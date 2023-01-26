@@ -1,0 +1,36 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 16
+      python: 3.8
+    commands:
+      - npm install
+
+  pre_build:
+    commands:
+      - echo "pre_build phase"
+
+  build:
+    commands:
+      - npm install -g @vue/cli
+      - npm run build-vue
+
+  post_build:
+    commands:
+      - chmod 755 ./scripts/*.sh
+      - ./scripts/create-build-summary.sh
+
+artifacts:
+  files:
+  - '.ebextensions/**/*'
+  - '.platform/**/*'
+  - 'Procfile'
+  - 'application.py'
+  - 'config/**/*'
+  - 'consoler.py'
+  - 'ripley/**/*'
+  - 'dist/**/*'
+  - 'requirements.txt'
+  - 'scripts/**/*'
