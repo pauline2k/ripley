@@ -24,6 +24,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 import logging
+import os
+
+# Base directory for the application (one level up from this config file).
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
 DEV_AUTH_ENABLED = False
 DEV_AUTH_PASSWORD = 'another secret'

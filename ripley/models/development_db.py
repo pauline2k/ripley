@@ -23,33 +23,16 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 from flask import current_app as app
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError
-
-__version__ = '0.1'
-
-db = SQLAlchemy()
+from ripley import db, std_commit
+from sqlalchemy.sql import text
 
 
-def std_commit(allow_test_environment=False):
-    """Commit failures in SQLAlchemy must be explicitly handled.
+def load(create_test_data=True):
+    _load_schemas()
 
-    This function follows the suggested default, which is to roll back and close the active session, letting the pooled
-    connection start a new transaction cleanly. WARNING: Session closure will invalidate any in-memory DB entities. Rows
-    will have to be reloaded from the DB to be read or updated.
-    """
-    # Give a hoot, don't pollute.
-    if app.config['TESTING'] and not allow_test_environment:
-        # When running tests, session flush generates id and timestamps that would otherwise show up during a commit.
-        db.session.flush()
-        return
-    successful_commit = False
-    try:
-        db.session.commit()
-        successful_commit = True
-    except SQLAlchemyError:
-        db.session.rollback()
-        raise
-    finally:
-        if not successful_commit:
-            db.session.close()
+
+def _load_schemas():
+    """Create DB schema from SQL file."""
+    with open(f"{app.config['BASE_DIR']}/scripts/db/schema.sql", 'r') as ddl_file:
+        db.session().execute(text(ddl_file.read()))
+        std_commit()
