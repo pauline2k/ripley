@@ -2,6 +2,10 @@
   "name": "ripley",
   "version": "0.1.0",
   "private": false,
+  "engines" : {
+    "npm" : ">=8.0.0 <9.0.0",
+    "node" : ">=16.0.0 <17.0.0"
+  },
   "scripts": {
     "build-vue": "vite build",
     "lint-vue": "eslint . --ignore-path .gitignore",
@@ -27,7 +31,7 @@
     "@types/lodash": "^4.14.191",
     "@types/node": "^18.11.18",
     "@types/webfontloader": "^1.6.35",
-    "@vitejs/plugin-vue": "^3.2.0",
+    "@vitejs/plugin-vue": "^4.0.0",
     "@vue/eslint-config-typescript": "^11.0.2",
     "eslint": "^8.32.0",
     "eslint-plugin-vue": "^9.9.0",
