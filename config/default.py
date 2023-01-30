@@ -39,7 +39,7 @@ FIXTURES_PATH = None
 INACTIVE_SESSION_LIFETIME = 120
 
 # These "INDEX_HTML" defaults are good in ripley-[dev|qa|prod]. See development.py for local configs.
-INDEX_HTML = 'dist/static/index.html'
+INDEX_HTML = 'dist/index.html'
 
 # Logging
 LOGGING_FORMAT = '[%(asctime)s] - %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
