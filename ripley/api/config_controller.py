@@ -45,6 +45,7 @@ def app_config():
 
     api_json = {
         **dict((_to_api_key(key), app.config[key]) for key in PUBLIC_CONFIGS),
+        **_get_app_version(),
         **{
             'ebEnvironment': get_eb_environment(),
         },
@@ -54,10 +55,7 @@ def app_config():
 
 @app.route('/api/version')
 def app_version():
-    build_stats = load_json('config/build-summary.json')
-    v = {'version': version}
-    v.update(build_stats or {'build': None})
-    return tolerant_jsonify(v)
+    return tolerant_jsonify(_get_app_version())
 
 
 def load_json(relative_path):
@@ -66,3 +64,10 @@ def load_json(relative_path):
         return json.load(file)
     except (FileNotFoundError, KeyError, TypeError):
         return None
+
+
+def _get_app_version():
+    build_stats = load_json('config/build-summary.json')
+    v = {'version': version}
+    v.update(build_stats or {'build': None})
+    return v
