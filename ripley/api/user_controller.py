@@ -22,45 +22,11 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+from flask import current_app as app
+from flask_login import current_user
+from ripley.lib.http import tolerant_jsonify
 
-import logging
-import os
 
-# Base directory for the application (one level up from this config file).
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-
-DEV_AUTH_ENABLED = False
-DEV_AUTH_PASSWORD = 'another secret'
-
-# Directory to search for mock fixtures, if running in "test" or "demo" mode.
-FIXTURES_PATH = None
-
-# Minutes of inactivity before session cookie is destroyed
-INACTIVE_SESSION_LIFETIME = 120
-
-# These "INDEX_HTML" defaults are good in ripley-[dev|qa|prod]. See development.py for local configs.
-INDEX_HTML = 'dist/index.html'
-
-LDAP_HOST = 'ldap-test.berkeley.edu'
-LDAP_BIND = 'mybind'
-LDAP_PASSWORD = 'secret'
-
-# Logging
-LOGGING_FORMAT = '[%(asctime)s] - %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
-LOGGING_LOCATION = 'ripley.log'
-LOGGING_LEVEL = logging.DEBUG
-LOGGING_PROPAGATION_LEVEL = logging.WARN
-
-REMEMBER_COOKIE_NAME = 'remember_ripley_token'
-
-# Used to encrypt session cookie.
-SECRET_KEY = 'secret'
-
-TIMEZONE = 'America/Los_Angeles'
-
-# This base-URL config should only be non-None in the "local" env where the Vue front-end runs on port 8080.
-VUE_LOCALHOST_BASE_URL = None
-
-# We keep these out of alphabetical sort above for readability's sake.
-HOST = '0.0.0.0'
-PORT = 5000
+@app.route('/api/user/my_profile')
+def my_profile():
+    return tolerant_jsonify(current_user.to_api_json())

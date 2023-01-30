@@ -22,7 +22,9 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+from flask import current_app as app
 from flask_login import UserMixin
+from ripley.lib.calnet_utils import get_calnet_user_for_uid
 
 
 class User(UserMixin):
@@ -77,8 +79,8 @@ class User(UserMixin):
 
     @classmethod
     def _load_user(cls, uid=None):
-        calnet_profile = {}  # TODO: get_calnet_user_for_uid(app, uid) if uid else {}
-        expired = False  # TODO: calnet_profile.get('isExpiredPerLdap', True)
+        calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
+        expired = calnet_profile.get('isExpiredPerLdap', True)
         is_admin = False
         is_teaching = False
         is_active = (is_teaching or is_admin) and not expired
