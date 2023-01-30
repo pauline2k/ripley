@@ -41,6 +41,11 @@ INACTIVE_SESSION_LIFETIME = 120
 # These "INDEX_HTML" defaults are good in ripley-[dev|qa|prod]. See development.py for local configs.
 INDEX_HTML = 'dist/index.html'
 
+# background_job_manager configs.
+JOB_HISTORY_DAYS_UNTIL_EXPIRE = 7
+JOBS_AUTO_START = False
+JOBS_SECONDS_BETWEEN_PENDING_CHECK = 60
+
 # Logging
 LOGGING_FORMAT = '[%(asctime)s] - %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
 LOGGING_LOCATION = 'ripley.log'

@@ -22,13 +22,23 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+
 from flask import current_app as app
 from ripley import db, std_commit
+from ripley.factory import background_job_manager
 from sqlalchemy.sql import text
+
+
+def clear():
+    with open(app.config['BASE_DIR'] + '/scripts/db/drop_schema.sql', 'r') as ddlfile:
+        db.session().execute(text(ddlfile.read()))
+        std_commit()
 
 
 def load(create_test_data=True):
     _load_schemas()
+    if create_test_data:
+        _set_up_and_run_jobs()
 
 
 def _load_schemas():
@@ -36,3 +46,16 @@ def _load_schemas():
     with open(f"{app.config['BASE_DIR']}/scripts/db/schema.sql", 'r') as ddl_file:
         db.session().execute(text(ddl_file.read()))
         std_commit()
+
+
+def _set_up_and_run_jobs():
+    # TODO create individual jobs
+
+    background_job_manager.start(app)
+    std_commit(allow_test_environment=True)
+
+
+if __name__ == '__main__':
+    import diablo.factory
+    diablo.factory.create_app()
+    load()

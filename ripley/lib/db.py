@@ -23,37 +23,32 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-import os
+from contextlib import contextmanager
 
-from flask import Flask
-from ripley import db
-from ripley.configs import load_configs
-from ripley.jobs.background_job_manager import BackgroundJobManager
-from ripley.logger import initialize_logger
-from ripley.routes import register_routes
+import psycopg2
+import psycopg2.extras
+import psycopg2.sql
 
 
-background_job_manager = BackgroundJobManager()
-
-
-def create_app():
-    """Initialize Ripley."""
-    app = Flask(__name__.split('.')[0])
-    load_configs(app)
-    initialize_logger(app)
-    # TODO for cache?
-    # cache.init_app(app)
-    # cache.clear()
-    db.init_app(app)
-
-    with app.app_context():
-        register_routes(app)
-        _register_jobs(app)
-
-    return app
-
-
-def _register_jobs(app):
-    # TODO import individual jobs
-    if app.config['JOBS_AUTO_START'] and (not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true'):
-        background_job_manager.start(app)
+@contextmanager
+def get_psycopg_cursor(operation='read', autocommit=True, **kwargs):
+    connection = None
+    cursor = None
+    if operation == 'write':
+        cursor_factory = None
+    else:
+        cursor_factory = psycopg2.extras.DictCursor
+    try:
+        if kwargs.get('uri'):
+            connection = psycopg2.connect(kwargs['uri'])
+        else:
+            connection = psycopg2.connect(**kwargs)
+        # Autocommit is required for EXTERNAL TABLE creation and deletion.
+        if autocommit:
+            connection.autocommit = True
+        yield connection.cursor(cursor_factory=cursor_factory)
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if connection is not None:
+            connection.close()
