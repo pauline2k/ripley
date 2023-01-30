@@ -31,6 +31,11 @@ EB_ENVIRONMENT = 'ripley-test'
 
 INDEX_HTML = f'{BASE_DIR}/tests/static/test-index.html'
 
+JOBS_AUTO_START = False
+JOBS_SECONDS_BETWEEN_PENDING_CHECK = 0.5
+
 LOGGING_LOCATION = 'STDOUT'
+
+SQLALCHEMY_DATABASE_URI = 'postgresql://ripley:ripley@localhost:5432/nostromo_test'
 
 TESTING = True

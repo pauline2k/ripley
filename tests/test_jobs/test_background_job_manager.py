@@ -22,38 +22,17 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
-
-import os
-
-from flask import Flask
-from ripley import db
-from ripley.configs import load_configs
-from ripley.jobs.background_job_manager import BackgroundJobManager
-from ripley.logger import initialize_logger
-from ripley.routes import register_routes
+from ripley.factory import background_job_manager
 
 
-background_job_manager = BackgroundJobManager()
+class TestBackgroundJobManager:
 
+    def test_started_at_property(self):
+        """The started_at property is only defined when background_job_manager is running."""
+        assert background_job_manager.is_running()
+        original_started_at = background_job_manager.get_started_at()
+        assert original_started_at
 
-def create_app():
-    """Initialize Ripley."""
-    app = Flask(__name__.split('.')[0])
-    load_configs(app)
-    initialize_logger(app)
-    # TODO for cache?
-    # cache.init_app(app)
-    # cache.clear()
-    db.init_app(app)
-
-    with app.app_context():
-        register_routes(app)
-        _register_jobs(app)
-
-    return app
-
-
-def _register_jobs(app):
-    # TODO import individual jobs
-    if app.config['JOBS_AUTO_START'] and (not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true'):
-        background_job_manager.start(app)
+        background_job_manager.restart()
+        assert original_started_at != background_job_manager.get_started_at()
+        assert background_job_manager.is_running()
