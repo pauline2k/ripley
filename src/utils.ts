@@ -2,9 +2,8 @@ import _ from 'lodash'
 import mitt from 'mitt'
 import router from './router'
 import {App, nextTick} from 'vue'
-import { useContextStore } from '@/stores/context'
 
-const $_axiosErrorHandler = (error: any) => {
+export function axiosErrorHandler(error: any) {
   const errorStatus = _.get(error, 'response.status')
   const currentUser = undefined  // TODO: The old way was Vue.prototype.$currentUser.
   if (_.get(currentUser, 'isLoggedIn')) {
@@ -29,7 +28,7 @@ const $_axiosErrorHandler = (error: any) => {
   }
 }
 
-export const putFocusNextTick = (id: string, cssSelector?: string) => {
+export function putFocusNextTick(id: string, cssSelector?: string) {
   const callable = () => {
     let el = document.getElementById(id)
     el = el && cssSelector ? el.querySelector(cssSelector) : el
@@ -40,14 +39,4 @@ export const putFocusNextTick = (id: string, cssSelector?: string) => {
     let counter = 0
     const job:any = setInterval(() => (callable() || ++counter > 3) && clearInterval(job), 500)
   }).then(_.noop)
-}
-
-export function registerUtils(app: App) {
-  const contextStore: any = useContextStore()
-  app.config.globalProperties.$_ = _
-  app.config.globalProperties.$errorHandler = $_axiosErrorHandler
-  app.config.globalProperties.$eventHub = mitt()
-  app.config.globalProperties.$loading = (label: string) => contextStore.loadingStart(label)
-  app.config.globalProperties.$ready = (label: string, focusTarget: string) => contextStore.loadingComplete(label, focusTarget)
-  app.config.globalProperties.$putFocusNextTick = putFocusNextTick
 }

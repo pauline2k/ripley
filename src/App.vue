@@ -16,6 +16,46 @@
   </div>
 </template>
 
+<script>
+import IFrameMixin from '@/mixins/IFrameMixin'
+
+export default {
+  name: 'App',
+  mixins: [IFrameMixin],
+  methods: {
+    skipTo: anchor => '' // TODO: VueScrollTo.scrollTo(anchor, 400)
+  }
+}
+</script>
+
+<style lang="scss">
+@import './assets/styles/junction-global.scss';
+</style>
+
+<style scoped lang="scss">
+.cc-accessibility-links {
+  position: relative;
+  z-index: 1;
+
+  a {
+    background: $cc-color-white;
+    display: block;
+    font-weight: bold;
+    padding: 8px;
+    position: absolute;
+    top: -999em;
+    z-index: 1;
+    &:focus, &:active {
+      left: 50%;
+      margin-left: -100px;
+      text-align: center;
+      top: 5px;
+      width: 200px;
+    }
+  }
+}
+</style>
+
 <style lang="scss">
 @import 'styles/colors';
 </style>
