@@ -41,6 +41,10 @@ INACTIVE_SESSION_LIFETIME = 120
 # These "INDEX_HTML" defaults are good in ripley-[dev|qa|prod]. See development.py for local configs.
 INDEX_HTML = 'dist/index.html'
 
+LDAP_HOST = 'ldap-test.berkeley.edu'
+LDAP_BIND = 'mybind'
+LDAP_PASSWORD = 'secret'
+
 # background_job_manager configs.
 JOB_HISTORY_DAYS_UNTIL_EXPIRE = 7
 JOBS_AUTO_START = False

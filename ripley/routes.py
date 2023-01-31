@@ -38,6 +38,8 @@ def register_routes(app):
 
     # Register API routes.
     import ripley.api.config_controller
+    import ripley.api.auth_controller
+    import ripley.api.user_controller
 
     # Register error handlers.
     import ripley.api.error_handlers
