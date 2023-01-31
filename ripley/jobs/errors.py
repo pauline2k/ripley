@@ -23,37 +23,6 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-import os
 
-from flask import Flask
-from ripley import db
-from ripley.configs import load_configs
-from ripley.jobs.background_job_manager import BackgroundJobManager
-from ripley.logger import initialize_logger
-from ripley.routes import register_routes
-
-
-background_job_manager = BackgroundJobManager()
-
-
-def create_app():
-    """Initialize Ripley."""
-    app = Flask(__name__.split('.')[0])
-    load_configs(app)
-    initialize_logger(app)
-    # TODO for cache?
-    # cache.init_app(app)
-    # cache.clear()
-    db.init_app(app)
-
-    with app.app_context():
-        register_routes(app)
-        _register_jobs(app)
-
-    return app
-
-
-def _register_jobs(app):
-    # TODO import individual jobs
-    if app.config['JOBS_AUTO_START'] and (not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true'):
-        background_job_manager.start(app)
+class BackgroundJobError(Exception):
+    pass

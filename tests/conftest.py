@@ -51,3 +51,16 @@ def app(request):
 
     request.addfinalizer(teardown)
     return _app
+
+
+# TODO Perform DB schema creation and deletion outside an app context, enabling test-specific app configurations.
+@pytest.fixture(scope='session', autouse=True)
+def db(app):
+    """Fixture database object, shared by all tests."""
+    from ripley.models import development_db
+    # Drop all tables before re-loading the schemas.
+    # If we dropped at teardown instead, an interrupted test run would block the next test run.
+    development_db.clear()
+    _db = development_db.load()
+
+    return _db
