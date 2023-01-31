@@ -37,8 +37,9 @@ def register_routes(app):
     login_manager.anonymous_user = _user_loader
 
     # Register API routes.
-    import ripley.api.config_controller
     import ripley.api.auth_controller
+    import ripley.api.config_controller
+    import ripley.api.status_controller
     import ripley.api.user_controller
 
     # Register error handlers.
