@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import mitt from 'mitt'
 import router from './router'
 import {App, nextTick} from 'vue'
 import { useContextStore } from '@/stores/context'
@@ -43,9 +44,9 @@ export const putFocusNextTick = (id: string, cssSelector?: string) => {
 
 export function registerUtils(app: App) {
   const contextStore: any = useContextStore()
-  app.config.globalProperties.$errorHandler = $_axiosErrorHandler
   app.config.globalProperties.$_ = _
-  // app.config.globalProperties.$eventHub = mitt()  TODO: Use 'mitt' to emit and listen for events.
+  app.config.globalProperties.$errorHandler = $_axiosErrorHandler
+  app.config.globalProperties.$eventHub = mitt()
   app.config.globalProperties.$loading = (label: string) => contextStore.loadingStart(label)
   app.config.globalProperties.$ready = (label: string, focusTarget: string) => contextStore.loadingComplete(label, focusTarget)
   app.config.globalProperties.$putFocusNextTick = putFocusNextTick
