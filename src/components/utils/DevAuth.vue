@@ -5,7 +5,7 @@
         <v-text-field
           id="basic-auth-uid"
           v-model="uid"
-          aria-invalid="!!error"
+          :aria-invalid="!!error"
           placeholder="UID"
           size="sm"
           required
@@ -61,7 +61,7 @@ export default {
       if (uid && password) {
         devAuthLogIn(uid, password).then(
           data => {
-            if (data.isLoggedIn) {
+            if (data.isAuthenticated) {
               auth.initSession().then(() => {
                 this.alertScreenReader('You are logged in.')
                 this.$router.push({path: '/'})

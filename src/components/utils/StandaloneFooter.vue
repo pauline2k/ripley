@@ -4,7 +4,7 @@
       <v-col>
         <v-container class="tangerine-border m-0 p-0 w-100" fluid>
           <v-row
-            v-if="$currentUser.isDirectlyAuthenticated || !$currentUser.isLoggedIn"
+            v-if="!$currentUser.isAuthenticated"
             class="mt-3 text-secondary"
             no-gutters
           >
@@ -34,28 +34,6 @@
                   </v-expansion-panel>
                 </v-expansion-panels>
               </div>
-              <div v-if="$currentUser.isBasicAuthEnabled && !$currentUser.isLoggedIn" class="pt-2">
-                <div class="d-flex pb-2">
-                  <div>
-                    <h4>DevAuth</h4>
-                  </div>
-                  <div>
-                    <v-btn
-                      id="toggle-show-dev-auth"
-                      aria-controls="dev-auth-collapse"
-                      variant="link"
-                      @click="showDevAuth = !showDevAuth"
-                    >
-                      <v-icon :icon="showDevAuth ? 'caret-up' : 'caret-down'" />
-                    </v-btn>
-                  </div>
-                </div>
-                <v-expansion-panels v-model="showDevAuth">
-                  <v-expansion-panel id="dev-auth-collapse">
-                    <DevAuth />
-                  </v-expansion-panel>
-                </v-expansion-panels>
-              </div>
             </v-col>
             <v-col cols="auto">
               <div class="d-flex flex-wrap mb-2">
@@ -73,7 +51,7 @@
               </div>
             </v-col>
           </v-row>
-          <v-row v-if="!isInIframe && $currentUser.isLoggedIn && !$currentUser.isDirectlyAuthenticated" class="border-top pl-3 pt-3 text-secondary w-100" no-gutters>
+          <v-row v-if="!isInIframe && $currentUser.isAuthenticated" class="border-top pl-3 pt-3 text-secondary w-100" no-gutters>
             <v-col class="pt-1" sm="8">
               <div aria-live="polite" role="alert">
                 You are viewing as {{ $currentUser.fullName }} ({{ $currentUser.uid }}),
@@ -111,7 +89,6 @@
 <script>
 import BuildSummary from '@/components/utils/BuildSummary'
 import Context from '@/mixins/Context'
-import DevAuth from '@/components/utils/DevAuth'
 import IFrameMixin from '@/mixins/IFrameMixin'
 import moment from 'moment'
 import OutboundLink from '@/components/utils/OutboundLink'
@@ -119,7 +96,7 @@ import OutboundLink from '@/components/utils/OutboundLink'
 export default {
   name: 'StandaloneFooter',
   mixins: [Context, IFrameMixin],
-  components: {BuildSummary, DevAuth, OutboundLink},
+  components: {BuildSummary, OutboundLink},
   props: {
     includeBuildSummary: {
       required: false,
@@ -127,8 +104,7 @@ export default {
     }
   },
   data: () => ({
-    showBuildSummary: false,
-    showDevAuth: true
+    showBuildSummary: false
   }),
   methods: {
     moment
