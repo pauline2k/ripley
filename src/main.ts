@@ -46,8 +46,8 @@ app.config.globalProperties.$loading = (label: string) => contextStore.loadingSt
 app.config.globalProperties.$ready = (label: string, focusTarget: string) => contextStore.loadingComplete(label, focusTarget)
 app.config.globalProperties.$putFocusNextTick = putFocusNextTick
 
-axios.get(`${apiBaseUrl}/api/user/my_profile`).then(data => {
-  app.config.globalProperties.$currentUser = data
+axios.get(`${apiBaseUrl}/api/user/my_profile`).then(response => {
+  app.config.globalProperties.$currentUser = response.data
 
   axios.get(`${apiBaseUrl}/api/config`).then(response => {
     const isDebugMode = _.trim(import.meta.env.VUE_APP_DEBUG).toLowerCase() === 'true'

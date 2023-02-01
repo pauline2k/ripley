@@ -1,23 +1,23 @@
 <template>
-  <b-row v-if="!isInIframe" class="bg-header" no-gutters>
-    <b-col sm="8">
+  <v-row v-if="!isInIframe" class="bg-header" no-gutters>
+    <v-col sm="8">
       <div class="header-text mt-1 pl-3 pt-2">
         ETS bCourses Utilities
       </div>
-    </b-col>
-    <b-col cols="auto" sm="4">
+    </v-col>
+    <v-col cols="auto" sm="4">
       <div class="mt-1 pr-3">
-        <b-button
+        <v-btn
           id="log-out"
           class="float-right text-white"
           variant="link"
           @click="exit"
         >
           Log out
-        </b-button>
+        </v-btn>
       </div>
-    </b-col>
-  </b-row>
+    </v-col>
+  </v-row>
 </template>
 
 <script>
@@ -30,7 +30,7 @@ export default {
   mixins: [Context, IFrameMixin],
   methods: {
     exit() {
-      this.alertScreenReader('Logging out.')
+      this.$announcer.polite('Logging out.')
       logOut().then(() => {
         window.location.href = '/'
       })

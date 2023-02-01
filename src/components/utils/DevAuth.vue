@@ -2,7 +2,7 @@
   <div class="d-inline-flex">
     <v-form class="border-0" @submit="devAuth">
       <div class="p-1">
-        <v-input
+        <v-text-field
           id="basic-auth-uid"
           v-model="uid"
           aria-invalid="!!error"
@@ -12,25 +12,23 @@
         />
       </div>
       <div class="p-1">
-        <v-input
+        <v-text-field
           id="basic-auth-password"
           v-model="password"
           autocomplete="off"
           class="mb-2"
+          :error-messages="error"
           placeholder="Password"
           required
           size="sm"
           type="password"
-        ></v-input>
-<!--        <b-form-invalid-feedback :state="!this.error">-->
-<!--          {{ error }}-->
-<!--        </b-form-invalid-feedback>-->
+        />
         <div class="pt-2">
           <v-btn
             id="basic-auth-submit-button"
             class="cc-button-blue"
             size="sm"
-            variant="outline-secondary"
+            variant="flat"
             @click="devAuth"
           >
             Login

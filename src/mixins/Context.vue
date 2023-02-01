@@ -1,15 +1,12 @@
 <script>
 import { mapActions } from 'pinia'
+import { mapState } from 'pinia'
 import { useContextStore } from "@/stores/context"
 
 export default {
   name: 'Context',
-  setup() {
-    const context = useContextStore()
-    return {
-      currentUser: context.currentUser,
-      loading: context.loading
-    }
+  computed: {
+    ...mapState(useContextStore, ['loading']),
   },
   methods: {
     ...mapActions(useContextStore, [
