@@ -83,14 +83,14 @@ class User(UserMixin):
         user = UserAuth.find_by_uid(uid) if uid else None
         calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
         expired = calnet_profile.get('isExpiredPerLdap', True)
-        is_active = user.is_active and not expired if user else False
-        is_admin = user.is_admin and is_active if user else False
+        is_active = user.active and not expired if user else False
+        is_admin = user.is_superuser and is_active if user else False
         return {
             **calnet_profile,
             **{
                 'id': uid,
                 'emailAddress': calnet_profile.get('email'),
-                'isActive': user.is_active and not expired if user else False,
+                'isActive': is_active,
                 'isAdmin': is_admin,
                 'isAnonymous': not is_active,
                 'isAuthenticated': is_active,

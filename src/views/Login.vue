@@ -7,16 +7,17 @@
   >
     <v-row>
       <v-col>
-<!--        <div>-->
-<!--          <v-btn-->
-<!--            id="sign-in-button"-->
-<!--            class="cc-button-blue text-nowrap"-->
-<!--            variant="text"-->
-<!--            @click="toCasLogin"-->
-<!--          >-->
-<!--            Sign In-->
-<!--          </v-btn>-->
-<!--        </div>-->
+        <div>
+          <v-btn
+            id="basic-auth-submit-button"
+            @click="toCasLogin"
+          >
+            CalNet Login
+          </v-btn>
+        </div>
+        <div>
+          <hr />
+        </div>
         <div v-if="$config.devAuthEnabled && !$currentUser.isAuthenticated">
           <h4 class="sr-only">DevAuth</h4>
           <DevAuth />
@@ -33,6 +34,7 @@ import nostromoCrew from '@/assets/nostromo-crew-eating-breakfast.png'
 <script>
 import Context from '@/mixins/Context'
 import DevAuth from '@/components/utils/DevAuth'
+import {getCasLoginURL} from "@/api/auth";
 
 export default {
   name: 'Login',
@@ -40,15 +42,16 @@ export default {
   components: {DevAuth},
   setup() {
     const showDevAuth = false
+    this.$ready('Welcome. Please log in.')
     return { showDevAuth }
   },
   methods: {
     toCasLogin() {
-      window.location.href = `${this.$config.apiBaseUrl}/auth/cas`
+      getCasLoginURL().then(data => {
+        console.log(data)
+        window.location.href = data.casLoginUrl
+      })
     }
-  },
-  created() {
-    this.$ready('Welcome. Please log in.')
   }
 }
 </script>

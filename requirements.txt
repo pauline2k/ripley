@@ -1,7 +1,7 @@
-canvasapi==2.2.0
+canvasapi==3.0.0
 Flask==2.2.2
 Flask-Login==0.6.2
-Flask-SQLAlchemy==3.0.2
+Flask-SQLAlchemy==3.0.3
 ldap3==2.7
 psycopg2-binary==2.9.5
 python-cas==1.6.0
@@ -9,11 +9,11 @@ python-dateutil==2.8.2
 pytz==2022.7.1
 schedule==1.1.0
 simplejson==3.18.1
-SQLAlchemy==1.4.46
+SQLAlchemy==2.0.1
 Werkzeug==2.2.2
 
 # For testing
 pytest==7.2.1
 pytest-flask==1.2.0
-requests-mock==1.9.3
-tox==4.4.0
+requests-mock==1.10.0
+tox==4.4.4

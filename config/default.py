@@ -29,6 +29,8 @@ import os
 # Base directory for the application (one level up from this config file).
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
+CAS_SERVER = 'https://auth-test.berkeley.edu/cas/'
+
 CANVAS_ACCESS_TOKEN = 'a token'
 CANVAS_API_URL = 'https://hard_knocks_api.instructure.com'
 CANVAS_BERKELEY_ACCOUNT_ID = 1

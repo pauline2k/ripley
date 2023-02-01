@@ -14,6 +14,14 @@ export function devAuthLogIn(uid: string, password: string) {
   })
 }
 
+export function getCasLoginURL() {
+  return utils.get(`/api/auth/cas_login_url`)
+}
+
+export function getCasLogoutUrl() {
+  return axios.get(`${utils.apiBaseUrl()}/api/auth/logout`)
+}
+
 export function logOut() {
-  return utils.get('/logout')
+  return utils.get('/api/auth/logout')
 }

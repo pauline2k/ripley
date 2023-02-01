@@ -31,6 +31,7 @@ from ripley.externals.canvas import ping_canvas
 from ripley.externals.rds import log_db_error
 from ripley.lib.http import tolerant_jsonify
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.sql import text
 
 
 @app.route('/api/ping')
@@ -57,7 +58,7 @@ def ping():
 
 
 def _db_status():
-    sql = 'SELECT 1'
+    sql = text('SELECT 1')
     try:
         db.session.execute(sql)
         return True
