@@ -44,8 +44,6 @@ ALTER TABLE IF EXISTS ONLY public.jobs
     DROP CONSTRAINT IF EXISTS jobs_pkey;
 ALTER TABLE IF EXISTS ONLY public.user_auths
     DROP CONSTRAINT IF EXISTS user_auths_unique_constraint;
-ALTER TABLE IF EXISTS ONLY public.user_data
-    DROP CONSTRAINT IF EXISTS user_data_unique_constraint;
 
 --
 
@@ -63,7 +61,6 @@ DROP TABLE IF EXISTS public.jobs;
 DROP TABLE IF EXISTS public.job_runner;
 DROP SEQUENCE IF EXISTS jobs_id_seq;
 DROP TABLE IF EXISTS public.user_auths;
-DROP TABLE IF EXISTS public.user_data;
 
 --
 

@@ -159,18 +159,3 @@ CREATE TABLE user_auths (
 );
 
 ALTER TABLE ONLY user_auths ADD CONSTRAINT user_auths_unique_constraint UNIQUE (uid);
-
---
-
-CREATE TABLE user_data (
-    id SERIAL PRIMARY KEY,
-    uid CHARACTER VARYING(255) NOT NULL,
-    preferred_name CHARACTER VARYING(255) NOT NULL,
-    first_login_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL
-);
-
-ALTER TABLE ONLY user_data ADD CONSTRAINT user_data_unique_constraint UNIQUE (uid);
-
---
