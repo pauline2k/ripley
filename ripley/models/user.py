@@ -25,6 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from flask import current_app as app
 from flask_login import UserMixin
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
+from ripley.models.user_auth import UserAuth
 
 
 class User(UserMixin):
@@ -79,22 +80,20 @@ class User(UserMixin):
 
     @classmethod
     def _load_user(cls, uid=None):
+        user = UserAuth.find_by_uid(uid) if uid else None
         calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
         expired = calnet_profile.get('isExpiredPerLdap', True)
-        is_admin = False
-        is_teaching = False
-        is_active = (is_teaching or is_admin) and not expired
-
+        is_active = user.is_active and not expired if user else False
+        is_admin = user.is_admin and is_active if user else False
         return {
             **calnet_profile,
             **{
                 'id': uid,
                 'emailAddress': calnet_profile.get('email'),
-                'isActive': is_active,
+                'isActive': user.is_active and not expired if user else False,
                 'isAdmin': is_admin,
                 'isAnonymous': not is_active,
                 'isAuthenticated': is_active,
-                'isTeaching': is_teaching,
                 'name': calnet_profile.get('name') or f'UID {uid}',
                 'uid': uid,
             },
