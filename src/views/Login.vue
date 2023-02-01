@@ -13,11 +13,27 @@
             Sign In
           </v-btn>
         </div>
-        <div>
-          <img alt="bCourses logo" class="float-left img-fluid" src="@/assets/bcourses_righthand.png">
-        </div>
-        <div class="pb-5">
-          <h1>ETS Support Utilities</h1>
+        <div v-if="$config.devAuthEnabled && !$currentUser.isAuthenticated" class="pt-2">
+          <div class="d-flex pb-2">
+            <div>
+              <h4>DevAuth</h4>
+            </div>
+            <div>
+              <v-btn
+                id="toggle-show-dev-auth"
+                aria-controls="dev-auth-collapse"
+                variant="text"
+                @click="showDevAuth = !showDevAuth"
+              >
+                <v-icon :icon="showDevAuth ? 'caret-up' : 'caret-down'" />
+              </v-btn>
+            </div>
+          </div>
+          <v-expansion-panels v-model="showDevAuth">
+            <v-expansion-panel id="dev-auth-collapse">
+              <DevAuth />
+            </v-expansion-panel>
+          </v-expansion-panels>
         </div>
       </v-col>
     </v-row>
@@ -27,12 +43,17 @@
 
 <script>
 import Context from '@/mixins/Context'
+import DevAuth from '@/components/utils/DevAuth'
 import StandaloneFooter from '@/components/utils/StandaloneFooter'
 
 export default {
   name: 'Login',
   mixins: [Context],
-  components: {StandaloneFooter},
+  components: {DevAuth, StandaloneFooter},
+  setup() {
+    const showDevAuth = false
+    return { showDevAuth }
+  },
   methods: {
     toCasLogin() {
       window.location.href = `${this.$config.apiBaseUrl}/auth/cas`

@@ -19,7 +19,7 @@ export default {
       axios.get(`${apiBaseUrl}/api/my/status`).then(response => {
         // TODO
         // Vue.prototype.$currentUser = response.data
-        // Vue.prototype.$currentUser.isLoggedIn = _.get(response.data, 'isLoggedIn', false)
+        // Vue.prototype.$currentUser.isAuthenticated = _.get(response.data, 'isAuthenticated', false)
         //
         // axios.get(`${apiBaseUrl}/api/config`).then(response => {
         //   Vue.prototype.$config = response.data
@@ -36,8 +36,8 @@ export default {
     })
   },
   requiresAuthenticated: (to: any, from: any, next: any) => {
-    const currentUser = {isLoggedIn: false} // TODO: Vue.prototype.$currentUser
-    if (currentUser.isLoggedIn) {
+    const currentUser = {isAuthenticated: false} // TODO: Vue.prototype.$currentUser
+    if (currentUser.isAuthenticated) {
       next()
     } else {
       goToLogin(to, next)

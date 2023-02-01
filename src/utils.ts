@@ -6,7 +6,7 @@ import {App, nextTick} from 'vue'
 export function axiosErrorHandler(error: any) {
   const errorStatus = _.get(error, 'response.status')
   const currentUser = undefined  // TODO: The old way was Vue.prototype.$currentUser.
-  if (_.get(currentUser, 'isLoggedIn')) {
+  if (_.get(currentUser, 'isAuthenticated')) {
     if (!errorStatus || errorStatus >= 400) {
       const message = _.get(error, 'response.data.error') || _.get(error, 'response.data.message') || error.message
       router.push({
