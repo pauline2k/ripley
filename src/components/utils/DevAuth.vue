@@ -1,41 +1,35 @@
 <template>
-  <div class="d-inline-flex">
-    <v-form class="border-0" @submit="devAuth">
-      <div class="p-1">
-        <v-text-field
-          id="basic-auth-uid"
-          v-model="uid"
-          :aria-invalid="!!error"
-          placeholder="UID"
-          size="sm"
-          required
-        />
-      </div>
-      <div class="p-1">
-        <v-text-field
-          id="basic-auth-password"
-          v-model="password"
-          autocomplete="off"
-          class="mb-2"
-          :error-messages="error"
-          placeholder="Password"
-          required
-          size="sm"
-          type="password"
-        />
-        <div class="pt-2">
-          <v-btn
-            id="basic-auth-submit-button"
-            class="cc-button-blue"
-            size="sm"
-            variant="flat"
-            @click="devAuth"
-          >
-            Login
-          </v-btn>
-        </div>
-      </div>
-    </v-form>
+  <div class="w-50">
+    <v-text-field
+      id="basic-auth-uid"
+      v-model="uid"
+      :aria-invalid="!!error"
+      class="mb-1 text-field"
+      hide-details
+      label="UID"
+      required
+      variant="outlined"
+      @keydown.enter="devAuth"
+    />
+    <v-text-field
+      id="basic-auth-password"
+      v-model="password"
+      autocomplete="off"
+      class="mb-1 text-field"
+      :error-messages="error"
+      hide-details
+      label="Password"
+      required
+      type="password"
+      variant="outlined"
+      @keydown.enter="devAuth"
+    />
+    <v-btn
+      id="basic-auth-submit-button"
+      @click="devAuth"
+    >
+      Dev Auth
+    </v-btn>
   </div>
 </template>
 
@@ -63,7 +57,7 @@ export default {
           data => {
             if (data.isAuthenticated) {
               auth.initSession().then(() => {
-                this.alertScreenReader('You are logged in.')
+                this.$announcer.polite('You are logged in.')
                 this.$router.push({path: '/'})
               })
             } else {
@@ -83,9 +77,16 @@ export default {
     },
     reportError(message, putFocus='basic-auth-uid') {
       this.error = message
-      this.alertScreenReader(message)
+      this.$announcer.polite(message)
       this.$putFocusNextTick(putFocus)
     }
   }
 }
 </script>
+
+<style>
+.text-field {
+  background-color: white;
+  opacity: 0.5;
+}
+</style>

@@ -26,17 +26,15 @@
         </span>
       </v-col>
     </v-row>
-    <StandaloneFooter :include-build-summary="true" />
   </v-container>
 </template>
 
 <script>
-import StandaloneFooter from '@/components/utils/StandaloneFooter'
 import ToolboxHeader from '@/components/toolbox/ToolboxHeader'
 
 export default {
   name: 'NotFound',
-  components: {StandaloneFooter, ToolboxHeader},
+  components: {ToolboxHeader},
   mounted() {
     this.$ready('404')
   }
