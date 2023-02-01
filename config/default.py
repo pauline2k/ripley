@@ -65,6 +65,9 @@ REMEMBER_COOKIE_NAME = 'remember_ripley_token'
 # Used to encrypt session cookie.
 SECRET_KEY = 'secret'
 
+# Override in local configs.
+SQLALCHEMY_DATABASE_URI = 'postgresql://ripley:ripley@localhost:5432/nostromo'
+
 TIMEZONE = 'America/Los_Angeles'
 
 # This base-URL config should only be non-None in the "local" env where the Vue front-end runs on port 8080.
