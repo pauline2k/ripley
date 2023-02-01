@@ -18,19 +18,21 @@
                     <h4>Build Summary</h4>
                   </div>
                   <div>
-                    <b-button
+                    <v-btn
                       id="toggle-show-build-summary"
                       aria-controls="build-summary-collapse"
-                      variant="link"
+                      variant="text"
                       @click="showBuildSummary = !showBuildSummary"
                     >
-                      <fa :icon="showBuildSummary ? 'caret-up' : 'caret-down'" />
-                    </b-button>
+                      <v-icon :icon="showBuildSummary ? 'caret-up' : 'caret-down'" />
+                    </v-btn>
                   </div>
                 </div>
-                <v-collapse id="build-summary-collapse" v-model="showBuildSummary" class="ml-3">
-                  <BuildSummary />
-                </v-collapse>
+                <v-expansion-panels v-model="showBuildSummary">
+                  <v-expansion-panel id="build-summary-collapse">
+                    <BuildSummary />
+                  </v-expansion-panel>
+                </v-expansion-panels>
               </div>
               <div v-if="$currentUser.isBasicAuthEnabled && !$currentUser.isLoggedIn" class="pt-2">
                 <div class="d-flex pb-2">
@@ -38,19 +40,21 @@
                     <h4>DevAuth</h4>
                   </div>
                   <div>
-                    <b-button
+                    <v-btn
                       id="toggle-show-dev-auth"
                       aria-controls="dev-auth-collapse"
                       variant="link"
                       @click="showDevAuth = !showDevAuth"
                     >
-                      <fa :icon="showDevAuth ? 'caret-up' : 'caret-down'" />
-                    </b-button>
+                      <v-icon :icon="showDevAuth ? 'caret-up' : 'caret-down'" />
+                    </v-btn>
                   </div>
                 </div>
-                <v-collapse id="dev-auth-collapse" v-model="showDevAuth">
-                  <DevAuth />
-                </v-collapse>
+                <v-expansion-panels v-model="showDevAuth">
+                  <v-expansion-panel id="dev-auth-collapse">
+                    <DevAuth />
+                  </v-expansion-panel>
+                </v-expansion-panels>
               </div>
             </v-col>
             <v-col cols="auto">
@@ -79,7 +83,7 @@
             </v-col>
             <v-col sm="4">
               <div class="float-right">
-                <b-button
+                <v-btn
                   id="stop-viewing-as"
                   class="btn-stop-viewing-as cc-button-blue text-nowrap"
                   size="sm"
@@ -87,7 +91,7 @@
                   @click="stopActAs"
                 >
                   Stop viewing as
-                </b-button>
+                </v-btn>
               </div>
             </v-col>
           </v-row>

@@ -5,7 +5,7 @@
       <v-col>
         <div class="d-flex">
           <div class="pr-3 pt-2">
-            <fa class="text-warning" icon="exclamation-triangle" size="2x" />
+            <v-icon class="text-warning" icon="exclamation-triangle" size="2x" />
           </div>
           <div>
             <h1 class="cc-text-xl text-secondary">Page Not Found</h1>
