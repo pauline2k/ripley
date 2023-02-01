@@ -8,6 +8,6 @@ export function getVersion() {
   return utils.get('/api/version')
 }
 
-export function serverInfo() {
-  return utils.get('/api/server_info')
+export function getConfig() {
+  return utils.get('/api/config')
 }

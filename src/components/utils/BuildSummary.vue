@@ -19,7 +19,7 @@
 
 <script>
 import Utils from '@/mixins/Utils'
-import {serverInfo} from '@/api/config'
+import { getConfig } from '@/api/config'
 
 export default {
   name: 'BuildSummary',
@@ -28,7 +28,7 @@ export default {
     summary: undefined
   }),
   created() {
-    serverInfo().then(data => {
+    getConfig().then(data => {
       this.summary = data
     })
   }
