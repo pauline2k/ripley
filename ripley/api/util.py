@@ -31,7 +31,7 @@ from flask_login import current_user
 def admin_required(func):
     @wraps(func)
     def _admin_required(*args, **kw):
-        if current_user.is_admin:
+        if current_user.is_superuser:
             return func(*args, **kw)
         else:
             app.logger.warning(f'Unauthorized request to {request.path}')

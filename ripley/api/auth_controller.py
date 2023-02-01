@@ -32,7 +32,7 @@ from ripley.lib.http import add_param_to_url, tolerant_jsonify
 from ripley.models.user import User
 
 
-@app.route('/api/auth/cas_login_url', methods=['GET'])
+@app.route('/api/auth/cas_login_url')
 def cas_login_url():
     target_url = request.referrer or None
     return tolerant_jsonify({
@@ -40,7 +40,7 @@ def cas_login_url():
     })
 
 
-@app.route('/api/auth/dev_auth_login', methods=['POST'])
+@app.route('/api/auth/dev_auth', methods=['POST'])
 def dev_auth_login():
     if app.config['DEV_AUTH_ENABLED']:
         params = request.get_json() or {}

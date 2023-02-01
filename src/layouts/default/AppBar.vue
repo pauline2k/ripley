@@ -6,13 +6,16 @@
           <BuildSummary />
         </div>
         <div class="float-right mr-3 text-body-2" cols="6">
-          <span
-            v-if="$config.isVueAppDebugMode"
-            class="font-weight-bolder text-secondary"
-          >
-            {{ screenReaderAlert || '&mdash;' }}
+          <span v-if="$currentUser.isAuthenticated">
+            <v-btn
+              id="log-out"
+              variant="link"
+              @click="logOut"
+            >
+              Log out
+            </v-btn>
           </span>
-          <span>
+          <span v-if="!$currentUser.isAuthenticated">
             Berkeley &copy; {{ new Date().getFullYear() }} UC Regents
           </span>
         </div>
@@ -25,6 +28,7 @@
 import BuildSummary from '@/components/utils/BuildSummary'
 import Context from '@/mixins/Context'
 import moment from 'moment'
+import {getCasLogoutUrl, logOut} from "@/api/auth";
 
 export default {
   name: 'AppBar',
@@ -37,6 +41,9 @@ export default {
     }
   },
   methods: {
+    logOut() {
+      logOut().then(this.$_.noop)
+    },
     moment
   }
 }

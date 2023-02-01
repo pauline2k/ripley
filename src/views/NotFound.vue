@@ -1,6 +1,5 @@
 <template>
   <v-container fluid>
-    <ToolboxHeader />
     <v-row class="ml-4 mt-4 pt-4">
       <v-col>
         <div class="d-flex">
@@ -30,11 +29,8 @@
 </template>
 
 <script>
-import ToolboxHeader from '@/components/toolbox/ToolboxHeader'
-
 export default {
   name: 'NotFound',
-  components: {ToolboxHeader},
   mounted() {
     this.$ready('404')
   }
