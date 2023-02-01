@@ -21,17 +21,15 @@
         </div>
       </v-col>
     </v-row>
-    <StandaloneFooter class="pt-5" :include-build-summary="true" />
   </v-container>
 </template>
 
 <script>
-import StandaloneFooter from '@/components/utils/StandaloneFooter'
 import ToolboxHeader from '@/components/toolbox/ToolboxHeader'
 
 export default {
   name: 'Toolbox',
-  components: {StandaloneFooter, ToolboxHeader},
+  components: {ToolboxHeader},
   data: () => ({
     canViewAs: undefined
   }),
