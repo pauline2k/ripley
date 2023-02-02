@@ -22,10 +22,19 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+
+import json
 import os
 
+from flask_login import logout_user
 import pytest
+from ripley import std_commit
 import ripley.factory
+from ripley.jobs.base_job import BaseJob
+from ripley.models.job import Job
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+from tests.util import override_config
 
 
 os.environ['RIPLEY_ENV'] = 'test'  # noqa
@@ -54,7 +63,7 @@ def app(request):
 
 
 # TODO Perform DB schema creation and deletion outside an app context, enabling test-specific app configurations.
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='session')
 def db(app):
     """Fixture database object, shared by all tests."""
     from ripley.models import development_db
@@ -64,3 +73,85 @@ def db(app):
     _db = development_db.load()
 
     return _db
+
+
+@pytest.fixture(scope='function', autouse=True)
+def db_session(db):
+    """Fixture database session used for the scope of a single test.
+
+    All executions are wrapped in a session and then rolled back to keep individual tests isolated.
+    """
+    # Mixing SQL-using test fixtures with SQL-using decorators seems to cause timing issues with pytest's
+    # fixture finalizers. Instead of using a finalizer to roll back the session and close connections,
+    # we begin by cleaning up any previous invocations.
+    # This fixture is marked 'autouse' to ensure that cleanup happens at the start of every test, whether
+    # or not it has an explicit database dependency.
+    db.session.rollback()
+    try:
+        bind = db.session.get_bind()
+        if isinstance(bind, Engine):
+            bind.dispose()
+        else:
+            bind.close()
+    # The session bind will close only if it was provided a specific connection via this fixture.
+    except TypeError:
+        pass
+    db.session.remove()
+
+    connection = db.engine.connect()
+    _session = scoped_session(sessionmaker(bind=connection))
+    db.session = _session
+
+    return _session
+
+
+class FakeAuth(object):
+    def __init__(self, the_app, the_client):
+        self.app = the_app
+        self.client = the_client
+
+    def login(self, uid):
+        with override_config(self.app, 'DEV_AUTH_ENABLED', True):
+            params = {
+                'uid': uid,
+                'password': self.app.config['DEV_AUTH_PASSWORD'],
+            }
+            self.client.post(
+                '/api/auth/dev_auth',
+                data=json.dumps(params),
+                content_type='application/json',
+            )
+
+
+@pytest.fixture(scope='function')
+def fake_auth(app, db, client):
+    """Shortcut to start an authenticated session."""
+    yield FakeAuth(app, client)
+    logout_user()
+
+
+class TempJob(BaseJob):
+    @classmethod
+    def description(cls):
+        return "I'm a mock job class"
+
+    @classmethod
+    def key(cls):
+        return 'TempJob'
+
+    def _run(self):
+        from flask import current_app as app
+        app.logger.info('TempJob has started.')
+
+
+@pytest.fixture(scope='function')
+def mock_job(app, db_session):
+    job = Job.create(
+        job_schedule_type='day_at',
+        job_schedule_value='Saturday',
+        key='TempJob',
+    )
+    std_commit(allow_test_environment=True)
+    yield job
+    db_session.delete(job)
+    std_commit(allow_test_environment=True)
