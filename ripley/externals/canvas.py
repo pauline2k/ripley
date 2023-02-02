@@ -116,7 +116,7 @@ def get_external_tools(obj_type, obj_id=None):
 
     tools = []
     try:
-        tools = obj.get_external_tools()
+        tools = list(obj.get_external_tools())
     except Exception as e:
         app.logger.error(f'Failed to retrieve Canvas external tools ({obj_type}_id={obj_id})')
         app.logger.exception(e)
@@ -126,7 +126,7 @@ def get_external_tools(obj_type, obj_id=None):
 def get_tabs(course_id):
     tabs = []
     try:
-        tabs = get_course(course_id, api_call=False).get_tabs()
+        tabs = list(get_course(course_id, api_call=False).get_tabs())
     except Exception as e:
         app.logger.error(f'Failed to retrieve Canvas tabs (course_id={course_id})')
         app.logger.exception(e)
@@ -136,7 +136,7 @@ def get_tabs(course_id):
 def get_teachers(course_id):
     teachers = []
     try:
-        teachers = get_course(course_id, api_call=False).get_users(enrollment_type='teacher', include=('email', 'enrollments'))
+        teachers = list(get_course(course_id, api_call=False).get_users(enrollment_type='teacher', include=('email', 'enrollments')))
     except Exception as e:
         app.logger.error(f'Failed to retrieve Canvas teachers (course_id={course_id})')
         app.logger.exception(e)
