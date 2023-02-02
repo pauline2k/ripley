@@ -23,10 +23,27 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+import re
+
 from flask import current_app as app
 from ripley import db, std_commit
 from ripley.factory import background_job_manager
+from ripley.models.user_auth import UserAuth
 from sqlalchemy.sql import text
+
+
+_test_users = [
+    {
+        'active': True,
+        'uid': '10000',
+        'is_superuser': True,
+    },
+    {
+        'active': True,
+        'uid': '10001',
+        'is_superuser': False,
+    },
+]
 
 
 def clear():
@@ -39,13 +56,32 @@ def load(create_test_data=True):
     _load_schemas()
     if create_test_data:
         _set_up_and_run_jobs()
+        _create_users()
+    return db
+
+
+def _create_users():
+    for test_user in _test_users:
+        user = UserAuth.create(
+            active=test_user['active'],
+            uid=test_user['uid'],
+            is_superuser=test_user['is_superuser'],
+        )
+        db.session.add(user)
+    std_commit(allow_test_environment=True)
 
 
 def _load_schemas():
     """Create DB schema from SQL file."""
     with open(f"{app.config['BASE_DIR']}/scripts/db/schema.sql", 'r') as ddl_file:
-        db.session().execute(text(ddl_file.read()))
-        std_commit()
+        _execute(ddl_file)
+
+
+def _execute(ddlfile):
+    # Let's leave the preprended copyright and license text out of this.
+    sql = re.sub(r'^/\*.*?\*/\s*', '', ddlfile.read(), flags=re.DOTALL)
+    db.session().execute(text(sql))
+    std_commit()
 
 
 def _set_up_and_run_jobs():

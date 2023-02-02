@@ -105,7 +105,7 @@ class BackgroundJobManager:
             self.continuous_thread = JobRunnerThread(daemon=True)
             self.continuous_thread.start()
         else:
-            app.logger.warn('No jobs. Nothing scheduled.')
+            app.logger.warning('No jobs. Nothing scheduled.')
 
     def restart(self):
         from flask import current_app as app
