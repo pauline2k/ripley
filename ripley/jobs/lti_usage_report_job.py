@@ -81,7 +81,7 @@ class LtiUsageReportJob(BaseJob):
         self.generate_courses_report(sis_term_id)
 
     def generate_summary_report(self, sis_term_id):
-        summary_report_filename = f"lti_usage_summary-{sis_term_id.replace('TERM:', '')}-#{datetime.now().strftime('%F')}.csv"
+        summary_report_filename = f"lti_usage_summary-{sis_term_id.replace('TERM:', '')}-{datetime.now().strftime('%F')}.csv"
         with open(summary_report_filename, mode='wt', encoding='utf-8') as f:
             csv_writer = csv.DictWriter(f, fieldnames=['Tool', 'URL', 'Accounts', 'Courses Visible'])
             csv_writer.writeheader()
@@ -97,7 +97,7 @@ class LtiUsageReportJob(BaseJob):
                 })
 
     def generate_courses_report(self, sis_term_id):
-        courses_report_filename = f"lti_usage_courses-{sis_term_id.replace('TERM:', '')}-#{datetime.now().strftime('%F')}.csv"
+        courses_report_filename = f"lti_usage_courses-{sis_term_id.replace('TERM:', '')}-{datetime.now().strftime('%F')}.csv"
         with open(courses_report_filename, mode='wt', encoding='utf-8') as f:
             csv_writer = csv.DictWriter(f, fieldnames=['Course URL', 'Name', 'Tool', 'Teacher', 'Email'])
             csv_writer.writeheader()
@@ -108,9 +108,9 @@ class LtiUsageReportJob(BaseJob):
                     csv_writer.writerow({
                         'Course URL': f"{app.config['CANVAS_API_URL']}/courses/{canvas_course_id}",
                         'Name': course_info['name'],
-                        'Tool': self.tool_url_to_summary.get('tool_url', {}).get('label'),
-                        'Teacher': teacher and teacher.name,
-                        'Email': teacher and teacher.email,
+                        'Tool': self.tool_url_to_summary.get(tool_url, {}).get('label'),
+                        'Teacher': teacher and getattr(teacher, 'name', None),
+                        'Email': teacher and getattr(teacher, 'email', None),
                     })
 
     def merge_course_occurrence(self, course, tool_url):
