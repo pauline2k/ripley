@@ -23,6 +23,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+import csv
+from datetime import datetime
 import re
 
 from flask import current_app as app
@@ -74,6 +76,42 @@ class LtiUsageReportJob(BaseJob):
                         tool_url = self.external_tool_instance_id_to_url.get(tool_id)
                         if tool_url:
                             self.merge_course_occurrence(course, tool_url)
+
+        self.generate_summary_report(sis_term_id)
+        self.generate_courses_report(sis_term_id)
+
+    def generate_summary_report(self, sis_term_id):
+        summary_report_filename = f"lti_usage_summary-{sis_term_id.replace('TERM:', '')}-#{datetime.now().strftime('%F')}.csv"
+        with open(summary_report_filename, mode='wt', encoding='utf-8') as f:
+            csv_writer = csv.DictWriter(f, fieldnames=['Tool', 'URL', 'Accounts', 'Courses Visible'])
+            csv_writer.writeheader()
+            for summary in self.tool_url_to_summary.values():
+                courses_count = summary['nbr_courses_visible']
+                if not courses_count and not summary['course_tool']:
+                    courses_count = 'N/A'
+                csv_writer.writerow({
+                    'Tool': summary['label'],
+                    'URL': summary['url'],
+                    'Accounts': ', '.join(summary['accounts']),
+                    'Courses Visible': courses_count,
+                })
+
+    def generate_courses_report(self, sis_term_id):
+        courses_report_filename = f"lti_usage_courses-{sis_term_id.replace('TERM:', '')}-#{datetime.now().strftime('%F')}.csv"
+        with open(courses_report_filename, mode='wt', encoding='utf-8') as f:
+            csv_writer = csv.DictWriter(f, fieldnames=['Course URL', 'Name', 'Tool', 'Teacher', 'Email'])
+            csv_writer.writeheader()
+            for canvas_course_id, course_info in self.course_to_visible_tools.items():
+                tool_urls = course_info['tools']
+                teacher = next(iter(canvas.get_teachers(course_id=canvas_course_id)), None)
+                for tool_url in tool_urls:
+                    csv_writer.writerow({
+                        'Course URL': f"{app.config['CANVAS_API_URL']}/courses/{canvas_course_id}",
+                        'Name': course_info['name'],
+                        'Tool': self.tool_url_to_summary.get('tool_url', {}).get('label'),
+                        'Teacher': teacher and teacher.name,
+                        'Email': teacher and teacher.email,
+                    })
 
     def merge_course_occurrence(self, course, tool_url):
         course_id = course['canvas_course_id']
