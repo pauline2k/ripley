@@ -54,6 +54,7 @@ def create_app():
 
 
 def _register_jobs(app):
-    # TODO import individual jobs
+    from ripley.jobs.lti_usage_report_job import LtiUsageReportJob  # noqa
+
     if app.config['JOBS_AUTO_START'] and (not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true'):
         background_job_manager.start(app)
