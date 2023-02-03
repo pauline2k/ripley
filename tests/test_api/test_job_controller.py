@@ -120,9 +120,12 @@ class TestJobSchedule:
         fake_auth.login(admin_uid)
         response = _api_job_schedule(client)
         assert response['autoStart'] is False
-        assert response['jobs'] == []
         assert response['secondsBetweenJobsCheck'] == 0.5
         assert response['startedAt']
+        assert len(response['jobs']) == 1
+        assert response['jobs'][0]['class'] == 'LtiUsageReportJob'
+        assert response['jobs'][0]['description'] == 'Generates reports on LTI usage within course sites.'
+        assert response['jobs'][0]['disabled'] is False
 
 
 def _api_job_schedule(client, expected_status_code=200):

@@ -39,6 +39,8 @@ CANVAS_ACCESS_TOKEN = 'a token'
 CANVAS_API_URL = 'https://hard_knocks_api.instructure.com'
 CANVAS_BERKELEY_ACCOUNT_ID = 1
 
+CURRENT_TERM_ID = '2023-B'
+
 DEV_AUTH_ENABLED = False
 DEV_AUTH_PASSWORD = 'another secret'
 

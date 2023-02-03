@@ -41,7 +41,10 @@ EXTERNAL_TOOL_ID_PATTERN = re.compile('context_external_tool_([0-9]+)')
 
 class LtiUsageReportJob(BaseJob):
 
-    def _run(self, sis_term_id):
+    def _run(self, sis_term_id=None):
+        if not sis_term_id:
+            sis_term_id = f"TERM:{app.config['CURRENT_TERM_ID']}"
+
         # The tool usage summary is keyed by external_tool['course_navigation']['url'] if available; otherwise by external_tool['url'].
         self.tool_url_to_summary = {}
 

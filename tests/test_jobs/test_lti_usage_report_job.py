@@ -68,7 +68,7 @@ class TestLtiUsageReportJob:
             }, m)
 
             with mock_s3_bucket(app) as s3:
-                LtiUsageReportJob(app)._run('TERM:2023-B')
+                LtiUsageReportJob(app)._run()
 
                 summary_report = _read_s3_csv(s3, 'lti_usage_summary-2023-B')
                 assert len(summary_report) == 11
