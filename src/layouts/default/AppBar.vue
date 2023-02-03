@@ -42,7 +42,7 @@ export default {
   },
   methods: {
     logOut() {
-      logOut().then(this.$_.noop)
+      logOut().then(data => window.location.href = data.casLogoutUrl)
     },
     moment
   }

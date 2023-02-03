@@ -14,7 +14,6 @@ export function registerPlugins (app: App) {
       withCredentials: true
     })
     .use(createPinia())
-    .use(router)
     .use(VueAnnouncer)
     .use(vuetify)
 }

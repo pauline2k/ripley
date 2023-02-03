@@ -9,7 +9,7 @@ import { createApp } from 'vue'
 import { registerPlugins } from '@/plugins'
 import { useContextStore } from "@/stores/context"
 
-const app = createApp(App)
+export const app = createApp(App)
 
 registerPlugins(app)
 
@@ -50,6 +50,7 @@ app.config.globalProperties.$putFocusNextTick = putFocusNextTick
 
 axios.get(`${apiBaseUrl}/api/user/my_profile`).then(response => {
   app.config.globalProperties.$currentUser = response.data
+  app.use(router)
 
   axios.get(`${apiBaseUrl}/api/config`).then(response => {
     const isDebugMode = _.trim(import.meta.env.VUE_APP_DEBUG).toLowerCase() === 'true'
