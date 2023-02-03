@@ -11,6 +11,13 @@ const routes:RouteRecordRaw[] = [
         name: 'Login',
         // Lazy-load components
         component: () => import('@/views/Login.vue')
+      },
+      {
+        path: '/jobs',
+        component: () => import('@/views/Jobs.vue'),
+        meta: {
+          title: 'MUTHUR'
+        }
       }
     ]
   },

@@ -5,12 +5,12 @@ import { defineStore } from 'pinia'
 
 export const useContextStore = defineStore('context', {
   state: () => ({
-    loading: false,
+    isLoading: false,
   }),
   actions: {
     loadingComplete(label?: string, focusTarget?: string) {
       document.title = `${label || 'UC Berkeley'} | bCourses Support`
-      this.loading = false
+      this.isLoading = false
       if (label) {
         // TODO: use '@vue-a11y/announcer' instead
         // state.screenReaderAlert = `${label} page is ready`
@@ -33,7 +33,7 @@ export const useContextStore = defineStore('context', {
       }
     },
     loadingStart(label?: string) {
-      this.loading = true
+      this.isLoading = true
       // TODO: use '@vue-a11y/announcer' instead
       // state.screenReaderAlert = `${label || 'Page'} is loading...`
     }

@@ -6,7 +6,7 @@ import { useContextStore } from "@/stores/context"
 export default {
   name: 'Context',
   computed: {
-    ...mapState(useContextStore, ['loading']),
+    ...mapState(useContextStore, ['isLoading']),
   },
   methods: {
     ...mapActions(useContextStore, [
