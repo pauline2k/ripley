@@ -1,8 +1,19 @@
 <template>
-  <div v-if="!isLoading" class="pt-3">
-    <v-card outlined class="elevation-1 mb-6">
-      <v-card-title class="align-start">
-        MUTHUR
+  <div v-if="!isLoading" class="pt-2">
+    <v-card class="elevation-1 mb-2">
+      <v-card-title class="d-flex align-start">
+        <div class="pl-2 pt-4">
+          <h1>
+            <v-icon
+              class="pr-3 pb-3"
+              color="primary"
+              size="small"
+            >
+              mdi-desktop-classic
+            </v-icon>
+            <span id="page-title" tabindex="0">MUTHUR</span>
+          </h1>
+        </div>
       </v-card-title>
       <v-card-text>
         <div class="mb-3">
@@ -10,7 +21,6 @@
         </div>
         <v-data-table-virtual
           :headers="headers"
-          height="500"
           :items="jobSchedule.jobs"
           item-value="name"
         >
@@ -39,20 +49,18 @@
             <span v-html="item.raw.description"></span>
           </template>
           <template #item.schedule="{ item }">
-            <div class="d-flex align-center">
-              <div>
-                <v-btn
-                  :id="`edit-job-schedule-${item.raw.key}`"
-                  :aria-label="`Edit job schedule ${item.raw.key}`"
-                  :disabled="!item.raw.disabled || isRunning(item.raw.key)"
-                  class="pr-2"
-                  flat
-                  size="small"
-                  @click.stop="scheduleEditOpen(item.raw)"
-                >
-                  <v-icon>mdi-playlist-edit</v-icon>
-                </v-btn>
-              </div>
+            <div class="d-flex align-center text-no-wrap">
+              <v-btn
+                :id="`edit-job-schedule-${item.raw.key}`"
+                :aria-label="`Edit job schedule ${item.raw.key}`"
+                :disabled="!item.raw.disabled || isRunning(item.raw.key)"
+                class="px-0"
+                icon
+                variant="plain"
+                @click.stop="scheduleEditOpen(item.raw)"
+              >
+                <v-icon>mdi-playlist-edit</v-icon>
+              </v-btn>
               <div>
                 <span v-if="item.raw.schedule.type === 'day_at'" :for="`edit-job-schedule-${item.raw.key}`">
                   Daily at {{ item.raw.schedule.value }} (UTC)
@@ -69,6 +77,7 @@
         </v-data-table-virtual>
       </v-card-text>
     </v-card>
+    <JobHistory :job-history="jobHistory" :refreshing="refreshing" />
     <v-dialog v-model="editJobDialog" max-width="400px" persistent>
       <v-card>
         <v-card-title>
@@ -117,23 +126,27 @@
 <script>
 import Context from '@/mixins/Context'
 import DisableJobToggle from '@/components/job/DisableJobToggle'
+import JobHistory from '@/components/job/JobHistory'
 import Utils from '@/mixins/Utils'
 import {getJobHistory, getJobSchedule, setJobDisabled, startJob, updateJobSchedule} from '@/api/job'
 
 export default {
   name: 'Jobs',
   mixins: [Context, Utils],
-  components: { DisableJobToggle },
+  components: {
+    DisableJobToggle,
+    JobHistory
+  },
   data: () => ({
     disableScheduleSave: false,
     editJob: undefined,
     editJobDialog: false,
     headers: [
-      {title: '', key: 'key'},
-      {title: 'Name', key: 'name'},
-      {title: 'Description', key: 'description'},
-      {title: 'Schedule', key: 'schedule'},
-      {title: 'Enabled', key: 'enabled'}
+      {key: 'key', title: ''},
+      {key: 'name', title: 'Name'},
+      {key: 'description', title: 'Description'},
+      {key: 'schedule', title: 'Schedule'},
+      {key: 'enabled', title: 'Enabled'}
     ],
     jobHistory: undefined,
     jobSchedule: undefined,

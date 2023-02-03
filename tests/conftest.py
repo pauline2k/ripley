@@ -148,7 +148,7 @@ class TempJob(BaseJob):
 def mock_job(app, db_session):
     job = Job.create(
         job_schedule_type='day_at',
-        job_schedule_value='Saturday',
+        job_schedule_value='10:00',
         key='TempJob',
     )
     std_commit(allow_test_environment=True)
