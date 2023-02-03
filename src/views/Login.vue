@@ -6,7 +6,7 @@
     :style="{backgroundImage: `url(${nostromoCrew})`}"
   >
     <v-row>
-      <v-col>
+      <v-col v-if="!$currentUser.isAuthenticated">
         <div>
           <v-btn
             id="basic-auth-submit-button"
@@ -18,12 +18,15 @@
         <div>
           <hr />
         </div>
-        <div v-if="$config.devAuthEnabled && !$currentUser.isAuthenticated">
+        <div v-if="$config.devAuthEnabled">
           <h4 class="sr-only">DevAuth</h4>
           <DevAuth />
         </div>
       </v-col>
     </v-row>
+    <v-col v-if="$currentUser.isAuthenticated">
+      Hello! {{ $currentUser }}
+    </v-col>
   </v-container>
 </template>
 

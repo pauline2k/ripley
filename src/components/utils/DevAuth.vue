@@ -38,6 +38,7 @@ import auth from '@/auth'
 import Context from '@/mixins/Context'
 import Utils from '@/mixins/Utils'
 import {devAuthLogIn} from '@/api/auth'
+import {app} from "@/main";
 
 export default {
   name: 'DevAuth',
@@ -56,10 +57,9 @@ export default {
         devAuthLogIn(uid, password).then(
           data => {
             if (data.isAuthenticated) {
-              auth.initSession().then(() => {
-                this.$announcer.polite('You are logged in.')
-                this.$router.push({path: '/'})
-              })
+              app.config.globalProperties.$currentUser = data
+              this.$announcer.polite('You are logged in.')
+              this.$router.push({path: data.isAdmin ? '/jobs' : '/welcome'})
             } else {
               const message = this.$_.get(data, 'response.data.error') || this.$_.get(data, 'response.data.message') || this.$_.get(data, 'message') || 'Authentication failed'
               this.reportError(message)
