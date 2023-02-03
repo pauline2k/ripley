@@ -1,0 +1,32 @@
+{
+    "download_provisioning_csv_accounts": {
+        "method": "GET",
+        "endpoint": "file_20000_download",
+        "data": "`csv/accounts_report.csv`",
+        "status_code": 200
+    },
+    "download_provisioning_csv_courses": {
+        "method": "GET",
+        "endpoint": "file_20001_download",
+        "data": "`csv/courses_report.csv`",
+        "status_code": 200
+    },
+    "get_provisioning_csv_accounts": {
+        "method": "GET",
+        "endpoint": "files/20000",
+        "data": {
+            "id": 20000,
+            "url": "https://hard_knocks_api.instructure.com/api/v1/file_20000_download"
+        },
+        "status_code": 200
+    },
+    "get_provisioning_csv_courses": {
+        "method": "GET",
+        "endpoint": "files/20001",
+        "data": {
+            "id": 20001,
+            "url": "https://hard_knocks_api.instructure.com/api/v1/file_20001_download"
+        },
+        "status_code": 200
+    }
+}

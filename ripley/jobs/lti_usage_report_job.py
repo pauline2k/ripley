@@ -26,11 +26,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import csv
 from datetime import datetime
 import re
+import tempfile
 
 from flask import current_app as app
 from ripley.externals import canvas
+from ripley.externals.s3 import put_binary_data_to_s3
 from ripley.jobs.base_job import BaseJob
-
+from ripley.jobs.errors import BackgroundJobError
 
 # Basic enabled-out-of-the-box course apps do not need to be included in the detailed course tools report.
 COMMONPLACE_APPS = re.compile('/canvas/embedded/(course_add_user|course_grade_export|course_manage_official_sections|rosters)$')
@@ -55,34 +57,42 @@ class LtiUsageReportJob(BaseJob):
             account_ids.append(r['canvas_account_id'])
 
         for account_id in account_ids:
-            for tool in canvas.get_external_tools('account', account_id):
-                tool_url = self.merge_tool_definition(tool)
-                self.tool_url_to_summary[tool_url]['accounts'].append(account_id)
+            self.merge_account(account_id)
 
         for course in canvas.get_csv_report('courses', term_id=sis_term_id):
-            course_id = course['canvas_course_id']
-            if course['status'] == 'unpublished':
-                continue
-            for tool in canvas.get_external_tools('course', course_id):
-                tool_url = self.merge_tool_definition(tool)
-                if not tool.course_navigation and tool_url:
-                    # This will not appear in course tabs, and so needs to be noted here.
-                    self.merge_course_occurrence(course, tool_url)
-            for tab in canvas.get_tabs(course_id=course_id):
-                if tab.type == 'external' and not getattr(tab, 'hidden', None):
-                    m = EXTERNAL_TOOL_ID_PATTERN.match(tab.id)
-                    if m:
-                        tool_id = int(m.group(1))
-                        tool_url = self.external_tool_instance_id_to_url.get(tool_id)
-                        if tool_url:
-                            self.merge_course_occurrence(course, tool_url)
+            self.merge_course(course)
 
-        self.generate_summary_report(sis_term_id)
-        self.generate_courses_report(sis_term_id)
+        if not self.generate_summary_report(sis_term_id):
+            raise BackgroundJobError('Summary report generation failed.')
+        if not self.generate_courses_report(sis_term_id):
+            raise BackgroundJobError('Courses report generation failed.')
+
+    def merge_account(self, account_id):
+        for tool in canvas.get_external_tools('account', account_id):
+            tool_url = self.merge_tool_definition(tool)
+            self.tool_url_to_summary[tool_url]['accounts'].append(str(account_id))
+
+    def merge_course(self, course):
+        course_id = course['canvas_course_id']
+        if course['status'] == 'unpublished':
+            return
+        for tool in canvas.get_external_tools('course', course_id):
+            tool_url = self.merge_tool_definition(tool)
+            if not tool.course_navigation and tool_url:
+                # This will not appear in course tabs, and so needs to be noted here.
+                self.merge_course_occurrence(course, tool_url)
+        for tab in canvas.get_tabs(course_id=course_id):
+            if tab.type == 'external' and not getattr(tab, 'hidden', None):
+                m = EXTERNAL_TOOL_ID_PATTERN.match(tab.id)
+                if m:
+                    tool_id = int(m.group(1))
+                    tool_url = self.external_tool_instance_id_to_url.get(tool_id)
+                    if tool_url:
+                        self.merge_course_occurrence(course, tool_url)
 
     def generate_summary_report(self, sis_term_id):
-        summary_report_filename = f"lti_usage_summary-{sis_term_id.replace('TERM:', '')}-{datetime.now().strftime('%F')}.csv"
-        with open(summary_report_filename, mode='wt', encoding='utf-8') as f:
+        tmpfile = tempfile.NamedTemporaryFile()
+        with open(tmpfile.name, mode='wt', encoding='utf-8') as f:
             csv_writer = csv.DictWriter(f, fieldnames=['Tool', 'URL', 'Accounts', 'Courses Visible'])
             csv_writer.writeheader()
             for summary in self.tool_url_to_summary.values():
@@ -96,9 +106,13 @@ class LtiUsageReportJob(BaseJob):
                     'Courses Visible': courses_count,
                 })
 
+        summary_report_filename = f"lti_usage_summary-{sis_term_id.replace('TERM:', '')}-{datetime.now().strftime('%F')}.csv"
+        with open(tmpfile.name, mode='rb') as f:
+            return put_binary_data_to_s3(f'lti_usage_reports/{summary_report_filename}', f, 'text/csv')
+
     def generate_courses_report(self, sis_term_id):
-        courses_report_filename = f"lti_usage_courses-{sis_term_id.replace('TERM:', '')}-{datetime.now().strftime('%F')}.csv"
-        with open(courses_report_filename, mode='wt', encoding='utf-8') as f:
+        tmpfile = tempfile.NamedTemporaryFile()
+        with open(tmpfile.name, mode='wt', encoding='utf-8') as f:
             csv_writer = csv.DictWriter(f, fieldnames=['Course URL', 'Name', 'Tool', 'Teacher', 'Email'])
             csv_writer.writeheader()
             for canvas_course_id, course_info in self.course_to_visible_tools.items():
@@ -112,6 +126,10 @@ class LtiUsageReportJob(BaseJob):
                         'Teacher': teacher and getattr(teacher, 'name', None),
                         'Email': teacher and getattr(teacher, 'email', None),
                     })
+
+        courses_report_filename = f"lti_usage_courses-{sis_term_id.replace('TERM:', '')}-{datetime.now().strftime('%F')}.csv"
+        with open(tmpfile.name, mode='rb') as f:
+            return put_binary_data_to_s3(f'lti_usage_reports/{courses_report_filename}', f, 'text/csv')
 
     def merge_course_occurrence(self, course, tool_url):
         course_id = course['canvas_course_id']
