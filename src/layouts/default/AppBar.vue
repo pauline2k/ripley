@@ -9,7 +9,7 @@
           <span v-if="$currentUser.isAuthenticated">
             <v-btn
               id="log-out"
-              variant="link"
+              variant="plain"
               @click="logOut"
             >
               Log out

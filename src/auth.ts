@@ -16,7 +16,7 @@ export default {
   initSession: () => {
     return new Promise<void>(resolve => {
       const apiBaseUrl = import.meta.env.VITE_APP_API_BASE_URL
-      axios.get(`${apiBaseUrl}/api/my/status`).then(response => {
+      // axios.get(`${apiBaseUrl}/api/my/status`).then(response => {
         // TODO
         // Vue.prototype.$currentUser = response.data
         // Vue.prototype.$currentUser.isAuthenticated = _.get(response.data, 'isAuthenticated', false)
@@ -32,7 +32,7 @@ export default {
         //   axios.defaults.headers.delete['X-CSRF-Token'] = response.data.csrfToken
         //   resolve()
         // })
-      })
+      // })
     })
   },
   requiresAuthenticated: (to: any, from: any, next: any) => {

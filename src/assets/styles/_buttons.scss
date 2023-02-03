@@ -10,8 +10,8 @@
 // markup:
 // <button>This is a button</button>
 //
-// :hover    - Underlined with pointer cursor
-// :focus    - Underlined with pointer cursor
+// :hover    - Pointer cursor
+// :focus    - Pointer cursor
 // :active   - No shadow
 //
 // Styleguide 2.1
@@ -20,7 +20,6 @@ button {
   font-family: $body-font-family;
   &:hover, &:focus {
     cursor: pointer;
-    text-decoration: underline;
   }
   &:active {
     box-shadow: none;
