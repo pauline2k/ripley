@@ -40,7 +40,7 @@ h1, h2, h3, h4, h5, h6 {
   color: $cc-color-night-rider;
   font-family: $header-font-family;
   font-style: normal;
-  font-weight: 500;
+  // font-weight: 500;
   line-height: 1.4;
   margin-bottom: 6px;
   margin-top: 3px;
@@ -66,9 +66,6 @@ ul li ul, ul li ol {
 }
 
 // Headings
-h1 {
-  font-size: 22px;
-}
 .cc-heading-page-title {
   color: $cc-color-night-rider;
   font-weight: normal;
@@ -76,9 +73,6 @@ h1 {
   @media #{$small-only} {
     margin-bottom: 15px;
   }
-}
-h2 {
-  font-size: 18px;
 }
 h3 {
   font-size: 15px;
