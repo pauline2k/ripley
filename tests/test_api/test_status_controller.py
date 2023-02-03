@@ -33,7 +33,7 @@ class TestStatusController:
     def test_ping(self, app, client):
         """Answers the phone when pinged."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'canvas_account': ['get_by_id']}, m)
+            register_canvas_uris(app, {'account': ['get_by_id']}, m)
 
             response = client.get('/api/ping')
             assert response.status_code == 200
@@ -44,7 +44,7 @@ class TestStatusController:
     def test_canvas_error(self, app, client):
         """Reports Canvas API error."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'canvas_account': ['get_by_id_404']}, m)
+            register_canvas_uris(app, {'account': ['get_by_id_404']}, m)
 
             response = client.get('/api/ping')
             assert response.status_code == 200

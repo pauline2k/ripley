@@ -1,0 +1,6 @@
+canvas_account_id,account_id,canvas_parent_id,parent_account_id,name,status
+129409,ACCT:COURSES,90242,,Courses,active
+129410,ACCT:OFFICIAL_COURSES,129409,ACCT:COURSES,Official Courses,active
+129069,,129410,ACCT:OFFICIAL_COURSES,COM LIT,active
+129091,ACCT:EWMBA,128848,ACCT:HAAS,EWMBA,active
+128848,ACCT:HAAS,129410,ACCT:OFFICIAL_COURSES,HAAS,active

@@ -26,6 +26,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import logging
 import os
 
+AWS_PROFILE = None
+AWS_S3_BUCKET = 'some-bucket'
+AWS_S3_REGION = 'us-west-2'
+
 # Base directory for the application (one level up from this config file).
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
