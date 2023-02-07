@@ -1,7 +1,10 @@
 import _ from 'lodash'
-import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 import auth from '@/auth'
-import {app} from "@/main";
+import {app} from '@/main'
+import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
+import {defineAsyncComponent} from 'vue'
+
+const load = (path: string) => defineAsyncComponent(() => import(`./${path}`))
 
 const routes:RouteRecordRaw[] = [
   {
@@ -14,39 +17,39 @@ const routes:RouteRecordRaw[] = [
               : next({path: '/welcome'}))
           : next()
     },
-    component: () => import('@/layouts/default/Default.vue'),
+    component: () => load('layouts/default/Default.vue'),
     children: [
       {
         path: '',
         name: 'Login',
         // Lazy-load components
-        component: () => import('@/views/Login.vue')
+        component: () => load('views/Login.vue')
       }
     ]
   },
     {
     path: '/',
     beforeEnter: auth.requiresAdmin,
-    component: () => import('@/layouts/default/Default.vue'),
+    component: () => load('layouts/default/Default.vue'),
     children: [
       {
         path: '/welcome',
         name: 'Welcome',
         // Lazy-load components
-        component: () => import('@/views/Welcome.vue')
+        component: () => load('views/Welcome.vue')
       },
       {
         path: '/jobs',
-        component: () => import('@/views/Jobs.vue'),
+        component: () => load('views/Jobs.vue'),
         meta: {
-          title: 'MUTHUR'
+          title: 'MU-TH-UR 6000'
         }
       }
     ]
   },
   {
     path: '/',
-    component: () => import('@/layouts/default/Default.vue'),
+    component: () => load('layouts/default/Default.vue'),
     children: [
       {
         beforeEnter: (to: any, from: any, next: any) => {
@@ -54,7 +57,7 @@ const routes:RouteRecordRaw[] = [
           next()
         },
         path: '/404',
-        component: () => import('@/views/NotFound.vue'),
+        component: () => load('views/NotFound.vue'),
         meta: {
           title: 'Page not found'
         }
@@ -75,13 +78,13 @@ const routes:RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes,
 })
 
 router.afterEach((to: any) => {
   const title = _.get(to, 'meta.title') || _.capitalize(to.name) || 'Welcome'
-  document.title = `${title} | Junction`
+  document.title = `${title} | UC Berkeley`
 })
 
 export default router
