@@ -1,13 +1,7 @@
 import _ from 'lodash'
-import Default from '@/layouts/default/Default.vue'
-import Error from '@/views/Error.vue'
-import Login from '@/views/Login.vue'
-import Jobs from '@/views/Jobs.vue'
-import NotFound from '@/views/NotFound.vue'
-import Welcome from '@/views/Welcome.vue'
-import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 import auth from '@/auth'
 import {app} from '@/main'
+import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 
 const routes:RouteRecordRaw[] = [
   {
@@ -20,30 +14,30 @@ const routes:RouteRecordRaw[] = [
               : next({path: '/welcome'}))
           : next()
     },
-    component: Default,
+    component: () => import('@/layouts/default/Default.vue'),
     children: [
       {
         path: '',
         name: 'Login',
         // Lazy-load components
-        component: Login
+        component: () => import('@/views/Login.vue')
       }
     ]
   },
     {
     path: '/',
     beforeEnter: auth.requiresAdmin,
-    component: Default,
+    component: () => import('@/layouts/default/Default.vue'),
     children: [
       {
         path: '/welcome',
         name: 'Welcome',
         // Lazy-load components
-        component: Welcome
+        component: () => import('@/views/Welcome.vue')
       },
       {
         path: '/jobs',
-        component: Jobs,
+        component: () => import('@/views/Jobs.vue'),
         meta: {
           title: 'MU-TH-UR 6000'
         }
@@ -52,7 +46,7 @@ const routes:RouteRecordRaw[] = [
   },
   {
     path: '/',
-    component: Default,
+    component: () => import('@/layouts/default/Default.vue'),
     children: [
       {
         beforeEnter: (to: any, from: any, next: any) => {
@@ -60,14 +54,14 @@ const routes:RouteRecordRaw[] = [
           next()
         },
         path: '/404',
-        component: NotFound,
+        component: () => import('@/views/NotFound.vue'),
         meta: {
           title: 'Page not found'
         }
       },
       {
         path: '/error',
-        component: Error,
+        component: () => import('@/views/Error.vue'),
         meta: {
           title: 'Error'
         }

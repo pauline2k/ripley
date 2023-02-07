@@ -38,7 +38,7 @@ import auth from '@/auth'
 import Context from '@/mixins/Context'
 import Utils from '@/mixins/Utils'
 import {devAuthLogIn} from '@/api/auth'
-import {app} from "@/main";
+import {app} from '@/main'
 
 export default {
   name: 'DevAuth',

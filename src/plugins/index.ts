@@ -1,10 +1,10 @@
 import axios from '@/plugins/axios'
 import router from '@/router'
-import type { App } from 'vue'
+import type {App} from 'vue'
 import VueAnnouncer from '@vue-a11y/announcer'
 import vuetify from './vuetify'
-import { createPinia } from 'pinia'
-import { loadFonts } from './webfontloader'
+import {createPinia} from 'pinia'
+import {loadFonts} from './webfontloader'
 
 export function registerPlugins (app: App) {
   loadFonts().then(() => {})

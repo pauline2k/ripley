@@ -4,10 +4,10 @@ import axios from 'axios'
 import mitt from 'mitt'
 import moment from 'moment'
 import router from '@/router'
-import { putFocusNextTick, axiosErrorHandler } from './utils'
-import { createApp } from 'vue'
-import { registerPlugins } from '@/plugins'
-import { useContextStore } from "@/stores/context"
+import {putFocusNextTick, axiosErrorHandler} from './utils'
+import {createApp} from 'vue'
+import {registerPlugins} from '@/plugins'
+import {useContextStore} from '@/stores/context'
 
 export const app = createApp(App)
 
