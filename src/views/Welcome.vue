@@ -1,12 +1,12 @@
 <template>
-<div>
-  Hello {{ $currentUser.firstName }}
-</div>
+  <div>
+    Hello {{ $currentUser.firstName }}
+  </div>
 </template>
 
 <script>
 export default {
-  name: "Welcome.vue"
+  name: 'Welcome.vue'
 }
 </script>
 

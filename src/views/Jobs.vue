@@ -37,7 +37,9 @@
               icon
               size="large"
               @click="runJob(item.raw)"
-            ><v-icon color="success" size="large">mdi-play</v-icon></v-btn>
+            >
+              <v-icon color="success" size="large">mdi-play</v-icon>
+            </v-btn>
             <v-progress-circular
               v-if="isRunning(item.raw.key)"
               indeterminate

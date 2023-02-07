@@ -1,7 +1,7 @@
 import _ from 'lodash'
-import { nextTick } from 'vue'
-import { putFocusNextTick } from '@/utils'
-import { defineStore } from 'pinia'
+import {nextTick} from 'vue'
+import {putFocusNextTick} from '@/utils'
+import {defineStore} from 'pinia'
 
 export const useContextStore = defineStore('context', {
   state: () => ({
@@ -9,7 +9,7 @@ export const useContextStore = defineStore('context', {
   }),
   actions: {
     loadingComplete(label?: string, focusTarget?: string) {
-      document.title = `${label || 'UC Berkeley'} | bCourses Support`
+      document.title = `${label || 'bCourses'} | UC Berkeley`
       this.isLoading = false
       if (label) {
         // TODO: use '@vue-a11y/announcer' instead

@@ -37,7 +37,7 @@ import nostromoCrew from '@/assets/nostromo-crew-eating-breakfast.png'
 <script>
 import Context from '@/mixins/Context'
 import DevAuth from '@/components/utils/DevAuth'
-import {getCasLoginURL} from "@/api/auth";
+import {getCasLoginURL} from '@/api/auth'
 
 export default {
   name: 'Login',
@@ -46,7 +46,7 @@ export default {
   setup() {
     const showDevAuth = false
     this.$ready('Welcome. Please log in.')
-    return { showDevAuth }
+    return {showDevAuth}
   },
   methods: {
     toCasLogin() {

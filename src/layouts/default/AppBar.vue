@@ -28,7 +28,7 @@
 import BuildSummary from '@/components/utils/BuildSummary'
 import Context from '@/mixins/Context'
 import moment from 'moment'
-import {getCasLogoutUrl, logOut} from "@/api/auth";
+import {getCasLogoutUrl, logOut} from '@/api/auth'
 
 export default {
   name: 'AppBar',

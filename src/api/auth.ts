@@ -15,7 +15,7 @@ export function devAuthLogIn(uid: string, password: string) {
 }
 
 export function getCasLoginURL() {
-  return utils.get(`/api/auth/cas_login_url`)
+  return utils.get('/api/auth/cas_login_url')
 }
 
 export function getCasLogoutUrl() {

@@ -1,4 +1,5 @@
-import { app } from "./main"
+import {app} from './main'
+import axios from 'axios'
 
 const goToLogin = (to: any, next: any) => {
   next({

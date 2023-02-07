@@ -1,4 +1,4 @@
-import { useContextStore } from '@/stores/context'
+import {useContextStore} from '@/stores/context'
 
 export default {
   setup() {
