@@ -32,6 +32,7 @@ from ripley.lib.util import get_eb_environment
 
 PUBLIC_CONFIGS = [
     'DEV_AUTH_ENABLED',
+    'EMAIL_RIPLEY_SUPPORT',
     'RIPLEY_ENV',
     'TIMEZONE',
 ]

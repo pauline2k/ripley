@@ -1,10 +1,13 @@
 import _ from 'lodash'
+import Default from '@/layouts/default/Default.vue'
+import Error from '@/views/Error.vue'
+import Login from '@/views/Login.vue'
+import Jobs from '@/views/Jobs.vue'
+import NotFound from '@/views/NotFound.vue'
+import Welcome from '@/views/Welcome.vue'
+import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 import auth from '@/auth'
 import {app} from '@/main'
-import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
-import {defineAsyncComponent} from 'vue'
-
-const load = (path: string) => defineAsyncComponent(() => import(`./${path}`))
 
 const routes:RouteRecordRaw[] = [
   {
@@ -17,30 +20,30 @@ const routes:RouteRecordRaw[] = [
               : next({path: '/welcome'}))
           : next()
     },
-    component: () => load('layouts/default/Default.vue'),
+    component: Default,
     children: [
       {
         path: '',
         name: 'Login',
         // Lazy-load components
-        component: () => load('views/Login.vue')
+        component: Login
       }
     ]
   },
     {
     path: '/',
     beforeEnter: auth.requiresAdmin,
-    component: () => load('layouts/default/Default.vue'),
+    component: Default,
     children: [
       {
         path: '/welcome',
         name: 'Welcome',
         // Lazy-load components
-        component: () => load('views/Welcome.vue')
+        component: Welcome
       },
       {
         path: '/jobs',
-        component: () => load('views/Jobs.vue'),
+        component: Jobs,
         meta: {
           title: 'MU-TH-UR 6000'
         }
@@ -49,7 +52,7 @@ const routes:RouteRecordRaw[] = [
   },
   {
     path: '/',
-    component: () => load('layouts/default/Default.vue'),
+    component: Default,
     children: [
       {
         beforeEnter: (to: any, from: any, next: any) => {
@@ -57,7 +60,7 @@ const routes:RouteRecordRaw[] = [
           next()
         },
         path: '/404',
-        component: () => load('views/NotFound.vue'),
+        component: NotFound,
         meta: {
           title: 'Page not found'
         }

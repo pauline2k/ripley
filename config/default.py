@@ -44,6 +44,8 @@ CURRENT_TERM_ID = '2023-B'
 DEV_AUTH_ENABLED = False
 DEV_AUTH_PASSWORD = 'another secret'
 
+EMAIL_RIPLEY_SUPPORT = 'bcourseshelp@berkeley.edu'
+
 # Directory to search for mock fixtures, if running in "test" or "demo" mode.
 FIXTURES_PATH = None
 
