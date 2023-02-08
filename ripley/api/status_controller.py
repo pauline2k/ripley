@@ -27,6 +27,7 @@ from canvasapi.exceptions import CanvasException
 from flask import current_app as app
 import psycopg2
 from ripley import db
+from ripley.externals import data_loch
 from ripley.externals.canvas import ping_canvas
 from ripley.externals.rds import log_db_error
 from ripley.lib.http import tolerant_jsonify
@@ -40,6 +41,7 @@ def ping():
     db_ping = False
     try:
         canvas_ping = _ping_canvas()
+        data_loch_ping = _data_loch_status()
         db_ping = _db_status()
     except Exception as e:
         subject = str(e)
@@ -52,9 +54,15 @@ def ping():
             {
                 'app': True,
                 'canvas': canvas_ping,
+                'data_loch': data_loch_ping,
                 'db': db_ping,
             },
         )
+
+
+def _data_loch_status():
+    rows = data_loch.safe_execute_rds('SELECT 1')
+    return rows is not None
 
 
 def _db_status():

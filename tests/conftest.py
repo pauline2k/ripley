@@ -130,6 +130,20 @@ def fake_auth(app, db, client):
     logout_user()
 
 
+@pytest.fixture(scope='session', autouse=True)
+def fake_loch(app):
+    """Mimic data loch schemas and tables in a local Postgres database."""
+    from sqlalchemy import create_engine
+    from sqlalchemy.sql import text
+    fixture_path = f"{app.config['BASE_DIR']}/tests/fixtures"
+    with open(f'{fixture_path}/loch/loch.sql', 'r') as ddlfile:
+        ddltext = ddlfile.read()
+    data_loch_db = create_engine(app.config['DATA_LOCH_RDS_URI'])
+    with data_loch_db.connect() as conn:
+        conn.execute(text(ddltext))
+        conn.commit()
+
+
 class TempJob(BaseJob):
     @classmethod
     def description(cls):
