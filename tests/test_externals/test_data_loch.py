@@ -23,33 +23,24 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-import requests_mock
-from tests.util import register_canvas_uris
+from datetime import date
+
+import pytest
+from ripley.externals import data_loch
 
 
-class TestStatusController:
-    """Status API."""
+@pytest.mark.usefixtures('db_session')
+class TestDataLoch:
 
-    def test_ping(self, app, client):
-        """Answers the phone when pinged."""
-        with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'account': ['get_by_id']}, m)
+    def test_get_current_term_index(self, app):
+        current_term_index = data_loch.get_current_term_index()
+        assert current_term_index['current_term_name'] == 'Spring 2023'
+        assert current_term_index['future_term_name'] == 'Summer 2023'
 
-            response = client.get('/api/ping')
-            assert response.status_code == 200
-            assert response.json['app'] is True
-            assert response.json['canvas'] is True
-            assert response.json['data_loch'] is True
-            assert response.json['db'] is True
-
-    def test_canvas_error(self, app, client):
-        """Reports Canvas API error."""
-        with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'account': ['get_by_id_404']}, m)
-
-            response = client.get('/api/ping')
-            assert response.status_code == 200
-            assert response.json['app'] is True
-            assert response.json['canvas'] is False
-            assert response.json['data_loch'] is True
-            assert response.json['db'] is True
+    def test_get_undergraduate_term(self, app):
+        term = data_loch.get_undergraduate_term('2228')
+        assert len(term) == 1
+        assert term[0]['term_id'] == '2228'
+        assert term[0]['term_name'] == 'Fall 2022'
+        assert term[0]['term_begins'] == date(2022, 8, 17)
+        assert term[0]['term_ends'] == date(2022, 12, 16)

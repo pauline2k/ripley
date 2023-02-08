@@ -41,6 +41,10 @@ CANVAS_BERKELEY_ACCOUNT_ID = 1
 
 CURRENT_TERM_ID = '2023-B'
 
+# The Data Loch provides read-only Postgres access.
+DATA_LOCH_RDS_URI = 'postgresql://nessie:secret@secret-rds-url.com:5432/db'
+DATA_LOCH_MAX_CONNECTIONS = 50
+
 DEV_AUTH_ENABLED = False
 DEV_AUTH_PASSWORD = 'another secret'
 

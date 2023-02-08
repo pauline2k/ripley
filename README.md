@@ -29,6 +29,7 @@ npm install
 createuser ripley --no-createdb --no-superuser --no-createrole --pwprompt
 createdb nostromo --owner=ripley
 createdb nostromo_test --owner=ripley
+createdb ripley_loch_test --owner=ripley
 
 # Load schema
 export FLASK_APP=application.py
