@@ -1,0 +1,13 @@
+{
+    "https://ucberkeley.beta.instructure.com": [{
+        "default": true,
+        "client_id": "10720000000000650",
+        "auth_login_url": "TODO",
+        "auth_token_url": "TODO",
+        "key_set_url": "/api/auth/jwks",
+        "key_set": null,
+        "private_key_file": "test_lti_rsa",
+        "public_key_file": "test_lti_rsa.pub",
+        "deployment_ids": []
+    }]
+}

@@ -22,11 +22,13 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+
 from urllib.parse import urlencode, urljoin, urlparse
 
 import cas
 from flask import abort, current_app as app, flash, redirect, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from pylti1p3.tool_config import ToolConfJsonFile
 from ripley.api.errors import ResourceNotFoundError
 from ripley.lib.http import add_param_to_url, tolerant_jsonify
 from ripley.models.user import User
@@ -60,6 +62,18 @@ def dev_auth_login():
         return tolerant_jsonify(current_user.to_api_json())
     else:
         raise ResourceNotFoundError('Unknown path')
+
+
+@app.route('/api/auth/jwks')
+def get_jwk_set():
+    lti_config_path = app.config['LTI_CONFIG_PATH']
+    try:
+        tool_conf = ToolConfJsonFile(lti_config_path)
+        key_set = tool_conf.get_jwks()
+        return tolerant_jsonify(key_set)
+    except Exception as e:
+        app.logger.error(f'Failed to generate LTI keys: {e}')
+        return tolerant_jsonify({})
 
 
 @app.route('/api/auth/logout')
