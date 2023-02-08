@@ -2,51 +2,42 @@ import _ from 'lodash'
 import auth from '@/auth'
 import {app} from '@/main'
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
+import {defineAsyncComponent} from 'vue'
 
 const routes:RouteRecordRaw[] = [
   {
-    path: '/',
     beforeEnter: (to: any, from: any, next: any) => {
       const currentUser = app.config.globalProperties.$currentUser
-      currentUser.isAuthenticated
-          ? (currentUser.isAdmin
-              ? next({path: '/jobs'})
-              : next({path: '/welcome'}))
-          : next()
+      currentUser.isAuthenticated ? (currentUser.isAdmin ? next({path: '/jobs'}) : next({path: '/welcome'})) : next()
     },
-    component: () => import('@/layouts/default/Default.vue'),
     children: [
       {
-        path: '',
+        component: defineAsyncComponent(() => import('@/views/Login.vue')),
         name: 'Login',
-        // Lazy-load components
-        component: () => import('@/views/Login.vue')
+        path: '',
       }
-    ]
+    ],
+    component: () => defineAsyncComponent(() => import('@/layouts/default/Default.vue')),
+    path: '/',
   },
     {
-    path: '/',
     beforeEnter: auth.requiresAdmin,
-    component: () => import('@/layouts/default/Default.vue'),
     children: [
       {
-        path: '/welcome',
+        component: () => defineAsyncComponent(() => import('@/views/Welcome.vue')),
         name: 'Welcome',
-        // Lazy-load components
-        component: () => import('@/views/Welcome.vue')
+        path: '/welcome',
       },
       {
         path: '/jobs',
-        component: () => import('@/views/Jobs.vue'),
-        meta: {
-          title: 'MU-TH-UR 6000'
-        }
+        component: () => defineAsyncComponent(() => import('@/views/Jobs.vue')),
+        meta: {title: 'MU-TH-UR 6000'}
       }
-    ]
+    ],
+    component: () => defineAsyncComponent(() => import('@/layouts/default/Default.vue')),
+    path: '/',
   },
   {
-    path: '/',
-    component: () => import('@/layouts/default/Default.vue'),
     children: [
       {
         beforeEnter: (to: any, from: any, next: any) => {
@@ -54,19 +45,17 @@ const routes:RouteRecordRaw[] = [
           next()
         },
         path: '/404',
-        component: () => import('@/views/NotFound.vue'),
-        meta: {
-          title: 'Page not found'
-        }
+        component: () => defineAsyncComponent(() => import('@/views/NotFound.vue')),
+        meta: {title: 'Page not found'}
       },
       {
         path: '/error',
-        component: () => import('@/views/Error.vue'),
-        meta: {
-          title: 'Error'
-        }
+        component: () => defineAsyncComponent(() => import('@/views/Error.vue')),
+        meta: {title: 'Error'}
       }
-    ]
+    ],
+    component: () => defineAsyncComponent(() => import('@/layouts/default/Default.vue')),
+    path: '/',
   },
   {
     path: '/:pathMatch(.*)*',

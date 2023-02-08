@@ -39,13 +39,12 @@ axios.interceptors.response.use(
   })
 
 // Global utilities
-const contextStore: any = useContextStore()
 app.config.globalProperties.$_ = _
 app.config.globalProperties.$errorHandler = axiosErrorHandler
 app.config.globalProperties.$eventHub = mitt()
-app.config.globalProperties.$loading = (label: string) => contextStore.loadingStart(label)
+app.config.globalProperties.$loading = (label: string) => useContextStore().loadingStart(label)
 app.config.globalProperties.$moment = moment
-app.config.globalProperties.$ready = (label: string, focusTarget: string) => contextStore.loadingComplete(label, focusTarget)
+app.config.globalProperties.$ready = (label: string, focusTarget: string) => useContextStore().loadingComplete(label, focusTarget)
 app.config.globalProperties.$putFocusNextTick = putFocusNextTick
 
 axios.get(`${apiBaseUrl}/api/user/my_profile`).then(response => {
