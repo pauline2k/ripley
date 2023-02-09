@@ -1,8 +1,12 @@
 import _ from 'lodash'
+import Default from '@/layouts/default/Default.vue'
+import Jobs from '@/views/Jobs.vue'
+import Login from '@/views/Login.vue'
+import NotFound from '@/views/NotFound.vue'
+import Welcome from '@/views/Welcome.vue'
 import auth from '@/auth'
 import {app} from '@/main'
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
-import {defineAsyncComponent} from 'vue'
 
 const routes:RouteRecordRaw[] = [
   {
@@ -12,29 +16,29 @@ const routes:RouteRecordRaw[] = [
     },
     children: [
       {
-        component: defineAsyncComponent(() => import('@/views/Login.vue')),
+        component: Login,
         name: 'Login',
         path: '',
       }
     ],
-    component: () => defineAsyncComponent(() => import('@/layouts/default/Default.vue')),
+    component: Default,
     path: '/',
   },
     {
     beforeEnter: auth.requiresAdmin,
     children: [
       {
-        component: () => defineAsyncComponent(() => import('@/views/Welcome.vue')),
+        component: () => Welcome,
         name: 'Welcome',
         path: '/welcome',
       },
       {
         path: '/jobs',
-        component: () => defineAsyncComponent(() => import('@/views/Jobs.vue')),
+        component: () => Jobs,
         meta: {title: 'MU-TH-UR 6000'}
       }
     ],
-    component: () => defineAsyncComponent(() => import('@/layouts/default/Default.vue')),
+    component: Default,
     path: '/',
   },
   {
@@ -45,16 +49,16 @@ const routes:RouteRecordRaw[] = [
           next()
         },
         path: '/404',
-        component: () => defineAsyncComponent(() => import('@/views/NotFound.vue')),
+        component: () => NotFound,
         meta: {title: 'Page not found'}
       },
       {
         path: '/error',
-        component: () => defineAsyncComponent(() => import('@/views/Error.vue')),
+        component: () => Error,
         meta: {title: 'Error'}
       }
     ],
-    component: () => defineAsyncComponent(() => import('@/layouts/default/Default.vue')),
+    component: Default,
     path: '/',
   },
   {
