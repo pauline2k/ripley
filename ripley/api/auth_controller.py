@@ -29,7 +29,7 @@ import cas
 from flask import abort, current_app as app, flash, redirect, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from pylti1p3.tool_config import ToolConfJsonFile
-from ripley.api.errors import ResourceNotFoundError
+from ripley.api.errors import InternalServerError, ResourceNotFoundError
 from ripley.lib.http import add_param_to_url, tolerant_jsonify
 from ripley.models.user import User
 
@@ -73,7 +73,7 @@ def get_jwk_set():
         return tolerant_jsonify(key_set)
     except Exception as e:
         app.logger.error(f'Failed to generate LTI keys: {e}')
-        return tolerant_jsonify({})
+        raise InternalServerError(e)
 
 
 @app.route('/api/auth/logout')
