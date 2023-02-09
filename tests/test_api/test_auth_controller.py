@@ -22,26 +22,16 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
-import os
 
-# Base directory for the application (one level up from this config file).
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-DATA_LOCH_RDS_URI = 'postgresql://ripley:ripley@localhost:5432/ripley_loch_test'
+class TestGetJwks:
+    """JSON Web Key Set API."""
 
-EB_ENVIRONMENT = 'ripley-test'
-
-FIXTURES_PATH = f'{BASE_DIR}/tests/fixtures'
-
-INDEX_HTML = f'{BASE_DIR}/tests/static/test-index.html'
-
-JOBS_AUTO_START = False
-JOBS_SECONDS_BETWEEN_PENDING_CHECK = 0.5
-
-LOGGING_LOCATION = 'STDOUT'
-
-LTI_CONFIG_PATH = f'{BASE_DIR}/tests/config/test-lti-config.json'
-
-SQLALCHEMY_DATABASE_URI = 'postgresql://ripley:ripley@localhost:5432/nostromo_test'
-
-TESTING = True
+    def test_anonymous(self, client):
+        """Anonymous user can get the JSON Web Key Set."""
+        response = client.get('/api/auth/jwks')
+        assert response.status_code == 200
+        assert 'keys' in response.json
+        keyset = response.json['keys'][0]
+        for key in ['alg', 'e', 'kid', 'kty', 'n', 'use']:
+            assert key in keyset

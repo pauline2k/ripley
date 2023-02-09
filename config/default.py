@@ -63,6 +63,8 @@ LDAP_HOST = 'ldap-test.berkeley.edu'
 LDAP_BIND = 'mybind'
 LDAP_PASSWORD = 'secret'
 
+LTI_CONFIG_PATH = 'path/to/lti-config.json'
+
 # background_job_manager configs.
 JOB_HISTORY_DAYS_UNTIL_EXPIRE = 7
 JOBS_AUTO_START = False
