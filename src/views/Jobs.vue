@@ -11,7 +11,7 @@
             >
               mdi-desktop-classic
             </v-icon>
-            <span id="page-title" tabindex="0">MUTHUR</span>
+            <span id="page-title" tabindex="0">MU-TH-UR 6000</span>
           </h1>
         </div>
       </v-card-title>
@@ -160,7 +160,7 @@ export default {
     getJobSchedule().then(data => {
       this.jobSchedule = data
       this.refresh(true).then(() => {
-        this.$ready('MUTHUR')
+        this.$ready('MU-TH-UR 6000')
       })
     })
   },
