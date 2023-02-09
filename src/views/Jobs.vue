@@ -177,7 +177,7 @@ export default {
         this.jobHistory = data
         this.refreshing = false
         if (!quietly) {
-        // TODO:  this.alertScreenReader('Job History refreshed')
+          this.$announcer.polite('Job History refreshed')
         }
         this.scheduleRefresh()
       })
@@ -195,12 +195,12 @@ export default {
     scheduleEditCancel() {
       this.editJob = undefined
       this.editJobDialog = false
-      // TODO: this.alertScreenReader('Cancelled')
+      this.$announcer.polite('Cancelled')
     },
     scheduleEditOpen(job) {
       this.editJob = this.$_.cloneDeep(job)
       this.editJobDialog = true
-      //TODO: this.alertScreenReader(`Opened dialog to edit job ${job.name}`)
+      this.$announcer.polite(`Opened dialog to edit job ${job.name}`)
     },
     scheduleEditSave() {
       updateJobSchedule(
@@ -212,7 +212,7 @@ export default {
         match.schedule = this.editJob.schedule
         this.editJob = undefined
         this.editJobDialog = false
-        // TODO: this.alertScreenReader(`Job '${match.name}' was updated.`)
+        this.$announcer.polite(`Job '${match.name}' was updated.`)
       })
     },
     scheduleRefresh() {
@@ -222,7 +222,7 @@ export default {
     toggleDisabled(job, isDisabled) {
       setJobDisabled(job.id, isDisabled).then(data => {
         job.disabled = data.disabled
-        // TODO:  this.alertScreenReader(`Job '${job.name}' ${job.disabled ? 'disabled' : 'enabled'}`)
+        this.$announcer.polite(`Job '${job.name}' ${job.disabled ? 'disabled' : 'enabled'}`)
       })
     }
   }

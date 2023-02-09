@@ -13,7 +13,7 @@
           History
         </h2>
       </div>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <v-text-field
         v-if="$_.size(jobHistory)"
         v-model="search"
@@ -22,7 +22,7 @@
         label="Search History"
         single-line
         variant="underlined"
-      ></v-text-field>
+      />
     </v-card-title>
     <v-card-text>
       <v-data-table
