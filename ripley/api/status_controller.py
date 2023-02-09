@@ -38,6 +38,7 @@ from sqlalchemy.sql import text
 @app.route('/api/ping')
 def ping():
     canvas_ping = False
+    data_loch_ping = False
     db_ping = False
     try:
         canvas_ping = _ping_canvas()
