@@ -47,8 +47,10 @@ def dev_auth_login():
     if app.config['DEV_AUTH_ENABLED']:
         params = request.get_json() or {}
         uid = params.get('uid')
+        app.logger.debug(f'Dev-auth login attempt by UID {uid}')
         password = params.get('password')
         if password != app.config['DEV_AUTH_PASSWORD']:
+            app.logger.debug(f'UID {uid} failed dev-auth login: bad password.')
             return tolerant_jsonify({'message': 'Invalid credentials'}, 401)
         user = User(uid)
         if not user.is_active:
@@ -59,8 +61,11 @@ def dev_auth_login():
             msg = f'The system failed to log in user with UID {uid}.'
             app.logger.error(msg)
             return tolerant_jsonify({'message': msg}, 403)
-        return tolerant_jsonify(current_user.to_api_json())
+        api_json = current_user.to_api_json()
+        app.logger.debug(f'Successful dev-auth login for {api_json}.')
+        return tolerant_jsonify(api_json)
     else:
+        app.logger.debug('Dev-auth attempt when DEV_AUTH_ENABLED == False.')
         raise ResourceNotFoundError('Unknown path')
 
 

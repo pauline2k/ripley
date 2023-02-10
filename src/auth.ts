@@ -16,10 +16,10 @@ export default {
     return new Promise<void>(resolve => {
       const apiBaseUrl = import.meta.env.VITE_APP_API_BASE_URL
         app.config.globalProperties.$currentUser = currentUser
-        // Set Axios CSRF headers for non-GET requests
-        axios.defaults.headers.post['X-CSRF-Token'] = response.data.csrfToken
-        axios.defaults.headers.put['X-CSRF-Token'] = response.data.csrfToken
-        axios.defaults.headers.delete['X-CSRF-Token'] = response.data.csrfToken
+        // TODO: Set Axios CSRF headers for non-GET requests
+        // axios.defaults.headers.post['X-CSRF-Token'] = response.data.csrfToken
+        // axios.defaults.headers.put['X-CSRF-Token'] = response.data.csrfToken
+        // axios.defaults.headers.delete['X-CSRF-Token'] = response.data.csrfToken
         resolve()
     })
   },
