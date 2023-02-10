@@ -38,36 +38,29 @@ from sqlalchemy.sql import text
 
 @app.route('/api/ping')
 def ping():
-    calnet_ping = False
-    canvas_ping = False
-    data_loch_ping = False
-    db_ping = False
-    try:
-        calnet_ping = _ping_calnet()
-        canvas_ping = _ping_canvas()
-        data_loch_ping = _data_loch_status()
-        db_ping = _db_status()
-    except Exception as e:
-        subject = str(e)
-        subject = f'{subject[:100]}...' if len(subject) > 100 else subject
-        message = f'Error during /api/ping: {subject}'
-        app.logger.error(message)
-        app.logger.exception(e)
-    finally:
-        return tolerant_jsonify(
-            {
-                'app': True,
-                'calnet': calnet_ping,
-                'canvas': canvas_ping,
-                'data_loch': data_loch_ping,
-                'db': db_ping,
-            },
-        )
+    return tolerant_jsonify(
+        {
+            'app': True,
+            'calnet': _ping_calnet(),
+            'canvas': _ping_canvas(),
+            'data_loch': _data_loch_status(),
+            'db': _db_status(),
+        },
+    )
 
 
 def _data_loch_status():
-    rows = data_loch.safe_execute_rds('SELECT 1')
-    return rows is not None
+    sql = 'SELECT 1'
+    try:
+        rows = data_loch.safe_execute_rds(sql)
+        return rows is not None
+    except psycopg2.Error as e:
+        log_db_error(e, sql)
+        return False
+    except SQLAlchemyError as e:
+        app.logger.error('Database connection error during /api/ping')
+        app.logger.exception(e)
+        return False
 
 
 def _db_status():
