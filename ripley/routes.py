@@ -23,6 +23,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 import datetime
+import traceback
 
 from flask import jsonify, make_response, redirect, request, session
 from flask_login import LoginManager
@@ -71,12 +72,14 @@ def register_routes(app):
         if isinstance(e, HTTPException):
             app.logger.warn(f'HTTPException: {subject} (Ops will not be notified)')
         else:
-            pass
-            # TODO? Notify Ripley Ops teams
+            message = f'{subject}\n\n<pre>{traceback.format_exc()}</pre>'
+            app.logger.warn(message)
+            # # TODO? Notify Ripley Ops teams
             # send_system_error_email(
-            #     message=f'{subject}\n\n<pre>{traceback.format_exc()}</pre>',
+            #     message=message,
             #     subject=f'{subject[:50]}...' if len(subject) > 50 else subject,
             # )
+
         return {'message': subject}, 400
 
     @app.before_request
