@@ -28,8 +28,9 @@ from urllib.parse import urlencode, urljoin, urlparse
 import cas
 from flask import abort, current_app as app, flash, redirect, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from pylti1p3.contrib.flask import (FlaskMessageLaunch, FlaskOIDCLogin, FlaskRequest)
 from pylti1p3.tool_config import ToolConfJsonFile
-from ripley.api.errors import InternalServerError, ResourceNotFoundError
+from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.lib.http import add_param_to_url, tolerant_jsonify
 from ripley.models.user import User
 
@@ -55,15 +56,10 @@ def dev_auth_login():
         user = User(uid)
         if not user.is_active:
             msg = f'Sorry, {uid} is not authorized to use this tool.'
-            app.logger.error(msg)
             return tolerant_jsonify({'message': msg}, 403)
-        if not login_user(user, force=True, remember=True):
-            msg = f'The system failed to log in user with UID {uid}.'
-            app.logger.error(msg)
-            return tolerant_jsonify({'message': msg}, 403)
-        api_json = current_user.to_api_json()
+        api_json = _login(user)
         app.logger.debug(f'Successful dev-auth login for {api_json}.')
-        return tolerant_jsonify(api_json)
+        return api_json
     else:
         app.logger.debug('Dev-auth attempt when DEV_AUTH_ENABLED == False.')
         raise ResourceNotFoundError('Unknown path')
@@ -77,8 +73,42 @@ def get_jwk_set():
         key_set = tool_conf.get_jwks()
         return tolerant_jsonify(key_set)
     except Exception as e:
-        app.logger.error(f'Failed to generate LTI keys: {e}')
-        raise InternalServerError(e)
+        app.logger.error(f'Failed to generate LTI keys: {e.__class__.__name__}: {e}')
+        raise InternalServerError({'message': str(e)})
+
+
+@app.route('/api/auth/lti_launch', methods=['GET', 'POST'])
+def lti_launch():
+    lti_config_path = app.config['LTI_CONFIG_PATH']
+    flask_request = FlaskRequest()
+    try:
+        tool_conf = ToolConfJsonFile(lti_config_path)
+        message_launch = FlaskMessageLaunch(flask_request, tool_conf)
+        message_launch_data = message_launch.get_launch_data()
+        app.logger.info(f'LTI launch: {message_launch_data}')
+        return tolerant_jsonify({
+            'launchData': message_launch_data,
+            'launchId': message_launch.get_launch_id,
+        })
+    except Exception as e:
+        app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
+        raise InternalServerError({'message': str(e)})
+
+
+@app.route('/api/auth/lti_login', methods=['GET', 'POST'])
+def lti_login():
+    lti_config_path = app.config['LTI_CONFIG_PATH']
+    flask_request = FlaskRequest()
+    target_link_uri = flask_request.get_param('target_link_uri')
+    if not target_link_uri:
+        raise BadRequestError('Required parameters are missing.')
+    try:
+        tool_conf = ToolConfJsonFile(lti_config_path)
+        oidc_login = FlaskOIDCLogin(flask_request, tool_conf)
+        return oidc_login.enable_check_cookies().redirect(target_link_uri)
+    except Exception as e:
+        app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
+        raise InternalServerError({'message': str(e)})
 
 
 @app.route('/api/auth/logout')
@@ -100,17 +130,13 @@ def cas_login():
     uid, attributes, proxy_granting_ticket = _cas_client(target_url).verify_ticket(ticket)
     app.logger.info(f'Logged into CAS as user {uid}')
     user = User(uid)
-    if not user.is_active:
-        redirect_url = add_param_to_url('/', ('error', f'Sorry, {user.name} is not authorized to use this tool.'))
+    if user.is_active:
+        flash('Logged in successfully.')
+        redirect_path = target_url or '/'
+        return _login(user, redirect_path=redirect_path)
     else:
-        login_user(user)
-        if _is_safe_url(request.args.get('next')):
-            # Is safe URL per https://flask-login.readthedocs.io/en/latest/
-            flash('Logged in successfully.')
-            redirect_url = target_url or '/'
-        else:
-            return abort(400)
-    return redirect(redirect_url)
+        redirect_path = add_param_to_url('/', ('error', f'Sorry, {user.name} is not authorized to use this tool.'))
+        return redirect(redirect_path)
 
 
 def _cas_client(target_url=None):
@@ -126,3 +152,16 @@ def _is_safe_url(target):
     ref_url = urlparse(request.host_url)
     test_url = urlparse(urljoin(request.host_url, target))
     return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+
+
+def _login(user, redirect_path=None):
+    authenticated = login_user(user, force=True, remember=True) and current_user.is_authenticated
+    if not _is_safe_url(request.args.get('next')):
+        return abort(400)
+    if authenticated:
+        if redirect_path:
+            return redirect(redirect_path)
+        else:
+            return tolerant_jsonify(current_user.to_api_json())
+    else:
+        return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)
