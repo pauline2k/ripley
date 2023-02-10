@@ -174,13 +174,13 @@ const routes:RouteRecordRaw[] = [
     beforeEnter: auth.requiresAdmin,
     children: [
       {
-        component: () => Welcome,
+        component: Welcome,
         name: 'Welcome',
         path: '/welcome',
       },
       {
         path: '/jobs',
-        component: () => Jobs,
+        component: Jobs,
         meta: {title: 'MU-TH-UR 6000'}
       }
     ],
@@ -195,12 +195,12 @@ const routes:RouteRecordRaw[] = [
           next()
         },
         path: '/404',
-        component: () => NotFound,
+        component: NotFound,
         meta: {title: 'Page not found'}
       },
       {
         path: '/error',
-        component: () => Error,
+        component: Error,
         meta: {title: 'Error'}
       }
     ],
