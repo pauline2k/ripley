@@ -1,13 +1,13 @@
 import _ from 'lodash'
 import auth from '@/auth'
+import BaseLTI from '@/layouts/lti/BaseLTI.vue'
+import BaseStandalone from '@/layouts/standalone/BaseStandalone.vue'
 import CourseAddUser from '@/views/CourseAddUser.vue'
 import CourseCaptures from '@/views/CourseCaptures.vue'
 import CourseGradeExport from '@/views/CourseGradeExport.vue'
 import CourseManageOfficialSections from '@/views/CourseManageOfficialSections.vue'
 import CreateCourseSite from '@/views/CreateCourseSite.vue'
 import CreateProjectSite from '@/views/CreateProjectSite.vue'
-import Default from '@/layouts/default/Default.vue'
-import EmbeddedLti from '@/layouts/default/EmbeddedLti.vue'
 import Jobs from '@/views/Jobs.vue'
 import Login from '@/views/Login.vue'
 import NotFound from '@/views/NotFound.vue'
@@ -34,11 +34,11 @@ const routes:RouteRecordRaw[] = [
         path: '',
       }
     ],
-    component: Default,
+    component: BaseStandalone,
     path: '/',
   },
   {
-    component: Default,
+    component: BaseStandalone,
     path: '/canvas',
     children: [
       {
@@ -121,7 +121,7 @@ const routes:RouteRecordRaw[] = [
     ]
   },
   {
-    component: EmbeddedLti,
+    component: BaseLTI,
     path: '/canvas/embedded',
     children: [
       {
@@ -184,7 +184,7 @@ const routes:RouteRecordRaw[] = [
         meta: {title: 'MU-TH-UR 6000'}
       }
     ],
-    component: Default,
+    component: BaseStandalone,
     path: '/',
   },
   {
@@ -204,7 +204,7 @@ const routes:RouteRecordRaw[] = [
         meta: {title: 'Error'}
       }
     ],
-    component: Default,
+    component: BaseStandalone,
     path: '/',
   },
   {

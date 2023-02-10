@@ -13,6 +13,6 @@ import DefaultView from './View.vue'
 
 <script>
 export default {
-  name: 'Default',
+  name: 'BaseStandalone',
 }
 </script>
