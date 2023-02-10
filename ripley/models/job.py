@@ -91,10 +91,8 @@ class Job(Base):
 
     @classmethod
     def get_all(cls, include_disabled=False):
-        if include_disabled:
-            return cls.query.order_by(cls.key).all()
-        else:
-            return cls.query.filter_by(disabled=False).order_by(cls.key).all()
+        query = cls.query if include_disabled else cls.query.filter_by(disabled=False)
+        return query.order_by(cls.key).all()
 
     @classmethod
     def get_job(cls, job_id):

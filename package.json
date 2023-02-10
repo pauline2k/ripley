@@ -14,6 +14,8 @@
     "serve-vue": "vite --host"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^36.0.1",
+    "@ckeditor/ckeditor5-vue": "^4.0.1",
     "@mdi/font": "7.1.96",
     "@vue-a11y/announcer": "^3.1.5",
     "axios": "1.2.3",
@@ -38,7 +40,7 @@
     "@vue/eslint-config-typescript": "^11.0.2",
     "eslint": "^8.32.0",
     "eslint-plugin-vue": "^9.9.0",
-    "sass": "^1.57.1",
+    "sass": "^1.58.0",
     "typescript": "^4.9.4",
     "vite": "4.0.4",
     "vite-plugin-vuetify": "^1.0.1",

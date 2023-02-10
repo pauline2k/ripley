@@ -1,5 +1,5 @@
 """
-Copyright ©2023. The Regents of the University of California (Regents). All Rights Reserved.
+Copyright ©2022. The Regents of the University of California (Regents). All Rights Reserved.
 
 Permission to use, copy, modify, and distribute this software and its documentation
 for educational, research, and not-for-profit purposes, without fee and without a
@@ -22,40 +22,21 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
-
-import os
-
-from flask import Flask
-from ripley import db
-from ripley.configs import load_configs
-from ripley.jobs.background_job_manager import BackgroundJobManager
-from ripley.logger import initialize_logger
-from ripley.routes import register_routes
+from flask import current_app as app
+from ripley.jobs.base_job import BaseJob
+from ripley.models.job_history import JobHistory
 
 
-background_job_manager = BackgroundJobManager()
+class HouseKeepingJob(BaseJob):
 
+    def _run(self):
+        JobHistory.expire_old_rows(app.config['JOB_HISTORY_DAYS_UNTIL_EXPIRE'])
 
-def create_app():
-    """Initialize Ripley."""
-    app = Flask(__name__.split('.')[0])
-    load_configs(app)
-    initialize_logger(app)
-    # TODO for cache?
-    # cache.init_app(app)
-    # cache.clear()
-    db.init_app(app)
+    @classmethod
+    def description(cls):
+        days = app.config['JOB_HISTORY_DAYS_UNTIL_EXPIRE']
+        return f'Deletes job_history older than {days} days.'
 
-    with app.app_context():
-        register_routes(app)
-        _register_jobs(app)
-
-    return app
-
-
-def _register_jobs(app):
-    from ripley.jobs.house_keeping_job import HouseKeepingJob  # noqa
-    from ripley.jobs.lti_usage_report_job import LtiUsageReportJob  # noqa
-
-    if app.config['JOBS_AUTO_START'] and (not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true'):
-        background_job_manager.start(app)
+    @classmethod
+    def key(cls):
+        return 'house_keeping'

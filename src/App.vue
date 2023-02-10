@@ -28,10 +28,6 @@ export default {
 }
 </script>
 
-<style lang="scss">
-@import './assets/styles/junction-global.scss';
-</style>
-
 <style scoped lang="scss">
 .cc-accessibility-links {
   position: relative;

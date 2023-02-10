@@ -11,7 +11,7 @@
   width: 100%;
   z-index: 1;
   &::before {
-    background: url('~@/assets/images/svg/select_arrow_20x28.svg') no-repeat right center, linear-gradient($cc-color-white, $cc-color-whisper);
+    background: url('~@/assets/svg/select_arrow_20x28.svg') no-repeat right center, linear-gradient($cc-color-white, $cc-color-whisper);
     content: '';
     display: block;
     height: 100%;
@@ -47,7 +47,7 @@
 .cc-inline-select {
   -moz-appearance: none !important;
   -webkit-appearance: none !important;
-  background: url('~@/assets/images/svg/select_arrow_20x28.svg') no-repeat right center, linear-gradient($cc-color-white, $cc-color-whisper);
+  background: url('~@/assets/svg/select_arrow_20x28.svg') no-repeat right center, linear-gradient($cc-color-white, $cc-color-whisper);
   border: 1px solid $cc-color-very-light-grey;
   border-radius: 5px;
   cursor: pointer;
