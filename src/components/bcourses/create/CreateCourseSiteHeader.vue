@@ -173,10 +173,10 @@ export default {
     setMode(mode) {
       this.setAdminMode(mode)
       if (mode === 'by_ccn') {
-        this.alertScreenReader('Input mode switched to section ID')
+        this.$announcer.polite('Input mode switched to section ID')
         this.$putFocusNextTick('load-sections-by-ccn')
       } else {
-        this.alertScreenReader(`Input mode switched to ${mode === 'by_ccn' ? 'section ID' : 'UID'}`)
+        this.$announcer.polite(`Input mode switched to ${mode === 'by_ccn' ? 'section ID' : 'UID'}`)
         this.$putFocusNextTick(mode === 'by_ccn' ? 'load-sections-by-ccn' : 'instructor-uid')
       }
     },
