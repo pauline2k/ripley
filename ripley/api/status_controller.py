@@ -30,6 +30,7 @@ from ripley import db
 from ripley.externals import data_loch
 from ripley.externals.canvas import ping_canvas
 from ripley.externals.rds import log_db_error
+from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.http import tolerant_jsonify
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import text
@@ -37,10 +38,12 @@ from sqlalchemy.sql import text
 
 @app.route('/api/ping')
 def ping():
+    calnet_ping = False
     canvas_ping = False
     data_loch_ping = False
     db_ping = False
     try:
+        calnet_ping = _ping_calnet()
         canvas_ping = _ping_canvas()
         data_loch_ping = _data_loch_status()
         db_ping = _db_status()
@@ -54,6 +57,7 @@ def ping():
         return tolerant_jsonify(
             {
                 'app': True,
+                'calnet': calnet_ping,
                 'canvas': canvas_ping,
                 'data_loch': data_loch_ping,
                 'db': db_ping,
@@ -76,6 +80,17 @@ def _db_status():
         return False
     except SQLAlchemyError as e:
         app.logger.error('Database connection error during /api/ping')
+        app.logger.exception(e)
+        return False
+
+
+def _ping_calnet():
+    try:
+        uid = '1022796'
+        calnet_user = get_calnet_user_for_uid(app, uid)
+        return calnet_user and calnet_user.get('uid', None)
+    except Exception as e:
+        app.logger.error('Calnet error during /api/ping')
         app.logger.exception(e)
         return False
 
