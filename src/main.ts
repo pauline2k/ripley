@@ -23,7 +23,7 @@ axios.interceptors.response.use(
     const errorStatus = _.get(error, 'response.status')
     if (_.includes([401, 403], errorStatus)) {
       // Refresh user in case his/her session expired.
-      return axios.get(`${apiBaseUrl}/api/my/status`).then(response => {
+      return axios.get(`${apiBaseUrl}/api/user/my_profile`).then(response => {
         app.config.globalProperties.$currentUser = response.data
         const errorUrl = _.get(error, 'response.config.url')
         // Auth errors from the academics API should be handled by individual LTI components.
