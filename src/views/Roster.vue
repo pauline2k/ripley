@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!loading" class="cc-page-roster">
+  <div v-if="!isLoading" class="cc-page-roster">
     <v-container v-if="roster && !error" fluid>
       <v-row align-v="start" class="cc-page-roster cc-print-hide cc-roster-search pb-3" no-gutters>
         <v-col class="pb-2 pr-2" sm="3">

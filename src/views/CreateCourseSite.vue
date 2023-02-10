@@ -1,7 +1,7 @@
 <template>
   <div class="bc-canvas-application bc-page-create-course-site pl-5 pr-5 pt-3 pb-3">
-    <div v-if="loading" class="cc-spinner"></div>
-    <div v-if="!loading && !displayError" class="bc-accessibility-no-outline">
+    <div v-if="isLoading" class="cc-spinner"></div>
+    <div v-if="!isLoading && !displayError" class="bc-accessibility-no-outline">
       <div class="d-flex flex-column pt-3">
         <div>
           <div v-if="showMaintenanceNotice" role="alert">

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!loading" class="bc-page-site-creation">
+  <div v-if="!isLoading" class="bc-page-site-creation">
     <h1 class="bc-header bc-page-site-creation-primary-header">Create a Site</h1>
     <v-container>
       <v-row>

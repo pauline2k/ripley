@@ -1,7 +1,7 @@
 <template>
   <div class="bc-canvas-application bc-page-create-project-site">
-    <div v-if="loading" class="cc-spinner"></div>
-    <div v-if="!loading && !error">
+    <div v-if="isLoading" class="cc-spinner"></div>
+    <div v-if="!isLoading && !error">
       <h1 class="bc-header bc-page-create-project-site-header">Create a Project Site</h1>
       <form class="bg-transparent border-0 bc-canvas-form" @submit.prevent="createProjectSite">
         <v-container>
