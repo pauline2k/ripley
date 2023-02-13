@@ -4,6 +4,10 @@ printf "\nEB_ENVIRONMENT = '${EB_ENVIRONMENT}'\n\n" >> config/production-local.p
 chown webapp config/production-local.py
 chmod 400 config/production-local.py
 
+PYTHONPATH='' aws s3 cp s3://ripley-deploy-configs/ripley/${EB_ENVIRONMENT}-lti-config.json config/lti-config.json
+chown webapp config/lti-config.json
+chmod 400 config/lti-config.json
+
 PYTHONPATH='' aws s3 cp s3://ripley-deploy-configs/ripley/lti_rsa config/lti_rsa
 chown webapp config/lti_rsa
 chmod 400 config/lti_rsa
