@@ -28,8 +28,9 @@ from urllib.parse import urlencode, urljoin, urlparse
 import cas
 from flask import abort, current_app as app, flash, redirect, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
-from pylti1p3.contrib.flask import (FlaskMessageLaunch, FlaskOIDCLogin, FlaskRequest)
+from pylti1p3.contrib.flask import (FlaskCacheDataStorage, FlaskMessageLaunch, FlaskOIDCLogin, FlaskRequest)
 from pylti1p3.tool_config import ToolConfJsonFile
+from ripley import cache
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.lib.http import add_param_to_url, tolerant_jsonify
 from ripley.models.user import User
@@ -83,7 +84,8 @@ def lti_launch():
     flask_request = FlaskRequest()
     try:
         tool_conf = ToolConfJsonFile(lti_config_path)
-        message_launch = FlaskMessageLaunch(flask_request, tool_conf)
+        launch_data_storage = FlaskCacheDataStorage(cache)
+        message_launch = FlaskMessageLaunch(flask_request, tool_conf, launch_data_storage)
         message_launch_data = message_launch.get_launch_data()
 
         data = {
@@ -107,7 +109,8 @@ def lti_login():
         raise BadRequestError('Required parameters are missing.')
     try:
         tool_conf = ToolConfJsonFile(lti_config_path)
-        oidc_login = FlaskOIDCLogin(flask_request, tool_conf)
+        launch_data_storage = FlaskCacheDataStorage(cache)
+        oidc_login = FlaskOIDCLogin(flask_request, tool_conf, launch_data_storage)
         app.logger.info(f'Redirecting to target_link_uri {target_link_uri}')
         return oidc_login.enable_check_cookies().redirect(target_link_uri)
     except Exception as e:
