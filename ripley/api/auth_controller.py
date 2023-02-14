@@ -85,11 +85,14 @@ def lti_launch():
         tool_conf = ToolConfJsonFile(lti_config_path)
         message_launch = FlaskMessageLaunch(flask_request, tool_conf)
         message_launch_data = message_launch.get_launch_data()
-        app.logger.info(f'LTI launch: {message_launch_data}')
-        return tolerant_jsonify({
+
+        data = {
             'launchData': message_launch_data,
-            'launchId': message_launch.get_launch_id,
-        })
+            'launchId': message_launch.get_launch_id(),
+        }
+        app.logger.info(f'LTI launch: {data}')
+        # TODO: _login() and redirect to the tool URI
+        return redirect('/welcome')
     except Exception as e:
         app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
         raise InternalServerError({'message': str(e)})
@@ -105,9 +108,10 @@ def lti_login():
     try:
         tool_conf = ToolConfJsonFile(lti_config_path)
         oidc_login = FlaskOIDCLogin(flask_request, tool_conf)
+        app.logger.info(f'Redirecting to target_link_uri {target_link_uri}')
         return oidc_login.enable_check_cookies().redirect(target_link_uri)
     except Exception as e:
-        app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
+        app.logger.error(f'OIDC login failed: {e.__class__.__name__}: {e}')
         raise InternalServerError({'message': str(e)})
 
 
