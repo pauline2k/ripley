@@ -9,7 +9,7 @@
       <v-col v-if="!$currentUser.isAuthenticated">
         <div>
           <v-btn
-            id="basic-auth-submit-button"
+            id="cas-auth-submit-button"
             @click="toCasLogin"
           >
             CalNet Login
