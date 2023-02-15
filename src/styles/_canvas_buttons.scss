@@ -1,6 +1,6 @@
 // Canvas Button Styles
 .bc-canvas-button,
-.bc-main .cc-widget-webcast .cc-button,
+.bc-main .cc-button,
 .bc-canvas-embedded .cc-page-roster .cc-roster-search .cc-button {
   background: $bc-color-button-background;
   border: 1px solid $bc-color-button-border;
@@ -56,7 +56,7 @@ a.bc-canvas-button {
   padding: 2px 8px;
 }
 
-.bc-canvas-button-selected, .bc-main .cc-widget-webcast .cc-button-selected {
+.bc-canvas-button-selected, .bc-main .cc-button-selected {
   background: $bc-color-button-selected-background;
   border-color: $bc-color-button-selected-border;
   color: $bc-color-button-selected-color;

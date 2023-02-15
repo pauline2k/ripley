@@ -3,7 +3,6 @@ import auth from '@/auth'
 import BaseLTI from '@/layouts/lti/BaseLTI.vue'
 import BaseStandalone from '@/layouts/standalone/BaseStandalone.vue'
 import CourseAddUser from '@/views/CourseAddUser.vue'
-import CourseCaptures from '@/views/CourseCaptures.vue'
 import CourseGradeExport from '@/views/CourseGradeExport.vue'
 import CourseManageOfficialSections from '@/views/CourseManageOfficialSections.vue'
 import CreateCourseSite from '@/views/CreateCourseSite.vue'
@@ -46,13 +45,6 @@ const routes:RouteRecordRaw[] = [
         path: '/canvas/course_add_user/:id',
         meta: {
           title: 'Find a User to Add'
-        }
-      },
-      {
-        component: CourseCaptures,
-        path: '/canvas/course_mediacasts/:id',
-        meta: {
-          title: 'Course Captures'
         }
       },
       {
@@ -127,10 +119,6 @@ const routes:RouteRecordRaw[] = [
       {
         component: CourseAddUser,
         path: '/canvas/embedded/course_add_user'
-      },
-      {
-        component: CourseCaptures,
-        path: '/canvas/embedded/course_mediacasts'
       },
       {
         component: CourseGradeExport,
