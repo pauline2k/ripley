@@ -85,16 +85,14 @@ def lti_launch():
     try:
         tool_conf = ToolConfJsonFile(lti_config_path)
         launch_data_storage = FlaskCacheDataStorage(cache)
-        app.logger.info(launch_data_storage)
-        message_launch = FlaskMessageLaunch(flask_request, tool_conf, launch_data_storage=launch_data_storage)
-        app.logger.info(message_launch)
-        message_launch_data = message_launch.get_launch_data()
 
-        data = {
-            'launchData': message_launch_data,
-            'launchId': message_launch.get_launch_id(),
-        }
-        app.logger.info(f'LTI launch: {data}')
+        message_launch = FlaskMessageLaunch(flask_request, tool_conf, launch_data_storage=launch_data_storage)
+        nonce = message_launch._get_jwt_body().get('nonce')
+        app.logger.info(f'nonce at launch: {nonce}')
+
+        message_launch_data = message_launch.get_launch_data()
+        app.logger.info(f'LTI launch: {message_launch_data}')
+
         # TODO: _login() and redirect to the tool URI
         return redirect('/welcome')
     except Exception as e:
@@ -112,8 +110,13 @@ def lti_login():
     try:
         tool_conf = ToolConfJsonFile(lti_config_path)
         launch_data_storage = FlaskCacheDataStorage(cache)
-        app.logger.info(launch_data_storage)
+
         oidc_login = FlaskOIDCLogin(flask_request, tool_conf, launch_data_storage=launch_data_storage)
+        nonce = oidc_login._generate_nonce()
+        app.logger.info(f'Generated nonce: {nonce}')
+        oidc_login._session_service.save_nonce(nonce)
+        app.logger.info(oidc_login._session_service._get_key('nonce'))
+
         app.logger.info(f'Redirecting to target_link_uri {target_link_uri}')
         return oidc_login.enable_check_cookies().redirect(target_link_uri)
     except Exception as e:
