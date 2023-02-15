@@ -52,7 +52,7 @@ axios.get(`${apiBaseUrl}/api/user/my_profile`).then(response => {
   app.use(router)
 
   axios.get(`${apiBaseUrl}/api/config`).then(response => {
-    const isDebugMode = _.trim(import.meta.env.VUE_APP_DEBUG).toLowerCase() === 'true'
+    const isDebugMode = _.trim(import.meta.env.VITE_APP_DEBUG).toLowerCase() === 'true'
     app.config.globalProperties.$config = {...response.data, apiBaseUrl, isVueAppDebugMode: isDebugMode}
     app.mount('#app')
   })
