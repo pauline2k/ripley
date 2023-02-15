@@ -1,5 +1,5 @@
 {
-    "https://ucberkeley.beta.instructure.com": [{
+    "https://canvas.beta.instructure.com": [{
         "default": true,
         "client_id": "10720000000000650",
         "auth_login_url": "TODO",
