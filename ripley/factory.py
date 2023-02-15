@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import os
 
 from flask import Flask
-from ripley import db
+from ripley import cache, db
 from ripley.configs import load_configs
 from ripley.jobs.background_job_manager import BackgroundJobManager
 from ripley.logger import initialize_logger
@@ -41,9 +41,8 @@ def create_app():
     app = Flask(__name__.split('.')[0])
     load_configs(app)
     initialize_logger(app)
-    # TODO for cache?
-    # cache.init_app(app)
-    # cache.clear()
+    cache.init_app(app)
+    cache.clear()
     db.init_app(app)
 
     with app.app_context():

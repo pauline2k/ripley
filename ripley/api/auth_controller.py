@@ -85,7 +85,9 @@ def lti_launch():
     try:
         tool_conf = ToolConfJsonFile(lti_config_path)
         launch_data_storage = FlaskCacheDataStorage(cache)
-        message_launch = FlaskMessageLaunch(flask_request, tool_conf, launch_data_storage)
+        app.logger.info(launch_data_storage)
+        message_launch = FlaskMessageLaunch(flask_request, tool_conf, launch_data_storage=launch_data_storage)
+        app.logger.info(message_launch)
         message_launch_data = message_launch.get_launch_data()
 
         data = {
@@ -110,7 +112,8 @@ def lti_login():
     try:
         tool_conf = ToolConfJsonFile(lti_config_path)
         launch_data_storage = FlaskCacheDataStorage(cache)
-        oidc_login = FlaskOIDCLogin(flask_request, tool_conf, launch_data_storage)
+        app.logger.info(launch_data_storage)
+        oidc_login = FlaskOIDCLogin(flask_request, tool_conf, launch_data_storage=launch_data_storage)
         app.logger.info(f'Redirecting to target_link_uri {target_link_uri}')
         return oidc_login.enable_check_cookies().redirect(target_link_uri)
     except Exception as e:

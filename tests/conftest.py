@@ -62,6 +62,12 @@ def app(request):
     return _app
 
 
+@pytest.fixture(scope='function', autouse=True)
+def cache_session():
+    from ripley import cache
+    cache.clear()
+
+
 # TODO Perform DB schema creation and deletion outside an app context, enabling test-specific app configurations.
 @pytest.fixture(scope='session')
 def db(app):
