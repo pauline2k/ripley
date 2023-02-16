@@ -30,7 +30,7 @@
             <label for="bc-page-site-mailing-list-site-id" class="bc-page-site-mailing-list-form-label">Course Site ID:</label>
           </v-col>
           <v-col sm="12" md="6">
-            <input
+            <v-text-field
               id="bc-page-site-mailing-list-site-id"
               v-model="canvasSite.canvasCourseId"
               type="text"
@@ -38,16 +38,16 @@
               placeholder="Enter numeric site ID"
               required
               aria-required="true"
-            >
-            <button
+            />
+            <v-btn
               id="btn-get-mailing-list"
-              type="submit"
               class="bc-canvas-button bc-canvas-button-primary"
               :disabled="isProcessing || !canvasSite.canvasCourseId"
+              @click="findSiteMailingList"
             >
               <span v-if="!isProcessing">Get Mailing List</span>
               <span v-if="isProcessing"><i class="fa fa-spinner fa-spin"></i> Finding ...</span>
-            </button>
+            </v-btn>
           </v-col>
         </v-row>
       </form>
@@ -164,6 +164,9 @@ export default {
     mailingList: {},
     siteSelected: false
   }),
+  mounted() {
+    this.$ready()
+  },
   methods: {
     findSiteMailingList() {
       this.isProcessing = true
@@ -257,9 +260,6 @@ export default {
         this.alerts.error.push('You can attempt to correct the errors by running the update again.')
       }
     }
-  },
-  mounted() {
-    this.$ready()
   }
 }
 </script>

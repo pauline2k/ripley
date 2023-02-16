@@ -1,5 +1,4 @@
 import axios from '@/plugins/axios'
-import router from '@/router'
 import type {App} from 'vue'
 import VueAnnouncer from '@vue-a11y/announcer'
 import vuetify from './vuetify'
@@ -9,10 +8,7 @@ import {loadFonts} from './webfontloader'
 export function registerPlugins (app: App) {
   loadFonts().then(() => {})
   app
-    .use(axios, {
-      baseUrl: import.meta.env.VITE_APP_API_BASE_URL,
-      withCredentials: true
-    })
+    .use(axios, {baseUrl: import.meta.env.VITE_APP_API_BASE_URL})
     .use(createPinia())
     .use(VueAnnouncer)
     .use(vuetify)

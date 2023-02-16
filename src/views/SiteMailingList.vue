@@ -77,11 +77,10 @@
             Paused
           </div>
           <div>
-            <button
+            <v-btn
               v-if="!isTogglingEmailActivation"
               id="welcome-email-activation-toggle"
-              type="button"
-              class="btn btn-link pt-0 pb-0 pl-1 pr-1"
+              class="pl-1 pr-1"
               @click="toggleEmailActivation"
               @keyup.down="toggleEmailActivation"
             >
@@ -89,7 +88,7 @@
                 <fa v-if="isWelcomeEmailActive" icon="toggle-on" class="toggle toggle-on"></fa>
                 <fa v-if="!isWelcomeEmailActive" icon="toggle-off" class="toggle toggle-off"></fa>
               </span>
-            </button>
+            </v-btn>
             <div v-if="isTogglingEmailActivation" class="pl-2">
               <fa icon="spinner" spin />
             </div>

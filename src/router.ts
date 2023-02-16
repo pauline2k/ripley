@@ -24,7 +24,7 @@ const routes:RouteRecordRaw[] = [
   {
     beforeEnter: (to: any, from: any, next: any) => {
       const currentUser = app.config.globalProperties.$currentUser
-      currentUser.isAuthenticated ? (currentUser.isAdmin ? next({path: '/jobs'}) : next({path: '/welcome'})) : next()
+      currentUser.isAuthenticated ? next({path: '/welcome'}) : next()
     },
     children: [
       {

@@ -1,18 +1,24 @@
 <template>
   <v-app>
     <DefaultBar />
-
-    <DefaultView />
+    <v-main>
+      <PageLoadProgress v-if="isLoading" />
+      <router-view />
+    </v-main>
   </v-app>
 </template>
 
 <script setup>
 import DefaultBar from './AppBar.vue'
-import DefaultView from './View.vue'
 </script>
 
 <script>
+import Context from '@/mixins/Context'
+import PageLoadProgress from '@/components/utils/PageLoadProgress'
+
 export default {
   name: 'BaseStandalone',
+  components: {PageLoadProgress},
+  mixins: [Context]
 }
 </script>
