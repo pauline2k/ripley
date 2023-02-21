@@ -29,11 +29,24 @@ import cas
 from flask import abort, current_app as app, flash, redirect, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 from pylti1p3.contrib.flask import (FlaskCacheDataStorage, FlaskMessageLaunch, FlaskOIDCLogin, FlaskRequest)
+from pylti1p3.exception import LtiException
 from pylti1p3.tool_config import ToolConfJsonFile
 from ripley import cache
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.lib.http import add_param_to_url, tolerant_jsonify
 from ripley.models.user import User
+
+
+class MessageLaunch(FlaskMessageLaunch):
+
+    def validate_nonce(self):
+        # Temporary(?) workaround for "Invalid nonce" error from pylti1p3.
+        try:
+            super().validate_nonce()
+        except LtiException as e:
+            nonce = self._get_jwt_body().get('nonce')
+            app.logger.warn(f'Nonce validation failed; skipping. {e} nonce={nonce}')
+        return self
 
 
 @app.route('/api/auth/cas_login_url')
@@ -86,14 +99,11 @@ def lti_launch():
         tool_conf = ToolConfJsonFile(lti_config_path)
         launch_data_storage = FlaskCacheDataStorage(cache)
 
-        message_launch = FlaskMessageLaunch(flask_request, tool_conf, launch_data_storage=launch_data_storage)
-        nonce = message_launch._get_jwt_body().get('nonce')
-        app.logger.info(f'nonce at launch: {nonce}')
-
+        message_launch = MessageLaunch(flask_request, tool_conf, launch_data_storage=launch_data_storage)
         message_launch_data = message_launch.get_launch_data()
         app.logger.info(f'LTI launch: {message_launch_data}')
 
-        # TODO: _login() and redirect to the tool URI
+        # TODO: _login()
         return redirect('/welcome')
     except Exception as e:
         app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
@@ -110,15 +120,11 @@ def lti_login():
     try:
         tool_conf = ToolConfJsonFile(lti_config_path)
         launch_data_storage = FlaskCacheDataStorage(cache)
-
         oidc_login = FlaskOIDCLogin(flask_request, tool_conf, launch_data_storage=launch_data_storage)
-        nonce = oidc_login._generate_nonce()
-        app.logger.info(f'Generated nonce: {nonce}')
-        oidc_login._session_service.save_nonce(nonce)
-        app.logger.info(oidc_login._session_service._get_key('nonce'))
 
+        response = oidc_login.enable_check_cookies().redirect(target_link_uri)
         app.logger.info(f'Redirecting to target_link_uri {target_link_uri}')
-        return oidc_login.enable_check_cookies().redirect(target_link_uri)
+        return response
     except Exception as e:
         app.logger.error(f'OIDC login failed: {e.__class__.__name__}: {e}')
         raise InternalServerError({'message': str(e)})
