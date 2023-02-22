@@ -40,6 +40,16 @@ class User(UserMixin):
             self.uid = None
         self.user = self._load_user(self.uid)
 
+    def __repr__(self):
+        return f"""<User
+                    email_address={self.email_address},
+                    is_active={self.is_active},
+                    is_admin={self.is_admin},
+                    is_anonymous={self.is_anonymous},
+                    is_authenticated={self.is_authenticated},
+                    uid={self.uid},
+                """
+
     def get_id(self):
         # Type 'int' is required for Flask-login user_id
         return int(self.uid)
