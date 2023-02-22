@@ -15,6 +15,10 @@ registerPlugins(app)
 
 // Axios
 const apiBaseUrl = import.meta.env.VITE_APP_API_BASE_URL
+const params = new URLSearchParams(window.location.search)
+if (params.get('canvasApiDomain')) {
+  axios.defaults.headers['Ripley-Canvas-Api-Domain'] = params.get('canvasApiDomain')
+}
 axios.defaults.withCredentials = true
 
 axios.interceptors.response.use(

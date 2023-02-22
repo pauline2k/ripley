@@ -30,7 +30,7 @@ from ripley.models.user_auth import UserAuth
 
 class User(UserMixin):
 
-    def __init__(self, uid=None):
+    def __init__(self, uid=None, canvas_api_domain=None):
         if uid:
             try:
                 self.uid = str(int(uid))
@@ -38,10 +38,12 @@ class User(UserMixin):
                 self.uid = None
         else:
             self.uid = None
-        self.user = self._load_user(self.uid)
+        self.canvas_api_domain = canvas_api_domain
+        self.user = self._load_user(self.uid, self.canvas_api_domain)
 
     def __repr__(self):
         return f"""<User
+                    canvas_api_domain={self.canvas_api_domain},
                     email_address={self.email_address},
                     is_active={self.is_active},
                     is_admin={self.is_admin},
@@ -56,6 +58,9 @@ class User(UserMixin):
 
     def uid(self):
         return self.uid
+
+    def canvas_api_domain(self):
+        return self.canvas_api_domain
 
     @property
     def email_address(self):
@@ -89,7 +94,7 @@ class User(UserMixin):
         return self.user
 
     @classmethod
-    def _load_user(cls, uid=None):
+    def _load_user(cls, uid=None, canvas_api_domain=None):
         user = UserAuth.find_by_uid(uid) if uid else None
         calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
         expired = calnet_profile.get('isExpiredPerLdap', True)
@@ -99,6 +104,7 @@ class User(UserMixin):
             **calnet_profile,
             **{
                 'id': uid,
+                'canvasApiDomain': canvas_api_domain,
                 'emailAddress': calnet_profile.get('email'),
                 'isActive': is_active,
                 'isAdmin': is_admin,

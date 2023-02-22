@@ -37,6 +37,13 @@ def localize_datetime(dt):
     return dt.astimezone(pytz.timezone(app.config['TIMEZONE']))
 
 
+def to_int(s):
+    try:
+        return int(s)
+    except (TypeError, ValueError):
+        return None
+
+
 def to_isoformat(value):
     return value and value.astimezone(tzutc()).isoformat()
 

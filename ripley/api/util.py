@@ -53,8 +53,15 @@ def start_login_session(user, redirect_path=None):
         return abort(400)
     if authenticated:
         if redirect_path:
-            return redirect(redirect_path)
+            response = redirect(redirect_path)
         else:
-            return tolerant_jsonify(current_user.to_api_json())
+            response = tolerant_jsonify(current_user.to_api_json())
+        response.set_cookie(
+            key=f'{current_user.canvas_api_domain}',
+            value=str(current_user.uid),
+            samesite='None',
+            secure=True,
+        )
+        return response
     else:
         return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)
