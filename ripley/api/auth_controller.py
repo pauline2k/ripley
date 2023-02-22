@@ -101,10 +101,12 @@ def lti_launch():
 
         message_launch = MessageLaunch(flask_request, tool_conf, launch_data_storage=launch_data_storage)
         message_launch_data = message_launch.get_launch_data()
-        app.logger.info(f'LTI launch: {message_launch_data}')
+        custom_fields = message_launch_data.get('https://purl.imsglobal.org/spec/lti/claim/custom', {})
+        uid = custom_fields.get('canvas_user_login_id')
+        user = User(uid)
 
-        # TODO: _login()
-        return redirect('/welcome')
+        app.logger.info(f'Logged in during LTI launch as user {uid}')
+        return _login(user, redirect_path='/welcome')
     except Exception as e:
         app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
         raise InternalServerError({'message': str(e)})
