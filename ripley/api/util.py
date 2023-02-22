@@ -23,17 +23,38 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 from functools import wraps
+from urllib.parse import urljoin, urlparse
 
-from flask import current_app as app, request
-from flask_login import current_user
+from flask import abort, current_app as app, redirect, request
+from flask_login import current_user, login_user
+from ripley.lib.http import tolerant_jsonify
 
 
 def admin_required(func):
     @wraps(func)
     def _admin_required(*args, **kw):
-        if current_user.is_admin:
+        if current_user and current_user.is_admin:
             return func(*args, **kw)
         else:
             app.logger.warning(f'Unauthorized request to {request.path}')
             return app.login_manager.unauthorized()
     return _admin_required
+
+
+def _is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+
+
+def start_login_session(user, redirect_path=None):
+    authenticated = login_user(user, force=True, remember=True) and current_user.is_authenticated
+    if not _is_safe_url(request.args.get('next')):
+        return abort(400)
+    if authenticated:
+        if redirect_path:
+            return redirect(redirect_path)
+        else:
+            return tolerant_jsonify(current_user.to_api_json())
+    else:
+        return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)

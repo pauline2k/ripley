@@ -27,6 +27,7 @@ import traceback
 
 from flask import jsonify, make_response, redirect, request, session
 from flask_login import LoginManager
+from ripley.api.util import start_login_session
 from werkzeug.exceptions import HTTPException
 
 
@@ -118,5 +119,15 @@ def register_routes(app):
 
 
 def _user_loader(user_id=None):
+    from flask import current_app as app
     from ripley.models.user import User
-    return User(user_id)
+    from ripley.models.user_auth import UserAuth
+
+    authorized_user = UserAuth.find_by_id(user_id) if user_id else None
+    if not authorized_user:
+        return None
+    user_session = User(uid=authorized_user.uid)
+    if not user_session.is_authenticated:
+        start_login_session(user_session)
+        app.logger.info(f'User {user_id} loaded.')
+    return user_session

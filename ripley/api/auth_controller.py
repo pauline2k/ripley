@@ -23,16 +23,17 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from urllib.parse import urlencode, urljoin, urlparse
+from urllib.parse import urlencode
 
 import cas
-from flask import abort, current_app as app, flash, redirect, request, url_for
-from flask_login import current_user, login_required, login_user, logout_user
+from flask import current_app as app, flash, redirect, request, url_for
+from flask_login import current_user, login_required, logout_user
 from pylti1p3.contrib.flask import (FlaskCacheDataStorage, FlaskMessageLaunch, FlaskOIDCLogin, FlaskRequest)
 from pylti1p3.exception import LtiException
 from pylti1p3.tool_config import ToolConfJsonFile
 from ripley import cache
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
+from ripley.api.util import start_login_session
 from ripley.lib.http import add_param_to_url, tolerant_jsonify
 from ripley.models.user import User
 
@@ -71,7 +72,7 @@ def dev_auth_login():
         if not user.is_active:
             msg = f'Sorry, {uid} is not authorized to use this tool.'
             return tolerant_jsonify({'message': msg}, 403)
-        api_json = _login(user)
+        api_json = start_login_session(user)
         app.logger.debug(f'Successful dev-auth login for {api_json}.')
         return api_json
     else:
@@ -103,10 +104,10 @@ def lti_launch():
         message_launch_data = message_launch.get_launch_data()
         custom_fields = message_launch_data.get('https://purl.imsglobal.org/spec/lti/claim/custom', {})
         uid = custom_fields.get('canvas_user_login_id')
-        user = User(uid)
 
-        app.logger.info(f'Logged in during LTI launch as user {uid}')
-        return _login(user, redirect_path='/welcome')
+        user = User(uid)
+        app.logger.info(f'Logged in during LTI launch as user {user}')
+        return start_login_session(user, redirect_path='/welcome')
     except Exception as e:
         app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
         raise InternalServerError({'message': str(e)})
@@ -154,7 +155,7 @@ def cas_login():
     if user.is_active:
         flash('Logged in successfully.')
         redirect_path = target_url or '/'
-        return _login(user, redirect_path=redirect_path)
+        return start_login_session(user, redirect_path=redirect_path)
     else:
         redirect_path = add_param_to_url('/', ('error', f'Sorry, {user.name} is not authorized to use this tool.'))
         return redirect(redirect_path)
@@ -167,22 +168,3 @@ def _cas_client(target_url=None):
     if target_url:
         service_url = service_url + '?' + urlencode({'url': target_url})
     return cas.CASClientV3(server_url=cas_server, service_url=service_url)
-
-
-def _is_safe_url(target):
-    ref_url = urlparse(request.host_url)
-    test_url = urlparse(urljoin(request.host_url, target))
-    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
-
-
-def _login(user, redirect_path=None):
-    authenticated = login_user(user, force=True, remember=True) and current_user.is_authenticated
-    if not _is_safe_url(request.args.get('next')):
-        return abort(400)
-    if authenticated:
-        if redirect_path:
-            return redirect(redirect_path)
-        else:
-            return tolerant_jsonify(current_user.to_api_json())
-    else:
-        return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)
