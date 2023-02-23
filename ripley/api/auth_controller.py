@@ -104,10 +104,12 @@ def lti_launch():
         message_launch_data = message_launch.get_launch_data()
         custom_fields = message_launch_data.get('https://purl.imsglobal.org/spec/lti/claim/custom', {})
         uid = custom_fields.get('canvas_user_login_id')
+        canvas_api_domain = custom_fields.get('canvas_api_domain')
 
-        user = User(uid)
-        app.logger.info(f'Logged in during LTI launch as user {user}')
-        return start_login_session(user, redirect_path='/welcome')
+        user = User(uid, canvas_api_domain)
+        app.logger.info(f"""Logged in during LTI launch as user {user}""")
+        params = f'canvasApiDomain={canvas_api_domain}'
+        return start_login_session(user, redirect_path=f'/welcome?{params}')
     except Exception as e:
         app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
         raise InternalServerError({'message': str(e)})
@@ -139,10 +141,16 @@ def logout():
     logout_user()
     redirect_url = app.config['VUE_LOCALHOST_BASE_URL'] or request.url_root
     cas_logout_url = _cas_client().get_logout_url(redirect_url=redirect_url)
-    return tolerant_jsonify({
+    response = tolerant_jsonify({
         'casLogoutUrl': cas_logout_url,
         **current_user.to_api_json(),
     })
+    response.delete_cookie(
+        key=f'{current_user.canvas_api_domain}',
+        samesite='None',
+        secure=True,
+    )
+    return response
 
 
 @app.route('/cas/callback', methods=['GET', 'POST'])

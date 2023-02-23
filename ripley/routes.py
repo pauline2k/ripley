@@ -28,6 +28,7 @@ import traceback
 from flask import jsonify, make_response, redirect, request, session
 from flask_login import LoginManager
 from ripley.api.util import start_login_session
+from ripley.lib.util import to_int
 from werkzeug.exceptions import HTTPException
 
 
@@ -95,7 +96,7 @@ def register_routes(app):
     def after_api_request(response):
         if app.config['RIPLEY_ENV'] == 'development':
             # In development the response can be shared with requesting code from any local origin.
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Ripley-Canvas-Api-Domain'
             response.headers['Access-Control-Allow-Origin'] = app.config['VUE_LOCALHOST_BASE_URL']
             response.headers['Access-Control-Allow-Credentials'] = 'true'
             response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
@@ -121,13 +122,14 @@ def register_routes(app):
 def _user_loader(user_id=None):
     from flask import current_app as app
     from ripley.models.user import User
-    from ripley.models.user_auth import UserAuth
 
-    authorized_user = UserAuth.find_by_id(user_id) if user_id else None
-    if not authorized_user:
-        return None
-    user_session = User(uid=authorized_user.uid)
-    if not user_session.is_authenticated:
-        start_login_session(user_session)
-        app.logger.info(f'User {user_id} loaded.')
-    return user_session
+    canvas_api_domain = request.headers.get('Ripley-Canvas-Api-Domain')
+    user = User(uid=user_id, canvas_api_domain=canvas_api_domain)
+
+    if not user.is_authenticated and canvas_api_domain:
+        cookie_value = request.cookies.get(f'{canvas_api_domain}')
+        uid = cookie_value and to_int(cookie_value)
+        user = User(uid, canvas_api_domain)
+        app.logger.info(f'User {uid} loaded from cookie.')
+        start_login_session(user)
+    return user
