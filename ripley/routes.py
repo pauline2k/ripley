@@ -126,10 +126,19 @@ def _user_loader(user_id=None):
     canvas_api_domain = request.headers.get('Ripley-Canvas-Api-Domain')
     user = User(uid=user_id, canvas_api_domain=canvas_api_domain)
 
-    if not user.is_authenticated and canvas_api_domain:
-        cookie_value = request.cookies.get(f'{canvas_api_domain}')
-        uid = cookie_value and to_int(cookie_value)
-        user = User(uid, canvas_api_domain)
-        app.logger.info(f'User {uid} loaded from cookie.')
-        start_login_session(user)
+    if canvas_api_domain:
+        if user.is_authenticated and canvas_api_domain != user.canvas_api_domain:
+            app.logger.info(
+                f"""Session data (canvas_api_domain={user.canvas_api_domain})
+                conflicts with headers (canvas_api_domain={canvas_api_domain}). This user session will be terminated.""",
+            )
+            user.logout()
+
+        if not user.is_authenticated:
+            cookie_value = request.cookies.get(f'{canvas_api_domain}')
+            uid = cookie_value and to_int(cookie_value)
+            if uid:
+                user = User(uid, canvas_api_domain)
+                app.logger.info(f'User {uid} loaded from cookie.')
+                start_login_session(user)
     return user
