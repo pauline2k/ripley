@@ -52,15 +52,15 @@ class User(UserMixin):
                     uid={self.uid},
                 """
 
+    def canvas_api_domain(self):
+        return self.canvas_api_domain
+
     def get_id(self):
         # Type 'int' is required for Flask-login user_id
         return int(self.uid)
 
     def uid(self):
         return self.uid
-
-    def canvas_api_domain(self):
-        return self.canvas_api_domain
 
     @property
     def email_address(self):
@@ -86,6 +86,9 @@ class User(UserMixin):
     def load_user(cls, user_id):
         return cls._load_user(uid=user_id)
 
+    def logout(self):
+        self.user = self._load_user()
+
     @property
     def name(self):
         return self.user['name']
@@ -98,8 +101,8 @@ class User(UserMixin):
         user = UserAuth.find_by_uid(uid) if uid else None
         calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
         expired = calnet_profile.get('isExpiredPerLdap', True)
-        is_active = user.active and not expired if user else False
-        is_admin = user.is_superuser and is_active if user else False
+        is_active = not expired and (user.active if user else True)
+        is_admin = is_active and (user.is_superuser if user else False)
         return {
             **calnet_profile,
             **{

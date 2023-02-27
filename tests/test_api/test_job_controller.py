@@ -66,7 +66,7 @@ class TestDisableJob:
     def test_bad_job_id(self, client, fake_auth):
         fake_auth.login(admin_uid)
         params = {
-            'jobId': 'not my job',
+            'jobId': 0,
             'disable': True,
         }
         _api_disable_job(client, params, expected_status_code=400)
@@ -236,7 +236,7 @@ class TestUpdateSchedule:
     def test_bad_job_key(self, client, fake_auth):
         fake_auth.login(admin_uid)
         params = {
-            'jobId': 'bad job',
+            'jobId': 0,
             'type': 'minutes',
             'value': '60',
         }
