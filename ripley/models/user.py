@@ -76,7 +76,7 @@ class User(UserMixin):
 
     @property
     def is_anonymous(self):
-        return not self.user['isAnonymous']
+        return self.user['isAnonymous']
 
     @property
     def is_admin(self):
