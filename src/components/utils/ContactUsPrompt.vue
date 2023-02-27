@@ -1,16 +1,8 @@
 <template>
-  <span>
-    Problem? Question? Email us at
-    <a
-      id="ripley-support-mailto"
-      aria-label="Open new window to send email"
-      :class="hrefMailtoClass"
-      :href="`mailto:${$config.emailRipleySupport}`"
-      target="_blank"
-    >
-      {{ $config.emailRipleySupport }}
-    </a>
-  </span>
+  <div>
+    If you need assistance then please
+    <a id="contact-us" href="https://dls.berkeley.edu/services/bcourses-0" target="_blank">contact us</a>.
+  </div>
 </template>
 
 <script>

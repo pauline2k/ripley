@@ -156,7 +156,7 @@ export default {
     refreshing: false
   }),
   created() {
-    this.$loading()
+    this.loadingStart()
     getJobSchedule().then(data => {
       this.jobSchedule = data
       this.refresh(true).then(() => {

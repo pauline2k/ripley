@@ -34,11 +34,10 @@
 </template>
 
 <script>
-import auth from '@/auth'
 import Context from '@/mixins/Context'
 import Utils from '@/mixins/Utils'
 import {devAuthLogIn} from '@/api/auth'
-import {app} from '@/main'
+import {useContextStore} from '@/stores/context'
 
 export default {
   name: 'DevAuth',
@@ -57,7 +56,7 @@ export default {
         devAuthLogIn(uid, password).then(
           data => {
             if (data.isAuthenticated) {
-              app.config.globalProperties.$currentUser = data
+              useContextStore().setCurrentUser(data)
               this.$announcer.polite('You are logged in.')
               this.$router.push({path: data.isAdmin ? '/jobs' : '/welcome'})
             } else {

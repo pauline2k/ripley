@@ -6,7 +6,7 @@
           <BuildSummary />
         </div>
         <div class="float-right mr-3 text-body-2" cols="6">
-          <span v-if="$currentUser.isAuthenticated">
+          <span v-if="currentUser.isAuthenticated">
             <v-btn
               id="log-out"
               variant="plain"
@@ -15,7 +15,7 @@
               Log out
             </v-btn>
           </span>
-          <span v-if="!$currentUser.isAuthenticated">
+          <span v-if="!currentUser.isAuthenticated">
             Berkeley &copy; {{ new Date().getFullYear() }} UC Regents
           </span>
         </div>

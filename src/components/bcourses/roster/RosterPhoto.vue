@@ -12,8 +12,11 @@
 </template>
 
 <script>
+import Context from '@/mixins/Context'
+
 export default {
   name: 'RosterPhoto',
+  mixins: [Context],
   props: {
     student: {
       required: true,
@@ -25,7 +28,7 @@ export default {
   }),
   created() {
     if (this.student.photo) {
-      this.photoUrl = this.$config.apiBaseUrl ? `${this.$config.apiBaseUrl}${this.student.photo}` : this.student.photo
+      this.photoUrl = this.config.apiBaseUrl ? `${this.config.apiBaseUrl}${this.student.photo}` : this.student.photo
     } else {
       this.imageError()
     }

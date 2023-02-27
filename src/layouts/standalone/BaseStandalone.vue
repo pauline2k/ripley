@@ -8,17 +8,14 @@
   </v-app>
 </template>
 
-<script setup>
-import DefaultBar from './AppBar.vue'
-</script>
-
 <script>
 import Context from '@/mixins/Context'
+import DefaultBar from './AppBar.vue'
 import PageLoadProgress from '@/components/utils/PageLoadProgress'
 
 export default {
   name: 'BaseStandalone',
-  components: {PageLoadProgress},
+  components: {DefaultBar, PageLoadProgress},
   mixins: [Context]
 }
 </script>
