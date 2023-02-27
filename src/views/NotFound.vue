@@ -1,38 +1,76 @@
 <template>
-  <v-container fluid>
-    <v-row class="ml-4 mt-4 pt-4">
-      <v-col>
-        <div class="d-flex">
-          <div class="pr-3 pt-2">
-            <v-icon class="text-warning" icon="exclamation-triangle" size="2x" />
-          </div>
-          <div>
-            <h1 class="cc-text-xl text-secondary">Page Not Found</h1>
-          </div>
-        </div>
-      </v-col>
-    </v-row>
-    <v-row class="cc-text-big ml-4 mt-4 pb-5">
-      <v-col>
-        <span id="error-message" aria-live="polite" role="alert">
-          <span v-if="$route.redirectedFrom">
-            The requested URL {{ this.$route.redirectedFrom }} was not found.
-          </span>
-          <span v-if="!$route.redirectedFrom">
-            Page not found.
-          </span>
-          If you need assistance then please <a id="contact-us" href="https://dls.berkeley.edu/services/bcourses-0" target="_blank">contact us</a>.
-        </span>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-app>
+    <DefaultBar />
+    <v-main>
+      <v-container
+        class="background-splash"
+        fill-height
+        fluid
+        :style="{backgroundImage: `url(${derelictOnAlienPlanet})`}"
+      >
+        <v-row class="mt-4 pt-4">
+          <v-col>
+            <v-card
+              class="mx-auto"
+              max-width="360"
+            >
+              <v-card-title>
+                {{ isError ? 'Error' : 'Page Not Found' }}
+              </v-card-title>
+              <v-card-subtitle>
+                <div v-if="isError" class="pb-2">
+                  <span
+                    id="error-message"
+                    aria-live="polite"
+                    role="alert"
+                  >
+                    {{ applicationState.message || 'Uh oh, there was a problem.' }}
+                  </span>
+                </div>
+                <div
+                  v-if="!isError"
+                  id="page-not-found"
+                  aria-live="polite"
+                  role="alert"
+                >
+                  <span v-if="$route.redirectedFrom">
+                    The requested URL {{ this.$route.redirectedFrom }} was not found.
+                  </span>
+                  <span v-if="!$route.redirectedFrom">
+                    Page not found.
+                  </span>
+                </div>
+              </v-card-subtitle>
+              <v-card-text>
+                <ContactUsPrompt />
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
+<script setup>
+import DefaultBar from '@/layouts/standalone/AppBar.vue'
+import derelictOnAlienPlanet from '@/assets/derelict-on-alien-planet.jpg'
+</script>
+
 <script>
+import Context from '@/mixins/Context'
+import ContactUsPrompt from '@/components/utils/ContactUsPrompt'
+
 export default {
   name: 'NotFound',
+  mixins: [Context],
+  components: {ContactUsPrompt},
+  data: () => ({
+    isError: false
+  }),
   mounted() {
-    this.$ready('404')
+    this.isError = ![200, 404].includes(this.applicationState.status)
+    this.$ready(this.isError ? 'Error' : 'Page Not Found')
   }
 }
 </script>

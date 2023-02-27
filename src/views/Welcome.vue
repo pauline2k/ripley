@@ -1,7 +1,7 @@
 <template>
   <div class="ma-3">
-    <h1>Hello {{ $currentUser.firstName }}</h1>
-    <div v-if="$currentUser.isAdmin">
+    <h1>Hello {{ currentUser.firstName }}</h1>
+    <div v-if="currentUser.isAdmin">
       <h2>Utilities</h2>
       <ul>
         <li><a href="/jobs">Jobs</a></li>
@@ -24,7 +24,10 @@
 </template>
 
 <script>
+import Context from '@/mixins/Context'
+
 export default {
-  name: 'Welcome'
+  name: 'Welcome',
+  mixins: [Context],
 }
 </script>

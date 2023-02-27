@@ -6,7 +6,7 @@
     :style="{backgroundImage: `url(${nostromoCrew})`}"
   >
     <v-row>
-      <v-col v-if="!$currentUser.isAuthenticated">
+      <v-col v-if="!currentUser.isAuthenticated">
         <div>
           <v-btn
             id="cas-auth-submit-button"
@@ -18,15 +18,12 @@
         <div>
           <hr />
         </div>
-        <div v-if="$config.devAuthEnabled">
+        <div v-if="config.devAuthEnabled">
           <h4 class="sr-only">DevAuth</h4>
           <DevAuth />
         </div>
       </v-col>
     </v-row>
-    <v-col v-if="$currentUser.isAuthenticated">
-      Hello! {{ $currentUser }}
-    </v-col>
   </v-container>
 </template>
 
@@ -69,12 +66,5 @@ h1 {
   font-size: 23px;
   font-weight: bold;
   margin: 0 0 10px;
-}
-.background-splash {
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-  min-height: 100vh;
 }
 </style>

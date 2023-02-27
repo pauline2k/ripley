@@ -3,14 +3,13 @@ import App from './App.vue'
 import axios from 'axios'
 import mitt from 'mitt'
 import moment from 'moment'
-import router from '@/router'
-import {putFocusNextTick, axiosErrorHandler} from './utils'
 import {createApp} from 'vue'
+import {putFocusNextTick, axiosErrorHandler} from './utils'
 import {registerPlugins} from '@/plugins'
 import {useContextStore} from '@/stores/context'
+import router from '@/router'
 
-export const app = createApp(App)
-
+const app = createApp(App)
 registerPlugins(app)
 
 // Axios
@@ -28,16 +27,16 @@ axios.interceptors.response.use(
     if (_.includes([401, 403], errorStatus)) {
       // Refresh user in case his/her session expired.
       return axios.get(`${apiBaseUrl}/api/user/my_profile`).then(response => {
-        app.config.globalProperties.$currentUser = response.data
+        useContextStore().setCurrentUser(response.data)
         const errorUrl = _.get(error, 'response.config.url')
         // Auth errors from the academics API should be handled by individual LTI components.
         if (!(errorUrl && errorUrl.includes('/api/academics'))) {
-          axiosErrorHandler(error)
+          axiosErrorHandler(app, error)
         }
         return Promise.reject(error)
       })
     } else {
-      axiosErrorHandler(error)
+      axiosErrorHandler(app, error)
       return Promise.reject(error)
     }
   })
@@ -52,12 +51,17 @@ app.config.globalProperties.$ready = (label: string, focusTarget: string) => use
 app.config.globalProperties.$putFocusNextTick = putFocusNextTick
 
 axios.get(`${apiBaseUrl}/api/user/my_profile`).then(response => {
-  app.config.globalProperties.$currentUser = response.data
-  app.use(router)
+  useContextStore().setCurrentUser(response.data)
 
   axios.get(`${apiBaseUrl}/api/config`).then(response => {
-    const isDebugMode = _.trim(import.meta.env.VITE_APP_DEBUG).toLowerCase() === 'true'
-    app.config.globalProperties.$config = {...response.data, apiBaseUrl, isVueAppDebugMode: isDebugMode}
+    useContextStore().setConfig({
+      ...response.data,
+      apiBaseUrl,
+      isVueAppDebugMode: _.trim(import.meta.env.VITE_APP_DEBUG).toLowerCase() === 'true'
+    })
+    app.use(router).config.errorHandler = function (error, vm, info) {
+      useContextStore().setApplicationState(500, _.get(error, 'message') || info)
+    }
     app.mount('#app')
   })
 })

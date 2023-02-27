@@ -16,14 +16,14 @@ import SiteMailingList from '@/views/SiteMailingList.vue'
 import SiteMailingLists from '@/views/SiteMailingLists.vue'
 import UserProvision from '@/views/UserProvision.vue'
 import Welcome from '@/views/Welcome.vue'
-import {app} from '@/main'
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
+import {useContextStore} from '@/stores/context'
 
 
 const routes:RouteRecordRaw[] = [
   {
     beforeEnter: (to: any, from: any, next: any) => {
-      const currentUser = app.config.globalProperties.$currentUser
+      const currentUser = useContextStore().currentUser
       currentUser.isAuthenticated ? next({path: '/welcome'}) : next()
     },
     children: [
@@ -176,34 +176,19 @@ const routes:RouteRecordRaw[] = [
     path: '/',
   },
   {
-    children: [
-      {
-        beforeEnter: (to: any, from: any, next: any) => {
-          to.params.m = to.redirectedFrom
-          next()
-        },
-        path: '/404',
-        component: NotFound,
-        meta: {title: 'Page not found'}
-      },
-      {
-        path: '/error',
-        component: Error,
-        meta: {title: 'Error'}
-      }
-    ],
-    component: BaseStandalone,
-    path: '/',
-  },
-  {
-    path: '/:pathMatch(.*)*',
-    redirect: '/404'
+    beforeEnter: () => useContextStore().setApplicationState(404),
+    component: NotFound,
+    path: '/:pathMatch(.*)',
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+})
+
+router.beforeEach(() => {
+  useContextStore().resetApplicationState()
 })
 
 router.afterEach((to: any) => {

@@ -12,16 +12,20 @@
         Skip to content
       </a>
     </div>
-    <router-view />
+    <router-view v-if="applicationState.status === 200" />
+    <NotFound v-if="applicationState.status !== 200" />
   </div>
 </template>
 
 <script>
+import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
+import NotFound from '@/views/NotFound'
 
 export default {
   name: 'App',
-  mixins: [IFrameMixin],
+  components: {NotFound},
+  mixins: [Context, IFrameMixin],
   methods: {
     skipTo: anchor => '' // TODO: VueScrollTo.scrollTo(anchor, 400)
   }
@@ -54,6 +58,14 @@ export default {
 
 <style lang="scss">
 @import 'styles/colors';
+
+.background-splash {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  min-height: 100vh;
+}
 </style>
 
 <style scoped lang="scss">
