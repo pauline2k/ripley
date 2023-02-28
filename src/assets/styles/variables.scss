@@ -1,0 +1,8 @@
+$bc-base-font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$small-breakpoint: (767px);
+$medium-breakpoint: (1024px);
+$screen: "only screen";
+$small-up: $screen;
+$small-only: "#{$screen} and (max-width: #{$small-breakpoint})";
+$medium-up: "#{$screen} and (min-width:#{$small-breakpoint + 1})";
+$medium-only: "#{$screen} and (min-width:#{$small-breakpoint + 1}) and (max-width:#{$medium-breakpoint})";

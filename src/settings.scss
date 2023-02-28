@@ -1,0 +1,5 @@
+// https://next.vuetifyjs.com/features/sass-variables/`
+@forward 'vuetify' with (
+  $color-pack: false,
+  $utilities: false
+);

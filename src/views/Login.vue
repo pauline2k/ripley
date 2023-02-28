@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import nostromoCrew from '@/assets/nostromo-crew-eating-breakfast.png'
+import nostromoCrew from '@/assets/images/nostromo-crew-eating-breakfast.png'
 </script>
 
 <script>

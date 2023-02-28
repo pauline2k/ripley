@@ -6,10 +6,15 @@
       :aria-label="`Photo of ${student.first_name} ${student.last_name}`"
       class="photo"
       :src="photoUrl"
+      :style="{backgroundImage: `url(${photoUnavailable})`}"
       @error="imageError"
     />
   </div>
 </template>
+
+<script setup>
+import photoUnavailable from '@/assets/images/photo_unavailable.svg'
+</script>
 
 <script>
 import Context from '@/mixins/Context'
@@ -35,7 +40,7 @@ export default {
   },
   methods: {
     imageError() {
-      this.photoUrl = require('@/assets/svg/photo_unavailable_official_72x96.svg')
+      this.photoUrl = require('@/assets/images/photo_unavailable.svg')
     }
   }
 }
@@ -43,7 +48,6 @@ export default {
 
 <style scoped>
 .photo {
-  background-image: url('~@/assets/svg/photo_unavailable_official_72x96.svg');
   background-size: cover;
   height: 96px;
   margin: 0 auto;

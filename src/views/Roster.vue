@@ -46,7 +46,6 @@
             <div>
               <v-btn
                 id="print-roster"
-                class="cc-button-blue"
                 variant="outline-secondary"
                 @click="printRoster"
               >
