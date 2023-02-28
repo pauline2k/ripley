@@ -71,7 +71,8 @@ export default {
   },
   methods: {
     cancel() {
-      this.$router.push({path: this.isInIframe ? '/canvas/embedded/site_creation' : '/canvas/site_creation'})
+      const path = this.isInIframe ? '/lti/create_site' : '/create_site'
+      this.$router.push({path})
     },
     createProjectSite() {
       this.isCreating = true

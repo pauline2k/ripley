@@ -1,4 +1,3 @@
-import router from './router'
 import {useContextStore} from '@/stores/context'
 
 const goToLogin = (to: any, next: any) => {
@@ -14,12 +13,18 @@ const goToLogin = (to: any, next: any) => {
 export default {
   requiresAdmin: (to: any, from: any, next: any) => {
     const currentUser = useContextStore().currentUser
-    if (currentUser.isAuthenticated) {
-      if (currentUser.isAdmin) {
-        next()
-      } else {
-        router.push({name: '404'})
-      }
+    if (currentUser.isAdmin) {
+      next()
+    } else if (currentUser.isAuthenticated) {
+      useContextStore().setApplicationState(404)
+      next()
+    } else {
+      goToLogin(to, next)
+    }
+  },
+  requiresAuthenticated: (to: any, from: any, next: any) => {
+    if (useContextStore().currentUser.isAuthenticated) {
+      next()
     } else {
       goToLogin(to, next)
     }
