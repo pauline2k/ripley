@@ -54,7 +54,7 @@
 
 <script setup>
 import DefaultBar from '@/layouts/standalone/AppBar.vue'
-import derelictOnAlienPlanet from '@/assets/derelict-on-alien-planet.jpg'
+import derelictOnAlienPlanet from '@/assets/images/derelict-on-alien-planet.jpg'
 </script>
 
 <script>

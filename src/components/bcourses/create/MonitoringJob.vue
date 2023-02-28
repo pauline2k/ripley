@@ -21,7 +21,6 @@
               <div class="bc-form-actions">
                 <button
                   id="start-over-button"
-                  class="bc-canvas-button bc-canvas-button-primary"
                   type="button"
                   aria-controls="bc-page-create-course-site-selecting-step"
                   aria-label="Start over course site creation process"
@@ -31,7 +30,6 @@
                 </button>
                 <button
                   id="go-back-button"
-                  class="cc-button cc-page-button-grey"
                   type="button"
                   aria-controls="bc-page-create-course-site-confirmation-step"
                   aria-label="Go Back to Site Details Confirmation"

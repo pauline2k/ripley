@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import muthur from '@/assets/muthur.png'
+import muthur from '@/assets/images/muthur.png'
 </script>
 
 <script>

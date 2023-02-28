@@ -51,7 +51,7 @@
             <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">your gradebook</a>
             for any assignments with a crossed-out eye icon
             <span class="cc-nowrap">
-              (<img class="bc-page-course-grade-export-image-inline" src="@/assets/crossed_out_eye.png" alt="Crossed-out eye icon">)
+              (<img class="bc-page-course-grade-export-image-inline" src="@/assets/images/crossed_out_eye.png" alt="Crossed-out eye icon">)
             </span>
             indicating that an assignment has unposted grades.
           </p>
@@ -61,7 +61,7 @@
           <ul class="bc-page-course-grade-export-download-list">
             <li>
               Mouse over the assignment name and select the three vertical dot menu
-              <span class="cc-nowrap">(<img class="bc-page-course-grade-export-image-inline" src="@/assets/three_vertical_dots.png" alt="Three vertical dots">)</span>
+              <span class="cc-nowrap">(<img class="bc-page-course-grade-export-image-inline" src="@/assets/images/three_vertical_dots.png" alt="Three vertical dots">)</span>
             </li>
             <li>Select "Post grades"</li>
             <li>Select whether you wish to post grades for "Everyone," or only "Graded" students and click "Post"</li>

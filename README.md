@@ -2,7 +2,7 @@
 
 Ripley heroically supports UC Berkeley's Canvas LMS instance.
 
-![Ripley, a character from the movie Alien, is holding a cat.](src/assets/ripley-with-cat.png)
+![Ripley, a character from the movie Alien, is holding a cat.](src/assets/images/ripley-with-cat.png)
 
 ## Installation
 
@@ -23,7 +23,7 @@ npm install
 
 ### Create Postgres user and databases
 
-![Photo of computer room of the movie Alien.](src/assets/muthur.png)
+![Photo of computer room of the movie Alien.](src/assets/images/muthur.png)
 
 ```
 createuser ripley --no-createdb --no-superuser --no-createrole --pwprompt
