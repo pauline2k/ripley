@@ -8,21 +8,13 @@
   >
     <v-row align="center" class="mt-8" justify="center">
       <v-col>
-        <v-card
-          class="mx-auto"
-          width="360"
-        >
+        <v-card class="mx-auto" width="320">
           <div class="ma-5">
             <h2 class="mb-0">Tools</h2>
             <v-list density="compact" :lines="false">
-              <v-list-item
-                v-for="(tool, index) in tools"
-                :key="index"
-                :value="tool"
-                active-color="primary"
-              >
+              <v-list-item v-for="(tool, index) in tools" :key="index">
                 <template #prepend>
-                  <v-icon class="mr-2" :icon="tool.icon" />
+                  <v-icon class="mr-4" :icon="tool.icon" />
                 </template>
                 <v-list-item-title>
                   <router-link class="text-decoration-none" :to="tool.path">
@@ -32,19 +24,14 @@
               </v-list-item>
             </v-list>
             <h2 class="mb-0 mt-5">Utilities</h2>
-            <v-list
-              density="compact"
-              :items="utilities"
-              :lines="false"
-            >
+            <v-list density="compact" :items="utilities" :lines="false">
               <v-list-item
                 v-for="(utility, index) in utilities"
                 :key="index"
-                :value="tool"
                 active-color="primary"
               >
                 <template #prepend>
-                  <v-icon class="mr-2" :icon="utility.icon" />
+                  <v-icon class="mr-4" :icon="utility.icon" />
                 </template>
                 <v-list-item-title>
                   <router-link class="text-decoration-none" :to="utility.path">

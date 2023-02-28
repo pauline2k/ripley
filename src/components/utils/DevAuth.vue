@@ -60,7 +60,7 @@ export default {
               this.$announcer.polite('You are logged in.')
               this.$router.push({path: data.isAdmin ? '/jobs' : '/welcome'})
             } else {
-              const message = this.$_.get(data, 'response.data.error') || this.$_.get(data, 'response.data.message') || this.$_.get(data, 'message') || 'Authentication failed'
+              const message = this.$_.get(data, 'error') || this.$_.get(data, 'message') || 'Authentication failed'
               this.reportError(message)
             }
           },
@@ -76,8 +76,10 @@ export default {
     },
     reportError(message, putFocus='basic-auth-uid') {
       this.error = this.$_.get(message, 'message')
-      this.$announcer.polite(this.error)
-      this.$putFocusNextTick(putFocus)
+      if (this.error) {
+        this.$announcer.polite(this.error)
+        this.$putFocusNextTick(putFocus)
+      }
     }
   }
 }
