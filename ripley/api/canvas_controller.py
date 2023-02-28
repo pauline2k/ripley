@@ -86,16 +86,6 @@ def canvas_egrade_export_status():
     return tolerant_jsonify([])
 
 
-@app.route('/api/academics/canvas/mailing_list/${canvasCourseId}')
-def canvas_mailing_list():
-    return tolerant_jsonify([])
-
-
-@app.route('/api/academics/canvas/mailing_lists/${canvasCourseId}')
-def canvas_mailing_lists():
-    return tolerant_jsonify([])
-
-
 @app.route('/api/academics/rosters/canvas/${courseId}')
 def canvas_rosters():
     return tolerant_jsonify([])

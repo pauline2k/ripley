@@ -26,17 +26,17 @@ from flask import current_app as app
 from ripley.lib.http import tolerant_jsonify
 
 
-@app.route('/api/academics/canvas/mailing_lists/:canvas_course_id')
+@app.route('/api/mailing_lists/<canvas_course_id>')
 def mailing_lists(canvas_course_id):
     return tolerant_jsonify([])
 
 
-@app.route('/api/academics/canvas/mailing_lists/:canvas_course_id/create', methods=['POST'])
+@app.route('/api/mailing_lists/<canvas_course_id>/create', methods=['POST'])
 def create_mailing_lists(canvas_course_id):
     return tolerant_jsonify([])
 
 
-@app.route('/api/academics/canvas/mailing_lists/:canvas_course_id/populate', methods=['POST'])
+@app.route('/api/mailing_lists/<canvas_course_id>/populate', methods=['POST'])
 def populate_mailing_lists(canvas_course_id):
     return tolerant_jsonify({
         'canvasSite': {

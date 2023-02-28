@@ -52,47 +52,6 @@ export function prepareGradesCacheJob(canvasCourseId: string) {
   return utils.post(`/api/academics/canvas/egrade_export/prepare/${canvasCourseId}`)
 }
 
-// Mailing lists: endpoints used by instructors
-
-export function activateWelcomeEmail(canvasCourseId: string) {
-  return utils.post(`/api/academics/canvas/mailing_list/${canvasCourseId}/welcome_email/activate`)
-}
-
-export function createSiteMailingList(canvasCourseId: string) {
-  return utils.post(`/api/academics/canvas/mailing_list/${canvasCourseId}/create`)
-}
-
-export function deactivateWelcomeEmail(canvasCourseId: string) {
-  return utils.post(`/api/academics/canvas/mailing_list/${canvasCourseId}/welcome_email/deactivate`)
-}
-
-export function downloadWelcomeEmailCsv(canvasCourseId: string) {
-  const filename = `${canvasCourseId}-welcome-messages-log-${moment().format('YYYY-MM-DD_hhmmss')}.csv`
-  return utils.downloadViaGet(`/api/academics/canvas/mailing_list/${canvasCourseId}/welcome_email_log`, filename)
-}
-
-export function getSiteMailingList(canvasCourseId: string) {
-  return utils.get(`/api/academics/canvas/mailing_list/${canvasCourseId}`)
-}
-
-export function updateWelcomeEmail(canvasCourseId: string, subject: string, body: string) {
-  return utils.post(`/api/academics/canvas/mailing_list/${canvasCourseId}/welcome_email/update`, {body, subject})
-}
-
-// Mailing lists: endpoints requiring admin permissions
-
-export function getSiteMailingListAdmin(canvasCourseId: string) {
-  return utils.get(`/api/academics/canvas/mailing_lists/${canvasCourseId}`)
-}
-
-export function createSiteMailingListAdmin(canvasCourseId: string, list: any) {
-  return utils.post(`/api/academics/canvas/mailing_lists/${canvasCourseId}/create`, {listName: list.name})
-}
-
-export function populateSiteMailingList(canvasCourseId: string) {
-  return utils.post(`/api/academics/canvas/mailing_lists/${canvasCourseId}/populate`)
-}
-
 // Rosters
 
 export function getRoster(courseId: number) {
