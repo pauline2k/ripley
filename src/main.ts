@@ -21,7 +21,7 @@ if (params.get('canvasApiDomain')) {
 axios.defaults.withCredentials = true
 
 axios.interceptors.response.use(
-  response => response,
+  response => response.headers['content-type'] === 'application/json' ? response.data : response,
   error => {
     const errorStatus = _.get(error, 'response.status')
     if (_.includes([401, 403], errorStatus)) {
@@ -50,12 +50,12 @@ app.config.globalProperties.$moment = moment
 app.config.globalProperties.$ready = (label: string, focusTarget: string) => useContextStore().loadingComplete(label, focusTarget)
 app.config.globalProperties.$putFocusNextTick = putFocusNextTick
 
-axios.get(`${apiBaseUrl}/api/user/my_profile`).then(response => {
-  useContextStore().setCurrentUser(response.data)
+axios.get(`${apiBaseUrl}/api/user/my_profile`).then(data => {
+  useContextStore().setCurrentUser(data)
 
-  axios.get(`${apiBaseUrl}/api/config`).then(response => {
+  axios.get(`${apiBaseUrl}/api/config`).then(data => {
     useContextStore().setConfig({
-      ...response.data,
+      ...data,
       apiBaseUrl,
       isVueAppDebugMode: _.trim(import.meta.env.VITE_APP_DEBUG).toLowerCase() === 'true'
     })
