@@ -23,23 +23,25 @@
                 </v-list-item-title>
               </v-list-item>
             </v-list>
-            <h2 class="mb-0 mt-5">Utilities</h2>
-            <v-list density="compact" :items="utilities" :lines="false">
-              <v-list-item
-                v-for="(utility, index) in utilities"
-                :key="index"
-                active-color="primary"
-              >
-                <template #prepend>
-                  <v-icon class="mr-4" :icon="utility.icon" />
-                </template>
-                <v-list-item-title>
-                  <router-link class="text-decoration-none" :to="utility.path">
-                    {{ utility.title }}
-                  </router-link>
-                </v-list-item-title>
-              </v-list-item>
-            </v-list>
+            <div v-if="currentUser.isAdmin">
+              <h2 class="mb-0 mt-5">Utilities</h2>
+              <v-list density="compact" :items="utilities" :lines="false">
+                <v-list-item
+                  v-for="(utility, index) in utilities"
+                  :key="index"
+                  active-color="primary"
+                >
+                  <template #prepend>
+                    <v-icon class="mr-4" :icon="utility.icon" />
+                  </template>
+                  <v-list-item-title>
+                    <router-link class="text-decoration-none" :to="utility.path">
+                      {{ utility.title }}
+                    </router-link>
+                  </v-list-item-title>
+                </v-list-item>
+              </v-list>
+            </div>
           </div>
         </v-card>
       </v-col>
@@ -63,7 +65,7 @@ export default {
       {icon: 'mdi-projector-screen-outline', title: 'Create a Project Site', path: '/create_project_site'},
       {icon: 'mdi-export', title: 'E-Grade Export', path: '/grade_export/:id'},
       {icon: 'mdi-account-school', title: 'Find a User to Add', path: '/add_user/:id'},
-      {icon: 'mdi-email-fast-outline', title: 'Mailing List', path: '/mailing_list/:id'},
+      {icon: 'mdi-email-fast-outline', title: 'Mailing List', path: '/mailing_list/1466'},
       {icon: 'mdi-email-multiple-outline', title: 'Mailing Lists', path: '/mailing_lists'},
       {icon: 'mdi-google-classroom', title: 'Official Sections', path: '/manage_official_sections/:id'},
       {icon: 'mdi-account-multiple', title: 'Roster Photos', path: '/rosters/:id'},

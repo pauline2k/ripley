@@ -143,10 +143,10 @@
 </template>
 
 <script>
-import {createSiteMailingListAdmin, getSiteMailingListAdmin, populateSiteMailingList} from '@/api/canvas'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import Utils from '@/mixins/Utils'
+import {createSiteMailingListAdmin, getSiteMailingListAdmin, populateSiteMailingList} from '@/api/mailing-lists'
 
 export default {
   name: 'SiteMailingLists',

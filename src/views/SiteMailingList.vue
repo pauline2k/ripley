@@ -1,189 +1,185 @@
 <template>
-  <div class="bc-canvas-application bc-page-site-mailing-list">
-    <div v-if="isLoading" class="cc-spinner"></div>
+  <div v-if="!isLoading" class="bc-canvas-application bc-page-site-mailing-list">
+    <h1 class="bc-header bc-header1">Mailing List</h1>
 
-    <div v-if="!isLoading">
-      <h1 class="bc-header bc-header1">Mailing List</h1>
+    <div v-if="alerts.error.length" role="alert" class="bc-alert bc-alert-error">
+      <fa icon="exclamation-triangle" class="cc-icon cc-left bc-icon-red bc-canvas-notice-icon"></fa>
+      <div class="bc-page-site-mailing-list-notice-message">
+        <div v-for="error in alerts.error" :key="error">{{ error }}</div>
+      </div>
+    </div>
 
-      <div v-if="alerts.error.length" role="alert" class="bc-alert bc-alert-error">
-        <fa icon="exclamation-triangle" class="cc-icon cc-left bc-icon-red bc-canvas-notice-icon"></fa>
-        <div class="bc-page-site-mailing-list-notice-message">
-          <div v-for="error in alerts.error" :key="error">{{ error }}</div>
+    <div v-if="errorMessages" role="alert" class="bc-alert bc-alert-error">
+      <div v-for="errorMessage in errorMessages" :key="errorMessage">{{ errorMessage }}</div>
+    </div>
+
+    <div v-if="!errorMessages && listCreated" role="alert" class="bc-alert bc-alert-success">
+      A Mailing List has been created at <strong>{{ mailingList.name }}@{{ mailingList.domain }}</strong>.
+      Messages can now be sent through this address.
+    </div>
+
+    <div v-if="!errorMessages && !listCreated" class="bc-alert">
+      No Mailing List has yet been created for this site.
+    </div>
+
+    <p class="bc-page-site-mailing-list-text">
+      bCourses Mailing Lists allow Teachers, TAs, Lead TAs and Readers to send email to everyone in a bCourses site by
+      giving the site its own email address. Messages sent to this address from the
+      <strong>official berkeley.edu email address</strong>
+      of a Teacher, TA, Lead TA or Reader will be sent to the official email addresses of all site
+      members. Students and people not in the site cannot send messages through Mailing Lists.
+    </p>
+
+    <form v-if="!listCreated" class="bc-canvas-page-form bc-canvas-form" @submit.prevent="createMailingList">
+      <div class="bc-form-actions">
+        <button
+          id="btn-create-mailing-list"
+          type="submit"
+          class="bc-canvas-button bc-canvas-button-primary"
+          aria-controls="cc-page-reader-alert"
+          :disabled="errorMessages"
+        >
+          <span v-if="!isCreating">Create mailing list</span>
+          <span v-if="isCreating"><fa icon="spinner" class="mr-2 fa-spin"></fa> Creating ...</span>
+        </button>
+      </div>
+    </form>
+
+    <div v-if="listCreated" class="border-top mt-3 pt-3">
+      <h2 id="send-welcome-email-header" class="bc-header bc-page-site-mailing-list-welcome-email-form-heading" tabindex="-1">
+        Send Welcome Email
+      </h2>
+      <v-row no-gutters>
+        <p class="bc-page-site-mailing-list-text">
+          The Welcome Email tool automatically sends a customizable message by email to all members of your course site, even if the site has not yet been published. For more information, visit <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900">https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900</OutboundLink>.
+        </p>
+      </v-row>
+
+      <div v-if="emailFieldsPresent && !isWelcomeEmailActive" role="alert" class="bc-alert bc-alert-warning">
+        Sending welcome emails is paused until activation.
+      </div>
+
+      <div v-if="alertEmailActivated" role="alert" class="bc-alert bc-alert-success">
+        Welcome email activated.
+      </div>
+
+      <div v-if="emailFieldsPresent" class="bc-page-site-mailing-list-welcome-email-toggle-outer">
+        <label for="welcome-email-activation-toggle" class="bc-page-site-mailing-list-welcome-email-toggle-label">
+          Send email:
+        </label>
+        <div v-if="isWelcomeEmailActive" class="email-status email-status-active toggle-on">
+          Active
+        </div>
+        <div v-if="!isWelcomeEmailActive" class="email-status email-status-paused">
+          Paused
+        </div>
+        <div>
+          <v-btn
+            v-if="!isTogglingEmailActivation"
+            id="welcome-email-activation-toggle"
+            class="pl-1 pr-1"
+            @click="toggleEmailActivation"
+            @keyup.down="toggleEmailActivation"
+          >
+            <span class="status-toggle-label">
+              <fa v-if="isWelcomeEmailActive" icon="toggle-on" class="toggle toggle-on"></fa>
+              <fa v-if="!isWelcomeEmailActive" icon="toggle-off" class="toggle toggle-off"></fa>
+            </span>
+          </v-btn>
+          <div v-if="isTogglingEmailActivation" class="pl-2">
+            <fa icon="spinner" spin />
+          </div>
         </div>
       </div>
 
-      <div v-if="errorMessages" role="alert" class="bc-alert bc-alert-error">
-        <div v-for="errorMessage in errorMessages" :key="errorMessage">{{ errorMessage }}</div>
+      <div v-if="mailingList.welcomeEmailLastSent" class="bc-page-site-mailing-list-text">
+        <v-btn
+          id="btn-download-sent-message-log"
+          type="button"
+          variant="link"
+          class="p-0"
+          @click="downloadMessageLog"
+        >
+          <fa icon="file-download"></fa>
+          Download sent message log (last updated {{ $moment(mailingList.welcomeEmailLastSent).format('MMM D, YYYY') }})
+        </v-btn>
       </div>
 
-      <div v-if="!errorMessages && listCreated" role="alert" class="bc-alert bc-alert-success">
-        A Mailing List has been created at <strong>{{ mailingList.name }}@{{ mailingList.domain }}</strong>.
-        Messages can now be sent through this address.
-      </div>
-
-      <div v-if="!errorMessages && !listCreated" class="bc-alert">
-        No Mailing List has yet been created for this site.
-      </div>
-
-      <p class="bc-page-site-mailing-list-text">
-        bCourses Mailing Lists allow Teachers, TAs, Lead TAs and Readers to send email to everyone in a bCourses site by
-        giving the site its own email address. Messages sent to this address from the
-        <strong>official berkeley.edu email address</strong>
-        of a Teacher, TA, Lead TA or Reader will be sent to the official email addresses of all site
-        members. Students and people not in the site cannot send messages through Mailing Lists.
-      </p>
-
-      <form v-if="!listCreated" class="bc-canvas-page-form bc-canvas-form" @submit.prevent="createMailingList">
-        <div class="bc-form-actions">
+      <form
+        v-if="isEditingWelcomeEmail"
+        class="bc-canvas-page-form bc-canvas-form bc-page-site-mailing-list-welcome-email-form border-top"
+        @submit.prevent="saveWelcomeEmail"
+      >
+        <v-row no-gutters>
+          <label for="bc-page-site-mailing-list-subject-input" class="bc-page-site-mailing-list-welcome-email-form-heading">
+            Subject
+          </label>
+        </v-row>
+        <v-row no-gutters>
+          <input id="bc-page-site-mailing-list-subject-input" v-model="mailingListSubject" type="text">
+        </v-row>
+        <v-row no-gutters>
+          <label for="bc-page-site-mailing-list-message-input" class="bc-page-site-mailing-list-welcome-email-form-heading">
+            Message
+          </label>
+        </v-row>
+        <v-row no-gutters>
+          <div id="bc-page-site-mailing-list-message-input" role="textbox" class="w-100 mb-4">
+            <ckeditor
+              v-model="mailingListMessage"
+              class="w-100"
+              :config="editorConfig"
+              :editor="editor"
+            ></ckeditor>
+          </div>
+        </v-row>
+        <v-row no-gutters>
           <button
-            id="btn-create-mailing-list"
+            id="btn-save-welcome-email"
             type="submit"
             class="bc-canvas-button bc-canvas-button-primary"
             aria-controls="cc-page-reader-alert"
-            :disabled="errorMessages"
+            :disabled="!mailingListSubject || !mailingListMessage"
           >
-            <span v-if="!isCreating">Create mailing list</span>
-            <span v-if="isCreating"><fa icon="spinner" class="mr-2 fa-spin"></fa> Creating ...</span>
+            <span v-if="!isSavingWelcomeEmail">Save welcome email</span>
+            <span v-if="isSavingWelcomeEmail"><fa icon="spinner" class="mr-2 fa-spin"></fa> Saving ...</span>
           </button>
-        </div>
+          <button
+            v-if="emailFieldsPresent"
+            id="btn-cancel-welcome-email-edit"
+            class="bc-canvas-button bc-canvas-button-secondary"
+            type="button"
+            @click="cancelEditMode"
+          >
+            Cancel
+          </button>
+        </v-row>
       </form>
 
-      <div v-if="listCreated" class="border-top mt-3 pt-3">
-        <h2 id="send-welcome-email-header" class="bc-header bc-page-site-mailing-list-welcome-email-form-heading" tabindex="-1">
-          Send Welcome Email
-        </h2>
-        <v-row no-gutters>
-          <p class="bc-page-site-mailing-list-text">
-            The Welcome Email tool automatically sends a customizable message by email to all members of your course site, even if the site has not yet been published. For more information, visit <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900">https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900</OutboundLink>.
-          </p>
-        </v-row>
-
-        <div v-if="emailFieldsPresent && !isWelcomeEmailActive" role="alert" class="bc-alert bc-alert-warning">
-          Sending welcome emails is paused until activation.
-        </div>
-
-        <div v-if="alertEmailActivated" role="alert" class="bc-alert bc-alert-success">
-          Welcome email activated.
-        </div>
-
-        <div v-if="emailFieldsPresent" class="bc-page-site-mailing-list-welcome-email-toggle-outer">
-          <label for="welcome-email-activation-toggle" class="bc-page-site-mailing-list-welcome-email-toggle-label">
-            Send email:
-          </label>
-          <div v-if="isWelcomeEmailActive" class="email-status email-status-active toggle-on">
-            Active
-          </div>
-          <div v-if="!isWelcomeEmailActive" class="email-status email-status-paused">
-            Paused
-          </div>
-          <div>
-            <v-btn
-              v-if="!isTogglingEmailActivation"
-              id="welcome-email-activation-toggle"
-              class="pl-1 pr-1"
-              @click="toggleEmailActivation"
-              @keyup.down="toggleEmailActivation"
-            >
-              <span class="status-toggle-label">
-                <fa v-if="isWelcomeEmailActive" icon="toggle-on" class="toggle toggle-on"></fa>
-                <fa v-if="!isWelcomeEmailActive" icon="toggle-off" class="toggle toggle-off"></fa>
-              </span>
-            </v-btn>
-            <div v-if="isTogglingEmailActivation" class="pl-2">
-              <fa icon="spinner" spin />
-            </div>
+      <div v-if="!isEditingWelcomeEmail" class="border-top mt-3 pt-3">
+        <div class="bc-page-site-mailing-list-welcome-email-field-content">
+          <h3 class="bc-header bc-page-site-mailing-list-welcome-email-field-heading">
+            Subject
+          </h3>
+          <div id="bc-page-site-mailing-list-subject">
+            {{ mailingList.welcomeEmailSubject }}
           </div>
         </div>
-
-        <div v-if="mailingList.welcomeEmailLastSent" class="bc-page-site-mailing-list-text">
+        <div class="bc-page-site-mailing-list-welcome-email-field-content">
+          <h3 class="bc-header bc-page-site-mailing-list-welcome-email-field-heading">
+            Message
+          </h3>
+          <div id="bc-page-site-mailing-list-body" class="bc-page-site-mailing-list-welcome-email-body" v-html="mailingList.welcomeEmailBody"></div>
+        </div>
+        <div class="bc-page-site-mailing-list-welcome-email-field-content">
           <v-btn
-            id="btn-download-sent-message-log"
-            type="button"
+            id="btn-edit-welcome-email"
             variant="link"
             class="p-0"
-            @click="downloadMessageLog"
+            @click="setEditMode"
           >
-            <fa icon="file-download"></fa>
-            Download sent message log (last updated {{ $moment(mailingList.welcomeEmailLastSent).format('MMM D, YYYY') }})
+            Edit welcome email
           </v-btn>
-        </div>
-
-        <form
-          v-if="isEditingWelcomeEmail"
-          class="bc-canvas-page-form bc-canvas-form bc-page-site-mailing-list-welcome-email-form border-top"
-          @submit.prevent="saveWelcomeEmail"
-        >
-          <v-row no-gutters>
-            <label for="bc-page-site-mailing-list-subject-input" class="bc-page-site-mailing-list-welcome-email-form-heading">
-              Subject
-            </label>
-          </v-row>
-          <v-row no-gutters>
-            <input id="bc-page-site-mailing-list-subject-input" v-model="mailingListSubject" type="text">
-          </v-row>
-          <v-row no-gutters>
-            <label for="bc-page-site-mailing-list-message-input" class="bc-page-site-mailing-list-welcome-email-form-heading">
-              Message
-            </label>
-          </v-row>
-          <v-row no-gutters>
-            <div id="bc-page-site-mailing-list-message-input" role="textbox" class="w-100 mb-4">
-              <ckeditor
-                v-model="mailingListMessage"
-                class="w-100"
-                :config="editorConfig"
-                :editor="editor"
-              ></ckeditor>
-            </div>
-          </v-row>
-          <v-row no-gutters>
-            <button
-              id="btn-save-welcome-email"
-              type="submit"
-              class="bc-canvas-button bc-canvas-button-primary"
-              aria-controls="cc-page-reader-alert"
-              :disabled="!mailingListSubject || !mailingListMessage"
-            >
-              <span v-if="!isSavingWelcomeEmail">Save welcome email</span>
-              <span v-if="isSavingWelcomeEmail"><fa icon="spinner" class="mr-2 fa-spin"></fa> Saving ...</span>
-            </button>
-            <button
-              v-if="emailFieldsPresent"
-              id="btn-cancel-welcome-email-edit"
-              class="bc-canvas-button bc-canvas-button-secondary"
-              type="button"
-              @click="cancelEditMode"
-            >
-              Cancel
-            </button>
-          </v-row>
-        </form>
-
-        <div v-if="!isEditingWelcomeEmail" class="border-top mt-3 pt-3">
-          <div class="bc-page-site-mailing-list-welcome-email-field-content">
-            <h3 class="bc-header bc-page-site-mailing-list-welcome-email-field-heading">
-              Subject
-            </h3>
-            <div id="bc-page-site-mailing-list-subject">
-              {{ mailingList.welcomeEmailSubject }}
-            </div>
-          </div>
-          <div class="bc-page-site-mailing-list-welcome-email-field-content">
-            <h3 class="bc-header bc-page-site-mailing-list-welcome-email-field-heading">
-              Message
-            </h3>
-            <div id="bc-page-site-mailing-list-body" class="bc-page-site-mailing-list-welcome-email-body" v-html="mailingList.welcomeEmailBody"></div>
-          </div>
-          <div class="bc-page-site-mailing-list-welcome-email-field-content">
-            <v-btn
-              id="btn-edit-welcome-email"
-              variant="link"
-              class="p-0"
-              @click="setEditMode"
-            >
-              Edit welcome email
-            </v-btn>
-          </div>
         </div>
       </div>
     </div>
@@ -191,6 +187,12 @@
 </template>
 
 <script>
+import CanvasUtils from '@/mixins/CanvasUtils'
+import CKEditor from '@ckeditor/ckeditor5-vue'
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+import Context from '@/mixins/Context'
+import OutboundLink from '@/components/utils/OutboundLink'
+import Utils from '@/mixins/Utils'
 import {
   activateWelcomeEmail,
   createSiteMailingList,
@@ -198,13 +200,7 @@ import {
   downloadWelcomeEmailCsv,
   getSiteMailingList,
   updateWelcomeEmail
-} from '@/api/canvas'
-import CanvasUtils from '@/mixins/CanvasUtils'
-import CKEditor from '@ckeditor/ckeditor5-vue'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
-import Context from '@/mixins/Context'
-import OutboundLink from '@/components/utils/OutboundLink'
-import Utils from '@/mixins/Utils'
+} from '@/api/mailing-lists'
 
 export default {
   name: 'SiteMailingList',
@@ -226,7 +222,6 @@ export default {
     errorMessages: null,
     isCreating: false,
     isEditingWelcomeEmail: false,
-    isLoading: false,
     isSavingWelcomeEmail: false,
     isTogglingEmailActivation: false,
     isWelcomeEmailActive: false,
@@ -239,6 +234,17 @@ export default {
     emailFieldsPresent() {
       return this.mailingList.welcomeEmailBody && this.mailingList.welcomeEmailSubject
     }
+  },
+  created() {
+    this.$loading()
+    this.getCanvasCourseId()
+    getSiteMailingList(this.canvasCourseId).then(
+      data => {
+        this.updateDisplay(data)
+        this.$ready()
+      },
+      this.$errorHandler
+    )
   },
   methods: {
     cancelEditMode() {
@@ -261,15 +267,6 @@ export default {
     downloadMessageLog() {
       this.$announcer.polite('Downloading message log')
       downloadWelcomeEmailCsv(this.canvasCourseId)
-    },
-    getMailingList() {
-      return getSiteMailingList(this.canvasCourseId).then(
-        response => {
-          this.updateDisplay(response)
-          this.$ready()
-        },
-        this.$errorHandler
-      )
     },
     saveWelcomeEmail() {
       this.$announcer.polite('Saving welcome email')
@@ -315,11 +312,6 @@ export default {
       this.isCreating = false
       this.isLoading = false
     }
-  },
-  created() {
-    this.isLoading = true
-    this.getCanvasCourseId()
-    this.getMailingList()
   }
 }
 </script>

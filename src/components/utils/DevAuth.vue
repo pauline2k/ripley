@@ -58,7 +58,7 @@ export default {
             if (data.isAuthenticated) {
               useContextStore().setCurrentUser(data)
               this.$announcer.polite('You are logged in.')
-              this.$router.push({path: data.isAdmin ? '/jobs' : '/welcome'})
+              this.$router.push({path: '/welcome'})
             } else {
               const message = this.$_.get(data, 'error') || this.$_.get(data, 'message') || 'Authentication failed'
               this.reportError(message)
@@ -76,10 +76,8 @@ export default {
     },
     reportError(message, putFocus='basic-auth-uid') {
       this.error = this.$_.get(message, 'message')
-      if (this.error) {
-        this.$announcer.polite(this.error)
-        this.$putFocusNextTick(putFocus)
-      }
+      this.$announcer.polite(this.error)
+      this.$putFocusNextTick(putFocus)
     }
   }
 }

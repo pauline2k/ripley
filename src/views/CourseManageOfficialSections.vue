@@ -1,7 +1,5 @@
 <template>
   <div class="bc-canvas-application bc-page-course-official-sections">
-    <div v-if="!feedFetched" class="cc-spinner"></div>
-
     <div v-if="feedFetched && !displayError">
       <div v-if="currentWorkflowStep === 'staging'">
         <MaintenanceNotice course-action-verb="site is updated" />
@@ -253,7 +251,6 @@ export default {
     feedFetched: false,
     isAdmin: false,
     isCourseCreator: false,
-    isLoading: false,
     isTeacher: false,
     jobStatus: null,
     jobStatusMessage: '',
@@ -309,7 +306,7 @@ export default {
       section.parentClass.collapsed = false
     },
     fetchFeed() {
-      this.isLoading = true
+      this.$loading()
       getCourseSections(this.canvasCourseId).then(
         response => {
           this.percentCompleteRounded = null
