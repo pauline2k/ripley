@@ -118,10 +118,12 @@ export default {
   },
   methods: {
     goCreateCourseSite() {
-      this.$router.push({path: this.isInIframe ? '/canvas/embedded/create_course_site' : '/canvas/create_course_site'})
+      const path = this.isInIframe ? '/lti/create_course_site' : '/create_course_site'
+      this.$router.push({path})
     },
     goCreateProjectSite() {
-      this.$router.push({path: this.isInIframe ? '/canvas/embedded/create_project_site' : '/canvas/create_project_site'})
+      const path = this.isInIframe ? '/lti/create_project_site' : '/create_project_site'
+      this.$router.push({path})
     }
   }
 }

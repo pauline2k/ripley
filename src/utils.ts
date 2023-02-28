@@ -5,7 +5,7 @@ import {useContextStore} from '@/stores/context'
 export function axiosErrorHandler(app: any, error: any) {
   const status = _.get(error, 'response.status')
   const message = useContextStore().currentUser.isAuthenticated && (!status || status >= 400)
-    ? _.get(error, 'response.data.error') || _.get(error, 'response.data.message') || error.message
+    ? _.get(error, 'response.data.error') || _.get(error, 'response.data.message') || _.get(error, 'message')
     : 'Your session has expired'
   useContextStore().setApplicationState(status, message)
 }

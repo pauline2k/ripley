@@ -6,15 +6,27 @@
           <BuildSummary />
         </div>
         <div class="float-right mr-3 text-body-2" cols="6">
-          <span v-if="currentUser.isAuthenticated">
-            <v-btn
-              id="log-out"
-              variant="plain"
-              @click="logOut"
-            >
-              Log out
-            </v-btn>
-          </span>
+          <v-menu v-if="currentUser.isAuthenticated">
+            <template #activator="{ props }">
+              <v-btn
+                color="primary"
+                v-bind="props"
+              >
+                {{ currentUser.firstName }}
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item>
+                <v-btn
+                  id="log-out"
+                  variant="plain"
+                  @click="logOut"
+                >
+                  Log out
+                </v-btn>
+              </v-list-item>
+            </v-list>
+          </v-menu>
           <span v-if="!currentUser.isAuthenticated">
             Berkeley &copy; {{ new Date().getFullYear() }} UC Regents
           </span>

@@ -1,9 +1,10 @@
 <template>
   <div class="align-center d-flex">
     <div class="pr-2">
-      <a class="text-decoration-none" href="/" title="Link to home">
+      <router-link class="text-decoration-none" to="/">
+        <span class="sr-only">Home</span>
         <v-icon color="primary" icon="mdi-alien" size="large" />
-      </a>
+      </router-link>
     </div>
     <div>
       <span class="font-weight-bold text-body-1">

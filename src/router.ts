@@ -37,75 +37,76 @@ const routes:RouteRecordRaw[] = [
     path: '/',
   },
   {
+    beforeEnter: auth.requiresAuthenticated,
     component: BaseStandalone,
-    path: '/canvas',
+    path: '/',
     children: [
       {
         component: CourseAddUser,
-        path: '/canvas/course_add_user/:id',
+        path: '/add_user/:id',
         meta: {
           title: 'Find a User to Add'
         }
       },
       {
         component: CourseGradeExport,
-        path: '/canvas/course_grade_export/:id',
+        path: '/export_grade/:id',
         meta: {
           title: 'E-Grade Export'
         }
       },
       {
         component: CourseManageOfficialSections,
-        path: '/canvas/course_manage_official_sections/:id',
+        path: '/manage_official_sections/:id',
         meta: {
           title: 'Official Sections'
         }
       },
       {
         component: Roster,
-        path: '/canvas/rosters/:id',
+        path: '/roster/:id',
         meta: {
           title: 'bCourses Roster Photos'
         }
       },
       {
         component: SiteCreation,
-        path: '/canvas/site_creation',
+        path: '/create_site',
         meta: {
           title: 'bCourses Site Creation'
         }
       },
       {
         component: CreateCourseSite,
-        path: '/canvas/create_course_site',
+        path: '/create_course_site',
         meta: {
           title: 'Create a Course Site'
         }
       },
       {
         component: CreateProjectSite,
-        path: '/canvas/create_project_site',
+        path: '/create_project_site',
         meta: {
           title: 'Create a Project Site'
         }
       },
       {
         component: SiteMailingList,
-        path: '/canvas/site_mailing_list/:id',
+        path: '/mailing_list/:id',
         meta: {
           title: 'bCourses Mailing List'
         }
       },
       {
         component: SiteMailingLists,
-        path: '/canvas/site_mailing_lists',
+        path: '/mailing_lists',
         meta: {
           title: 'bCourses Site Mailing Lists'
         }
       },
       {
         component: UserProvision,
-        path: '/canvas/user_provision',
+        path: '/provision_user',
         meta: {
           title: 'bCourses User Provision'
         }
@@ -113,48 +114,49 @@ const routes:RouteRecordRaw[] = [
     ]
   },
   {
+    beforeEnter: auth.requiresAuthenticated,
     component: BaseLTI,
-    path: '/canvas/embedded',
+    path: '/lti',
     children: [
       {
         component: CourseAddUser,
-        path: '/canvas/embedded/course_add_user'
+        path: '/add_user'
       },
       {
         component: CourseGradeExport,
-        path: '/canvas/embedded/course_grade_export'
+        path: '/export_grade'
       },
       {
         component: CourseManageOfficialSections,
-        path: '/canvas/embedded/course_manage_official_sections'
+        path: '/manage_official_sections'
       },
       {
         component: CreateCourseSite,
-        path: '/canvas/embedded/create_course_site'
+        path: '/create_course_site'
       },
       {
         component: CreateProjectSite,
-        path: '/canvas/embedded/create_project_site'
+        path: '/create_project_site'
       },
       {
         component: Roster,
-        path: '/canvas/embedded/rosters'
+        path: '/roster'
       },
       {
         component: SiteCreation,
-        path: '/canvas/embedded/site_creation'
+        path: '/create_site'
       },
       {
         component: SiteMailingList,
-        path: '/canvas/embedded/site_mailing_list'
+        path: '/mailing_list'
       },
       {
         component: SiteMailingLists,
-        path: '/canvas/embedded/site_mailing_lists'
+        path: '/mailing_lists'
       },
       {
         component: UserProvision,
-        path: '/canvas/embedded/user_provision'
+        path: '/provision_user'
       }
     ]
   },
@@ -178,7 +180,7 @@ const routes:RouteRecordRaw[] = [
   {
     beforeEnter: () => useContextStore().setApplicationState(404),
     component: NotFound,
-    path: '/:pathMatch(.*)',
+    path: '/:pathMatch(.*)'
   }
 ]
 
