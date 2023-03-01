@@ -22,6 +22,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+import json
 
 from flask import current_app as app
 from flask_login import UserMixin
@@ -35,7 +36,10 @@ class User(UserMixin):
     # We will lazy-load canvas_user_id.
     __canvas_user_id = None
 
-    def __init__(self, uid=None, canvas_course_id=None):
+    def __init__(self, serialized_composite_key=None):
+        composite_key = json.loads(serialized_composite_key) if serialized_composite_key else {}
+        uid = composite_key.get('uid', None)
+        canvas_course_id = composite_key.get('canvas_course_id', None)
         if uid:
             try:
                 uid = str(int(uid))
@@ -62,9 +66,9 @@ class User(UserMixin):
         return self._lazy_load_canvas_user_id()
 
     def get_id(self):
-        # Type 'int' is required for Flask-login user_id
-        return int(self.user['uid'])
+        return self.get_serialized_composite_key(canvas_course_id=self.canvas_course_id, uid=self.uid)
 
+    @property
     def uid(self):
         return self.user['uid']
 
@@ -98,13 +102,22 @@ class User(UserMixin):
     def to_api_json(self):
         return self.user
 
+    @classmethod
+    def get_serialized_composite_key(cls, canvas_course_id, uid):
+        return json.dumps({
+            'canvas_course_id': canvas_course_id,
+            'uid': uid,
+        })
+
     def _load_user(self, canvas_course_id=None, uid=None):
         user = UserAuth.find_by_uid(uid) if uid else None
         calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
         expired = calnet_profile.get('isExpiredPerLdap', True)
         is_active = not expired and (user.active if user else True)
         is_admin = is_active and (user.is_superuser if user else False)
-        affiliations = set(calnet_profile.get('affiliations', []))
+
+        affiliations = calnet_profile.get('affiliations', []) or []
+        affiliations = set(affiliations if calnet_profile else [])
         is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
         is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
         return {
