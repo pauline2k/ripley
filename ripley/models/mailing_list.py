@@ -56,7 +56,7 @@ class MailingList(Base):
         mailing_list = cls.query.filter_by(canvas_site_id=canvas_site_id).first()
         if not mailing_list:
             mailing_list = cls(canvas_site_id=canvas_site_id)
-            mailing_list.initalize()
+            mailing_list.initialize()
         return mailing_list
 
     @classmethod
@@ -66,7 +66,7 @@ class MailingList(Base):
             raise ValueError(f'List with id {canvas_site_id} already exists')
 
         mailing_list = cls(canvas_site_id=canvas_site_id)
-        mailing_list.initalize()
+        mailing_list.initialize()
         # Admins can optionally override the mailing list name.
         if list_name:
             mailing_list.list_name = list_name
@@ -75,7 +75,7 @@ class MailingList(Base):
         std_commit()
         return mailing_list
 
-    def initalize(self):
+    def initialize(self):
         self.canvas_site = canvas.get_course(self.canvas_site_id)
         if self.canvas_site:
             self.canvas_site_name = self.canvas_site.name.strip()
@@ -94,14 +94,13 @@ class MailingList(Base):
             else:
                 self.list_name += '-list'
 
-    def to_json(self):
-        term = BerkeleyTerm.from_canvas_sis_term_id(self.canvas_site.term['sis_term_id'])
+    def to_api_json(self):
         feed = {
             'canvasSite': {
                 'canvasCourseId': self.canvas_site_id,
-                'sisCourseId': self.canvas_site.sis_course_id,
+                'sisCourseId': self.canvas_site.sis_course_id if self.canvas_site else None,
                 'name': self.canvas_site_name,
-                'courseCode': self.canvas_site.course_code,
+                'courseCode': self.canvas_site.course_code if self.canvas_site else None,
                 'url': f"{app.config['CANVAS_API_URL']}/courses/{self.canvas_site_id}",
             },
             'mailingList': {
@@ -112,13 +111,15 @@ class MailingList(Base):
             },
         }
 
-        term = BerkeleyTerm.from_canvas_sis_term_id(self.canvas_site.term['sis_term_id'])
-        if term:
-            feed['canvasSite']['term'] = {
-                'term_yr': term.year,
-                'term_cd': term.season,
-                'name': term.to_english(),
-            }
+        if self.canvas_site:
+            canvas_sis_term_id = self.canvas_site.term['sis_term_id']
+            term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
+            if term:
+                feed['canvasSite']['term'] = {
+                    'term_yr': term.year,
+                    'term_cd': term.season,
+                    'name': term.to_english(),
+                }
 
         if not self.id:
             feed['mailingList']['state'] = 'unregistered'

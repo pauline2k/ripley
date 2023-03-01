@@ -1,5 +1,16 @@
 <template>
-  <div class="w-50">
+  <div class="w-50 pt-5">
+    <v-text-field
+      id="basic-auth-canvas-course-id"
+      v-model="canvasCourseId"
+      :aria-invalid="!!error"
+      class="mb-1 text-field"
+      hide-details
+      label="Canvas Course ID"
+      required
+      variant="outlined"
+      @keydown.enter="devAuth"
+    />
     <v-text-field
       id="basic-auth-uid"
       v-model="uid"
@@ -26,6 +37,7 @@
     />
     <v-btn
       id="basic-auth-submit-button"
+      :disabled="disableSubmit"
       @click="devAuth"
     >
       Dev Auth
@@ -43,17 +55,24 @@ export default {
   name: 'DevAuth',
   mixins: [Context, Utils],
   data: () => ({
+    canvasCourseId: undefined,
     error: undefined,
-    uid: undefined,
     password: undefined,
-    showError: false
+    showError: false,
+    uid: undefined
   }),
+  computed: {
+    disableSubmit() {
+      return !this.$_.trim(this.canvasCourseId) || !this.$_.trim(this.password) || !this.$_.trim(this.uid)
+    }
+  },
   methods: {
     devAuth() {
-      let uid = this.$_.trim(this.uid)
-      let password = this.$_.trim(this.password)
-      if (uid && password) {
-        devAuthLogIn(uid, password).then(
+      const canvasCourseId = this.$_.trim(this.canvasCourseId)
+      const password = this.$_.trim(this.password)
+      const uid = this.$_.trim(this.uid)
+      if (canvasCourseId && uid && password) {
+        devAuthLogIn(canvasCourseId, uid, password).then(
           data => {
             if (data.isAuthenticated) {
               useContextStore().setCurrentUser(data)

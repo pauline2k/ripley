@@ -73,9 +73,9 @@ def register_routes(app):
     def handle_exception(e):
         subject = str(e)
         if isinstance(e, HTTPException):
-            app.logger.warn(f'HTTPException: {subject} (Ops will not be notified)')
+            app.logger.warn(f"""\n\n{type(e).__name__} {subject}\n{traceback.format_exc()}\n""")
         else:
-            message = f'{subject}\n\n<pre>{traceback.format_exc()}</pre>'
+            message = f'{e}\n\n<pre>{traceback.format_exc()}</pre>'
             app.logger.warn(message)
             # # TODO? Notify Ripley Ops teams
             # send_system_error_email(
@@ -123,4 +123,6 @@ def _user_loader(user_id=None):
     from ripley.models.user import User
 
     app.logger.info(f'Loading user UID={user_id}')
-    return User(user_id)
+    params = request.form or request.args or (request.get_json() if request.content_type == 'application/json' else {})
+    canvas_course_id = params.get('canvasCourseId') or params.get('canvas_course_id')
+    return User(uid=user_id, canvas_course_id=canvas_course_id)

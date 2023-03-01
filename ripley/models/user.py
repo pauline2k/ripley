@@ -32,48 +32,41 @@ from ripley.models.user_auth import UserAuth
 
 class User(UserMixin):
 
-    def __init__(self, uid=None, canvas_api_domain=None):
+    # We will lazy-load canvas_user_id.
+    __canvas_user_id = None
+
+    def __init__(self, uid=None, canvas_course_id=None):
         if uid:
             try:
-                self.uid = str(int(uid))
+                uid = str(int(uid))
             except ValueError:
-                self.uid = None
-        else:
-            self.uid = None
-        self.user = self._load_user(self.uid)
+                pass
+        self.user = self._load_user(canvas_course_id=canvas_course_id, uid=uid)
 
     def __repr__(self):
         return f"""<User
-                    canvas_api_domain={self.canvas_api_domain},
+                    canvas_course_id={self.user['canvasCourseId']},
                     email_address={self.email_address},
                     is_active={self.is_active},
                     is_admin={self.is_admin},
                     is_anonymous={self.is_anonymous},
                     is_authenticated={self.is_authenticated},
-                    uid={self.uid},
+                    uid={self.user['uid']},
                 """
 
-    # TODO We currently have a lot of Squiggy-derived code expecting a Canvas domain in the session cookie, but may not need it.
-    def canvas_api_domain(self):
-        return app.config['CANVAS_API_URL']
+    @property
+    def canvas_course_id(self):
+        return self.user['canvasCourseId']
 
     def canvas_user_id(self):
-        if not self.uid:
-            return None
-        # Lazy load.
-        if 'canvasUserId' not in self.user:
-            canvas_user_profile = canvas.get_sis_user_profile(self.uid)
-            if canvas_user_profile:
-                self.user['canvasUserId'] = canvas_user_profile.id
-        if 'canvasUserId' in self.user:
-            return self.user['canvasUserId']
+        return self._lazy_load_canvas_user_id()
 
     def get_id(self):
         # Type 'int' is required for Flask-login user_id
-        return int(self.uid)
+        return int(self.user['uid'])
 
     def uid(self):
-        return self.uid
+        return self.user['uid']
 
     @property
     def email_address(self):
@@ -95,10 +88,6 @@ class User(UserMixin):
     def is_admin(self):
         return self.user['isAdmin']
 
-    @classmethod
-    def load_user(cls, user_id):
-        return cls._load_user(uid=user_id)
-
     def logout(self):
         self.user = self._load_user()
 
@@ -109,8 +98,7 @@ class User(UserMixin):
     def to_api_json(self):
         return self.user
 
-    @classmethod
-    def _load_user(cls, uid=None):
+    def _load_user(self, canvas_course_id=None, uid=None):
         user = UserAuth.find_by_uid(uid) if uid else None
         calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
         expired = calnet_profile.get('isExpiredPerLdap', True)
@@ -123,6 +111,9 @@ class User(UserMixin):
             **calnet_profile,
             **{
                 'id': uid,
+                'canvasCourseId': canvas_course_id,
+                # Callable properties (eg, methods) will be invoked by custom serializer: LazyLoadingEncoder in http.py.
+                'canvasUserId': self._lazy_load_canvas_user_id,
                 'emailAddress': calnet_profile.get('email'),
                 'isActive': is_active,
                 'isAdmin': is_admin,
@@ -134,3 +125,10 @@ class User(UserMixin):
                 'uid': uid,
             },
         }
+
+    def _lazy_load_canvas_user_id(self):
+        if self.uid and self.__canvas_user_id is None:
+            canvas_user_profile = canvas.get_sis_user_profile(self.uid)
+            if canvas_user_profile:
+                self.__canvas_user_id = canvas_user_profile.id
+        return self.__canvas_user_id

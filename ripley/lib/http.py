@@ -37,5 +37,14 @@ def add_param_to_url(url, param):
 
 
 def tolerant_jsonify(obj, status=200, **kwargs):
-    content = json.dumps(obj, ignore_nan=True, separators=(',', ':'), **kwargs)
+    class LazyLoadingEncoder(json.JSONEncoder):
+        def default(self, value):
+            return json.JSONEncoder.encode(self, value() if callable(value) else value)
+    content = json.dumps(
+        obj,
+        cls=LazyLoadingEncoder,
+        ignore_nan=True,
+        separators=(',', ':'),
+        **kwargs,
+    )
     return Response(content, mimetype='application/json', status=status)

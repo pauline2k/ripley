@@ -77,10 +77,6 @@ def start_login_session(user, redirect_path=None):
         return abort(400)
     if authenticated:
         app.logger.info('Success!')
-        if redirect_path:
-            response = redirect(redirect_path)
-        else:
-            response = tolerant_jsonify(current_user.to_api_json())
-        return response
+        return redirect(redirect_path) if redirect_path else tolerant_jsonify(current_user.to_api_json())
     else:
         return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)

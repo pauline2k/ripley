@@ -34,7 +34,7 @@ from ripley.models.mailing_list import MailingList
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def mailing_lists(canvas_course_id):
     m = MailingList.find_or_initialize(canvas_course_id)
-    return tolerant_jsonify(m)
+    return tolerant_jsonify(m.to_api_json())
 
 
 @app.route('/api/mailing_lists/<canvas_course_id>/create', methods=['POST'])

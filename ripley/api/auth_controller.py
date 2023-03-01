@@ -62,13 +62,14 @@ def cas_login_url():
 def dev_auth_login():
     if app.config['DEV_AUTH_ENABLED']:
         params = request.get_json() or {}
+        canvas_course_id = params.get('canvasCourseId')
         uid = params.get('uid')
         app.logger.debug(f'Dev-auth login attempt by UID {uid}')
         password = params.get('password')
         if password != app.config['DEV_AUTH_PASSWORD']:
             app.logger.debug(f'UID {uid} failed dev-auth login: bad password.')
             return tolerant_jsonify({'message': 'Invalid credentials'}, 401)
-        user = User(uid)
+        user = User(canvas_course_id=canvas_course_id, uid=uid)
         if not user.is_active:
             msg = f'Sorry, {uid} is not authorized to use this tool.'
             return tolerant_jsonify({'message': msg}, 403)
