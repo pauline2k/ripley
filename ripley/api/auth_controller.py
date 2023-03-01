@@ -101,15 +101,17 @@ def lti_launch():
         launch_data_storage = FlaskCacheDataStorage(cache)
 
         message_launch = MessageLaunch(flask_request, tool_conf, launch_data_storage=launch_data_storage)
-        message_launch_data = message_launch.get_launch_data()
-        custom_fields = message_launch_data.get('https://purl.imsglobal.org/spec/lti/claim/custom', {})
-        uid = custom_fields.get('canvas_user_login_id')
-        canvas_api_domain = custom_fields.get('canvas_api_domain')
+        launch_data = message_launch.get_launch_data()
+        canvas_course_id = _get_custom_param(launch_data, 'canvas_course_id')
+        canvas_masquerading_user_id = _get_custom_param(launch_data, 'canvas_masquerading_user_id')
+        canvas_user_id = _get_custom_param(launch_data, 'canvas_user_id')
+        uid = _get_custom_param(launch_data, 'canvas_user_login_id')
+        masquerade = f'Canvas ID {canvas_masquerading_user_id} acting as ' if canvas_masquerading_user_id else ''
+        course_context = f', course id {canvas_course_id}' if canvas_course_id else ''
 
-        user = User(uid, canvas_api_domain)
-        app.logger.info(f"""Logged in during LTI launch as user {user}""")
-        params = f'canvasApiDomain={canvas_api_domain}'
-        return start_login_session(user, redirect_path=f'/welcome?{params}')
+        user = User(uid)
+        app.logger.info(f"""Logged in during LTI launch as {masquerade}UID {uid}, Canvas ID {canvas_user_id}{course_context}""")
+        return start_login_session(user, redirect_path='/welcome')
     except Exception as e:
         app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
         raise InternalServerError({'message': str(e)})
@@ -176,3 +178,8 @@ def _cas_client(target_url=None):
     if target_url:
         service_url = service_url + '?' + urlencode({'url': target_url})
     return cas.CASClientV3(server_url=cas_server, service_url=service_url)
+
+
+def _get_custom_param(lti_data, key):
+    value = lti_data.get('https://purl.imsglobal.org/spec/lti/claim/custom', {}).get(key)
+    return value if value and value.isnumeric() else None
