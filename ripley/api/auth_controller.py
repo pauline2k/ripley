@@ -72,9 +72,9 @@ def dev_auth_login():
         if not user.is_active:
             msg = f'Sorry, {uid} is not authorized to use this tool.'
             return tolerant_jsonify({'message': msg}, 403)
-        api_json = start_login_session(user)
-        app.logger.debug(f'Successful dev-auth login for {api_json}.')
-        return api_json
+        response = start_login_session(user)
+        app.logger.debug(f'Successful dev-auth login for UID {user.uid}.')
+        return response
     else:
         app.logger.debug('Dev-auth attempt when DEV_AUTH_ENABLED == False.')
         raise ResourceNotFoundError('Unknown path')
