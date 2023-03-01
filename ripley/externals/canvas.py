@@ -129,7 +129,8 @@ def get_external_tools(obj_type, obj_id=None):
 
 
 def get_sis_user_profile(uid):
-    return get_user(f'sis_login_id:{uid}').get_profile()
+    user = get_user(f'sis_login_id:{uid}')
+    return user.get_profile() if user else None
 
 
 def get_tabs(course_id):

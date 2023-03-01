@@ -1,9 +1,9 @@
 import axios from 'axios'
 import utils from './api-utils'
 
-export function devAuthLogIn(uid: string, password: string) {
+export function devAuthLogIn(canvasCourseId: number, uid: string, password: string) {
   const url = `${utils.apiBaseUrl()}/api/auth/dev_auth`
-  return axios.post(url, {password, uid})
+  return axios.post(url, {canvasCourseId, password, uid})
 }
 
 export function getCasLoginURL() {

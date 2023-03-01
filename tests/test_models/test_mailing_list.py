@@ -35,7 +35,7 @@ class TestMailingList:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {'course': ['get_by_id']}, m)
             mailing_list = MailingList.find_or_initialize('1234567')
-            feed = mailing_list.to_json()
+            feed = mailing_list.to_api_json()
 
             assert feed['canvasSite']['canvasCourseId'] == '1234567'
             assert feed['canvasSite']['sisCourseId'] == 'CRS:ASTRON-218-2023-B'
@@ -55,7 +55,7 @@ class TestMailingList:
             register_canvas_uris(app, {'course': ['get_by_id']}, m)
 
             mailing_list = MailingList.create('1234567')
-            feed = mailing_list.to_json()
+            feed = mailing_list.to_api_json()
 
             assert feed['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
             assert feed['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
