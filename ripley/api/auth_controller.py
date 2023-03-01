@@ -69,7 +69,8 @@ def dev_auth_login():
         if password != app.config['DEV_AUTH_PASSWORD']:
             app.logger.debug(f'UID {uid} failed dev-auth login: bad password.')
             return tolerant_jsonify({'message': 'Invalid credentials'}, 401)
-        user = User(canvas_course_id=canvas_course_id, uid=uid)
+        user_id = User.get_serialized_composite_key(canvas_course_id=canvas_course_id, uid=uid)
+        user = User(user_id)
         if not user.is_active:
             msg = f'Sorry, {uid} is not authorized to use this tool.'
             return tolerant_jsonify({'message': msg}, 403)
