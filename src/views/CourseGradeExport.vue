@@ -1,7 +1,11 @@
 <template>
   <div class="bc-canvas-application bc-page-course-grade-export">
-    <div v-if="appState === 'initializing'" class="cc-spinner"></div>
-
+    <v-progress-circular
+      v-if="appState === 'initializing'"
+      class="mr-2"
+      color="primary"
+      indeterminate
+    />
     <div v-if="appState === 'error'">
       <div v-if="errorStatus" role="alert">
         <p>
@@ -261,11 +265,19 @@
           </v-col>
         </v-row>
         <div v-if="!jobStatus" class="bc-page-course-grade-export-notice-pending-request">
-          <fa icon="spinner" class="cc-icon fa-spin mr-2" />
+          <v-progress-circular
+            class="mr-2"
+            color="primary"
+            indeterminate
+          />
           Sending preparation request...
         </div>
         <div v-if="jobStatus === 'New'" class="bc-page-course-grade-export-notice-pending-request">
-          <fa icon="spinner" class="cc-icon fa-spin mr-2"></fa>
+          <v-progress-circular
+            class="mr-2"
+            color="primary"
+            indeterminate
+          />
           Preparation request sent. Awaiting processing....
         </div>
         <div v-if="jobStatus">
@@ -282,7 +294,7 @@ import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
 import OutboundLink from '@/components/utils/OutboundLink'
 import ProgressBar from '@/components/bcourses/shared/ProgressBar'
-import {downloadGradeCsv, getCourseUserRoles, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/canvas'
+import {downloadGradeCsv, getCourseUserRoles, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/course'
 
 export default {
   name: 'CourseGradeExport',

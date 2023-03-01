@@ -53,8 +53,12 @@
                 </v-col>
                 <v-col cols="8">
                   <div role="alert" aria-live="polite">
-                    <div v-if="importProcessing" class="cc-spinner">
+                    <div v-if="importProcessing">
                       <span class="sr-only">Processing import</span>
+                      <v-progress-circular
+                        color="primary"
+                        indeterminate
+                      />
                     </div>
                     <div v-if="status === 'error'" class="cc-page-user-provision-feedback">
                       <fa icon="exclamation-circle" class="cc-icon-red mr-2"></fa>

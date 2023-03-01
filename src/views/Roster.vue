@@ -66,7 +66,10 @@
       </v-row>
     </v-container>
     <div v-if="!roster & !error">
-      <div class="cc-spinner"></div>
+      <v-progress-circular
+        color="primary"
+        indeterminate
+      />
       <div aria-live="polite" class="pt-5 text-center w-100" role="alert">
         Downloading rosters. This may take a minute for larger classes.
       </div>
@@ -91,7 +94,7 @@ import CanvasUtils from '@/mixins/CanvasUtils'
 import Context from '@/mixins/Context'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
 import Utils from '@/mixins/Utils'
-import {getCourseUserRoles, getRoster, getRosterCsv} from '@/api/canvas'
+import {getCourseUserRoles, getRoster, getRosterCsv} from '@/api/course'
 
 export default {
   name: 'Roster',

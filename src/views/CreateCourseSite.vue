@@ -1,6 +1,5 @@
 <template>
   <div class="bc-canvas-application bc-page-create-course-site pl-5 pr-5 pt-3 pb-3">
-    <div v-if="isLoading" class="cc-spinner"></div>
     <div v-if="!isLoading && !displayError" class="bc-accessibility-no-outline">
       <div class="d-flex flex-column pt-3">
         <div>
@@ -87,7 +86,7 @@ import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import MonitoringJob from '@/components/bcourses/create/MonitoringJob'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
 import Utils from '@/mixins/Utils'
-import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas'
+import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/course'
 
 export default {
   name: 'CreateCourseSite',

@@ -199,11 +199,19 @@
           Updating Official Sections in Course Site
         </h2>
         <div v-if="jobStatus === 'sendingRequest'" class="bc-page-course-official-sections-pending-request">
-          <fa icon="spinner" class="cc-icon fa-spin mr-2"></fa>
+          <v-progress-circular
+            class="mr-2"
+            color="primary"
+            indeterminate
+          />
           Sending request...
         </div>
         <div v-if="jobStatus === 'New'" class="bc-page-course-official-sections-pending-request">
-          <fa icon="spinner" class="cc-icon fa-spin mr-2"></fa>
+          <v-progress-circular
+            class="mr-2"
+            color="primary"
+            indeterminate
+          />
           Request sent. Awaiting processing....
         </div>
         <div v-if="jobStatus">
@@ -229,7 +237,7 @@ import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import ProgressBar from '@/components/bcourses/shared/ProgressBar'
 
-import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas'
+import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/course'
 
 export default {
   name: 'CourseManageOfficialSections',

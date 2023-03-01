@@ -3,11 +3,19 @@
     <h2 class="cc-visuallyhidden">Course Site Creation</h2>
     <div aria-live="polite">
       <div v-show="!jobStatus" class="bc-page-create-course-site-pending-request">
-        <fa icon="spinner" spin></fa>
+        <v-progress-circular
+          class="mr-2"
+          color="primary"
+          indeterminate
+        />
         Sending request...
       </div>
       <div v-if="jobStatus === 'New'" class="bc-page-create-course-site-pending-request">
-        <fa icon="spinner" spin></fa>
+        <v-progress-circular
+          class="mr-2"
+          color="primary"
+          indeterminate
+        />
         Course provisioning request sent. Awaiting processing....
       </div>
       <div v-if="jobStatus && jobStatus !== 'Completed'">
@@ -44,7 +52,11 @@
       </div>
     </div>
     <div v-if="jobStatus === 'Completed'" :aria-expanded="`${jobStatus === 'Completed'}`">
-      <div class="cc-spinner"></div>
+      <v-progress-circular
+        class="mr-2"
+        color="primary"
+        indeterminate
+      />
       <div class="cc-visuallyhidden" role="alert">
         Redirecting to new course site.
       </div>

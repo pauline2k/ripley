@@ -1,6 +1,5 @@
 <template>
   <div class="bc-canvas-application bc-page-create-project-site">
-    <div v-if="isLoading" class="cc-spinner"></div>
     <div v-if="!isLoading && !error">
       <h1 class="bc-header bc-page-create-project-site-header">Create a Project Site</h1>
       <form class="bg-transparent border-0 bc-canvas-form" @submit.prevent="createProjectSite">
@@ -30,7 +29,14 @@
             type="submit"
           >
             <span v-if="!isCreating">Create a Project Site</span>
-            <span v-if="isCreating"><fa class="mr-1" icon="spinner" spin></fa> Creating...</span>
+            <span v-if="isCreating">
+              <v-progress-circular
+                class="mr-2"
+                color="primary"
+                indeterminate
+              />
+              Creating...
+            </span>
           </button>
           <v-btn
             id="cancel-and-return-to-site-creation"
@@ -55,7 +61,7 @@
 import CanvasErrors from '@/components/bcourses/CanvasErrors'
 import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
-import {createProjectSite} from '@/api/canvas'
+import {createProjectSite} from '@/api/course'
 
 export default {
   name: 'CreateProjectSite',
