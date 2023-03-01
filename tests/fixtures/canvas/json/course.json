@@ -1,4 +1,26 @@
 {
+    "get_by_id": {
+        "method": "GET",
+        "endpoint": "courses/1234567",
+        "data": {
+            "id": 1234567,
+            "course_code": "ASTRON 218",
+            "name": "ASTRON 218: Stellar Dynamics and Galactic Structure",
+            "sis_course_id": "CRS:ASTRON-218-2023-B",
+            "account_id": 1,
+            "root_account_id": 1,
+            "enrollment_term_id": 1,
+            "grading_standard_id": 1,
+            "term": {
+                "id": 5538,
+                "name": "Spring 2023",
+                "sis_term_id": "TERM:2023-B"
+            },
+            "time_zone": "America/Los_Angeles",
+            "workflow_state": "available"
+        },
+        "status_code": 200
+    },
     "get_external_tools_1234567": {
         "method": "GET",
         "endpoint": "courses/1234567/external_tools",

@@ -40,8 +40,18 @@ class BerkeleyTerm:
 
     def to_abbreviation(self):
         season_map = {
+            'A': 'wi',
             'B': 'sp',
             'C': 'su',
             'D': 'fa',
         }
         return season_map[self.season] + self.year[-2:]
+
+    def to_english(self):
+        season_map = {
+            'A': 'Winter',
+            'B': 'Spring',
+            'C': 'Summer',
+            'D': 'Fall',
+        }
+        return season_map[self.season] + ' ' + self.year
