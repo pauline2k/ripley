@@ -22,21 +22,33 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+
 from flask import current_app as app
+from ripley.api.errors import BadRequestError
+from ripley.api.util import canvas_role_required
 from ripley.lib.http import tolerant_jsonify
+from ripley.models.mailing_list import MailingList
 
 
 @app.route('/api/mailing_lists/<canvas_course_id>')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def mailing_lists(canvas_course_id):
-    return tolerant_jsonify([])
+    m = MailingList.find_or_initialize(canvas_course_id)
+    return tolerant_jsonify(m)
 
 
 @app.route('/api/mailing_lists/<canvas_course_id>/create', methods=['POST'])
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def create_mailing_lists(canvas_course_id):
-    return tolerant_jsonify([])
+    try:
+        m = MailingList.create(canvas_course_id)
+    except ValueError as e:
+        raise BadRequestError(e.message)
+    return tolerant_jsonify(m)
 
 
 @app.route('/api/mailing_lists/<canvas_course_id>/populate', methods=['POST'])
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def populate_mailing_lists(canvas_course_id):
     return tolerant_jsonify({
         'canvasSite': {

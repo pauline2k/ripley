@@ -30,6 +30,7 @@ from time import sleep
 from canvasapi import Canvas
 from canvasapi.account import Account
 from canvasapi.course import Course
+from canvasapi.user import User
 from flask import current_app as app
 
 
@@ -67,6 +68,10 @@ def get_course(course_id, api_call=True):
             app.logger.error(f'Failed to retrieve Canvas course (id={course_id})')
             app.logger.exception(e)
         return course
+
+
+def get_course_user(course_id, user_id):
+    return get_course(course_id, api_call=False).get_user(user_id, include='enrollments')
 
 
 def get_csv_report(report_type, download_path=None, term_id=None):
@@ -123,6 +128,10 @@ def get_external_tools(obj_type, obj_id=None):
     return tools
 
 
+def get_sis_user_profile(uid):
+    return get_user(f'sis_login_id:{uid}').get_profile()
+
+
 def get_tabs(course_id):
     tabs = []
     try:
@@ -141,6 +150,20 @@ def get_teachers(course_id):
         app.logger.error(f'Failed to retrieve Canvas teachers (course_id={course_id})')
         app.logger.exception(e)
     return teachers
+
+
+def get_user(user_id, api_call=True):
+    c = _get_canvas()
+    if api_call is False:
+        return User(c._Canvas__requester, {'id': user_id})
+    else:
+        user = None
+        try:
+            user = c.get_user(user_id)
+        except Exception as e:
+            app.logger.error(f'Failed to retrieve Canvas user (id={user_id})')
+            app.logger.exception(e)
+        return user
 
 
 def _get_canvas():

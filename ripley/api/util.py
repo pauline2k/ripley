@@ -22,11 +22,13 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+
 from functools import wraps
 from urllib.parse import urljoin, urlparse
 
 from flask import abort, current_app as app, redirect, request
 from flask_login import current_user, login_user
+from ripley.externals import canvas
 from ripley.lib.http import tolerant_jsonify
 
 
@@ -39,6 +41,27 @@ def admin_required(func):
             app.logger.warning(f'Unauthorized request to {request.path}')
             return app.login_manager.unauthorized()
     return _admin_required
+
+
+def canvas_role_required(*roles):
+    def _canvas_role_required(func):
+        @wraps(func)
+        def wrapper(*args, **kw):
+            authorized = False
+            if current_user and current_user.is_admin:
+                authorized = True
+            elif current_user and current_user.canvas_user_id:
+                canvas_course_user = canvas.get_course_user(current_user.canvas_user_id, args[0])
+                if canvas_course_user and canvas_course_user.enrollments:
+                    if next((e for e in canvas_course_user.enrollments if e['role'] in roles), None):
+                        authorized = True
+            if authorized:
+                return func(*args, **kw)
+            else:
+                app.logger.warning(f'Unauthorized request to {request.path}')
+                return app.login_manager.unauthorized()
+        return wrapper
+    return _canvas_role_required
 
 
 def _is_safe_url(target):
