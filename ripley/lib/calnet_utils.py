@@ -68,6 +68,7 @@ def _calnet_user_api_feed(person):
     first_name = _get('first_name')
     last_name = _get('last_name')
     return {
+        'affiliations': _get('affiliations'),
         'deptCode': _get('primary_dept_code') or _get('dept_code'),
         'email': _get('email'),
         'firstName': first_name,
@@ -81,7 +82,5 @@ def _calnet_user_api_feed(person):
 def _get_attribute(person, key):
     if not person:
         return None
-    elif isinstance(person[key], list):
-        return person[key][0]
     else:
         return person[key]

@@ -103,6 +103,9 @@ class User(UserMixin):
         expired = calnet_profile.get('isExpiredPerLdap', True)
         is_active = not expired and (user.active if user else True)
         is_admin = is_active and (user.is_superuser if user else False)
+        affiliations = set(calnet_profile.get('affiliations', []))
+        is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
+        is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
         return {
             **calnet_profile,
             **{
@@ -113,6 +116,8 @@ class User(UserMixin):
                 'isAdmin': is_admin,
                 'isAnonymous': not is_active,
                 'isAuthenticated': is_active,
+                'isFaculty': is_faculty,
+                'isStaff': is_staff,
                 'name': calnet_profile.get('name') or f'UID {uid}',
                 'uid': uid,
             },
