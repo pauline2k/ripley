@@ -46,7 +46,14 @@
               @click="findSiteMailingList"
             >
               <span v-if="!isProcessing">Get Mailing List</span>
-              <span v-if="isProcessing"><i class="fa fa-spinner fa-spin"></i> Finding ...</span>
+              <span v-if="isProcessing">
+                <v-progress-circular
+                  class="mr-2"
+                  color="primary"
+                  indeterminate
+                />
+                Finding...
+              </span>
             </v-btn>
           </v-col>
         </v-row>
@@ -126,7 +133,14 @@
             @click="populateMailingList"
           >
             <span v-if="!isProcessing">Update membership from course site</span>
-            <span v-if="isProcessing"><fa icon="spinner" class="mr-2 fa-spin"></fa> Updating ...</span>
+            <span v-if="isProcessing">
+              <v-progress-circular
+                class="mr-2"
+                color="primary"
+                indeterminate
+              />
+              Updating...
+            </span>
           </button>
           <button
             id="btn-cancel"

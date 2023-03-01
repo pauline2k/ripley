@@ -26,21 +26,49 @@ from flask import current_app as app
 from ripley.lib.http import tolerant_jsonify
 
 
-@app.route('/api/canvas/external_tools')
-def canvas_external_tools():
+@app.route('/api/course/provision')
+def canvas_course_provision():
     return tolerant_jsonify([])
 
 
-@app.route('/api/canvas/authorizations')
-def canvas_site_creation():
-    return tolerant_jsonify({
-        'authorizations': {
-            'canCreateCourseSite': True,
-            'canCreateProjectSite': True,
-        },
-    })
+@app.route('/api/course/<canvas_course_id>/add_user/course_sections')
+def canvas_course_add_user(canvas_course_id):
+    return tolerant_jsonify([])
 
 
-@app.route('/api/canvas/can_user_create_site')
-def canvas_user_can_create_site():
+@app.route('/api/course/<canvas_course_id>/add_user/search_users')
+def canvas_course_search_users():
+    # TODO: ?searchText=${searchText}&searchType=${searchType}
+    return tolerant_jsonify([])
+
+
+@app.route('/api/course/<canvas_course_id>/provision/sections_feed')
+def canvas_course_provision_sections_feed(canvas_course_id):
+    return tolerant_jsonify([])
+
+
+@app.route('/api/course/provision/status')
+def canvas_course_provision_status():
+    # TODO: ?jobId=${jobId}
+    return tolerant_jsonify([])
+
+
+@app.route('/api/course/<canvas_course_id>/user_roles')
+def canvas_course_user_roles(canvas_course_id):
+    return tolerant_jsonify([])
+
+
+@app.route('/api/course/<canvas_course_id>/egrade_export/options')
+def canvas_egrade_export(canvas_course_id):
+    return tolerant_jsonify([])
+
+
+@app.route('/api/course/<canvas_course_id>/egrade_export/status')
+def canvas_egrade_export_status(canvas_course_id):
+    # TODO: ?jobId=${jobId}
+    return tolerant_jsonify([])
+
+
+@app.route('/api/course/<canvas_course_id>/roster')
+def canvas_rosters(canvas_course_id):
     return tolerant_jsonify([])

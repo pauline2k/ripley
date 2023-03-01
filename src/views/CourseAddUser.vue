@@ -167,7 +167,12 @@
         </v-col>
       </v-row>
 
-      <div v-if="isLoading" class="cc-spinner"></div>
+      <v-progress-circular
+        v-if="isLoading"
+        class="mr-2"
+        color="primary"
+        indeterminate
+      />
 
       <v-row v-if="showUsersArea" no-gutters>
         <h2 id="bc-user-search-results-header" class="cc-visuallyhidden" tabindex="-1">User Search Results</h2>
@@ -271,7 +276,7 @@ import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
-import {addUser, getAddUserCourseSections, getCourseUserRoles, searchUsers} from '@/api/canvas'
+import {addUser, getAddUserCourseSections, getCourseUserRoles, searchUsers} from '@/api/course'
 
 export default {
   name: 'CourseAddUser',

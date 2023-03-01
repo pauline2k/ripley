@@ -40,7 +40,12 @@
           :disabled="errorMessages"
         >
           <span v-if="!isCreating">Create mailing list</span>
-          <span v-if="isCreating"><fa icon="spinner" class="mr-2 fa-spin"></fa> Creating ...</span>
+          <span v-if="isCreating">
+            <v-progress-circular
+              class="mr-2"
+              color="primary"
+              indeterminate
+            /> Creating ...</span>
         </button>
       </div>
     </form>
@@ -87,7 +92,10 @@
             </span>
           </v-btn>
           <div v-if="isTogglingEmailActivation" class="pl-2">
-            <fa icon="spinner" spin />
+            <v-progress-circular
+              color="primary"
+              indeterminate
+            />
           </div>
         </div>
       </div>
@@ -142,7 +150,14 @@
             :disabled="!mailingListSubject || !mailingListMessage"
           >
             <span v-if="!isSavingWelcomeEmail">Save welcome email</span>
-            <span v-if="isSavingWelcomeEmail"><fa icon="spinner" class="mr-2 fa-spin"></fa> Saving ...</span>
+            <span v-if="isSavingWelcomeEmail">
+              <v-progress-circular
+                class="mr-2"
+                color="primary"
+                indeterminate
+              />
+              Saving...
+            </span>
           </button>
           <button
             v-if="emailFieldsPresent"
