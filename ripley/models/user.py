@@ -22,8 +22,10 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+
 from flask import current_app as app
 from flask_login import UserMixin
+from ripley.externals import canvas
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.models.user_auth import UserAuth
 
@@ -38,8 +40,7 @@ class User(UserMixin):
                 self.uid = None
         else:
             self.uid = None
-        self.canvas_api_domain = canvas_api_domain
-        self.user = self._load_user(self.uid, self.canvas_api_domain)
+        self.user = self._load_user(self.uid)
 
     def __repr__(self):
         return f"""<User
@@ -52,8 +53,20 @@ class User(UserMixin):
                     uid={self.uid},
                 """
 
+    # TODO We currently have a lot of Squiggy-derived code expecting a Canvas domain in the session cookie, but may not need it.
     def canvas_api_domain(self):
-        return self.canvas_api_domain
+        return app.config['CANVAS_API_URL']
+
+    def canvas_user_id(self):
+        if not self.uid:
+            return None
+        # Lazy load.
+        if 'canvasUserId' not in self.user:
+            canvas_user_profile = canvas.get_sis_user_profile(self.uid)
+            if canvas_user_profile:
+                self.user['canvasUserId'] = canvas_user_profile.id
+        if 'canvasUserId' in self.user:
+            return self.user['canvasUserId']
 
     def get_id(self):
         # Type 'int' is required for Flask-login user_id
@@ -97,7 +110,7 @@ class User(UserMixin):
         return self.user
 
     @classmethod
-    def _load_user(cls, uid=None, canvas_api_domain=None):
+    def _load_user(cls, uid=None):
         user = UserAuth.find_by_uid(uid) if uid else None
         calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
         expired = calnet_profile.get('isExpiredPerLdap', True)
@@ -110,7 +123,6 @@ class User(UserMixin):
             **calnet_profile,
             **{
                 'id': uid,
-                'canvasApiDomain': canvas_api_domain,
                 'emailAddress': calnet_profile.get('email'),
                 'isActive': is_active,
                 'isAdmin': is_admin,
