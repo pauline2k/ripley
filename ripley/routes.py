@@ -27,8 +27,6 @@ import traceback
 
 from flask import jsonify, make_response, redirect, request, session
 from flask_login import LoginManager
-from ripley.api.util import start_login_session
-from ripley.lib.util import to_int
 from werkzeug.exceptions import HTTPException
 
 
@@ -124,22 +122,5 @@ def _user_loader(user_id=None):
     from flask import current_app as app
     from ripley.models.user import User
 
-    canvas_api_domain = request.headers.get('Ripley-Canvas-Api-Domain')
-    user = User(uid=user_id, canvas_api_domain=canvas_api_domain)
-
-    if canvas_api_domain:
-        if user.is_authenticated and canvas_api_domain != user.canvas_api_domain:
-            app.logger.info(
-                f"""Session data (canvas_api_domain={user.canvas_api_domain})
-                conflicts with headers (canvas_api_domain={canvas_api_domain}). This user session will be terminated.""",
-            )
-            user.logout()
-
-        if not user.is_authenticated:
-            cookie_value = request.cookies.get(f'{canvas_api_domain}')
-            uid = cookie_value and to_int(cookie_value)
-            if uid:
-                user = User(uid, canvas_api_domain)
-                app.logger.info(f'User {uid} loaded from cookie.')
-                start_login_session(user)
-    return user
+    app.logger.info(f'Loading user UID={user_id}')
+    return User(user_id)

@@ -143,16 +143,10 @@ def logout():
     logout_user()
     redirect_url = app.config['VUE_LOCALHOST_BASE_URL'] or request.url_root
     cas_logout_url = _cas_client().get_logout_url(redirect_url=redirect_url)
-    response = tolerant_jsonify({
+    return tolerant_jsonify({
         'casLogoutUrl': cas_logout_url,
         **current_user.to_api_json(),
     })
-    response.delete_cookie(
-        key=f'{current_user.canvas_api_domain}',
-        samesite='None',
-        secure=True,
-    )
-    return response
 
 
 @app.route('/cas/callback', methods=['GET', 'POST'])

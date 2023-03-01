@@ -71,20 +71,16 @@ def _is_safe_url(target):
 
 
 def start_login_session(user, redirect_path=None):
+    app.logger.info(f"""Starting login session for {user.uid}...""")
     authenticated = login_user(user, force=True, remember=True) and current_user.is_authenticated
     if not _is_safe_url(request.args.get('next')):
         return abort(400)
     if authenticated:
+        app.logger.info('Success!')
         if redirect_path:
             response = redirect(redirect_path)
         else:
             response = tolerant_jsonify(current_user.to_api_json())
-        response.set_cookie(
-            key=f'{current_user.canvas_api_domain}',
-            value=str(current_user.uid),
-            samesite='None',
-            secure=True,
-        )
         return response
     else:
         return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)
