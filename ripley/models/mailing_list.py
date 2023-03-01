@@ -25,6 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 import re
 
+from flask import current_app as app
 from ripley import db, std_commit
 from ripley.externals import canvas
 from ripley.lib.berkeley_term import BerkeleyTerm
@@ -48,6 +49,7 @@ class MailingList(Base):
 
     def __init__(self, canvas_site_id):
         self.canvas_site_id = canvas_site_id
+        self.welcome_email_active = False
 
     @classmethod
     def find_or_initialize(cls, canvas_site_id):
@@ -91,3 +93,36 @@ class MailingList(Base):
                 self.list_name += '-' + term.to_abbreviation()
             else:
                 self.list_name += '-list'
+
+    def to_json(self):
+        term = BerkeleyTerm.from_canvas_sis_term_id(self.canvas_site.term['sis_term_id'])
+        feed = {
+            'canvasSite': {
+                'canvasCourseId': self.canvas_site_id,
+                'sisCourseId': self.canvas_site.sis_course_id,
+                'name': self.canvas_site_name,
+                'courseCode': self.canvas_site.course_code,
+                'url': f"{app.config['CANVAS_API_URL']}/courses/{self.canvas_site_id}",
+            },
+            'mailingList': {
+                'name': self.list_name,
+                'welcomeEmailActive': self.welcome_email_active,
+                'welcomeEmailBody': self.welcome_email_body,
+                'welcomeEmailSubject': self.welcome_email_subject,
+            },
+        }
+
+        term = BerkeleyTerm.from_canvas_sis_term_id(self.canvas_site.term['sis_term_id'])
+        if term:
+            feed['canvasSite']['term'] = {
+                'term_yr': term.year,
+                'term_cd': term.season,
+                'name': term.to_english(),
+            }
+
+        if not self.id:
+            feed['mailingList']['state'] = 'unregistered'
+        else:
+            feed['mailingList']['state'] = 'created'
+
+        return feed
