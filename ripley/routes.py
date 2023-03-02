@@ -123,13 +123,9 @@ def _user_loader(user_id=None):
     from flask import current_app as app
     from ripley.models.user import User
 
+    app.logger.info(f'Loading user UID={user_id}')
     composite_key = json.loads(user_id) if user_id else {}
     canvas_course_id = composite_key.get('canvas_course_id', None)
     uid = composite_key.get('uid', None)
-
-    if not canvas_course_id:
-        app.logger.info(f'Loading user UID={user_id}')
-        params = request.form or request.args or (request.get_json() if request.content_type == 'application/json' else {})
-        canvas_course_id = params.get('canvasCourseId') or params.get('canvas_course_id')
     user_id = User.get_serialized_composite_key(canvas_course_id=canvas_course_id, uid=uid)
     return User(user_id)

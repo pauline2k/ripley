@@ -17,3 +17,7 @@ export function getCasLogoutUrl() {
 export function logOut() {
   return utils.get('/api/auth/logout')
 }
+
+export function updateUserSession(canvasCourseId: number) {
+  return axios.post(`${utils.apiBaseUrl()}/api/auth/update_user_session`, {canvasCourseId})
+}
