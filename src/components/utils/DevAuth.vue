@@ -63,7 +63,7 @@ export default {
   }),
   computed: {
     disableSubmit() {
-      return !this.$_.trim(this.canvasCourseId) || !this.$_.trim(this.password) || !this.$_.trim(this.uid)
+      return !this.$_.trim(this.password) || !this.$_.trim(this.uid)
     }
   },
   methods: {
@@ -71,7 +71,7 @@ export default {
       const canvasCourseId = this.$_.trim(this.canvasCourseId)
       const password = this.$_.trim(this.password)
       const uid = this.$_.trim(this.uid)
-      if (canvasCourseId && uid && password) {
+      if (uid && password) {
         devAuthLogIn(canvasCourseId, uid, password).then(
           data => {
             if (data.isAuthenticated) {

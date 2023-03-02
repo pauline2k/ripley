@@ -1,11 +1,26 @@
 <template>
   <v-app-bar flat>
     <v-app-bar-title>
-      <div class="align-center d-flex justify-space-between">
-        <div>
+      <div class="align-center d-flex flex-wrap justify-space-between">
+        <div class="me-auto">
           <BuildSummary />
         </div>
-        <div class="float-right mr-3 text-body-2" cols="6">
+        <div v-if="currentUser.isAuthenticated" class="pr-2">
+          <v-text-field
+            id="update-canvas-course-id"
+            v-model="canvasCourseId"
+            append-inner-icon="mdi-arrow-right-circle-outline"
+            density="compact"
+            :disabled="isUpdatingCanvasCourseId"
+            hide-details
+            label="Canvas Course ID"
+            maxlength="12"
+            style="width: 200px"
+            @click:append-inner="updateCanvasCourseId"
+            @keydown.enter="updateCanvasCourseId"
+          />
+        </div>
+        <div class="float-right mr-3 text-body-2">
           <v-menu v-if="currentUser.isAuthenticated">
             <template #activator="{ props }">
               <v-btn
@@ -40,7 +55,8 @@
 import BuildSummary from '@/components/utils/BuildSummary'
 import Context from '@/mixins/Context'
 import moment from 'moment'
-import {logOut} from '@/api/auth'
+import {logOut, updateUserSession} from '@/api/auth'
+import {useContextStore} from '@/stores/context'
 
 export default {
   name: 'AppBar',
@@ -52,11 +68,29 @@ export default {
       type: Boolean
     }
   },
+  data: () => ({
+    canvasCourseId: undefined,
+    isUpdatingCanvasCourseId: false
+  }),
+  created() {
+    this.canvasCourseId = this.currentUser.canvasCourseId
+  },
   methods: {
     logOut() {
       logOut().then(data => window.location.href = data.casLogoutUrl)
     },
-    moment
+    moment,
+    updateCanvasCourseId() {
+      if (this.currentUser.isAuthenticated) {
+        this.isUpdatingCanvasCourseId = true
+        updateUserSession(this.canvasCourseId).then(data => {
+          useContextStore().setCurrentUser(data)
+          this.canvasCourseId = this.currentUser.canvasCourseId
+          this.isUpdatingCanvasCourseId = false
+          this.$eventHub.emit('current-user-update')
+        })
+      }
+    }
   }
 }
 </script>

@@ -82,6 +82,26 @@ def dev_auth_login():
         raise ResourceNotFoundError('Unknown path')
 
 
+@app.route('/api/auth/update_user_session', methods=['POST'])
+def update_user_session():
+    if app.config['DEV_AUTH_ENABLED'] and current_user.is_authenticated:
+        params = request.get_json() or {}
+        canvas_course_id = params.get('canvasCourseId')
+        uid = current_user.uid
+        if canvas_course_id:
+            logout_user()
+            user_id = User.get_serialized_composite_key(canvas_course_id=canvas_course_id, uid=uid)
+            user = User(user_id)
+            if user.is_active:
+                start_login_session(user)
+                return tolerant_jsonify(current_user.to_api_json())
+            else:
+                msg = f'Sorry, {uid} is not authorized to use this tool.'
+                return tolerant_jsonify({'message': msg}, 403)
+    else:
+        raise ResourceNotFoundError('Unknown path')
+
+
 @app.route('/api/auth/jwks')
 def get_jwk_set():
     lti_config_path = app.config['LTI_CONFIG_PATH']
