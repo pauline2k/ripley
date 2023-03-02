@@ -48,10 +48,10 @@ def canvas_role_required(*roles):
         @wraps(func)
         def wrapper(*args, **kw):
             authorized = False
-            if current_user and current_user.is_admin:
+            if current_user.is_authenticated and current_user.is_admin:
                 authorized = True
-            elif current_user and current_user.canvas_user_id:
-                canvas_course_user = canvas.get_course_user(current_user.canvas_user_id, args[0])
+            elif current_user.is_authenticated and current_user.canvas_user_id:
+                canvas_course_user = canvas.get_course_user(kw['canvas_course_id'], current_user.canvas_user_id)
                 if canvas_course_user and canvas_course_user.enrollments:
                     if next((e for e in canvas_course_user.enrollments if e['role'] in roles), None):
                         authorized = True

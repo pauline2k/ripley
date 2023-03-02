@@ -71,7 +71,11 @@ def get_course(course_id, api_call=True):
 
 
 def get_course_user(course_id, user_id):
-    return get_course(course_id, api_call=False).get_user(user_id, include='enrollments')
+    try:
+        return get_course(course_id, api_call=False).get_user(user_id, include='enrollments')
+    except Exception as e:
+        app.logger.error(f'Failed to retrieve Canvas course user (course_id={course_id}, user_id={user_id})')
+        app.logger.exception(e)
 
 
 def get_csv_report(report_type, download_path=None, term_id=None):
@@ -129,8 +133,12 @@ def get_external_tools(obj_type, obj_id=None):
 
 
 def get_sis_user_profile(uid):
-    user = get_user(f'sis_login_id:{uid}')
-    return user.get_profile() if user else None
+    try:
+        user = get_user(f'sis_login_id:{uid}', api_call=False)
+        return user.get_profile() if user else None
+    except Exception as e:
+        app.logger.error(f'Failed to retrieve Canvas user profile (uid={uid})')
+        app.logger.exception(e)
 
 
 def get_tabs(course_id):

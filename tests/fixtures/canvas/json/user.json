@@ -1,0 +1,62 @@
+{
+    "profile_20000": {
+        "method": "GET",
+        "endpoint": "users/sis_login_id:20000/profile",
+        "data": {
+            "id": 3456789,
+            "name": "Joan Lambert",
+            "short_name": "Joan Lambert",
+            "sortable_name": "Lambert, Joan",
+            "sis_user_id": "UID:20000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": null,
+            "bio": null,
+            "primary_email": "joan.lambert@berkeley.edu",
+            "login_id": "20000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
+    },
+    "profile_30000": {
+        "method": "GET",
+        "endpoint": "users/sis_login_id:30000/profile",
+        "data": {
+            "id": 4567890,
+            "name": "Ash 🤖",
+            "short_name": "Ash 🤖",
+            "sortable_name": "🤖, Ash",
+            "sis_user_id": "UID:30000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": null,
+            "bio": null,
+            "primary_email": "synthetic.ash@berkeley.edu",
+            "login_id": "30000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
+    },
+    "profile_40000": {
+        "method": "GET",
+        "endpoint": "users/sis_login_id:40000/profile",
+        "data": {
+            "id": 5678901,
+            "name": "XO Kane",
+            "short_name": "XO Kane",
+            "sortable_name": "Kane, XO",
+            "sis_user_id": "UID:40000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": null,
+            "bio": null,
+            "primary_email": "xo.kane@berkeley.edu",
+            "login_id": "40000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
+    }
+}

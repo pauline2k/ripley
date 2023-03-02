@@ -44,7 +44,7 @@ def create_mailing_lists(canvas_course_id):
         m = MailingList.create(canvas_course_id)
     except ValueError as e:
         raise BadRequestError(e.message)
-    return tolerant_jsonify(m)
+    return tolerant_jsonify(m.to_api_json())
 
 
 @app.route('/api/mailing_lists/<canvas_course_id>/populate', methods=['POST'])
