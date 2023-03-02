@@ -74,6 +74,9 @@ export default {
   }),
   created() {
     this.canvasCourseId = this.currentUser.canvasCourseId
+    this.eventHub.on('current-user-update', () => {
+      this.canvasCourseId = this.currentUser.canvasCourseId
+    })
   },
   methods: {
     logOut() {
@@ -87,7 +90,7 @@ export default {
           useContextStore().setCurrentUser(data)
           this.canvasCourseId = this.currentUser.canvasCourseId
           this.isUpdatingCanvasCourseId = false
-          this.$eventHub.emit('current-user-update')
+          this.eventHub.emit('current-user-update')
         })
       }
     }

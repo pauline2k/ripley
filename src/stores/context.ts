@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import mitt from 'mitt'
 import {nextTick} from 'vue'
 import {putFocusNextTick} from '@/utils'
 import {defineStore} from 'pinia'
@@ -16,6 +17,7 @@ export const useContextStore = defineStore('context', {
       isAdmin: false,
       isAuthenticated: false
     },
+    eventHub: mitt(),
     isLoading: false
   }),
   actions: {
@@ -57,6 +59,7 @@ export const useContextStore = defineStore('context', {
     },
     setCurrentUser(user: any) {
       this.currentUser = user
+      this.eventHub.emit('current-user-update')
     }
   }
 })

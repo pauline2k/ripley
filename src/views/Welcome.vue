@@ -76,7 +76,7 @@ export default {
   }),
   created() {
     this.loadTools()
-    this.$eventHub.on('current-user-update', () => {
+    this.eventHub.on('current-user-update', () => {
       this.loadTools()
     })
   },

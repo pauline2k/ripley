@@ -10,6 +10,7 @@ export default {
       'applicationState',
       'config',
       'currentUser',
+      'eventHub',
       'isLoading'
     ]),
   },
