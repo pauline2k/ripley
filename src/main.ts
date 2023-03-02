@@ -1,7 +1,6 @@
 import _ from 'lodash'
 import App from './App.vue'
 import axios from 'axios'
-import mitt from 'mitt'
 import moment from 'moment'
 import {createApp} from 'vue'
 import {putFocusNextTick, axiosErrorHandler, initializeAxios} from './utils'
@@ -19,7 +18,6 @@ initializeAxios(app, axios)
 // Global utilities
 app.config.globalProperties.$_ = _
 app.config.globalProperties.$errorHandler = axiosErrorHandler
-app.config.globalProperties.$eventHub = mitt()
 app.config.globalProperties.$loading = (label: string) => useContextStore().loadingStart(label)
 app.config.globalProperties.$moment = moment
 app.config.globalProperties.$ready = (label: string, focusTarget: string) => useContextStore().loadingComplete(label, focusTarget)

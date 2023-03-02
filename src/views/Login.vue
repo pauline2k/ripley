@@ -7,7 +7,7 @@
   >
     <v-row>
       <v-col v-if="!currentUser.isAuthenticated">
-        <div>
+        <div class="py-5">
           <v-btn
             id="cas-auth-submit-button"
             @click="toCasLogin"

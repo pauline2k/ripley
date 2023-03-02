@@ -176,10 +176,12 @@
 </template>
 
 <script>
+import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 
 export default {
   name: 'CourseSectionsTable',
+  mixins: [Context],
   components: {OutboundLink},
   props: {
     mode: {
@@ -254,7 +256,7 @@ export default {
   created() {
     this.selected = this.$_.map(this.$_.filter(this.sections, 'selected'), 'ccn')
     this.updateSectionDisplay()
-    this.$eventHub.on('sections-table-updated', this.updateSectionDisplay)
+    this.eventHub.on('sections-table-updated', this.updateSectionDisplay)
   },
   methods: {
     noCurrentSections() {
@@ -267,15 +269,15 @@ export default {
     },
     stageAdd(section) {
       this.stageAddAction(section)
-      this.$eventHub.emit('sections-table-updated')
+      this.eventHub.emit('sections-table-updated')
     },
     stageUpdate(section) {
       this.stageUpdateAction(section)
-      this.$eventHub.emit('sections-table-updated')
+      this.eventHub.emit('sections-table-updated')
     },
     stageDelete(section) {
       this.stageDeleteAction(section)
-      this.$eventHub.emit('sections-table-updated')
+      this.eventHub.emit('sections-table-updated')
     },
     toggleAll(checked) {
       this.selected = checked ? this.$_.map(this.sections, 'ccn').slice() : []
@@ -288,7 +290,7 @@ export default {
     },
     unstage(section) {
       this.unstageAction(section)
-      this.$eventHub.emit('sections-table-updated')
+      this.eventHub.emit('sections-table-updated')
     }
   }
 }

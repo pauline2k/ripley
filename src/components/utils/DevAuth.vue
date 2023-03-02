@@ -1,40 +1,46 @@
 <template>
-  <div class="w-50 pt-5">
-    <v-text-field
-      id="basic-auth-canvas-course-id"
-      v-model="canvasCourseId"
-      :aria-invalid="!!error"
-      class="mb-1 text-field"
-      hide-details
-      label="Canvas Course ID"
-      required
-      variant="outlined"
-      @keydown.enter="devAuth"
-    />
-    <v-text-field
-      id="basic-auth-uid"
-      v-model="uid"
-      :aria-invalid="!!error"
-      class="mb-1 text-field"
-      hide-details
-      label="UID"
-      required
-      variant="outlined"
-      @keydown.enter="devAuth"
-    />
-    <v-text-field
-      id="basic-auth-password"
-      v-model="password"
-      autocomplete="off"
-      class="mb-1 text-field"
-      :error-messages="error"
-      hide-details
-      label="Password"
-      required
-      type="password"
-      variant="outlined"
-      @keydown.enter="devAuth"
-    />
+  <div class="w-50">
+    <div class="pb-2 pt-5">
+      <v-text-field
+        id="basic-auth-uid"
+        v-model="uid"
+        :aria-invalid="!!error"
+        class="text-field"
+        hide-details
+        label="UID"
+        required
+        variant="outlined"
+        @keydown.enter="devAuth"
+      />
+    </div>
+    <div class="pb-2">
+      <v-text-field
+        id="basic-auth-password"
+        v-model="password"
+        autocomplete="off"
+        class="my-2 text-field"
+        :error-messages="error"
+        hide-details
+        label="Password"
+        required
+        type="password"
+        variant="outlined"
+        @keydown.enter="devAuth"
+      />
+    </div>
+    <div class="pb-4">
+      <v-text-field
+        id="basic-auth-canvas-course-id"
+        v-model="canvasCourseId"
+        :aria-invalid="!!error"
+        class="text-field"
+        hide-details
+        label="Canvas Course ID (optional)"
+        required
+        variant="outlined"
+        @keydown.enter="devAuth"
+      />
+    </div>
     <v-btn
       id="basic-auth-submit-button"
       :disabled="disableSubmit"
@@ -105,6 +111,6 @@ export default {
 <style>
 .text-field {
   background-color: white;
-  opacity: 0.5;
+  opacity: 0.7;
 }
 </style>
