@@ -77,6 +77,7 @@ LOGGING_LEVEL = logging.DEBUG
 LOGGING_PROPAGATION_LEVEL = logging.WARN
 
 REMEMBER_COOKIE_NAME = 'remember_ripley_token'
+REMEMBER_COOKIE_SECURE = True
 
 # Used to encrypt session cookie.
 SECRET_KEY = 'secret'
