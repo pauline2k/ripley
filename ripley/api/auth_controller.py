@@ -131,7 +131,8 @@ def lti_launch():
         masquerade = f'Canvas ID {canvas_masquerading_user_id} acting as ' if canvas_masquerading_user_id else ''
         course_context = f', course id {canvas_course_id}' if canvas_course_id else ''
 
-        user = User(uid)
+        user_id = User.get_serialized_composite_key(canvas_course_id=canvas_course_id, uid=uid)
+        user = User(user_id)
         app.logger.info(f"""Logged in during LTI launch as {masquerade}UID {uid}, Canvas ID {canvas_user_id}{course_context}""")
         return start_login_session(user, redirect_path='/welcome')
     except Exception as e:
@@ -177,7 +178,8 @@ def cas_login():
     target_url = request.args.get('url')
     uid, attributes, proxy_granting_ticket = _cas_client(target_url).verify_ticket(ticket)
     app.logger.info(f'Logged into CAS as user {uid}')
-    user = User(uid)
+    user_id = User.get_serialized_composite_key(canvas_course_id=None, uid=uid)
+    user = User(user_id)
     if user.is_active:
         flash('Logged in successfully.')
         redirect_path = target_url or '/'
