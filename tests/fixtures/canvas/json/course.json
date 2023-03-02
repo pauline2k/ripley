@@ -980,5 +980,57 @@
             }
         ],
         "status_code": 200
+    },
+    "get_user_1234567_4567890": {
+        "method": "GET",
+        "endpoint": "courses/1234567/users/4567890?include=enrollments",
+        "data": {
+            "id": 4567890,
+            "name": "Ash 🤖",
+            "short_name": "Ash 🤖",
+            "sortable_name": "🤖, Ash",
+            "integration_id": null,
+            "login_id": "30000",
+            "enrollments": [
+                {
+                    "user_id": 4567890,
+                    "course_id": 1234567,
+                    "type": "TeacherEnrollment",
+                    "enrollment_state": "active",
+                    "role": "TeacherEnrollment",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "UID:300000",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
+                }
+            ],
+            "email": "synthetic.ash@berkeley.edu"
+        },
+        "status_code": 200
+    },
+    "get_user_1234567_5678901": {
+        "method": "GET",
+        "endpoint": "courses/1234567/users/5678901?include=enrollments",
+        "data": {
+            "id": 5678901,
+            "name": "XO Kane",
+            "short_name": "XO Kane",
+            "sortable_name": "Kane, XO",
+            "integration_id": null,
+            "login_id": "40000",
+            "enrollments": [
+                {
+                    "user_id": 5678901,
+                    "course_id": 1234567,
+                    "type": "StudentEnrollment",
+                    "enrollment_state": "active",
+                    "role": "StudentEnrollment",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "UID:400000",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/5678901"
+                }
+            ],
+            "email": "xo.kane@berkeley.edu"
+        },
+        "status_code": 200
     }
 }

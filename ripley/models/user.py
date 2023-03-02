@@ -62,6 +62,7 @@ class User(UserMixin):
     def canvas_course_id(self):
         return self.user['canvasCourseId']
 
+    @property
     def canvas_user_id(self):
         return self._lazy_load_canvas_user_id()
 
@@ -143,5 +144,5 @@ class User(UserMixin):
         if self.uid and self.__canvas_user_id is None:
             canvas_user_profile = canvas.get_sis_user_profile(self.uid)
             if canvas_user_profile:
-                self.__canvas_user_id = canvas_user_profile.id
+                self.__canvas_user_id = canvas_user_profile['id']
         return self.__canvas_user_id
