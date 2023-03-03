@@ -27,7 +27,7 @@ from functools import wraps
 from urllib.parse import urljoin, urlparse
 
 from flask import abort, current_app as app, redirect, request
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user
 from ripley.externals import canvas
 from ripley.lib.http import tolerant_jsonify
 
@@ -71,12 +71,16 @@ def _is_safe_url(target):
 
 
 def start_login_session(user, redirect_path=None):
-    app.logger.info(f"""Starting login session for {user.uid}...""")
+    app.logger.info(f"""Starting login session for {user.uid}""")
+    if (current_user.is_authenticated and (
+            current_user.uid != user.uid or current_user.canvas_course_id != user.canvas_course_id)):
+        app.logger.info(f'User (UID {user.uid} canvas_course_id {user.canvas_course_id}) does not match existing session \
+            (UID {current_user.uid} canvas_course_id {current_user.canvas_course_id}). Terminating existing session.')
+        logout_user()
     authenticated = login_user(user, force=True, remember=True) and current_user.is_authenticated
     if not _is_safe_url(request.args.get('next')):
         return abort(400)
     if authenticated:
-        app.logger.info('Success!')
         return redirect(redirect_path) if redirect_path else tolerant_jsonify(current_user.to_api_json())
     else:
         return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)
