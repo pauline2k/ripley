@@ -67,8 +67,14 @@ def _calnet_user_api_feed(person):
     uid = _get('uid')
     first_name = _get('first_name')
     last_name = _get('last_name')
+
+    affiliations = _get('affiliations')
+    # If only one affiliation is present, CalNet might return it as a string rather than an array.
+    if isinstance(affiliations, str):
+        affiliations = [affiliations]
+
     return {
-        'affiliations': _get('affiliations'),
+        'affiliations': affiliations,
         'deptCode': _get('primary_dept_code') or _get('dept_code'),
         'email': _get('email'),
         'firstName': first_name,
