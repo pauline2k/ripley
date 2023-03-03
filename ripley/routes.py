@@ -23,7 +23,6 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 import datetime
-from http.cookies import SimpleCookie
 import json
 import traceback
 
@@ -127,10 +126,7 @@ def _set_session(response):
     cookie_name = app.config['REMEMBER_COOKIE_NAME']
     if cookie_name in request.cookies:
         user_id = request.cookies[cookie_name]
-        cookie = SimpleCookie()
-        cookie.load({'user_id': user_id})
-        cookie_value = cookie['user_id'].coded_value
-        response.headers['Set-Cookie'] = f'{cookie_name}={cookie_value}; Secure; HttpOnly; SameSite=None; Path=/;'
+        response.set_cookie(cookie_name, user_id, samesite='None', secure=True)
 
 
 def _user_loader(user_id=None):
