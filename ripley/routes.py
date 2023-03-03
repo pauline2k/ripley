@@ -93,7 +93,8 @@ def register_routes(app):
         session.modified = True
 
     @app.after_request
-    def after_api_request(response):
+    def after_request(response):
+        _set_session(response)
         if app.config['RIPLEY_ENV'] == 'development':
             # In development the response can be shared with requesting code from any local origin.
             response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Ripley-Canvas-Api-Domain'
@@ -117,6 +118,15 @@ def register_routes(app):
             else:
                 app.logger.info(log_message)
         return response
+
+
+def _set_session(response):
+    from flask import current_app as app
+
+    cookie_name = app.config['REMEMBER_COOKIE_NAME']
+    if cookie_name in request.cookies:
+        user_id = request.cookies[cookie_name]
+        response.set_cookie(cookie_name, user_id, samesite='None', secure=True)
 
 
 def _user_loader(user_id=None):
