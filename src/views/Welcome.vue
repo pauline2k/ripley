@@ -14,6 +14,9 @@
             <div v-if="!currentUser.canvasCourseId">
               Certain tools are unavailable because the current user has a null <span class="font-italic">canvas_course_id</span>.
             </div>
+            <div v-if="!currentUser.isAdmin">
+              The current user is not an Admin. Expect authorization errors.
+            </div>
             <v-list density="compact" :lines="false">
               <template v-for="(tool, index) in tools" :key="index">
                 <v-list-item v-if="!tool.disabled">

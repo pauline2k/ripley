@@ -5,43 +5,24 @@
         <div class="me-auto">
           <BuildSummary />
         </div>
-        <div v-if="currentUser.isAuthenticated" class="pr-2">
+        <div v-if="currentUser.isAuthenticated" class="pr-5">
           <v-text-field
             id="update-canvas-course-id"
             v-model="canvasCourseId"
-            append-inner-icon="mdi-arrow-right-circle-outline"
+            :append-inner-icon="isUpdatingCanvasCourseId ? 'mdi-progress-check' : 'mdi-arrow-right-circle-outline'"
             density="compact"
             :disabled="isUpdatingCanvasCourseId"
             hide-details
             label="Canvas Course ID"
             maxlength="12"
+            :error="!!$_.trim(canvasCourseId) && !canvasCourseId.match(/^\d+$/)"
             style="width: 200px"
             @click:append-inner="updateCanvasCourseId"
             @keydown.enter="updateCanvasCourseId"
           />
         </div>
         <div class="float-right mr-3 text-body-2">
-          <v-menu v-if="currentUser.isAuthenticated">
-            <template #activator="{ props }">
-              <v-btn
-                color="primary"
-                v-bind="props"
-              >
-                {{ currentUser.firstName }}
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item>
-                <v-btn
-                  id="log-out"
-                  variant="plain"
-                  @click="logOut"
-                >
-                  Log out
-                </v-btn>
-              </v-list-item>
-            </v-list>
-          </v-menu>
+          <AppBarMenu v-if="currentUser.isAuthenticated" />
           <span v-if="!currentUser.isAuthenticated">
             Berkeley &copy; {{ new Date().getFullYear() }} UC Regents
           </span>
@@ -52,16 +33,17 @@
 </template>
 
 <script>
+import AppBarMenu from '@/components/utils/AppBarMenu.vue'
 import BuildSummary from '@/components/utils/BuildSummary'
 import Context from '@/mixins/Context'
 import moment from 'moment'
-import {logOut, updateUserSession} from '@/api/auth'
+import {updateUserSession} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
 
 export default {
   name: 'AppBar',
   mixins: [Context],
-  components: {BuildSummary},
+  components: {AppBarMenu, BuildSummary},
   props: {
     includeBuildSummary: {
       required: false,
@@ -79,12 +61,9 @@ export default {
     })
   },
   methods: {
-    logOut() {
-      logOut().then(data => window.location.href = data.casLogoutUrl)
-    },
     moment,
     updateCanvasCourseId() {
-      if (this.currentUser.isAuthenticated) {
+      if (this.currentUser.isAuthenticated && this.canvasCourseId.match(/^\d+$/)) {
         this.isUpdatingCanvasCourseId = true
         updateUserSession(this.canvasCourseId).then(data => {
           useContextStore().setCurrentUser(data)

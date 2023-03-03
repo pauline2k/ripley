@@ -1,7 +1,7 @@
 <template>
   <div class="align-center d-flex">
     <div class="pr-2">
-      <router-link class="text-decoration-none" to="/">
+      <router-link id="link-to-home" class="text-decoration-none" to="/">
         <span class="sr-only">Home</span>
         <v-icon color="primary" icon="mdi-alien" size="large" />
       </router-link>

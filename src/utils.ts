@@ -15,8 +15,8 @@ export function initializeAxios(app: any, axios: any) {
       const errorStatus = _.get(error, 'response.status')
       if (_.includes([401, 403], errorStatus)) {
         // Refresh user in case his/her session expired.
-        return axios.get(`${apiBaseUrl}/api/user/my_profile`).then((response: any) => {
-          useContextStore().setCurrentUser(response.data)
+        return axios.get(`${apiBaseUrl}/api/user/my_profile`).then((data: any) => {
+          useContextStore().setCurrentUser(data)
           const errorUrl = _.get(error, 'response.config.url')
           // Auth errors from the academics API should be handled by individual LTI components.
           if (!(errorUrl && errorUrl.includes('/api/academics'))) {

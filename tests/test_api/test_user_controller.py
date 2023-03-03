@@ -22,28 +22,41 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
-from flask import current_app as app, request
-from flask_login import current_user, login_required
-from ripley.api.errors import BadRequestError
-from ripley.lib.http import tolerant_jsonify
-from ripley.models.user import User
+import json
+
+admin_uid = '10000'
+student_uid = '40000'
+teacher_uid = '30000'
 
 
-@app.route('/api/user/my_profile')
-def my_profile():
-    return tolerant_jsonify(current_user.to_api_json())
+class TestUserProfile:
+    """User profile API."""
 
-
-@app.route('/api/user/profile', methods=['POST'])
-@login_required
-def get_user_profile():
-    params = request.get_json() or {}
-    uid = params.get('uid')
-    if uid and (uid == current_user.uid or current_user.is_admin):
-        user_id = User.get_serialized_composite_key(
-            canvas_course_id=current_user.canvas_course_id,
-            uid=uid,
+    @classmethod
+    def _api_user_profile(cls, client, uid, expected_status_code=200):
+        response = client.post(
+            '/api/user/profile',
+            data=json.dumps({'uid': uid}),
+            content_type='application/json',
         )
-        return tolerant_jsonify(User(user_id).to_api_json())
-    else:
-        raise BadRequestError('Invalid UID')
+        assert response.status_code == expected_status_code
+        return response.json
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        self._api_user_profile(client, expected_status_code=401, uid=student_uid)
+
+    def test_unauthorized(self, client, fake_auth):
+        """Denies unauthorized user."""
+        fake_auth.login(teacher_uid)
+        self._api_user_profile(client, expected_status_code=400, uid=student_uid)
+
+    def test_user_can_view_own_profile(self, client, fake_auth):
+        """Teacher can ."""
+        fake_auth.login(student_uid)
+        self._api_user_profile(client, uid=student_uid)
+
+    def test_authorized_admin(self, client, fake_auth):
+        fake_auth.login(admin_uid)
+        api_json = self._api_user_profile(client, uid=student_uid)
+        assert api_json['uid'] == student_uid
