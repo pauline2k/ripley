@@ -32,10 +32,6 @@ export default {
 }
 </script>
 
-<style lang="scss">
-  @use './settings';
-</style>
-
 <style>
 @import './assets/styles/ripley-global.css';
 </style>

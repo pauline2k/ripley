@@ -21,10 +21,9 @@ export default defineConfig({
     vue({
       template: {transformAssetUrls}
     }),
-    // https://github.com/vuetifyjs/vuetify-loader/tree/next/packages/vite-plugin
     vuetify({
       autoImport: true,
-      styles: {configFile: 'src/settings.scss'}
+      styles: {configFile: 'src/main.scss'}
     })
   ],
   resolve: {

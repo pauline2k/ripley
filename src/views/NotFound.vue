@@ -17,8 +17,8 @@
               <v-card-title>
                 {{ isError ? 'Error' : 'Page Not Found' }}
               </v-card-title>
-              <v-card-subtitle>
-                <div v-if="isError" class="pb-2">
+              <v-card-text>
+                <div v-if="isError">
                   <span
                     id="error-message"
                     aria-live="polite"
@@ -40,10 +40,10 @@
                     Page not found.
                   </span>
                 </div>
-              </v-card-subtitle>
-              <v-card-text>
-                <ContactUsPrompt />
               </v-card-text>
+              <v-card-subtitle class="pb-5">
+                <ContactUsPrompt />
+              </v-card-subtitle>
             </v-card>
           </v-col>
         </v-row>

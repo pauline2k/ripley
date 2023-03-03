@@ -10,6 +10,7 @@ import CreateProjectSite from '@/views/CreateProjectSite.vue'
 import Jobs from '@/views/Jobs.vue'
 import Login from '@/views/Login.vue'
 import NotFound from '@/views/NotFound.vue'
+import Profile from '@/views/Profile.vue'
 import Roster from '@/views/Roster.vue'
 import SiteCreation from '@/views/SiteCreation.vue'
 import SiteMailingList from '@/views/SiteMailingList.vue'
@@ -63,6 +64,13 @@ const routes:RouteRecordRaw[] = [
         }
       },
       {
+        component: Profile,
+        path: '/profile/:uid',
+        meta: {
+          title: 'Profile'
+        }
+      },
+      {
         component: Roster,
         path: '/roster/:id',
         meta: {
@@ -110,6 +118,11 @@ const routes:RouteRecordRaw[] = [
         meta: {
           title: 'bCourses User Provision'
         }
+      },
+      {
+        component: Welcome,
+        name: 'Welcome',
+        path: '/welcome',
       }
     ]
   },
@@ -163,11 +176,6 @@ const routes:RouteRecordRaw[] = [
   {
     beforeEnter: auth.requiresAdmin,
     children: [
-      {
-        component: Welcome,
-        name: 'Welcome',
-        path: '/welcome',
-      },
       {
         path: '/jobs',
         component: Jobs,
