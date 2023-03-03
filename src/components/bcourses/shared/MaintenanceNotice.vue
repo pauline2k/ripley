@@ -1,25 +1,25 @@
 <template>
-  <div class="bc-alert">
+  <div class="alert">
     <button
       id="maintenance-notice-button"
-      class="bc-button-link bc-template-canvas-maintenance-notice-button"
+      class="button-link template-canvas-maintenance-notice-button"
       aria-controls="maintenance-details"
       :aria-expanded="`${!maintenanceCollapsed}`"
       aria-haspopup="true"
       @click="maintenanceCollapsed = !maintenanceCollapsed"
     >
-      <fa
-        :icon="maintenanceCollapsed ? 'caret-right' : 'caret-down'"
-        class="cc-left bc-template-canvas-maintenance-notice-collapse-icon"
+      <v-icon
+        :icon="maintenanceCollapsed ? 'mdi-caret-right' : 'mdi-caret-down'"
+        class="left template-canvas-maintenance-notice-collapse-icon"
         aria-hidden="true"
-      ></fa>
-      <fa icon="exclamation-triangle" class="cc-icon-gold" aria-hidden="true"></fa>
-      <span class="bc-template-canvas-maintenance-notice-text">
+      />
+      <v-icon icon="mdi-exclamation-triangle" class="icon-gold" aria-hidden="true" />
+      <span class="template-canvas-maintenance-notice-text">
         From 8 - 9 AM, you may experience delays of up to 10 minutes before your {{ courseActionVerb }}.
       </span>
     </button>
     <div id="maintenance-details" aria-live="polite">
-      <div v-if="!maintenanceCollapsed" class="bc-template-canvas-maintenance-notice-details">
+      <div v-if="!maintenanceCollapsed" class="template-canvas-maintenance-notice-details">
         <p>
           bCourses performs scheduled maintenance every day between 8-9AM, during which time bCourses user
           and enrollment information is synchronized with other campus systems.

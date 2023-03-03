@@ -1,8 +1,8 @@
 <template>
   <div>
-    <h2 class="cc-visuallyhidden">Course Site Creation</h2>
+    <h2 class="visuallyhidden">Course Site Creation</h2>
     <div aria-live="polite">
-      <div v-show="!jobStatus" class="bc-page-create-course-site-pending-request">
+      <div v-show="!jobStatus" class="page-create-course-site-pending-request">
         <v-progress-circular
           class="mr-2"
           color="primary"
@@ -10,7 +10,7 @@
         />
         Sending request...
       </div>
-      <div v-if="jobStatus === 'New'" class="bc-page-create-course-site-pending-request">
+      <div v-if="jobStatus === 'New'" class="page-create-course-site-pending-request">
         <v-progress-circular
           class="mr-2"
           color="primary"
@@ -19,18 +19,18 @@
         Course provisioning request sent. Awaiting processing....
       </div>
       <div v-if="jobStatus && jobStatus !== 'Completed'">
-        <div id="bc-page-create-course-site-progress-bar-outer">
+        <div id="page-create-course-site-progress-bar-outer">
           <ProgressBar :percent-complete-rounded="Math.round(percentComplete * 100)" />
         </div>
         <div v-if="jobStatus === 'Error'">
           <BackgroundJobError :error-config="errorConfig" :errors="errors" />
-          <div class="bc-page-create-course-site-step-options">
+          <div class="page-create-course-site-step-options">
             <div>
-              <div class="bc-form-actions">
+              <div class="form-actions">
                 <button
                   id="start-over-button"
                   type="button"
-                  aria-controls="bc-page-create-course-site-selecting-step"
+                  aria-controls="page-create-course-site-selecting-step"
                   aria-label="Start over course site creation process"
                   @click="fetchFeed"
                 >
@@ -39,7 +39,7 @@
                 <button
                   id="go-back-button"
                   type="button"
-                  aria-controls="bc-page-create-course-site-confirmation-step"
+                  aria-controls="page-create-course-site-confirmation-step"
                   aria-label="Go Back to Site Details Confirmation"
                   @click="showConfirmation"
                 >
@@ -57,7 +57,7 @@
         color="primary"
         indeterminate
       />
-      <div class="cc-visuallyhidden" role="alert">
+      <div class="visuallyhidden" role="alert">
         Redirecting to new course site.
       </div>
     </div>
@@ -97,11 +97,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.bc-page-create-course-site-pending-request {
+.page-create-course-site-pending-request {
   margin: 15px auto;
 }
 
-.bc-page-create-course-site-step-options {
+.page-create-course-site-step-options {
   padding: 20px 0;
 }
 </style>

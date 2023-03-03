@@ -1,8 +1,8 @@
 <template>
-  <div class="bc-canvas-application cc-page-user-provision">
+  <div class="canvas-application page-user-provision">
     <v-container fluid>
       <v-row no-gutters>
-        <h1 class="cc-page-user-provision-heading">Add Users to bCourses</h1>
+        <h1 class="page-user-provision-heading">Add Users to bCourses</h1>
       </v-row>
       <form name="userImportForm" @submit="onSubmit">
         <v-row no-gutters>
@@ -10,7 +10,7 @@
             <v-container fluid>
               <v-row no-gutters>
                 <v-col cols="2">
-                  <label for="cc-page-user-provision-uid-list" class="bc-form-label">
+                  <label for="page-user-provision-uid-list" class="form-label">
                     <span aria-hidden="true">UID</span>
                     <span class="sr-only">U I D</span>
                     List
@@ -18,9 +18,9 @@
                 </v-col>
                 <v-col cols="10">
                   <textarea
-                    id="cc-page-user-provision-uid-list"
+                    id="page-user-provision-uid-list"
                     v-model="rawUids"
-                    class="cc-page-user-provision-uid-list-input"
+                    class="page-user-provision-uid-list-input"
                     rows="4"
                     name="uids"
                     placeholder="Paste your list of UIDs here organized one UID per a line, or separated by spaces or commas."
@@ -45,7 +45,7 @@
                 <v-col cols="2">
                   <button
                     type="submit"
-                    class="bc-canvas-button bc-canvas-button-primary d-block"
+                    class="canvas-button canvas-button-primary d-block"
                     :disabled="importButtonDisabled"
                   >
                     Import Users
@@ -60,12 +60,12 @@
                         indeterminate
                       />
                     </div>
-                    <div v-if="status === 'error'" class="cc-page-user-provision-feedback">
-                      <fa icon="exclamation-circle" class="cc-icon-red mr-2"></fa>
+                    <div v-if="status === 'error'" class="page-user-provision-feedback">
+                      <v-icon icon="mdi-exclamation-circle" class="icon-red mr-2" />
                       <strong>Error : {{ error }}</strong>
                     </div>
-                    <div v-if="status === 'success'" class="cc-page-user-provision-feedback">
-                      <fa icon="check-circle" class="cc-icon-green mr-2"></fa>
+                    <div v-if="status === 'success'" class="page-user-provision-feedback">
+                      <v-icon icon="mdi-check-circle" class="icon-green mr-2" />
                       Success : The users specified were imported into bCourses.
                     </div>
                   </div>
@@ -143,25 +143,25 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.cc-page-user-provision {
-  color: $bc-color-off-black;
-  font-family: $bc-base-font-family;
+.page-user-provision {
+  color: $color-off-black;
+  font-family: $body-font-family;
   font-size: 14px;
   font-weight: 300;
   padding: 10px 20px;
 
-  .cc-page-user-provision-heading {
-    font-family: $bc-base-font-family;
+  .page-user-provision-heading {
+    font-family: $body-font-family;
     font-size: 23px;
     font-weight: normal;
     margin: 10px 0;
   }
 
-  .cc-page-user-provision-uid-list-input {
+  .page-user-provision-uid-list-input {
     padding: 8px 12px;
   }
 
-  .cc-page-user-provision-feedback {
+  .page-user-provision-feedback {
     padding: 5px 0 15px;
     div {
       margin-top: 5px;

@@ -1,70 +1,76 @@
 <template>
-  <div class="bc-canvas-application bc-page-site-mailing-list">
-    <h1 class="bc-header bc-header1">Manage a Site Mailing List</h1>
-    <div v-if="alerts.error.length" role="alert" class="bc-alert bc-alert-error">
-      <fa icon="exclamation-triangle" class="cc-icon cc-left bc-icon-red bc-canvas-notice-icon"></fa>
-      <div class="bc-page-site-mailing-list-notice-message">
+  <div class="canvas-application page-site-mailing-list">
+    <h1 class="header header1">Manage a Site Mailing List</h1>
+    <div v-if="alerts.error.length" role="alert" class="alert alert-error">
+      <v-icon icon="mdi-exclamation-triangle" class="icon left icon-red canvas-notice-icon" />
+      <div class="page-site-mailing-list-notice-message">
         <div v-for="error in alerts.error" :key="error">{{ error }}</div>
       </div>
     </div>
 
-    <div v-if="alerts.success.length" role="alert" class="bc-alert bc-alert-success">
-      <fa icon="check-circle" class="cc-icon cc-left bc-icon-green bc-canvas-notice-icon"></fa>
-      <div class="bc-page-site-mailing-list-notice-message">
+    <div v-if="alerts.success.length" role="alert" class="alert alert-success">
+      <v-icon icon="mdi-check-circle" class="icon left icon-green canvas-notice-icon" />
+      <div class="page-site-mailing-list-notice-message">
         <div v-for="success in alerts.success" :key="success">{{ success }}</div>
       </div>
     </div>
 
-    <div v-if="listCreated && !mailingList.timeLastPopulated" role="alert" class="bc-alert bc-alert-info">
+    <div v-if="listCreated && !mailingList.timeLastPopulated" role="alert" class="alert alert-info">
       The list <strong>"{{ mailingList.name }}@{{ mailingList.domain }}"</strong> has been created. Choose "Update membership from course site" to add members.
     </div>
 
-    <div v-if="siteSelected && !listCreated" role="alert" class="bc-alert bc-alert-info">
+    <div v-if="siteSelected && !listCreated" role="alert" class="alert alert-info">
       No mailing list has been created for this site.
     </div>
 
-    <div v-if="!siteSelected">
-      <form class="bc-page-site-mailing-list-form" @submit.prevent="findSiteMailingList">
-        <v-row no-gutters>
-          <v-col sm="12" md="3">
-            <label for="bc-page-site-mailing-list-site-id" class="bc-page-site-mailing-list-form-label">Course Site ID:</label>
-          </v-col>
-          <v-col sm="12" md="6">
-            <v-text-field
-              id="bc-page-site-mailing-list-site-id"
-              v-model="canvasSite.canvasCourseId"
-              type="text"
-              class="cc-left bc-canvas-form-input-text"
-              placeholder="Enter numeric site ID"
-              required
-              aria-required="true"
-            />
-            <v-btn
-              id="btn-get-mailing-list"
-              class="bc-canvas-button bc-canvas-button-primary"
-              :disabled="isProcessing || !canvasSite.canvasCourseId"
-              @click="findSiteMailingList"
-            >
-              <span v-if="!isProcessing">Get Mailing List</span>
-              <span v-if="isProcessing">
-                <v-progress-circular
-                  class="mr-2"
-                  color="primary"
-                  indeterminate
-                />
-                Finding...
-              </span>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </form>
-    </div>
+    <v-container v-if="!siteSelected">
+      <v-row align="center" no-gutters>
+        <v-col cols="2">
+          <div class="float-right pr-3">
+            <label for="page-site-mailing-list-site-id">Course Site ID</label>
+          </div>
+        </v-col>
+        <v-col cols="10">
+          <v-text-field
+            id="page-site-mailing-list-site-id"
+            v-model="canvasSite.canvasCourseId"
+            aria-required="true"
+            :error="!!$_.trim(canvasSite.canvasCourseId) && !isCanvasCourseIdValid"
+            hide-details
+            placeholder="Enter numeric site ID"
+            required
+            @keydown.enter="findSiteMailingList"
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="2"></v-col>
+        <v-col cols="10">
+          <v-btn
+            id="btn-get-mailing-list"
+            class="canvas-button canvas-button-primary"
+            :disabled="isProcessing || !isCanvasCourseIdValid"
+            @click="findSiteMailingList"
+          >
+            <span v-if="!isProcessing">Get Mailing List</span>
+            <span v-if="isProcessing">
+              <v-progress-circular
+                class="mr-2"
+                color="primary"
+                indeterminate
+              />
+              Finding...
+            </span>
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-container>
 
     <div v-if="siteSelected">
-      <div id="mailing-list-details" class="bc-page-site-mailing-list-info-box">
-        <h2 id="mailing-list-details-header" class="bc-header bc-page-site-mailing-list-header2" tabindex="-1">
-          <span v-if="!listCreated" class="cc-ellipsis">{{ canvasSite.name }}</span>
-          <span v-if="listCreated" class="cc-ellipsis">{{ mailingList.name }}@{{ mailingList.domain }}</span>
+      <div id="mailing-list-details" class="page-site-mailing-list-info-box">
+        <h2 id="mailing-list-details-header" class="header page-site-mailing-list-header2" tabindex="-1">
+          <span v-if="!listCreated" class="ellipsis">{{ canvasSite.name }}</span>
+          <span v-if="listCreated" class="ellipsis">{{ mailingList.name }}@{{ mailingList.domain }}</span>
         </h2>
         <div v-if="listCreated">
           <div id="mailing-list-member-count">{{ pluralize('member', mailingList.membersCount, {0: 'No'}) }}</div>
@@ -94,32 +100,32 @@
         </OutboundLink>
       </div>
 
-      <form class="bc-canvas-page-form bc-canvas-form">
+      <form class="canvas-page-form canvas-form">
         <div v-if="!listCreated">
-          <v-row no-gutters class="bc-page-site-mailing-list-form-input-row">
+          <v-row no-gutters class="page-site-mailing-list-form-input-row">
             <v-col sm="12" md="3">
-              <label for="mailingListName" class="bc-page-site-mailing-list-form-label">New Mailing List Name:</label>
+              <label for="mailingListName" class="page-site-mailing-list-form-label">New Mailing List Name:</label>
             </v-col>
             <v-col sm="12" md="9">
-              <input
+              <v-text-field
                 id="mailingListName"
                 v-model="mailingList.name"
-                type="text"
-                class="cc-left bc-canvas-form-input-text"
-                required
                 aria-required="true"
+                hide-details
+                required
               />
             </v-col>
           </v-row>
         </div>
 
-        <div class="bc-form-actions">
+        <div class="form-actions">
+          xxx
           <button
             v-if="!listCreated"
             id="btn-create-mailing-list"
             type="button"
-            class="bc-canvas-button bc-canvas-button-primary"
-            aria-controls="cc-page-reader-alert"
+            class="canvas-button canvas-button-primary"
+            aria-controls="page-reader-alert"
             @click="registerMailingList"
           >
             <span>Create mailing list</span>
@@ -128,8 +134,8 @@
             v-if="listCreated"
             id="btn-populate-mailing-list"
             type="button"
-            class="bc-canvas-button bc-canvas-button-primary"
-            aria-controls="cc-page-reader-alert"
+            class="canvas-button canvas-button-primary"
+            aria-controls="page-reader-alert"
             @click="populateMailingList"
           >
             <span v-if="!isProcessing">Update membership from course site</span>
@@ -145,7 +151,7 @@
           <button
             id="btn-cancel"
             type="button"
-            class="bc-canvas-button"
+            class="canvas-button"
             @click="resetForm"
           >
             Cancel
@@ -178,18 +184,21 @@ export default {
     mailingList: {},
     siteSelected: false
   }),
+  computed: {
+    isCanvasCourseIdValid() {
+      const canvasCourseId = this.$_.trim(this.canvasSite.canvasCourseId)
+      return !!canvasCourseId && canvasCourseId.match(/^\d+$/)
+    }
+  },
   mounted() {
     this.$ready()
   },
   methods: {
     findSiteMailingList() {
-      this.isProcessing = true
-      getSiteMailingListAdmin(this.canvasSite.canvasCourseId).then(
-        response => {
-          this.updateDisplay(response)
-        },
-        this.$errorHandler
-      )
+      if (!this.isProcessing && this.canvasSite.canvasCourseId) {
+        this.isProcessing = true
+        getSiteMailingListAdmin(this.canvasSite.canvasCourseId).then(this.updateDisplay, this.$errorHandler)
+      }
     },
     populateMailingList() {
       this.$announcer.polite('Updating membership')
@@ -219,7 +228,7 @@ export default {
       this.mailingList = {}
       this.updateDisplay({})
       this.$announcer.polite('Canceled.')
-      this.putFocusNextTick('bc-page-site-mailing-list-site-id')
+      this.putFocusNextTick('page-site-mailing-list-site-id')
     },
     trackExternalLink() {
       // TODO implement CLC-7512
@@ -235,23 +244,27 @@ export default {
       canvasSite.codeAndTerm = codeAndTermArray.join(', ')
     },
     updateDisplay(data) {
-      this.alerts.success = []
-      this.alerts.error = data.errorMessages || []
-      this.canvasSite = data.canvasSite || {}
-      this.mailingList = data.mailingList || {}
-      this.siteSelected = !!this.$_.get(data, 'canvasSite.canvasCourseId')
-      this.listCreated = (this.$_.get(data, 'mailingList.state') === 'created')
-      if (this.siteSelected) {
-        this.updateCodeAndTerm(this.canvasSite)
-        this.$putFocusNextTick('mailing-list-details-header')
+      if (data) {
+        this.alerts.success = []
+        this.alerts.error = data.errorMessages || []
+        this.canvasSite = data.canvasSite || {}
+        this.mailingList = data.mailingList || {}
+        this.siteSelected = !!this.$_.get(data, 'canvasSite.canvasCourseId')
+        this.listCreated = (this.$_.get(data, 'mailingList.state') === 'created')
+        if (this.siteSelected) {
+          this.updateCodeAndTerm(this.canvasSite)
+          this.$putFocusNextTick('mailing-list-details-header')
+        }
+        if (this.listCreated) {
+          this.updateListLastPopulated(this.mailingList)
+        }
+        if (data.populationResults) {
+          this.updatePopulationResults(data.populationResults)
+        }
+        this.isProcessing = false
+      } else {
+        this.alerts.error = [`No bCourses site with ID "${this.canvasSite.canvasCourseId}" was found.`]
       }
-      if (this.listCreated) {
-        this.updateListLastPopulated(this.mailingList)
-      }
-      if (data.populationResults) {
-        this.updatePopulationResults(data.populationResults)
-      }
-      this.isProcessing = false
     },
     updateListLastPopulated(mailingList) {
       if (mailingList.timeLastPopulated) {
@@ -279,53 +292,53 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.bc-page-site-mailing-list {
+.page-site-mailing-list {
   padding: 20px;
 
-  .bc-page-site-mailing-list-button-primary {
+  .page-site-mailing-list-button-primary {
     margin: 0 4px;
   }
 
-  .bc-page-site-mailing-list-header2 {
+  .page-site-mailing-list-header2 {
     font-size: 17px;
     line-height: 25px;
   }
 
-  .bc-page-site-mailing-list-header3 {
+  .page-site-mailing-list-header3 {
     font-size: 15px;
     line-height: 22px;
   }
 
-  .bc-page-site-mailing-list-info-box {
-    border: 1px solid $bc-color-container-grey-border;
+  .page-site-mailing-list-info-box {
+    border: 1px solid $color-container-grey-border;
     margin: 24px 0;
     padding: 6px 10px;
   }
 
-  .bc-page-site-mailing-list-form {
+  .page-site-mailing-list-form {
     margin: 20px 0;
   }
 
-  .bc-page-site-mailing-list-form-input-row {
+  .page-site-mailing-list-form-input-row {
     margin: 20px 0;
     text-align: right;
   }
 
-  .bc-page-site-mailing-list-form-label {
+  .page-site-mailing-list-form-label {
     text-align: right;
   }
 
-  .bc-page-site-mailing-list-form-label-long {
+  .page-site-mailing-list-form-label-long {
     display: inline;
     font-weight: 300;
     text-align: left;
   }
 
-  .bc-page-site-mailing-list-notice-message {
+  .page-site-mailing-list-notice-message {
     margin-left: 30px;
   }
 
-  .bc-page-site-mailing-list-text {
+  .page-site-mailing-list-text {
     font-size: 14px;
     font-weight: 300;
     line-height: 1.6;
@@ -333,7 +346,7 @@ export default {
   }
 
   @media #{$small-only} {
-    .bc-page-site-mailing-list-form-label {
+    .page-site-mailing-list-form-label {
       text-align: left;
     }
   }

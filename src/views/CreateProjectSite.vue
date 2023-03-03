@@ -1,18 +1,18 @@
 <template>
-  <div class="bc-canvas-application bc-page-create-project-site">
+  <div class="canvas-application page-create-project-site">
     <div v-if="!isLoading && !error">
-      <h1 class="bc-header bc-page-create-project-site-header">Create a Project Site</h1>
-      <form class="bg-transparent border-0 bc-canvas-form" @submit.prevent="createProjectSite">
+      <h1 class="header page-create-project-site-header">Create a Project Site</h1>
+      <form class="bg-transparent border-0 canvas-form" @submit.prevent="createProjectSite">
         <v-container>
           <v-row>
             <v-col class="float-right" sm="3">
-              <label for="bc-page-create-project-site-name" class="bc-page-create-project-site-form-label">Project Site Name</label>
+              <label for="page-create-project-site-name" class="page-create-project-site-form-label">Project Site Name</label>
             </v-col>
             <v-col class="pl-0 pt-2" sm="9">
               <v-text-field
-                id="bc-page-create-project-site-name"
+                id="page-create-project-site-name"
                 v-model="name"
-                class="bc-canvas-form-input-text w-50"
+                class="w-50"
                 :disabled="isCreating"
                 placeholder="Enter a name for your site"
               />
@@ -20,12 +20,12 @@
           </v-row>
         </v-container>
 
-        <div class="bc-form-actions mt-4">
+        <div class="form-actions mt-4">
           <button
             id="create-project-site-button"
             :disabled="isCreating || !$_.trim(name)"
-            aria-controls="cc-page-reader-alert"
-            class="bc-canvas-button bc-canvas-button-primary"
+            aria-controls="page-reader-alert"
+            class="canvas-button canvas-button-primary"
             type="submit"
           >
             <span v-if="!isCreating">Create a Project Site</span>
@@ -42,7 +42,7 @@
             id="cancel-and-return-to-site-creation"
             type="button"
             aria-label="Cancel and return to Site Creation Overview"
-            class="bc-canvas-button"
+            class="canvas-button"
             variant="link"
             @click="cancel"
           >
@@ -51,7 +51,7 @@
         </div>
       </form>
     </div>
-    <div v-if="error" class="bc-alert-container">
+    <div v-if="error" class="alert-container">
       <CanvasErrors :message="error" />
     </div>
   </div>
@@ -73,7 +73,7 @@ export default {
     name: undefined
   }),
   created() {
-    this.$ready('Create bCourses Project Site', 'bc-page-create-project-site-name')
+    this.$ready('Create bCourses Project Site', 'page-create-project-site-name')
   },
   methods: {
     cancel() {
@@ -101,24 +101,24 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.bc-page-create-project-site {
-  background: $cc-color-white;
+.page-create-project-site {
+  background: $color-white;
   padding: 20px;
 
-  .bc-page-create-project-site-form-label {
+  .page-create-project-site-form-label {
     font-size: 16px;
     font-weight: bold;
     text-align: right;
   }
 
-  .bc-page-create-project-site-header {
+  .page-create-project-site-header {
     font-size: 24px;
     line-height: 30px;
     margin: 15px 0 16px;
   }
 
   @media #{$small-only} {
-    .bc-page-create-project-site-form-label {
+    .page-create-project-site-form-label {
       text-align: left;
     }
   }

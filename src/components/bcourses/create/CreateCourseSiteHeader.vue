@@ -1,25 +1,25 @@
 <template>
-  <div class="bc-page-create-course-site-admin-options">
-    <h2 class="cc-visuallyhidden">Administrator Options</h2>
+  <div class="page-create-course-site-admin-options">
+    <h2 class="visuallyhidden">Administrator Options</h2>
     <v-btn
       id="toggle-admin-mode-button"
-      aria-controls="bc-page-create-course-site-admin-section-loader-form"
-      class="bc-canvas-button bc-canvas-button-small bc-page-create-course-site-admin-mode-switch pb-2 ptl-3 pr-2 pt-2"
+      aria-controls="page-create-course-site-admin-section-loader-form"
+      class="canvas-button canvas-button-small page-create-course-site-admin-mode-switch pb-2 ptl-3 pr-2 pt-2"
       @click="setMode(adminMode === 'act_as' ? 'by_ccn' : 'act_as')"
     >
       Switch to {{ adminMode === 'act_as' ? 'CCN input' : 'acting as instructor' }}
     </v-btn>
-    <div id="bc-page-create-course-site-admin-section-loader-form">
+    <div id="page-create-course-site-admin-section-loader-form">
       <div v-if="adminMode === 'act_as'">
-        <h3 class="cc-visuallyhidden">Load Sections By Instructor UID</h3>
+        <h3 class="visuallyhidden">Load Sections By Instructor UID</h3>
         <form
-          id="bc-page-create-course-site-act-as-form"
-          class="bc-canvas-page-form bc-page-create-course-site-act-as-form"
+          id="page-create-course-site-act-as-form"
+          class="canvas-page-form page-create-course-site-act-as-form"
           @submit.prevent="submit"
         >
           <v-row no-gutters>
             <v-col cols="auto">
-              <label for="instructor-uid" class="cc-visuallyhidden">Instructor UID</label>
+              <label for="instructor-uid" class="visuallyhidden">Instructor UID</label>
               <v-text-field
                 id="instructor-uid"
                 v-model="uid"
@@ -32,10 +32,10 @@
                 <v-btn
                   id="sections-by-uid-button"
                   type="submit"
-                  class="bc-canvas-button bc-canvas-button-primary"
+                  class="canvas-button canvas-button-primary"
                   :disabled="!uid"
                   aria-label="Load official sections for instructor"
-                  aria-controls="bc-page-create-course-site-steps-container"
+                  aria-controls="page-create-course-site-steps-container"
                 >
                   As instructor
                 </v-btn>
@@ -45,16 +45,16 @@
         </form>
       </div>
       <div v-if="adminMode === 'by_ccn'">
-        <h3 id="load-sections-by-ccn" class="cc-visuallyhidden">Load Sections By Course Control Numbers (CCN)</h3>
-        <form id="load-sections-by-ccn-form" class="bc-canvas-page-form" @submit.prevent="submit">
+        <h3 id="load-sections-by-ccn" class="visuallyhidden">Load Sections By Course Control Numbers (CCN)</h3>
+        <form id="load-sections-by-ccn-form" class="canvas-page-form" @submit.prevent="submit">
           <div v-if="$_.size(adminSemesters)">
-            <div class="bc-buttonset">
+            <div class="buttonset">
               <span v-for="(semester, index) in adminSemesters" :key="index">
                 <input
                   :id="`semester${index}`"
                   type="radio"
                   name="adminSemester"
-                  class="cc-visuallyhidden"
+                  class="visuallyhidden"
                   :aria-selected="currentAdminSemester === semester.slug"
                   role="tab"
                   @click="switchAdminSemester(semester)"
@@ -62,13 +62,13 @@
                 />
                 <label
                   :for="`semester${index}`"
-                  class="bc-buttonset-button"
+                  class="buttonset-button"
                   role="button"
                   aria-disabled="false"
                   :class="{
-                    'bc-buttonset-button-active': currentAdminSemester === semester.slug,
-                    'bc-buttonset-corner-left': index === 0,
-                    'bc-buttonset-corner-right': index === ($_.size(adminSemesters) - 1)
+                    'buttonset-button-active': currentAdminSemester === semester.slug,
+                    'buttonset-corner-left': index === 0,
+                    'buttonset-corner-right': index === ($_.size(adminSemesters) - 1)
                   }"
                 >
                   {{ semester.name }}
@@ -76,20 +76,20 @@
               </span>
             </div>
             <label
-              for="bc-page-create-course-site-ccn-list"
-              class="cc-visuallyhidden"
+              for="page-create-course-site-ccn-list"
+              class="visuallyhidden"
             >
               Provide CCN List Separated by Commas or Spaces
             </label>
             <textarea
-              id="bc-page-create-course-site-ccn-list"
+              id="page-create-course-site-ccn-list"
               v-model="ccns"
               placeholder="Paste your list of CCNs here, separated by commas or spaces"
             ></textarea>
             <v-btn
               id="sections-by-ids-button"
-              class="bc-canvas-button bc-canvas-button-primary"
-              aria-controls="bc-page-create-course-site-steps-container"
+              class="canvas-button canvas-button-primary"
+              aria-controls="page-create-course-site-steps-container"
               :disabled="!$_.trim(ccns)"
               type="submit"
             >
@@ -187,7 +187,7 @@ export default {
         const notNumeric = this.$_.partition(split, ccn => /^\d+$/.test(this.$_.trim(ccn)))[1]
         if (notNumeric.length) {
           this.error = 'CCNs must be numeric.'
-          this.$putFocusNextTick('bc-page-create-course-site-ccn-list')
+          this.$putFocusNextTick('page-create-course-site-ccn-list')
         } else {
           this.setAdminByCcns(split)
           this.fetchFeed()
@@ -208,32 +208,32 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.bc-page-create-course-site-act-as-form {
+.page-create-course-site-act-as-form {
   margin: 5px 0;
   input[type="text"] {
-    font-family: $bc-base-font-family;
+    font-family: $body-font-family;
     font-size: 14px;
     margin: 2px 10px 0 0;
     padding: 8px 12px;
     width: 140px;
   }
 }
-.bc-page-create-course-site-admin-options {
+.page-create-course-site-admin-options {
   margin-bottom: 15px;
 }
-.bc-page-create-course-site-admin-mode-switch {
+.page-create-course-site-admin-mode-switch {
   margin-bottom: 5px;
   outline: none;
 }
-.bc-page-create-course-site-header {
-  color: $bc-color-headers;
-  font-family: $bc-base-font-family;
+.page-create-course-site-header {
+  color: $color-headers;
+  font-family: $body-font-family;
   font-weight: normal;
   line-height: 40px;
   margin: 5px 0;
 }
 .has-error {
-  color: $bc-color-alert-error-foreground;
+  color: $color-alert-error-foreground;
   font-size: 14px;
   font-weight: bolder;
 }

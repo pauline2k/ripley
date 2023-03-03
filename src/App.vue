@@ -7,7 +7,7 @@
         href="#content"
         class="sr-only sr-only-focusable"
         tabindex="0"
-        @click="skipTo('#cc-main-content')"
+        @click="skipTo('#main-content')"
       >
         Skip to content
       </a>
@@ -32,6 +32,30 @@ export default {
 }
 </script>
 
-<style>
-@import './assets/styles/ripley-global.css';
+<style lang="scss">
+.background-splash {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  min-height: 100vh;
+}
+.bc-header {
+  color: $color-primary;
+  font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-weight: normal;
+}
+.bc-header1 {
+  font-size: 24px;
+  line-height: 30px;
+  margin: 15px 0 16px;
+}
+.sr-only {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
 </style>

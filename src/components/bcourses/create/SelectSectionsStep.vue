@@ -5,27 +5,27 @@
     </div>
     <div v-if="$_.size(teachingSemesters)">
       <div>
-        <div id="bc-page-create-course-select-semesters" class="bc-buttonset">
-          <h2 class="bc-page-create-course-site-header bc-page-create-course-site-header2">Term</h2>
+        <div id="page-create-course-select-semesters" class="buttonset">
+          <h2 class="page-create-course-site-header page-create-course-site-header2">Term</h2>
           <span v-for="(semester, index) in teachingSemesters" :key="index">
             <input
               :id="`semester${index}`"
               type="radio"
               name="semester"
-              class="cc-visuallyhidden"
+              class="visuallyhidden"
               :aria-selected="currentSemester === semester.slug"
               role="tab"
               @click="switchSemester(semester)"
             />
             <label
               :for="`semester${index}`"
-              class="bc-buttonset-button"
+              class="buttonset-button"
               role="button"
               aria-disabled="false"
               :class="{
-                'bc-buttonset-button-active': currentSemester === semester.slug,
-                'bc-buttonset-corner-left': !index,
-                'bc-buttonset-corner-right': (index === $_.size(teachingSemesters) - 1)
+                'buttonset-button-active': currentSemester === semester.slug,
+                'buttonset-corner-left': !index,
+                'buttonset-corner-right': (index === $_.size(teachingSemesters) - 1)
               }"
             >
               {{ semester.name }}
@@ -34,13 +34,13 @@
         </div>
       </div>
       <div class="pt-2">
-        <h2 class="bc-page-create-course-site-header bc-page-create-course-site-header2">Official Sections</h2>
+        <h2 class="page-create-course-site-header page-create-course-site-header2">Official Sections</h2>
         <p>All official sections you select below will be put in ONE, single course site.</p>
-        <div class="bc-page-help-notice bc-page-create-course-site-help-notice">
-          <fa icon="question-circle" class="cc-left bc-page-help-notice-icon"></fa>
-          <div class="bc-page-help-notice-left-margin pl-1">
+        <div class="page-help-notice page-create-course-site-help-notice">
+          <v-icon icon="mdi-question-circle" class="left page-help-notice-icon" />
+          <div class="page-help-notice-left-margin pl-1">
             <button
-              class="bc-button-link"
+              class="button-link"
               aria-haspopup="true"
               aria-controls="section-selection-help"
               :aria-expanded="`${toggle.displayHelp}`"
@@ -52,10 +52,10 @@
               <div
                 v-if="toggle.displayHelp"
                 id="section-selection-help"
-                class="bc-page-help-notice-content"
+                class="page-help-notice-content"
               >
                 <p>If you have a course with multiple sections, you will need to decide whether you want to:</p>
-                <ol class="bc-page-create-course-site-help-notice-ordered-list">
+                <ol class="page-create-course-site-help-notice-ordered-list">
                   <li>
                     Create one, single course site which includes official sections for both your primary and secondary sections, or
                   </li>
@@ -75,9 +75,9 @@
         </div>
       </div>
       <div>
-        <form class="bc-canvas-page-form" @submit="showConfirmation">
-          <ul class="bc-page-create-course-site-section-margin">
-            <li v-for="course in coursesList" :key="course.course_id" class="bc-sections-course-container bc-sections-course-container-bottom-margin">
+        <form class="canvas-page-form" @submit="showConfirmation">
+          <ul class="page-create-course-site-section-margin">
+            <li v-for="course in coursesList" :key="course.course_id" class="sections-course-container sections-course-container-bottom-margin">
               <v-btn
                 :aria-expanded="`${course.visible}`"
                 class="d-flex p-0"
@@ -85,11 +85,11 @@
                 @click="toggleShowHide(course)"
               >
                 <div class="toggle-show-hide">
-                  <fa :icon="course.visible ? 'caret-down' : 'caret-right'" />
+                  <v-icon :icon="course.visible ? 'mdi-caret-down' : 'mdi-caret-right'" />
                   <span class="sr-only">Toggle course sections list</span>
                 </div>
                 <div class="btn-course-title-text pr-2 pt-1">
-                  <h3 class="bc-sections-course-title">{{ course.course_code }}<span v-if="course.title">: {{ course.title }}</span></h3>
+                  <h3 class="sections-course-title">{{ course.course_code }}<span v-if="course.title">: {{ course.title }}</span></h3>
                 </div>
                 <div v-if="$_.size(course.sections)" class="btn-course-title-text pt-1">
                   ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
@@ -104,22 +104,22 @@
               </v-collapse>
             </li>
           </ul>
-          <div class="bc-form-actions">
+          <div class="form-actions">
             <v-btn
-              id="bc-page-create-course-site-continue"
-              class="bc-canvas-button bc-canvas-button-primary"
+              id="page-create-course-site-continue"
+              class="canvas-button canvas-button-primary"
               type="button"
               :disabled="!selectedSectionsList.length"
-              aria-controls="bc-page-create-course-site-steps-container"
+              aria-controls="page-create-course-site-steps-container"
               aria-label="Continue to next step"
               @click="showConfirmation"
             >
               Next
             </v-btn>
             <v-btn
-              id="bc-page-create-course-site-cancel"
+              id="page-create-course-site-cancel"
               aria-label="Cancel and return to Site Creation Overview"
-              class="bc-canvas-button"
+              class="canvas-button"
               variant="link"
               @click="cancel"
             >
@@ -189,39 +189,39 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.bc-page-create-course-site-help-notice {
+.page-create-course-site-help-notice {
   margin-bottom: 20px;
-  .bc-page-create-course-site-help-notice-ordered-list {
+  .page-create-course-site-help-notice-ordered-list {
     margin-bottom: 10px;
     margin-left: 20px;
   }
 
-  .bc-page-create-course-site-help-notice-paragraph {
+  .page-create-course-site-help-notice-paragraph {
     margin-bottom: 7px;
   }
 }
-.bc-page-create-course-site-form-select-all-option {
+.page-create-course-site-form-select-all-option {
   font-size: 12px;
   font-weight: normal;
   margin: 6px 0 4px 2px;
 }
-.bc-page-create-course-site-header {
-  color: $bc-color-headers;
-  font-family: $bc-base-font-family;
+.page-create-course-site-header {
+  color: $color-headers;
+  font-family: $body-font-family;
   font-weight: normal;
   line-height: 40px;
   margin: 5px 0;
 }
-.bc-page-create-course-site-header2 {
+.page-create-course-site-header2 {
   font-size: 18px;
   margin: 10px 0;
 }
-.bc-page-create-course-site-section-margin {
+.page-create-course-site-section-margin {
   margin: 0;
   overflow: hidden;
 }
 .btn-course-title-text {
-  color: $cc-color-black;
+  color: $color-black;
   font-weight: 300;
   text-decoration: none;
 }

@@ -1,28 +1,28 @@
 <template>
-  <div v-if="!isLoading" class="bc-canvas-application bc-page-site-mailing-list">
-    <h1 class="bc-header bc-header1">Mailing List</h1>
+  <div v-if="!isLoading" class="canvas-application page-site-mailing-list">
+    <h1 class="header header1">Mailing List</h1>
 
-    <div v-if="alerts.error.length" role="alert" class="bc-alert bc-alert-error">
-      <fa icon="exclamation-triangle" class="cc-icon cc-left bc-icon-red bc-canvas-notice-icon"></fa>
-      <div class="bc-page-site-mailing-list-notice-message">
+    <div v-if="alerts.error.length" role="alert" class="alert alert-error">
+      <v-icon icon="mdi-exclamation-triangle" class="icon left icon-red canvas-notice-icon" />
+      <div class="page-site-mailing-list-notice-message">
         <div v-for="error in alerts.error" :key="error">{{ error }}</div>
       </div>
     </div>
 
-    <div v-if="errorMessages" role="alert" class="bc-alert bc-alert-error">
+    <div v-if="errorMessages" role="alert" class="alert alert-error">
       <div v-for="errorMessage in errorMessages" :key="errorMessage">{{ errorMessage }}</div>
     </div>
 
-    <div v-if="!errorMessages && listCreated" role="alert" class="bc-alert bc-alert-success">
+    <div v-if="!errorMessages && listCreated" role="alert" class="alert alert-success">
       A Mailing List has been created at <strong>{{ mailingList.name }}@{{ mailingList.domain }}</strong>.
       Messages can now be sent through this address.
     </div>
 
-    <div v-if="!errorMessages && !listCreated" class="bc-alert">
+    <div v-if="!errorMessages && !listCreated" class="alert">
       No Mailing List has yet been created for this site.
     </div>
 
-    <p class="bc-page-site-mailing-list-text">
+    <p class="page-site-mailing-list-text">
       bCourses Mailing Lists allow Teachers, TAs, Lead TAs and Readers to send email to everyone in a bCourses site by
       giving the site its own email address. Messages sent to this address from the
       <strong>official berkeley.edu email address</strong>
@@ -30,13 +30,13 @@
       members. Students and people not in the site cannot send messages through Mailing Lists.
     </p>
 
-    <form v-if="!listCreated" class="bc-canvas-page-form bc-canvas-form" @submit.prevent="createMailingList">
-      <div class="bc-form-actions">
+    <form v-if="!listCreated" class="canvas-page-form canvas-form" @submit.prevent="createMailingList">
+      <div class="form-actions">
         <button
           id="btn-create-mailing-list"
           type="submit"
-          class="bc-canvas-button bc-canvas-button-primary"
-          aria-controls="cc-page-reader-alert"
+          class="canvas-button canvas-button-primary"
+          aria-controls="page-reader-alert"
           :disabled="errorMessages"
         >
           <span v-if="!isCreating">Create mailing list</span>
@@ -51,25 +51,25 @@
     </form>
 
     <div v-if="listCreated" class="border-top mt-3 pt-3">
-      <h2 id="send-welcome-email-header" class="bc-header bc-page-site-mailing-list-welcome-email-form-heading" tabindex="-1">
+      <h2 id="send-welcome-email-header" class="header page-site-mailing-list-welcome-email-form-heading" tabindex="-1">
         Send Welcome Email
       </h2>
       <v-row no-gutters>
-        <p class="bc-page-site-mailing-list-text">
+        <p class="page-site-mailing-list-text">
           The Welcome Email tool automatically sends a customizable message by email to all members of your course site, even if the site has not yet been published. For more information, visit <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900">https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900</OutboundLink>.
         </p>
       </v-row>
 
-      <div v-if="emailFieldsPresent && !isWelcomeEmailActive" role="alert" class="bc-alert bc-alert-warning">
+      <div v-if="emailFieldsPresent && !isWelcomeEmailActive" role="alert" class="alert alert-warning">
         Sending welcome emails is paused until activation.
       </div>
 
-      <div v-if="alertEmailActivated" role="alert" class="bc-alert bc-alert-success">
+      <div v-if="alertEmailActivated" role="alert" class="alert alert-success">
         Welcome email activated.
       </div>
 
-      <div v-if="emailFieldsPresent" class="bc-page-site-mailing-list-welcome-email-toggle-outer">
-        <label for="welcome-email-activation-toggle" class="bc-page-site-mailing-list-welcome-email-toggle-label">
+      <div v-if="emailFieldsPresent" class="page-site-mailing-list-welcome-email-toggle-outer">
+        <label for="welcome-email-activation-toggle" class="page-site-mailing-list-welcome-email-toggle-label">
           Send email:
         </label>
         <div v-if="isWelcomeEmailActive" class="email-status email-status-active toggle-on">
@@ -87,8 +87,8 @@
             @keyup.down="toggleEmailActivation"
           >
             <span class="status-toggle-label">
-              <fa v-if="isWelcomeEmailActive" icon="toggle-on" class="toggle toggle-on"></fa>
-              <fa v-if="!isWelcomeEmailActive" icon="toggle-off" class="toggle toggle-off"></fa>
+              <v-icon v-if="isWelcomeEmailActive" icon="mdi-toggle-on" class="toggle toggle-on" />
+              <v-icon v-if="!isWelcomeEmailActive" icon="mdi-toggle-off" class="toggle toggle-off" />
             </span>
           </v-btn>
           <div v-if="isTogglingEmailActivation" class="pl-2">
@@ -100,7 +100,7 @@
         </div>
       </div>
 
-      <div v-if="mailingList.welcomeEmailLastSent" class="bc-page-site-mailing-list-text">
+      <div v-if="mailingList.welcomeEmailLastSent" class="page-site-mailing-list-text">
         <v-btn
           id="btn-download-sent-message-log"
           type="button"
@@ -108,31 +108,31 @@
           class="p-0"
           @click="downloadMessageLog"
         >
-          <fa icon="file-download"></fa>
+          <v-icon icon="mdi-file-download" />
           Download sent message log (last updated {{ $moment(mailingList.welcomeEmailLastSent).format('MMM D, YYYY') }})
         </v-btn>
       </div>
 
       <form
         v-if="isEditingWelcomeEmail"
-        class="bc-canvas-page-form bc-canvas-form bc-page-site-mailing-list-welcome-email-form border-top"
+        class="canvas-page-form canvas-form page-site-mailing-list-welcome-email-form border-top"
         @submit.prevent="saveWelcomeEmail"
       >
         <v-row no-gutters>
-          <label for="bc-page-site-mailing-list-subject-input" class="bc-page-site-mailing-list-welcome-email-form-heading">
+          <label for="page-site-mailing-list-subject-input" class="page-site-mailing-list-welcome-email-form-heading">
             Subject
           </label>
         </v-row>
         <v-row no-gutters>
-          <input id="bc-page-site-mailing-list-subject-input" v-model="mailingListSubject" type="text">
+          <input id="page-site-mailing-list-subject-input" v-model="mailingListSubject" type="text">
         </v-row>
         <v-row no-gutters>
-          <label for="bc-page-site-mailing-list-message-input" class="bc-page-site-mailing-list-welcome-email-form-heading">
+          <label for="page-site-mailing-list-message-input" class="page-site-mailing-list-welcome-email-form-heading">
             Message
           </label>
         </v-row>
         <v-row no-gutters>
-          <div id="bc-page-site-mailing-list-message-input" role="textbox" class="w-100 mb-4">
+          <div id="page-site-mailing-list-message-input" role="textbox" class="w-100 mb-4">
             <ckeditor
               v-model="mailingListMessage"
               class="w-100"
@@ -145,8 +145,8 @@
           <button
             id="btn-save-welcome-email"
             type="submit"
-            class="bc-canvas-button bc-canvas-button-primary"
-            aria-controls="cc-page-reader-alert"
+            class="canvas-button canvas-button-primary"
+            aria-controls="page-reader-alert"
             :disabled="!mailingListSubject || !mailingListMessage"
           >
             <span v-if="!isSavingWelcomeEmail">Save welcome email</span>
@@ -162,7 +162,7 @@
           <button
             v-if="emailFieldsPresent"
             id="btn-cancel-welcome-email-edit"
-            class="bc-canvas-button bc-canvas-button-secondary"
+            class="canvas-button canvas-button-secondary"
             type="button"
             @click="cancelEditMode"
           >
@@ -172,21 +172,21 @@
       </form>
 
       <div v-if="!isEditingWelcomeEmail" class="border-top mt-3 pt-3">
-        <div class="bc-page-site-mailing-list-welcome-email-field-content">
-          <h3 class="bc-header bc-page-site-mailing-list-welcome-email-field-heading">
+        <div class="page-site-mailing-list-welcome-email-field-content">
+          <h3 class="header page-site-mailing-list-welcome-email-field-heading">
             Subject
           </h3>
-          <div id="bc-page-site-mailing-list-subject">
+          <div id="page-site-mailing-list-subject">
             {{ mailingList.welcomeEmailSubject }}
           </div>
         </div>
-        <div class="bc-page-site-mailing-list-welcome-email-field-content">
-          <h3 class="bc-header bc-page-site-mailing-list-welcome-email-field-heading">
+        <div class="page-site-mailing-list-welcome-email-field-content">
+          <h3 class="header page-site-mailing-list-welcome-email-field-heading">
             Message
           </h3>
-          <div id="bc-page-site-mailing-list-body" class="bc-page-site-mailing-list-welcome-email-body" v-html="mailingList.welcomeEmailBody"></div>
+          <div id="page-site-mailing-list-body" class="page-site-mailing-list-welcome-email-body" v-html="mailingList.welcomeEmailBody"></div>
         </div>
-        <div class="bc-page-site-mailing-list-welcome-email-field-content">
+        <div class="page-site-mailing-list-welcome-email-field-content">
           <v-btn
             id="btn-edit-welcome-email"
             variant="link"
@@ -297,7 +297,7 @@ export default {
     setEditMode() {
       this.alertEmailActivated = false
       this.isEditingWelcomeEmail = true
-      this.$putFocusNextTick('bc-page-site-mailing-list-subject-input')
+      this.$putFocusNextTick('page-site-mailing-list-subject-input')
     },
     toggleEmailActivation() {
       this.alertEmailActivated = false
@@ -346,54 +346,54 @@ export default {
   list-style-type: disc;
   margin: 0 0 10px 20px;
 }
-.bc-page-site-mailing-list-welcome-email-body ol {
+.page-site-mailing-list-welcome-email-body ol {
   margin: 0 0 10px 20px;
 }
-.bc-page-site-mailing-list-welcome-email-body p {
+.page-site-mailing-list-welcome-email-body p {
   margin: 0 0 10px 0;
 }
-.bc-page-site-mailing-list-welcome-email-body ul {
+.page-site-mailing-list-welcome-email-body ul {
   list-style-type: disc;
   margin: 0 0 10px 20px;
 }
 </style>
 
 <style scoped lang="scss">
-.bc-page-site-mailing-list {
+.page-site-mailing-list {
   padding: 20px;
 
-  .bc-page-site-mailing-list-notice-message {
+  .page-site-mailing-list-notice-message {
     margin-left: 30px;
   }
 
-  .bc-page-site-mailing-list-text {
+  .page-site-mailing-list-text {
     font-size: 14px;
     font-weight: 300;
     line-height: 1.6;
     margin: 15px;
   }
 
-  .bc-page-site-mailing-list-welcome-email-form {
+  .page-site-mailing-list-welcome-email-form {
     margin: 15px 15px 0 0;
     padding: 15px 0 0 15px;
   }
 
-  .bc-page-site-mailing-list-welcome-email-body ol {
+  .page-site-mailing-list-welcome-email-body ol {
     margin-left: 20px;
   }
 
-  .bc-page-site-mailing-list-welcome-email-body ul {
+  .page-site-mailing-list-welcome-email-body ul {
     margin-left: 20px;
   }
 
-  .bc-page-site-mailing-list-welcome-email-field-content {
+  .page-site-mailing-list-welcome-email-field-content {
     font-size: 14px;
     font-weight: 300;
     line-height: 1.6;
     margin: 0 0 15px 15px;
   }
 
-  .bc-page-site-mailing-list-welcome-email-field-heading {
+  .page-site-mailing-list-welcome-email-field-heading {
     font-size: 18px;
     font-weight: 600;
     line-height: 1.6;
@@ -401,18 +401,18 @@ export default {
     padding: 0;
   }
 
-  .bc-page-site-mailing-list-welcome-email-form-heading {
+  .page-site-mailing-list-welcome-email-form-heading {
     font-size: 18px;
     font-weight: 600;
   }
 
-  .bc-page-site-mailing-list-welcome-email-toggle-label {
+  .page-site-mailing-list-welcome-email-toggle-label {
     font-size: 14px;
     font-weight: 600;
     padding-right: 15px;
   }
 
-  .bc-page-site-mailing-list-welcome-email-toggle-outer {
+  .page-site-mailing-list-welcome-email-toggle-outer {
     display: flex;
     margin: 15px;
   }

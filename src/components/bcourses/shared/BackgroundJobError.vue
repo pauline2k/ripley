@@ -1,13 +1,13 @@
 <template>
-  <div class="bc-template-background-job-error">
-    <p class="bc-template-background-job-error-paragraph">
-      <i class="cc-left fa fa-exclamation-circle cc-icon-red bc-template-background-job-error-icon"></i>
-      <span class="bc-template-background-job-error-header">{{ errorConfig.header }}</span>
+  <div class="template-background-job-error">
+    <p class="template-background-job-error-paragraph">
+      <i class="left fa fa-exclamation-circle icon-red template-background-job-error-icon"></i>
+      <span class="template-background-job-error-header">{{ errorConfig.header }}</span>
     </p>
-    <p class="bc-template-background-job-error-paragraph">
+    <p class="template-background-job-error-paragraph">
       Due to technical issues encountered, our support team must {{ errorConfig.supportAction }}.
     </p>
-    <p class="bc-template-background-job-error-paragraph">
+    <p class="template-background-job-error-paragraph">
       Please email us at
       <a
         :href="`bcourseshelp@berkeley.edu?subject=bCourses+Course+Site+Creation+Failure`"
