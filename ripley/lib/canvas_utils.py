@@ -32,7 +32,18 @@ def uid_from_canvas_login_id(login_id):
     match = re.match('^(inactive-)?([0-9]+)$', login_id)
     if match:
         try:
-            result = {'uid': int(match.group(2)), 'inactive': bool(match.group(1))}
+            result = {'uid': str(match.group(2)), 'inactive': bool(match.group(1))}
         except Exception:
             pass
     return result
+
+
+def user_id_from_attributes(attributes):
+    if (
+        attributes['sid']
+        and attributes['affiliations']
+        and ('STUDENT-TYPE-REGISTERED' in attributes['affiliations'] or 'STUDENT-TYPE-NOT REGISTERED' in attributes['affiliations'])
+    ):
+        return attributes['sid']
+    else:
+        return f"UID:{attributes['ldap_uid']}"

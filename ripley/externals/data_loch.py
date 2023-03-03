@@ -55,7 +55,7 @@ def cursor_from_pool():
 def _safe_execute(sql, cursor, **kwargs):
     try:
         ts = datetime.now().timestamp()
-        cursor.execute(sql, kwargs)
+        cursor.execute(sql, (kwargs or None))
         query_time = datetime.now().timestamp() - ts
     except psycopg2.Error as e:
         app.logger.error(f'SQL {sql} threw {e}')
@@ -63,6 +63,13 @@ def _safe_execute(sql, cursor, **kwargs):
     rows = [dict(r) for r in cursor.fetchall()]
     app.logger.debug(f'Query returned {len(rows)} rows in {query_time} seconds:\n{sql}\n{kwargs}')
     return rows
+
+
+def get_all_active_users():
+    sql = """select * from sis_data.basic_attributes
+        where (affiliations like '%-TYPE-%' and affiliations not like '%TYPE-SPA%')
+        and person_type != 'A'"""
+    return safe_execute_rds(sql)
 
 
 def get_current_term_index():
