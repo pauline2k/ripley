@@ -1,5 +1,5 @@
 <template>
-  <div class="bc-canvas-application bc-page-course-grade-export">
+  <div class="canvas-application page-course-grade-export">
     <v-progress-circular
       v-if="appState === 'initializing'"
       class="mr-2"
@@ -9,7 +9,7 @@
     <div v-if="appState === 'error'">
       <div v-if="errorStatus" role="alert">
         <p>
-          <fa icon="exclamation-triangle" class="text-warning"></fa> {{ errorStatus }}
+          <v-icon icon="mdi-exclamation-triangle" class="text-warning" /> {{ errorStatus }}
         </p>
         <p v-if="showRetryOption"><a @click="retrySelection">Retry</a></p>
         <p v-if="contactSupport">If this is not expected, please contact <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink> for further assistance.</p>
@@ -20,75 +20,75 @@
       <v-row no-gutters>
         <v-col md="12">
           <div>
-            <fa icon="angle-left" class="cc-icon bc-template-back-icon mr-2"></fa>
-            <a class="bc-template-back-link" :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
+            <v-icon icon="mdi-angle-left" class="icon template-back-icon mr-2" />
+            <a class="template-back-link" :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
           </div>
         </v-col>
       </v-row>
       <v-row no-gutters>
         <v-col md="12">
-          <h1 class="bc-page-course-grade-export-header">Before exporting your E-Grades:</h1>
+          <h1 class="page-course-grade-export-header">Before exporting your E-Grades:</h1>
         </v-col>
       </v-row>
       <v-row no-gutters>
         <v-col md="12">
-          <h2 class="bc-page-course-grade-export-sub-header">1. Select a grading scheme:</h2>
-          <p v-if="!noGradingStandardEnabled" class="bc-page-course-grade-export-download-description">
+          <h2 class="page-course-grade-export-sub-header">1. Select a grading scheme:</h2>
+          <p v-if="!noGradingStandardEnabled" class="page-course-grade-export-download-description">
             You have already set a grading scheme. You can view your grading scheme or select an alternate grading scheme in
             <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/settings#tab-details`" target="_top">Course Settings</a>.
           </p>
-          <p v-if="noGradingStandardEnabled" class="bc-page-course-grade-export-download-description">
+          <p v-if="noGradingStandardEnabled" class="page-course-grade-export-download-description">
             Set a grading scheme in
             <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/settings#tab-details`" target="_top">Course Settings</a>
             and return once completed.
           </p>
-          <p class="bc-page-course-grade-export-download-description">
+          <p class="page-course-grade-export-download-description">
             For detailed instructions, see: "<OutboundLink href="https://community.canvaslms.com/docs/DOC-26521-how-do-i-enable-a-grading-scheme-for-a-course">How do I enable a grading scheme for a course?</OutboundLink>"
           </p>
         </v-col>
       </v-row>
       <v-row no-gutters>
         <v-col md="12">
-          <h2 class="bc-page-course-grade-export-sub-header">2. Post all assignment grades:</h2>
-          <p class="bc-page-course-grade-export-download-description">
+          <h2 class="page-course-grade-export-sub-header">2. Post all assignment grades:</h2>
+          <p class="page-course-grade-export-download-description">
             All assignment grades must be posted (published/unmuted) to ensure that your E-Grades export matches what you see in the gradebook. To confirm that all grades have been posted, review all columns in
             <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">your gradebook</a>
             for any assignments with a crossed-out eye icon
-            <span class="cc-nowrap">
-              (<img class="bc-page-course-grade-export-image-inline" src="@/assets/images/crossed_out_eye.png" alt="Crossed-out eye icon">)
+            <span class="nowrap">
+              (<img class="page-course-grade-export-image-inline" src="@/assets/images/crossed_out_eye.png" alt="Crossed-out eye icon">)
             </span>
             indicating that an assignment has unposted grades.
           </p>
-          <p class="bc-page-course-grade-export-download-description">
+          <p class="page-course-grade-export-download-description">
             To post unposted grades:
           </p>
-          <ul class="bc-page-course-grade-export-download-list">
+          <ul class="page-course-grade-export-download-list">
             <li>
               Mouse over the assignment name and select the three vertical dot menu
-              <span class="cc-nowrap">(<img class="bc-page-course-grade-export-image-inline" src="@/assets/images/three_vertical_dots.png" alt="Three vertical dots">)</span>
+              <span class="nowrap">(<img class="page-course-grade-export-image-inline" src="@/assets/images/three_vertical_dots.png" alt="Three vertical dots">)</span>
             </li>
             <li>Select "Post grades"</li>
             <li>Select whether you wish to post grades for "Everyone," or only "Graded" students and click "Post"</li>
           </ul>
-          <p class="bc-page-course-grade-export-download-description">
+          <p class="page-course-grade-export-download-description">
             For detailed instructions, see:
             "<OutboundLink href="https://community.canvaslms.com/docs/DOC-17330-41521116619">How do I post grades for an assignment?</OutboundLink>"
           </p>
-          <p class="bc-page-course-grade-export-download-description">
+          <p class="page-course-grade-export-download-description">
             <strong>In order to avoid errors, we suggest cross-checking final grades in the bCourses gradebook with the output CSV to confirm grades were exported as expected.</strong>
           </p>
-          <p class="bc-page-course-grade-export-download-description">
+          <p class="page-course-grade-export-download-description">
             If you have used the <OutboundLink href="https://community.canvaslms.com/t5/Instructor-Guide/How-do-I-override-a-student-s-final-grade-in-the-Gradebook/ta-p/946">Final Grade Override</OutboundLink> feature to set student grades, the override grades will be included in the export.
           </p>
         </v-col>
       </v-row>
       <v-row no-gutters>
         <v-col md="12">
-          <div class="cc-text-right">
+          <div class="text-right">
             <button
               id="cancel-button"
               type="button"
-              class="bc-canvas-button"
+              class="canvas-button"
               aria-label="Go Back to Gradebook"
               @click="goToGradebook"
             >
@@ -97,7 +97,7 @@
             <button
               id="continue-button"
               type="button"
-              class="bc-canvas-button bc-canvas-button-primary"
+              class="canvas-button canvas-button-primary"
               :disabled="noGradingStandardEnabled"
               @click="switchToSelection"
             >
@@ -111,30 +111,30 @@
     <v-container v-if="appState === 'selection'">
       <v-row no-gutters aria-hidden="true">
         <v-col md="12">
-          <fa icon="angle-left" class="bc-template-back-icon cc-icon mr-2"></fa>
-          <a class="bc-template-back-link" :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
+          <v-icon icon="mdi-angle-left" class="template-back-icon icon mr-2" />
+          <a class="template-back-link" :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
         </v-col>
       </v-row>
       <v-row no-gutters>
         <v-col md="12">
           <h1
-            id="bc-page-course-grade-export-header"
-            class="bc-page-course-grade-export-header"
+            id="page-course-grade-export-header"
+            class="page-course-grade-export-header"
             tabindex="-1"
           >
             Export E-Grades
           </h1>
         </v-col>
       </v-row>
-      <v-row class="cc-visuallyhidden">
+      <v-row class="visuallyhidden">
         <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
       </v-row>
       <v-row v-if="officialSections.length > 1" no-gutters>
-        <h2 class="bc-page-course-grade-export-download-header">Select section</h2>
+        <h2 class="page-course-grade-export-download-header">Select section</h2>
       </v-row>
       <v-row v-if="officialSections.length > 1" no-gutters>
         <v-col md="5">
-          <select id="course-sections" v-model="selectedSection" class="bc-form-input-select w-100">
+          <select id="course-sections" v-model="selectedSection" class="form-input-select w-100">
             <option v-for="section in officialSections" :key="section.display_name" :value="section">
               {{ section.display_name }}
             </option>
@@ -142,11 +142,11 @@
         </v-col>
       </v-row>
       <v-row no-gutters>
-        <h2 class="bc-page-course-grade-export-download-header">Configure P/NP grade options</h2>
+        <h2 class="page-course-grade-export-download-header">Configure P/NP grade options</h2>
       </v-row>
       <v-row no-gutters>
         <v-col md="5">
-          <p class="bc-page-course-grade-export-download-description">
+          <p class="page-course-grade-export-download-description">
             <label for="input-enable-pnp-conversion-true">
               <input
                 id="input-enable-pnp-conversion-true"
@@ -164,11 +164,11 @@
       </v-row>
       <v-row no-gutters>
         <v-col md="5">
-          <p class="bc-page-course-grade-export-download-description">
+          <p class="page-course-grade-export-download-description">
             <select
               id="select-pnp-grade-cutoff"
               v-model="selectedPnpCutoffGrade"
-              class="bc-form-input-select bc-page-course-grade-export-select-pnp-cutoff"
+              class="form-input-select page-course-grade-export-select-pnp-cutoff"
               :disabled="enablePnpConversion !== 'true'"
             >
               <option value="">Select a grade</option>
@@ -181,7 +181,7 @@
       </v-row>
       <v-row no-gutters>
         <v-col md="5">
-          <p class="bc-page-course-grade-export-download-description">
+          <p class="page-course-grade-export-download-description">
             <label for="input-enable-pnp-conversion-true">
               <input
                 id="input-enable-pnp-conversion-false"
@@ -198,14 +198,14 @@
         </v-col>
       </v-row>
       <v-row no-gutters>
-        <h2 class="bc-page-course-grade-export-download-header">What would you like to download?</h2>
+        <h2 class="page-course-grade-export-download-header">What would you like to download?</h2>
       </v-row>
       <v-row no-gutters>
-        <h3 class="bc-page-course-grade-export-download-header">Current Grades</h3>
+        <h3 class="page-course-grade-export-download-header">Current Grades</h3>
       </v-row>
       <v-row no-gutters>
         <v-col md="5">
-          <p class="bc-page-course-grade-export-download-description">
+          <p class="page-course-grade-export-download-description">
             Current grades download ignores unsubmitted assignments when calculating grades.
             Use this download when you want to excuse unsubmitted assignments.
           </p>
@@ -213,7 +213,7 @@
             id="download-current-grades-button"
             type="button"
             :disabled="enablePnpConversion !== 'false' && !selectedPnpCutoffGrade"
-            class="bc-canvas-button bc-canvas-button-primary"
+            class="canvas-button canvas-button-primary"
             @click="preloadGrades('current')"
           >
             Download Current Grades
@@ -221,11 +221,11 @@
         </v-col>
       </v-row>
       <v-row no-gutters>
-        <h3 class="bc-page-course-grade-export-download-header">Final Grades</h3>
+        <h3 class="page-course-grade-export-download-header">Final Grades</h3>
       </v-row>
       <v-row no-gutters>
         <v-col md="5">
-          <p class="bc-page-course-grade-export-download-description">
+          <p class="page-course-grade-export-download-description">
             Final grades download counts unsubmitted assignments as zeroes when calculating grades.
             Use this download when you want to include all unsubmitted assignments as part of the grade.
           </p>
@@ -233,7 +233,7 @@
             id="download-final-grades-button"
             type="button"
             :disabled="enablePnpConversion !== 'false' && !selectedPnpCutoffGrade"
-            class="bc-canvas-button bc-canvas-button-primary"
+            class="canvas-button canvas-button-primary"
             @click="preloadGrades('final')"
           >
             Download Final Grades
@@ -242,8 +242,8 @@
       </v-row>
       <v-row no-gutters>
         <v-col md="12">
-          <div class="bc-page-course-grade-export-more-info-container">
-            <p class="bc-page-course-grade-export-more-info">
+          <div class="page-course-grade-export-more-info-container">
+            <p class="page-course-grade-export-more-info">
               For more information, see
               <OutboundLink href="https://berkeley.service-now.com/kb?id=kb_article_view&sysparm_article=KB0010659&sys_kb_id=8b7818e11b1837ccbc27feeccd4bcbbe">From bCourses to E-Grades</OutboundLink>
             </p>
@@ -251,7 +251,7 @@
         </v-col>
       </v-row>
       <v-row no-gutters>
-        <v-col v-if="canvasCourseId && canvasRootUrl" md="12" class="bc-page-course-grade-export-grade-link">
+        <v-col v-if="canvasCourseId && canvasRootUrl" md="12" class="page-course-grade-export-grade-link">
           <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
         </v-col>
       </v-row>
@@ -261,10 +261,10 @@
       <v-container v-if="appState === 'loading'">
         <v-row no-gutters>
           <v-col md="5">
-            <h1 class="bc-page-course-grade-export-header">Preparing E-Grades for Download</h1>
+            <h1 class="page-course-grade-export-header">Preparing E-Grades for Download</h1>
           </v-col>
         </v-row>
-        <div v-if="!jobStatus" class="bc-page-course-grade-export-notice-pending-request">
+        <div v-if="!jobStatus" class="page-course-grade-export-notice-pending-request">
           <v-progress-circular
             class="mr-2"
             color="primary"
@@ -272,7 +272,7 @@
           />
           Sending preparation request...
         </div>
-        <div v-if="jobStatus === 'New'" class="bc-page-course-grade-export-notice-pending-request">
+        <div v-if="jobStatus === 'New'" class="page-course-grade-export-notice-pending-request">
           <v-progress-circular
             class="mr-2"
             color="primary"
@@ -433,7 +433,7 @@ export default {
     switchToSelection() {
       this.iframeScrollToTop()
       this.appState = 'selection'
-      this.$putFocusNextTick('bc-page-course-grade-export-header')
+      this.$putFocusNextTick('page-course-grade-export-header')
     }
   },
   beforeUnmount() {
@@ -460,54 +460,54 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.bc-page-course-grade-export {
-  background-color: $bc-color-white;
+.page-course-grade-export {
+  background-color: $color-white;
   padding: 15px 25px;
 
   // Reset to avoid default Foundation form styling
   p {
-    font-family: $bc-base-font-family;
+    font-family: $body-font-family;
     font-size: 14px;
     font-weight: 300;
     margin-bottom: 10px;
   }
 
-  .bc-page-course-grade-export-button-link {
+  .page-course-grade-export-button-link {
     font-weight: 300;
   }
 
-  .bc-page-course-grade-export-header {
-    font-family: $bc-base-font-family;
+  .page-course-grade-export-header {
+    font-family: $body-font-family;
     font-size: 23px;
     font-weight: 400;
     padding: 12px 0 0;
   }
 
-  .bc-page-course-grade-export-sub-header {
-    font-family: $bc-base-font-family;
+  .page-course-grade-export-sub-header {
+    font-family: $body-font-family;
     font-size: 20px;
     font-weight: 400;
     margin: 15px 0;
   }
 
-  .bc-page-course-grade-export-download-button-container {
-    border: $bc-color-off-black 1px solid;
+  .page-course-grade-export-download-button-container {
+    border: $color-off-black 1px solid;
     margin: 10px;
   }
 
-  .bc-page-course-grade-export-download-description {
+  .page-course-grade-export-download-description {
     line-height: 18px;
     margin-bottom: 10px;
     padding: 4px 0;
   }
 
-  .bc-page-course-grade-export-download-header {
+  .page-course-grade-export-download-header {
     font-size: 20px;
     font-weight: 400;
     margin: 30px 0 5px;
   }
 
-  .bc-page-course-grade-export-download-list {
+  .page-course-grade-export-download-list {
     line-height: 18px;
     list-style-position: inside;
     list-style-type: disc;
@@ -515,38 +515,38 @@ export default {
     padding: 4px 0;
   }
 
-  .bc-page-course-grade-export-image-inline {
+  .page-course-grade-export-image-inline {
     height: 20px;
   }
 
-  .bc-page-course-grade-export-more-info-container {
+  .page-course-grade-export-more-info-container {
     margin-top: 40px;
   }
 
-  .bc-page-course-grade-export-more-info {
+  .page-course-grade-export-more-info {
     margin: 20px 0;
   }
 
-  .bc-page-course-grade-export-section {
+  .page-course-grade-export-section {
     margin: 10px 0;
   }
 
-  .bc-page-course-grade-export-form-label {
+  .page-course-grade-export-form-label {
     display: inline-block;
     margin: 8px 0;
   }
 
-  .bc-page-course-grade-export-notice-pending-request {
+  .page-course-grade-export-notice-pending-request {
     margin: 15px auto;
   }
 
-  .bc-page-course-grade-export-refresh-button {
+  .page-course-grade-export-refresh-button {
     font-size: 11px;
     padding: 1px 5px;
     text-decoration: none;
   }
 
-  .bc-page-course-grade-export-select-pnp-cutoff {
+  .page-course-grade-export-select-pnp-cutoff {
     padding-right: 25px;
     width: fit-content;
   }

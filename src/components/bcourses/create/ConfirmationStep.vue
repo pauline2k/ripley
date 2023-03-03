@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div class="bc-alert bc-alert-info" role="alert">
-      <h2 id="confirm-course-site-details-header" class="cc-visuallyhidden" tabindex="-1">Confirm Course Site Details</h2>
+    <div class="alert alert-info" role="alert">
+      <h2 id="confirm-course-site-details-header" class="visuallyhidden" tabindex="-1">Confirm Course Site Details</h2>
       <strong>
         You are about to create a {{ currentSemesterName }} course site with {{ pluralize('section', selectedSectionsList.length) }}:
       </strong>
-      <ul id="bc-page-create-course-site-section-list" class="bc-page-create-course-site-section-list">
+      <ul id="page-create-course-site-section-list" class="page-create-course-site-section-list">
         <li v-for="section in selectedSectionsList" :key="section.ccn">
           {{ section.courseTitle }} - {{ section.courseCode }} {{ section.section_label }} ({{ section.ccn }})
         </li>
@@ -15,7 +15,7 @@
       <form
         id="create-course-site-form"
         name="createCourseSiteForm"
-        class="bc-canvas-page-form"
+        class="canvas-page-form"
         @submit.prevent="create"
       >
         <v-container fluid>
@@ -33,8 +33,8 @@
                 name="siteName"
                 :required="true"
               />
-              <div v-if="!$_.trim(siteName)" class="bc-alert bc-notice-error">
-                <fa icon="exclamation-circle" class="cc-left cc-icon-red bc-canvas-notice-icon"></fa>
+              <div v-if="!$_.trim(siteName)" class="alert notice-error">
+                <v-icon icon="mdi-exclamation-circle" class="left icon-red canvas-notice-icon" />
                 Please fill out a site name.
               </div>
             </v-col>
@@ -50,8 +50,8 @@
                 class="w-100"
                 :required="true"
               />
-              <div v-if="!$_.trim(siteAbbreviation)" class="bc-alert bc-notice-error">
-                <fa icon="exclamation-circle" class="cc-left cc-icon-red bc-canvas-notice-icon"></fa>
+              <div v-if="!$_.trim(siteAbbreviation)" class="alert notice-error">
+                <v-icon icon="mdi-exclamation-circle" class="left icon-red canvas-notice-icon" />
                 Please fill out a site abbreviation.
               </div>
             </v-col>
@@ -62,9 +62,9 @@
             <v-btn
               id="create-course-site-button"
               type="submit"
-              aria-controls="bc-page-create-course-site-steps-container"
+              aria-controls="page-create-course-site-steps-container"
               aria-label="Create Course Site"
-              class="bc-canvas-button bc-canvas-button-primary"
+              class="canvas-button canvas-button-primary"
               :disabled="!$_.trim(siteName) || !$_.trim(siteAbbreviation)"
             >
               Create Course Site
@@ -73,7 +73,7 @@
           <div class="pr-2">
             <v-btn
               id="go-back-button"
-              class="bc-canvas-button"
+              class="canvas-button"
               @click="goBack"
             >
               Go Back
@@ -131,7 +131,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.bc-page-create-course-site-section-list {
+.page-create-course-site-section-list {
   list-style-type: disc;
   margin: 10px 0 0 39px;
 }

@@ -1,6 +1,6 @@
 <template>
-  <div class="bc-canvas-application bc-page-create-course-site pl-5 pr-5 pt-3 pb-3">
-    <div v-if="!isLoading && !displayError" class="bc-accessibility-no-outline">
+  <div class="canvas-application page-create-course-site pl-5 pr-5 pt-3 pb-3">
+    <div v-if="!isLoading && !displayError" class="accessibility-no-outline">
       <div class="d-flex flex-column pt-3">
         <div>
           <div v-if="showMaintenanceNotice" role="alert">
@@ -8,7 +8,7 @@
           </div>
         </div>
         <div>
-          <h1 class="bc-page-create-course-site-header bc-page-create-course-site-header1">Create a Course Site</h1>
+          <h1 class="page-create-course-site-header page-create-course-site-header1">Create a Course Site</h1>
         </div>
         <div>
           <CreateCourseSiteHeader
@@ -28,10 +28,10 @@
       <div v-if="isAdmin && !currentWorkflowStep">
         Use inputs above to choose courses by CCN or as an instructor.
       </div>
-      <div id="bc-page-create-course-site-steps-container" class="p-0">
+      <div id="page-create-course-site-steps-container" class="p-0">
         <div
           v-if="currentWorkflowStep === 'selecting'"
-          id="bc-page-create-course-site-selecting-step"
+          id="page-create-course-site-selecting-step"
           :aria-expanded="`${currentWorkflowStep === 'selecting'}`"
         >
           <SelectSectionsStep
@@ -46,7 +46,7 @@
         </div>
         <div
           v-if="currentWorkflowStep === 'confirmation'"
-          id="bc-page-create-course-site-confirmation-step"
+          id="page-create-course-site-confirmation-step"
           :aria-expanded="`${currentWorkflowStep === 'confirmation'}`"
         >
           <ConfirmationStep
@@ -58,7 +58,7 @@
         </div>
         <div
           v-if="currentWorkflowStep === 'monitoring_job'"
-          id="bc-page-create-course-site-monitor-step"
+          id="page-create-course-site-monitor-step"
           :aria-expanded="`${currentWorkflowStep === 'monitoring_job'}`"
         >
           <MonitoringJob
@@ -70,7 +70,7 @@
         </div>
       </div>
     </div>
-    <div v-if="displayError" class="bc-alert-container pt-5">
+    <div v-if="displayError" class="alert-container pt-5">
       <CanvasErrors :message="displayError" />
     </div>
   </div>
@@ -411,21 +411,21 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.bc-page-create-course-site {
+.page-create-course-site {
   padding: 25px;
 
-  .cc-button {
+  .button {
     padding: 10px;
   }
-  .cc-page-button-grey {
-    background: linear-gradient($bc-color-button-grey-gradient-1, $bc-color-button-grey-gradient-2);
-    border: 1px solid $bc-color-button-grey-border;
-    color: $bc-color-button-grey-text;
+  .page-button-grey {
+    background: linear-gradient($color-button-grey-gradient-1, $color-button-grey-gradient-2);
+    border: 1px solid $color-button-grey-border;
+    color: $color-button-grey-text;
   }
-  .bc-page-create-course-site-choices {
+  .page-create-course-site-choices {
     overflow: hidden;
     li {
-      border-left: 1px solid $cc-color-very-light-grey;
+      border-left: 1px solid $color-very-light-grey;
       float: left;
       max-width: 250px;
       padding: 15px;
@@ -435,21 +435,21 @@ export default {
       }
     }
   }
-  .bc-page-create-course-site-form-course-button {
-    color: $bc-color-body-black;
+  .page-create-course-site-form-course-button {
+    color: $color-body-black;
 
     &:focus, &:hover {
       text-decoration: none;
     }
   }
-  .bc-page-create-course-site-header {
-    color: $bc-color-headers;
-    font-family: $bc-base-font-family;
+  .page-create-course-site-header {
+    color: $color-headers;
+    font-family: $body-font-family;
     font-weight: normal;
     line-height: 40px;
     margin: 5px 0;
   }
-  .bc-page-create-course-site-header1 {
+  .page-create-course-site-header1 {
     font-size: 23px;
   }
 }

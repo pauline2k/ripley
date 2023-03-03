@@ -1,6 +1,6 @@
 <template>
   <div
-    class="cc-container-main"
+    class="container-main"
     role="main"
   >
     <router-view />

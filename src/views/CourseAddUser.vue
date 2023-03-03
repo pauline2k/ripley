@@ -1,75 +1,75 @@
 <template>
-  <div class="bc-canvas-application bc-page-course-add-user">
+  <div class="canvas-application page-course-add-user">
     <MaintenanceNotice course-action-verb="user is added" />
 
-    <h1 class="bc-page-course-add-user-header">Find a Person to Add</h1>
+    <h1 class="page-course-add-user-header">Find a Person to Add</h1>
 
     <div v-if="showError">
-      <fa icon="exclamation-triangle" class="cc-icon-red bc-canvas-notice-icon"></fa>
+      <v-icon icon="mdi-exclamation-triangle" class="icon-red canvas-notice-icon" />
       {{ errorStatus }}
     </div>
 
     <div v-if="!showError">
       <v-row v-if="showAlerts" role="alert">
         <v-col v-if="!isLoading" md="12">
-          <div v-if="noUserSelectedAlert" class="bc-alert bc-alert-error bc-page-course-add-user-alert">
+          <div v-if="noUserSelectedAlert" class="alert alert-error page-course-add-user-alert">
             Please select a user.
-            <div class="bc-alert-close-button-container">
+            <div class="alert-close-button-container">
               <button
                 id="hide-select-user-alert-button"
-                class="bc-close-button"
+                class="close-button"
                 @click="noUserSelectedAlert = ''"
               >
-                <fa icon="times-circle"></fa>
-                <span class="cc-visuallyhidden">Hide Alert</span>
+                <v-icon icon="mdi-times-circle" />
+                <span class="visuallyhidden">Hide Alert</span>
               </button>
             </div>
           </div>
 
-          <div v-if="searchAlert" class="bc-alert bc-alert-error bc-page-course-add-user-alert">
+          <div v-if="searchAlert" class="alert alert-error page-course-add-user-alert">
             {{ searchAlert }}
             {{ searchTypeNotice }}
             Please try again.
-            <div class="bc-alert-close-button-container">
+            <div class="alert-close-button-container">
               <button
                 id="hide-search-alert-button"
-                class="bc-close-button"
+                class="close-button"
                 @click="searchAlert = null"
               >
-                <fa icon="times-circle"></fa>
-                <span class="cc-visuallyhidden">Hide Alert</span>
+                <v-icon icon="mdi-times-circle" />
+                <span class="visuallyhidden">Hide Alert</span>
               </button>
             </div>
           </div>
 
-          <div v-if="userSearchResultsCount > userSearchResults.length" class="bc-alert bc-alert-info bc-page-course-add-user-alert">
+          <div v-if="userSearchResultsCount > userSearchResults.length" class="alert alert-info page-course-add-user-alert">
             Your search returned {{ userSearchResultsCount }} results, but only the first
             {{ userSearchResults.length }} are shown.
             Please refine your search to limit the number of results.
           </div>
 
-          <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="cc-visuallyhidden">
+          <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="visuallyhidden">
             {{ userSearchResultsCount }} user search results loaded.
           </div>
 
-          <div v-if="additionSuccessMessage" id="success-message" class="bc-alert bc-alert-success bc-page-course-add-user-alert">
+          <div v-if="additionSuccessMessage" id="success-message" class="alert alert-success page-course-add-user-alert">
             {{ userAdded.fullName }} was added to the
             &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course as a {{ userAdded.role }}.
-            <div class="bc-alert-close-button-container">
-              <button class="bc-close-button" @click="additionSuccessMessage = ''">
-                <fa icon="times-circle"></fa>
-                <span class="cc-visuallyhidden">Hide Alert</span>
+            <div class="alert-close-button-container">
+              <button class="close-button" @click="additionSuccessMessage = ''">
+                <v-icon icon="mdi-times-circle" />
+                <span class="visuallyhidden">Hide Alert</span>
               </button>
             </div>
           </div>
 
-          <div v-if="additionFailureMessage" class="bc-alert bc-alert-error bc-page-course-add-user-alert">
-            <fa icon="exclamation-triangle" class="cc-icon-red bc-canvas-notice-icon"></fa>
+          <div v-if="additionFailureMessage" class="alert alert-error page-course-add-user-alert">
+            <v-icon icon="mdi-exclamation-triangle" class="icon-red canvas-notice-icon" />
             {{ errorStatus }}
-            <div class="bc-alert-close-button-container">
-              <button class="bc-close-button" @click="additionFailureMessage = ''">
-                <fa icon="times-circle"></fa>
-                <span class="cc-visuallyhidden">Hide Alert</span>
+            <div class="alert-close-button-container">
+              <button class="close-button" @click="additionFailureMessage = ''">
+                <v-icon icon="mdi-times-circle" />
+                <span class="visuallyhidden">Hide Alert</span>
               </button>
             </div>
           </div>
@@ -78,14 +78,14 @@
 
       <v-row v-if="showSearchForm" no-gutters>
         <v-col md="6">
-          <form class="bc-canvas-page-form" @submit.prevent="searchUsers">
-            <v-row class="bc-horizontal-form" no-gutters>
+          <form class="canvas-page-form" @submit.prevent="searchUsers">
+            <v-row class="horizontal-form" no-gutters>
               <v-col md="4">
-                <label for="search-text" class="cc-visuallyhidden">Search users</label>
+                <label for="search-text" class="visuallyhidden">Search users</label>
                 <input
                   id="search-text"
                   v-model="searchText"
-                  class="bc-form-input-text"
+                  class="form-input-text"
                   :type="searchTextType"
                   placeholder="Find a person to add"
                 >
@@ -93,13 +93,13 @@
               <v-col md="6">
                 <v-row no-gutters>
                   <v-col class="d-none d-sm-none d-md-block" md="2">
-                    <label for="search-type" class="bc-label bc-label-horizontal bc-form-entities">By:</label>
+                    <label for="search-type" class="label label-horizontal form-entities">By:</label>
                   </v-col>
                   <v-col md="10">
                     <select
                       id="search-type"
                       v-model="searchType"
-                      class="bc-form-input-select"
+                      class="form-input-select"
                       @change="updateSearchTextType"
                     >
                       <option value="name">Last Name, First Name</option>
@@ -109,12 +109,12 @@
                   </v-col>
                 </v-row>
               </v-col>
-              <v-col md="2" class="bc-column-align-center">
+              <v-col md="2" class="column-align-center">
                 <button
                   id="submit-search"
                   type="submit"
                   :disabled="!searchText"
-                  class="bc-canvas-button bc-canvas-button-primary bc-full-wide"
+                  class="canvas-button canvas-button-primary full-wide"
                   aria-label="Perform User Search"
                 >
                   Go
@@ -125,13 +125,13 @@
         </v-col>
       </v-row>
 
-      <v-row v-if="showSearchForm" class="bc-page-help-notice" no-gutters>
+      <v-row v-if="showSearchForm" class="page-help-notice" no-gutters>
         <v-col md="12">
-          <fa icon="question-circle" class="bc-page-help-notice-icon cc-left mr-2"></fa>
-          <div class="bc-page-help-notice-left-margin">
+          <v-icon icon="mdi-question-circle" class="page-help-notice-icon left mr-2" />
+          <div class="page-help-notice-left-margin">
             <button
-              class="bc-button-link"
-              aria-controls="bc-page-help-notice"
+              class="button-link"
+              aria-controls="page-help-notice"
               aria-haspopup="true"
               :aria-expanded="`${toggle.displayHelp}`"
               @click="toggle.displayHelp = !toggle.displayHelp"
@@ -139,23 +139,23 @@
               Need help finding someone?
             </button>
             <div aria-live="polite">
-              <div v-if="toggle.displayHelp" id="bc-page-help-notice" class="bc-page-help-notice-content bc-user-search-notice">
+              <div v-if="toggle.displayHelp" id="page-help-notice" class="page-help-notice-content user-search-notice">
                 <!-- Note: This help text content is also maintained in the public/canvas/canvas-customization.js script -->
-                <dl class="bc-user-search-notice-description-list">
-                  <dt class="bc-user-search-notice-description-term">UC Berkeley Faculty, Staff and Students</dt>
-                  <dd class="bc-user-search-notice-description">
+                <dl class="user-search-notice-description-list">
+                  <dt class="user-search-notice-description-term">UC Berkeley Faculty, Staff and Students</dt>
+                  <dd class="user-search-notice-description">
                     UC Berkeley faculty, staff and students <em>(regular and concurrent enrollment)</em> can be found in the
                     <OutboundLink href="http://directory.berkeley.edu/">CalNet Directory</OutboundLink>
                     and be added to your site using their CalNet UID or official email address.
                   </dd>
-                  <dt class="bc-user-search-notice-description-term">Guests</dt>
-                  <dd class="bc-user-search-notice-description">
+                  <dt class="user-search-notice-description-term">Guests</dt>
+                  <dd class="user-search-notice-description">
                     Peers from other institutions or guests from the community must be sponsored with a
                     <OutboundLink href="https://idc.berkeley.edu/guests/">CalNet Guest Account</OutboundLink>.
                     Do NOT request a CalNet Guest Account for concurrent enrollment students.
                   </dd>
-                  <dt class="bc-user-search-notice-description-term">More Information</dt>
-                  <dd class="bc-user-search-notice-description">
+                  <dt class="user-search-notice-description-term">More Information</dt>
+                  <dd class="user-search-notice-description">
                     Go to this
                     <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010842">bCourses help page</OutboundLink>
                     for more information about adding people to bCourses sites.
@@ -175,41 +175,41 @@
       />
 
       <v-row v-if="showUsersArea" no-gutters>
-        <h2 id="bc-user-search-results-header" class="cc-visuallyhidden" tabindex="-1">User Search Results</h2>
+        <h2 id="user-search-results-header" class="visuallyhidden" tabindex="-1">User Search Results</h2>
         <v-col v-if="userSearchResults.length > 0" md="12">
-          <form class="bc-canvas-page-form">
-            <fieldset class="bc-form-fieldset">
-              <legend class="cc-visuallyhidden">Select the user you wish to add to the course site:</legend>
-              <table class="bc-table bc-table-striped">
+          <form class="canvas-page-form">
+            <fieldset class="form-fieldset">
+              <legend class="visuallyhidden">Select the user you wish to add to the course site:</legend>
+              <table class="table table-striped">
                 <thead>
                   <tr>
-                    <th scope="col"><span class="cc-visuallyhidden">Actions</span></th>
+                    <th scope="col"><span class="visuallyhidden">Actions</span></th>
                     <th scope="col">Name</th>
                     <th scope="col">Calnet UID</th>
                     <th scope="col">Email</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(user, index) in userSearchResults" :id="`bc-user-search-result-row-${index}`" :key="user.ldapUid">
-                    <td :id="`bc-user-search-result-row-select-${index}`">
+                  <tr v-for="(user, index) in userSearchResults" :id="`user-search-result-row-${index}`" :key="user.ldapUid">
+                    <td :id="`user-search-result-row-select-${index}`">
                       <input
-                        :id="`bc-user-search-result-input-${index}`"
+                        :id="`user-search-result-input-${index}`"
                         v-model="selectedUser"
                         type="radio"
                         name="selectedUser"
                         :value="user"
-                        :aria-labelled-by="`bc-user-search-result-row-name-${index} bc-user-search-result-row-ldap-uid-${index}`"
+                        :aria-labelled-by="`user-search-result-row-name-${index} user-search-result-row-ldap-uid-${index}`"
                       >
                     </td>
-                    <td :id="`bc-user-search-result-row-name-${index}`">
-                      <label :for="`bc-user-search-result-${index}-input`" class="bc-form-input-label-no-align">
+                    <td :id="`user-search-result-row-name-${index}`">
+                      <label :for="`user-search-result-${index}-input`" class="form-input-label-no-align">
                         {{ user.firstName }} {{ user.lastName }}
                       </label>
                     </td>
-                    <td :id="`bc-user-search-result-row-ldap-uid-${index}`">
+                    <td :id="`user-search-result-row-ldap-uid-${index}`">
                       {{ user.ldapUid }}
                     </td>
-                    <td :id="`bc-user-search-result-row-email-${index}`">
+                    <td :id="`user-search-result-row-email-${index}`">
                       {{ user.emailAddress }}
                     </td>
                   </tr>
@@ -220,10 +220,10 @@
               <v-col md="7">
                 <v-row no-gutters>
                   <v-col sm="3">
-                    <label for="user-role"><strong><span class="cc-required-field-indicator">*</span> Role</strong>:</label>
+                    <label for="user-role"><strong><span class="required-field-indicator">*</span> Role</strong>:</label>
                   </v-col>
                   <v-col sm="9">
-                    <select id="user-role" v-model="selectedRole" class="bc-form-input-select">
+                    <select id="user-role" v-model="selectedRole" class="form-input-select">
                       <option v-for="role in grantingRoles" :key="role" :value="role">
                         {{ role }}
                       </option>
@@ -232,10 +232,10 @@
                 </v-row>
                 <v-row no-gutters>
                   <v-col sm="3">
-                    <label for="course-section"><strong><span class="cc-required-field-indicator">*</span> Section</strong>:</label>
+                    <label for="course-section"><strong><span class="required-field-indicator">*</span> Section</strong>:</label>
                   </v-col>
                   <v-col sm="9">
-                    <select id="course-section" v-model="selectedSection" class="bc-form-input-select">
+                    <select id="course-section" v-model="selectedSection" class="form-input-select">
                       <option v-for="section in courseSections" :key="section.name" :value="section">
                         {{ section.name }}
                       </option>
@@ -245,10 +245,10 @@
               </v-col>
             </v-row>
             <v-row no-gutters>
-              <v-col md="12" class="bc-form-actions">
+              <v-col md="12" class="form-actions">
                 <button
                   type="button"
-                  class="bc-canvas-button bc-start-over-button"
+                  class="canvas-button start-over-button"
                   @click="resetForm"
                 >
                   Start Over
@@ -256,7 +256,7 @@
                 <button
                   :disabled="!selectedUser"
                   type="button"
-                  class="bc-canvas-button bc-canvas-button-primary"
+                  class="canvas-button canvas-button-primary"
                   @click="submitUser"
                 >
                   Add User
@@ -358,7 +358,7 @@ export default {
           if (response.users && response.users.length) {
             this.userSearchResultsCount = response.users[0].resultCount
             this.selectedUser = response.users[0]
-            this.$putFocusNextTick('bc-user-search-results-header')
+            this.$putFocusNextTick('user-search-results-header')
           } else {
             this.userSearchResultsCount = 0
             let noResultsAlert = 'Your search did not match any users with a CalNet ID.'
@@ -441,17 +441,17 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.bc-page-course-add-user {
-  background: $cc-color-white;
+.page-course-add-user {
+  background: $color-white;
   padding: 10px;
 
-  .bc-page-course-add-user-alert {
+  .page-course-add-user-alert {
     margin-bottom: 20px;
   }
 
-  .bc-page-course-add-user-header {
-    color: $bc-color-off-black;
-    font-family: $bc-base-font-family;
+  .page-course-add-user-header {
+    color: $color-off-black;
+    font-family: $body-font-family;
     font-size: 23px;
     font-weight: 400;
     line-height: 40px;
@@ -460,7 +460,7 @@ export default {
 
   button {
     &, &:hover, &:active, &:focus {
-      font-family: $bc-base-font-family;
+      font-family: $body-font-family;
       font-size: 14px;
       font-weight: 300;
     }
@@ -476,30 +476,30 @@ export default {
     width: 100%;
   }
 
-  .bc-canvas-page-form {
+  .canvas-page-form {
     form input[type="text"] {
-      font-family: $bc-base-font-family;
+      font-family: $body-font-family;
       font-size: 14px;
       margin: 2px 10px 0 0;
       padding: 8px 12px;
     }
 
-    .bc-form-input-select {
+    .form-input-select {
       margin-bottom: 8px;
     }
   }
 
-  .bc-horizontal-form {
-    .bc-label {
+  .horizontal-form {
+    .label {
       white-space: nowrap;
     }
 
-    .bc-label-horizontal {
+    .label-horizontal {
       margin-top: 9px;
     }
 
-    .bc-form-entity {
-      border: 1px solid $cc-color-very-light-grey;
+    .form-entity {
+      border: 1px solid $color-very-light-grey;
       font-family: Arial;
       font-size: 12px;
       height: 25px;
@@ -508,33 +508,33 @@ export default {
     }
   }
 
-  .bc-fa-black {
-    color: $bc-color-off-black !important;
+  .fa-black {
+    color: $color-off-black !important;
   }
 
-  .bc-user-search-notice {
-    .bc-user-search-notice-description-list {
+  .user-search-notice {
+    .user-search-notice-description-list {
       margin-bottom: 0;
     }
-    .bc-user-search-notice-description-term {
+    .user-search-notice-description-term {
       font-weight: bold;
       margin: 5px 0;
     }
-    .bc-user-search-notice-description {
+    .user-search-notice-description {
       margin-left: 15px;
     }
   }
 
-  .bc-column-align-center {
+  .column-align-center {
     text-align: center;
   }
 
   @media #{$small-only} {
-    .bc-full-wide {
+    .full-wide {
       width: 100%;
     }
 
-    .bc-horizontal-form {
+    .horizontal-form {
       .columns {
         margin-bottom: 0;
       }

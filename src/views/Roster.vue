@@ -1,7 +1,7 @@
 <template>
-  <div v-if="!isLoading" class="cc-page-roster">
+  <div v-if="!isLoading" class="page-roster">
     <v-container v-if="roster && !error" fluid>
-      <v-row align-v="start" class="cc-page-roster cc-print-hide cc-roster-search pb-3" no-gutters>
+      <v-row align-v="start" class="page-roster print-hide roster-search pb-3" no-gutters>
         <v-col class="pb-2 pr-2" sm="3">
           <v-text-field
             id="roster-search"
@@ -34,7 +34,7 @@
             <div class="pr-2">
               <v-btn
                 id="download-csv"
-                class="cc-text-light"
+                class="text-light"
                 :disabled="!roster.students.length"
                 size="md"
                 variant="outline-secondary"
@@ -49,7 +49,7 @@
                 variant="outline-secondary"
                 @click="printRoster"
               >
-                <fa icon="print" size="1x" variant="primary" /> Print<span class="sr-only"> roster of students</span>
+                <v-icon icon="mdi-print" size="1x" variant="primary" /> Print<span class="sr-only"> roster of students</span>
               </v-btn>
             </div>
           </div>
@@ -59,7 +59,7 @@
         <v-col sm="12">
           <RosterPhotos v-if="studentsFiltered.length" :course-id="canvasCourseId" :students="studentsFiltered" />
           <div v-if="!studentsFiltered.length">
-            <fa icon="exclamation-circle" class="cc-icon-gold"></fa>
+            <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
             Students have not yet signed up for this class.
           </div>
         </v-col>
@@ -75,15 +75,15 @@
       </div>
     </div>
     <div v-if="error" role="alert">
-      <fa icon="exclamation-triangle" class="cc-icon-red"></fa>
+      <v-icon icon="mdi-exclamation-triangle" class="icon-red" />
       You must be a teacher in this bCourses course to view official student rosters.
     </div>
     <div v-if="!error && roster && !roster.sections" role="alert">
-      <fa icon="exclamation-circle" class="cc-icon-gold"></fa>
+      <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
       There are no currently maintained official sections in this course site.
     </div>
     <div v-if="!error && roster && roster.sections && !roster.students" role="alert">
-      <fa icon="exclamation-circle" class="cc-icon-gold"></fa>
+      <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
       Students have not yet signed up for this class.
     </div>
   </div>
@@ -183,15 +183,15 @@ button {
   height: 38px;
   width: 76px;
 }
-.cc-page-roster {
-  background: $cc-color-white;
+.page-roster {
+  background: $color-white;
   overflow: hidden;
   padding: 20px;
 
-  .cc-roster-search {
+  .roster-search {
     background: transparent;
     border: 0;
-    border-bottom: 1px solid $cc-color-very-light-grey;
+    border-bottom: 1px solid $color-very-light-grey;
     margin: 0 0 15px;
     overflow: hidden;
     padding: 7px 0 5px;
@@ -200,7 +200,7 @@ button {
   @media print {
     overflow: visible;
     padding: 0;
-    .cc-roster-search {
+    .roster-search {
       display: none;
     }
   }

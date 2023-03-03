@@ -1,25 +1,25 @@
 <template>
-  <div class="bc-canvas-application bc-page-course-official-sections">
+  <div class="canvas-application page-course-official-sections">
     <div v-if="feedFetched && !displayError">
       <div v-if="currentWorkflowStep === 'staging'">
         <MaintenanceNotice course-action-verb="site is updated" />
       </div>
 
-      <h1 class="bc-page-course-official-sections-header1">Official Sections</h1>
+      <h1 class="page-course-official-sections-header1">Official Sections</h1>
 
       <div v-if="currentWorkflowStep === 'preview'">
         <div
           v-if="jobStatusMessage !== ''"
-          id="bc-page-course-official-sections-job-status-notice"
-          class="bc-alert"
-          :class="{'bc-notice-error': (jobStatus !== 'sectionEditsCompleted'), 'bc-alert-success': (jobStatus === 'sectionEditsCompleted')}"
+          id="page-course-official-sections-job-status-notice"
+          class="alert"
+          :class="{'notice-error': (jobStatus !== 'sectionEditsCompleted'), 'alert-success': (jobStatus === 'sectionEditsCompleted')}"
           role="alert"
         >
           {{ jobStatusMessage }}
-          <div class="bc-alert-close-button-container">
+          <div class="alert-close-button-container">
             <button
-              class="fa fa-times-circle bc-close-button"
-              aria-controls="bc-page-course-official-sections-job-status-notice"
+              class="fa fa-times-circle close-button"
+              aria-controls="page-course-official-sections-job-status-notice"
               @click="jobStatusMessage = ''"
             >
               <span class="sr-only">Hide Notice</span>
@@ -29,25 +29,25 @@
 
         <h2 class="sr-only">Viewing Sections</h2>
 
-        <div class="bc-page-course-official-sections-sections-area bc-page-course-official-sections-current-sections-white-border">
-          <v-row no-gutters class="bc-page-course-official-sections-current-sections-header">
+        <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-white-border">
+          <v-row no-gutters class="page-course-official-sections-current-sections-header">
             <v-col md="4">
-              <h3 class="bc-header bc-page-course-official-sections-existing-sections-header-label">
+              <h3 class="header page-course-official-sections-existing-sections-header-label">
                 Sections in this Course Site
               </h3>
             </v-col>
-            <v-col md="8" class="cc-text-right">
+            <v-col md="8" class="text-right">
               <button
                 v-if="isTeacher"
-                class="bc-canvas-button bc-canvas-button-primary bc-canvas-no-decoration bc-page-course-official-sections-button"
+                class="canvas-button canvas-button-primary canvas-no-decoration page-course-official-sections-button"
                 @click="changeWorkflowStep('staging')"
               >
                 Edit Sections
               </button>
             </v-col>
           </v-row>
-          <v-row no-gutters class="bc-page-course-official-sections-courses-container">
-            <v-col md="12" class="bc-page-course-official-sections-current-course">
+          <v-row no-gutters class="page-course-official-sections-courses-container">
+            <v-col md="12" class="page-course-official-sections-current-course">
               <CourseSectionsTable
                 mode="preview"
                 :sections="existingCourseSections"
@@ -60,18 +60,18 @@
       </div>
 
       <div v-if="currentWorkflowStep === 'staging'">
-        <div class="bc-page-course-official-sections-sections-area bc-page-course-official-sections-current-sections-grey-border">
+        <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-grey-border">
           <h2 class="sr-only">Managing Sections</h2>
 
-          <v-row no-gutters class="row bc-page-course-official-sections-current-sections-header">
+          <v-row no-gutters class="row page-course-official-sections-current-sections-header">
             <v-col md="4">
-              <h3 class="bc-header bc-page-course-official-sections-existing-sections-header-label">
+              <h3 class="header page-course-official-sections-existing-sections-header-label">
                 Sections in this Course Site
               </h3>
             </v-col>
-            <v-col md="8" class="cc-text-right">
+            <v-col md="8" class="text-right">
               <button
-                class="bc-canvas-button bc-canvas-no-decoration"
+                class="canvas-button canvas-no-decoration"
                 type="button"
                 aria-label="Cancel section modifications for this course site"
                 @click="cancel"
@@ -79,7 +79,7 @@
                 Cancel
               </button>
               <button
-                class="bc-canvas-button bc-canvas-button-primary bc-canvas-no-decoration"
+                class="canvas-button canvas-button-primary canvas-no-decoration"
                 :disabled="totalStagedCount === 0"
                 type="button"
                 aria-label="Apply pending modifications to this course site"
@@ -90,8 +90,8 @@
             </v-col>
           </v-row>
 
-          <v-row no-gutters class="bc-page-course-official-sections-courses-container">
-            <v-col md="12" class="bc-page-course-official-sections-current-course">
+          <v-row no-gutters class="page-course-official-sections-courses-container">
+            <v-col md="12" class="page-course-official-sections-current-course">
               <CourseSectionsTable
                 mode="currentStaging"
                 :sections="allSections"
@@ -105,9 +105,9 @@
           </v-row>
 
           <v-row v-if="currentStagedCount() > 12" class="row">
-            <v-col md="12" class="cc-text-right">
+            <v-col md="12" class="text-right">
               <button
-                class="bc-canvas-button bc-canvas-no-decoration"
+                class="canvas-button canvas-no-decoration"
                 aria-label="Cancel section modifications for this course site"
                 @click="changeWorkflowStep('preview')"
               >
@@ -115,7 +115,7 @@
               </button>
               <button
                 :disabled="totalStagedCount === 0"
-                class="bc-canvas-button bc-canvas-button-primary bc-canvas-no-decoration"
+                class="canvas-button canvas-button-primary canvas-no-decoration"
                 aria-label="Apply pending modifications to this course site"
                 @click="saveChanges"
               >
@@ -125,31 +125,31 @@
           </v-row>
         </div>
 
-        <div class="bc-page-course-official-sections-sections-area">
+        <div class="page-course-official-sections-sections-area">
           <v-row no-gutters>
             <v-col md="12">
-              <h3 class="bc-header bc-page-course-official-sections-available-sections-header-label">
+              <h3 class="header page-course-official-sections-available-sections-header-label">
                 All sections available to add to this Course Site
               </h3>
             </v-col>
           </v-row>
 
-          <div v-if="courseSemesterClasses.length > 0" class="bc-page-course-official-sections-courses-container">
-            <div v-for="course in courseSemesterClasses" :key="course.course_code" class="bc-sections-course-container-bottom-margin">
-              <div class="bc-sections-course-container">
+          <div v-if="courseSemesterClasses.length > 0" class="page-course-official-sections-courses-container">
+            <div v-for="course in courseSemesterClasses" :key="course.course_code" class="sections-course-container-bottom-margin">
+              <div class="sections-course-container">
                 <button
                   type="button"
-                  class="bc-button-link bc-page-course-official-sections-form-course-button"
+                  class="button-link page-course-official-sections-form-course-button"
                   :aria-controls="course.course_id"
                   :aria-expanded="`${!course.collapsed}`"
                   aria-haspopup="true"
                   @click="toggleCollapse(course)"
                 >
-                  <fa
-                    class="cc-left bc-sections-triangle-icon mr-2"
-                    :icon="course.collapsed ? 'caret-right' : 'caret-down'"
-                  ></fa>
-                  <h3 class="bc-sections-course-title">
+                  <v-icon
+                    class="left sections-triangle-icon mr-2"
+                    :icon="course.collapsed ? 'mdi-caret-right' : 'mdi-caret-down'"
+                  />
+                  <h3 class="sections-course-title">
                     {{ course.course_code }}
                     <span v-if="course.title"> : {{ course.title }}</span>
                   </h3>
@@ -159,13 +159,13 @@
                 <div
                   v-if="!course.collapsed"
                   :id="course.course_id"
-                  class="bc-page-course-official-sections-form-collapsible-container"
+                  class="page-course-official-sections-form-collapsible-container"
                   role="region"
                 >
-                  <div v-if="course.sections.length > 1" class="bc-page-course-official-sections-form-select-all-option">
+                  <div v-if="course.sections.length > 1" class="page-course-official-sections-form-select-all-option">
                     <button
                       v-if="!allSectionsAdded(course)"
-                      class="bc-button-link bc-page-course-official-sections-form-select-all-option-button"
+                      class="button-link page-course-official-sections-form-select-all-option-button"
                       type="button"
                       aria-label="Add all sections for this course to the list of sections to be added"
                       @click="addAllSections(course)"
@@ -195,10 +195,10 @@
       </div>
 
       <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
-        <h2 class="bc-header bc-page-course-official-sections-existing-sections-header-label">
+        <h2 class="header page-course-official-sections-existing-sections-header-label">
           Updating Official Sections in Course Site
         </h2>
-        <div v-if="jobStatus === 'sendingRequest'" class="bc-page-course-official-sections-pending-request">
+        <div v-if="jobStatus === 'sendingRequest'" class="page-course-official-sections-pending-request">
           <v-progress-circular
             class="mr-2"
             color="primary"
@@ -206,7 +206,7 @@
           />
           Sending request...
         </div>
-        <div v-if="jobStatus === 'New'" class="bc-page-course-official-sections-pending-request">
+        <div v-if="jobStatus === 'New'" class="page-course-official-sections-pending-request">
           <v-progress-circular
             class="mr-2"
             color="primary"
@@ -220,10 +220,10 @@
       </div>
     </div>
 
-    <div v-if="displayError" class="bc-alert-container" role="alert">
-      <i class="fa fa-warning bc-canvas-notice-icon"></i>
-      <div class="bc-notice-text-container">
-        <h1 class="bc-notice-text-header">Error</h1>
+    <div v-if="displayError" class="alert-container" role="alert">
+      <i class="fa fa-warning canvas-notice-icon"></i>
+      <div class="notice-text-container">
+        <h1 class="notice-text-header">Error</h1>
         <p>{{ displayError }}</p>
       </div>
     </div>
@@ -395,9 +395,9 @@ export default {
     },
     rowClassLogic(listMode, section) {
       return {
-        'bc-template-sections-table-row-added': (listMode === 'currentStaging' && section.stagedState === 'add'),
-        'bc-template-sections-table-row-deleted': (listMode === 'availableStaging' && section.stagedState === 'delete'),
-        'bc-template-sections-table-row-disabled': (
+        'template-sections-table-row-added': (listMode === 'currentStaging' && section.stagedState === 'add'),
+        'template-sections-table-row-deleted': (listMode === 'availableStaging' && section.stagedState === 'delete'),
+        'template-sections-table-row-disabled': (
           listMode === 'availableStaging' &&
           (
             section.stagedState === 'add' ||
@@ -518,97 +518,97 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.bc-page-course-official-sections {
-  background-color: $bc-color-white;
+.page-course-official-sections {
+  background-color: $color-white;
   padding: 25px;
-  .cc-button {
+  .button {
     padding: 10px;
   }
 
-  .bc-page-course-official-sections-header1 {
+  .page-course-official-sections-header1 {
     font-size: 24px;
     font-weight: 400;
     line-height: 30px;
     margin: 15px 0 16px;
   }
 
-  .bc-page-course-official-sections-button {
+  .page-course-official-sections-button {
     white-space: nowrap;
   }
 
-  .bc-page-course-official-sections-courses-container {
+  .page-course-official-sections-courses-container {
     margin: 0;
   }
 
-  .bc-page-course-official-sections-current-sections-grey-border {
-    border: $bc-color-grey-area-border-dark solid 1px;
-    .bc-page-course-official-sections-courses-container {
+  .page-course-official-sections-current-sections-grey-border {
+    border: $color-grey-area-border-dark solid 1px;
+    .page-course-official-sections-courses-container {
       margin-bottom: 15px;
     }
 
-    .bc-page-course-official-sections-existing-sections-header-label {
+    .page-course-official-sections-existing-sections-header-label {
       margin-top: 3px;
     }
   }
 
-  .bc-page-course-official-sections-current-course {
+  .page-course-official-sections-current-course {
     margin-left: 0;
     margin-top: 10px;
   }
 
-  .bc-page-course-official-sections-current-sections-header {
+  .page-course-official-sections-current-sections-header {
     margin-bottom: 5px;
   }
 
-  .bc-page-course-official-sections-current-sections-white-border {
-    border: $cc-color-white solid 1px;
+  .page-course-official-sections-current-sections-white-border {
+    border: $color-white solid 1px;
   }
 
-  .bc-page-course-official-sections-sections-area.bc-page-course-official-sections-current-sections-grey-border {
+  .page-course-official-sections-sections-area.page-course-official-sections-current-sections-grey-border {
     padding: 15px;
   }
 
-  .bc-page-course-official-sections-sections-area + .bc-page-course-official-sections-sections-area {
+  .page-course-official-sections-sections-area + .page-course-official-sections-sections-area {
     margin-top: 25px;
   }
 
-  .bc-page-course-official-sections-existing-sections-header-label {
+  .page-course-official-sections-existing-sections-header-label {
     font-size: 19px;
     margin-top: 10px;
   }
 
-  .bc-page-course-official-sections-available-sections-header-label {
+  .page-course-official-sections-available-sections-header-label {
     font-size: 19px;
     margin-bottom: 15px;
   }
 
-  .bc-page-course-official-sections-form-course-button {
-    color: $bc-color-body-black;
+  .page-course-official-sections-form-course-button {
+    color: $color-body-black;
 
     &:focus, &:hover {
       text-decoration: none;
     }
   }
 
-  .bc-page-course-official-sections-form-collapsible-container {
+  .page-course-official-sections-form-collapsible-container {
     margin-top: 7px;
   }
 
-  .bc-page-course-official-sections-form-select-all-option {
+  .page-course-official-sections-form-select-all-option {
     font-size: 12px;
     margin: 6px 0 4px 2px;
   }
 
-  .bc-page-course-official-sections-form-select-all-option-button {
+  .page-course-official-sections-form-select-all-option-button {
     outline: none;
   }
 
-  .bc-page-course-official-sections-pending-request {
+  .page-course-official-sections-pending-request {
     margin: 20px 0;
   }
 
   @media #{$small-only} {
-    .bc-page-course-official-sections-small-only-align-left {
+    .page-course-official-sections-small-only-align-left {
       text-align: left;
     }
   }
