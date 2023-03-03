@@ -35,7 +35,9 @@ from flask import current_app as app
 
 
 # By default, we allow up to an hour for Canvas to rouse itself.
+BACKGROUND_STATUS_CHECK_INTERVAL = 20
 MAX_REPORT_RETRIEVAL_ATTEMPTS = 180
+MAX_SIS_IMPORT_ATTEMPTS = 180
 
 
 def ping_canvas():
@@ -110,7 +112,7 @@ def get_csv_report(report_type, download_path=None, term_id=None):
 
         else:
             attempts += 1
-            sleep(5)
+            sleep(BACKGROUND_STATUS_CHECK_INTERVAL)
 
     app.logger.error(f'Failed to retrieve CSV {report_type} report after {MAX_REPORT_RETRIEVAL_ATTEMPTS} attempts')
 
@@ -173,6 +175,38 @@ def get_user(user_id, api_call=True):
             app.logger.error(f'Failed to retrieve Canvas user (id={user_id})')
             app.logger.exception(e)
         return user
+
+
+def post_sis_import(attachment):
+    c = _get_canvas()
+
+    try:
+        account = c.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False)
+        sis_import = account.create_sis_import(attachment, import_type='instructure_csv', extension='csv')
+        if not sis_import:
+            raise RuntimeError(f'Failed to create Canvas SIS import (attachment={attachment})')
+
+        attempts = 0
+
+        while attempts < MAX_SIS_IMPORT_ATTEMPTS:
+            sis_import = account.get_sis_import(sis_import)
+            if sis_import.workflow_state in {'initializing', 'created', 'importing'}:
+                attempts += 1
+                sleep(BACKGROUND_STATUS_CHECK_INTERVAL)
+            elif not sis_import.workflow_state or sis_import.progress < 100 or sis_import.workflow_state.startswith('failed'):
+                raise RuntimeError(f'Canvas SIS import failed or incompletely processed (attachment={attachment}, id={sis_import.id})')
+            elif sis_import.workflow_state == 'imported':
+                app.logger.info(f'SIS import succeeded (attachment={attachment}, id={sis_import.id}, results={sis_import.data})')
+                return sis_import
+            elif sis_import.workflow_state == 'imported_with_messages':
+                app.logger.info(f'SIS import partially succeeded; (attachment={attachment}, id={sis_import.id}, results={sis_import.data})')
+                return sis_import
+            else:
+                raise RuntimeError(f'Could not parse SIS import status (attachment={attachment}, id={sis_import.id})')
+
+    except Exception as e:
+        app.logger.error(e.message)
+        app.logger.exception(e)
 
 
 def _get_canvas():
