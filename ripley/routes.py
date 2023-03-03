@@ -23,6 +23,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 import datetime
+from http.cookies import SimpleCookie
 import json
 import traceback
 
@@ -93,7 +94,8 @@ def register_routes(app):
         session.modified = True
 
     @app.after_request
-    def after_api_request(response):
+    def after_request(response):
+        _set_session(response)
         if app.config['RIPLEY_ENV'] == 'development':
             # In development the response can be shared with requesting code from any local origin.
             response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Ripley-Canvas-Api-Domain'
@@ -117,6 +119,18 @@ def register_routes(app):
             else:
                 app.logger.info(log_message)
         return response
+
+
+def _set_session(response):
+    from flask import current_app as app
+
+    cookie_name = app.config['REMEMBER_COOKIE_NAME']
+    if cookie_name in request.cookies:
+        user_id = request.cookies[cookie_name]
+        cookie = SimpleCookie()
+        cookie.load({'user_id': user_id})
+        cookie_value = cookie['user_id'].coded_value
+        response.headers['Set-Cookie'] = f'{cookie_name}={cookie_value}; Secure; HttpOnly; SameSite=None; Path=/;'
 
 
 def _user_loader(user_id=None):
