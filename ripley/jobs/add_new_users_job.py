@@ -30,6 +30,7 @@ from flask import current_app as app
 from ripley.externals import canvas
 from ripley.externals.data_loch import get_all_active_users
 from ripley.jobs.base_job import BaseJob
+from ripley.jobs.errors import BackgroundJobError
 from ripley.lib.canvas_utils import uid_from_canvas_login_id, user_id_from_attributes
 
 
@@ -52,18 +53,28 @@ class AddNewUsersJob(BaseJob):
                 uid = uid_from_canvas_login_id(row['login_id'])['uid']
                 new_users_by_uid.pop(uid, None)
 
-        with open(canvas_import_filename, 'w') as canvas_import_file:
-            canvas_import = csv.DictWriter(canvas_import_file, fieldnames=['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) # noqa
-            canvas_import.writeheader()
-            for user in new_users_by_uid.values():
-                canvas_import.writerow({
-                    'user_id': user_id_from_attributes(user),
-                    'login_id': str(user['ldap_uid']),
-                    'first_name': user['first_name'],
-                    'last_name': user['last_name'],
-                    'email': user['email_address'],
-                    'status': 'active',
-                })
+        if not len(new_users_by_uid):
+            app.logger.info('No new users to add, job complete.')
+            return
+        else:
+            app.logger.info(f'Will add {len(new_users_by_uid)} new users.')
+            with open(canvas_import_filename, 'w') as canvas_import_file:
+                canvas_import = csv.DictWriter(canvas_import_file, fieldnames=['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) # noqa
+                canvas_import.writeheader()
+                for user in new_users_by_uid.values():
+                    canvas_import.writerow({
+                        'user_id': user_id_from_attributes(user),
+                        'login_id': str(user['ldap_uid']),
+                        'first_name': user['first_name'],
+                        'last_name': user['last_name'],
+                        'email': user['email_address'],
+                        'status': 'active',
+                    })
+
+            if canvas.post_sis_import(canvas_import_filename):
+                app.logger.info('Users added, job complete.')
+            else:
+                raise BackgroundJobError('New users import failed.')
 
     @classmethod
     def description(cls):
