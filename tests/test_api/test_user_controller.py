@@ -22,7 +22,10 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+
 import json
+
+from werkzeug.http import parse_cookie
 
 admin_uid = '10000'
 student_uid = '40000'
@@ -52,7 +55,7 @@ class TestUserProfile:
         self._api_user_profile(client, expected_status_code=400, uid=student_uid)
 
     def test_user_can_view_own_profile(self, client, fake_auth):
-        """Teacher can ."""
+        """User can view own profile."""
         fake_auth.login(student_uid)
         self._api_user_profile(client, uid=student_uid)
 
@@ -60,3 +63,31 @@ class TestUserProfile:
         fake_auth.login(admin_uid)
         api_json = self._api_user_profile(client, uid=student_uid)
         assert api_json['uid'] == student_uid
+
+    def test_masquerading_cookies(self, client, fake_auth):
+        """Masquerading user gets profile of masqueradee."""
+        from flask_login import current_user
+
+        fake_auth.login(teacher_uid)
+        assert current_user.uid == teacher_uid
+        response = client.get('/api/user/my_profile')
+        assert response.json['uid'] == teacher_uid
+        cookies = response.headers.getlist('Set-Cookie')
+        user_sessions = [c for c in cookies if 'remember_ripley_token' in c]
+        assert len(user_sessions) == 1
+        user_session = parse_cookie(user_sessions[0])
+        assert '{"canvas_course_id": null, "uid": "30000"}' in user_session['remember_ripley_token']
+        assert 'Secure' in user_session
+        assert user_session['SameSite'] == 'None'
+
+        fake_auth.login(student_uid)
+        assert current_user.uid == student_uid
+        response = client.get('/api/user/my_profile')
+        assert response.json['uid'] == student_uid
+        cookies = response.headers.getlist('Set-Cookie')
+        user_sessions = [c for c in cookies if 'remember_ripley_token' in c]
+        assert len(user_sessions) == 1
+        user_session = parse_cookie(user_sessions[0])
+        assert '{"canvas_course_id": null, "uid": "40000"}' in user_session['remember_ripley_token']
+        assert 'Secure' in user_session
+        assert user_session['SameSite'] == 'None'

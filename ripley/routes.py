@@ -27,7 +27,7 @@ import json
 import traceback
 
 from flask import jsonify, make_response, redirect, request, session
-from flask_login import LoginManager
+from flask_login import current_user, LoginManager
 from werkzeug.exceptions import HTTPException
 
 
@@ -125,8 +125,10 @@ def _set_session(response):
 
     cookie_name = app.config['REMEMBER_COOKIE_NAME']
     if cookie_name in request.cookies:
-        user_id = request.cookies[cookie_name]
-        response.set_cookie(cookie_name, user_id, samesite='None', secure=True)
+        cookie_value = request.cookies[cookie_name]
+        composite_key = json.loads(cookie_value.split('|')[0])
+        if composite_key['uid'] == current_user.uid and composite_key['canvas_course_id'] == current_user.canvas_course_id:
+            response.set_cookie(cookie_name, cookie_value, samesite='None', secure=True)
 
 
 def _user_loader(user_id=None):
