@@ -3,14 +3,14 @@
     <h1 class="header header1">Manage a Site Mailing List</h1>
     <div v-if="alerts.error.length" role="alert" class="alert alert-error">
       <v-icon icon="mdi-exclamation-triangle" class="icon left icon-red canvas-notice-icon" />
-      <div class="page-site-mailing-list-notice-message">
+      <div class="ml-3">
         <div v-for="error in alerts.error" :key="error">{{ error }}</div>
       </div>
     </div>
 
     <div v-if="alerts.success.length" role="alert" class="alert alert-success">
       <v-icon icon="mdi-check-circle" class="icon left icon-green canvas-notice-icon" />
-      <div class="page-site-mailing-list-notice-message">
+      <div class="ml-3">
         <div v-for="success in alerts.success" :key="success">{{ success }}</div>
       </div>
     </div>
@@ -23,48 +23,42 @@
       No mailing list has been created for this site.
     </div>
 
-    <v-container v-if="!siteSelected">
-      <v-row align="center" no-gutters>
-        <v-col cols="2">
-          <div class="float-right pr-3">
-            <label for="page-site-mailing-list-site-id">Course Site ID</label>
-          </div>
-        </v-col>
-        <v-col cols="10">
-          <v-text-field
-            id="page-site-mailing-list-site-id"
-            v-model="canvasSite.canvasCourseId"
-            aria-required="true"
-            :error="!!$_.trim(canvasSite.canvasCourseId) && !isCanvasCourseIdValid"
-            hide-details
-            placeholder="Enter numeric site ID"
-            required
-            @keydown.enter="findSiteMailingList"
-          />
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="2"></v-col>
-        <v-col cols="10">
-          <v-btn
-            id="btn-get-mailing-list"
-            class="canvas-button canvas-button-primary"
-            :disabled="isProcessing || !isCanvasCourseIdValid"
-            @click="findSiteMailingList"
-          >
-            <span v-if="!isProcessing">Get Mailing List</span>
-            <span v-if="isProcessing">
-              <v-progress-circular
-                class="mr-2"
-                color="primary"
-                indeterminate
-              />
-              Finding...
-            </span>
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-container>
+    <div v-if="!siteSelected" class="align-center d-flex flex-wrap pa-3">
+      <div class="pr-2">
+        <label for="page-site-mailing-list-site-id" class="sr-only">Course Site ID</label>
+        <v-text-field
+          id="page-site-mailing-list-site-id"
+          v-model="canvasSite.canvasCourseId"
+          aria-required="true"
+          :error="!!$_.trim(canvasSite.canvasCourseId) && !isCanvasCourseIdValid"
+          hide-details
+          maxlength="9"
+          label="Canvas Course ID"
+          required
+          style="width: 200px"
+          @keydown.enter="findSiteMailingList"
+        />
+      </div>
+      <div>
+        <v-btn
+          id="btn-get-mailing-list"
+          :disabled="isProcessing || !isCanvasCourseIdValid"
+          size="large"
+          @click="findSiteMailingList"
+        >
+          <span v-if="!isProcessing">Get Mailing List</span>
+          <span v-if="isProcessing">
+            <v-progress-circular
+              class="mr-2"
+              color="primary"
+              indeterminate
+              size="x-small"
+            />
+            Searching...
+          </span>
+        </v-btn>
+      </div>
+    </div>
 
     <div v-if="siteSelected">
       <div id="mailing-list-details" class="page-site-mailing-list-info-box">
@@ -119,22 +113,17 @@
         </div>
 
         <div class="form-actions">
-          xxx
-          <button
+          <v-btn
             v-if="!listCreated"
             id="btn-create-mailing-list"
-            type="button"
-            class="canvas-button canvas-button-primary"
             aria-controls="page-reader-alert"
             @click="registerMailingList"
           >
             <span>Create mailing list</span>
-          </button>
-          <button
+          </v-btn>
+          <v-btn
             v-if="listCreated"
             id="btn-populate-mailing-list"
-            type="button"
-            class="canvas-button canvas-button-primary"
             aria-controls="page-reader-alert"
             @click="populateMailingList"
           >
@@ -147,15 +136,10 @@
               />
               Updating...
             </span>
-          </button>
-          <button
-            id="btn-cancel"
-            type="button"
-            class="canvas-button"
-            @click="resetForm"
-          >
+          </v-btn>
+          <v-btn id="btn-cancel" @click="resetForm">
             Cancel
-          </button>
+          </v-btn>
         </div>
       </form>
     </div>
@@ -203,32 +187,24 @@ export default {
     populateMailingList() {
       this.$announcer.polite('Updating membership')
       this.isProcessing = true
-      populateSiteMailingList(this.canvasSite.canvasCourseId).then(
-        response => {
-          this.updateDisplay(response)
-          if (!response || !response.populationResults) {
-            this.alerts.error.push('The mailing list could not be populated.')
-          }
-        },
-        this.$errorHandler
-      )
+      populateSiteMailingList(this.canvasSite.canvasCourseId).then(data => {
+        this.updateDisplay(data)
+        if (!data || !data.populationResults) {
+          this.alerts.error.push('The mailing list could not be populated.')
+        }
+      })
     },
     registerMailingList() {
       this.$announcer.polite('Creating list')
       this.isProcessing = true
-      createSiteMailingListAdmin(this.canvasSite.canvasCourseId, this.mailingList).then(
-        response => {
-          this.updateDisplay(response)
-        },
-        this.$errorHandler
-      )
+      createSiteMailingListAdmin(this.canvasSite.canvasCourseId, this.mailingList).then(this.updateDisplay, this.$errorHandler)
     },
     resetForm() {
       this.canvasSite = {}
       this.mailingList = {}
       this.updateDisplay({})
       this.$announcer.polite('Canceled.')
-      this.putFocusNextTick('page-site-mailing-list-site-id')
+      this.$putFocusNextTick('page-site-mailing-list-site-id')
     },
     trackExternalLink() {
       // TODO implement CLC-7512
@@ -263,7 +239,7 @@ export default {
         }
         this.isProcessing = false
       } else {
-        this.alerts.error = [`No bCourses site with ID "${this.canvasSite.canvasCourseId}" was found.`]
+        this.alerts.error = [`bCourses site ${this.canvasSite.canvasCourseId} has no mailing list.`]
       }
     },
     updateListLastPopulated(mailingList) {
@@ -332,10 +308,6 @@ export default {
     display: inline;
     font-weight: 300;
     text-align: left;
-  }
-
-  .page-site-mailing-list-notice-message {
-    margin-left: 30px;
   }
 
   .page-site-mailing-list-text {
