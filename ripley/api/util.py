@@ -74,8 +74,8 @@ def start_login_session(user, redirect_path=None):
     app.logger.info(f"""Starting login session for {user.uid}""")
     if (current_user.is_authenticated and (
             current_user.uid != user.uid or current_user.canvas_course_id != user.canvas_course_id)):
-        app.logger.info(f'User (UID {user.uid} canvas_course_id {user.canvas_course_id}) does not match existing session \
-            (UID {current_user.uid} canvas_course_id {current_user.canvas_course_id}). Terminating existing session.')
+        app.logger.info(f"""User (UID {user.uid} canvas_course_id {user.canvas_course_id}) does not match existing session \
+            (UID {current_user.uid} canvas_course_id {current_user.canvas_course_id}). Terminating existing session.""")
         logout_user()
     authenticated = login_user(user, force=True, remember=True) and current_user.is_authenticated
     if not _is_safe_url(request.args.get('next')):
