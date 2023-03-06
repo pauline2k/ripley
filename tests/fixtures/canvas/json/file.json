@@ -11,6 +11,12 @@
         "data": "`csv/courses_report.csv`",
         "status_code": 200
     },
+    "download_provisioning_csv_users": {
+        "method": "GET",
+        "endpoint": "file_20002_download",
+        "data": "`csv/users_report.csv`",
+        "status_code": 200
+    },
     "get_provisioning_csv_accounts": {
         "method": "GET",
         "endpoint": "files/20000",
@@ -26,6 +32,15 @@
         "data": {
             "id": 20001,
             "url": "https://hard_knocks_api.instructure.com/api/v1/file_20001_download"
+        },
+        "status_code": 200
+    },
+    "get_provisioning_csv_users": {
+        "method": "GET",
+        "endpoint": "files/20002",
+        "data": {
+            "id": 20002,
+            "url": "https://hard_knocks_api.instructure.com/api/v1/file_20002_download"
         },
         "status_code": 200
     }

@@ -25,10 +25,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 import csv
 from datetime import datetime
+import tempfile
 
 from flask import current_app as app
 from ripley.externals import canvas
 from ripley.externals.data_loch import get_all_active_users
+from ripley.externals.s3 import upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.jobs.errors import BackgroundJobError
 from ripley.lib.canvas_utils import uid_from_canvas_login_id, user_id_from_attributes
@@ -38,16 +40,16 @@ class AddNewUsersJob(BaseJob):
 
     def _run(self):
         timestamp = datetime.now().strftime('%F_%H-%M-%S')
-        canvas_export_filename = f"{app.config['CANVAS_EXPORT_PATH']}/canvas-{timestamp}-sync-all-users.csv"
-        canvas_import_filename = f"{app.config['CANVAS_EXPORT_PATH']}/canvas-{timestamp}-users-report.csv"
+        canvas_export_file = tempfile.NamedTemporaryFile()
+        canvas_import_file = tempfile.NamedTemporaryFile()
 
-        canvas.get_csv_report('users', download_path=canvas_export_filename)
+        canvas.get_csv_report('users', download_path=canvas_export_file.name)
 
         # Start with a map of all users.
         new_users_by_uid = {r['ldap_uid']: r for r in get_all_active_users()}
 
-        with open(canvas_export_filename, 'r') as canvas_export_file:
-            canvas_export = csv.DictReader(canvas_export_file)
+        with open(canvas_export_file.name, 'r') as f:
+            canvas_export = csv.DictReader(f)
             # Remove users from map where UID already exists in Canvas.
             for row in canvas_export:
                 uid = uid_from_canvas_login_id(row['login_id'])['uid']
@@ -58,8 +60,8 @@ class AddNewUsersJob(BaseJob):
             return
         else:
             app.logger.info(f'Will add {len(new_users_by_uid)} new users.')
-            with open(canvas_import_filename, 'w') as canvas_import_file:
-                canvas_import = csv.DictWriter(canvas_import_file, fieldnames=['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) # noqa
+            with open(canvas_import_file.name, 'w') as f:
+                canvas_import = csv.DictWriter(f, fieldnames=['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) # noqa
                 canvas_import.writeheader()
                 for user in new_users_by_uid.values():
                     canvas_import.writerow({
@@ -71,7 +73,10 @@ class AddNewUsersJob(BaseJob):
                         'status': 'active',
                     })
 
-            if canvas.post_sis_import(canvas_import_filename):
+            if canvas.post_sis_import(canvas_import_file.name):
+                # Archive export and import files in S3.
+                upload_dated_csv(canvas_export_file.name, 'user-provision-report', 'canvas_csv_reports', timestamp)
+                upload_dated_csv(canvas_import_file.name, 'user-sis-import', 'canvas_csv_imports', timestamp)
                 app.logger.info('Users added, job complete.')
             else:
                 raise BackgroundJobError('New users import failed.')
@@ -82,4 +87,4 @@ class AddNewUsersJob(BaseJob):
 
     @classmethod
     def key(cls):
-        return 'add_users'
+        return 'add_new_users'

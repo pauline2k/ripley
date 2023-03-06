@@ -91,6 +91,11 @@ def stream_folder_zipped(folder_key):
         return None
 
 
+def upload_dated_csv(local_name, remote_name, folder, timestamp):
+    with open(local_name, mode='rb') as f:
+        return put_binary_data_to_s3(f'{folder}/{timestamp[0:4]}/{timestamp[5:2]}/{timestamp}-{remote_name}.csv', f, 'text/csv')
+
+
 def _get_s3_client():
     return _get_session().client('s3')
 

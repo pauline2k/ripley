@@ -19,6 +19,51 @@
 		},
 		"status_code": 200
 	},
+	"create_report_provisioning_csv_users": {
+		"method": "POST",
+		"endpoint": "accounts/1/reports/provisioning_csv",
+		"requestBody": "parameters[users]=1}",
+		"data": {
+			"id": "10002",
+			"report": "provisioning_csv"
+		},
+		"status_code": 200
+	},
+	"create_sis_import": {
+		"method": "POST",
+		"endpoint": "accounts/1/sis_imports",
+		"data": {
+			"id": 2,
+			"progress": 100,
+			"workflow_state": "created",
+			"data": {
+				"import_type": "instructure_csv"
+			},
+			"batch_mode": null,
+			"batch_mode_term_id": null,
+			"multi_term_batch_mode": null,
+			"override_sis_stickiness": null,
+			"add_sis_stickiness": null,
+			"clear_sis_stickiness": null,
+			"diffing_data_set_identifier": null,
+			"diffed_against_import_id": null,
+			"diffing_drop_status": null,
+			"skip_deletes": null,
+			"change_threshold": null,
+			"user": {
+				"id": 1,
+				"name": "SIS Import Admin",
+				"sortable_name": "Admin, SIS Import",
+				"short_name": "SIS Import Admin",
+				"sis_user_id": "sisimporter",
+				"integration_id": null,
+				"sis_import_id": null,
+				"login_id": "sisimporter"
+			},
+			"account_id": 1
+		},
+		"status_code": 200
+	},
 	"get_external_tools_1": {
 		"method": "GET",
 		"endpoint": "accounts/1/external_tools",
@@ -797,6 +842,19 @@
 			"status": "complete",
 			"attachment": {
 				"id": "20001"
+			}
+		},
+		"status_code": 200
+	},
+	"get_report_provisioning_csv_users": {
+		"method": "GET",
+		"endpoint": "accounts/1/reports/provisioning_csv/10002",
+		"data": {
+			"id": "10002",
+			"report": "provisioning_csv",
+			"status": "complete",
+			"attachment": {
+				"id": "20002"
 			}
 		},
 		"status_code": 200

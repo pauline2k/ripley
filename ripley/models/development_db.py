@@ -87,6 +87,7 @@ def _execute(ddlfile):
 
 def _set_up_and_run_jobs():
     Job.create(job_schedule_type='day_at', job_schedule_value='15:00', key='lti_usage_report')
+    Job.create(job_schedule_type='day_at', job_schedule_value='16:00', key='add_new_users')
 
     background_job_manager.start(app)
     std_commit(allow_test_environment=True)

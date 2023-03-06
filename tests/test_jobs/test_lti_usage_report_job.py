@@ -23,11 +23,10 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from flask import current_app as app
 from moto import mock_s3
 import requests_mock
 from ripley.jobs.lti_usage_report_job import LtiUsageReportJob
-from tests.util import mock_s3_bucket, register_canvas_uris
+from tests.util import mock_s3_bucket, read_s3_csv, register_canvas_uris
 
 
 class TestLtiUsageReportJob:
@@ -70,7 +69,7 @@ class TestLtiUsageReportJob:
             with mock_s3_bucket(app) as s3:
                 LtiUsageReportJob(app)._run()
 
-                summary_report = _read_s3_csv(s3, 'lti_usage_summary-2023-B')
+                summary_report = read_s3_csv(app, s3, 'lti_usage_summary-2023-B')
                 assert len(summary_report) == 11
                 assert summary_report[0] == 'Tool,URL,Accounts,Courses Visible'
                 assert summary_report[1] == 'Canvas Data Portal,https://beta.example.com/session/lti/launch,1,N/A'
@@ -84,19 +83,10 @@ class TestLtiUsageReportJob:
                 assert summary_report[9] == 'W. W. Norton,ncia.wwnorton.com,,1'
                 assert summary_report[10] == 'Pizza,https://example.com/pizza/basic_lti,,2'
 
-                courses_report = _read_s3_csv(s3, 'lti_usage_courses-2023-B')
+                courses_report = read_s3_csv(app, s3, 'lti_usage_courses-2023-B')
                 assert len(courses_report) == 5
                 assert courses_report[0] == 'Course URL,Name,Tool,Teacher,Email'
                 assert courses_report[1] == 'https://hard_knocks_api.instructure.com/courses/1234567,COM LIT ABC,W. W. Norton,,'
                 assert courses_report[2] == 'https://hard_knocks_api.instructure.com/courses/1234567,COM LIT ABC,Chat,,'
                 assert courses_report[3] == 'https://hard_knocks_api.instructure.com/courses/8876542,FOODSERV 10,Pizza,Fitzi Ritz,fitzi@example.com'
                 assert courses_report[4] == 'https://hard_knocks_api.instructure.com/courses/9876543,FOODSERV 2,Pizza,Nancy Ritz,nancy@example.com'
-
-
-def _read_s3_csv(s3, key):
-    obj = next(o for o in s3.Bucket(app.config['AWS_S3_BUCKET']).objects.all() if key in o.key)
-    object_data = obj.get()['Body'].read()
-    rows = object_data.decode('utf-8').split('\r\n')
-    if rows[-1] == '':
-        rows.pop()
-    return rows
