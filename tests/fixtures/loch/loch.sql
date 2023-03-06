@@ -1,3 +1,27 @@
+DROP SCHEMA IF EXISTS sis_data cascade;
+
+CREATE SCHEMA sis_data;
+
+CREATE TABLE sis_data.basic_attributes
+(
+    ldap_uid VARCHAR,
+    sid VARCHAR,
+    first_name VARCHAR,
+    last_name VARCHAR,
+    email_address VARCHAR,
+    affiliations VARCHAR,
+    person_type VARCHAR
+);
+
+INSERT INTO sis_data.basic_attributes
+(ldap_uid, sid, first_name, last_name, email_address, affiliations, person_type)
+VALUES
+('10000', NULL, 'Ellen', 'Ripley', 'ellen.ripley@berkeley.edu', 'EMPLOYEE-TYPE-ACADEMIC', 'S'),
+('10001', NULL, 'Dallas', '👨‍✈️', 'dallas@berkeley.edu', 'EMPLOYEE-TYPE-STAFF', 'S'),
+('20000', NULL, 'Joan', 'Lambert', 'joan.lambert@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
+('30000', NULL, 'Ash', '🤖', 'synthetic.ash@berkeley.edu', 'STUDENT-TYPE-NOT REGISTERED', 'S'),
+('40000', NULL, 'XO', 'Kane', 'xo.kane@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S');
+
 DROP SCHEMA IF EXISTS terms cascade;
 
 CREATE SCHEMA terms;

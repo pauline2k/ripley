@@ -1,0 +1,4 @@
+canvas_user_id,user_id,login_id,first_name,last_name,full_name,email,status
+3456789,UID:20000,20000,Joan,Lambert,joan.lambert@berkeley.edu,active
+4567890,UID:30000,30000,Ash,🤖,Ash 🤖,synthetic.ash@berkeley.edu,active
+5678901,UID:40000,40000,XO,Kane,XO Kane,xo.kane@berkeley.edu,active

@@ -25,6 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from contextlib import contextmanager
 import json
+import re
 from urllib.parse import urlencode
 
 import boto3
@@ -50,6 +51,15 @@ def override_config(app, key, value):
         yield
     finally:
         app.config[key] = old_value
+
+
+def read_s3_csv(app, s3, key):
+    obj = next(o for o in s3.Bucket(app.config['AWS_S3_BUCKET']).objects.all() if key in o.key)
+    object_data = obj.get()['Body'].read()
+    rows = re.split('[\r\n]+', object_data.decode('utf-8'))
+    if rows[-1] == '':
+        rows.pop()
+    return rows
 
 
 def register_canvas_uris(app, requirements, requests_mocker):

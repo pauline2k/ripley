@@ -122,10 +122,15 @@ class TestJobSchedule:
         assert response['autoStart'] is False
         assert response['secondsBetweenJobsCheck'] == 0.5
         assert response['startedAt']
-        assert len(response['jobs']) == 1
-        assert response['jobs'][0]['class'] == 'LtiUsageReportJob'
-        assert response['jobs'][0]['description'] == 'Generates reports on LTI usage within course sites.'
-        assert response['jobs'][0]['disabled'] is False
+        assert len(response['jobs']) == 2
+
+        add_new_users_job = next(job for job in response['jobs'] if job['class'] == 'AddNewUsersJob')
+        assert add_new_users_job['description'] == 'Adds new campus users to Canvas.'
+        assert add_new_users_job['disabled'] is False
+
+        lti_usage_report_job = next(job for job in response['jobs'] if job['class'] == 'LtiUsageReportJob')
+        assert lti_usage_report_job['description'] == 'Generates reports on LTI usage within course sites.'
+        assert lti_usage_report_job['disabled'] is False
 
 
 def _api_job_schedule(client, expected_status_code=200):
