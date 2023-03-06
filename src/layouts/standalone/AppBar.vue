@@ -14,8 +14,8 @@
             :disabled="isUpdatingCanvasCourseId"
             hide-details
             label="Canvas Course ID"
-            maxlength="12"
-            :error="!!$_.trim(canvasCourseId) && !canvasCourseId.match(/^\d+$/)"
+            maxlength="10"
+            :error="!!$_.trim(canvasCourseId) && !isCanvasCourseIdValid(canvasCourseId)"
             style="width: 200px"
             @click:append-inner="updateCanvasCourseId"
             @keydown.enter="updateCanvasCourseId"
@@ -35,6 +35,7 @@
 <script>
 import AppBarMenu from '@/components/utils/AppBarMenu.vue'
 import BuildSummary from '@/components/utils/BuildSummary'
+import CanvasUtils from '@/mixins/CanvasUtils.vue'
 import Context from '@/mixins/Context'
 import moment from 'moment'
 import {updateUserSession} from '@/api/auth'
@@ -42,7 +43,7 @@ import {useContextStore} from '@/stores/context'
 
 export default {
   name: 'AppBar',
-  mixins: [Context],
+  mixins: [CanvasUtils, Context],
   components: {AppBarMenu, BuildSummary},
   props: {
     includeBuildSummary: {

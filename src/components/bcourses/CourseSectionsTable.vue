@@ -15,7 +15,7 @@
       </v-checkbox>
     </div>
     <table id="template-sections-table" class="template-sections-table bg-white">
-      <thead class="visuallyhidden">
+      <thead class="sr-only">
         <tr>
           <th v-if="mode === 'createCourseForm'">Action</th>
           <th>Course Code</th>
@@ -121,7 +121,7 @@
             </div>
 
             <div v-if="mode === 'availableStaging' && !section.isCourseSection && section.stagedState === 'add'">
-              Linked <span class="visuallyhidden">to pending list of new sections</span>
+              Linked <span class="sr-only">to pending list of new sections</span>
             </div>
 
             <div v-if="mode === 'availableStaging' && !section.isCourseSection && section.stagedState === null">

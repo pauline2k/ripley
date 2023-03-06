@@ -1,6 +1,6 @@
 <template>
   <div class="page-create-course-site-admin-options">
-    <h2 class="visuallyhidden">Administrator Options</h2>
+    <h2 class="sr-only">Administrator Options</h2>
     <v-btn
       id="toggle-admin-mode-button"
       aria-controls="page-create-course-site-admin-section-loader-form"
@@ -11,7 +11,7 @@
     </v-btn>
     <div id="page-create-course-site-admin-section-loader-form">
       <div v-if="adminMode === 'act_as'">
-        <h3 class="visuallyhidden">Load Sections By Instructor UID</h3>
+        <h3 class="sr-only">Load Sections By Instructor UID</h3>
         <form
           id="page-create-course-site-act-as-form"
           class="canvas-page-form page-create-course-site-act-as-form"
@@ -19,7 +19,7 @@
         >
           <v-row no-gutters>
             <v-col cols="auto">
-              <label for="instructor-uid" class="visuallyhidden">Instructor UID</label>
+              <label for="instructor-uid" class="sr-only">Instructor UID</label>
               <v-text-field
                 id="instructor-uid"
                 v-model="uid"
@@ -45,7 +45,7 @@
         </form>
       </div>
       <div v-if="adminMode === 'by_ccn'">
-        <h3 id="load-sections-by-ccn" class="visuallyhidden">Load Sections By Course Control Numbers (CCN)</h3>
+        <h3 id="load-sections-by-ccn" class="sr-only">Load Sections By Course Control Numbers (CCN)</h3>
         <form id="load-sections-by-ccn-form" class="canvas-page-form" @submit.prevent="submit">
           <div v-if="$_.size(adminSemesters)">
             <div class="buttonset">
@@ -54,7 +54,7 @@
                   :id="`semester${index}`"
                   type="radio"
                   name="adminSemester"
-                  class="visuallyhidden"
+                  class="sr-only"
                   :aria-selected="currentAdminSemester === semester.slug"
                   role="tab"
                   @click="switchAdminSemester(semester)"
@@ -77,7 +77,7 @@
             </div>
             <label
               for="page-create-course-site-ccn-list"
-              class="visuallyhidden"
+              class="sr-only"
             >
               Provide CCN List Separated by Commas or Spaces
             </label>

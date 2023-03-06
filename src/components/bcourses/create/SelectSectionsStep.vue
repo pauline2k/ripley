@@ -12,7 +12,7 @@
               :id="`semester${index}`"
               type="radio"
               name="semester"
-              class="visuallyhidden"
+              class="sr-only"
               :aria-selected="currentSemester === semester.slug"
               role="tab"
               @click="switchSemester(semester)"
@@ -104,7 +104,16 @@
               </v-collapse>
             </li>
           </ul>
-          <div class="form-actions">
+          <div class="d-flex justify-end">
+            <v-btn
+              id="page-create-course-site-cancel"
+              aria-label="Cancel and return to Site Creation Overview"
+              class="canvas-button"
+              variant="link"
+              @click="cancel"
+            >
+              Cancel
+            </v-btn>
             <v-btn
               id="page-create-course-site-continue"
               class="canvas-button canvas-button-primary"
@@ -115,15 +124,6 @@
               @click="showConfirmation"
             >
               Next
-            </v-btn>
-            <v-btn
-              id="page-create-course-site-cancel"
-              aria-label="Cancel and return to Site Creation Overview"
-              class="canvas-button"
-              variant="link"
-              @click="cancel"
-            >
-              Cancel
             </v-btn>
           </div>
         </form>

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h2 class="visuallyhidden">Course Site Creation</h2>
+    <h2 class="sr-only">Course Site Creation</h2>
     <div aria-live="polite">
       <div v-show="!jobStatus" class="page-create-course-site-pending-request">
         <v-progress-circular
@@ -26,25 +26,23 @@
           <BackgroundJobError :error-config="errorConfig" :errors="errors" />
           <div class="page-create-course-site-step-options">
             <div>
-              <div class="form-actions">
-                <button
-                  id="start-over-button"
-                  type="button"
-                  aria-controls="page-create-course-site-selecting-step"
-                  aria-label="Start over course site creation process"
-                  @click="fetchFeed"
-                >
-                  Start Over
-                </button>
-                <button
+              <div class="d-flex justify-end">
+                <v-btn
                   id="go-back-button"
-                  type="button"
                   aria-controls="page-create-course-site-confirmation-step"
                   aria-label="Go Back to Site Details Confirmation"
                   @click="showConfirmation"
                 >
                   Back
-                </button>
+                </v-btn>
+                <v-btn
+                  id="start-over-button"
+                  aria-controls="page-create-course-site-selecting-step"
+                  aria-label="Start over course site creation process"
+                  @click="fetchFeed"
+                >
+                  Start Over
+                </v-btn>
               </div>
             </div>
           </div>
@@ -57,7 +55,7 @@
         color="primary"
         indeterminate
       />
-      <div class="visuallyhidden" role="alert">
+      <div class="sr-only" role="alert">
         Redirecting to new course site.
       </div>
     </div>

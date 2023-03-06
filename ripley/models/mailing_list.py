@@ -53,10 +53,8 @@ class MailingList(Base):
 
     @classmethod
     def find_or_initialize(cls, canvas_site_id):
-        mailing_list = cls.query.filter_by(canvas_site_id=canvas_site_id).first()
-        if not mailing_list:
-            mailing_list = cls(canvas_site_id=canvas_site_id)
-            mailing_list.initialize()
+        mailing_list = cls.query.filter_by(canvas_site_id=canvas_site_id).first() or cls(canvas_site_id=canvas_site_id)
+        mailing_list._initialize()
         return mailing_list
 
     @classmethod
@@ -66,7 +64,7 @@ class MailingList(Base):
             raise ValueError(f'List with id {canvas_site_id} already exists')
 
         mailing_list = cls(canvas_site_id=canvas_site_id)
-        mailing_list.initialize()
+        mailing_list._initialize()
         # Admins can optionally override the mailing list name.
         if list_name:
             mailing_list.list_name = list_name
@@ -74,25 +72,6 @@ class MailingList(Base):
         db.session.add(mailing_list)
         std_commit()
         return mailing_list
-
-    def initialize(self):
-        self.canvas_site = canvas.get_course(self.canvas_site_id)
-        if self.canvas_site:
-            self.canvas_site_name = self.canvas_site.name.strip()
-
-            # 'CHEM 1A LEC 003' => 'chem-1a-lec-003-sp15'
-            # {{design}} => 'design-sp15'
-            # 'The "Wild"-"Wild" West?' => 'the-wild-wild-west-sp15'
-            # 'Conversation intermédiaire' => 'conversation-intermediaire-sp15'
-            # 'Global Health: Disaster Preparedness and Response' => 'global-health-disaster-preparedness-and-respo-sp15'
-
-            normalized_name = unidecode(self.canvas_site_name.lower())
-            self.list_name = '-'.join([word for word in re.split('[^a-z0-9]+', normalized_name) if word])[0:45]
-            term = BerkeleyTerm.from_canvas_sis_term_id(self.canvas_site.term['sis_term_id'])
-            if term:
-                self.list_name += '-' + term.to_abbreviation()
-            else:
-                self.list_name += '-list'
 
     def to_api_json(self):
         feed = {
@@ -127,3 +106,22 @@ class MailingList(Base):
             feed['mailingList']['state'] = 'created'
 
         return feed
+
+    def _initialize(self):
+        self.canvas_site = canvas.get_course(self.canvas_site_id)
+        if self.canvas_site:
+            self.canvas_site_name = self.canvas_site.name.strip()
+
+            # 'CHEM 1A LEC 003' => 'chem-1a-lec-003-sp15'
+            # {{design}} => 'design-sp15'
+            # 'The "Wild"-"Wild" West?' => 'the-wild-wild-west-sp15'
+            # 'Conversation intermédiaire' => 'conversation-intermediaire-sp15'
+            # 'Global Health: Disaster Preparedness and Response' => 'global-health-disaster-preparedness-and-respo-sp15'
+
+            normalized_name = unidecode(self.canvas_site_name.lower())
+            self.list_name = '-'.join([word for word in re.split('[^a-z0-9]+', normalized_name) if word])[0:45]
+            term = BerkeleyTerm.from_canvas_sis_term_id(self.canvas_site.term['sis_term_id'])
+            if term:
+                self.list_name += '-' + term.to_abbreviation()
+            else:
+                self.list_name += '-list'

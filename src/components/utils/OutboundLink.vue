@@ -1,7 +1,11 @@
 <template>
-  <a :id="id || `link-to-${href.replace(/\W/g, '')}`" :href="href" target="_blank">
+  <a
+    :id="id || `link-to-${href.replace(/\W/g, '')}`"
+    :href="href"
+    target="_blank"
+  >
     <slot />
-    <span class="outbound-link visuallyhidden print-hide"> (link opens new browser tab)</span>
+    <span class="sr-only print-hide"> (link opens new browser tab)</span>
   </a>
 </template>
 
