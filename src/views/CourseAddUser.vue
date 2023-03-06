@@ -21,7 +21,7 @@
                 @click="noUserSelectedAlert = ''"
               >
                 <v-icon icon="mdi-times-circle" />
-                <span class="visuallyhidden">Hide Alert</span>
+                <span class="sr-only">Hide Alert</span>
               </button>
             </div>
           </div>
@@ -37,7 +37,7 @@
                 @click="searchAlert = null"
               >
                 <v-icon icon="mdi-times-circle" />
-                <span class="visuallyhidden">Hide Alert</span>
+                <span class="sr-only">Hide Alert</span>
               </button>
             </div>
           </div>
@@ -48,7 +48,7 @@
             Please refine your search to limit the number of results.
           </div>
 
-          <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="visuallyhidden">
+          <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="sr-only">
             {{ userSearchResultsCount }} user search results loaded.
           </div>
 
@@ -58,7 +58,7 @@
             <div class="alert-close-button-container">
               <button class="close-button" @click="additionSuccessMessage = ''">
                 <v-icon icon="mdi-times-circle" />
-                <span class="visuallyhidden">Hide Alert</span>
+                <span class="sr-only">Hide Alert</span>
               </button>
             </div>
           </div>
@@ -69,7 +69,7 @@
             <div class="alert-close-button-container">
               <button class="close-button" @click="additionFailureMessage = ''">
                 <v-icon icon="mdi-times-circle" />
-                <span class="visuallyhidden">Hide Alert</span>
+                <span class="sr-only">Hide Alert</span>
               </button>
             </div>
           </div>
@@ -81,7 +81,7 @@
           <form class="canvas-page-form" @submit.prevent="searchUsers">
             <v-row class="horizontal-form" no-gutters>
               <v-col md="4">
-                <label for="search-text" class="visuallyhidden">Search users</label>
+                <label for="search-text" class="sr-only">Search users</label>
                 <input
                   id="search-text"
                   v-model="searchText"
@@ -175,15 +175,15 @@
       />
 
       <v-row v-if="showUsersArea" no-gutters>
-        <h2 id="user-search-results-header" class="visuallyhidden" tabindex="-1">User Search Results</h2>
+        <h2 id="user-search-results-header" class="sr-only" tabindex="-1">User Search Results</h2>
         <v-col v-if="userSearchResults.length > 0" md="12">
           <form class="canvas-page-form">
             <fieldset class="form-fieldset">
-              <legend class="visuallyhidden">Select the user you wish to add to the course site:</legend>
+              <legend class="sr-only">Select the user you wish to add to the course site:</legend>
               <table class="table table-striped">
                 <thead>
                   <tr>
-                    <th scope="col"><span class="visuallyhidden">Actions</span></th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
                     <th scope="col">Name</th>
                     <th scope="col">Calnet UID</th>
                     <th scope="col">Email</th>
@@ -245,22 +245,24 @@
               </v-col>
             </v-row>
             <v-row no-gutters>
-              <v-col md="12" class="form-actions">
-                <button
-                  type="button"
-                  class="canvas-button start-over-button"
-                  @click="resetForm"
-                >
-                  Start Over
-                </button>
-                <button
-                  :disabled="!selectedUser"
-                  type="button"
-                  class="canvas-button canvas-button-primary"
-                  @click="submitUser"
-                >
-                  Add User
-                </button>
+              <v-col md="12">
+                <div class="d-flex justify-end">
+                  <v-btn
+                    id="add-user-btn"
+                    class="canvas-button canvas-button-primary"
+                    :disabled="!selectedUser"
+                    @click="submitUser"
+                  >
+                    Add User
+                  </v-btn>
+                  <v-btn
+                    id="start-over-btn"
+                    class="canvas-button start-over-button"
+                    @click="resetForm"
+                  >
+                    Start Over
+                  </v-btn>
+                </div>
               </v-col>
             </v-row>
           </form>

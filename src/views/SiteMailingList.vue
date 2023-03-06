@@ -30,25 +30,24 @@
       members. Students and people not in the site cannot send messages through Mailing Lists.
     </p>
 
-    <form v-if="!listCreated" class="canvas-page-form canvas-form" @submit.prevent="createMailingList">
-      <div class="form-actions">
-        <button
-          id="btn-create-mailing-list"
-          type="submit"
-          class="canvas-button canvas-button-primary"
-          aria-controls="page-reader-alert"
-          :disabled="errorMessages"
-        >
-          <span v-if="!isCreating">Create mailing list</span>
-          <span v-if="isCreating">
-            <v-progress-circular
-              class="mr-2"
-              color="primary"
-              indeterminate
-            /> Creating ...</span>
-        </button>
-      </div>
-    </form>
+    <div v-if="!listCreated">
+      <v-btn
+        id="btn-create-mailing-list"
+        class="canvas-button canvas-button-primary"
+        aria-controls="page-reader-alert"
+        color="primary"
+        :disabled="errorMessages"
+        @click="createMailingList"
+      >
+        <span v-if="!isCreating">Create mailing list</span>
+        <span v-if="isCreating">
+          <v-progress-circular
+            class="mr-2"
+            color="primary"
+            indeterminate
+          /> Creating ...</span>
+      </v-btn>
+    </div>
 
     <div v-if="listCreated" class="border-top mt-3 pt-3">
       <h2 id="send-welcome-email-header" class="header page-site-mailing-list-welcome-email-form-heading" tabindex="-1">

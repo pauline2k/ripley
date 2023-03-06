@@ -15,35 +15,45 @@
       </div>
     </div>
 
-    <div v-if="listCreated && !mailingList.timeLastPopulated" role="alert" class="alert alert-info">
-      The list <strong>"{{ mailingList.name }}@{{ mailingList.domain }}"</strong> has been created. Choose "Update membership from course site" to add members.
-    </div>
+    <v-alert
+      v-if="listCreated && !mailingList.timeLastPopulated"
+      role="alert"
+      type="info"
+    >
+      The list <strong>"{{ mailingList.name }}@{{ mailingList.domain }}"</strong> has been created.
+      Choose "Update membership from course site" to add members.
+    </v-alert>
 
-    <div v-if="siteSelected && !listCreated" role="alert" class="alert alert-info">
+    <v-alert
+      v-if="siteSelected && !listCreated"
+      role="alert"
+      type="info"
+    >
       No mailing list has been created for this site.
-    </div>
+    </v-alert>
 
     <div v-if="!siteSelected" class="align-center d-flex flex-wrap pa-3">
-      <div class="pr-2">
+      <div class="pr-3">
         <label for="page-site-mailing-list-site-id" class="sr-only">Course Site ID</label>
         <v-text-field
           id="page-site-mailing-list-site-id"
           v-model="canvasSite.canvasCourseId"
           aria-required="true"
-          :error="!!$_.trim(canvasSite.canvasCourseId) && !isCanvasCourseIdValid"
+          :error="!!$_.trim(canvasSite.canvasCourseId) && !isCanvasCourseIdValid(canvasSite.canvasCourseId)"
           hide-details
-          maxlength="9"
+          maxlength="10"
           label="Canvas Course ID"
           required
           style="width: 200px"
+          variant="outlined"
           @keydown.enter="findSiteMailingList"
         />
       </div>
       <div>
         <v-btn
           id="btn-get-mailing-list"
+          color="primary"
           :disabled="isProcessing || !isCanvasCourseIdValid"
-          size="large"
           @click="findSiteMailingList"
         >
           <span v-if="!isProcessing">Get Mailing List</span>
@@ -60,93 +70,106 @@
       </div>
     </div>
 
-    <div v-if="siteSelected">
-      <div id="mailing-list-details" class="page-site-mailing-list-info-box">
-        <h2 id="mailing-list-details-header" class="header page-site-mailing-list-header2" tabindex="-1">
-          <span v-if="!listCreated" class="ellipsis">{{ canvasSite.name }}</span>
-          <span v-if="listCreated" class="ellipsis">{{ mailingList.name }}@{{ mailingList.domain }}</span>
-        </h2>
-        <div v-if="listCreated">
-          <div id="mailing-list-member-count">{{ pluralize('member', mailingList.membersCount, {0: 'No'}) }}</div>
-          <div>Membership last updated: <strong id="mailing-list-membership-last-updated">{{ listLastPopulated }}</strong></div>
-          <div>
-            Course site:
-            <OutboundLink
-              id="mailing-list-court-site-name"
-              :href="canvasSite.url"
-              @click="trackExternalLink('Canvas Site Mailing List', 'bCourses', canvasSite.url)"
-            >
-              {{ canvasSite.name }}
-            </OutboundLink>
+    <div v-if="siteSelected" class="mt-4">
+      <v-card id="mailing-list-details">
+        <v-card-text>
+          <h2 id="mailing-list-details-header" class="header page-site-mailing-list-header2" tabindex="-1">
+            <span v-if="!listCreated" class="ellipsis">{{ canvasSite.name }}</span>
+            <span v-if="listCreated" class="ellipsis">{{ mailingList.name }}@{{ mailingList.domain }}</span>
+          </h2>
+          <div v-if="listCreated">
+            <div id="mailing-list-member-count">{{ pluralize('member', mailingList.membersCount, {0: 'No'}) }}</div>
+            <div>Membership last updated: <strong id="mailing-list-membership-last-updated">{{ listLastPopulated }}</strong></div>
+            <div>
+              Course site:
+              <OutboundLink
+                id="mailing-list-court-site-name"
+                :href="canvasSite.url"
+                @click="trackExternalLink('Canvas Site Mailing List', 'bCourses', canvasSite.url)"
+              >
+                {{ canvasSite.name }}
+              </OutboundLink>
+            </div>
           </div>
+          <div class="d-flex flex-wrap justify-space-between">
+            <div id="mailing-list-canvas-code-and-term">{{ canvasSite.codeAndTerm }}</div>
+            <div id="mailing-list-canvas-course-id">
+              <span class="font-weight-medium">Site ID:</span>
+              {{ canvasSite.canvasCourseId }}
+            </div>
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <OutboundLink
+            v-if="!listCreated"
+            id="view-course-site-link"
+            class="mb-3 px-3"
+            :href="canvasSite.url"
+            @click="trackExternalLink('Canvas Site Mailing List', 'bCourses', canvasSite.url)"
+          >
+            View course site
+          </OutboundLink>
+        </v-card-actions>
+      </v-card>
+
+      <div v-if="!listCreated" class="align-center d-flex flex-wrap py-8 w-100">
+        <div class="mx-3 text-right">
+          <label for="mailing-list-name-input">New Mailing List Name:</label>
         </div>
-        <v-row no-gutters>
-          <v-col id="mailing-list-canvas-code-and-term" sm="12" md="4">{{ canvasSite.codeAndTerm }}</v-col>
-          <v-col id="mailing-list-canvas-course-id" sm="12" md="6">Site ID: {{ canvasSite.canvasCourseId }}</v-col>
-        </v-row>
-        <OutboundLink
-          v-if="!listCreated"
-          id="view-course-site-link"
-          :href="canvasSite.url"
-          @click="trackExternalLink('Canvas Site Mailing List', 'bCourses', canvasSite.url)"
-        >
-          View course site
-        </OutboundLink>
+        <div class="w-75">
+          <v-text-field
+            id="mailing-list-name-input"
+            v-model="mailingList.name"
+            aria-required="true"
+            hide-details
+            max-length="255"
+            variant="outlined"
+            required
+          />
+        </div>
       </div>
 
-      <form class="canvas-page-form canvas-form">
-        <div v-if="!listCreated">
-          <v-row no-gutters class="page-site-mailing-list-form-input-row">
-            <v-col sm="12" md="3">
-              <label for="mailingListName" class="page-site-mailing-list-form-label">New Mailing List Name:</label>
-            </v-col>
-            <v-col sm="12" md="9">
-              <v-text-field
-                id="mailingListName"
-                v-model="mailingList.name"
-                aria-required="true"
-                hide-details
-                required
-              />
-            </v-col>
-          </v-row>
-        </div>
-
-        <div class="form-actions">
-          <v-btn
-            v-if="!listCreated"
-            id="btn-create-mailing-list"
-            aria-controls="page-reader-alert"
-            @click="registerMailingList"
-          >
-            <span>Create mailing list</span>
-          </v-btn>
-          <v-btn
-            v-if="listCreated"
-            id="btn-populate-mailing-list"
-            aria-controls="page-reader-alert"
-            @click="populateMailingList"
-          >
-            <span v-if="!isProcessing">Update membership from course site</span>
-            <span v-if="isProcessing">
-              <v-progress-circular
-                class="mr-2"
-                color="primary"
-                indeterminate
-              />
-              Updating...
-            </span>
-          </v-btn>
-          <v-btn id="btn-cancel" @click="resetForm">
-            Cancel
-          </v-btn>
-        </div>
-      </form>
+      <div class="form-actions">
+        <v-btn
+          id="btn-cancel"
+          class="mr-1"
+          variant="text"
+          @click="resetForm"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          v-if="!listCreated"
+          id="btn-create-mailing-list"
+          aria-controls="page-reader-alert"
+          color="primary"
+          @click="registerMailingList"
+        >
+          Create mailing list
+        </v-btn>
+        <v-btn
+          v-if="listCreated"
+          id="btn-populate-mailing-list"
+          aria-controls="page-reader-alert"
+          @click="populateMailingList"
+        >
+          <span v-if="!isProcessing">Update membership from course site</span>
+          <span v-if="isProcessing">
+            <v-progress-circular
+              class="mr-2"
+              color="primary"
+              indeterminate
+            />
+            Updating...
+          </span>
+        </v-btn>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
+import CanvasUtils from '@/mixins/CanvasUtils.vue'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import Utils from '@/mixins/Utils'
@@ -155,7 +178,7 @@ import {createSiteMailingListAdmin, getSiteMailingListAdmin, populateSiteMailing
 export default {
   name: 'SiteMailingLists',
   components: {OutboundLink},
-  mixins: [Context, Utils],
+  mixins: [CanvasUtils, Context, Utils],
   data: () => ({
     alerts: {
       error: [],
@@ -168,12 +191,6 @@ export default {
     mailingList: {},
     siteSelected: false
   }),
-  computed: {
-    isCanvasCourseIdValid() {
-      const canvasCourseId = this.$_.trim(this.canvasSite.canvasCourseId)
-      return !!canvasCourseId && canvasCourseId.match(/^\d+$/)
-    }
-  },
   mounted() {
     this.$ready()
   },
@@ -274,53 +291,27 @@ export default {
   .page-site-mailing-list-button-primary {
     margin: 0 4px;
   }
-
   .page-site-mailing-list-header2 {
     font-size: 17px;
     line-height: 25px;
   }
-
   .page-site-mailing-list-header3 {
     font-size: 15px;
     line-height: 22px;
   }
-
-  .page-site-mailing-list-info-box {
-    border: 1px solid $color-container-grey-border;
-    margin: 24px 0;
-    padding: 6px 10px;
-  }
-
   .page-site-mailing-list-form {
     margin: 20px 0;
   }
-
-  .page-site-mailing-list-form-input-row {
-    margin: 20px 0;
-    text-align: right;
-  }
-
-  .page-site-mailing-list-form-label {
-    text-align: right;
-  }
-
   .page-site-mailing-list-form-label-long {
     display: inline;
     font-weight: 300;
     text-align: left;
   }
-
   .page-site-mailing-list-text {
     font-size: 14px;
     font-weight: 300;
     line-height: 1.6;
     margin: 15px;
-  }
-
-  @media #{$small-only} {
-    .page-site-mailing-list-form-label {
-      text-align: left;
-    }
   }
 }
 </style>

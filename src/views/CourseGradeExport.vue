@@ -126,7 +126,7 @@
           </h1>
         </v-col>
       </v-row>
-      <v-row class="visuallyhidden">
+      <v-row class="sr-only">
         <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
       </v-row>
       <v-row v-if="officialSections.length > 1" no-gutters>
