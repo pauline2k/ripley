@@ -37,7 +37,7 @@ class BaseJob:
     def __init__(self, app_context):
         self.app_context = app_context
 
-    def run(self, force_run=False):
+    def run(self, force_run=False, params={}):
         with self.app_context():
             job = Job.get_job_by_key(self.key())
             if job:
@@ -57,7 +57,7 @@ class BaseJob:
                     app.logger.info(f'Job {self.key()} is starting.')
                     job_tracker = JobHistory.job_started(job_key=self.key())
                     try:
-                        self._run()
+                        self._run(params)
                         JobHistory.job_finished(id_=job_tracker.id)
                         app.logger.info(f'Job {self.key()} finished successfully.')
 
@@ -70,7 +70,7 @@ class BaseJob:
             else:
                 raise BackgroundJobError(f'Job {self.key()} is not registered in the database')
 
-    def _run(self):
+    def _run(self, params):
         raise BackgroundJobError('Implement this method in Job sub-class')
 
     @classmethod

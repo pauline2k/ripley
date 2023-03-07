@@ -29,7 +29,7 @@ from ripley.models.job_history import JobHistory
 
 class HouseKeepingJob(BaseJob):
 
-    def _run(self):
+    def _run(self, params={}):
         JobHistory.expire_old_rows(app.config['JOB_HISTORY_DAYS_UNTIL_EXPIRE'])
 
     @classmethod
