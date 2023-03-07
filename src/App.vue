@@ -89,11 +89,6 @@ a {
   border: 0;
   padding: 0;
 }
-.form-actions {
-  display: flex;
-  justify-content: right;
-  margin: 5px 0;
-}
 .header {
   color: $color-primary;
   font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;

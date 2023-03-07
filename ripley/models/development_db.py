@@ -94,6 +94,6 @@ def _set_up_and_run_jobs():
 
 
 if __name__ == '__main__':
-    import diablo.factory
-    diablo.factory.create_app()
+    import ripley.factory
+    ripley.factory.create_app()
     load()

@@ -70,10 +70,11 @@ def register_canvas_uris(app, requirements, requests_mocker):
     """
     for fixture, objects in requirements.items():
         try:
-            with open(f'tests/fixtures/canvas/json/{fixture}.json') as file:
+            base_dir = app.config['BASE_DIR']
+            with open(f'{base_dir}/tests/fixtures/canvas/json/{fixture}.json') as file:
                 data = json.loads(file.read())
-        except (IOError, ValueError):
-            raise ValueError(f'Fixture {fixture}.json contains invalid JSON.')
+        except (IOError, ValueError) as e:
+            raise ValueError(str(e) or f'Fixture {fixture}.json contains invalid JSON.')
 
         if not isinstance(objects, list):
             raise TypeError(f'{objects} is not a list.')
