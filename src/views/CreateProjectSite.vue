@@ -20,7 +20,7 @@
           </v-row>
         </v-container>
 
-        <div class="form-actions mt-4">
+        <div class="d-flex justify-end mt-4">
           <button
             id="create-project-site-button"
             :disabled="isCreating || !$_.trim(name)"

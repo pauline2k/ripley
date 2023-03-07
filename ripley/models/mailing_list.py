@@ -29,7 +29,9 @@ from flask import current_app as app
 from ripley import db, std_commit
 from ripley.externals import canvas
 from ripley.lib.berkeley_term import BerkeleyTerm
+from ripley.lib.mailing_list_utils import send_welcome_emails
 from ripley.models.base import Base
+from ripley.models.mailing_list_members import MailingListMembers
 from unidecode import unidecode
 
 
@@ -73,6 +75,16 @@ class MailingList(Base):
         std_commit()
         return mailing_list
 
+    @classmethod
+    def populate(cls, mailing_list):
+        course = canvas.get_course(api_call=False, course_id=mailing_list.canvas_site_id)
+        course_users = course.get_users()
+        existing_list_members = MailingListMembers.get_mailing_list_members(mailing_list_id=mailing_list.id)
+
+        MailingListMembers.update_memberships(course_users, existing_list_members)
+        if mailing_list.welcome_email_active and mailing_list.welcome_email_body and mailing_list.welcome_email_subject:
+            send_welcome_emails()
+
     def to_api_json(self):
         feed = {
             'canvasSite': {
@@ -111,13 +123,6 @@ class MailingList(Base):
         self.canvas_site = canvas.get_course(self.canvas_site_id)
         if self.canvas_site:
             self.canvas_site_name = self.canvas_site.name.strip()
-
-            # 'CHEM 1A LEC 003' => 'chem-1a-lec-003-sp15'
-            # {{design}} => 'design-sp15'
-            # 'The "Wild"-"Wild" West?' => 'the-wild-wild-west-sp15'
-            # 'Conversation intermédiaire' => 'conversation-intermediaire-sp15'
-            # 'Global Health: Disaster Preparedness and Response' => 'global-health-disaster-preparedness-and-respo-sp15'
-
             normalized_name = unidecode(self.canvas_site_name.lower())
             self.list_name = '-'.join([word for word in re.split('[^a-z0-9]+', normalized_name) if word])[0:45]
             term = BerkeleyTerm.from_canvas_sis_term_id(self.canvas_site.term['sis_term_id'])

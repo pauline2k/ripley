@@ -30,8 +30,8 @@ export function getSiteMailingListAdmin(canvasCourseId: string) {
   return utils.get(`/api/mailing_lists/${canvasCourseId}`)
 }
 
-export function createSiteMailingListAdmin(canvasCourseId: string, list: any) {
-  return utils.post(`/api/mailing_lists/${canvasCourseId}/create`, {listName: list.name})
+export function createSiteMailingListAdmin(canvasCourseId: string, name: string) {
+  return utils.post(`/api/mailing_lists/${canvasCourseId}/create`, {listName: name})
 }
 
 export function populateSiteMailingList(canvasCourseId: string) {

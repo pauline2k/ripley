@@ -12,7 +12,7 @@
           <v-col>
             <v-card
               class="mx-auto"
-              max-width="360"
+              max-width="480"
             >
               <v-card-title>
                 {{ isError ? 'Error' : 'Page Not Found' }}

@@ -24,7 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from flask import current_app as app
-from ripley.api.errors import BadRequestError
+from ripley.api.errors import BadRequestError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required
 from ripley.lib.http import tolerant_jsonify
 from ripley.models.mailing_list import MailingList
@@ -41,35 +41,21 @@ def mailing_lists(canvas_course_id):
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def create_mailing_lists(canvas_course_id):
     try:
-        m = MailingList.create(canvas_course_id)
+        return tolerant_jsonify(MailingList.create(canvas_course_id).to_api_json())
     except ValueError as e:
         raise BadRequestError(e.message)
-    return tolerant_jsonify(m.to_api_json())
 
 
 @app.route('/api/mailing_lists/<canvas_course_id>/populate', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def populate_mailing_lists(canvas_course_id):
-    return tolerant_jsonify({
-        'canvasSite': {
-            'canvasCourseId': canvas_course_id,
-            'courseCode': None,
-            'name': None,
-            'sisCourseId': None,
-            'term': None,
-            'url': f"{app.config['CANVAS_API_URL']}/courses/{canvas_course_id}",
-        },
-        'errorMessages': [],
-        'mailingList': {
-            'domain': None,
-            'membersCount': None,
-            'name': None,
-            'state': None,
-            'timeLastPopulated': None,
-            'welcomeEmailActive': None,
-            'welcomeEmailBody': None,
-            'welcomeEmailLastSent': None,
-            'welcomeEmailSubject': None,
-        },
-        'populationResults': [],
-    })
+    mailing_list = MailingList.find_or_initialize(canvas_course_id)
+    if mailing_list:
+        population_results = MailingList.populate(mailing_list=mailing_list)
+        return tolerant_jsonify({
+            **mailing_list.to_api_json(),
+            'errorMessages': [],  # TODO
+            'populationResults': population_results,
+        })
+    else:
+        raise ResourceNotFoundError()

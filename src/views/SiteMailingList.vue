@@ -40,12 +40,7 @@
         @click="createMailingList"
       >
         <span v-if="!isCreating">Create mailing list</span>
-        <span v-if="isCreating">
-          <v-progress-circular
-            class="mr-2"
-            color="primary"
-            indeterminate
-          /> Creating ...</span>
+        <span v-if="isCreating"><SpinnerWithinButton /> Creating...</span>
       </v-btn>
     </div>
 
@@ -91,10 +86,7 @@
             </span>
           </v-btn>
           <div v-if="isTogglingEmailActivation" class="pl-2">
-            <v-progress-circular
-              color="primary"
-              indeterminate
-            />
+            <SpinnerWithinButton />
           </div>
         </div>
       </div>
@@ -103,7 +95,7 @@
         <v-btn
           id="btn-download-sent-message-log"
           type="button"
-          variant="link"
+          variant="text"
           class="p-0"
           @click="downloadMessageLog"
         >
@@ -141,32 +133,25 @@
           </div>
         </v-row>
         <v-row no-gutters>
-          <button
+          <v-btn
             id="btn-save-welcome-email"
-            type="submit"
-            class="canvas-button canvas-button-primary"
             aria-controls="page-reader-alert"
+            color="primary"
             :disabled="!mailingListSubject || !mailingListMessage"
           >
             <span v-if="!isSavingWelcomeEmail">Save welcome email</span>
             <span v-if="isSavingWelcomeEmail">
-              <v-progress-circular
-                class="mr-2"
-                color="primary"
-                indeterminate
-              />
-              Saving...
+              <SpinnerWithinButton /> Saving...
             </span>
-          </button>
-          <button
+          </v-btn>
+          <v-btn
             v-if="emailFieldsPresent"
             id="btn-cancel-welcome-email-edit"
-            class="canvas-button canvas-button-secondary"
-            type="button"
+            color="secondary"
             @click="cancelEditMode"
           >
             Cancel
-          </button>
+          </v-btn>
         </v-row>
       </form>
 
@@ -206,6 +191,7 @@ import CKEditor from '@ckeditor/ckeditor5-vue'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import Utils from '@/mixins/Utils'
 import {
   activateWelcomeEmail,
@@ -219,6 +205,7 @@ import {
 export default {
   name: 'SiteMailingList',
   components: {
+    SpinnerWithinButton,
     ckeditor: CKEditor.component,
     OutboundLink
   },

@@ -53,18 +53,12 @@
         <v-btn
           id="btn-get-mailing-list"
           color="primary"
-          :disabled="isProcessing || !isCanvasCourseIdValid"
+          :disabled="isProcessing || !isCanvasCourseIdValid(canvasSite.canvasCourseId)"
           @click="findSiteMailingList"
         >
           <span v-if="!isProcessing">Get Mailing List</span>
           <span v-if="isProcessing">
-            <v-progress-circular
-              class="mr-2"
-              color="primary"
-              indeterminate
-              size="x-small"
-            />
-            Searching...
+            <SpinnerWithinButton /> Searching...
           </span>
         </v-btn>
       </div>
@@ -77,21 +71,20 @@
             <span v-if="!listCreated" class="ellipsis">{{ canvasSite.name }}</span>
             <span v-if="listCreated" class="ellipsis">{{ mailingList.name }}@{{ mailingList.domain }}</span>
           </h2>
-          <div v-if="listCreated">
+          <div v-if="listCreated" class="pt-2">
             <div id="mailing-list-member-count">{{ pluralize('member', mailingList.membersCount, {0: 'No'}) }}</div>
             <div>Membership last updated: <strong id="mailing-list-membership-last-updated">{{ listLastPopulated }}</strong></div>
-            <div>
+            <div class="pt-2">
               Course site:
               <OutboundLink
                 id="mailing-list-court-site-name"
                 :href="canvasSite.url"
-                @click="trackExternalLink('Canvas Site Mailing List', 'bCourses', canvasSite.url)"
               >
                 {{ canvasSite.name }}
               </OutboundLink>
             </div>
           </div>
-          <div class="d-flex flex-wrap justify-space-between">
+          <div class="d-flex flex-wrap justify-space-between mb-2">
             <div id="mailing-list-canvas-code-and-term">{{ canvasSite.codeAndTerm }}</div>
             <div id="mailing-list-canvas-course-id">
               <span class="font-weight-medium">Site ID:</span>
@@ -99,13 +92,11 @@
             </div>
           </div>
         </v-card-text>
-        <v-card-actions>
+        <v-card-actions v-if="!listCreated">
           <OutboundLink
-            v-if="!listCreated"
             id="view-course-site-link"
             class="mb-3 px-3"
             :href="canvasSite.url"
-            @click="trackExternalLink('Canvas Site Mailing List', 'bCourses', canvasSite.url)"
           >
             View course site
           </OutboundLink>
@@ -125,11 +116,12 @@
             max-length="255"
             variant="outlined"
             required
+            @keydown.enter="registerMailingList"
           />
         </div>
       </div>
 
-      <div class="form-actions">
+      <div class="d-flex justify-end mt-4">
         <v-btn
           id="btn-cancel"
           class="mr-1"
@@ -143,6 +135,7 @@
           id="btn-create-mailing-list"
           aria-controls="page-reader-alert"
           color="primary"
+          :disabled="!$_.trim(mailingList.name)"
           @click="registerMailingList"
         >
           Create mailing list
@@ -151,16 +144,12 @@
           v-if="listCreated"
           id="btn-populate-mailing-list"
           aria-controls="page-reader-alert"
+          color="primary"
           @click="populateMailingList"
         >
           <span v-if="!isProcessing">Update membership from course site</span>
           <span v-if="isProcessing">
-            <v-progress-circular
-              class="mr-2"
-              color="primary"
-              indeterminate
-            />
-            Updating...
+            <SpinnerWithinButton /> Updating...
           </span>
         </v-btn>
       </div>
@@ -172,12 +161,13 @@
 import CanvasUtils from '@/mixins/CanvasUtils.vue'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import Utils from '@/mixins/Utils'
 import {createSiteMailingListAdmin, getSiteMailingListAdmin, populateSiteMailingList} from '@/api/mailing-lists'
 
 export default {
   name: 'SiteMailingLists',
-  components: {OutboundLink},
+  components: {OutboundLink, SpinnerWithinButton},
   mixins: [CanvasUtils, Context, Utils],
   data: () => ({
     alerts: {
@@ -214,7 +204,10 @@ export default {
     registerMailingList() {
       this.$announcer.polite('Creating list')
       this.isProcessing = true
-      createSiteMailingListAdmin(this.canvasSite.canvasCourseId, this.mailingList).then(this.updateDisplay, this.$errorHandler)
+      const name = this.$_.trim(this.mailingList.name)
+      if (name) {
+        createSiteMailingListAdmin(this.canvasSite.canvasCourseId, name).then(this.updateDisplay, this.$errorHandler)
+      }
     },
     resetForm() {
       this.canvasSite = {}
@@ -222,9 +215,6 @@ export default {
       this.updateDisplay({})
       this.$announcer.polite('Canceled.')
       this.$putFocusNextTick('page-site-mailing-list-site-id')
-    },
-    trackExternalLink() {
-      // TODO implement CLC-7512
     },
     updateCodeAndTerm(canvasSite) {
       const codeAndTermArray = []
