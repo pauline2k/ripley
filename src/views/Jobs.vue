@@ -77,6 +77,8 @@
             <DisableJobToggle :key="item.raw.disabled" :job="item.raw" :on-change="toggleDisabled" />
           </template>
         </v-data-table-virtual>
+        <v-checkbox id="dry-run-checkbox" v-model="isDryRun" label="Dry run">
+        </v-checkbox>
       </v-card-text>
     </v-card>
     <JobHistory :job-history="jobHistory" :refreshing="refreshing" />
@@ -150,6 +152,7 @@ export default {
       {key: 'schedule', title: 'Schedule'},
       {key: 'enabled', title: 'Enabled'}
     ],
+    isDryRun: false,
     jobHistory: undefined,
     jobSchedule: undefined,
     refresher: undefined,
@@ -188,7 +191,7 @@ export default {
         failed: false,
         startedAt: this.$moment()
       })
-      startJob(job.key).then(() => {})
+      startJob(job.key, {isDryRun: this.isDryRun}).then(() => {})
       const jobName = this.$_.find(this.jobSchedule.jobs, ['key', job.key]).name
       // TODO: this.snackbarOpen(`${jobName} job started`)
     },

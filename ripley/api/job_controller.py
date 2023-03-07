@@ -83,13 +83,14 @@ def last_successful_run(job_key):
     return tolerant_jsonify(entry and entry.to_api_json())
 
 
-@app.route('/api/job/<job_key>/start')
+@app.route('/api/job/<job_key>/start', methods=['POST'])
 @admin_required
 def start_job(job_key):
+    params = request.get_json()
     job_class = next((job for job in BackgroundJobManager.available_job_classes() if job.key() == job_key), None)
     if job_class:
         app.logger.info(f'Current user ({current_user.uid}) started job {job_class.key()}')
-        job_class(app.app_context).run(force_run=True)
+        job_class(app.app_context).run(force_run=True, params=params)
         return tolerant_jsonify(_job_class_to_json(job_class))
     else:
         raise ResourceNotFoundError(f'Invalid job_key: {job_key}')

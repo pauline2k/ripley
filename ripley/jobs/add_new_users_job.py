@@ -38,10 +38,12 @@ from ripley.lib.canvas_utils import uid_from_canvas_login_id, user_id_from_attri
 
 class AddNewUsersJob(BaseJob):
 
-    def _run(self):
+    def _run(self, params={}):
         timestamp = datetime.now().strftime('%F_%H-%M-%S')
         canvas_export_file = tempfile.NamedTemporaryFile()
         canvas_import_file = tempfile.NamedTemporaryFile()
+
+        dry_run = params.get('isDryRun', None) or False
 
         canvas.get_csv_report('users', download_path=canvas_export_file.name)
 
@@ -73,13 +75,16 @@ class AddNewUsersJob(BaseJob):
                         'status': 'active',
                     })
 
-            if canvas.post_sis_import(canvas_import_file.name):
-                # Archive export and import files in S3.
-                upload_dated_csv(canvas_export_file.name, 'user-provision-report', 'canvas_csv_reports', timestamp)
-                upload_dated_csv(canvas_import_file.name, 'user-sis-import', 'canvas_csv_imports', timestamp)
-                app.logger.info('Users added, job complete.')
+            if dry_run:
+                app.logger.info('Dry run mode, will not post SIS import file to Canvas.')
             else:
-                raise BackgroundJobError('New users import failed.')
+                if not canvas.post_sis_import(canvas_import_file.name):
+                    raise BackgroundJobError('New users import failed.')
+
+            # Archive export and import files in S3.
+            upload_dated_csv(canvas_export_file.name, 'user-provision-report', 'canvas_csv_reports', timestamp)
+            upload_dated_csv(canvas_import_file.name, 'user-sis-import', 'canvas_csv_imports', timestamp)
+            app.logger.info('Users added, job complete.')
 
     @classmethod
     def description(cls):

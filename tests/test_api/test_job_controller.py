@@ -191,8 +191,12 @@ class TestStartJob:
         _api_start_job(client, job_key='ready to work', expected_status_code=404)
 
 
-def _api_start_job(client, job_key=None, expected_status_code=200):
-    response = client.get(f'/api/job/{job_key}/start')
+def _api_start_job(client, job_key=None, params=None, expected_status_code=200):
+    response = client.post(
+        f'/api/job/{job_key}/start',
+        data=json.dumps(params or {}),
+        content_type='application/json',
+    )
     assert response.status_code == expected_status_code
     return response.json
 

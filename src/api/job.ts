@@ -19,8 +19,8 @@ export function setJobDisabled(jobId: String, disable: Boolean) {
   })
 }
 
-export function startJob(jobKey: String) {
-  return utils.get(`/api/job/${jobKey}/start`)
+export function startJob(jobKey: String, params: Object) {
+  return utils.post(`/api/job/${jobKey}/start`, params)
 }
 
 export function updateJobSchedule(jobId: String, type: String, value: String) {
