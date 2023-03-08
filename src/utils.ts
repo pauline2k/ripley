@@ -16,27 +16,17 @@ export function initializeAxios(app: any, axios: any) {
       if (_.includes([401, 403], errorStatus)) {
         // Refresh user in case his/her session expired.
         return axios.get(`${apiBaseUrl}/api/user/my_profile`).then((data: any) => {
-          useContextStore().setCurrentUser(data)
-          const errorUrl = _.get(error, 'response.config.url')
-          // Auth errors from the academics API should be handled by individual LTI components.
-          if (!(errorUrl && errorUrl.includes('/api/academics'))) {
-            axiosErrorHandler(error)
+          const currentUser = data
+          useContextStore().setCurrentUser(currentUser)
+          if (!currentUser.isAuthenticated) {
+            useContextStore().setApplicationState(errorStatus, 'Your session has expired')
           }
           return Promise.reject(error)
         })
       } else {
-        axiosErrorHandler(error)
         return Promise.reject(error)
       }
     })
-}
-
-export function axiosErrorHandler(error: any) {
-  const status = _.get(error, 'response.status')
-  const message = useContextStore().currentUser.isAuthenticated && (!status || status >= 400)
-    ? _.get(error, 'response.data.error') || _.get(error, 'response.data.message') || _.get(error, 'message')
-    : 'Your session has expired'
-  useContextStore().setApplicationState(status, message)
 }
 
 export function putFocusNextTick(id: string, cssSelector?: string) {

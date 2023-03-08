@@ -7,7 +7,7 @@
       closable
       density="compact"
       role="alert"
-      type="error"
+      type="warning"
     >
       <div v-for="error in errorMessages" :key="error">{{ error }}</div>
     </v-alert>
@@ -210,10 +210,17 @@ export default {
     this.$ready()
   },
   methods: {
+    axiosErrorHandler(message) {
+      this.errorMessages = [message]
+      this.isProcessing = false
+    },
     findSiteMailingList() {
       if (!this.isProcessing && this.modelCanvasCourseId) {
         this.isProcessing = true
-        getSiteMailingListAdmin(this.modelCanvasCourseId).then(this.updateDisplay, this.$errorHandler)
+        getSiteMailingListAdmin(this.modelCanvasCourseId).then(
+          this.updateDisplay,
+          this.axiosErrorHandler
+        )
       }
     },
     populateMailingList() {
@@ -237,6 +244,7 @@ export default {
     },
     resetForm() {
       this.mailingList = undefined
+      this.modelCanvasCourseId = undefined
       this.$announcer.polite('Canceled.')
       this.$putFocusNextTick('page-site-mailing-list-site-id')
     },
