@@ -28,26 +28,10 @@ from urllib.parse import urlencode
 import cas
 from flask import current_app as app, flash, redirect, request, url_for
 from flask_login import current_user, login_required, logout_user
-from pylti1p3.contrib.flask import (FlaskCacheDataStorage, FlaskMessageLaunch, FlaskOIDCLogin, FlaskRequest)
-from pylti1p3.exception import LtiException
-from pylti1p3.tool_config import ToolConfJsonFile
-from ripley import cache
-from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
+from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import start_login_session
 from ripley.lib.http import add_param_to_url, tolerant_jsonify
 from ripley.models.user import User
-
-
-class MessageLaunch(FlaskMessageLaunch):
-
-    def validate_nonce(self):
-        # Temporary(?) workaround for "Invalid nonce" error from pylti1p3.
-        try:
-            super().validate_nonce()
-        except LtiException as e:
-            nonce = self._get_jwt_body().get('nonce')
-            app.logger.warn(f'Nonce validation failed; skipping. {e} nonce={nonce}')
-        return self
 
 
 @app.route('/api/auth/cas_login_url')
@@ -99,64 +83,6 @@ def update_user_session():
             return tolerant_jsonify({'message': msg}, 403)
     else:
         raise ResourceNotFoundError('Unknown path')
-
-
-@app.route('/api/auth/jwks')
-def get_jwk_set():
-    lti_config_path = app.config['LTI_CONFIG_PATH']
-    try:
-        tool_conf = ToolConfJsonFile(lti_config_path)
-        key_set = tool_conf.get_jwks()
-        return tolerant_jsonify(key_set)
-    except Exception as e:
-        app.logger.error(f'Failed to generate LTI keys: {e.__class__.__name__}: {e}')
-        raise InternalServerError({'message': str(e)})
-
-
-@app.route('/api/auth/lti_launch', methods=['GET', 'POST'])
-def lti_launch():
-    lti_config_path = app.config['LTI_CONFIG_PATH']
-    flask_request = FlaskRequest()
-    try:
-        tool_conf = ToolConfJsonFile(lti_config_path)
-        launch_data_storage = FlaskCacheDataStorage(cache)
-
-        message_launch = MessageLaunch(flask_request, tool_conf, launch_data_storage=launch_data_storage)
-        launch_data = message_launch.get_launch_data()
-        canvas_course_id = _get_custom_param(launch_data, 'canvas_course_id')
-        canvas_masquerading_user_id = _get_custom_param(launch_data, 'canvas_masquerading_user_id')
-        canvas_user_id = _get_custom_param(launch_data, 'canvas_user_id')
-        uid = _get_custom_param(launch_data, 'canvas_user_login_id')
-        masquerade = f'Canvas ID {canvas_masquerading_user_id} acting as ' if canvas_masquerading_user_id else ''
-        course_context = f', course id {canvas_course_id}' if canvas_course_id else ''
-
-        user_id = User.get_serialized_composite_key(canvas_course_id=canvas_course_id, uid=uid)
-        user = User(user_id)
-        app.logger.info(f"""Logged in during LTI launch as {masquerade}UID {uid}, Canvas ID {canvas_user_id}{course_context}""")
-        return start_login_session(user, redirect_path='/welcome')
-    except Exception as e:
-        app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
-        raise InternalServerError({'message': str(e)})
-
-
-@app.route('/api/auth/lti_login', methods=['GET', 'POST'])
-def lti_login():
-    lti_config_path = app.config['LTI_CONFIG_PATH']
-    flask_request = FlaskRequest()
-    target_link_uri = flask_request.get_param('target_link_uri')
-    if not target_link_uri:
-        raise BadRequestError('Required parameters are missing.')
-    try:
-        tool_conf = ToolConfJsonFile(lti_config_path)
-        launch_data_storage = FlaskCacheDataStorage(cache)
-        oidc_login = FlaskOIDCLogin(flask_request, tool_conf, launch_data_storage=launch_data_storage)
-
-        response = oidc_login.enable_check_cookies().redirect(target_link_uri)
-        app.logger.info(f'Redirecting to target_link_uri {target_link_uri}')
-        return response
-    except Exception as e:
-        app.logger.error(f'OIDC login failed: {e.__class__.__name__}: {e}')
-        raise InternalServerError({'message': str(e)})
 
 
 @app.route('/api/auth/logout')

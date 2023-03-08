@@ -29,9 +29,47 @@ class TestGetJwks:
 
     def test_anonymous(self, client):
         """Anonymous user can get the JSON Web Key Set."""
-        response = client.get('/api/auth/jwks')
+        response = client.get('/api/lti/jwks')
         assert response.status_code == 200
         assert 'keys' in response.json
         keyset = response.json['keys'][0]
         for key in ['alg', 'e', 'kid', 'kty', 'n', 'use']:
             assert key in keyset
+
+
+class TestGetMailingListsConfig:
+
+    def test_anonymous(self, client, app):
+        """Anonymous user can get the mailing lists config."""
+        response = client.get('api/lti/mailing_lists_config')
+        response.status_code == 200
+        assert response.json == {
+            'title': 'Mailing Lists',
+            'description': 'Create and manage mailing lists for all course sites',
+            'oidc_initiation_url': app.url_for('initiate_login', _external=True),
+            'target_link_uri': app.url_for('launch_mailing_lists', _external=True),
+            'public_jwk_url': app.url_for('get_jwk_set', _external=True),
+            'extensions': [
+                {
+                    'platform': 'canvas.instructure.com',
+                    'privacy_level': 'public',
+                    'tool_id': 'site_mailing_lists',
+                    'settings': {
+                        'platform': 'canvas.instructure.com',
+                        'text': 'Mailing Lists',
+                        'placements': [
+                            {
+                                'placement': 'account_navigation',
+                                'message_type': 'LtiResourceLinkRequest',
+                            },
+                        ],
+                    },
+                },
+            ],
+            'custom_fields': {
+                'canvas_user_id': '$Canvas.user.id',
+                'canvas_course_id': '$Canvas.course.id',
+                'canvas_user_login_id': '$Canvas.user.loginId',
+                'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
+            },
+        }
