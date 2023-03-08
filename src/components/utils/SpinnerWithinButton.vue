@@ -13,7 +13,7 @@ export default {
   name: 'SpinnerWithinButton',
   props: {
     color: {
-      default: 'primary',
+      default: 'white',
       type: String,
       required: false
     }

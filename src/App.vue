@@ -74,7 +74,7 @@ a {
     border-radius: 3px;
     color: $color-off-black;
     display: inline-block;
-    font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: $body-font-family;
     font-size: 14px;
     line-height: 20px;
     margin-bottom: 10px;
@@ -89,15 +89,18 @@ a {
   border: 0;
   padding: 0;
 }
-.header {
+h1 {
   color: $color-primary;
-  font-family: 'Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-weight: normal;
-}
-.header1 {
+  font-family: $body-font-family;
   font-size: 24px;
+  font-weight: normal;
   line-height: 30px;
   margin: 15px 0 16px;
+}
+h2, h3 {
+  color: $color-primary;
+  font-family: $body-font-family;
+  font-weight: normal;
 }
 .sr-only {
   position: absolute;

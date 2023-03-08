@@ -43,7 +43,7 @@ def create_mailing_lists(canvas_course_id):
     try:
         return tolerant_jsonify(MailingList.create(canvas_course_id).to_api_json())
     except ValueError as e:
-        raise BadRequestError(e.message)
+        raise BadRequestError(str(e))
 
 
 @app.route('/api/mailing_lists/<canvas_course_id>/populate', methods=['POST'])
@@ -51,11 +51,16 @@ def create_mailing_lists(canvas_course_id):
 def populate_mailing_lists(canvas_course_id):
     mailing_list = MailingList.find_or_initialize(canvas_course_id)
     if mailing_list:
-        population_results = MailingList.populate(mailing_list=mailing_list)
-        return tolerant_jsonify({
+        api_json = {
             **mailing_list.to_api_json(),
             'errorMessages': [],  # TODO
-            'populationResults': population_results,
-        })
+            'populationResults': None,
+        }
+        if api_json['state'] == 'created':
+            api_json['populationResults'] = MailingList.populate(mailing_list=mailing_list)
+        else:
+            # TODO: api_json['errorMessages'].append(???)
+            pass
+        return tolerant_jsonify(api_json)
     else:
-        raise ResourceNotFoundError()
+        raise ResourceNotFoundError(f'No mailing list found for Canvas course {canvas_course_id}')

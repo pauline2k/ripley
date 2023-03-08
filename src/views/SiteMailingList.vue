@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading" class="canvas-application page-site-mailing-list">
-    <h1 class="header header1">Mailing List</h1>
+    <h1>Mailing List</h1>
 
     <div v-if="alerts.error.length" role="alert" class="alert alert-error">
       <v-icon icon="mdi-exclamation-triangle" class="icon left icon-red canvas-notice-icon" />
@@ -45,7 +45,7 @@
     </div>
 
     <div v-if="listCreated" class="border-top mt-3 pt-3">
-      <h2 id="send-welcome-email-header" class="header page-site-mailing-list-welcome-email-form-heading" tabindex="-1">
+      <h2 id="send-welcome-email-header" class="page-site-mailing-list-welcome-email-form-heading" tabindex="-1">
         Send Welcome Email
       </h2>
       <v-row no-gutters>
@@ -157,7 +157,7 @@
 
       <div v-if="!isEditingWelcomeEmail" class="border-top mt-3 pt-3">
         <div class="page-site-mailing-list-welcome-email-field-content">
-          <h3 class="header page-site-mailing-list-welcome-email-field-heading">
+          <h3 class="page-site-mailing-list-welcome-email-field-heading">
             Subject
           </h3>
           <div id="page-site-mailing-list-subject">
@@ -165,7 +165,7 @@
           </div>
         </div>
         <div class="page-site-mailing-list-welcome-email-field-content">
-          <h3 class="header page-site-mailing-list-welcome-email-field-heading">
+          <h3 class="page-site-mailing-list-welcome-email-field-heading">
             Message
           </h3>
           <div id="page-site-mailing-list-body" class="page-site-mailing-list-welcome-email-body" v-html="mailingList.welcomeEmailBody"></div>
@@ -173,7 +173,7 @@
         <div class="page-site-mailing-list-welcome-email-field-content">
           <v-btn
             id="btn-edit-welcome-email"
-            variant="link"
+            variant="text"
             class="p-0"
             @click="setEditMode"
           >
@@ -227,7 +227,7 @@ export default {
     isTogglingEmailActivation: false,
     isWelcomeEmailActive: false,
     listCreated: false,
-    mailingList: {},
+    mailingList: undefined,
     mailingListMessage: '',
     mailingListSubject: '',
   }),
@@ -239,13 +239,7 @@ export default {
   created() {
     this.$loading()
     this.getCanvasCourseId()
-    getSiteMailingList(this.canvasCourseId).then(
-      data => {
-        this.updateDisplay(data)
-        this.$ready()
-      },
-      this.$errorHandler
-    )
+    getSiteMailingList(this.canvasCourseId).then(this.updateDisplay, this.$errorHandler)
   },
   methods: {
     cancelEditMode() {
@@ -299,19 +293,16 @@ export default {
       })
     },
     updateDisplay(data) {
-      this.mailingList = data.mailingList || {}
+      this.mailingList = data
       this.isWelcomeEmailActive = this.mailingList.welcomeEmailActive
       this.mailingListMessage = this.mailingList.welcomeEmailBody
       this.mailingListSubject = this.mailingList.welcomeEmailSubject
-      this.errorMessages = data.errorMessages
-      this.listCreated = (data.mailingList && data.mailingList.state === 'created')
-      if (this.listCreated && (!this.mailingListMessage && !this.mailingListSubject)) {
-        this.isEditingWelcomeEmail = true
-      } else {
-        this.isEditingWelcomeEmail = false
-      }
+      this.errorMessages = this.mailingList.errorMessages
+      this.listCreated = this.mailingList.state === 'created'
+      this.isEditingWelcomeEmail = this.listCreated && (!this.mailingListMessage && !this.mailingListSubject)
       this.isCreating = false
       this.isLoading = false
+      this.$ready()
     }
   }
 }

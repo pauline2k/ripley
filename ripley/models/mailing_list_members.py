@@ -38,6 +38,8 @@ class MailingListMembers(Base):
     last_name = db.Column(db.String(255))
     deleted_at = db.Column(db.DateTime)
     welcomed_at = db.Column(db.DateTime)
+    # Parent mailing list
+    mailing_list = db.relationship('MailingList', back_populates='mailing_list_members')
 
     def __init__(self, can_send, email_address, mailing_list_id, first_name=None, last_name=None):
         self.can_send = can_send
@@ -150,7 +152,27 @@ class MailingListMembers(Base):
         # self.populate_remove_errors = population_results[:remove][:failure].count
         # self.populated_at = DateTime.now
         # save
-        pass
+        return {
+            'add': {
+                'failure': [],
+                'success': 0,
+                'total': 0,
+            },
+            'remove': {
+                'failure': [],
+                'success': 0,
+                'total': 0,
+            },
+            'update': {
+                'failure': [],
+                'success': 0,
+                'total': 0,
+            },
+            'welcomeEmails': {
+                'success': 0,
+                'total': 0,
+            },
+        }
 
     def to_api_json(self):
         return {

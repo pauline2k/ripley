@@ -60,8 +60,8 @@ class TestFindMailingList:
 
             assert response['canvasSite']['canvasCourseId'] == '1234567'
             assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
-            assert response['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
-            assert response['mailingList']['state'] == 'unregistered'
+            assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+            assert response['state'] == 'unregistered'
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -73,8 +73,8 @@ class TestFindMailingList:
             fake_auth.login(teacher_uid)
             response = _api_find_mailing_list(client, '1234567')
 
-            assert response['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
-            assert response['mailingList']['state'] == 'unregistered'
+            assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+            assert response['state'] == 'unregistered'
 
     def test_student(self, client, app, fake_auth):
         """Denies student."""
@@ -120,8 +120,8 @@ class TestCreateMailingList:
 
             assert response['canvasSite']['canvasCourseId'] == '1234567'
             assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
-            assert response['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
-            assert response['mailingList']['state'] == 'created'
+            assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+            assert response['state'] == 'created'
 
             # But you can't step into the same mailing list twice.
             _api_create_mailing_list(client, '1234567', expected_status_code=400)
@@ -136,8 +136,8 @@ class TestCreateMailingList:
             fake_auth.login(teacher_uid)
             response = _api_create_mailing_list(client, '1234567')
 
-            assert response['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
-            assert response['mailingList']['state'] == 'created'
+            assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+            assert response['state'] == 'created'
 
     def test_student(self, client, app, fake_auth):
         """Denies student."""
@@ -186,7 +186,7 @@ class TestPopulateMailingList:
             }, m)
             fake_auth.login(teacher_uid)
             response = _api_populate_mailing_list(client, '1234567')
-            assert response['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+            assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
             # TODO: verify populated mailing list
 
     def test_student(self, client, app, fake_auth):

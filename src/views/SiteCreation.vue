@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading" class="page-site-creation">
-    <h1 class="header page-site-creation-primary-header">Create a Site</h1>
+    <h1 class="page-site-creation-primary-header">Create a Site</h1>
     <v-container>
       <v-row>
         <v-col sm="3">
@@ -16,7 +16,7 @@
         </v-col>
         <v-col sm="9">
           <div class="page-site-creation-feature-details mr-5 pr-5">
-            <h2 class="header page-site-creation-h2">Course Sites</h2>
+            <h2 class="page-site-creation-h2">Course Sites</h2>
             <div v-if="canCreateCourseSite" class="page-site-creation-feature-description">
               Set up course sites to communicate with and manage the work of students enrolled in your classes.
             </div>
@@ -59,7 +59,7 @@
         </v-col>
         <v-col sm="9">
           <div class="page-site-creation-feature-details mr-5 pr-5">
-            <h2 class="header page-site-creation-h2">Project Sites</h2>
+            <h2 class="page-site-creation-h2">Project Sites</h2>
             <div class="page-site-creation-feature-description">
               Share files and collaborate with your team. Projects are best suited for instructors and GSIs who already
               use bCourses.
