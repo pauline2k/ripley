@@ -30,6 +30,7 @@ from ripley import db, std_commit
 from ripley.externals import canvas
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.mailing_list_utils import send_welcome_emails
+from ripley.lib.util import to_isoformat
 from ripley.models.base import Base
 from ripley.models.mailing_list_members import MailingListMembers
 from unidecode import unidecode
@@ -44,10 +45,17 @@ class MailingList(Base):
     list_name = db.Column(db.String(255))
     members_count = db.Column(db.Integer)
     populate_add_errors = db.Column(db.Integer)
+    populated_at = db.Column(db.DateTime)
     populate_remove_errors = db.Column(db.Integer)
     welcome_email_active = db.Column(db.Boolean, nullable=False)
     welcome_email_body = db.Column(db.Text)
     welcome_email_subject = db.Column(db.Text)
+    # Members
+    mailing_list_members = db.relationship(
+        'MailingListMembers',
+        back_populates='mailing_list',
+        cascade='all, delete-orphan',
+    )
 
     def __init__(self, canvas_site_id):
         self.canvas_site_id = canvas_site_id
@@ -81,43 +89,46 @@ class MailingList(Base):
         course_users = course.get_users()
         existing_list_members = MailingListMembers.get_mailing_list_members(mailing_list_id=mailing_list.id)
 
-        MailingListMembers.update_memberships(course_users, existing_list_members)
+        population_results = MailingListMembers.update_memberships(course_users, existing_list_members)
         if mailing_list.welcome_email_active and mailing_list.welcome_email_body and mailing_list.welcome_email_subject:
             send_welcome_emails()
+        return population_results
 
     def to_api_json(self):
-        feed = {
+        welcome_email_last_sent = max([m.welcomed_at for m in self.mailing_list_members]) if self.mailing_list_members else None
+        return {
             'canvasSite': {
                 'canvasCourseId': self.canvas_site_id,
-                'sisCourseId': self.canvas_site.sis_course_id if self.canvas_site else None,
-                'name': self.canvas_site_name,
                 'courseCode': self.canvas_site.course_code if self.canvas_site else None,
+                'name': self.canvas_site_name,
+                'sisCourseId': self.canvas_site.sis_course_id if self.canvas_site else None,
+                'term': self._canvas_site_term_json(),
                 'url': f"{app.config['CANVAS_API_URL']}/courses/{self.canvas_site_id}",
             },
-            'mailingList': {
-                'name': self.list_name,
-                'welcomeEmailActive': self.welcome_email_active,
-                'welcomeEmailBody': self.welcome_email_body,
-                'welcomeEmailSubject': self.welcome_email_subject,
-            },
+            'name': self.list_name,
+            'membersCount': len(self.mailing_list_members),
+            'populatedAt': to_isoformat(self.populated_at),
+            'state': 'created' if self.id else 'unregistered',
+            'welcomeEmailActive': self.welcome_email_active,
+            'welcomeEmailBody': self.welcome_email_body,
+            'welcomeEmailLastSent': welcome_email_last_sent,
+            'welcomeEmailSubject': self.welcome_email_subject,
+            'createdAt': to_isoformat(self.created_at),
+            'updatedAt': to_isoformat(self.updated_at),
         }
 
+    def _canvas_site_term_json(self):
+        api_json = None
         if self.canvas_site:
             canvas_sis_term_id = self.canvas_site.term['sis_term_id']
             term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
             if term:
-                feed['canvasSite']['term'] = {
+                api_json = {
                     'term_yr': term.year,
                     'term_cd': term.season,
                     'name': term.to_english(),
                 }
-
-        if not self.id:
-            feed['mailingList']['state'] = 'unregistered'
-        else:
-            feed['mailingList']['state'] = 'created'
-
-        return feed
+        return api_json
 
     def _initialize(self):
         self.canvas_site = canvas.get_course(self.canvas_site_id)

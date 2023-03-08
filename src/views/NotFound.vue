@@ -12,7 +12,7 @@
           <v-col>
             <v-card
               class="mx-auto"
-              max-width="480"
+              :max-width="applicationState.stacktrace ? 640 : 480"
             >
               <v-card-title>
                 {{ isError ? 'Error' : 'Page Not Found' }}
@@ -25,6 +25,9 @@
                     role="alert"
                   >
                     {{ applicationState.message || 'Uh oh, there was a problem.' }}
+                    <div v-if="applicationState.stacktrace" class="py-3">
+                      <pre>{{ applicationState.stacktrace }}</pre>
+                    </div>
                   </span>
                 </div>
                 <div
@@ -74,3 +77,12 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+pre {
+  white-space: pre-wrap;
+  white-space: -moz-pre-wrap;
+  white-space: -o-pre-wrap;
+  word-wrap: break-word;
+}
+</style>

@@ -6,6 +6,7 @@ import {defineStore} from 'pinia'
 
 const DEFAULT_APPLICATION_STATE = {
   message: undefined,
+  stacktrace: undefined,
   status: 200
 }
 
@@ -54,8 +55,8 @@ export const useContextStore = defineStore('context', {
     setConfig(config: any) {
       this.config = config
     },
-    setApplicationState(status: number, message?: any) {
-      this.applicationState = {message, status}
+    setApplicationState(status: number, message?: any, stacktrace?: any) {
+      this.applicationState = {message, stacktrace, status}
     },
     setCurrentUser(user: any) {
       this.currentUser = user

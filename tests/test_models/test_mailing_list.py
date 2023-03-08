@@ -44,11 +44,11 @@ class TestMailingList:
             assert feed['canvasSite']['url'] == 'https://hard_knocks_api.instructure.com/courses/1234567'
             assert feed['canvasSite']['term'] == {'term_yr': '2023', 'term_cd': 'B', 'name': 'Spring 2023'}
 
-            assert feed['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
-            assert feed['mailingList']['welcomeEmailActive'] is False
-            assert feed['mailingList']['welcomeEmailBody'] is None
-            assert feed['mailingList']['welcomeEmailSubject'] is None
-            assert feed['mailingList']['state'] == 'unregistered'
+            assert feed['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+            assert feed['welcomeEmailActive'] is False
+            assert feed['welcomeEmailBody'] is None
+            assert feed['welcomeEmailSubject'] is None
+            assert feed['state'] == 'unregistered'
 
     def test_create(self, app):
         with requests_mock.Mocker() as m:
@@ -58,8 +58,8 @@ class TestMailingList:
             feed = mailing_list.to_api_json()
 
             assert feed['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
-            assert feed['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
-            assert feed['mailingList']['state'] == 'created'
+            assert feed['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+            assert feed['state'] == 'created'
 
             with pytest.raises(ValueError, match='List with id 1234567 already exists'):
                 mailing_list = MailingList.create('1234567')

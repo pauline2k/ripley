@@ -1,7 +1,7 @@
 <template>
   <div class="canvas-application page-create-project-site">
     <div v-if="!isLoading && !error">
-      <h1 class="header page-create-project-site-header">Create a Project Site</h1>
+      <h1 class="page-create-project-site-header">Create a Project Site</h1>
       <form class="bg-transparent border-0 canvas-form" @submit.prevent="createProjectSite">
         <v-container>
           <v-row>

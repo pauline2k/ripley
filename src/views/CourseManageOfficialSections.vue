@@ -32,7 +32,7 @@
         <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-white-border">
           <v-row no-gutters class="page-course-official-sections-current-sections-header">
             <v-col md="4">
-              <h3 class="header page-course-official-sections-existing-sections-header-label">
+              <h3 class="page-course-official-sections-existing-sections-header-label">
                 Sections in this Course Site
               </h3>
             </v-col>
@@ -65,7 +65,7 @@
 
           <v-row no-gutters class="row page-course-official-sections-current-sections-header">
             <v-col md="4">
-              <h3 class="header page-course-official-sections-existing-sections-header-label">
+              <h3 class="page-course-official-sections-existing-sections-header-label">
                 Sections in this Course Site
               </h3>
             </v-col>
@@ -128,7 +128,7 @@
         <div class="page-course-official-sections-sections-area">
           <v-row no-gutters>
             <v-col md="12">
-              <h3 class="header page-course-official-sections-available-sections-header-label">
+              <h3 class="page-course-official-sections-available-sections-header-label">
                 All sections available to add to this Course Site
               </h3>
             </v-col>
@@ -195,7 +195,7 @@
       </div>
 
       <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
-        <h2 class="header page-course-official-sections-existing-sections-header-label">
+        <h2 class="page-course-official-sections-existing-sections-header-label">
           Updating Official Sections in Course Site
         </h2>
         <div v-if="jobStatus === 'sendingRequest'" class="page-course-official-sections-pending-request">
