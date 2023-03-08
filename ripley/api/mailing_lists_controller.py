@@ -26,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from flask import current_app as app
 from ripley.api.errors import BadRequestError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required
+from ripley.externals import canvas
 from ripley.lib.http import tolerant_jsonify
 from ripley.models.mailing_list import MailingList
 
@@ -33,8 +34,12 @@ from ripley.models.mailing_list import MailingList
 @app.route('/api/mailing_lists/<canvas_course_id>')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def mailing_lists(canvas_course_id):
-    mailing_list = MailingList.find_or_initialize(canvas_course_id)
-    return tolerant_jsonify(mailing_list.to_api_json() if mailing_list else None)
+    course = canvas.get_course(canvas_course_id)
+    if course:
+        mailing_list = MailingList.find_or_initialize(canvas_course_id)
+        return tolerant_jsonify(mailing_list.to_api_json() if mailing_list else None)
+    else:
+        raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_course_id}" was found.')
 
 
 @app.route('/api/mailing_lists/<canvas_course_id>/create', methods=['POST'])

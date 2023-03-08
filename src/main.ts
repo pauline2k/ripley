@@ -3,7 +3,7 @@ import App from './App.vue'
 import axios from 'axios'
 import moment from 'moment'
 import {createApp} from 'vue'
-import {putFocusNextTick, axiosErrorHandler, initializeAxios} from './utils'
+import {putFocusNextTick, initializeAxios} from './utils'
 import {registerPlugins} from '@/plugins'
 import {useContextStore} from '@/stores/context'
 import router from '@/router'
@@ -15,9 +15,9 @@ const app = createApp(App)
 registerPlugins(app)
 initializeAxios(app, axios)
 
-// Global utilities
+// Globals
 app.config.globalProperties.$_ = _
-app.config.globalProperties.$errorHandler = axiosErrorHandler
+// app.config.globalProperties.$errorHandler = axiosErrorHandler
 app.config.globalProperties.$loading = (label: string) => useContextStore().loadingStart(label)
 app.config.globalProperties.$moment = moment
 app.config.globalProperties.$ready = (label: string, focusTarget: string) => useContextStore().loadingComplete(label, focusTarget)
