@@ -41,7 +41,7 @@ class AddNewUsersJob(BaseJob):
     def _run(self, params={}):
         timestamp = datetime.now().strftime('%F_%H-%M-%S')
         canvas_export_file = tempfile.NamedTemporaryFile()
-        canvas_import_file = tempfile.NamedTemporaryFile()
+        canvas_import_file = tempfile.NamedTemporaryFile(suffix='.csv')
 
         dry_run = params.get('isDryRun', None) or False
 
