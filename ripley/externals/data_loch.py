@@ -52,19 +52,6 @@ def cursor_from_pool():
         connection_pool.putconn(connection)
 
 
-def _safe_execute(sql, cursor, **kwargs):
-    try:
-        ts = datetime.now().timestamp()
-        cursor.execute(sql, (kwargs or None))
-        query_time = datetime.now().timestamp() - ts
-    except psycopg2.Error as e:
-        app.logger.error(f'SQL {sql} threw {e}')
-        return None
-    rows = [dict(r) for r in cursor.fetchall()]
-    app.logger.debug(f'Query returned {len(rows)} rows in {query_time} seconds:\n{sql}\n{kwargs}')
-    return rows
-
-
 def get_all_active_users():
     sql = """select * from sis_data.basic_attributes
         where (affiliations like '%-TYPE-%' and affiliations not like '%TYPE-SPA%')
@@ -82,3 +69,27 @@ def get_undergraduate_term(term_id):
               WHERE term_id = '{term_id}'
            """
     return safe_execute_rds(sql)
+
+
+def get_users(uids):
+    sql = """
+        SELECT * FROM sis_data.basic_attributes
+        WHERE
+            (affiliations LIKE '%-TYPE-%' AND affiliations NOT LIKE '%TYPE-SPA%')
+            AND person_type != 'A'
+            AND ldap_uid = ANY(:uids)
+    """
+    return safe_execute_rds(sql, params={'uids': uids})
+
+
+def _safe_execute(sql, cursor, **kwargs):
+    try:
+        ts = datetime.now().timestamp()
+        cursor.execute(sql, (kwargs or None))
+        query_time = datetime.now().timestamp() - ts
+    except psycopg2.Error as e:
+        app.logger.error(f'SQL {sql} threw {e}')
+        return None
+    rows = [dict(r) for r in cursor.fetchall()]
+    app.logger.debug(f'Query returned {len(rows)} rows in {query_time} seconds:\n{sql}\n{kwargs}')
+    return rows

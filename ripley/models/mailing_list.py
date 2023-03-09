@@ -27,10 +27,11 @@ import re
 
 from flask import current_app as app
 from ripley import db, std_commit
-from ripley.externals import canvas
+from ripley.externals import canvas, data_loch
 from ripley.lib.berkeley_term import BerkeleyTerm
+from ripley.lib.canvas_user_utils import has_instructing_role, is_project_maintainer, is_project_owner
 from ripley.lib.mailing_list_utils import send_welcome_emails
-from ripley.lib.util import to_isoformat
+from ripley.lib.util import to_isoformat, utc_now
 from ripley.models.base import Base
 from ripley.models.mailing_list_members import MailingListMembers
 from unidecode import unidecode
@@ -86,13 +87,38 @@ class MailingList(Base):
     @classmethod
     def populate(cls, mailing_list):
         course = canvas.get_course(api_call=False, course_id=mailing_list.canvas_site_id)
-        course_users = course.get_users()
-        existing_list_members = MailingListMembers.get_mailing_list_members(mailing_list_id=mailing_list.id)
-
-        population_results = MailingListMembers.update_memberships(course_users, existing_list_members)
+        canvas_course_users = course.get_users()
+        mailing_list_members = MailingListMembers.get_mailing_list_members(
+            include_deleted=True,
+            mailing_list_id=mailing_list.id,
+        )
+        population_results = cls._update_memberships(
+            canvas_course_users=canvas_course_users,
+            mailing_list=mailing_list,
+            mailing_list_members=mailing_list_members,
+        )
         if mailing_list.welcome_email_active and mailing_list.welcome_email_body and mailing_list.welcome_email_subject:
             send_welcome_emails()
         return population_results
+
+    @classmethod
+    def update_population_metadata(
+            cls,
+            mailing_list_id,
+            members_count,
+            populate_add_errors,
+            populate_remove_errors,
+            populated_at,
+    ):
+        mailing_list = cls.query.filter_by(id=mailing_list_id).first()
+        if mailing_list:
+            mailing_list.members_count = members_count
+            mailing_list.populate_add_errors = populate_add_errors
+            mailing_list.populate_remove_errors = populate_remove_errors
+            mailing_list.populated_at = populated_at
+            db.session.add(mailing_list)
+            std_commit()
+        return mailing_list
 
     def to_api_json(self):
         welcome_email_last_sent = max([m.welcomed_at for m in self.mailing_list_members]) if self.mailing_list_members else None
@@ -141,3 +167,192 @@ class MailingList(Base):
                 self.list_name += '-' + term.to_abbreviation()
             else:
                 self.list_name += '-list'
+
+    @classmethod
+    def _update_memberships(cls, canvas_course_users, mailing_list, mailing_list_members):
+        summary = {
+            'add': {
+                'failure': [],
+                'success': 0,
+                'total': 0,
+            },
+            'remove': {
+                'failure': [],
+                'success': 0,
+                'total': 0,
+            },
+            'update': {
+                'failure': [],
+                'success': 0,
+                'total': 0,
+            },
+            'welcomeEmails': {
+                'success': 0,
+                'total': 0,
+            },
+        }
+        # Track by email address
+        mailing_list_members_by_email = {m.email_address.lower(): m for m in mailing_list_members}
+        active_mailing_list_members = filter(lambda m: not m.deleted_at, mailing_list_members)
+        email_addresses_of_active_mailing_list_members = [m.email_address.lower() for m in active_mailing_list_members]
+
+        count_per_chunk = 10000
+        for chunk in range(0, len(canvas_course_users), count_per_chunk):
+            canvas_user_chunk = canvas_course_users[chunk:chunk + count_per_chunk]
+            uids = [u.login_id for u in canvas_user_chunk]
+            loch_users_by_uid = [u['ldap_uid'] for u in data_loch.get_users(uids=uids)]
+
+            for course_user in canvas_user_chunk:
+                uid = course_user.login_id
+                loch_user = loch_users_by_uid[uid]
+                loch_user_email = loch_user['email_address']
+                preferred_email = _get_preferred_email(
+                    canvas_user_email=course_user.email,
+                    loch_user_email=loch_user_email,
+                )
+                user = {
+                    **{
+                        'affiliations': loch_user['affiliations'],
+                        'firstName': loch_user['first_name'],
+                        'emailAddress': loch_user_email,
+                        'lastName': loch_user['last_name'],
+                        'personType': loch_user['person_type'],
+                        'sid': loch_user['sid'],
+                        'uid': uid,
+                    },
+                    'canSend': _can_send(course_user),
+                    'preferredEmail': preferred_email,
+                }
+                if preferred_email:
+                    _remove_from_list_safely(
+                        item=preferred_email,
+                        list_of_items=email_addresses_of_active_mailing_list_members,
+                    )
+                    existing_member = mailing_list_members_by_email.get(preferred_email)
+                    if existing_member:
+                        if existing_member.deleted_at:
+                            summary['add']['total'] += 1
+                            app.logger.debug(f'Reactivating previously deleted address {preferred_email}')
+
+                            if MailingListMembers.update(
+                                    can_send=user['can_send'],
+                                    deleted_at=user['deleted_at'],
+                                    first_name=user['first_name'],
+                                    last_name=user['last_name'],
+                                    mailing_list_member_id=existing_member.id,
+                            ):
+                                summary['add']['success'] += 1
+                            else:
+                                summary['add']['failure'].append(preferred_email)
+                        else:
+                            update_required = user['canSend'] != existing_member.can_send or \
+                                user['firstName'] != existing_member.first_name or \
+                                user['lastName'] != existing_member.last_name
+                            if update_required:
+                                summary['update']['total'] += 1
+                                app.logger.debug(f'Updating user {preferred_email} of mailing_list {mailing_list.id}')
+                                if MailingListMembers.update(
+                                    can_send=user['can_send'],
+                                    deleted_at=user['deleted_at'],
+                                    first_name=user['first_name'],
+                                    last_name=user['last_name'],
+                                    mailing_list_member_id=existing_member.id,
+                                ):
+                                    summary['update']['success'] += 1
+                                else:
+                                    summary['update']['failure'].append(preferred_email)
+                    else:
+                        # Address is not currently in the list. Add it.
+                        summary['add']['total'] += 1
+                        app.logger.debug(f'Adding user {preferred_email}')
+                        if MailingListMembers.create(
+                            can_send=user['canSend'],
+                            first_name=user['firstName'],
+                            last_name=user['lastName'],
+                            mailing_list_id=mailing_list.id,
+                        ):
+                            summary['add']['success'] += 1
+                        else:
+                            summary['add']['failure'].append(preferred_email)
+                else:
+                    app.logger.warn(f"No email address found for UID {user['uid']}")
+
+        # Email addresses NOT accounted for above must now be removed from the db.
+        summary['remove']['total'] = len(email_addresses_of_active_mailing_list_members)
+        for email_address in email_addresses_of_active_mailing_list_members:
+            app.logger.debug(f'Removing {email_address} from mailing_list {mailing_list.id}')
+            mailing_list_member = mailing_list_members_by_email[email_address]
+            if mailing_list_member:
+                MailingListMembers.delete(mailing_list_member.id)
+                summary['remove']['success'] += 1
+            else:
+                summary['remove']['failure'] += 1
+
+        members = MailingListMembers.get_mailing_list_members(mailing_list_id=mailing_list.id)
+        cls.update_population_metadata(
+            mailing_list_id=mailing_list.id,
+            members_count=len(members),
+            populate_add_errors=len(summary['add']['failure']),
+            populate_remove_errors=len(summary['remove']['failure']),
+            populated_at=utc_now(),
+        )
+        _log_summary_of_mailing_list_updates(mailing_list, summary)
+        return summary
+
+
+def _can_send(canvas_course_user):
+    return has_instructing_role(canvas_course_user) or \
+        is_project_maintainer(canvas_course_user) or \
+        is_project_owner(canvas_course_user)
+
+
+def _get_preferred_email(canvas_user_email, loch_user_email):
+    preferred_email_source = app.config['MAILING_LISTS_PREFERRED_EMAIL_SOURCE']
+    preferred_email = None
+    if preferred_email_source == 'DATA_LOCH':
+        preferred_email = loch_user_email or canvas_user_email
+    # elif preferred_email_source == 'CALNET':
+    #     TODO: Do we need to support this option?
+    #     preferred_email = ???
+    elif preferred_email_source == 'CANVAS':
+        preferred_email = canvas_user_email or loch_user_email
+    return preferred_email.lower() if preferred_email else None
+
+
+def _log_summary_of_mailing_list_updates(mailing_list, summary):
+    info_log = []
+
+    def _log(statement):
+        info_log.append(statement)
+
+    def _get(category, key):
+        return summary[category][key]
+
+    list_name = mailing_list.list_name
+    add_failures = _get('add', 'failure')
+    remove_failures = _get('remove', 'failure')
+    remove_successes = _get('remove', 'success')
+    update_failures = _get('update', 'failure')
+    update_successes = _get('update', 'success')
+    update_total = _get('update', 'total')
+
+    _log(f'Finished population of mailing list {mailing_list.list_name}.')
+    _log(f"Added {_get('add', 'success')} of {_get('add', 'total')} new site members.")
+    if add_failures:
+        fails = ', '.join(add_failures)
+        app.logger.error(f'[ERROR] Failed to add {add_failures.count} addresses to {list_name}: {fails}')
+    _log(f"Removed {remove_successes} of {_get('remove', 'total')} former site members.")
+    if remove_failures:
+        fails = ', '.join(remove_failures)
+        app.logger.error(f'[ERROR] Failed to remove {remove_failures.count} addresses from {list_name}: {fails}')
+    _log(f'Updated {update_successes} of {update_total} new site members.')
+    if update_failures:
+        fails = ', '.join(update_failures)
+        app.logger.error(f'[ERROR] Failed to update {update_failures.count} addresses in {list_name}: {fails}')
+    # Log it all.
+    app.logger.info('\n'.join(info_log))
+
+
+def _remove_from_list_safely(item, list_of_items):
+    if item in list_of_items:
+        list_of_items.remove(item)
