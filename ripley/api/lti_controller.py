@@ -83,9 +83,9 @@ def initiate_login():
         raise InternalServerError({'message': str(e)})
 
 
-@app.route('/api/lti/mailing_lists_config')
+@app.route('/api/lti/mailing_lists_config.json')
 def mailing_lists_config():
-    return tolerant_jsonify({
+    return {
         'title': 'Mailing Lists',
         'description': 'Create and manage mailing lists for all course sites',
         'oidc_initiation_url': app.url_for('initiate_login', _external=True),
@@ -114,7 +114,7 @@ def mailing_lists_config():
             'canvas_user_login_id': '$Canvas.user.loginId',
             'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
         },
-    })
+    }
 
 
 def _get_custom_param(lti_data, key):

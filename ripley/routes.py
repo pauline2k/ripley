@@ -102,6 +102,8 @@ def register_routes(app):
             response.headers['Access-Control-Allow-Origin'] = app.config['VUE_LOCALHOST_BASE_URL']
             response.headers['Access-Control-Allow-Credentials'] = 'true'
             response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
+        else:
+            response.headers['Access-Control-Allow-Origin'] = app.config['CANVAS_API_URL']
         if request.full_path.startswith('/api'):
             forwarded_for = request.headers.get('X-Forwarded-For')
             forwarded_for = forwarded_for.split(',')[0] if forwarded_for else None

@@ -41,8 +41,9 @@ class TestGetMailingListsConfig:
 
     def test_anonymous(self, client, app):
         """Anonymous user can get the mailing lists config."""
-        response = client.get('api/lti/mailing_lists_config')
-        response.status_code == 200
+        response = client.get('api/lti/mailing_lists_config.json')
+        assert response.status_code == 200
+        assert response.content_type == 'application/json'
         assert response.json == {
             'title': 'Mailing Lists',
             'description': 'Create and manage mailing lists for all course sites',
