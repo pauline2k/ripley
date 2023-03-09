@@ -33,15 +33,8 @@ export default {
 </script>
 
 <style lang="scss">
-a {
-  color: $primary-color;
-  text-decoration: none;
-  &:hover {
-    cursor: pointer;
-  }
-  &:hover, &:focus {
-    text-decoration: underline;
-  }
+* {
+  text-transform: none !important;
 }
 .background-splash {
   -webkit-background-size: cover;
@@ -89,17 +82,40 @@ a {
   border: 0;
   padding: 0;
 }
+.ellipsis {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+a {
+  color: $primary-color;
+  text-decoration: none;
+  &:hover {
+    cursor: pointer;
+  }
+  &:hover, &:focus {
+    text-decoration: underline;
+  }
+}
 h1 {
-  color: $color-primary;
+  color: $color-off-black;
   font-family: $body-font-family;
   font-size: 24px;
-  font-weight: normal;
+  font-weight: 500;
   line-height: 30px;
   margin: 15px 0 16px;
 }
-h2, h3 {
-  color: $color-primary;
+h2 {
+  color: $color-off-black;
   font-family: $body-font-family;
+  font-size: 20px;
+  font-weight: normal;
+}
+h3 {
+  color: $color-off-black;
+  font-family: $body-font-family;
+  font-size: 18px;
   font-weight: normal;
 }
 .sr-only {

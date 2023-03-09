@@ -2,19 +2,19 @@ import utils from '@/api/api-utils'
 import _ from 'lodash'
 
 export function getCourseUserRoles(canvasCourseId: number) {
-  return utils.get(`/api/course/${canvasCourseId}/user_roles`)
+  return utils.get(`/api/course/${canvasCourseId}/user_roles`, true)
 }
 
 export function addUser(canvasCourseId: number, ldapUserId: string, sectionId: string, role: string) {
-  return utils.post(`/api/course/${canvasCourseId}/add_user/add_user`, {ldapUserId, sectionId, role})
+  return utils.post(`/api/course/${canvasCourseId}/add_user/add_user`, {ldapUserId, sectionId, role}, true)
 }
 
 export function getAddUserCourseSections(canvasCourseId: number) {
-  return utils.get(`/api/course/${canvasCourseId}/add_user/course_sections`)
+  return utils.get(`/api/course/${canvasCourseId}/add_user/course_sections`, true)
 }
 
 export function searchUsers(canvasCourseId: number, searchText: string, searchType: string) {
-  return utils.get(`/api/course/${canvasCourseId}/add_user/search_users?searchText=${searchText}&searchType=${searchType}`)
+  return utils.get(`/api/course/${canvasCourseId}/add_user/search_users?searchText=${searchText}&searchType=${searchType}`, true)
 }
 
 export function downloadGradeCsv(canvasCourseId: number, ccn: string, termCode: string, termYear: string, type: string, pnpCutoff: string) {
@@ -26,19 +26,19 @@ export function downloadGradeCsv(canvasCourseId: number, ccn: string, termCode: 
     `pnp_cutoff=${pnpCutoff}`
   ].join('&')
   const filename = `egrades-${type}-${ccn}-${utils.termCodeToName(termCode)}-${termYear}-${canvasCourseId}.csv`
-  return utils.downloadViaGet(`/api/course/${canvasCourseId}/egrade_export/download?${queryParams}`, filename)
+  return utils.downloadViaGet(`/api/course/${canvasCourseId}/egrade_export/download?${queryParams}`, filename, true)
 }
 
 export function getExportOptions(canvasCourseId: number) {
-  return utils.get(`/api/course/${canvasCourseId}/egrade_export/options`)
+  return utils.get(`/api/course/${canvasCourseId}/egrade_export/options`, true)
 }
 
 export function getExportJobStatus(canvasCourseId: number, jobId: string) {
-  return utils.get(`/api/course/${canvasCourseId}/egrade_export/status?jobId=${jobId}`)
+  return utils.get(`/api/course/${canvasCourseId}/egrade_export/status?jobId=${jobId}`, true)
 }
 
 export function prepareGradesCacheJob(canvasCourseId: number) {
-  return utils.post(`/api/course/${canvasCourseId}/egrade_export/prepare`)
+  return utils.post(`/api/course/${canvasCourseId}/egrade_export/prepare`, {}, true)
 }
 
 export function getRoster(canvasCourseId: number) {

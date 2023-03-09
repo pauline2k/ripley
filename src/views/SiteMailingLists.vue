@@ -26,19 +26,21 @@
     <v-alert
       v-if="listCreated && !mailingList.timeLastPopulated"
       class="mb-2"
+      color="primary"
       closable
       density="compact"
       role="alert"
       type="info"
     >
-      The list <strong>"{{ mailingList.name }}{{ mailingList.domain ? `@${mailingList.domain}` : '' }}"</strong>
-      has been created. Choose "Update membership from course site" to add members.
+      The list <strong>"{{ mailingList.name }}{{ mailingList.domain ? `@${mailingList.domain}` : '' }}"</strong> exists.
+      Choose "Update membership from course site" to add members.
     </v-alert>
 
     <v-alert
       v-if="siteSelected && !listCreated"
       class="mb-2"
       closable
+      color="primary"
       density="compact"
       role="alert"
       type="info"
@@ -117,21 +119,24 @@
         </v-card-actions>
       </v-card>
 
-      <div v-if="!listCreated" class="align-center d-flex flex-wrap py-8 w-100">
-        <div class="mx-3 text-right">
-          <label for="mailing-list-name-input">New Mailing List Name:</label>
-        </div>
-        <div class="w-75">
-          <v-text-field
-            id="mailing-list-name-input"
-            v-model="mailingList.name"
-            aria-required="true"
-            hide-details
-            maxlength="255"
-            variant="outlined"
-            required
-            @keydown.enter="registerMailingList"
-          />
+      <div v-if="!listCreated" class="py-8">
+        <h2>Create Mailing List</h2>
+        <div class="align-center d-flex flex-wrap pt-2">
+          <div class="pr-3">
+            <label for="mailing-list-name-input">Name:</label>
+          </div>
+          <div class="w-75">
+            <v-text-field
+              id="mailing-list-name-input"
+              v-model="mailingList.name"
+              aria-required="true"
+              hide-details
+              maxlength="255"
+              variant="outlined"
+              required
+              @keydown.enter="registerMailingList"
+            />
+          </div>
         </div>
       </div>
 
@@ -147,17 +152,18 @@
         <v-btn
           v-if="!listCreated"
           id="btn-create-mailing-list"
-          aria-controls="page-reader-alert"
           color="primary"
-          :disabled="!$_.trim(mailingList.name)"
+          :disabled="isProcessing || !$_.trim(mailingList.name)"
           @click="registerMailingList"
         >
-          Create mailing list
+          <span v-if="!isProcessing">Create mailing list</span>
+          <span v-if="isProcessing">
+            <SpinnerWithinButton /> Creating...
+          </span>
         </v-btn>
         <v-btn
           v-if="listCreated"
           id="btn-populate-mailing-list"
-          aria-controls="page-reader-alert"
           color="primary"
           @click="populateMailingList"
         >
@@ -214,6 +220,9 @@ export default {
       this.errorMessages = [message]
       this.isProcessing = false
     },
+    clearAlerts() {
+      this.errorMessages = this.successMessages = []
+    },
     findSiteMailingList() {
       if (!this.isProcessing && this.modelCanvasCourseId) {
         this.isProcessing = true
@@ -224,22 +233,26 @@ export default {
       }
     },
     populateMailingList() {
-      this.errorMessages = this.successMessages = []
+      this.clearAlerts()
       this.$announcer.polite('Updating membership')
       this.isProcessing = true
-      populateSiteMailingList(this.canvasCourseId).then(data => {
-        this.updateDisplay(data)
-        if (!data || !data.populationResults) {
-          this.errorMessages.push('The mailing list could not be populated.')
-        }
-      })
+      populateSiteMailingList(this.canvasCourseId).then(
+        data => {
+          this.updateDisplay(data)
+          if (!data || !data.populationResults) {
+            this.errorMessages.push('The mailing list could not be populated.')
+          }
+        },
+        this.axiosErrorHandler
+      )
     },
     registerMailingList() {
+      this.clearAlerts()
       this.$announcer.polite('Creating list')
       this.isProcessing = true
       const name = this.$_.trim(this.mailingList.name)
       if (name) {
-        createSiteMailingListAdmin(this.canvasCourseId, name).then(this.updateDisplay, this.$errorHandler)
+        createSiteMailingListAdmin(this.canvasCourseId, name).then(this.updateDisplay, this.axiosErrorHandler)
       }
     },
     resetForm() {
