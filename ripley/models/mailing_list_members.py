@@ -23,7 +23,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from ripley import db
+from ripley import db, std_commit
+from ripley.lib.util import utc_now
 from ripley.models.base import Base
 
 
@@ -49,141 +50,56 @@ class MailingListMembers(Base):
         self.mailing_list_id = mailing_list_id
 
     @classmethod
-    def create(cls, canvas_site_id, list_name=None):
-        pass
+    def create(cls, can_send, first_name, last_name, mailing_list_id):
+        mailing_list_member = cls(
+            can_send=can_send,
+            first_name=first_name,
+            last_name=last_name,
+            mailing_list_id=mailing_list_id,
+        )
+        db.session.add(mailing_list_member)
+        std_commit()
+        return mailing_list_member
 
     @classmethod
-    def get_mailing_list_members(cls, mailing_list_id):
-        return cls.query.filter_by(deleted_at=None, mailing_list_id=mailing_list_id).all()
+    def delete(cls, mailing_list_member_id):
+        member = cls.query.filter_by(id=mailing_list_member_id).first()
+        if member:
+            member.deleted_at = utc_now()
+            db.session.add(member)
+            std_commit()
 
     @classmethod
-    def update_memberships(cls, course_users, list_members):
-        # TODO:
-        # # List members are keyed by email addresses; keep track of any needed removals in a separate set.
-        # addresses_to_remove = list_members.select{ |k, v| v.deleted_at.nil? }.keys.to_set
-        #
-        # # Note UIDs for users with send permission, defined for now as having a teacher role in the course site,
-        # # or an Owner or Maintainer role in a project site.
-        # sender_uids = Set.new
-        # course_users.each { |user| sender_uids << user['login_id'] if can_send_to_mailing_list?(user) }
-        #
-        # logger.info "Starting population of mailing list #{self.list_name} for course site #{self.canvas_site_id}."
-        # initialize_population_results
-        #
-        # population_results[:initial_count] = list_members.count
-        #
-        # course_users.map{ |user| user['login_id'] }.each_slice(1000) do |uid_slice|
-        #   User::BasicAttributes.attributes_for_uids(uid_slice).each do |user|
-        #
-        #     user[:can_send] = sender_uids.include?(user[:ldap_uid])
-        #
-        #     # In general we want to use official berkeley.edu email addresses sourced from User::BasicAttributes.
-        #     # However, we may wish to override with Canvas-sourced email addresses for testing purposes.
-        #     # Note that the course_users list will not include email addresses for any members with
-        #     # "enrollment_state": "invited".
-        #     user_address = case Settings.canvas_mailing_lists.preferred_email_address_source
-        #       when 'ldapAlternateId'
-        #         user[:official_bmail_address] || user[:email_address]
-        #       when 'ldapMail'
-        #         user[:email_address] || user[:official_bmail_address]
-        #       when 'canvas'
-        #         if (canvas_user = course_users.find { |course_user| course_user['login_id'] == user[:ldap_uid] })
-        #           logger.info "Setting email address for UID #{user[:ldap_uid]} to Canvas-sourced address #{canvas_user['email']}"
-        #           canvas_user['email']
-        #         else
-        #           user[:official_bmail_address] || user[:email_address]
-        #         end
-        #     end
-        #
-        #     if user_address
-        #       user_address.downcase!
-        #       addresses_to_remove.delete user_address
-        #       if list_members.has_key? user_address
-        #         # Address is in the list but deleted; reactivate with latest data.
-        #         if list_members[user_address].deleted_at
-        #           population_results[:add][:total] += 1
-        #           logger.debug "Reactivating previously deleted address #{user_address}"
-        #           if reactivate_member(list_members[user_address], user)
-        #             population_results[:add][:success] += 1
-        #           else
-        #             population_results[:add][:failure] << user_address
-        #           end
-        #         # Address is in the list and active; check if any data needs updating.
-        #         elsif update_required?(list_members[user_address], user)
-        #           population_results[:update][:total] += 1
-        #           logger.debug "Updating address #{user_address}"
-        #           if update_member(list_members[user_address], user)
-        #             population_results[:update][:success] += 1
-        #           else
-        #             population_results[:update][:failure] << user_address
-        #           end
-        #         end
-        #       else
-        #         # Address is not currently in the list; add it.
-        #         population_results[:add][:total] += 1
-        #         logger.debug "Adding address #{user_address}"
-        #         if add_member(user_address, user[:first_name], user[:last_name], user[:can_send])
-        #           population_results[:add][:success] += 1
-        #         else
-        #           population_results[:add][:failure] << user_address
-        #         end
-        #       end
-        #     else
-        #       logger.warn "No email address found for UID #{user[:ldap_uid]}"
-        #     end
-        #   end
-        # end
-        #
-        # population_results[:remove][:total] = addresses_to_remove.count
-        #
-        # addresses_to_remove.each do |address|
-        #   logger.debug "Removing address #{address}"
-        #   if remove_member address
-        #     population_results[:remove][:success] += 1
-        #   else
-        #     population_results[:remove][:failure] << address
-        #   end
-        # end
-        #
-        # log_population_results
-        #
-        # logger.info "Finished population of mailing list #{self.list_name}."
-        # self.populate_add_errors = population_results[:add][:failure].count
-        # self.populate_remove_errors = population_results[:remove][:failure].count
-        # self.populated_at = DateTime.now
-        # save
-        return {
-            'add': {
-                'failure': [],
-                'success': 0,
-                'total': 0,
-            },
-            'remove': {
-                'failure': [],
-                'success': 0,
-                'total': 0,
-            },
-            'update': {
-                'failure': [],
-                'success': 0,
-                'total': 0,
-            },
-            'welcomeEmails': {
-                'success': 0,
-                'total': 0,
-            },
-        }
+    def get_mailing_list_members(cls, mailing_list_id, include_deleted=False):
+        if include_deleted:
+            query = cls.query.filter_by(mailing_list_id=mailing_list_id)
+        else:
+            query = cls.query.filter_by(deleted_at=None, mailing_list_id=mailing_list_id)
+        return query.all()
 
-    def to_api_json(self):
-        return {
-            'id': self.id,
-            'canSend': self.can_send,
-            'createdAt': self.created_at,
-            'deletedAt': self.deleted_at,
-            'emailAddress': self.email_address,
-            'firstName': self.first_name,
-            'lastName': self.last_name,
-            'mailingListId': self.mailing_list_id,
-            'updatedAt': self.updated_at,
-            'welcomedAt': self.welcomed_at,
-        }
+    @classmethod
+    def update(cls, can_send, deleted_at, first_name, last_name, mailing_list_member_id):
+        member = cls.query.filter_by(id=mailing_list_member_id).first()
+        if member:
+            member.can_send = can_send
+            member.deleted_at = deleted_at
+            member.first_name = first_name
+            member.last_name = last_name
+            db.session.add(member)
+            std_commit()
+        return member
+
+
+def to_api_json(self):
+    return {
+        'id': self.id,
+        'canSend': self.can_send,
+        'createdAt': self.created_at,
+        'deletedAt': self.deleted_at,
+        'emailAddress': self.email_address,
+        'firstName': self.first_name,
+        'lastName': self.last_name,
+        'mailingListId': self.mailing_list_id,
+        'updatedAt': self.updated_at,
+        'welcomedAt': self.welcomed_at,
+    }
