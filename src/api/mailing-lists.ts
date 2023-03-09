@@ -30,10 +30,10 @@ export function getSiteMailingListAdmin(canvasCourseId: string, redirectOnError?
   return utils.get(`/api/mailing_lists/${canvasCourseId}`, redirectOnError)
 }
 
-export function createSiteMailingListAdmin(canvasCourseId: string, name: string) {
-  return utils.post(`/api/mailing_lists/${canvasCourseId}/create`, {listName: name}, true)
+export function createSiteMailingListAdmin(canvasCourseId: string, name: string, redirectOnError?: boolean) {
+  return utils.post(`/api/mailing_lists/${canvasCourseId}/create`, {listName: name}, redirectOnError)
 }
 
-export function populateSiteMailingList(canvasCourseId: string) {
-  return utils.post(`/api/mailing_lists/${canvasCourseId}/populate`, {}, true)
+export function populateSiteMailingList(canvasCourseId: string, redirectOnError?: boolean) {
+  return utils.post(`/api/mailing_lists/${canvasCourseId}/populate`, {}, redirectOnError)
 }

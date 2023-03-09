@@ -34,7 +34,6 @@
       <v-btn
         id="btn-create-mailing-list"
         class="canvas-button canvas-button-primary"
-        aria-controls="page-reader-alert"
         color="primary"
         :disabled="errorMessages"
         @click="createMailingList"
@@ -135,7 +134,6 @@
         <v-row no-gutters>
           <v-btn
             id="btn-save-welcome-email"
-            aria-controls="page-reader-alert"
             color="primary"
             :disabled="!mailingListSubject || !mailingListMessage"
           >
