@@ -98,7 +98,7 @@ def register_routes(app):
         _set_session(response)
         if app.config['RIPLEY_ENV'] == 'development':
             # In development the response can be shared with requesting code from any local origin.
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Ripley-Canvas-Api-Domain'
+            response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
             response.headers['Access-Control-Allow-Origin'] = app.config['VUE_LOCALHOST_BASE_URL']
             response.headers['Access-Control-Allow-Credentials'] = 'true'
             response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS, PUT, DELETE'
@@ -130,6 +130,7 @@ def _set_session(response):
     if cookie_name in request.cookies:
         cookie_value = request.cookies[cookie_name]
         composite_key = json.loads(cookie_value.split('|')[0])
+        app.logger.debug(f'cookie: {composite_key}')
         if composite_key['uid'] == current_user.uid and composite_key['canvas_course_id'] == current_user.canvas_course_id:
             response.set_cookie(cookie_name, cookie_value, samesite='None', secure=True)
 
