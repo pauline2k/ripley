@@ -50,9 +50,10 @@ class MailingListMembers(Base):
         self.mailing_list_id = mailing_list_id
 
     @classmethod
-    def create(cls, can_send, first_name, last_name, mailing_list_id):
+    def create(cls, can_send, email_address, first_name, last_name, mailing_list_id):
         mailing_list_member = cls(
             can_send=can_send,
+            email_address=email_address,
             first_name=first_name,
             last_name=last_name,
             mailing_list_id=mailing_list_id,

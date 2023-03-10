@@ -72,14 +72,15 @@ def get_undergraduate_term(term_id):
 
 
 def get_users(uids):
-    sql = """
+    uids_sql_fragment = "'" + "', '".join(uids) + "'"
+    sql = f"""
         SELECT * FROM sis_data.basic_attributes
         WHERE
             (affiliations LIKE '%-TYPE-%' AND affiliations NOT LIKE '%TYPE-SPA%')
             AND person_type != 'A'
-            AND ldap_uid = ANY(:uids)
+            AND ldap_uid IN ({uids_sql_fragment})
     """
-    return safe_execute_rds(sql, params={'uids': uids})
+    return safe_execute_rds(sql)
 
 
 def _safe_execute(sql, cursor, **kwargs):

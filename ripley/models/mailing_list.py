@@ -87,7 +87,7 @@ class MailingList(Base):
     @classmethod
     def populate(cls, mailing_list):
         course = canvas.get_course(api_call=False, course_id=mailing_list.canvas_site_id)
-        canvas_course_users = course.get_users()
+        canvas_course_users = list(course.get_users(include=('email', 'enrollments')))
         mailing_list_members = MailingListMembers.get_mailing_list_members(
             include_deleted=True,
             mailing_list_id=mailing_list.id,
@@ -200,7 +200,7 @@ class MailingList(Base):
         for chunk in range(0, len(canvas_course_users), count_per_chunk):
             canvas_user_chunk = canvas_course_users[chunk:chunk + count_per_chunk]
             uids = [u.login_id for u in canvas_user_chunk]
-            loch_users_by_uid = [u['ldap_uid'] for u in data_loch.get_users(uids=uids)]
+            loch_users_by_uid = {u['ldap_uid']: u for u in data_loch.get_users(uids=uids)}
 
             for course_user in canvas_user_chunk:
                 uid = course_user.login_id
@@ -267,6 +267,7 @@ class MailingList(Base):
                         app.logger.debug(f'Adding user {preferred_email}')
                         if MailingListMembers.create(
                             can_send=user['canSend'],
+                            email_address=user['emailAddress'],
                             first_name=user['firstName'],
                             last_name=user['lastName'],
                             mailing_list_id=mailing_list.id,
