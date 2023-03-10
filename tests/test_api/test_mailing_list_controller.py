@@ -56,9 +56,10 @@ class TestFindMailingList:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {'course': ['get_by_id']}, m)
             fake_auth.login(admin_uid)
+            _api_create_mailing_list(client, '1234567')
             response = _api_find_mailing_list(client, '1234567')
 
-            assert response['canvasSite']['canvasCourseId'] == '1234567'
+            assert response['canvasSite']['canvasCourseId'] == 1234567
             assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
             assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
@@ -70,6 +71,7 @@ class TestFindMailingList:
                 'user': ['profile_30000'],
             }, m)
             fake_auth.login(teacher_uid)
+            _api_create_mailing_list(client, '1234567')
             response = _api_find_mailing_list(client, '1234567')
 
             assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
@@ -169,8 +171,9 @@ class TestPopulateMailingList:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {'course': ['get_by_id', 'search_users_1234567', 'user_profile_10000']}, m)
             fake_auth.login(admin_uid)
+            _api_create_mailing_list(client, '1234567')
             api_json = _api_populate_mailing_list(client, '1234567')
-            assert api_json['mailingList']['canvasSite']['canvasCourseId'] == '1234567'
+            assert api_json['mailingList']['canvasSite']['canvasCourseId'] == 1234567
             # TODO: verify populated mailing list
 
     def test_teacher(self, client, app, fake_auth):
@@ -181,6 +184,7 @@ class TestPopulateMailingList:
                 'user': ['profile_30000'],
             }, m)
             fake_auth.login(teacher_uid)
+            _api_create_mailing_list(client, '1234567')
             api_json = _api_populate_mailing_list(client, '1234567')
             assert api_json['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
             # TODO: verify populated mailing list

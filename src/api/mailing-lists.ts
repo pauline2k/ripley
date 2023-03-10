@@ -19,7 +19,7 @@ export function deactivateWelcomeEmail(canvasCourseId: string) {
 
 export function downloadWelcomeEmailCsv(canvasCourseId: string) {
   const filename = `${canvasCourseId}-welcome-messages-log-${moment().format('YYYY-MM-DD_hhmmss')}.csv`
-  return utils.downloadViaGet(`/api/mailing_lists/${canvasCourseId}/welcome_email_log`, filename,true)
+  return utils.downloadViaGet(`/api/mailing_lists/${canvasCourseId}/download/welcome_email_log`, filename,true)
 }
 
 export function getMailingList(canvasCourseId: string, redirectOnError?: boolean) {

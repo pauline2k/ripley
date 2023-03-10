@@ -63,11 +63,10 @@ class MailingList(Base):
         self.welcome_email_active = False
 
     @classmethod
-    def find_or_initialize(cls, canvas_site_id):
+    def find_by_canvas_site_id(cls, canvas_site_id):
         mailing_list = cls.query.filter_by(canvas_site_id=canvas_site_id).first()
-        if not mailing_list:
-            mailing_list = cls.create(canvas_site_id=canvas_site_id)
-        mailing_list._initialize()
+        if mailing_list:
+            mailing_list._initialize()
         return mailing_list
 
     @classmethod

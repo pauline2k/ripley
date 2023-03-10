@@ -22,10 +22,24 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+from ripley.models.user_auth import UserAuth
+
+
+def can_manage_mailing_list(canvas_user):
+    return is_course_teacher_or_assistant(canvas_user) or is_course_reader(canvas_user) or is_account_admin(canvas_user)
+
+
+def can_view_course_roster_photos(canvas_user):
+    return is_course_teacher_or_assistant(canvas_user)
 
 
 def has_instructing_role(canvas_user):
     return is_course_teacher(canvas_user) or is_course_teachers_assistant(canvas_user) or is_course_reader(canvas_user)
+
+
+def is_account_admin(canvas_user):
+    user_auth = UserAuth.find_by_uid(canvas_user.login_id)
+    return user_auth and user_auth.is_superuser
 
 
 def is_course_reader(canvas_user):
@@ -34,6 +48,10 @@ def is_course_reader(canvas_user):
 
 def is_course_teacher(canvas_user):
     return _has_any_role(canvas_user, ['TeacherEnrollment'])
+
+
+def is_course_teacher_or_assistant(canvas_user):
+    return is_course_teacher(canvas_user) or is_course_teachers_assistant(canvas_user)
 
 
 def is_course_teachers_assistant(canvas_user):

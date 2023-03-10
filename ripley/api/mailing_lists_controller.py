@@ -23,12 +23,15 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from datetime import datetime
+
 from flask import current_app as app
 from ripley.api.errors import BadRequestError, ResourceNotFoundError
-from ripley.api.util import canvas_role_required
+from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas
 from ripley.lib.http import tolerant_jsonify
 from ripley.models.mailing_list import MailingList
+from ripley.models.mailing_list_members import MailingListMembers
 
 
 @app.route('/api/mailing_lists/<canvas_course_id>')
@@ -36,7 +39,7 @@ from ripley.models.mailing_list import MailingList
 def mailing_lists(canvas_course_id):
     course = canvas.get_course(canvas_course_id)
     if course:
-        mailing_list = MailingList.find_or_initialize(canvas_course_id)
+        mailing_list = MailingList.find_by_canvas_site_id(canvas_course_id)
         return tolerant_jsonify(mailing_list.to_api_json() if mailing_list else None)
     else:
         raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_course_id}" was found.')
@@ -51,10 +54,34 @@ def create_mailing_lists(canvas_course_id):
         raise BadRequestError(str(e))
 
 
+@app.route('/api/mailing_lists/<canvas_course_id>/download/welcome_email_log', methods=['POST'])
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+def download_welcome_email_log(canvas_course_id):
+    mailing_list = MailingList.find_by_canvas_site_id(canvas_course_id)
+    if mailing_list:
+        now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        rows = []
+        mailing_list_members = MailingListMembers.get_mailing_list_members(mailing_list_id=mailing_list.id)
+        for member in mailing_list_members:
+            rows.append({
+                'Name': f'{member.first_name} {member.last_name}',
+                'Email address': member.email_address,
+                'Message sent': member.welcomed_at,
+                'Current member': 'N' if member.deleted_at else 'Y',
+            })
+        return csv_download_response(
+            rows=rows,
+            filename=f'{canvas_course_id}-welcome-messages-log-{now}.csv',
+            fieldnames=['Name', 'Email address', 'Message sent', 'Current member'],
+        )
+    else:
+        raise ResourceNotFoundError(f'No mailing list found for Canvas course {canvas_course_id}')
+
+
 @app.route('/api/mailing_lists/<canvas_course_id>/populate', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def populate_mailing_lists(canvas_course_id):
-    mailing_list = MailingList.find_or_initialize(canvas_course_id)
+    mailing_list = MailingList.find_by_canvas_site_id(canvas_course_id)
     if mailing_list:
         mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
         return tolerant_jsonify({
