@@ -56,16 +56,10 @@ def create_mailing_lists(canvas_course_id):
 def populate_mailing_lists(canvas_course_id):
     mailing_list = MailingList.find_or_initialize(canvas_course_id)
     if mailing_list:
-        api_json = {
-            **mailing_list.to_api_json(),
-            'errorMessages': [],  # TODO
-            'populationResults': None,
-        }
-        if api_json['state'] == 'created':
-            api_json['populationResults'] = MailingList.populate(mailing_list=mailing_list)
-        else:
-            # TODO: api_json['errorMessages'].append(???)
-            pass
-        return tolerant_jsonify(api_json)
+        mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
+        return tolerant_jsonify({
+            'mailingList': mailing_list.to_api_json(),
+            'summary': update_summary,
+        })
     else:
         raise ResourceNotFoundError(f'No mailing list found for Canvas course {canvas_course_id}')

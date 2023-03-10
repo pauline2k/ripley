@@ -89,7 +89,17 @@
           </h2>
           <div v-if="listCreated" class="pt-2">
             <div id="mailing-list-member-count">{{ pluralize('member', mailingList.membersCount, {0: 'No'}) }}</div>
-            <div>Membership last updated: <strong id="mailing-list-membership-last-updated">{{ listLastPopulated }}</strong></div>
+            <div>
+              Membership last updated:
+              <strong id="mailing-list-membership-last-updated">
+                <span v-if="$_.get(mailingList, 'timeLastPopulated')">
+                  {{ $moment.unix(mailingList.timeLastPopulated.epoch).format('MMM D, YYYY') }}
+                </span>
+                <span v-if="!$_.get(mailingList, 'timeLastPopulated')">
+                  never
+                </span>
+              </strong>
+            </div>
             <div class="pt-2">
               Course site:
               <OutboundLink
@@ -183,7 +193,7 @@ import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import Utils from '@/mixins/Utils'
-import {createSiteMailingListAdmin, getSiteMailingListAdmin, populateSiteMailingList} from '@/api/mailing-lists'
+import {createMailingList, getMailingList, populateMailingList} from '@/api/mailing-lists'
 
 export default {
   name: 'SiteMailingLists',
@@ -192,7 +202,6 @@ export default {
   data: () => ({
     errorMessages: [],
     isProcessing: false,
-    listLastPopulated: null,
     mailingList: undefined,
     modelCanvasCourseId: undefined,
     successMessages: []
@@ -205,7 +214,7 @@ export default {
       return this.$_.get(this.mailingList, 'canvasSite')
     },
     listCreated() {
-      return this.$_.get(this.mailingList, 'state') === 'created'
+      return !!this.$_.get(this.mailingList, 'id')
     },
     siteSelected() {
       return !!this.$_.get(this.canvasSite, 'canvasCourseId')
@@ -226,7 +235,7 @@ export default {
     findSiteMailingList() {
       if (!this.isProcessing && this.modelCanvasCourseId) {
         this.isProcessing = true
-        getSiteMailingListAdmin(this.modelCanvasCourseId).then(
+        getMailingList(this.modelCanvasCourseId).then(
           this.updateDisplay,
           this.axiosErrorHandler
         )
@@ -236,12 +245,10 @@ export default {
       this.clearAlerts()
       this.$announcer.polite('Updating membership')
       this.isProcessing = true
-      populateSiteMailingList(this.canvasCourseId).then(
+      populateMailingList(this.canvasCourseId).then(
         data => {
-          this.updateDisplay(data)
-          if (!data || !data.populationResults) {
-            this.errorMessages.push('The mailing list could not be populated.')
-          }
+          this.updateDisplay(data.mailingList)
+          this.updatePopulationResults(data.summary)
         },
         this.axiosErrorHandler
       )
@@ -252,7 +259,7 @@ export default {
       this.isProcessing = true
       const name = this.$_.trim(this.mailingList.name)
       if (name) {
-        createSiteMailingListAdmin(this.canvasCourseId, name).then(this.updateDisplay, this.axiosErrorHandler)
+        createMailingList(this.canvasCourseId, name).then(this.updateDisplay, this.axiosErrorHandler)
       }
     },
     resetForm() {
@@ -273,38 +280,24 @@ export default {
     },
     updateDisplay(data) {
       this.mailingList = data
-      this.successMessages = []
-      this.errorMessages = this.mailingList.errorMessages || []
+      this.clearAlerts()
       if (this.siteSelected) {
         this.updateCodeAndTerm(this.canvasSite)
         this.$putFocusNextTick('mailing-list-details-header')
       }
-      if (this.listCreated) {
-        this.updateListLastPopulated()
-      }
-      if (this.mailingList.populationResults) {
-        this.updatePopulationResults(this.mailingList.populationResults)
-      }
       this.isProcessing = false
     },
-    updateListLastPopulated() {
-      if (this.mailingList && this.mailingList.timeLastPopulated) {
-        this.listLastPopulated = this.$moment.unix(this.mailingList.timeLastPopulated.epoch).format('MMM D, YYYY')
-      } else {
-        this.listLastPopulated = 'never'
-      }
-    },
-    updatePopulationResults(populationResults) {
-      if (populationResults.success) {
+    updatePopulationResults(summary) {
+      if (summary.success) {
         this.successMessages.push('Memberships were successfully updated.')
-        if (this.$_.size(populationResults.messages)) {
-          this.successMessages = this.successMessages.concat(populationResults.messages)
+        if (this.$_.size(summary.messages)) {
+          this.successMessages = this.successMessages.concat(summary.messages)
         } else {
           this.successMessages.push('No changes in membership were found.')
         }
       } else {
         this.errorMessages.push('There were errors during the last membership update.')
-        this.errorMessages = this.errorMessages.concat(populationResults.messages)
+        this.errorMessages = this.errorMessages.concat(summary.messages)
         this.errorMessages.push('You can attempt to correct the errors by running the update again.')
       }
     }

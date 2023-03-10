@@ -48,7 +48,6 @@ class TestMailingList:
             assert feed['welcomeEmailActive'] is False
             assert feed['welcomeEmailBody'] is None
             assert feed['welcomeEmailSubject'] is None
-            assert feed['state'] == 'unregistered'
 
     def test_create(self, app):
         with requests_mock.Mocker() as m:
@@ -59,7 +58,6 @@ class TestMailingList:
 
             assert feed['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
             assert feed['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
-            assert feed['state'] == 'created'
 
             with pytest.raises(ValueError, match='List with id 1234567 already exists'):
                 mailing_list = MailingList.create('1234567')

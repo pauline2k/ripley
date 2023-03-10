@@ -64,7 +64,9 @@ class MailingList(Base):
 
     @classmethod
     def find_or_initialize(cls, canvas_site_id):
-        mailing_list = cls.query.filter_by(canvas_site_id=canvas_site_id).first() or cls(canvas_site_id=canvas_site_id)
+        mailing_list = cls.query.filter_by(canvas_site_id=canvas_site_id).first()
+        if not mailing_list:
+            mailing_list = cls.create(canvas_site_id=canvas_site_id)
         mailing_list._initialize()
         return mailing_list
 
@@ -86,20 +88,20 @@ class MailingList(Base):
 
     @classmethod
     def populate(cls, mailing_list):
-        course = canvas.get_course(api_call=False, course_id=mailing_list.canvas_site_id)
+        course = canvas.get_course(course_id=mailing_list.canvas_site_id)
         canvas_course_users = list(course.get_users(include=('email', 'enrollments')))
         mailing_list_members = MailingListMembers.get_mailing_list_members(
             include_deleted=True,
             mailing_list_id=mailing_list.id,
         )
-        population_results = cls._update_memberships(
+        mailing_list, update_summary = cls._update_memberships(
             canvas_course_users=canvas_course_users,
             mailing_list=mailing_list,
             mailing_list_members=mailing_list_members,
         )
         if mailing_list.welcome_email_active and mailing_list.welcome_email_body and mailing_list.welcome_email_subject:
             send_welcome_emails()
-        return population_results
+        return mailing_list, update_summary
 
     @classmethod
     def update_population_metadata(
@@ -121,7 +123,8 @@ class MailingList(Base):
         return mailing_list
 
     def to_api_json(self):
-        welcome_email_last_sent = max([m.welcomed_at for m in self.mailing_list_members]) if self.mailing_list_members else None
+        with_welcomed_at = list(filter(lambda m: m.welcomed_at, self.mailing_list_members or []))
+        welcome_email_last_sent = max([m.welcomed_at for m in with_welcomed_at]) if with_welcomed_at else None
         return {
             'canvasSite': {
                 'canvasCourseId': self.canvas_site_id,
@@ -131,10 +134,10 @@ class MailingList(Base):
                 'term': self._canvas_site_term_json(),
                 'url': f"{app.config['CANVAS_API_URL']}/courses/{self.canvas_site_id}",
             },
-            'name': self.list_name,
+            'id': self.id,
             'membersCount': len(self.mailing_list_members),
+            'name': self.list_name,
             'populatedAt': to_isoformat(self.populated_at),
-            'state': 'created' if self.id else 'unregistered',
             'welcomeEmailActive': self.welcome_email_active,
             'welcomeEmailBody': self.welcome_email_body,
             'welcomeEmailLastSent': welcome_email_last_sent,
@@ -193,7 +196,7 @@ class MailingList(Base):
         }
         # Track by email address
         mailing_list_members_by_email = {m.email_address.lower(): m for m in mailing_list_members}
-        active_mailing_list_members = filter(lambda m: not m.deleted_at, mailing_list_members)
+        active_mailing_list_members = list(filter(lambda m: not m.deleted_at, mailing_list_members))
         email_addresses_of_active_mailing_list_members = [m.email_address.lower() for m in active_mailing_list_members]
 
         count_per_chunk = 10000
@@ -297,8 +300,9 @@ class MailingList(Base):
             populate_remove_errors=len(summary['remove']['failure']),
             populated_at=utc_now(),
         )
+        mailing_list = cls.query.filter_by(id=mailing_list.id).first()
         _log_summary_of_mailing_list_updates(mailing_list, summary)
-        return summary
+        return mailing_list, summary
 
 
 def _can_send(canvas_course_user):
@@ -351,7 +355,7 @@ def _log_summary_of_mailing_list_updates(mailing_list, summary):
         fails = ', '.join(update_failures)
         app.logger.error(f'[ERROR] Failed to update {update_failures.count} addresses in {list_name}: {fails}')
     # Log it all.
-    app.logger.info('\n'.join(info_log))
+    app.logger.info('\n' + '\n'.join(info_log) + '\n')
 
 
 def _remove_from_list_safely(item, list_of_items):
