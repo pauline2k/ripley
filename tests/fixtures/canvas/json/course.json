@@ -21,6 +21,40 @@
         },
         "status_code": 200
     },
+    "user_profile_10000": {
+        "endpoint": "users/sis_login_id:10000/profile",
+        "data": [],
+        "method": "GET",
+        "status_code": 200
+    },
+    "search_users_1234567": {
+        "endpoint": "courses/1234567/search_users",
+        "data": [
+            {
+                "id": 4567890,
+                "email": "synthetic.ash@berkeley.edu",
+                "enrollments": [
+                    {
+                    "user_id": 4567890,
+                    "course_id": 1234567,
+                    "type": "TeacherEnrollment",
+                    "enrollment_state": "active",
+                    "role": "TeacherEnrollment",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "UID:300000",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
+                    }
+                ],
+                "login_id": "30000",
+                "integration_id": null,
+                "name": "Ash 🤖",
+                "short_name": "Ash 🤖",
+                "sortable_name": "🤖, Ash"
+            }
+        ],
+        "method": "GET",
+        "status_code": 200
+    },
     "get_external_tools_1234567": {
         "method": "GET",
         "endpoint": "courses/1234567/external_tools",

@@ -13,12 +13,12 @@
       <div v-for="errorMessage in errorMessages" :key="errorMessage">{{ errorMessage }}</div>
     </div>
 
-    <div v-if="!errorMessages && listCreated" role="alert" class="alert alert-success">
+    <div v-if="!errorMessages && mailingList.id" role="alert" class="alert alert-success">
       A Mailing List has been created at <strong>{{ mailingList.name }}@{{ mailingList.domain }}</strong>.
       Messages can now be sent through this address.
     </div>
 
-    <div v-if="!errorMessages && !listCreated" class="alert">
+    <div v-if="!errorMessages && !mailingList.id" class="alert">
       No Mailing List has yet been created for this site.
     </div>
 
@@ -30,7 +30,7 @@
       members. Students and people not in the site cannot send messages through Mailing Lists.
     </p>
 
-    <div v-if="!listCreated">
+    <div v-if="!mailingList.id">
       <v-btn
         id="btn-create-mailing-list"
         class="canvas-button canvas-button-primary"
@@ -43,7 +43,7 @@
       </v-btn>
     </div>
 
-    <div v-if="listCreated" class="border-top mt-3 pt-3">
+    <div v-if="mailingList.id" class="border-top mt-3 pt-3">
       <h2 id="send-welcome-email-header" class="page-site-mailing-list-welcome-email-form-heading" tabindex="-1">
         Send Welcome Email
       </h2>
@@ -196,7 +196,7 @@ import {
   createSiteMailingList,
   deactivateWelcomeEmail,
   downloadWelcomeEmailCsv,
-  getSiteMailingList,
+  getMailingList,
   updateWelcomeEmail
 } from '@/api/mailing-lists'
 
@@ -224,7 +224,6 @@ export default {
     isSavingWelcomeEmail: false,
     isTogglingEmailActivation: false,
     isWelcomeEmailActive: false,
-    listCreated: false,
     mailingList: undefined,
     mailingListMessage: '',
     mailingListSubject: '',
@@ -237,7 +236,7 @@ export default {
   created() {
     this.$loading()
     this.getCanvasCourseId()
-    getSiteMailingList(this.canvasCourseId).then(this.updateDisplay, this.$errorHandler)
+    getMailingList(this.canvasCourseId).then(this.updateDisplay, this.$errorHandler)
   },
   methods: {
     cancelEditMode() {
@@ -296,8 +295,7 @@ export default {
       this.mailingListMessage = this.mailingList.welcomeEmailBody
       this.mailingListSubject = this.mailingList.welcomeEmailSubject
       this.errorMessages = this.mailingList.errorMessages
-      this.listCreated = this.mailingList.state === 'created'
-      this.isEditingWelcomeEmail = this.listCreated && (!this.mailingListMessage && !this.mailingListSubject)
+      this.isEditingWelcomeEmail = this.mailingList.id && (!this.mailingListMessage && !this.mailingListSubject)
       this.isCreating = false
       this.isLoading = false
       this.$ready()
