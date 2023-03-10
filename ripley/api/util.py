@@ -23,13 +23,15 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+import csv
 from functools import wraps
 from urllib.parse import urljoin, urlparse
 
-from flask import abort, current_app as app, redirect, request
+from flask import abort, current_app as app, redirect, request, Response
 from flask_login import current_user, login_user, logout_user
 from ripley.externals import canvas
 from ripley.lib.http import tolerant_jsonify
+from werkzeug.wrappers import ResponseStream
 
 
 def admin_required(func):
@@ -64,10 +66,17 @@ def canvas_role_required(*roles):
     return _canvas_role_required
 
 
-def _is_safe_url(target):
-    ref_url = urlparse(request.host_url)
-    test_url = urlparse(urljoin(request.host_url, target))
-    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
+def csv_download_response(rows, filename, fieldnames=None):
+    response = Response(
+        content_type='text/csv',
+        headers={
+            'Content-disposition': f'attachment; filename="{filename}"',
+        },
+    )
+    csv_writer = csv.DictWriter(ResponseStream(response), fieldnames=fieldnames)
+    csv_writer.writeheader()
+    csv_writer.writerows(rows)
+    return response
 
 
 def start_login_session(user, redirect_path=None):
@@ -84,3 +93,9 @@ def start_login_session(user, redirect_path=None):
         return redirect(redirect_path) if redirect_path else tolerant_jsonify(current_user.to_api_json())
     else:
         return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)
+
+
+def _is_safe_url(target):
+    ref_url = urlparse(request.host_url)
+    test_url = urlparse(urljoin(request.host_url, target))
+    return test_url.scheme in ('http', 'https') and ref_url.netloc == test_url.netloc
