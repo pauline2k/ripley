@@ -54,7 +54,7 @@ def create_mailing_lists(canvas_course_id):
         raise BadRequestError(str(e))
 
 
-@app.route('/api/mailing_lists/<canvas_course_id>/download/welcome_email_log', methods=['POST'])
+@app.route('/api/mailing_lists/<canvas_course_id>/download/welcome_email_log')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def download_welcome_email_log(canvas_course_id):
     mailing_list = MailingList.find_by_canvas_site_id(canvas_course_id)

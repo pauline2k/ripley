@@ -238,7 +238,7 @@ class MailingList(Base):
 
                             if MailingListMembers.update(
                                     can_send=user['can_send'],
-                                    deleted_at=user['deleted_at'],
+                                    deleted_at=None,
                                     first_name=user['first_name'],
                                     last_name=user['last_name'],
                                     mailing_list_member_id=existing_member.id,

@@ -288,17 +288,42 @@ export default {
       this.isProcessing = false
     },
     updatePopulationResults(summary) {
-      if (summary.success) {
-        this.successMessages.push('Memberships were successfully updated.')
-        if (this.$_.size(summary.messages)) {
-          this.successMessages = this.successMessages.concat(summary.messages)
-        } else {
-          this.successMessages.push('No changes in membership were found.')
+      this.clearAlerts()
+      const pushErrorMessage = action => {
+        const error = this.oxfordJoin(summary[action].failure)
+        if (error) {
+          this.errorMessages.push(`Failed to ${action} ${error}.`)
         }
-      } else {
-        this.errorMessages.push('There were errors during the last membership update.')
-        this.errorMessages = this.errorMessages.concat(summary.messages)
-        this.errorMessages.push('You can attempt to correct the errors by running the update again.')
+      }
+      const pushSuccessMessage = action => {
+        const count = summary[action].success
+        if (count) {
+          const prefix = this.pluralize('member', count, {1: 'One'})
+          this.successMessages.push(`${prefix} updated.`)
+        }
+      }
+      this.$_.each(summary, (value, key) => {
+        switch (key) {
+        case 'add':
+          pushErrorMessage('add')
+          pushSuccessMessage('add')
+          break
+        case 'remove':
+          pushErrorMessage('remove')
+          pushSuccessMessage('remove')
+          break
+        case 'update':
+          pushErrorMessage('update')
+          pushSuccessMessage('update')
+          break
+        default:
+        }
+      })
+      if (this.errorMessages.length > 1) {
+        this.errorMessages.unshift('We have errors.')
+      }
+      if (this.successMessages.length > 1) {
+        this.successMessages.unshift('Memberships successfully updated.')
       }
     }
   }
