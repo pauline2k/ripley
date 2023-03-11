@@ -37,16 +37,16 @@ class TestGetJwks:
             assert key in keyset
 
 
-class TestGetMailingListsConfig:
+class TestGetConfig:
 
     def test_anonymous(self, client, app):
-        """Anonymous user can get the mailing lists config."""
-        response = client.get('api/lti/mailing_lists_config.json')
+        """Anonymous user can get the tool config JSON."""
+        response = client.get('api/lti/config.json')
         assert response.status_code == 200
         assert response.content_type == 'application/json'
         assert response.json == {
-            'title': 'Mailing Lists',
-            'description': 'Create and manage mailing lists for all course sites',
+            'title': 'Ripley',
+            'description': 'LTI tools for bCourses',
             'oidc_initiation_url': app.url_for('initiate_login', _external=True),
             'target_link_uri': app.url_for('launch_mailing_lists', _external=True),
             'public_jwk_url': app.url_for('get_jwk_set', _external=True),
@@ -54,14 +54,20 @@ class TestGetMailingListsConfig:
                 {
                     'platform': 'canvas.instructure.com',
                     'privacy_level': 'public',
-                    'tool_id': 'site_mailing_lists',
                     'settings': {
                         'platform': 'canvas.instructure.com',
-                        'text': 'Mailing Lists',
                         'placements': [
                             {
+                                'text': 'Mailing Lists',
                                 'placement': 'account_navigation',
                                 'message_type': 'LtiResourceLinkRequest',
+                                'target_link_uri': app.url_for('launch_mailing_lists', _external=True),
+                            },
+                            {
+                                'text': 'User Provisioning',
+                                'placement': 'account_navigation',
+                                'message_type': 'LtiResourceLinkRequest',
+                                'target_link_uri': app.url_for('launch_provision_user', _external=True),
                             },
                         ],
                     },

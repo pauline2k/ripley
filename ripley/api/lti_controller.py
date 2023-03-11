@@ -58,11 +58,6 @@ def get_jwk_set():
         raise InternalServerError({'message': str(e)})
 
 
-@app.route('/api/lti/mailing_lists', methods=['GET', 'POST'])
-def launch_mailing_lists():
-    return _launch_tool('mailing_lists')
-
-
 @app.route('/api/lti/login', methods=['GET', 'POST'])
 def initiate_login():
     lti_config_path = app.config['LTI_CONFIG_PATH']
@@ -83,26 +78,42 @@ def initiate_login():
         raise InternalServerError({'message': str(e)})
 
 
-@app.route('/api/lti/mailing_lists_config.json')
-def mailing_lists_config():
+@app.route('/api/lti/mailing_lists', methods=['GET', 'POST'])
+def launch_mailing_lists():
+    return _launch_tool('mailing_lists')
+
+
+@app.route('/api/lti/provision_user', methods=['GET', 'POST'])
+def launch_provision_user():
+    return _launch_tool('provision_user')
+
+
+@app.route('/api/lti/config.json')
+def tool_config():
     return {
-        'title': 'Mailing Lists',
-        'description': 'Create and manage mailing lists for all course sites',
+        'title': 'Ripley',
+        'description': 'LTI tools for bCourses',
         'oidc_initiation_url': app.url_for('initiate_login', _external=True),
-        'target_link_uri': app.url_for('launch_mailing_lists', _external=True),
         'public_jwk_url': app.url_for('get_jwk_set', _external=True),
+        'target_link_uri': app.url_for('launch_mailing_lists', _external=True),
         'extensions': [
             {
                 'platform': 'canvas.instructure.com',
                 'privacy_level': 'public',
-                'tool_id': 'site_mailing_lists',
                 'settings': {
                     'platform': 'canvas.instructure.com',
-                    'text': 'Mailing Lists',
                     'placements': [
                         {
+                            'text': 'Mailing Lists',
                             'placement': 'account_navigation',
                             'message_type': 'LtiResourceLinkRequest',
+                            'target_link_uri': app.url_for('launch_mailing_lists', _external=True),
+                        },
+                        {
+                            'text': 'User Provisioning',
+                            'placement': 'account_navigation',
+                            'message_type': 'LtiResourceLinkRequest',
+                            'target_link_uri': app.url_for('launch_provision_user', _external=True),
                         },
                     ],
                 },
