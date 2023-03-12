@@ -114,7 +114,6 @@ export default {
     studentsFiltered: [],
   }),
   created() {
-    this.$loading()
     this.getCanvasCourseId()
     if (this.canvasCourseId === 'embedded') {
       getCourseUserRoles(this.canvasCourseId).then(

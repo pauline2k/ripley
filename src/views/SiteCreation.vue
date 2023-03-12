@@ -108,7 +108,6 @@ export default {
     linkToCreateProjectSite: undefined
   }),
   created() {
-    this.$loading()
     getSiteCreationAuthorizations().then(data => {
       this.canCreateCourseSite = data.authorizations.canCreateCourseSite
       this.canCreateProjectSite = data.authorizations.canCreateProjectSite

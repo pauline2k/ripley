@@ -82,6 +82,7 @@ export default {
     this.eventHub.on('current-user-update', () => {
       this.loadTools()
     })
+    this.$ready()
   },
   methods: {
     loadTools() {
@@ -89,12 +90,12 @@ export default {
       this.tools = this.$_.sortBy([
         {disabled: false, icon: 'mdi-google-classroom', path: '/create_course_site', title: 'Create a Course Site'},
         {disabled: false, icon: 'mdi-projector-screen-outline', path: '/create_project_site', title: 'Create a Project Site'},
-        {disabled: false, icon: 'mdi-email-multiple-outline', path: '/mailing_lists', title: 'Mailing Lists'},
+        {disabled: false, icon: 'mdi-email-multiple-outline', path: '/mailing_list/select_course', title: 'Manage Mailing List'},
         {disabled: false, icon: 'mdi-web', path: '/create_site', title: 'Site Creation'},
         {disabled: false, icon: 'mdi-account-plus-outline', path: '/provision_user', title: 'User Provision'},
         {disabled: !canvasCourseId, icon: 'mdi-export', path: `/grade_export/${canvasCourseId}`, title: 'E-Grade Export'},
         {disabled: !canvasCourseId, icon: 'mdi-account-school', path: `/add_user/${canvasCourseId}`, title: 'Find a User to Add'},
-        {disabled: !canvasCourseId, icon: 'mdi-email-fast-outline', path: `/mailing_list/${canvasCourseId}`, title: 'Mailing List'},
+        {disabled: !canvasCourseId, icon: 'mdi-email-fast-outline', path: `/welcome_email/mailing_list/${canvasCourseId}`, title: 'Send Welcome Email'},
         {disabled: !canvasCourseId, icon: 'mdi-google-classroom', path: `/manage_official_sections/${canvasCourseId}`, title: 'Official Sections'},
         {disabled: !canvasCourseId, icon: 'mdi-account-multiple', path: `/rosters/${canvasCourseId}`, title: 'Roster Photos'}
       ], tool => tool.title)

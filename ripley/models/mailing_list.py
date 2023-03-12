@@ -133,6 +133,7 @@ class MailingList(Base):
                 'term': self._canvas_site_term_json(),
                 'url': f"{app.config['CANVAS_API_URL']}/courses/{self.canvas_site_id}",
             },
+            'domain': app.config['MAILGUN_DOMAIN'],
             'id': self.id,
             'membersCount': len(self.mailing_list_members),
             'name': self.list_name,
@@ -174,22 +175,22 @@ class MailingList(Base):
     def _update_memberships(cls, canvas_course_users, mailing_list, mailing_list_members):
         summary = {
             'add': {
-                'failure': [],
-                'success': 0,
+                'errors': [],
+                'successes': [],
                 'total': 0,
             },
             'remove': {
-                'failure': [],
-                'success': 0,
+                'errors': [],
+                'successes': [],
                 'total': 0,
             },
             'update': {
-                'failure': [],
-                'success': 0,
+                'errors': [],
+                'successes': [],
                 'total': 0,
             },
             'welcomeEmails': {
-                'success': 0,
+                'successes': [],
                 'total': 0,
             },
         }
@@ -235,17 +236,15 @@ class MailingList(Base):
                         if existing_member.deleted_at:
                             summary['add']['total'] += 1
                             app.logger.debug(f'Reactivating previously deleted address {preferred_email}')
-
-                            if MailingListMembers.update(
-                                    can_send=user['can_send'],
-                                    deleted_at=None,
-                                    first_name=user['first_name'],
-                                    last_name=user['last_name'],
-                                    mailing_list_member_id=existing_member.id,
-                            ):
-                                summary['add']['success'] += 1
-                            else:
-                                summary['add']['failure'].append(preferred_email)
+                            success = MailingListMembers.update(
+                                can_send=user['can_send'],
+                                deleted_at=None,
+                                first_name=user['first_name'],
+                                last_name=user['last_name'],
+                                mailing_list_member_id=existing_member.id,
+                            )
+                            key = 'successes' if success else 'errors'
+                            summary['add'][key].append(preferred_email)
                         else:
                             update_required = user['canSend'] != existing_member.can_send or \
                                 user['firstName'] != existing_member.first_name or \
@@ -253,30 +252,28 @@ class MailingList(Base):
                             if update_required:
                                 summary['update']['total'] += 1
                                 app.logger.debug(f'Updating user {preferred_email} of mailing_list {mailing_list.id}')
-                                if MailingListMembers.update(
+                                success = MailingListMembers.update(
                                     can_send=user['can_send'],
                                     deleted_at=user['deleted_at'],
                                     first_name=user['first_name'],
                                     last_name=user['last_name'],
                                     mailing_list_member_id=existing_member.id,
-                                ):
-                                    summary['update']['success'] += 1
-                                else:
-                                    summary['update']['failure'].append(preferred_email)
+                                )
+                                key = 'successes' if success else 'errors'
+                                summary['update'][key].append(preferred_email)
                     else:
                         # Address is not currently in the list. Add it.
                         summary['add']['total'] += 1
                         app.logger.debug(f'Adding user {preferred_email}')
-                        if MailingListMembers.create(
+                        success = MailingListMembers.create(
                             can_send=user['canSend'],
                             email_address=user['emailAddress'],
                             first_name=user['firstName'],
                             last_name=user['lastName'],
                             mailing_list_id=mailing_list.id,
-                        ):
-                            summary['add']['success'] += 1
-                        else:
-                            summary['add']['failure'].append(preferred_email)
+                        )
+                        key = 'successes' if success else 'errors'
+                        summary['add'][key].append(preferred_email)
                 else:
                     app.logger.warn(f"No email address found for UID {user['uid']}")
 
@@ -287,16 +284,15 @@ class MailingList(Base):
             mailing_list_member = mailing_list_members_by_email[email_address]
             if mailing_list_member:
                 MailingListMembers.delete(mailing_list_member.id)
-                summary['remove']['success'] += 1
-            else:
-                summary['remove']['failure'] += 1
+            key = 'successes' if mailing_list_member else 'errors'
+            summary['remove'][key] += 1
 
         members = MailingListMembers.get_mailing_list_members(mailing_list_id=mailing_list.id)
         cls.update_population_metadata(
             mailing_list_id=mailing_list.id,
             members_count=len(members),
-            populate_add_errors=len(summary['add']['failure']),
-            populate_remove_errors=len(summary['remove']['failure']),
+            populate_add_errors=len(summary['add']['errors']),
+            populate_remove_errors=len(summary['remove']['errors']),
             populated_at=utc_now(),
         )
         mailing_list = cls.query.filter_by(id=mailing_list.id).first()
@@ -325,34 +321,30 @@ def _get_preferred_email(canvas_user_email, loch_user_email):
 
 def _log_summary_of_mailing_list_updates(mailing_list, summary):
     info_log = []
+    list_name = mailing_list.list_name
+
+    add_errors = summary['add']['errors']
+    remove_errors = summary['remove']['errors']
+    remove_successes = summary['remove']['successes']
+    update_errors = summary['update']['errors']
+    update_successes = summary['update']['successes']
+    update_total = summary['update']['total']
 
     def _log(statement):
         info_log.append(statement)
 
-    def _get(category, key):
-        return summary[category][key]
-
-    list_name = mailing_list.list_name
-    add_failures = _get('add', 'failure')
-    remove_failures = _get('remove', 'failure')
-    remove_successes = _get('remove', 'success')
-    update_failures = _get('update', 'failure')
-    update_successes = _get('update', 'success')
-    update_total = _get('update', 'total')
-
-    _log(f'Finished population of mailing list {mailing_list.list_name}.')
-    _log(f"Added {_get('add', 'success')} of {_get('add', 'total')} new site members.")
-    if add_failures:
-        fails = ', '.join(add_failures)
-        app.logger.error(f'[ERROR] Failed to add {add_failures.count} addresses to {list_name}: {fails}')
-    _log(f"Removed {remove_successes} of {_get('remove', 'total')} former site members.")
-    if remove_failures:
-        fails = ', '.join(remove_failures)
-        app.logger.error(f'[ERROR] Failed to remove {remove_failures.count} addresses from {list_name}: {fails}')
+    _log(f'Finished population of mailing list {list_name}.')
+    if add_errors:
+        fails = ', '.join(add_errors)
+        app.logger.error(f'[ERROR] Failed to add {len(add_errors)} addresses to {list_name}: {fails}')
+    _log(f"Removed {remove_successes} of {summary['remove']['total']} former site members.")
+    if remove_errors:
+        fails = ', '.join(remove_errors)
+        app.logger.error(f'[ERROR] Failed to remove {remove_errors.count} addresses from {list_name}: {fails}')
     _log(f'Updated {update_successes} of {update_total} new site members.')
-    if update_failures:
-        fails = ', '.join(update_failures)
-        app.logger.error(f'[ERROR] Failed to update {update_failures.count} addresses in {list_name}: {fails}')
+    if update_errors:
+        fails = ', '.join(update_errors)
+        app.logger.error(f'[ERROR] Failed to update {update_errors.count} addresses in {list_name}: {fails}')
     # Log it all.
     app.logger.info('\n' + '\n'.join(info_log) + '\n')
 

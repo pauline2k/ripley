@@ -17,7 +17,6 @@ initializeAxios(app, axios)
 
 // Globals
 app.config.globalProperties.$_ = _
-// app.config.globalProperties.$errorHandler = axiosErrorHandler
 app.config.globalProperties.$loading = (label: string) => useContextStore().loadingStart(label)
 app.config.globalProperties.$moment = moment
 app.config.globalProperties.$ready = (label: string, focusTarget: string) => useContextStore().loadingComplete(label, focusTarget)

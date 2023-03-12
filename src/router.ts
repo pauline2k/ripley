@@ -9,12 +9,14 @@ import CreateCourseSite from '@/views/CreateCourseSite.vue'
 import CreateProjectSite from '@/views/CreateProjectSite.vue'
 import Jobs from '@/views/Jobs.vue'
 import Login from '@/views/Login.vue'
+import MailingListCreate from '@/views/MailingListCreate.vue'
+import MailingListSelectCourse from '@/views/MailingListSelectCourse.vue'
+import MailingListUpdate from '@/views/MailingListUpdate.vue'
 import NotFound from '@/views/NotFound.vue'
 import Profile from '@/views/Profile.vue'
 import Roster from '@/views/Roster.vue'
+import SendWelcomeEmail from '@/views/SendWelcomeEmail.vue'
 import SiteCreation from '@/views/SiteCreation.vue'
-import SiteMailingList from '@/views/SiteMailingList.vue'
-import SiteMailingLists from '@/views/SiteMailingLists.vue'
 import UserProvision from '@/views/UserProvision.vue'
 import Welcome from '@/views/Welcome.vue'
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
@@ -99,17 +101,31 @@ const routes:RouteRecordRaw[] = [
         }
       },
       {
-        component: SiteMailingList,
-        path: '/mailing_list/:id',
+        component: MailingListSelectCourse,
+        path: '/mailing_list/select_course',
         meta: {
-          title: 'bCourses Mailing List'
+          title: 'Select Course Site'
         }
       },
       {
-        component: SiteMailingLists,
-        path: '/mailing_lists',
+        component: MailingListCreate,
+        path: '/mailing_list/create',
         meta: {
-          title: 'bCourses Site Mailing Lists'
+          title: 'Create Mailing List'
+        }
+      },
+      {
+        component: MailingListUpdate,
+        path: '/mailing_list/update',
+        meta: {
+          title: 'Update Mailing List'
+        }
+      },
+      {
+        component: SendWelcomeEmail,
+        path: '/welcome_email/mailing_list/:id',
+        meta: {
+          title: 'Send Welcome Email'
         }
       },
       {
@@ -160,12 +176,12 @@ const routes:RouteRecordRaw[] = [
         path: '/create_site'
       },
       {
-        component: SiteMailingList,
+        component: SendWelcomeEmail,
         path: '/mailing_list'
       },
       {
-        component: SiteMailingLists,
-        path: '/mailing_lists'
+        component: MailingListSelectCourse,
+        path: '/mailing_list/manage'
       },
       {
         component: UserProvision,
@@ -198,6 +214,7 @@ const router = createRouter({
 })
 
 router.beforeEach(() => {
+  useContextStore().loadingStart()
   useContextStore().resetApplicationState()
 })
 

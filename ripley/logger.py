@@ -62,7 +62,7 @@ def initialize_logger(app):
             logger.addHandler(handler)
             logger.setLevel(level)
 
-    for name in ['boto3', 'botocore', 'canvasapi', 's3transfer', 'werkzeug']:
+    for name in app.config['LOGGING_PROPAGATION_TARGETS']:
         logging.getLogger(name).setLevel(log_propagation_level)
 
     def address_string(self):
