@@ -130,7 +130,6 @@ export default {
     timeoutPromise: undefined
   }),
   created() {
-    this.$loading()
     getCourseProvisioningMetadata().then(data => {
       this.updateMetadata(data)
       this.$ready('Create Canvas Course Site')
@@ -155,7 +154,6 @@ export default {
     },
     fetchFeed() {
       this.clearCourseSiteJob()
-      this.$loading()
       this.currentWorkflowStep = 'selecting'
       this.selectedSectionsList = []
       this.$announcer.polite('Loading courses and sections')

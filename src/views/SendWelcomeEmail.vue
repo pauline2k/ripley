@@ -198,10 +198,10 @@ import {
   downloadWelcomeEmailCsv,
   getMailingList,
   updateWelcomeEmail
-} from '@/api/mailing-lists'
+} from '@/api/mailing-list'
 
 export default {
-  name: 'SiteMailingList',
+  name: 'SendWelcomeEmail',
   components: {
     SpinnerWithinButton,
     ckeditor: CKEditor.component,
@@ -234,7 +234,6 @@ export default {
     }
   },
   created() {
-    this.$loading()
     this.getCanvasCourseId()
     getMailingList(this.canvasCourseId).then(this.updateDisplay, this.$errorHandler)
   },

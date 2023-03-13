@@ -13,7 +13,6 @@ export default {
     profile: undefined
   }),
   created() {
-    this.$loading()
     const uid = this.$_.get(this.$route, 'params.uid')
     getUserProfile(uid).then(data => {
       this.profile = data

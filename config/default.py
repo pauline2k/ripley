@@ -76,6 +76,12 @@ LOGGING_FORMAT = '[%(asctime)s] - %(levelname)s: %(message).10000s [in %(pathnam
 LOGGING_LOCATION = 'ripley.log'
 LOGGING_LEVEL = logging.DEBUG
 LOGGING_PROPAGATION_LEVEL = logging.WARN
+LOGGING_PROPAGATION_TARGETS = ['boto3', 'botocore', 'canvasapi', 's3transfer', 'werkzeug']
+
+MAILGUN_API_KEY = None
+MAILGUN_BASE_URL = 'https://api.mailgun.net/v3'
+MAILGUN_DOMAIN = 'bcourses-mail.berkeley.edu'
+MAILGUN_MAX_RETRIES = 4
 
 MAILING_LISTS_PREFERRED_EMAIL_SOURCE = 'DATA_LOCH'  # Choose one: 'DATA_LOCH' or 'CANVAS'. TODO: CALNET, too?
 MAILING_LISTS_TIMESTAMP_TOLERANCE = 60
