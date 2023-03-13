@@ -36,6 +36,15 @@ from ripley.models.user import User
 
 class MessageLaunch(FlaskMessageLaunch):
 
+    def validate_deployment(self):
+        # pylti1p3 expects a deployment ID, but Canvas makes them optional
+        # (https://canvas.instructure.com/doc/api/file.lti_dev_key_config.html#configuring-canvas-in-the-tool).
+        try:
+            super().validate_deployment()
+        except LtiException as e:
+            app.logger.warn(f'Deployment ID validation failed; skipping. {e}')
+        return self
+
     def validate_nonce(self):
         # Temporary(?) workaround for "Invalid nonce" error from pylti1p3.
         try:
