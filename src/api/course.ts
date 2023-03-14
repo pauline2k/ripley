@@ -42,7 +42,7 @@ export function prepareGradesCacheJob(canvasCourseId: number) {
 }
 
 export function getRoster(canvasCourseId: number) {
-  return utils.get(`/api/course/${canvasCourseId}/roster`)
+  return utils.get(`/api/course/${canvasCourseId}/roster`, true)
 }
 
 export function getRosterCsv(canvasCourseId: number) {

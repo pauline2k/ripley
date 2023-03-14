@@ -97,7 +97,7 @@ export default {
         {disabled: !canvasCourseId, icon: 'mdi-account-school', path: `/add_user/${canvasCourseId}`, title: 'Find a User to Add'},
         {disabled: !canvasCourseId, icon: 'mdi-email-fast-outline', path: `/welcome_email/mailing_list/${canvasCourseId}`, title: 'Send Welcome Email'},
         {disabled: !canvasCourseId, icon: 'mdi-google-classroom', path: `/manage_official_sections/${canvasCourseId}`, title: 'Official Sections'},
-        {disabled: !canvasCourseId, icon: 'mdi-account-multiple', path: `/rosters/${canvasCourseId}`, title: 'Roster Photos'}
+        {disabled: !canvasCourseId, icon: 'mdi-account-multiple', path: `/roster/${canvasCourseId}`, title: 'Roster Photos'}
       ], tool => tool.title)
     }
   }

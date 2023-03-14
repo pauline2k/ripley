@@ -1,8 +1,7 @@
 import utils from './api-utils'
 
 export function devAuthLogIn(canvasCourseId: number, uid: string, password: string) {
-  const url = `${utils.apiBaseUrl()}/api/auth/dev_auth`
-  return utils.post(url, {canvasCourseId, password, uid}, true)
+  return utils.post('/api/auth/dev_auth', {canvasCourseId, password, uid}, true)
 }
 
 export function getCasLoginURL() {
@@ -10,7 +9,7 @@ export function getCasLoginURL() {
 }
 
 export function getCasLogoutUrl() {
-  return utils.get(`${utils.apiBaseUrl()}/api/auth/logout`, true)
+  return utils.get('/api/auth/logout', true)
 }
 
 export function logOut() {
@@ -18,5 +17,5 @@ export function logOut() {
 }
 
 export function updateUserSession(canvasCourseId: number) {
-  return utils.post(`${utils.apiBaseUrl()}/api/auth/update_user_session`, {canvasCourseId}, true)
+  return utils.post('/api/auth/update_user_session', {canvasCourseId}, true)
 }

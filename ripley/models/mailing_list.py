@@ -30,6 +30,7 @@ from ripley import db, std_commit
 from ripley.externals import canvas, data_loch
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_user_utils import has_instructing_role, is_project_maintainer, is_project_owner
+from ripley.lib.canvas_utils import canvas_site_to_api_json
 from ripley.lib.mailing_list_utils import send_welcome_emails
 from ripley.lib.util import to_isoformat, utc_now
 from ripley.models.base import Base
@@ -125,14 +126,7 @@ class MailingList(Base):
         with_welcomed_at = list(filter(lambda m: m.welcomed_at, self.mailing_list_members or []))
         welcome_email_last_sent = max([m.welcomed_at for m in with_welcomed_at]) if with_welcomed_at else None
         return {
-            'canvasSite': {
-                'canvasCourseId': self.canvas_site_id,
-                'courseCode': self.canvas_site.course_code if self.canvas_site else None,
-                'name': self.canvas_site_name,
-                'sisCourseId': self.canvas_site.sis_course_id if self.canvas_site else None,
-                'term': self._canvas_site_term_json(),
-                'url': f"{app.config['CANVAS_API_URL']}/courses/{self.canvas_site_id}",
-            },
+            'canvasSite': canvas_site_to_api_json(self.canvas_site),
             'domain': app.config['MAILGUN_DOMAIN'],
             'id': self.id,
             'membersCount': len(self.mailing_list_members),
@@ -145,19 +139,6 @@ class MailingList(Base):
             'createdAt': to_isoformat(self.created_at),
             'updatedAt': to_isoformat(self.updated_at),
         }
-
-    def _canvas_site_term_json(self):
-        api_json = None
-        if self.canvas_site:
-            canvas_sis_term_id = self.canvas_site.term['sis_term_id']
-            term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
-            if term:
-                api_json = {
-                    'term_yr': term.year,
-                    'term_cd': term.season,
-                    'name': term.to_english(),
-                }
-        return api_json
 
     def _initialize(self):
         self.canvas_site = canvas.get_course(self.canvas_site_id)
