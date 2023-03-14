@@ -15,7 +15,7 @@
             hide-details
             label="Canvas Course ID"
             maxlength="10"
-            :error="!!$_.trim(canvasCourseId) && !isCanvasCourseIdValid(canvasCourseId)"
+            :error="!!$_.trim(canvasCourseId) && !isCanvasCourseIdValid"
             style="width: 200px"
             @click:append-inner="updateCanvasCourseId"
             @keydown.enter="updateCanvasCourseId"
@@ -35,15 +35,15 @@
 <script>
 import AppBarMenu from '@/components/utils/AppBarMenu.vue'
 import BuildSummary from '@/components/utils/BuildSummary'
-import CanvasUtils from '@/mixins/CanvasUtils.vue'
 import Context from '@/mixins/Context'
 import moment from 'moment'
+import Utils from '@/mixins/Utils'
 import {updateUserSession} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
 
 export default {
   name: 'AppBar',
-  mixins: [CanvasUtils, Context],
+  mixins: [Context, Utils],
   components: {AppBarMenu, BuildSummary},
   props: {
     includeBuildSummary: {
@@ -55,6 +55,11 @@ export default {
     canvasCourseId: undefined,
     isUpdatingCanvasCourseId: false
   }),
+  computed: {
+    isCanvasCourseIdValid() {
+      return this.isValidCanvasCourseId(this.canvasCourseId)
+    }
+  },
   created() {
     this.canvasCourseId = this.currentUser.canvasCourseId
     this.eventHub.on('current-user-update', () => {

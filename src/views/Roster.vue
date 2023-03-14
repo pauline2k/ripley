@@ -81,7 +81,6 @@
 </template>
 
 <script>
-import CanvasUtils from '@/mixins/CanvasUtils'
 import Context from '@/mixins/Context'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
 import Utils from '@/mixins/Utils'
@@ -89,7 +88,7 @@ import {getRoster, getRosterCsv} from '@/api/course'
 
 export default {
   name: 'Roster',
-  mixins: [CanvasUtils, Context, Utils],
+  mixins: [Context, Utils],
   components: {RosterPhotos},
   data: () => ({
     error: undefined,

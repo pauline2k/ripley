@@ -1,5 +1,6 @@
 <script>
 import _ from 'lodash'
+import {useContextStore} from '@/stores/context'
 
 export default {
   name: 'Utils',
@@ -7,6 +8,12 @@ export default {
     decamelize: (str, separator=' ') => _.capitalize(str.replace(/([a-z\d])([A-Z])/g, '$1' + separator + '$2').replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2')),
     goToPath(path) {
       this.$router.push({path}, _.noop)
+    },
+    isValidCanvasCourseId(canvasCourseId) {
+      canvasCourseId = this.$_.trim(canvasCourseId)
+      return !!canvasCourseId
+        && canvasCourseId.match(/^\d+$/)
+        && parseInt(canvasCourseId, 10) <= useContextStore().config.maxValidCanvasCourseId
     },
     oxfordJoin: arr => {
       switch(arr.length) {

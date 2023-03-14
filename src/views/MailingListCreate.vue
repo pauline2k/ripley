@@ -91,7 +91,6 @@
 </template>
 
 <script>
-import CanvasUtils from '@/mixins/CanvasUtils.vue'
 import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
@@ -102,7 +101,7 @@ import {createMailingList} from '@/api/mailing-list'
 export default {
   name: 'MailingListCreate',
   components: {OutboundLink, SpinnerWithinButton},
-  mixins: [CanvasUtils, Context, MailingList, Utils],
+  mixins: [Context, MailingList, Utils],
   data: () => ({
     error: undefined,
     isCreating: false,

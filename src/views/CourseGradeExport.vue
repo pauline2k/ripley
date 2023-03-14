@@ -289,7 +289,6 @@
 </template>
 
 <script>
-import CanvasUtils from '@/mixins/CanvasUtils'
 import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
 import OutboundLink from '@/components/utils/OutboundLink'
@@ -299,7 +298,7 @@ import {downloadGradeCsv, getCourseUserRoles, getExportJobStatus, getExportOptio
 export default {
   name: 'CourseGradeExport',
   components: {OutboundLink, ProgressBar},
-  mixins: [CanvasUtils, Context, IFrameMixin],
+  mixins: [Context, IFrameMixin],
   data: () => ({
     appState: null,
     backgroundJobId: null,
@@ -441,7 +440,6 @@ export default {
   },
   created() {
     this.appState = 'initializing'
-    this.getCanvasCourseId()
     getCourseUserRoles(this.canvasCourseId).then(
       response => {
         this.canvasRootUrl = response.canvasRootUrl
