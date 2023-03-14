@@ -55,6 +55,26 @@ class MessageLaunch(FlaskMessageLaunch):
         return self
 
 
+@app.route('/api/lti/config/mailing_list.json')
+def config_mailing_list():
+    return _tool_config(
+        title='Mailing List',
+        description='Create and manage a mailing list for a course site',
+        target='launch_mailing_list',
+        placement='course_navigation',
+    )
+
+
+@app.route('/api/lti/config/provision_user.json')
+def config_provision_user():
+    return _tool_config(
+        title='User Provisioning',
+        description='Automated user provisioning',
+        target='launch_provision_user',
+        placement='account_navigation',
+    )
+
+
 @app.route('/api/lti/jwks')
 def get_jwk_set():
     lti_config_path = app.config['LTI_CONFIG_PATH']
@@ -87,9 +107,9 @@ def initiate_login():
         raise InternalServerError({'message': str(e)})
 
 
-@app.route('/api/lti/mailing_lists', methods=['GET', 'POST'])
-def launch_mailing_lists():
-    return _launch_tool('mailing_lists')
+@app.route('/api/lti/mailing_list', methods=['GET', 'POST'])
+def launch_mailing_list():
+    return _launch_tool('mailing_list/select_course')
 
 
 @app.route('/api/lti/provision_user', methods=['GET', 'POST'])
@@ -97,52 +117,12 @@ def launch_provision_user():
     return _launch_tool('provision_user')
 
 
-@app.route('/api/lti/config.json')
-def tool_config():
-    return {
-        'title': 'Ripley',
-        'description': 'LTI tools for bCourses',
-        'oidc_initiation_url': app.url_for('initiate_login', _external=True),
-        'public_jwk_url': app.url_for('get_jwk_set', _external=True),
-        'target_link_uri': app.url_for('launch_mailing_lists', _external=True),
-        'extensions': [
-            {
-                'platform': 'canvas.instructure.com',
-                'privacy_level': 'public',
-                'settings': {
-                    'platform': 'canvas.instructure.com',
-                    'placements': [
-                        {
-                            'text': 'Mailing Lists',
-                            'placement': 'account_navigation',
-                            'message_type': 'LtiResourceLinkRequest',
-                            'target_link_uri': app.url_for('launch_mailing_lists', _external=True),
-                        },
-                        {
-                            'text': 'User Provisioning',
-                            'placement': 'account_navigation',
-                            'message_type': 'LtiResourceLinkRequest',
-                            'target_link_uri': app.url_for('launch_provision_user', _external=True),
-                        },
-                    ],
-                },
-            },
-        ],
-        'custom_fields': {
-            'canvas_user_id': '$Canvas.user.id',
-            'canvas_course_id': '$Canvas.course.id',
-            'canvas_user_login_id': '$Canvas.user.loginId',
-            'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
-        },
-    }
-
-
 def _get_custom_param(lti_data, key):
     value = lti_data.get('https://purl.imsglobal.org/spec/lti/claim/custom', {}).get(key)
     return value if value and value.isnumeric() else None
 
 
-def _launch_tool(tool_id):
+def _launch_tool(target_uri):
     lti_config_path = app.config['LTI_CONFIG_PATH']
     flask_request = FlaskRequest()
     try:
@@ -161,7 +141,39 @@ def _launch_tool(tool_id):
         user_id = User.get_serialized_composite_key(canvas_course_id=canvas_course_id, uid=uid)
         user = User(user_id)
         app.logger.info(f"""Logged in during LTI launch as {masquerade}UID {uid}, Canvas ID {canvas_user_id}{course_context}""")
-        return start_login_session(user, redirect_path=f'/{tool_id}')
+        return start_login_session(user, redirect_path=f'/{target_uri}')
     except Exception as e:
         app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
         raise InternalServerError({'message': str(e)})
+
+
+def _tool_config(title, description, target, placement):
+    return {
+        'title': title,
+        'description': description,
+        'oidc_initiation_url': app.url_for('initiate_login', _external=True),
+        'public_jwk_url': app.url_for('get_jwk_set', _external=True),
+        'target_link_uri': app.url_for(target, _external=True),
+        'extensions': [
+            {
+                'platform': 'canvas.instructure.com',
+                'privacy_level': 'public',
+                'settings': {
+                    'platform': 'canvas.instructure.com',
+                    'placements': [
+                        {
+                            'text': title,
+                            'placement': placement,
+                            'message_type': 'LtiResourceLinkRequest',
+                        },
+                    ],
+                },
+            },
+        ],
+        'custom_fields': {
+            'canvas_user_id': '$Canvas.user.id',
+            'canvas_course_id': '$Canvas.course.id',
+            'canvas_user_login_id': '$Canvas.user.loginId',
+            'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
+        },
+    }

@@ -37,46 +37,63 @@ class TestGetJwks:
             assert key in keyset
 
 
-class TestGetConfig:
+class TestGetMailingListConfig:
 
     def test_anonymous(self, client, app):
-        """Anonymous user can get the tool config JSON."""
-        response = client.get('api/lti/config.json')
+        """Anonymous user can get the Mailing List config JSON."""
+        response = client.get('api/lti/config/mailing_list.json')
         assert response.status_code == 200
         assert response.content_type == 'application/json'
-        assert response.json == {
-            'title': 'Ripley',
-            'description': 'LTI tools for bCourses',
-            'oidc_initiation_url': app.url_for('initiate_login', _external=True),
-            'target_link_uri': app.url_for('launch_mailing_lists', _external=True),
-            'public_jwk_url': app.url_for('get_jwk_set', _external=True),
-            'extensions': [
-                {
-                    'platform': 'canvas.instructure.com',
-                    'privacy_level': 'public',
-                    'settings': {
-                        'platform': 'canvas.instructure.com',
-                        'placements': [
-                            {
-                                'text': 'Mailing Lists',
-                                'placement': 'account_navigation',
-                                'message_type': 'LtiResourceLinkRequest',
-                                'target_link_uri': app.url_for('launch_mailing_lists', _external=True),
-                            },
-                            {
-                                'text': 'User Provisioning',
-                                'placement': 'account_navigation',
-                                'message_type': 'LtiResourceLinkRequest',
-                                'target_link_uri': app.url_for('launch_provision_user', _external=True),
-                            },
-                        ],
-                    },
-                },
-            ],
-            'custom_fields': {
-                'canvas_user_id': '$Canvas.user.id',
-                'canvas_course_id': '$Canvas.course.id',
-                'canvas_user_login_id': '$Canvas.user.loginId',
-                'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
-            },
+        config = response.json
+        assert config['title'] == 'Mailing List'
+        assert config['description'] == 'Create and manage a mailing list for a course site'
+        assert config['oidc_initiation_url'] == app.url_for('initiate_login', _external=True)
+        assert config['target_link_uri'] == app.url_for('launch_mailing_list', _external=True)
+        assert config['public_jwk_url'] == app.url_for('get_jwk_set', _external=True)
+        assert config['custom_fields'] == {
+            'canvas_user_id': '$Canvas.user.id',
+            'canvas_course_id': '$Canvas.course.id',
+            'canvas_user_login_id': '$Canvas.user.loginId',
+            'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
+        }
+        assert len(config['extensions']) == 1
+        tool = config['extensions'][0]
+        assert tool['platform'] == 'canvas.instructure.com'
+        assert tool['privacy_level'] == 'public'
+        assert len(tool['settings']['placements']) == 1
+        assert tool['settings']['placements'][0] == {
+            'text': 'Mailing List',
+            'placement': 'course_navigation',
+            'message_type': 'LtiResourceLinkRequest',
+        }
+
+
+class TestGetUserProvisioningConfig:
+
+    def test_anonymous(self, client, app):
+        """Anonymous user can get the User Provisioning config JSON."""
+        response = client.get('api/lti/config/provision_user.json')
+        assert response.status_code == 200
+        assert response.content_type == 'application/json'
+        config = response.json
+        assert config['title'] == 'User Provisioning'
+        assert config['description'] == 'Automated user provisioning'
+        assert config['oidc_initiation_url'] == app.url_for('initiate_login', _external=True)
+        assert config['target_link_uri'] == app.url_for('launch_provision_user', _external=True)
+        assert config['public_jwk_url'] == app.url_for('get_jwk_set', _external=True)
+        assert config['custom_fields'] == {
+            'canvas_user_id': '$Canvas.user.id',
+            'canvas_course_id': '$Canvas.course.id',
+            'canvas_user_login_id': '$Canvas.user.loginId',
+            'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
+        }
+        assert len(config['extensions']) == 1
+        tool = config['extensions'][0]
+        assert tool['platform'] == 'canvas.instructure.com'
+        assert tool['privacy_level'] == 'public'
+        assert len(tool['settings']['placements']) == 1
+        assert tool['settings']['placements'][0] == {
+            'text': 'User Provisioning',
+            'placement': 'account_navigation',
+            'message_type': 'LtiResourceLinkRequest',
         }
