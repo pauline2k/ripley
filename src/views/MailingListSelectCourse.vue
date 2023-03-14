@@ -18,7 +18,7 @@
           id="page-site-mailing-list-site-id"
           v-model="canvasCourseId"
           aria-required="true"
-          :error="!!$_.trim(canvasCourseId) && !isCanvasCourseIdValid(canvasCourseId)"
+          :error="!!$_.trim(canvasCourseId) && !isCanvasCourseIdValid"
           hide-details
           maxlength="10"
           label="Canvas Course ID"
@@ -32,7 +32,7 @@
         <v-btn
           id="btn-get-mailing-list"
           color="primary"
-          :disabled="isProcessing || !isCanvasCourseIdValid(canvasCourseId)"
+          :disabled="isProcessing || !isCanvasCourseIdValid"
           @click="getMailingList"
         >
           <span v-if="!isProcessing">Get Mailing List</span>
@@ -46,7 +46,6 @@
 </template>
 
 <script>
-import CanvasUtils from '@/mixins/CanvasUtils.vue'
 import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
@@ -56,12 +55,17 @@ import {getMailingList} from '@/api/mailing-list'
 export default {
   name: 'MailingListSelectCourse',
   components: {SpinnerWithinButton},
-  mixins: [CanvasUtils, Context, MailingList, Utils],
+  mixins: [Context, MailingList, Utils],
   data: () => ({
     error: undefined,
     isProcessing: false,
     canvasCourseId: undefined
   }),
+  computed: {
+    isCanvasCourseIdValid() {
+      return this.isValidCanvasCourseId(this.canvasCourseId)
+    }
+  },
   mounted() {
     this.init()
     this.$putFocusNextTick('page-header')

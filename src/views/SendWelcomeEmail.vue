@@ -184,7 +184,6 @@
 </template>
 
 <script>
-import CanvasUtils from '@/mixins/CanvasUtils'
 import CKEditor from '@ckeditor/ckeditor5-vue'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import Context from '@/mixins/Context'
@@ -207,7 +206,7 @@ export default {
     ckeditor: CKEditor.component,
     OutboundLink
   },
-  mixins: [CanvasUtils, Context, Utils],
+  mixins: [Context, Utils],
   data: () => ({
     alertEmailActivated: false,
     alerts: {
@@ -234,8 +233,7 @@ export default {
     }
   },
   created() {
-    this.getCanvasCourseId()
-    getMailingList(this.canvasCourseId).then(this.updateDisplay, this.$errorHandler)
+    getMailingList(this.currentUser.canvasCourseId).then(this.updateDisplay, this.$errorHandler)
   },
   methods: {
     cancelEditMode() {
@@ -247,7 +245,7 @@ export default {
     createMailingList() {
       this.$announcer.polite('Creating list')
       this.isCreating = true
-      createSiteMailingList(this.canvasCourseId, this.mailingList).then(
+      createSiteMailingList(this.currentUser.canvasCourseId, this.mailingList).then(
         response => {
           this.updateDisplay(response)
           this.$ready()
@@ -257,12 +255,12 @@ export default {
     },
     downloadMessageLog() {
       this.$announcer.polite('Downloading message log')
-      downloadWelcomeEmailCsv(this.canvasCourseId)
+      downloadWelcomeEmailCsv(this.currentUser.canvasCourseId)
     },
     saveWelcomeEmail() {
       this.$announcer.polite('Saving welcome email')
       this.savingWelcomeEmail = true
-      updateWelcomeEmail(this.canvasCourseId, this.mailingListSubject, this.mailingListMessage).then(
+      updateWelcomeEmail(this.currentUser.canvasCourseId, this.mailingListSubject, this.mailingListMessage).then(
         response => {
           this.updateDisplay(response)
           this.$putFocusNextTick('send-welcome-email-header')
@@ -279,7 +277,7 @@ export default {
       this.alertEmailActivated = false
       this.isTogglingEmailActivation = true
       const toggleEmailActivation = this.isWelcomeEmailActive ? deactivateWelcomeEmail : activateWelcomeEmail
-      toggleEmailActivation(this.canvasCourseId).then((data) => {
+      toggleEmailActivation(this.currentUser.canvasCourseId).then((data) => {
         this.isWelcomeEmailActive = !!data.welcomeEmailActive
         this.isTogglingEmailActivation = false
         if (this.isWelcomeEmailActive) {

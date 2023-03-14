@@ -231,7 +231,6 @@
 </template>
 
 <script>
-import CanvasUtils from '@/mixins/CanvasUtils'
 import Context from '@/mixins/Context'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
@@ -246,7 +245,7 @@ export default {
     MaintenanceNotice,
     ProgressBar
   },
-  mixins: [CanvasUtils, Context],
+  mixins: [Context],
   data: () => ({
     adminActingAs: null,
     adminSemesters: null,
@@ -266,7 +265,6 @@ export default {
     totalStagedCount: 0
   }),
   created() {
-    this.getCanvasCourseId()
     this.fetchFeed()
     this.$ready()
   },
@@ -315,7 +313,7 @@ export default {
     },
     fetchFeed() {
       this.$loading()
-      getCourseSections(this.canvasCourseId).then(
+      getCourseSections(this.currentUser.canvasCourseId).then(
         response => {
           this.percentCompleteRounded = null
           if (response.canvas_course) {
@@ -379,9 +377,6 @@ export default {
         this.usersClassCount = 0
       }
     },
-    otherCourseSection(site) {
-      return (site && (site.emitter === 'bCourses') && (site.id !== this.canvasCourse.canvasCourseId))
-    },
     refreshFromFeed(feed) {
       if (feed.teachingSemesters) {
         this.loadCourseLists(feed.teachingSemesters)
@@ -417,7 +412,7 @@ export default {
       this.jobStatus = 'sendingRequest'
       const update = this.getStagedSections()
       updateSiteSections(
-        this.canvasCourse.canvasCourseId,
+        this.currentUser.canvasCourseId,
         update.addSections,
         update.deleteSections,
         update.updateSections

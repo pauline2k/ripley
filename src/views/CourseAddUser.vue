@@ -273,7 +273,6 @@
 </template>
 
 <script>
-import CanvasUtils from '@/mixins/CanvasUtils'
 import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
@@ -283,7 +282,7 @@ import {addUser, getAddUserCourseSections, getCourseUserRoles, searchUsers} from
 export default {
   name: 'CourseAddUser',
   components: {MaintenanceNotice, OutboundLink},
-  mixins: [CanvasUtils, Context, IFrameMixin],
+  mixins: [Context, IFrameMixin],
   data: () => ({
     additionFailureMessage: null,
     additionSuccessMessage: null,
@@ -422,7 +421,6 @@ export default {
   },
   created() {
     this.isLoading = true
-    this.getCanvasCourseId()
     getCourseUserRoles(this.canvasCourseId).then(response => {
       if (this.isAuthorized(response)) {
         this.grantingRoles = response.grantingRoles

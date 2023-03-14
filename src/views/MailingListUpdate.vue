@@ -24,7 +24,7 @@
               </v-col>
               <v-col>
                 <OutboundLink
-                  id="mailing-list-court-site-name"
+                  id="mailing-list-course-site-name"
                   class="pr-2"
                   :href="canvasSite.url"
                 >
@@ -121,7 +121,6 @@
 </template>
 
 <script>
-import CanvasUtils from '@/mixins/CanvasUtils.vue'
 import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
@@ -132,7 +131,7 @@ import {populateMailingList} from '@/api/mailing-list'
 export default {
   name: 'MailingListUpdate',
   components: {OutboundLink, SpinnerWithinButton},
-  mixins: [CanvasUtils, MailingList, Context, Utils],
+  mixins: [MailingList, Context, Utils],
   data: () => ({
     isUpdating: false,
     hasUpdatedSincePageLoad: false,
