@@ -39,7 +39,8 @@ class User(UserMixin):
     def __init__(self, serialized_composite_key=None):
         composite_key = json.loads(serialized_composite_key) if serialized_composite_key else {}
         uid = composite_key.get('uid', None)
-        canvas_course_id = composite_key.get('canvas_course_id', None)
+        canvas_course_id = str(composite_key.get('canvas_course_id', None)).strip()
+        canvas_course_id = int(canvas_course_id) if canvas_course_id and canvas_course_id.isnumeric() else None
         if uid:
             try:
                 uid = str(int(uid))

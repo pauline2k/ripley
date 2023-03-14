@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading" class="page-roster">
-    <v-container v-if="!error" fluid>
+    <v-container fluid>
       <v-row align-v="start" class="page-roster print-hide roster-search pb-3" no-gutters>
         <v-col class="pb-2 pr-2" sm="3">
           <v-text-field
@@ -55,6 +55,8 @@
         </v-col>
       </v-row>
     </v-container>
+    <!--
+    TODO: Sort out messaging with more elegant code.
     <div v-if="!error">
       <v-progress-circular
         color="primary"
@@ -64,7 +66,6 @@
         Downloading rosters. This may take a minute for larger classes.
       </div>
     </div>
-    {{ error }}
     <div v-if="error" role="alert">
       <v-icon icon="mdi-exclamation-triangle" class="icon-red" />
       You must be a teacher in this bCourses course to view official student rosters.
@@ -77,6 +78,7 @@
       <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
       Students have not yet signed up for this class.
     </div>
+    -->
   </div>
 </template>
 

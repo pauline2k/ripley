@@ -40,7 +40,7 @@ export default {
   },
   methods: {
     imageError() {
-      this.photoUrl = require('@/assets/images/photo_unavailable.svg')
+      this.photoUrl = photoUnavailable
     }
   }
 }
