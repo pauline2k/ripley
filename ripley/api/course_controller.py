@@ -22,6 +22,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+
 from flask import current_app as app
 from ripley.externals import canvas
 from ripley.lib.canvas_utils import canvas_site_to_api_json
@@ -75,6 +76,32 @@ def canvas_egrade_export_status(canvas_course_id):
 def get_roster(canvas_course_id):
     return tolerant_jsonify({
         'canvasCourse': canvas_site_to_api_json(canvas.get_course(canvas_course_id)),
-        'sections': [],
-        'students': [],
+        'sections': [
+            {
+                'sectionId': '15257',
+                'name': 'ECON H195B IND 020 (In Person)',
+                'sis_id': 'SEC:2022-B-15257',
+            },
+        ],
+        'students': [
+            {
+                'studentId': '999999999',
+                'firstName': 'Ellen',
+                'lastName': 'Ripley',
+                'email': 'ellen_ripley@berkeley.edu',
+                'enrollStatus': 'E',
+                'units': '3',
+                'gradeOption': 'Letter',
+                'sections':
+                    [
+                        {
+                            'sectionId': '15257',
+                            'name': 'ECON H195B IND 020 (In Person)',
+                            'sisId': 'SEC:2022-B-15257',
+                        },
+                    ],
+                'uid': '999999',
+                'photo': None,
+            },
+        ],
     })
