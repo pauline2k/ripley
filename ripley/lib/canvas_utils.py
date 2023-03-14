@@ -23,8 +23,22 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-
 import re
+
+from flask import current_app as app
+from ripley.lib.berkeley_term import BerkeleyTerm
+
+
+def canvas_site_to_api_json(canvas_site):
+    canvas_site_id = canvas_site.id
+    return {
+        'canvasCourseId': canvas_site_id,
+        'courseCode': canvas_site.course_code if canvas_site else None,
+        'name': canvas_site.name.strip() if canvas_site else None,
+        'sisCourseId': canvas_site.sis_course_id if canvas_site else None,
+        'term': _canvas_site_term_json(canvas_site),
+        'url': f"{app.config['CANVAS_API_URL']}/courses/{canvas_site_id}",
+    }
 
 
 def uid_from_canvas_login_id(login_id):
@@ -47,3 +61,17 @@ def user_id_from_attributes(attributes):
         return attributes['sid']
     else:
         return f"UID:{attributes['ldap_uid']}"
+
+
+def _canvas_site_term_json(canvas_site):
+    api_json = None
+    if canvas_site:
+        canvas_sis_term_id = canvas_site.term['sis_term_id']
+        term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
+        if term:
+            api_json = {
+                'term_yr': term.year,
+                'term_cd': term.season,
+                'name': term.to_english(),
+            }
+    return api_json

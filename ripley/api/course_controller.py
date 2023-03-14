@@ -23,6 +23,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 from flask import current_app as app
+from ripley.externals import canvas
+from ripley.lib.canvas_utils import canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
 
 
@@ -70,5 +72,9 @@ def canvas_egrade_export_status(canvas_course_id):
 
 
 @app.route('/api/course/<canvas_course_id>/roster')
-def canvas_rosters(canvas_course_id):
-    return tolerant_jsonify([])
+def get_roster(canvas_course_id):
+    return tolerant_jsonify({
+        'canvasCourse': canvas_site_to_api_json(canvas.get_course(canvas_course_id)),
+        'sections': [],
+        'students': [],
+    })

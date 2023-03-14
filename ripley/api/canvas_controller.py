@@ -27,12 +27,12 @@ from ripley.lib.http import tolerant_jsonify
 
 
 @app.route('/api/canvas/external_tools')
-def canvas_external_tools():
+def get_external_tools():
     return tolerant_jsonify([])
 
 
 @app.route('/api/canvas/authorizations')
-def canvas_site_creation():
+def get_authorizations():
     return tolerant_jsonify({
         'authorizations': {
             'canCreateCourseSite': True,
@@ -42,5 +42,6 @@ def canvas_site_creation():
 
 
 @app.route('/api/canvas/can_user_create_site')
-def canvas_user_can_create_site():
+def can_user_create_site():
+    # Used by canvas-customization.js
     return tolerant_jsonify([])

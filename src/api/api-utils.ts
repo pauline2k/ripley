@@ -5,6 +5,7 @@ import {useContextStore} from '@/stores/context'
 const $_errorHandler = (error: any, redirectOnError?: boolean) => {
   const status = _.get(error, 'response.status')
   const message = $_getErrorMessage(error, status)
+  console.log(`\n${error}\n${message}\n`)
   if (redirectOnError) {
     useContextStore().setApplicationState(status, message)
   }

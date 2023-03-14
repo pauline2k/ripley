@@ -19,7 +19,7 @@ initializeAxios(app, axios)
 app.config.globalProperties.$_ = _
 app.config.globalProperties.$loading = (label: string) => useContextStore().loadingStart(label)
 app.config.globalProperties.$moment = moment
-app.config.globalProperties.$ready = (label: string, focusTarget: string) => useContextStore().loadingComplete(label, focusTarget)
+app.config.globalProperties.$ready = (label: string, focusTarget?: string) => useContextStore().loadingComplete(label, focusTarget)
 app.config.globalProperties.$putFocusNextTick = putFocusNextTick
 
 const apiBaseUrl = import.meta.env.VITE_APP_API_BASE_URL
@@ -36,6 +36,7 @@ axios.get(`${apiBaseUrl}/api/user/my_profile`).then(data => {
     app.use(router).config.errorHandler = function (error, vm, info) {
       const message = _.get(error, 'message') || info || 'Uh oh, there was a problem.'
       const stacktrace = _.get(error, 'stack', null)
+      console.log(`\n${message}\n${stacktrace}\n`)
       useContextStore().setApplicationState(500, message, stacktrace)
     }
     app.mount('#app')

@@ -76,7 +76,7 @@ const routes:RouteRecordRaw[] = [
         component: Roster,
         path: '/roster/:id',
         meta: {
-          title: 'bCourses Roster Photos'
+          title: 'Roster Photos'
         }
       },
       {
