@@ -2,14 +2,18 @@
   <div v-if="!isLoading" class="canvas-application page-site-mailing-list">
     <h1 id="page-header" tabindex="-1">Update Mailing List</h1>
     <v-alert
-      v-if="message"
+      v-if="alert.message || $_.size(alert.items)"
+      id="mailing-list-update-alert"
       class="mb-2"
       closable
       density="compact"
       role="alert"
-      :type="messageType"
+      :type="alert.type"
     >
-      {{ message }}
+      <div v-if="alert.message">{{ alert.message }}</div>
+      <ul v-if="$_.size(alert.items)">
+        <li v-for="item in alert.items" :key="item">{{ item }}</li>
+      </ul>
     </v-alert>
     <div class="mt-4">
       <v-card id="mailing-list-details">
@@ -135,10 +139,11 @@ export default {
   data: () => ({
     isUpdating: false,
     hasUpdatedSincePageLoad: false,
-    message: undefined,
+    alert: undefined,
     messageType: undefined
   }),
   created() {
+    this.setAlert(undefined)
     if (this.mailingList && this.canvasSite) {
       this.$putFocusNextTick('page-header')
       this.$ready()
@@ -151,8 +156,24 @@ export default {
       this.$announcer.polite('Canceled')
       this.$router.push({path: '/mailing_list/select_course'})
     },
+    composeAlertMessage(errorCount, successCount) {
+      let message
+      if (errorCount > 1 && successCount > 1) {
+        const describe = (count, noun, pluralize) => {
+          return count ? `${count === 1 ? 'one' : count} ${noun}${count === 1 ? '' : pluralize}` : ''
+        }
+        const prefix = 'The update resulted in '
+        message = prefix + describe(errorCount, 'error', 's')
+        message += errorCount && successCount ? ' and ' : ''
+        message += describe(successCount, 'success', 'es')
+      }
+      return message
+    },
+    setAlert(message, items, type) {
+      this.alert = {message, items: items || [], type}
+    },
     update() {
-      this.message = this.messageType = undefined
+      this.setAlert(undefined)
       this.$announcer.polite('Updating')
       this.isUpdating = true
       this.alerts = {error: [], success: []}
@@ -161,33 +182,35 @@ export default {
         data => {
           this.setMailingList(data.mailingList)
           const summary = data.summary
-
-          const errors = summary['add']['errors'].concat(
-            summary['remove']['errors'],
-            summary['update']['errors']
-          )
-          const successes = summary['add']['successes'].concat(
-            summary['remove']['successes'],
-            summary['update']['successes']
-          )
+          const actions = ['add', 'remove', 'update']
+          const count = key => {
+            let count = 0
+            this.$_.each(actions, action => count += summary[action][key].length)
+            return count
+          }
+          const errorCount = count('errors')
+          const successCount = count('successes')
           let message
-          if (errors.length && successes.length) {
-            message = `${errors.length} errors and ${successes.length} successes.
-              Errors occurred with ${this.oxfordJoin(errors)}.`
-            message += ''.join(this.$_.map())
-          } else if (errors.length && !successes.length) {
-            message = `Errors occurred with ${this.oxfordJoin(errors)}.`
-          } else if (!errors.length && successes.length) {
-            message = 'Memberships were successfully updated.'
+          let items = []
+          if (errorCount || successCount) {
+            message = this.composeAlertMessage(errorCount, successCount)
+            this.$_.each(['errors', 'successes'], key => {
+              this.$_.each(actions, action => {
+                const emailAddresses = summary[action][key]
+                if (emailAddresses.length) {
+                  const pastTense = action === 'add' ? 'added' : `${action}d`
+                  const prefix = key === 'errors' ? `failed to ${action}` : `Successfully ${pastTense} `
+                  items.push(prefix + this.oxfordJoin(emailAddresses))
+                }
+              })
+            })
           } else {
             message = 'No changes made because no changes needed.'
           }
-          this.message = message
-          this.messageType = errors.length ? 'warning' : 'success'
+          this.setAlert(message, items, errorCount ? 'warning' : 'success')
         },
         error => {
-          this.message = error
-          this.messageType = 'warning'
+          this.setAlert(error, 'warning', [])
         }
       ).then(() => {
         this.isUpdating = false
