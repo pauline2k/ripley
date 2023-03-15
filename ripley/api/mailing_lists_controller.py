@@ -38,9 +38,9 @@ from ripley.models.mailing_list_members import MailingListMembers
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def mailing_lists(canvas_course_id):
     course = canvas.get_course(canvas_course_id)
-    if course:
-        mailing_list = MailingList.find_by_canvas_site_id(canvas_course_id)
-        return tolerant_jsonify(mailing_list.to_api_json() if mailing_list else None)
+    mailing_list = MailingList.find_by_canvas_site_id(canvas_course_id) if course else None
+    if mailing_list:
+        return tolerant_jsonify(mailing_list.to_api_json())
     else:
         raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_course_id}" was found.')
 
