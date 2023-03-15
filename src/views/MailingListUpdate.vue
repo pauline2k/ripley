@@ -103,7 +103,7 @@
           variant="text"
           @click="cancel"
         >
-          Cancel
+          Exit
         </v-btn>
         <v-btn
           id="btn-populate-mailing-list"
