@@ -293,7 +293,8 @@ import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
 import OutboundLink from '@/components/utils/OutboundLink'
 import ProgressBar from '@/components/bcourses/shared/ProgressBar'
-import {downloadGradeCsv, getCourseUserRoles, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/course'
+import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/canvas-course'
+import {getCanvasSiteUserRoles} from '@/api/canvas-user'
 
 export default {
   name: 'CourseGradeExport',
@@ -440,7 +441,7 @@ export default {
   },
   created() {
     this.appState = 'initializing'
-    getCourseUserRoles(this.canvasCourseId).then(
+    getCanvasSiteUserRoles(this.canvasCourseId).then(
       response => {
         this.canvasRootUrl = response.canvasRootUrl
         this.canvasCourseId = response.courseId

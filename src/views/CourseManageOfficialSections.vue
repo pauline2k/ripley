@@ -236,7 +236,7 @@ import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import ProgressBar from '@/components/bcourses/shared/ProgressBar'
 
-import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/course'
+import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-course'
 
 export default {
   name: 'CourseManageOfficialSections',

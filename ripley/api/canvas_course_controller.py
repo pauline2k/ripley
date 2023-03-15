@@ -30,62 +30,46 @@ from ripley.lib.canvas_utils import canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
 
 
-@app.route('/api/course/provision')
+@app.route('/api/canvas_course/provision')
 def canvas_course_provision():
     return tolerant_jsonify([])
 
 
-@app.route('/api/course/<canvas_course_id>')
-def get_canvas_course_site(canvas_course_id):
-    course = canvas.get_course(canvas_course_id)
+@app.route('/api/canvas_course/<canvas_site_id>')
+def get_canvas_course_site(canvas_site_id):
+    course = canvas.get_course(canvas_site_id)
     if course:
         return tolerant_jsonify(canvas_site_to_api_json(course))
     else:
-        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_course_id}')
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
 
 
-@app.route('/api/course/<canvas_course_id>/add_user/course_sections')
-def canvas_course_add_user(canvas_course_id):
+@app.route('/api/canvas_course/<canvas_site_id>/provision/sections_feed')
+def canvas_course_provision_sections_feed(canvas_site_id):
     return tolerant_jsonify([])
 
 
-@app.route('/api/course/<canvas_course_id>/add_user/search_users')
-def canvas_course_search_users():
-    # TODO: ?searchText=${searchText}&searchType=${searchType}
-    return tolerant_jsonify([])
-
-
-@app.route('/api/course/<canvas_course_id>/provision/sections_feed')
-def canvas_course_provision_sections_feed(canvas_course_id):
-    return tolerant_jsonify([])
-
-
-@app.route('/api/course/provision/status')
+@app.route('/api/canvas_course/provision/status')
 def canvas_course_provision_status():
     # TODO: ?jobId=${jobId}
     return tolerant_jsonify([])
 
 
-@app.route('/api/course/<canvas_course_id>/user_roles')
-def canvas_course_user_roles(canvas_course_id):
+@app.route('/api/canvas_course/<canvas_site_id>/egrade_export/options')
+def canvas_egrade_export(canvas_site_id):
     return tolerant_jsonify([])
 
 
-@app.route('/api/course/<canvas_course_id>/egrade_export/options')
-def canvas_egrade_export(canvas_course_id):
-    return tolerant_jsonify([])
-
-
-@app.route('/api/course/<canvas_course_id>/egrade_export/status')
-def canvas_egrade_export_status(canvas_course_id):
+@app.route('/api/canvas_course/<canvas_site_id>/egrade_export/status')
+def canvas_egrade_export_status(canvas_site_id):
     # TODO: ?jobId=${jobId}
     return tolerant_jsonify([])
 
 
-@app.route('/api/course/<canvas_course_id>/roster')
-def get_roster(canvas_course_id):
+@app.route('/api/canvas_course/<canvas_site_id>/roster')
+def get_roster(canvas_site_id):
     return tolerant_jsonify({
-        'canvasCourse': canvas_site_to_api_json(canvas.get_course(canvas_course_id)),
+        'canvasCourse': canvas_site_to_api_json(canvas.get_course(canvas_site_id)),
         'sections': [
             {
                 'sectionId': '15257',

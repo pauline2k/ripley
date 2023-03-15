@@ -86,7 +86,7 @@ import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import MonitoringJob from '@/components/bcourses/create/MonitoringJob'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
 import Utils from '@/mixins/Utils'
-import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/course'
+import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-course'
 
 export default {
   name: 'CreateCourseSite',
