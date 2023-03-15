@@ -108,7 +108,7 @@ export default {
     success: undefined
   }),
   mounted() {
-    if (this.canvasSite) {
+    if (this.mailingList && this.canvasSite) {
       this.$putFocusNextTick('page-header')
       this.$ready()
     } else {
