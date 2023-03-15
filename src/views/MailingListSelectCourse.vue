@@ -25,7 +25,7 @@
           required
           style="width: 200px"
           variant="outlined"
-          @keydown.enter="getMailingList"
+          @keydown.enter="submit"
         />
       </div>
       <div>
@@ -33,7 +33,7 @@
           id="btn-get-mailing-list"
           color="primary"
           :disabled="isProcessing || !isCanvasCourseIdValid"
-          @click="getMailingList"
+          @click="submit"
         >
           <span v-if="!isProcessing">Get Mailing List</span>
           <span v-if="isProcessing">
@@ -51,6 +51,7 @@ import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import Utils from '@/mixins/Utils'
 import {getMailingList} from '@/api/mailing-list'
+import {getCanvasSite} from '@/api/course'
 
 export default {
   name: 'MailingListSelectCourse',
@@ -72,15 +73,21 @@ export default {
     this.$ready()
   },
   methods: {
-    getMailingList() {
+    submit() {
       if (!this.isProcessing && this.canvasCourseId) {
         this.isProcessing = true
         getMailingList(this.canvasCourseId).then(
           data => {
-            this.setMailingList(data)
-            const path = data ? '/mailing_list/update' : '/mailing_list/create'
-            this.$router.push({path})
             this.error = undefined
+            if (data) {
+              this.setMailingList(data)
+              this.$router.push({path: '/mailing_list/update'})
+            } else {
+              getCanvasSite(this.canvasCourseId).then(data => {
+                this.setCanvasSite(data)
+                this.$router.push({path: '/mailing_list/update'})
+              })
+            }
           },
           error => this.error = error
         ).then(() => this.isProcessing = false)

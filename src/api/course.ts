@@ -41,6 +41,10 @@ export function prepareGradesCacheJob(canvasCourseId: number) {
   return utils.post(`/api/course/${canvasCourseId}/egrade_export/prepare`, {}, true)
 }
 
+export function getCanvasSite(canvasCourseId: number) {
+  return utils.get(`/api/course/${canvasCourseId}`, false)
+}
+
 export function getRoster(canvasCourseId: number) {
   return utils.get(`/api/course/${canvasCourseId}/roster`, true)
 }
