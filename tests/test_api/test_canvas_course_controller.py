@@ -33,30 +33,30 @@ teacher_uid = '30000'
 student_uid = '40000'
 
 
-class TestFindMailingList:
+class TestGetRoster:
 
     def test_anonymous(self, client):
         """Denies anonymous user."""
-        _api_roster_photos(client, '1234567', expected_status_code=401)
+        _api_get_roster(client, '1234567', expected_status_code=401)
 
     def test_no_canvas_account(self, client, fake_auth):
         """Denies user with no Canvas account."""
         fake_auth.login(no_canvas_account_uid)
-        _api_roster_photos(client, '1234567', expected_status_code=401)
+        _api_get_roster(client, '1234567', expected_status_code=401)
 
     def test_not_enrolled(self, client, app, fake_auth):
         """Denies user with no course enrollment."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {'course': ['get_by_id'], 'user': ['profile_20000']}, m)
             fake_auth.login(not_enrolled_uid)
-            _api_roster_photos(client, '1234567', expected_status_code=401)
+            _api_get_roster(client, '1234567', expected_status_code=401)
 
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {'course': ['get_by_id']}, m)
             fake_auth.login(admin_uid)
-            response = _api_roster_photos(client, '1234567')
+            response = _api_get_roster(client, '1234567')
 
             assert response['canvasSite']['canvasCourseId'] == 1234567
             assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
@@ -71,7 +71,7 @@ class TestFindMailingList:
                 'user': ['profile_30000'],
             }, m)
             fake_auth.login(teacher_uid)
-            response = _api_roster_photos(client, '1234567')
+            response = _api_get_roster(client, '1234567')
 
             assert response['canvasSite']['canvasCourseId'] == 1234567
             assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
@@ -86,10 +86,10 @@ class TestFindMailingList:
                 'user': ['profile_40000'],
             }, m)
             fake_auth.login(student_uid)
-            _api_roster_photos(client, '1234567', expected_status_code=401)
+            _api_get_roster(client, '1234567', expected_status_code=401)
 
 
-def _api_roster_photos(client, course_id, expected_status_code=200):
-    response = client.get(f'api/canvas_roster/{course_id}')
+def _api_get_roster(client, course_id, expected_status_code=200):
+    response = client.get(f'api/canvas_course/{course_id}/roster')
     assert response.status_code == expected_status_code
     return response.json

@@ -41,7 +41,6 @@ def register_routes(app):
     # Register API routes.
     import ripley.api.auth_controller
     import ripley.api.canvas_course_controller
-    import ripley.api.canvas_roster_controller
     import ripley.api.canvas_user_controller
     import ripley.api.canvas_utility_controller
     import ripley.api.config_controller
