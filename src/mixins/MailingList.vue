@@ -14,6 +14,7 @@ export default {
   methods: {
     ...mapActions(useMailingListStore, [
       'init',
+      'setCanvasSite',
       'setMailingList'
     ])
   }

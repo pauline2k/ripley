@@ -9,19 +9,21 @@ export const useMailingListStore = defineStore('mailingList', {
     init() {
       this.canvasSite = this.mailingList = undefined
     },
+    setCanvasSite(canvasSite: any) {
+      const a = []
+      if (canvasSite.courseCode !== canvasSite.name) {
+        a.push(canvasSite.courseCode)
+      }
+      if (canvasSite.term && canvasSite.term.name) {
+        a.push(canvasSite.term.name)
+      }
+      canvasSite.codeAndTerm = a.join(', ')
+      this.canvasSite = canvasSite
+    },
     setMailingList(mailingList: any) {
       this.mailingList = mailingList
       if (this.mailingList) {
-        const canvasSite = mailingList.canvasSite
-        const a = []
-        if (canvasSite.courseCode !== canvasSite.name) {
-          a.push(canvasSite.courseCode)
-        }
-        if (canvasSite.term && canvasSite.term.name) {
-          a.push(canvasSite.term.name)
-        }
-        canvasSite.codeAndTerm = a.join(', ')
-        this.canvasSite = canvasSite
+        this.setCanvasSite(mailingList.canvasSite)
       }
     }
   }

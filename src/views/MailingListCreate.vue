@@ -9,7 +9,7 @@
       role="alert"
       :type="error ? 'warning' : 'success'"
     >
-      {{ message }}
+      {{ error || success }}
     </v-alert>
     <div class="mt-4">
       <v-card id="mailing-list-details">
@@ -54,7 +54,7 @@
           <div class="w-75">
             <v-text-field
               id="mailing-list-name-input"
-              v-model="mailingList.name"
+              v-model="mailingListName"
               aria-required="true"
               hide-details
               maxlength="255"
@@ -105,10 +105,11 @@ export default {
   data: () => ({
     error: undefined,
     isCreating: false,
+    mailingListName: undefined,
     success: undefined
   }),
   mounted() {
-    if (this.mailingList && this.canvasSite) {
+    if (this.canvasSite) {
       this.$putFocusNextTick('page-header')
       this.$ready()
     } else {
@@ -121,11 +122,10 @@ export default {
     },
     create() {
       this.error = this.success = null
-      this.clearAlerts()
-      this.$announcer.polite('Creating list')
-      this.isCreating = true
-      const name = this.$_.trim(this.mailingList.name)
+      const name = this.$_.trim(this.mailingListName)
       if (name) {
+        this.isCreating = true
+        this.$announcer.polite('Creating list')
         createMailingList(this.canvasSite.canvasCourseId, name).then(
           data => {
             this.setMailingList(data)

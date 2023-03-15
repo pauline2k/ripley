@@ -24,6 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from flask import current_app as app
+from ripley.api.errors import ResourceNotFoundError
 from ripley.externals import canvas
 from ripley.lib.canvas_utils import canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
@@ -32,6 +33,15 @@ from ripley.lib.http import tolerant_jsonify
 @app.route('/api/course/provision')
 def canvas_course_provision():
     return tolerant_jsonify([])
+
+
+@app.route('/api/course/<canvas_course_id>')
+def get_canvas_course_site(canvas_course_id):
+    course = canvas.get_course(canvas_course_id)
+    if course:
+        return tolerant_jsonify(canvas_site_to_api_json(course))
+    else:
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_course_id}')
 
 
 @app.route('/api/course/<canvas_course_id>/add_user/course_sections')
