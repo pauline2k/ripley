@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import {importUsers} from '@/api/canvas'
+import {importUsers} from '@/api/canvas-utility'
 
 export default {
   name: 'UserProvision',

@@ -277,7 +277,7 @@ import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
-import {addUser, getAddUserCourseSections, getCourseUserRoles, searchUsers} from '@/api/course'
+import {addUser, getAddUserCourseSections, getCanvasSiteUserRoles, searchUsers} from '@/api/canvas-user'
 
 export default {
   name: 'CourseAddUser',
@@ -421,7 +421,7 @@ export default {
   },
   created() {
     this.isLoading = true
-    getCourseUserRoles(this.canvasCourseId).then(response => {
+    getCanvasSiteUserRoles(this.canvasCourseId).then(response => {
       if (this.isAuthorized(response)) {
         this.grantingRoles = response.grantingRoles
         this.selectedRole = response.grantingRoles[0]

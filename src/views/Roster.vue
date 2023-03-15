@@ -86,7 +86,7 @@
 import Context from '@/mixins/Context'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
 import Utils from '@/mixins/Utils'
-import {getRoster, getRosterCsv} from '@/api/course'
+import {getRoster, getRosterCsv} from '@/api/canvas-course'
 
 export default {
   name: 'Roster',

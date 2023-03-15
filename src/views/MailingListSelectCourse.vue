@@ -51,7 +51,7 @@ import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import Utils from '@/mixins/Utils'
 import {getMailingList} from '@/api/mailing-list'
-import {getCanvasSite} from '@/api/course'
+import {getCanvasSite} from '@/api/canvas-course'
 
 export default {
   name: 'MailingListSelectCourse',
