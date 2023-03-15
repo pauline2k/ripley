@@ -25,9 +25,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from flask import current_app as app
 from ripley.api.errors import ResourceNotFoundError
+from ripley.api.util import canvas_role_required
 from ripley.externals import canvas
 from ripley.lib.canvas_utils import canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
+from ripley.merged.roster import canvas_course_roster
 
 
 @app.route('/api/canvas_course/provision')
@@ -66,36 +68,12 @@ def canvas_egrade_export_status(canvas_site_id):
     return tolerant_jsonify([])
 
 
-@app.route('/api/canvas_course/<canvas_site_id>/roster')
-def get_roster(canvas_site_id):
-    return tolerant_jsonify({
-        'canvasCourse': canvas_site_to_api_json(canvas.get_course(canvas_site_id)),
-        'sections': [
-            {
-                'sectionId': '15257',
-                'name': 'ECON H195B IND 020 (In Person)',
-                'sis_id': 'SEC:2022-B-15257',
-            },
-        ],
-        'students': [
-            {
-                'studentId': '999999999',
-                'firstName': 'Ellen',
-                'lastName': 'Ripley',
-                'email': 'ellen_ripley@berkeley.edu',
-                'enrollStatus': 'E',
-                'units': '3',
-                'gradeOption': 'Letter',
-                'sections':
-                    [
-                        {
-                            'sectionId': '15257',
-                            'name': 'ECON H195B IND 020 (In Person)',
-                            'sisId': 'SEC:2022-B-15257',
-                        },
-                    ],
-                'uid': '999999',
-                'photo': None,
-            },
-        ],
-    })
+@app.route('/api/canvas_course/<canvas_course_id>/roster')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+def get_roster(canvas_course_id):
+    course = canvas.get_course(canvas_course_id)
+    if course:
+        roster = canvas_course_roster(canvas_course_id)
+        return tolerant_jsonify(roster if roster else None)
+    else:
+        raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_course_id}" was found.')
