@@ -23,7 +23,11 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from datetime import timedelta
+
+import pytz
 from ripley import db, std_commit
+from ripley.lib.util import utc_now
 
 
 class CanvasSynchronization(db.Model):
@@ -50,6 +54,22 @@ class CanvasSynchronization(db.Model):
         return cls.query.first()
 
     @classmethod
+    def get_last_enrollment_sync(cls):
+        return _utc(cls.get().last_enrollment_sync) or _yesterday()
+
+    @classmethod
+    def get_last_guest_user_sync(cls):
+        return _utc(cls.get().last_guest_user_sync) or _yesterday()
+
+    @classmethod
+    def get_last_instructor_sync(cls):
+        return _utc(cls.get().last_instructor_sync) or _yesterday()
+
+    @classmethod
+    def get_latest_term_enrollment_csv_set(cls):
+        return _utc(cls.get().latest_term_enrollment_csv_set) or _yesterday()
+
+    @classmethod
     def update(cls, enrollments=None, guests=None, instructors=None, term_enrollment_csvs=None):
         record = cls.get()
         if enrollments:
@@ -63,3 +83,13 @@ class CanvasSynchronization(db.Model):
         db.session.add(record)
         std_commit()
         return record
+
+
+def _utc(sync_time):
+    if sync_time:
+        sync_time = sync_time.astimezone(pytz.utc)
+    return sync_time
+
+
+def _yesterday():
+    return utc_now() - timedelta(days=1)
