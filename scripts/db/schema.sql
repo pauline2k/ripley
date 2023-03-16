@@ -88,13 +88,19 @@ ALTER TABLE ONLY canvas_site_mailing_lists
 
 --
 
+-- This table contains one and only one row.
+
 CREATE TABLE canvas_synchronization (
-    id SERIAL PRIMARY KEY,
+    id BOOLEAN PRIMARY KEY DEFAULT TRUE,
     last_guest_user_sync TIMESTAMP WITH TIME ZONE,
     latest_term_enrollment_csv_set TIMESTAMP WITH TIME ZONE,
     last_enrollment_sync TIMESTAMP WITH TIME ZONE,
-    last_instructor_sync TIMESTAMP WITH TIME ZONE
+    last_instructor_sync TIMESTAMP WITH TIME ZONE,
+    CONSTRAINT canvas_synchronization_unique CHECK (id)
 );
+ALTER TABLE ONLY canvas_synchronization
+    ADD CONSTRAINT canvas_synchronization_unique_constraint CHECK (id);
+INSERT INTO canvas_synchronization (id) VALUES (TRUE);
 
 --
 
