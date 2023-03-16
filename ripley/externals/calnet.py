@@ -22,9 +22,13 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
-import ssl
 
-import ldap3
+from bonsai import LDAPClient
+from bonsai.pool import ThreadedConnectionPool
+
+
+ldap_connection_pool = None
+
 
 SCHEMA_DICT = {
     'berkeleyEduAffiliations': 'affiliations',
@@ -46,48 +50,75 @@ def client(app):
 class Client:
 
     def __init__(self, app):
-        self.app = app
-        self.host = app.config['LDAP_HOST']
-        self.bind = app.config['LDAP_BIND']
-        self.password = app.config['LDAP_PASSWORD']
-        tls = ldap3.Tls(validate=ssl.CERT_REQUIRED)
-        server = ldap3.Server(self.host, port=636, use_ssl=True, get_info=ldap3.ALL, tls=tls)
-        self.server = server
+        global ldap_connection_pool
+        if ldap_connection_pool is None:
+            client = LDAPClient(f"ldaps://{app.config['LDAP_HOST']}:{app.config['LDAP_PORT']}")
+            client.set_credentials('SIMPLE', user=app.config['LDAP_BIND'], password=app.config['LDAP_PASSWORD'])
+            ldap_connection_pool = ThreadedConnectionPool(
+                client,
+                minconn=app.config['LDAP_POOL_SIZE_MIN'],
+                maxconn=app.config['LDAP_POOL_SIZE_MAX'],
+            )
 
-    def connect(self):
-        conn = ldap3.Connection(self.server, user=self.bind, password=self.password, auto_bind=ldap3.AUTO_BIND_TLS_BEFORE_BIND)
-        return conn
+    def guests_modified_since(self, utc_datetime):
+        timestamp = utc_datetime.strftime('%Y%m%d%H%M%SZ')
+        search_filter = _ldap_search_filter(
+            {
+                'createtimestamp': [timestamp],
+                'modifytimestamp': [timestamp],
+            },
+            search_base='guests',
+            comparator='>=',
+        )
+        return self._search(search_filter, use_fallback_mail=True)
 
-    def search_uids(self, uids, search_expired=False):
+    def search_uids(self, uids, search_base=None):
         all_out = []
         for i in range(0, len(uids), BATCH_QUERY_MAXIMUM):
             uids_batch = uids[i:i + BATCH_QUERY_MAXIMUM]
-            with self.connect() as conn:
-                search_filter = self._ldap_search_filter(uids_batch, 'uid', search_expired)
-                conn.search('dc=berkeley,dc=edu', search_filter, attributes=ldap3.ALL_ATTRIBUTES)
-                all_out += [_attributes_to_dict(entry, search_expired) for entry in conn.entries]
+            _filter = _ldap_search_filter({'uid': uids_batch}, search_base)
+            all_out += self._search(_filter, search_base)
         return all_out
 
-    @classmethod
-    def _ldap_search_filter(cls, ids, id_type, search_expired=False):
-        ids_filter = ''.join(f'({id_type}={_id})' for _id in ids)
-        ou_scope = '(ou=expired people)' if search_expired else '(ou=people) (ou=advcon people)'
-        return f"""(&
-            (objectclass=person)
-            (|
-                {ids_filter}
-            )
-            (|
-                { ou_scope }
-            )
-        )"""
+    def _search(self, search_filter, search_base=None, use_fallback_mail=False):
+        from flask import current_app as app
+        with ldap_connection_pool.spawn(timeout=app.config['LDAP_TIMEOUT']) as conn:
+            results = conn.search('dc=berkeley,dc=edu', scope=2, filter_exp=search_filter)
+            return [_attributes_to_dict(entry, search_base, use_fallback_mail) for entry in results]
 
 
-def _attributes_to_dict(entry, expired_per_ldap):
+def _attributes_to_dict(entry, search_base, use_fallback_mail=False):
     out = dict.fromkeys(SCHEMA_DICT.values(), None)
-    out['expired'] = expired_per_ldap
-    # ldap3's entry.entry_attributes_as_dict would work for us, except that it wraps a single value as a list.
+    out['expired'] = True if search_base == 'expired' else False
+    keys = entry.keys()
     for attr in SCHEMA_DICT:
-        if attr in entry.entry_attributes:
-            out[SCHEMA_DICT[attr]] = entry[attr].value
+        if attr in keys:
+            value = entry[attr]
+            # We generally want to unwrap single-value arrays, except affiliations.
+            if type(value).__name__ == 'LDAPValueList' and len(value) == 1 and attr != 'berkeleyEduAffiliations':
+                value = value[0]
+            out[SCHEMA_DICT[attr]] = value
+    if use_fallback_mail and not out['email'] and 'mail' in keys:
+        out['email'] = entry['mail']
     return out
+
+
+def _ldap_search_filter(attributes, search_base, comparator='='):
+    attribute_filters = []
+    for attribute, values in attributes.items():
+        for value in values:
+            attribute_filters.append(f'({attribute}{comparator}{value})')
+    if search_base == 'expired':
+        ou_scope = '(ou=expired people)'
+    elif search_base == 'guests':
+        ou_scope = '(ou=guests)'
+    else:
+        ou_scope = '(ou=people) (ou=advcon people)'
+    return f"""(&
+        (|
+            { ''.join(attribute_filters) }
+        )
+        (|
+            { ou_scope }
+        )
+    )"""
