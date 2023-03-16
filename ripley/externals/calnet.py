@@ -24,6 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from bonsai import LDAPClient
+from bonsai.errors import ConnectionError, LDAPError
 from bonsai.pool import ThreadedConnectionPool
 
 
@@ -82,24 +83,37 @@ class Client:
 
     def _search(self, search_filter, search_base=None, use_fallback_mail=False):
         from flask import current_app as app
-        with ldap_connection_pool.spawn(timeout=app.config['LDAP_TIMEOUT']) as conn:
-            results = conn.search('dc=berkeley,dc=edu', scope=2, filter_exp=search_filter)
-            return [_attributes_to_dict(entry, search_base, use_fallback_mail) for entry in results]
+        idle_count = ldap_connection_pool.idle_connection
+        # Long-running idle connections may have been closed, so we cycle through.
+        for attempt in range(idle_count + 1):
+            with ldap_connection_pool.spawn(timeout=app.config['LDAP_TIMEOUT']) as conn:
+                try:
+                    results = conn.search('dc=berkeley,dc=edu', scope=2, filter_exp=search_filter)
+                    return [_attributes_to_dict(entry, search_base, use_fallback_mail) for entry in results]
+                except (ConnectionError, LDAPError) as e:
+                    conn.close()
+                    # If we've been through all idle connections in the pool and are still getting errors, something is more deeply wrong.
+                    if attempt == idle_count:
+                        app.logger.error(f'LDAP search failed: {e}')
+                        raise
 
 
 def _attributes_to_dict(entry, search_base, use_fallback_mail=False):
     out = dict.fromkeys(SCHEMA_DICT.values(), None)
     out['expired'] = True if search_base == 'expired' else False
     keys = entry.keys()
+
+    def _unwrap_value(value):
+        # We generally want to unwrap single-value arrays, except affiliations.
+        if type(value).__name__ == 'LDAPValueList' and len(value) == 1 and attr != 'berkeleyEduAffiliations':
+            value = value[0]
+        return value
+
     for attr in SCHEMA_DICT:
         if attr in keys:
-            value = entry[attr]
-            # We generally want to unwrap single-value arrays, except affiliations.
-            if type(value).__name__ == 'LDAPValueList' and len(value) == 1 and attr != 'berkeleyEduAffiliations':
-                value = value[0]
-            out[SCHEMA_DICT[attr]] = value
+            out[SCHEMA_DICT[attr]] = _unwrap_value(entry[attr])
     if use_fallback_mail and not out['email'] and 'mail' in keys:
-        out['email'] = entry['mail']
+        out['email'] = _unwrap_value(entry['mail'])
     return out
 
 
