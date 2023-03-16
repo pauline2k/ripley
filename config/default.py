@@ -61,8 +61,12 @@ INACTIVE_SESSION_LIFETIME = 120
 INDEX_HTML = 'dist/static/index.html'
 
 LDAP_HOST = 'ldap-test.berkeley.edu'
+LDAP_PORT = 636
 LDAP_BIND = 'mybind'
 LDAP_PASSWORD = 'secret'
+LDAP_POOL_SIZE_MIN = 1
+LDAP_POOL_SIZE_MAX = 10
+LDAP_TIMEOUT = 30
 
 LTI_CONFIG_PATH = 'path/to/lti-config.json'
 
