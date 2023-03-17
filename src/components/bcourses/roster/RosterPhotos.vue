@@ -1,49 +1,40 @@
 <template>
   <ul class="align-content-start page-roster-photos-list ml-3 pt-3">
-    <li v-for="student in students" :key="student.student_id" class="list-item pb-3 text-center">
-      <div v-if="student.profile_url">
+    <li v-for="student in students" :key="student.id" class="list-item pb-3 text-center">
+      <div>
         <a
-          :id="`student-profile-url-${student.student_id}`"
-          :href="student.profile_url"
+          :id="`student-profile-url-${student.id}`"
+          :href="`/${context}/${courseId}/profile/${student.loginId}`"
           target="_top"
         >
           <RosterPhoto :student="student" />
         </a>
       </div>
-      <div v-if="!student.profile_url">
-        <a
-          :id="`student-profile-url-${student.student_id}`"
-          :href="`/${context}/${courseId}/profile/${student.login_id}`"
-          target="_top"
-        >
-          <RosterPhoto :student="student" />
-        </a>
-      </div>
-      <div v-if="!student.email" :id="`student-without-email-${student.student_id}`">
-        <div class="page-roster-student-name">{{ student.first_name }}</div>
-        <div class="page-roster-student-name font-weight-bolder">{{ student.last_name }}</div>
+      <div v-if="!student.email" :id="`student-without-email-${student.id}`">
+        <div class="page-roster-student-name">{{ student.firstName }}</div>
+        <div class="page-roster-student-name font-weight-bolder">{{ student.lastName }}</div>
       </div>
       <div v-if="student.email" class="pt-2">
-        <OutboundLink :id="`student-email-${student.student_id}`" :href="`mailto:${student.email}`">
+        <OutboundLink :id="`student-email-${student.id}`" :href="`mailto:${student.email}`">
           <div class="sr-only">Email</div>
-          <div class="page-roster-student-name">{{ student.first_name }}</div>
-          <div class="page-roster-student-name font-weight-bolder">{{ student.last_name }}</div>
+          <div class="page-roster-student-name">{{ student.firstName }}</div>
+          <div class="page-roster-student-name font-weight-bolder">{{ student.lastName }}</div>
         </OutboundLink>
       </div>
-      <div :id="`student-id-${student.student_id}`" class="print-hide">
+      <div :id="`student-id-${student.id}`" class="print-hide">
         <span class="sr-only">Student ID: </span>
-        {{ student.student_id }}
+        {{ student.id }}
       </div>
       <div
         v-if="student.terms_in_attendance"
-        :id="`student-terms-in-attendance-${student.student_id}`"
+        :id="`student-terms-in-attendance-${student.id}`"
         class="page-roster-student-terms print-hide"
       >
         Terms: {{ student.terms_in_attendance }}
       </div>
       <div
         v-if="student.majors"
-        :id="`student-majors-${student.student_id}`"
+        :id="`student-majors-${student.id}`"
         class="page-roster-student-majors print-hide"
       >
         {{ $_.truncate(student.majors.join(', '), {length: 50}) }}

@@ -40,7 +40,7 @@ export default {
   name: 'Login',
   mixins: [Context],
   components: {DevAuth},
-  setup() {
+  created() {
     const showDevAuth = false
     this.$ready('Welcome. Please log in.')
     return {showDevAuth}
