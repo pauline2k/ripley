@@ -5,7 +5,7 @@
         v-bind="props"
         variant="outlined"
       >
-        {{ currentUser.firstName }}
+        {{ currentUser.firstName || currentUser.uid }}
       </v-btn>
     </template>
     <v-list class="pt-3">

@@ -32,12 +32,12 @@ from ripley.lib.http import tolerant_jsonify
 from ripley.merged.roster import canvas_course_roster
 
 
-@app.route('/api/canvas_course/provision')
+@app.route('/api/canvas_site/provision')
 def canvas_course_provision():
     return tolerant_jsonify([])
 
 
-@app.route('/api/canvas_course/<canvas_site_id>')
+@app.route('/api/canvas_site/<canvas_site_id>')
 def get_canvas_course_site(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
@@ -46,29 +46,29 @@ def get_canvas_course_site(canvas_site_id):
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
 
 
-@app.route('/api/canvas_course/<canvas_site_id>/provision/sections_feed')
+@app.route('/api/canvas_site/<canvas_site_id>/provision/sections_feed')
 def canvas_course_provision_sections_feed(canvas_site_id):
     return tolerant_jsonify([])
 
 
-@app.route('/api/canvas_course/provision/status')
+@app.route('/api/canvas_site/provision/status')
 def canvas_course_provision_status():
     # TODO: ?jobId=${jobId}
     return tolerant_jsonify([])
 
 
-@app.route('/api/canvas_course/<canvas_site_id>/egrade_export/options')
+@app.route('/api/canvas_site/<canvas_site_id>/egrade_export/options')
 def canvas_egrade_export(canvas_site_id):
     return tolerant_jsonify([])
 
 
-@app.route('/api/canvas_course/<canvas_site_id>/egrade_export/status')
+@app.route('/api/canvas_site/<canvas_site_id>/egrade_export/status')
 def canvas_egrade_export_status(canvas_site_id):
     # TODO: ?jobId=${jobId}
     return tolerant_jsonify([])
 
 
-@app.route('/api/canvas_course/<canvas_course_id>/roster')
+@app.route('/api/canvas_site/<canvas_course_id>/roster')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def get_roster(canvas_course_id):
     course = canvas.get_course(canvas_course_id)
