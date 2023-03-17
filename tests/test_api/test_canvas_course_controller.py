@@ -90,6 +90,6 @@ class TestGetRoster:
 
 
 def _api_get_roster(client, course_id, expected_status_code=200):
-    response = client.get(f'api/canvas_course/{course_id}/roster')
+    response = client.get(f'api/canvas_site/{course_id}/roster')
     assert response.status_code == expected_status_code
     return response.json

@@ -29,8 +29,8 @@ export function getCanvasSite(canvasSiteId: number) {
   return utils.get(`/api/canvas_site/${canvasSiteId}`, false)
 }
 
-export function getRoster(canvasSiteId: number) {
-  return utils.get(`/api/canvas_site/${canvasSiteId}/roster`, true)
+export function getRoster(canvasSiteId: number, redirectOnError?: boolean) {
+  return utils.get(`/api/canvas_site/${canvasSiteId}/roster`, redirectOnError)
 }
 
 export function getRosterCsv(canvasSiteId: number) {

@@ -1,16 +1,7 @@
 <template>
   <div class="canvas-application page-site-mailing-list">
     <h1 id="page-header" tabindex="-1">Manage course site mailing list</h1>
-    <v-alert
-      v-if="error || success"
-      class="mb-2"
-      closable
-      density="compact"
-      role="alert"
-      :type="error ? 'warning' : 'success'"
-    >
-      {{ error || success }}
-    </v-alert>
+    <Alert :error-message="error" :success-message="success" />
     <div class="mt-4">
       <v-card id="mailing-list-details">
         <v-card-text>
@@ -91,6 +82,7 @@
 </template>
 
 <script>
+import Alert from '@/components/utils/Alert'
 import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
@@ -100,7 +92,7 @@ import {createMailingList} from '@/api/mailing-list'
 
 export default {
   name: 'MailingListCreate',
-  components: {OutboundLink, SpinnerWithinButton},
+  components: {Alert, OutboundLink, SpinnerWithinButton},
   mixins: [Context, MailingList, Utils],
   data: () => ({
     error: undefined,

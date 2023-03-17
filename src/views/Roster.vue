@@ -1,5 +1,6 @@
 <template>
   <div v-if="!isLoading" class="page-roster">
+    <Alert :error-message="error" :success-message="success" />
     <v-container fluid>
       <v-row align-v="start" class="page-roster print-hide roster-search pb-3" no-gutters>
         <v-col class="pb-2 pr-2" sm="3">
@@ -83,6 +84,7 @@
 </template>
 
 <script>
+import Alert from '@/components/utils/Alert'
 import Context from '@/mixins/Context'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
 import Utils from '@/mixins/Utils'
@@ -91,13 +93,14 @@ import {getRoster, getRosterCsv} from '@/api/canvas-course'
 export default {
   name: 'Roster',
   mixins: [Context, Utils],
-  components: {RosterPhotos},
+  components: {Alert, RosterPhotos},
   data: () => ({
     error: undefined,
     roster: undefined,
     search: undefined,
     sections: [{title: 'All sections', value: null}],
-    section: null
+    section: null,
+    success: undefined
   }),
   computed: {
     canvasCourse() {
@@ -121,19 +124,22 @@ export default {
     },
   },
   created() {
-    getRoster(this.currentUser.canvasCourseId).then(data => {
-      this.roster = data
-      this.$_.each(data.sections, section => {
-        this.sections.push({
-          ...section,
-          ...{
-            title: section.name,
-            value: section.sectionId
-          }
+    getRoster(this.currentUser.canvasCourseId).then(
+      data => {
+        this.roster = data
+        this.$_.each(data.sections, section => {
+          this.sections.push({
+            ...section,
+            ...{
+              title: section.name,
+              value: section.sectionId
+            }
+          })
         })
-      })
-      this.$_.each(this.students, s => s.idx = this.idx(`${s.first_name} ${s.last_name} ${s.student_id}`))
-    }).finally(() => this.$ready('Roster'))
+        this.$_.each(this.students, s => s.idx = this.idx(`${s.first_name} ${s.last_name} ${s.student_id}`))
+      },
+      error => this.error = error
+    ).finally(() => this.$ready('Roster'))
   },
   methods: {
     downloadCsv() {
