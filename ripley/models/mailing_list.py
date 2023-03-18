@@ -89,13 +89,13 @@ class MailingList(Base):
     @classmethod
     def populate(cls, mailing_list):
         course = canvas.get_course(course_id=mailing_list.canvas_site_id)
-        canvas_course_users = list(course.get_users(include=('email', 'enrollments')))
+        canvas_site_users = list(course.get_users(include=('email', 'enrollments')))
         mailing_list_members = MailingListMembers.get_mailing_list_members(
             include_deleted=True,
             mailing_list_id=mailing_list.id,
         )
         mailing_list, update_summary = cls._update_memberships(
-            canvas_course_users=canvas_course_users,
+            canvas_site_users=canvas_site_users,
             mailing_list=mailing_list,
             mailing_list_members=mailing_list_members,
         )
@@ -153,7 +153,7 @@ class MailingList(Base):
                 self.list_name += '-list'
 
     @classmethod
-    def _update_memberships(cls, canvas_course_users, mailing_list, mailing_list_members):
+    def _update_memberships(cls, canvas_site_users, mailing_list, mailing_list_members):
         summary = {
             'add': {
                 'errors': [],
@@ -180,10 +180,10 @@ class MailingList(Base):
         active_mailing_list_members = list(filter(lambda m: not m.deleted_at, mailing_list_members))
         email_addresses_of_active_mailing_list_members = [m.email_address.lower() for m in active_mailing_list_members]
 
-        active_canvas_course_users = list(filter(lambda u: str(u.login_id).strip().isnumeric(), canvas_course_users))
+        active_canvas_site_users = list(filter(lambda u: str(u.login_id).strip().isnumeric(), canvas_site_users))
         count_per_chunk = 10000
-        for chunk in range(0, len(active_canvas_course_users), count_per_chunk):
-            canvas_user_chunk = canvas_course_users[chunk:chunk + count_per_chunk]
+        for chunk in range(0, len(active_canvas_site_users), count_per_chunk):
+            canvas_user_chunk = canvas_site_users[chunk:chunk + count_per_chunk]
             uids = [u.login_id for u in canvas_user_chunk]
             loch_users_by_uid = {u['ldap_uid']: u for u in data_loch.get_users(uids=uids)}
 
@@ -283,10 +283,10 @@ class MailingList(Base):
         return mailing_list, summary
 
 
-def _can_send(canvas_course_user):
-    return has_instructing_role(canvas_course_user) or \
-        is_project_maintainer(canvas_course_user) or \
-        is_project_owner(canvas_course_user)
+def _can_send(canvas_site_user):
+    return has_instructing_role(canvas_site_user) or \
+        is_project_maintainer(canvas_site_user) or \
+        is_project_owner(canvas_site_user)
 
 
 def _get_preferred_email(canvas_user_email, loch_user_email):

@@ -34,30 +34,30 @@ from ripley.models.mailing_list import MailingList
 from ripley.models.mailing_list_members import MailingListMembers
 
 
-@app.route('/api/mailing_lists/<canvas_course_id>')
+@app.route('/api/mailing_lists/<canvas_site_id>')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def mailing_lists(canvas_course_id):
-    course = canvas.get_course(canvas_course_id)
-    mailing_list = MailingList.find_by_canvas_site_id(canvas_course_id) if course else None
+def mailing_lists(canvas_site_id):
+    course = canvas.get_course(canvas_site_id)
+    mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id) if course else None
     if mailing_list:
         return tolerant_jsonify(mailing_list.to_api_json())
     else:
-        raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_course_id}" was found.')
+        raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
 
 
-@app.route('/api/mailing_lists/<canvas_course_id>/create', methods=['POST'])
+@app.route('/api/mailing_lists/<canvas_site_id>/create', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def create_mailing_lists(canvas_course_id):
+def create_mailing_lists(canvas_site_id):
     try:
-        return tolerant_jsonify(MailingList.create(canvas_course_id).to_api_json())
+        return tolerant_jsonify(MailingList.create(canvas_site_id).to_api_json())
     except ValueError as e:
         raise BadRequestError(str(e))
 
 
-@app.route('/api/mailing_lists/<canvas_course_id>/download/welcome_email_log')
+@app.route('/api/mailing_lists/<canvas_site_id>/download/welcome_email_log')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def download_welcome_email_log(canvas_course_id):
-    mailing_list = MailingList.find_by_canvas_site_id(canvas_course_id)
+def download_welcome_email_log(canvas_site_id):
+    mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id)
     if mailing_list:
         now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         rows = []
@@ -71,17 +71,17 @@ def download_welcome_email_log(canvas_course_id):
             })
         return csv_download_response(
             rows=rows,
-            filename=f'{canvas_course_id}-welcome-messages-log-{now}.csv',
+            filename=f'{canvas_site_id}-welcome-messages-log-{now}.csv',
             fieldnames=['Name', 'Email address', 'Message sent', 'Current member'],
         )
     else:
-        raise ResourceNotFoundError(f'No mailing list found for Canvas course {canvas_course_id}')
+        raise ResourceNotFoundError(f'No mailing list found for Canvas course {canvas_site_id}')
 
 
-@app.route('/api/mailing_lists/<canvas_course_id>/populate', methods=['POST'])
+@app.route('/api/mailing_lists/<canvas_site_id>/populate', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def populate_mailing_lists(canvas_course_id):
-    mailing_list = MailingList.find_by_canvas_site_id(canvas_course_id)
+def populate_mailing_lists(canvas_site_id):
+    mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id)
     if mailing_list:
         mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
         return tolerant_jsonify({
@@ -89,4 +89,4 @@ def populate_mailing_lists(canvas_course_id):
             'summary': update_summary,
         })
     else:
-        raise ResourceNotFoundError(f'No mailing list found for Canvas course {canvas_course_id}')
+        raise ResourceNotFoundError(f'No mailing list found for Canvas course {canvas_site_id}')

@@ -53,9 +53,9 @@ def canvas_role_required(*roles):
             if current_user.is_authenticated and current_user.is_admin:
                 authorized = True
             elif current_user.is_authenticated and current_user.canvas_user_id:
-                canvas_course_user = canvas.get_course_user(kw['canvas_course_id'], current_user.canvas_user_id)
-                if canvas_course_user and canvas_course_user.enrollments:
-                    if next((e for e in canvas_course_user.enrollments if e['role'] in roles), None):
+                canvas_site_user = canvas.get_course_user(kw['canvas_site_id'], current_user.canvas_user_id)
+                if canvas_site_user and canvas_site_user.enrollments:
+                    if next((e for e in canvas_site_user.enrollments if e['role'] in roles), None):
                         authorized = True
             if authorized:
                 return func(*args, **kw)
@@ -82,9 +82,9 @@ def csv_download_response(rows, filename, fieldnames=None):
 def start_login_session(user, redirect_path=None):
     app.logger.info(f"""Starting login session for {user.uid}""")
     if (current_user.is_authenticated and (
-            current_user.uid != user.uid or current_user.canvas_course_id != user.canvas_course_id)):
-        app.logger.info(f"""User (UID {user.uid} canvas_course_id {user.canvas_course_id}) does not match existing session \
-            (UID {current_user.uid} canvas_course_id {current_user.canvas_course_id}). Terminating existing session.""")
+            current_user.uid != user.uid or current_user.canvas_site_id != user.canvas_site_id)):
+        app.logger.info(f"""User (UID {user.uid} canvas_site_id {user.canvas_site_id}) does not match existing session \
+            (UID {current_user.uid} canvas_site_id {current_user.canvas_site_id}). Terminating existing session.""")
         logout_user()
     authenticated = login_user(user, force=True, remember=True) and current_user.is_authenticated
     if not _is_safe_url(request.args.get('next')):

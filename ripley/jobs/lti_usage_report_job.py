@@ -75,7 +75,7 @@ class LtiUsageReportJob(BaseJob):
             self.tool_url_to_summary[tool_url]['accounts'].append(str(account_id))
 
     def merge_course(self, course):
-        course_id = course['canvas_course_id']
+        course_id = course['canvas_site_id']
         if course['status'] == 'unpublished':
             return
         for tool in canvas.get_external_tools('course', course_id):
@@ -117,12 +117,12 @@ class LtiUsageReportJob(BaseJob):
         with open(tmpfile.name, mode='wt', encoding='utf-8') as f:
             csv_writer = csv.DictWriter(f, fieldnames=['Course URL', 'Name', 'Tool', 'Teacher', 'Email'])
             csv_writer.writeheader()
-            for canvas_course_id, course_info in self.course_to_visible_tools.items():
+            for canvas_site_id, course_info in self.course_to_visible_tools.items():
                 tool_urls = course_info['tools']
-                teacher = next(iter(canvas.get_teachers(course_id=canvas_course_id)), None)
+                teacher = next(iter(canvas.get_teachers(course_id=canvas_site_id)), None)
                 for tool_url in tool_urls:
                     csv_writer.writerow({
-                        'Course URL': f"{app.config['CANVAS_API_URL']}/courses/{canvas_course_id}",
+                        'Course URL': f"{app.config['CANVAS_API_URL']}/courses/{canvas_site_id}",
                         'Name': course_info['name'],
                         'Tool': self.tool_url_to_summary.get(tool_url, {}).get('label'),
                         'Teacher': teacher and getattr(teacher, 'name', None),
@@ -134,7 +134,7 @@ class LtiUsageReportJob(BaseJob):
             return put_binary_data_to_s3(f'lti_usage_reports/{courses_report_filename}', f, 'text/csv')
 
     def merge_course_occurrence(self, course, tool_url):
-        course_id = course['canvas_course_id']
+        course_id = course['canvas_site_id']
         if tool_url in self.tool_url_to_summary:
             self.tool_url_to_summary[tool_url]['nbr_courses_visible'] += 1
             if not COMMONPLACE_APPS.match(tool_url):

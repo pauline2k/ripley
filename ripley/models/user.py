@@ -39,18 +39,18 @@ class User(UserMixin):
     def __init__(self, serialized_composite_key=None):
         composite_key = json.loads(serialized_composite_key) if serialized_composite_key else {}
         uid = composite_key.get('uid', None)
-        canvas_course_id = str(composite_key.get('canvas_course_id', None)).strip()
-        canvas_course_id = int(canvas_course_id) if canvas_course_id and canvas_course_id.isnumeric() else None
+        canvas_site_id = str(composite_key.get('canvas_site_id', None)).strip()
+        canvas_site_id = int(canvas_site_id) if canvas_site_id and canvas_site_id.isnumeric() else None
         if uid:
             try:
                 uid = str(int(uid))
             except ValueError:
                 pass
-        self.user = self._load_user(canvas_course_id=canvas_course_id, uid=uid)
+        self.user = self._load_user(canvas_site_id=canvas_site_id, uid=uid)
 
     def __repr__(self):
         return f"""<User
-                    canvas_course_id={self.user['canvasCourseId']},
+                    canvas_site_id={self.user['canvasSiteId']},
                     email_address={self.email_address},
                     is_active={self.is_active},
                     is_admin={self.is_admin},
@@ -60,15 +60,15 @@ class User(UserMixin):
                 """
 
     @property
-    def canvas_course_id(self):
-        return self.user['canvasCourseId']
+    def canvas_site_id(self):
+        return self.user['canvasSiteId']
 
     @property
     def canvas_user_id(self):
         return self._lazy_load_canvas_user_id()
 
     def get_id(self):
-        return self.get_serialized_composite_key(canvas_course_id=self.canvas_course_id, uid=self.uid)
+        return self.get_serialized_composite_key(canvas_site_id=self.canvas_site_id, uid=self.uid)
 
     @property
     def uid(self):
@@ -105,13 +105,13 @@ class User(UserMixin):
         return self.user
 
     @classmethod
-    def get_serialized_composite_key(cls, canvas_course_id, uid):
+    def get_serialized_composite_key(cls, canvas_site_id, uid):
         return json.dumps({
-            'canvas_course_id': canvas_course_id,
+            'canvas_site_id': canvas_site_id,
             'uid': uid,
         })
 
-    def _load_user(self, canvas_course_id=None, uid=None):
+    def _load_user(self, canvas_site_id=None, uid=None):
         user = UserAuth.find_by_uid(uid) if uid else None
         calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
         expired = calnet_profile.get('isExpiredPerLdap', True)
@@ -126,7 +126,7 @@ class User(UserMixin):
             **calnet_profile,
             **{
                 'id': uid,
-                'canvasCourseId': canvas_course_id,
+                'canvasSiteId': canvas_site_id,
                 # Callable properties (eg, methods) will be invoked by custom serializer: LazyLoadingEncoder in http.py.
                 'canvasUserId': self._lazy_load_canvas_user_id,
                 'emailAddress': calnet_profile.get('email'),

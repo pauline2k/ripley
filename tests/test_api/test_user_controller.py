@@ -76,7 +76,7 @@ class TestUserProfile:
         user_sessions = [c for c in cookies if 'remember_ripley_token' in c]
         assert len(user_sessions) == 1
         user_session = parse_cookie(user_sessions[0])
-        assert '{"canvas_course_id": null, "uid": "30000"}' in user_session['remember_ripley_token']
+        assert '{"canvas_site_id": null, "uid": "30000"}' in user_session['remember_ripley_token']
         assert 'Secure' in user_session
         assert user_session['SameSite'] == 'None'
 
@@ -88,6 +88,6 @@ class TestUserProfile:
         user_sessions = [c for c in cookies if 'remember_ripley_token' in c]
         assert len(user_sessions) == 1
         user_session = parse_cookie(user_sessions[0])
-        assert '{"canvas_course_id": null, "uid": "40000"}' in user_session['remember_ripley_token']
+        assert '{"canvas_site_id": null, "uid": "40000"}' in user_session['remember_ripley_token']
         assert 'Secure' in user_session
         assert user_session['SameSite'] == 'None'

@@ -59,7 +59,7 @@ class TestFindMailingList:
             _api_create_mailing_list(client, '1234567')
             response = _api_find_mailing_list(client, '1234567')
 
-            assert response['canvasSite']['canvasCourseId'] == 1234567
+            assert response['canvasSite']['canvasSiteId'] == 1234567
             assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
             assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
@@ -118,7 +118,7 @@ class TestCreateMailingList:
             fake_auth.login(admin_uid)
             response = _api_create_mailing_list(client, '1234567')
 
-            assert response['canvasSite']['canvasCourseId'] == 1234567
+            assert response['canvasSite']['canvasSiteId'] == 1234567
             assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
             assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
@@ -173,7 +173,7 @@ class TestPopulateMailingList:
             fake_auth.login(admin_uid)
             _api_create_mailing_list(client, '1234567')
             api_json = _api_populate_mailing_list(client, '1234567')
-            assert api_json['mailingList']['canvasSite']['canvasCourseId'] == 1234567
+            assert api_json['mailingList']['canvasSite']['canvasSiteId'] == 1234567
             # TODO: verify populated mailing list
 
     def test_teacher(self, client, app, fake_auth):

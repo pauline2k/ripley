@@ -52,7 +52,7 @@ class TestGetMailingListConfig:
         assert config['public_jwk_url'] == app.url_for('get_jwk_set', _external=True)
         assert config['custom_fields'] == {
             'canvas_user_id': '$Canvas.user.id',
-            'canvas_course_id': '$Canvas.course.id',
+            'canvas_site_id': '$Canvas.course.id',
             'canvas_user_login_id': '$Canvas.user.loginId',
             'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
         }
@@ -83,7 +83,7 @@ class TestGetUserProvisioningConfig:
         assert config['public_jwk_url'] == app.url_for('get_jwk_set', _external=True)
         assert config['custom_fields'] == {
             'canvas_user_id': '$Canvas.user.id',
-            'canvas_course_id': '$Canvas.course.id',
+            'canvas_site_id': '$Canvas.course.id',
             'canvas_user_login_id': '$Canvas.user.loginId',
             'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
         }

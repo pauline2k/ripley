@@ -11,14 +11,15 @@
     >
       {{ error }}
     </v-alert>
+    <Alert :closable="true" :error-message="error" />
     <div class="align-center d-flex flex-wrap pa-3">
       <div class="pr-3">
         <label for="page-site-mailing-list-site-id" class="sr-only">Course Site ID</label>
         <v-text-field
           id="page-site-mailing-list-site-id"
-          v-model="canvasCourseId"
+          v-model="canvasSiteId"
           aria-required="true"
-          :error="!!$_.trim(canvasCourseId) && !isCanvasCourseIdValid"
+          :error="!!$_.trim(canvasSiteId) && !isCanvasSiteIdValid"
           hide-details
           maxlength="10"
           label="Canvas Course ID"
@@ -32,7 +33,7 @@
         <v-btn
           id="btn-get-mailing-list"
           color="primary"
-          :disabled="isProcessing || !isCanvasCourseIdValid"
+          :disabled="isProcessing || !isCanvasSiteIdValid"
           @click="submit"
         >
           <span v-if="!isProcessing">Get Mailing List</span>
@@ -46,25 +47,26 @@
 </template>
 
 <script>
+import Alert from '@/components/utils/Alert'
 import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList'
-import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import Utils from '@/mixins/Utils'
 import {getMailingList} from '@/api/mailing-list'
 import {getCanvasSite} from '@/api/canvas-course'
 
 export default {
   name: 'MailingListSelectCourse',
-  components: {SpinnerWithinButton},
   mixins: [Context, MailingList, Utils],
+  components: {Alert, SpinnerWithinButton},
   data: () => ({
     error: undefined,
     isProcessing: false,
-    canvasCourseId: undefined
+    canvasSiteId: undefined
   }),
   computed: {
-    isCanvasCourseIdValid() {
-      return this.isValidCanvasCourseId(this.canvasCourseId)
+    isCanvasSiteIdValid() {
+      return this.isValidCanvasSiteId(this.canvasSiteId)
     }
   },
   mounted() {
@@ -74,16 +76,16 @@ export default {
   },
   methods: {
     submit() {
-      if (!this.isProcessing && this.canvasCourseId) {
+      if (!this.isProcessing && this.canvasSiteId) {
         this.isProcessing = true
-        getMailingList(this.canvasCourseId).then(
+        getMailingList(this.canvasSiteId).then(
           data => {
             this.error = undefined
             if (data) {
               this.setMailingList(data)
               this.$router.push({path: '/mailing_list/update'})
             } else {
-              getCanvasSite(this.canvasCourseId).then(data => {
+              getCanvasSite(this.canvasSiteId).then(data => {
                 this.setCanvasSite(data)
                 this.$router.push({path: '/mailing_list/update'})
               })

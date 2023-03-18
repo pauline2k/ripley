@@ -1,35 +1,35 @@
 import utils from '@/api/api-utils'
 import moment from 'moment-timezone'
 
-export function activateWelcomeEmail(canvasCourseId: string) {
-  return utils.post(`/api/mailing_lists/${canvasCourseId}/welcome_email/activate`, true)
+export function activateWelcomeEmail(canvasSiteId: string) {
+  return utils.post(`/api/mailing_lists/${canvasSiteId}/welcome_email/activate`, true)
 }
 
-export function createMailingList(canvasCourseId: string, name: string, redirectOnError?: boolean) {
-  return utils.post(`/api/mailing_lists/${canvasCourseId}/create`, {listName: name}, redirectOnError)
+export function createMailingList(canvasSiteId: string, name: string, redirectOnError?: boolean) {
+  return utils.post(`/api/mailing_lists/${canvasSiteId}/create`, {listName: name}, redirectOnError)
 }
 
-export function createSiteMailingList(canvasCourseId: string) {
-  return utils.post(`/api/mailing_lists/${canvasCourseId}/create`, {}, true)
+export function createSiteMailingList(canvasSiteId: string) {
+  return utils.post(`/api/mailing_lists/${canvasSiteId}/create`, {}, true)
 }
 
-export function deactivateWelcomeEmail(canvasCourseId: string) {
-  return utils.post(`/api/mailing_lists/${canvasCourseId}/welcome_email/deactivate`, {}, true)
+export function deactivateWelcomeEmail(canvasSiteId: string) {
+  return utils.post(`/api/mailing_lists/${canvasSiteId}/welcome_email/deactivate`, {}, true)
 }
 
-export function downloadWelcomeEmailCsv(canvasCourseId: string) {
-  const filename = `${canvasCourseId}-welcome-messages-log-${moment().format('YYYY-MM-DD_hhmmss')}.csv`
-  return utils.downloadViaGet(`/api/mailing_lists/${canvasCourseId}/download/welcome_email_log`, filename,true)
+export function downloadWelcomeEmailCsv(canvasSiteId: string) {
+  const filename = `${canvasSiteId}-welcome-messages-log-${moment().format('YYYY-MM-DD_hhmmss')}.csv`
+  return utils.downloadViaGet(`/api/mailing_lists/${canvasSiteId}/download/welcome_email_log`, filename,true)
 }
 
-export function getMailingList(canvasCourseId: string, redirectOnError?: boolean) {
-  return utils.get(`/api/mailing_lists/${canvasCourseId}`, redirectOnError)
+export function getMailingList(canvasSiteId: string, redirectOnError?: boolean) {
+  return utils.get(`/api/mailing_lists/${canvasSiteId}`, redirectOnError)
 }
 
-export function populateMailingList(canvasCourseId: string, redirectOnError?: boolean) {
-  return utils.post(`/api/mailing_lists/${canvasCourseId}/populate`, {}, redirectOnError)
+export function populateMailingList(canvasSiteId: string, redirectOnError?: boolean) {
+  return utils.post(`/api/mailing_lists/${canvasSiteId}/populate`, {}, redirectOnError)
 }
 
-export function updateWelcomeEmail(canvasCourseId: string, subject: string, body: string) {
-  return utils.post(`/api/mailing_lists/${canvasCourseId}/welcome_email/update`, {body, subject}, true)
+export function updateWelcomeEmail(canvasSiteId: string, subject: string, body: string) {
+  return utils.post(`/api/mailing_lists/${canvasSiteId}/welcome_email/update`, {body, subject}, true)
 }

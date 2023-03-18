@@ -11,8 +11,8 @@
         <v-card class="mx-auto" width="480">
           <div class="ma-5">
             <h2 class="mb-0">Tools</h2>
-            <div v-if="!currentUser.canvasCourseId">
-              Certain tools are unavailable because the current user has a null <span class="font-italic">canvas_course_id</span>.
+            <div v-if="!currentUser.canvasSiteId">
+              Certain tools are unavailable because the current user has a null <span class="font-italic">canvas_site_id</span>.
             </div>
             <div v-if="!currentUser.isAdmin">
               The current user is not an Admin. Expect authorization errors.
@@ -86,18 +86,18 @@ export default {
   },
   methods: {
     loadTools() {
-      const canvasCourseId = this.currentUser.canvasCourseId
+      const canvasSiteId = this.currentUser.canvasSiteId
       this.tools = this.$_.sortBy([
         {disabled: false, icon: 'mdi-google-classroom', path: '/create_course_site', title: 'Create a Course Site'},
         {disabled: false, icon: 'mdi-projector-screen-outline', path: '/create_project_site', title: 'Create a Project Site'},
         {disabled: false, icon: 'mdi-email-multiple-outline', path: '/mailing_list/select_course', title: 'Manage Mailing List'},
         {disabled: false, icon: 'mdi-web', path: '/create_site', title: 'Site Creation'},
         {disabled: false, icon: 'mdi-account-plus-outline', path: '/provision_user', title: 'User Provision'},
-        {disabled: !canvasCourseId, icon: 'mdi-export', path: `/grade_export/${canvasCourseId}`, title: 'E-Grade Export'},
-        {disabled: !canvasCourseId, icon: 'mdi-account-school', path: `/add_user/${canvasCourseId}`, title: 'Find a User to Add'},
-        {disabled: !canvasCourseId, icon: 'mdi-email-fast-outline', path: `/welcome_email/mailing_list/${canvasCourseId}`, title: 'Send Welcome Email'},
-        {disabled: !canvasCourseId, icon: 'mdi-google-classroom', path: `/manage_official_sections/${canvasCourseId}`, title: 'Official Sections'},
-        {disabled: !canvasCourseId, icon: 'mdi-account-multiple', path: `/roster/${canvasCourseId}`, title: 'Roster Photos'}
+        {disabled: !canvasSiteId, icon: 'mdi-export', path: `/grade_export/${canvasSiteId}`, title: 'E-Grade Export'},
+        {disabled: !canvasSiteId, icon: 'mdi-account-school', path: `/add_user/${canvasSiteId}`, title: 'Find a User to Add'},
+        {disabled: !canvasSiteId, icon: 'mdi-email-fast-outline', path: `/welcome_email/mailing_list/${canvasSiteId}`, title: 'Send Welcome Email'},
+        {disabled: !canvasSiteId, icon: 'mdi-google-classroom', path: `/manage_official_sections/${canvasSiteId}`, title: 'Official Sections'},
+        {disabled: !canvasSiteId, icon: 'mdi-account-multiple', path: `/roster/${canvasSiteId}`, title: 'Roster Photos'}
       ], tool => tool.title)
     }
   }

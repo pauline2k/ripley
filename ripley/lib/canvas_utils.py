@@ -32,7 +32,7 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 def canvas_site_to_api_json(canvas_site):
     canvas_site_id = canvas_site.id
     return {
-        'canvasCourseId': canvas_site_id,
+        'canvasSiteId': canvas_site_id,
         'courseCode': canvas_site.course_code if canvas_site else None,
         'name': canvas_site.name.strip() if canvas_site else None,
         'sisCourseId': canvas_site.sis_course_id if canvas_site else None,

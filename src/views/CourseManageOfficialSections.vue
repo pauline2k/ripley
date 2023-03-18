@@ -250,7 +250,7 @@ export default {
     adminActingAs: null,
     adminSemesters: null,
     allSections: [],
-    canvasCourse: {},
+    canvasSite: {},
     courseSemesterClasses: [],
     currentWorkflowStep: null,
     displayError: null,
@@ -313,12 +313,12 @@ export default {
     },
     fetchFeed() {
       this.$loading()
-      getCourseSections(this.currentUser.canvasCourseId).then(
+      getCourseSections(this.currentUser.canvasSiteId).then(
         response => {
           this.percentCompleteRounded = null
-          if (response.canvas_course) {
-            this.canvasCourse = response.canvas_course
-            this.isTeacher = this.canvasCourse.canEdit
+          if (response.canvas_site) {
+            this.canvasSite = response.canvas_site
+            this.isTeacher = this.canvasSite.canEdit
             this.refreshFromFeed(response)
           } else {
             this.displayError = 'Failed to retrieve section data.'
@@ -348,7 +348,7 @@ export default {
     },
     loadCourseLists(teachingSemesters) {
       const courseSemester = this.$_.find(teachingSemesters, semester => {
-        return (semester.termYear === this.canvasCourse.term.term_yr) && (semester.termCode === this.canvasCourse.term.term_cd)
+        return (semester.termYear === this.canvasSite.term.term_yr) && (semester.termCode === this.canvasSite.term.term_cd)
       })
       if (courseSemester) {
         this.courseSemesterClasses = courseSemester.classes
@@ -362,7 +362,7 @@ export default {
             section.parentClass = classItem
             this.allSections.push(section)
             section.stagedState = null
-            this.canvasCourse.officialSections.forEach(officialSection => {
+            this.canvasSite.officialSections.forEach(officialSection => {
               if (officialSection.ccn === section.ccn && this.existingCcns.indexOf(section.ccn) === -1) {
                 this.existingCcns.push(section.ccn)
                 this.existingCourseSections.push(section)
@@ -412,7 +412,7 @@ export default {
       this.jobStatus = 'sendingRequest'
       const update = this.getStagedSections()
       updateSiteSections(
-        this.currentUser.canvasCourseId,
+        this.currentUser.canvasSiteId,
         update.addSections,
         update.deleteSections,
         update.updateSections

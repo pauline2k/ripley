@@ -286,7 +286,7 @@ export default {
   data: () => ({
     additionFailureMessage: null,
     additionSuccessMessage: null,
-    canvasCourseId: null,
+    canvasSiteId: null,
     courseSections: [],
     errorStatus: null,
     grantingRoles: [],
@@ -354,7 +354,7 @@ export default {
         this.$announcer.polite('Loading user search results')
         this.showUsersArea = true
         this.isLoading = true
-        searchUsers(this.canvasCourseId, this.searchText, this.searchType).then(response => {
+        searchUsers(this.canvasSiteId, this.searchText, this.searchType).then(response => {
           this.userSearchResults = response.users
           if (response.users && response.users.length) {
             this.userSearchResultsCount = response.users[0].resultCount
@@ -396,7 +396,7 @@ export default {
       this.$announcer.polite('Adding user')
       this.isLoading = true
       this.showAlerts = true
-      addUser(this.canvasCourseId, this.selectedUser.ldapUid, this.selectedSection.id, this.selectedRole).then(response => {
+      addUser(this.canvasSiteId, this.selectedUser.ldapUid, this.selectedSection.id, this.selectedRole).then(response => {
         this.userAdded = {
           ...response.userAdded,
           fullName: this.selectedUser.firstName + ' ' + this.selectedUser.lastName,
@@ -421,11 +421,11 @@ export default {
   },
   created() {
     this.isLoading = true
-    getCanvasSiteUserRoles(this.canvasCourseId).then(response => {
+    getCanvasSiteUserRoles(this.canvasSiteId).then(response => {
       if (this.isAuthorized(response)) {
         this.grantingRoles = response.grantingRoles
         this.selectedRole = response.grantingRoles[0]
-        getAddUserCourseSections(this.canvasCourseId).then(response => {
+        getAddUserCourseSections(this.canvasSiteId).then(response => {
           this.isLoading = false
           this.courseSections = response.courseSections
           this.selectedSection = response.courseSections[0]
