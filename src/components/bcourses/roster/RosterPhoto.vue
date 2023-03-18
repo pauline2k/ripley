@@ -1,9 +1,9 @@
 <template>
   <div>
     <img
-      :id="`student-photo-${student.student_id}`"
-      :alt="`Photo of ${student.first_name} ${student.last_name}`"
-      :aria-label="`Photo of ${student.first_name} ${student.last_name}`"
+      :id="`student-photo-${student.id}`"
+      :alt="`Photo of ${student.firstName} ${student.lastName}`"
+      :aria-label="`Photo of ${student.firstName} ${student.lastName}`"
       class="photo"
       :src="photoUrl"
       :style="{backgroundImage: `url(${photoUnavailable})`}"

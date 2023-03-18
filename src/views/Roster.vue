@@ -17,8 +17,20 @@
               id="section-select"
               v-model="section"
               aria-label="Search specific section (defaults to all sections)"
-              :options="sections"
-            />
+              :items="sections"
+            >
+              <template #selection="{ item }">
+                {{ item.value }}
+                <span v-if="!item.value">
+                  All sections
+                </span>
+                <span
+                  v-if="item.value"
+                >
+                  {{ item.title }}
+                </span>
+              </template>
+            </v-select>
           </div>
         </v-col>
         <v-col cols="auto" sm="6">
@@ -132,11 +144,11 @@ export default {
             ...section,
             ...{
               title: section.name,
-              value: section.sectionId
+              value: section.ccn
             }
           })
         })
-        this.$_.each(this.students, s => s.idx = this.idx(`${s.first_name} ${s.last_name} ${s.student_id}`))
+        this.$_.each(this.students, s => s.idx = this.idx(`${s.firstName} ${s.lastName} ${s.id}`))
       },
       error => this.error = error
     ).finally(() => this.$ready('Roster'))
