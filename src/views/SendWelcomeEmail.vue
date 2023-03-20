@@ -233,7 +233,7 @@ export default {
     }
   },
   created() {
-    getMailingList(this.currentUser.canvasCourseId).then(this.updateDisplay, this.$errorHandler)
+    getMailingList(this.currentUser.canvasSiteId).then(this.updateDisplay, this.$errorHandler)
   },
   methods: {
     cancelEditMode() {
@@ -245,7 +245,7 @@ export default {
     createMailingList() {
       this.$announcer.polite('Creating list')
       this.isCreating = true
-      createSiteMailingList(this.currentUser.canvasCourseId, this.mailingList).then(
+      createSiteMailingList(this.currentUser.canvasSiteId, this.mailingList).then(
         response => {
           this.updateDisplay(response)
           this.$ready()
@@ -255,12 +255,12 @@ export default {
     },
     downloadMessageLog() {
       this.$announcer.polite('Downloading message log')
-      downloadWelcomeEmailCsv(this.currentUser.canvasCourseId)
+      downloadWelcomeEmailCsv(this.currentUser.canvasSiteId)
     },
     saveWelcomeEmail() {
       this.$announcer.polite('Saving welcome email')
       this.savingWelcomeEmail = true
-      updateWelcomeEmail(this.currentUser.canvasCourseId, this.mailingListSubject, this.mailingListMessage).then(
+      updateWelcomeEmail(this.currentUser.canvasSiteId, this.mailingListSubject, this.mailingListMessage).then(
         response => {
           this.updateDisplay(response)
           this.$putFocusNextTick('send-welcome-email-header')
@@ -277,7 +277,7 @@ export default {
       this.alertEmailActivated = false
       this.isTogglingEmailActivation = true
       const toggleEmailActivation = this.isWelcomeEmailActive ? deactivateWelcomeEmail : activateWelcomeEmail
-      toggleEmailActivation(this.currentUser.canvasCourseId).then((data) => {
+      toggleEmailActivation(this.currentUser.canvasSiteId).then((data) => {
         this.isWelcomeEmailActive = !!data.welcomeEmailActive
         this.isTogglingEmailActivation = false
         if (this.isWelcomeEmailActive) {

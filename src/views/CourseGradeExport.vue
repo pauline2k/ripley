@@ -21,7 +21,7 @@
         <v-col md="12">
           <div>
             <v-icon icon="mdi-angle-left" class="icon template-back-icon mr-2" />
-            <a class="template-back-link" :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
+            <a class="template-back-link" :href="`${canvasRootUrl}/courses/${canvasSiteId}/grades`" target="_top">Back to Gradebook</a>
           </div>
         </v-col>
       </v-row>
@@ -35,11 +35,11 @@
           <h2 class="page-course-grade-export-sub-header">1. Select a grading scheme:</h2>
           <p v-if="!noGradingStandardEnabled" class="page-course-grade-export-download-description">
             You have already set a grading scheme. You can view your grading scheme or select an alternate grading scheme in
-            <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/settings#tab-details`" target="_top">Course Settings</a>.
+            <a :href="`${canvasRootUrl}/courses/${canvasSiteId}/settings#tab-details`" target="_top">Course Settings</a>.
           </p>
           <p v-if="noGradingStandardEnabled" class="page-course-grade-export-download-description">
             Set a grading scheme in
-            <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/settings#tab-details`" target="_top">Course Settings</a>
+            <a :href="`${canvasRootUrl}/courses/${canvasSiteId}/settings#tab-details`" target="_top">Course Settings</a>
             and return once completed.
           </p>
           <p class="page-course-grade-export-download-description">
@@ -52,7 +52,7 @@
           <h2 class="page-course-grade-export-sub-header">2. Post all assignment grades:</h2>
           <p class="page-course-grade-export-download-description">
             All assignment grades must be posted (published/unmuted) to ensure that your E-Grades export matches what you see in the gradebook. To confirm that all grades have been posted, review all columns in
-            <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">your gradebook</a>
+            <a :href="`${canvasRootUrl}/courses/${canvasSiteId}/grades`" target="_top">your gradebook</a>
             for any assignments with a crossed-out eye icon
             <span class="nowrap">
               (<img class="page-course-grade-export-image-inline" src="@/assets/images/crossed_out_eye.png" alt="Crossed-out eye icon">)
@@ -112,7 +112,7 @@
       <v-row no-gutters aria-hidden="true">
         <v-col md="12">
           <v-icon icon="mdi-angle-left" class="template-back-icon icon mr-2" />
-          <a class="template-back-link" :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
+          <a class="template-back-link" :href="`${canvasRootUrl}/courses/${canvasSiteId}/grades`" target="_top">Back to Gradebook</a>
         </v-col>
       </v-row>
       <v-row no-gutters>
@@ -127,7 +127,7 @@
         </v-col>
       </v-row>
       <v-row class="sr-only">
-        <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
+        <a :href="`${canvasRootUrl}/courses/${canvasSiteId}/grades`" target="_top">Back to Gradebook</a>
       </v-row>
       <v-row v-if="officialSections.length > 1" no-gutters>
         <h2 class="page-course-grade-export-download-header">Select section</h2>
@@ -251,8 +251,8 @@
         </v-col>
       </v-row>
       <v-row no-gutters>
-        <v-col v-if="canvasCourseId && canvasRootUrl" md="12" class="page-course-grade-export-grade-link">
-          <a :href="`${canvasRootUrl}/courses/${canvasCourseId}/grades`" target="_top">Back to Gradebook</a>
+        <v-col v-if="canvasSiteId && canvasRootUrl" md="12" class="page-course-grade-export-grade-link">
+          <a :href="`${canvasRootUrl}/courses/${canvasSiteId}/grades`" target="_top">Back to Gradebook</a>
         </v-col>
       </v-row>
     </v-container>
@@ -303,7 +303,7 @@ export default {
   data: () => ({
     appState: null,
     backgroundJobId: null,
-    canvasCourseId: null,
+    canvasSiteId: null,
     canvasRootUrl: null,
     contactSupport: false,
     courseUserRoles: [],
@@ -323,7 +323,7 @@ export default {
     downloadGrades() {
       const pnpCutoff = this.enablePnpConversion === 'false' ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
       downloadGradeCsv(
-        this.canvasCourseId,
+        this.canvasSiteId,
         this.selectedSection.course_cntl_num,
         this.selectedSection.term_cd,
         this.selectedSection.term_yr,
@@ -332,7 +332,7 @@ export default {
       )
     },
     goToGradebook() {
-      const gradebookUrl = `${this.canvasRootUrl}/courses/${this.canvasCourseId}/grades`
+      const gradebookUrl = `${this.canvasRootUrl}/courses/${this.canvasSiteId}/grades`
       if (this.isInIframe) {
         this.iframeParentLocation(gradebookUrl)
       } else {
@@ -344,7 +344,7 @@ export default {
       this.selectedPnpCutoffGrade = ''
     },
     loadExportOptions() {
-      getExportOptions(this.canvasCourseId).then(
+      getExportOptions(this.canvasSiteId).then(
         response => {
           this.loadSectionTerms(this.$_.get(response, 'sectionTerms'))
           if (this.appState !== 'error') {
@@ -391,7 +391,7 @@ export default {
       this.appfocus = true
       this.jobStatus = 'New'
       this.iframeScrollToTop()
-      prepareGradesCacheJob(this.canvasCourseId).then(
+      prepareGradesCacheJob(this.canvasSiteId).then(
         response => {
           if (response.jobRequestStatus === 'Success') {
             this.backgroundJobId = response.jobId
@@ -414,7 +414,7 @@ export default {
     },
     startExportJob() {
       this.exportTimer = setInterval(() => {
-        getExportJobStatus(this.canvasCourseId, this.backgroundJobId).then(
+        getExportJobStatus(this.canvasSiteId, this.backgroundJobId).then(
           response => {
             this.jobStatus = response.jobStatus
             this.percentCompleteRounded = Math.round(response.percentComplete * 100)
@@ -441,10 +441,10 @@ export default {
   },
   created() {
     this.appState = 'initializing'
-    getCanvasSiteUserRoles(this.canvasCourseId).then(
+    getCanvasSiteUserRoles(this.canvasSiteId).then(
       response => {
         this.canvasRootUrl = response.canvasRootUrl
-        this.canvasCourseId = response.courseId
+        this.canvasSiteId = response.courseId
         if (this.$_.includes(response.roles, 'Teacher') || this.$_.includes(response.roles, 'globalAdmin') ) {
           this.loadExportOptions()
         } else {

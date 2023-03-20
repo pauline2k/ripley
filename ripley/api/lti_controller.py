@@ -132,14 +132,14 @@ def _launch_tool(target_uri):
 
         message_launch = MessageLaunch(flask_request, tool_conf, launch_data_storage=launch_data_storage)
         launch_data = message_launch.get_launch_data()
-        canvas_course_id = _get_custom_param(launch_data, 'canvas_course_id')
+        canvas_site_id = _get_custom_param(launch_data, 'canvas_site_id')
         canvas_masquerading_user_id = _get_custom_param(launch_data, 'canvas_masquerading_user_id')
         canvas_user_id = _get_custom_param(launch_data, 'canvas_user_id')
         uid = _get_custom_param(launch_data, 'canvas_user_login_id')
         masquerade = f'Canvas ID {canvas_masquerading_user_id} acting as ' if canvas_masquerading_user_id else ''
-        course_context = f', course id {canvas_course_id}' if canvas_course_id else ''
+        course_context = f', course id {canvas_site_id}' if canvas_site_id else ''
 
-        user_id = User.get_serialized_composite_key(canvas_course_id=canvas_course_id, uid=uid)
+        user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
         user = User(user_id)
         app.logger.info(f"""Logged in during LTI launch as {masquerade}UID {uid}, Canvas ID {canvas_user_id}{course_context}""")
         return start_login_session(user, redirect_path=f'/{target_uri}')
@@ -173,7 +173,7 @@ def _tool_config(title, description, target, placement):
         ],
         'custom_fields': {
             'canvas_user_id': '$Canvas.user.id',
-            'canvas_course_id': '$Canvas.course.id',
+            'canvas_site_id': '$Canvas.course.id',
             'canvas_user_login_id': '$Canvas.user.loginId',
             'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
         },

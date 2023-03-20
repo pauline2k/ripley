@@ -29,16 +29,16 @@ from ripley.api.util import canvas_role_required
 from ripley.externals import canvas
 from ripley.lib.canvas_utils import canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
-from ripley.merged.roster import canvas_course_roster
+from ripley.merged.roster import canvas_site_roster
 
 
 @app.route('/api/canvas_site/provision')
-def canvas_course_provision():
+def canvas_site_provision():
     return tolerant_jsonify([])
 
 
 @app.route('/api/canvas_site/<canvas_site_id>')
-def get_canvas_course_site(canvas_site_id):
+def get_canvas_site_site(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
         return tolerant_jsonify(canvas_site_to_api_json(course))
@@ -47,12 +47,12 @@ def get_canvas_course_site(canvas_site_id):
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections_feed')
-def canvas_course_provision_sections_feed(canvas_site_id):
+def canvas_site_provision_sections_feed(canvas_site_id):
     return tolerant_jsonify([])
 
 
 @app.route('/api/canvas_site/provision/status')
-def canvas_course_provision_status():
+def canvas_site_provision_status():
     # TODO: ?jobId=${jobId}
     return tolerant_jsonify([])
 
@@ -68,12 +68,12 @@ def canvas_egrade_export_status(canvas_site_id):
     return tolerant_jsonify([])
 
 
-@app.route('/api/canvas_site/<canvas_course_id>/roster')
+@app.route('/api/canvas_site/<canvas_site_id>/roster')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def get_roster(canvas_course_id):
-    course = canvas.get_course(canvas_course_id)
+def get_roster(canvas_site_id):
+    course = canvas.get_course(canvas_site_id)
     if course:
-        roster = canvas_course_roster(canvas_course_id)
+        roster = canvas_site_roster(canvas_site_id)
         return tolerant_jsonify(roster if roster else None)
     else:
-        raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_course_id}" was found.')
+        raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')

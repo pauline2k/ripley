@@ -31,7 +31,7 @@
     <div class="pb-4">
       <v-text-field
         id="basic-auth-canvas-course-id"
-        v-model="canvasCourseId"
+        v-model="canvasSiteId"
         :aria-invalid="!!error"
         class="text-field"
         hide-details
@@ -61,7 +61,7 @@ export default {
   name: 'DevAuth',
   mixins: [Context, Utils],
   data: () => ({
-    canvasCourseId: undefined,
+    canvasSiteId: undefined,
     error: undefined,
     password: undefined,
     showError: false,
@@ -74,11 +74,11 @@ export default {
   },
   methods: {
     devAuth() {
-      const canvasCourseId = this.$_.trim(this.canvasCourseId)
+      const canvasSiteId = this.$_.trim(this.canvasSiteId)
       const password = this.$_.trim(this.password)
       const uid = this.$_.trim(this.uid)
       if (uid && password) {
-        devAuthLogIn(canvasCourseId, uid, password).then(
+        devAuthLogIn(canvasSiteId, uid, password).then(
           data => {
             if (data.isAuthenticated) {
               useContextStore().setCurrentUser(data)

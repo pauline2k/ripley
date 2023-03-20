@@ -24,10 +24,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 
-def canvas_course_roster(canvas_course_id):
+def canvas_site_roster(canvas_site_id):
     return {
         'canvasSite': {
-            'canvasCourseId': int(canvas_course_id),
+            'canvasSiteId': int(canvas_site_id),
             'name': 'ASTRON 218: Stellar Dynamics and Galactic Structure',
         },
         'sections': [

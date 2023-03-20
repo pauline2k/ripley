@@ -104,8 +104,8 @@ export default {
     adminByCcns: undefined,
     adminMode: 'act_as',
     adminSemesters: undefined,
-    canvasCourse: undefined,
-    canvasCourseId: undefined,
+    canvasSite: undefined,
+    canvasSiteId: undefined,
     course: undefined,
     coursesList: undefined,
     currentAdminSemester: undefined,
@@ -162,9 +162,9 @@ export default {
         this.updateMetadata(data)
         this.usersClassCount = this.classCount(data.teachingSemesters)
         this.teachingSemesters = data.teachingSemesters
-        this.canvasCourse = data.canvas_course
-        const canvasCourseId = this.canvasCourse ? this.canvasCourse.canvasCourseId : ''
-        this.fillCourseSites(data.teachingSemesters, canvasCourseId)
+        this.canvasSite = data.canvas_site
+        const canvasSiteId = this.canvasSite ? this.canvasSite.canvasSiteId : ''
+        this.fillCourseSites(data.teachingSemesters, canvasSiteId)
         this.$announcer.polite('Course section loaded successfully')
         if (this.adminMode === 'by_ccn' && this.adminByCcns) {
           this.$_.each(this.coursesList, course => {
@@ -197,7 +197,7 @@ export default {
         this.isAdmin
       ).then(onSuccess, onError)
     },
-    fillCourseSites(semestersFeed, canvasCourseId=null) {
+    fillCourseSites(semestersFeed, canvasSiteId=null) {
       this.$_.each(semestersFeed, semester => {
         this.$_.each(semester.classes, course => {
           course.allSelected = false
@@ -206,7 +206,7 @@ export default {
           let ccnToSites = {}
           this.$_.each(course.class_sites, site => {
             if (site.emitter === 'bCourses') {
-              if (site.id !== canvasCourseId) {
+              if (site.id !== canvasSiteId) {
                 this.$_.each(site.sections, siteSection => {
                   hasSites = true
                   if (!ccnToSites[siteSection.ccn]) {
@@ -270,7 +270,7 @@ export default {
       this.courseSemester = false
       // identify semester matching current course site
       this.$_.each(this.teachingSemesters, semester => {
-        if ((semester.termYear === this.canvasCourse.term.term_yr) && (semester.termCode === this.canvasCourse.term.term_cd)) {
+        if ((semester.termYear === this.canvasSite.term.term_yr) && (semester.termCode === this.canvasSite.term.term_cd)) {
           this.courseSemester = semester
           return false
         }
@@ -289,7 +289,7 @@ export default {
             section.parentClass = classItem
             this.allSections.push(section)
             section.stagedState = null
-            this.$_.each(this.canvasCourse.officialSections, officialSection => {
+            this.$_.each(this.canvasSite.officialSections, officialSection => {
               if (officialSection.ccn === section.ccn && existingCcns.indexOf(section.ccn) === -1) {
                 existingCcns.push(section.ccn)
                 this.existingCourseSections.push(section)

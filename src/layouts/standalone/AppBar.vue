@@ -8,17 +8,17 @@
         <div v-if="currentUser.isAuthenticated" class="pr-5">
           <v-text-field
             id="update-canvas-course-id"
-            v-model="canvasCourseId"
-            :append-inner-icon="isUpdatingCanvasCourseId ? 'mdi-progress-check' : 'mdi-arrow-right-circle-outline'"
+            v-model="canvasSiteId"
+            :append-inner-icon="isUpdatingCanvasSiteId ? 'mdi-progress-check' : 'mdi-arrow-right-circle-outline'"
             density="compact"
-            :disabled="isUpdatingCanvasCourseId"
+            :disabled="isUpdatingCanvasSiteId"
             hide-details
             label="Canvas Course ID"
             maxlength="10"
-            :error="!!$_.trim(canvasCourseId) && !isCanvasCourseIdValid"
+            :error="!!$_.trim(canvasSiteId) && !isCanvasSiteIdValid"
             style="width: 200px"
-            @click:append-inner="updateCanvasCourseId"
-            @keydown.enter="updateCanvasCourseId"
+            @click:append-inner="updateCanvasSiteId"
+            @keydown.enter="updateCanvasSiteId"
           />
         </div>
         <div class="float-right mr-3 text-body-2">
@@ -52,29 +52,29 @@ export default {
     }
   },
   data: () => ({
-    canvasCourseId: undefined,
-    isUpdatingCanvasCourseId: false
+    canvasSiteId: undefined,
+    isUpdatingCanvasSiteId: false
   }),
   computed: {
-    isCanvasCourseIdValid() {
-      return this.isValidCanvasCourseId(this.canvasCourseId)
+    isCanvasSiteIdValid() {
+      return this.isValidCanvasSiteId(this.canvasSiteId)
     }
   },
   created() {
-    this.canvasCourseId = this.currentUser.canvasCourseId
+    this.canvasSiteId = this.currentUser.canvasSiteId
     this.eventHub.on('current-user-update', () => {
-      this.canvasCourseId = this.currentUser.canvasCourseId
+      this.canvasSiteId = this.currentUser.canvasSiteId
     })
   },
   methods: {
     moment,
-    updateCanvasCourseId() {
-      if (this.currentUser.isAuthenticated && this.canvasCourseId.match(/^\d+$/)) {
-        this.isUpdatingCanvasCourseId = true
-        updateUserSession(this.canvasCourseId).then(data => {
+    updateCanvasSiteId() {
+      if (this.currentUser.isAuthenticated && this.canvasSiteId.match(/^\d+$/)) {
+        this.isUpdatingCanvasSiteId = true
+        updateUserSession(this.canvasSiteId).then(data => {
           useContextStore().setCurrentUser(data)
-          this.canvasCourseId = this.currentUser.canvasCourseId
-          this.isUpdatingCanvasCourseId = false
+          this.canvasSiteId = this.currentUser.canvasSiteId
+          this.isUpdatingCanvasSiteId = false
           this.eventHub.emit('current-user-update')
         })
       }

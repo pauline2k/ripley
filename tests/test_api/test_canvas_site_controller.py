@@ -58,7 +58,7 @@ class TestGetRoster:
             fake_auth.login(admin_uid)
             response = _api_get_roster(client, '1234567')
 
-            assert response['canvasSite']['canvasCourseId'] == 1234567
+            assert response['canvasSite']['canvasSiteId'] == 1234567
             assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
             assert response['sections']
             assert response['students']
@@ -73,7 +73,7 @@ class TestGetRoster:
             fake_auth.login(teacher_uid)
             response = _api_get_roster(client, '1234567')
 
-            assert response['canvasSite']['canvasCourseId'] == 1234567
+            assert response['canvasSite']['canvasSiteId'] == 1234567
             assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
             assert response['sections']
             assert response['students']

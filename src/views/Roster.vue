@@ -1,7 +1,31 @@
 <template>
+  <!--
+  TODO: Sort out messaging with more elegant code.
+  <div v-if="!error">
+    <v-progress-circular
+      color="primary"
+      indeterminate
+    />
+    <div aria-live="polite" class="pt-5 text-center w-100" role="alert">
+      Downloading rosters. This may take a minute for larger classes.
+    </div>
+  </div>
+  <div v-if="error" role="alert">
+    <v-icon icon="mdi-exclamation-triangle" class="icon-red" />
+    You must be a teacher in this bCourses course to view official student rosters.
+  </div>
+  <div v-if="!error && roster && !sections" role="alert">
+    <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
+    There are no currently maintained official sections in this course site.
+  </div>
+  <div v-if="!error && roster && sections && !students" role="alert">
+    <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
+    Students have not yet signed up for this class.
+  </div>
+  -->
   <div v-if="!isLoading" class="page-roster">
     <Alert :error-message="error" :success-message="success" />
-    <v-container fluid>
+    <v-container v-if="!error" fluid>
       <v-row align-v="start" class="page-roster print-hide roster-search pb-3" no-gutters>
         <v-col class="pb-2 pr-2" sm="3">
           <v-text-field
@@ -60,7 +84,7 @@
       </v-row>
       <v-row no-gutters>
         <v-col sm="12">
-          <RosterPhotos v-if="students.length" :course-id="currentUser.canvasCourseId" :students="students" />
+          <RosterPhotos v-if="students.length" :course-id="currentUser.canvasSiteId" :students="students" />
           <div v-if="!students.length">
             <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
             Students have not yet signed up for this class.
@@ -68,30 +92,6 @@
         </v-col>
       </v-row>
     </v-container>
-    <!--
-    TODO: Sort out messaging with more elegant code.
-    <div v-if="!error">
-      <v-progress-circular
-        color="primary"
-        indeterminate
-      />
-      <div aria-live="polite" class="pt-5 text-center w-100" role="alert">
-        Downloading rosters. This may take a minute for larger classes.
-      </div>
-    </div>
-    <div v-if="error" role="alert">
-      <v-icon icon="mdi-exclamation-triangle" class="icon-red" />
-      You must be a teacher in this bCourses course to view official student rosters.
-    </div>
-    <div v-if="!error && roster && !sections" role="alert">
-      <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
-      There are no currently maintained official sections in this course site.
-    </div>
-    <div v-if="!error && roster && sections && !students" role="alert">
-      <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
-      Students have not yet signed up for this class.
-    </div>
-    -->
   </div>
 </template>
 
@@ -115,28 +115,31 @@ export default {
     success: undefined
   }),
   computed: {
-    canvasCourse() {
-      return this.roster.canvasCourse
+    canvasSite() {
+      return this.roster.canvasSite
     },
     students() {
-      let students = this.roster.students
-      const phrase = this.idx(this.search)
-      if (phrase) {
-        students = this.$_.filter(this.roster.students, student => {
-          const idxMatch = student.idx.includes(phrase)
-          return idxMatch && (!this.section || this.$_.includes(student.section_ccns, this.section.toString()))
-        })
-        let alert = this.section ? `Showing the ${students.length} students of section ${this.section}` : 'Showing all students'
+      let students
+      if (!this.isLoading) {
+        let students = this.roster.students
+        const phrase = this.idx(this.search)
         if (phrase) {
-          alert += ` with '${phrase}' in name.`
+          students = this.$_.filter(this.roster.students, student => {
+            const idxMatch = student.idx.includes(phrase)
+            return idxMatch && (!this.section || this.$_.includes(student.section_ccns, this.section.toString()))
+          })
+          let alert = this.section ? `Showing the ${students.length} students of section ${this.section}` : 'Showing all students'
+          if (phrase) {
+            alert += ` with '${phrase}' in name.`
+          }
+          this.$announcer.polite(alert)
         }
-        this.$announcer.polite(alert)
       }
       return students
     },
   },
   created() {
-    getRoster(this.currentUser.canvasCourseId).then(
+    getRoster(this.currentUser.canvasSiteId).then(
       data => {
         this.roster = data
         this.$_.each(data.sections, section => {
@@ -155,15 +158,15 @@ export default {
   },
   methods: {
     downloadCsv() {
-      getRosterCsv(this.currentUser.canvasCourseId).then(() => {
-        this.$announcer.polite(`${this.canvasCourse.name} CSV downloaded`)
+      getRosterCsv(this.currentUser.canvasSiteId).then(() => {
+        this.$announcer.polite(`${this.canvasSite.name} CSV downloaded`)
       })
     },
     idx(value) {
       return value && this.$_.trim(value).replace(/[^\w\s]/gi, '').toLowerCase()
     },
     printRoster() {
-      this.printPage(`${this.idx(this.canvasCourse.name).replace(/\s/g, '-')}_roster`)
+      this.printPage(`${this.idx(this.canvasSite.name).replace(/\s/g, '-')}_roster`)
     }
   }
 }

@@ -49,7 +49,7 @@ def app_config():
         **_get_app_version(),
         **{
             'ebEnvironment': get_eb_environment(),
-            'maxValidCanvasCourseId': 2147483647,
+            'maxValidCanvasSiteId': 2147483647,
         },
     }
     return tolerant_jsonify(OrderedDict(sorted(api_json.items())))

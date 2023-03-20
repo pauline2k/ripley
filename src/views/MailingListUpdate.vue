@@ -43,7 +43,7 @@
                 </div>
               </v-col>
               <v-col>
-                {{ canvasSite.canvasCourseId }}
+                {{ canvasSite.canvasSiteId }}
               </v-col>
             </v-row>
             <v-row no-gutters>
@@ -178,7 +178,7 @@ export default {
       this.isUpdating = true
       this.alerts = {error: [], success: []}
 
-      populateMailingList(this.canvasSite.canvasCourseId).then(
+      populateMailingList(this.canvasSite.canvasSiteId).then(
         data => {
           this.setMailingList(data.mailingList)
           const summary = data.summary

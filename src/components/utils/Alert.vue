@@ -15,6 +15,10 @@
 export default {
   name: 'Alert',
   props: {
+    closable: {
+      required: false,
+      type: Boolean
+    },
     errorMessage: {
       default: undefined,
       required: false,

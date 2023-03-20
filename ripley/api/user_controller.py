@@ -41,7 +41,7 @@ def get_user_profile():
     uid = params.get('uid')
     if uid and (uid == current_user.uid or current_user.is_admin):
         user_id = User.get_serialized_composite_key(
-            canvas_course_id=current_user.canvas_course_id,
+            canvas_site_id=current_user.canvas_site_id,
             uid=uid,
         )
         return tolerant_jsonify(User(user_id).to_api_json())

@@ -46,14 +46,14 @@ def cas_login_url():
 def dev_auth_login():
     if app.config['DEV_AUTH_ENABLED']:
         params = request.get_json() or {}
-        canvas_course_id = params.get('canvasCourseId')
+        canvas_site_id = params.get('canvasSiteId')
         uid = params.get('uid')
         app.logger.debug(f'Dev-auth login attempt by UID {uid}')
         password = params.get('password')
         if password != app.config['DEV_AUTH_PASSWORD']:
             app.logger.debug(f'UID {uid} failed dev-auth login: bad password.')
             return tolerant_jsonify({'message': 'Invalid credentials'}, 401)
-        user_id = User.get_serialized_composite_key(canvas_course_id=canvas_course_id, uid=uid)
+        user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
         user = User(user_id)
         if not user.is_active:
             msg = f'Sorry, {uid} is not authorized to use this tool.'
@@ -70,10 +70,10 @@ def dev_auth_login():
 def update_user_session():
     if app.config['DEV_AUTH_ENABLED'] and current_user.is_authenticated:
         params = request.get_json() or {}
-        canvas_course_id = params.get('canvasCourseId')
+        canvas_site_id = params.get('canvasSiteId')
         uid = current_user.uid
         logout_user()
-        user_id = User.get_serialized_composite_key(canvas_course_id=canvas_course_id, uid=uid)
+        user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
         user = User(user_id)
         if user.is_active:
             start_login_session(user)
@@ -103,7 +103,7 @@ def cas_login():
     target_url = request.args.get('url')
     uid, attributes, proxy_granting_ticket = _cas_client(target_url).verify_ticket(ticket)
     app.logger.info(f'Logged into CAS as user {uid}')
-    user_id = User.get_serialized_composite_key(canvas_course_id=None, uid=uid)
+    user_id = User.get_serialized_composite_key(canvas_site_id=None, uid=uid)
     user = User(user_id)
     if user.is_active:
         flash('Logged in successfully.')

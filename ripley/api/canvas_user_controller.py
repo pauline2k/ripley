@@ -28,16 +28,16 @@ from ripley.lib.http import tolerant_jsonify
 
 
 @app.route('/api/canvas_user/<canvas_site_id>/roles')
-def canvas_course_user_roles(canvas_site_id):
+def canvas_site_user_roles(canvas_site_id):
     return tolerant_jsonify([])
 
 
 @app.route('/api/canvas_user/<canvas_site_id>/course_sections')
-def canvas_course_add_user(canvas_site_id):
+def canvas_site_add_user(canvas_site_id):
     return tolerant_jsonify([])
 
 
 @app.route('/api/canvas_user/<canvas_site_id>/search')
-def canvas_course_search_users():
+def canvas_site_search_users():
     # TODO: ?searchText=${searchText}&searchType=${searchType}
     return tolerant_jsonify([])

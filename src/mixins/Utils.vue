@@ -9,11 +9,11 @@ export default {
     goToPath(path) {
       this.$router.push({path}, _.noop)
     },
-    isValidCanvasCourseId(canvasCourseId) {
-      canvasCourseId = this.$_.trim(canvasCourseId)
-      return !!canvasCourseId
-        && canvasCourseId.match(/^\d+$/)
-        && parseInt(canvasCourseId, 10) <= useContextStore().config.maxValidCanvasCourseId
+    isValidCanvasSiteId(canvasSiteId) {
+      canvasSiteId = this.$_.trim(canvasSiteId)
+      return !!canvasSiteId
+        && canvasSiteId.match(/^\d+$/)
+        && parseInt(canvasSiteId, 10) <= useContextStore().config.maxValidCanvasSiteId
     },
     oxfordJoin: arr => {
       switch(arr.length) {

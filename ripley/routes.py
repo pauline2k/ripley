@@ -40,7 +40,7 @@ def register_routes(app):
 
     # Register API routes.
     import ripley.api.auth_controller
-    import ripley.api.canvas_course_controller
+    import ripley.api.canvas_site_controller
     import ripley.api.canvas_user_controller
     import ripley.api.canvas_utility_controller
     import ripley.api.config_controller
@@ -132,7 +132,7 @@ def _set_session(response):
         cookie_value = request.cookies[cookie_name]
         composite_key = json.loads(cookie_value.split('|')[0])
         app.logger.debug(f'cookie: {composite_key}')
-        if composite_key['uid'] == current_user.uid and composite_key['canvas_course_id'] == current_user.canvas_course_id:
+        if composite_key['uid'] == current_user.uid and composite_key['canvas_site_id'] == current_user.canvas_site_id:
             response.set_cookie(cookie_name, cookie_value, samesite='None', secure=True)
 
 
@@ -140,7 +140,7 @@ def _user_loader(user_id=None):
     from ripley.models.user import User
 
     composite_key = json.loads(user_id) if user_id else {}
-    canvas_course_id = composite_key.get('canvas_course_id', None)
+    canvas_site_id = composite_key.get('canvas_site_id', None)
     uid = composite_key.get('uid', None)
-    user_id = User.get_serialized_composite_key(canvas_course_id=canvas_course_id, uid=uid)
+    user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
     return User(user_id)

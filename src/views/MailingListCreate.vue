@@ -1,7 +1,11 @@
 <template>
   <div class="canvas-application page-site-mailing-list">
     <h1 id="page-header" tabindex="-1">Manage course site mailing list</h1>
-    <Alert :error-message="error" :success-message="success" />
+    <Alert
+      :closable="true"
+      :error-message="error"
+      :success-message="success"
+    />
     <div class="mt-4">
       <v-card id="mailing-list-details">
         <v-card-text>
@@ -22,7 +26,7 @@
             <div id="mailing-list-canvas-code-and-term">{{ canvasSite.codeAndTerm }}</div>
             <div id="mailing-list-canvas-course-id">
               <span class="font-weight-medium">Site ID:</span>
-              {{ canvasSite.canvasCourseId }}
+              {{ canvasSite.canvasSiteId }}
             </div>
           </div>
         </v-card-text>
@@ -118,7 +122,7 @@ export default {
       if (name) {
         this.isCreating = true
         this.$announcer.polite('Creating list')
-        createMailingList(this.canvasSite.canvasCourseId, name).then(
+        createMailingList(this.canvasSite.canvasSiteId, name).then(
           data => {
             this.setMailingList(data)
             this.$putFocusNextTick('mailing-list-details-header')
