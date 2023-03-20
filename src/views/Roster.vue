@@ -91,9 +91,13 @@
       <v-row no-gutters>
         <v-col sm="12">
           <RosterPhotos v-if="students.length" :course-id="currentUser.canvasSiteId" :students="students" />
-          <div v-if="!students.length">
+          <div v-if="!roster.students.length">
             <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
             Students have not yet signed up for this class.
+          </div>
+          <div v-if="!students.length">
+            <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
+            No students found matching your query.
           </div>
         </v-col>
       </v-row>
@@ -118,36 +122,41 @@ export default {
     search: undefined,
     sections: [{title: 'All sections', value: null}],
     section: null,
+    students: undefined,
     success: undefined
   }),
+  watch: {
+    search(rosterSearch) {
+      const phrase = this.idx(rosterSearch)
+      if (phrase) {
+        this.students = []
+        this.students = this.$_.filter(this.roster.students, student => {
+          const idxMatch = student.idx.includes(phrase)
+          return idxMatch && (!this.section || this.$_.includes(student.section_ccns, this.section.toString()))
+        })
+        // let alert = this.section ? `Showing the ${students.length} students of section ${this.section}` : 'Showing all students'
+        // if (phrase) {
+        //   alert += ` with '${phrase}' in name.`
+        // }
+        // this.$announcer.polite(alert)
+      } else {
+        this.students = this.roster.students
+      }
+    },
+    section(selectedSection) {
+      console.log(selectedSection)
+    }
+  },
   computed: {
     canvasSite() {
       return this.roster.canvasSite
-    },
-    students() {
-      let students = []
-      if (!this.isLoading) {
-        let students = this.roster.students
-        const phrase = this.idx(this.search)
-        if (phrase) {
-          students = this.$_.filter(this.roster.students, student => {
-            const idxMatch = student.idx.includes(phrase)
-            return idxMatch && (!this.section || this.$_.includes(student.section_ccns, this.section.toString()))
-          })
-          let alert = this.section ? `Showing the ${students.length} students of section ${this.section}` : 'Showing all students'
-          if (phrase) {
-            alert += ` with '${phrase}' in name.`
-          }
-          this.$announcer.polite(alert)
-        }
-      }
-      return students
     },
   },
   created() {
     getRoster(this.currentUser.canvasSiteId).then(
       data => {
         this.roster = data
+        this.students = this.roster.students
         this.$_.each(data.sections, section => {
           this.sections.push({
             ...section,
