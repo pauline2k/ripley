@@ -31,6 +31,7 @@ from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import get_eb_environment
 
 PUBLIC_CONFIGS = [
+    'CANVAS_API_URL',
     'DEV_AUTH_ENABLED',
     'EMAIL_RIPLEY_SUPPORT',
     'RIPLEY_ENV',

@@ -10,8 +10,9 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         additionalData: `
-          @use "./src/assets/styles/colors.scss" as *;
-          @use "./src/assets/styles/variables.scss" as *;
+          @use "@/assets/styles/colors.scss" as *;
+          @use "@/assets/styles/ripley-global.scss" as *;
+          @use "@/assets/styles/variables.scss" as *;
         `
       }
     }
