@@ -24,6 +24,11 @@
   </div>
   -->
   <div v-if="!isLoading" class="page-roster">
+    <div style="background-color: lightgray" class="pa-5">
+      Here is a sample
+      <a href="https://ucberkeley.test.instructure.com/courses/1461531/external_tools/36940" target="_blank">Roster photos</a>
+      view in Junction, the legacy platform.
+    </div>
     <Alert :error-message="error" :success-message="success" />
     <v-container v-if="!error" fluid>
       <v-row align-v="start" class="page-roster print-hide roster-search pb-3" no-gutters>
@@ -33,6 +38,7 @@
             v-model="search"
             aria-label="Search people by name or SID"
             placeholder="Search People"
+            variant="outlined"
           />
         </v-col>
         <v-col class="pb-2" sm="3">
@@ -119,7 +125,7 @@ export default {
       return this.roster.canvasSite
     },
     students() {
-      let students
+      let students = []
       if (!this.isLoading) {
         let students = this.roster.students
         const phrase = this.idx(this.search)
