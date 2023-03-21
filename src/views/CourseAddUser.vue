@@ -278,6 +278,7 @@ import IFrameMixin from '@/mixins/IFrameMixin'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {addUser, getAddUserCourseSections, getCanvasSiteUserRoles, searchUsers} from '@/api/canvas-user'
+import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CourseAddUser',
@@ -327,7 +328,7 @@ export default {
       this.showAlerts = false
       this.resetSearchState()
       this.resetImportState()
-      this.$putFocusNextTick('search-text')
+      putFocusNextTick('search-text')
     },
     resetImportState() {
       this.userAdded = false
@@ -359,7 +360,7 @@ export default {
           if (response.users && response.users.length) {
             this.userSearchResultsCount = response.users[0].resultCount
             this.selectedUser = response.users[0]
-            this.$putFocusNextTick('user-search-results-header')
+            putFocusNextTick('user-search-results-header')
           } else {
             this.userSearchResultsCount = 0
             let noResultsAlert = 'Your search did not match any users with a CalNet ID.'

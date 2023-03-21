@@ -1,8 +1,8 @@
 <template>
   <v-alert
     v-if="errorMessage || successMessage"
-    class="mb-2"
-    closable
+    class="ma-2"
+    :closable="closable"
     density="compact"
     role="alert"
     :type="errorMessage ? 'warning' : 'successMessage'"

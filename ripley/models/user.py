@@ -136,10 +136,15 @@ class User(UserMixin):
                 'canvasUserSortableName': p.get('sortable_name'),
                 'canvasUserTitle': p.get('title'),
             })
+            is_teaching = False
             if self.__canvas_site_id:
                 canvas_site_user = canvas.get_course_user(self.__canvas_site_id, canvas_user_id)
                 if canvas_site_user and canvas_site_user.enrollments:
-                    self.user['canvasSiteUserRoles'] = [e['role'] for e in canvas_site_user.enrollments]
+                    roles = [e['role'] for e in canvas_site_user.enrollments]
+                    self.user['canvasSiteUserRoles'] = roles
+                    roles_that_teach = ['TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader']
+                    is_teaching = bool(next((role for role in roles if role in roles_that_teach), None))
+            self.user['isTeaching'] = is_teaching
 
     def _load_user(self, uid=None):
         user = UserAuth.find_by_uid(uid) if uid else None

@@ -23,7 +23,8 @@
     Students have not yet signed up for this class.
   </div>
   -->
-  <div v-if="!isLoading" class="page-roster">
+  <Alert :closable="false" :error-message="error" />
+  <div v-if="!isLoading && roster" class="page-roster">
     <div style="background-color: lightgray" class="pa-5">
       Here is a sample
       <a href="https://ucberkeley.test.instructure.com/courses/1461531/external_tools/36940" target="_blank">Roster photos</a>
@@ -134,11 +135,7 @@ export default {
           const idxMatch = student.idx.includes(phrase)
           return idxMatch && (!this.section || this.$_.includes(student.section_ccns, this.section.toString()))
         })
-        // let alert = this.section ? `Showing the ${students.length} students of section ${this.section}` : 'Showing all students'
-        // if (phrase) {
-        //   alert += ` with '${phrase}' in name.`
-        // }
-        // this.$announcer.polite(alert)
+        this.$announcer.polite(`${this.students.length} student${this.students.length === 1 ? '' : 's'} shown.`)
       } else {
         this.students = this.roster.students
       }
@@ -147,41 +144,41 @@ export default {
       console.log(selectedSection)
     }
   },
-  computed: {
-    canvasSite() {
-      return this.roster.canvasSite
-    },
-  },
   created() {
-    getRoster(this.currentUser.canvasSiteId).then(
-      data => {
-        this.roster = data
-        this.students = this.roster.students
-        this.$_.each(data.sections, section => {
-          this.sections.push({
-            ...section,
-            ...{
-              title: section.name,
-              value: section.ccn
-            }
+    if (this.currentUser.isTeaching) {
+      getRoster(this.currentUser.canvasSiteId).then(
+        data => {
+          this.roster = data
+          this.students = this.roster.students
+          this.$_.each(data.sections, section => {
+            this.sections.push({
+              ...section,
+              ...{
+                title: section.name,
+                value: section.ccn
+              }
+            })
           })
-        })
-        this.$_.each(this.students, s => s.idx = this.idx(`${s.firstName} ${s.lastName} ${s.id}`))
-      },
-      error => this.error = error
-    ).finally(() => this.$ready('Roster'))
+          this.$_.each(this.students, s => s.idx = this.idx(`${s.firstName} ${s.lastName} ${s.id}`))
+        },
+        error => this.error = error
+      ).finally(() => this.$ready('Roster'))
+    } else {
+      this.error = 'You must be a teacher in this bCourses course to view official student rosters.'
+      this.$ready('Roster')
+    }
   },
   methods: {
     downloadCsv() {
       getRosterCsv(this.currentUser.canvasSiteId).then(() => {
-        this.$announcer.polite(`${this.canvasSite.name} CSV downloaded`)
+        this.$announcer.polite(`${this.roster.canvasSite.name} CSV downloaded`)
       })
     },
     idx(value) {
       return value && this.$_.trim(value).replace(/[^\w\s]/gi, '').toLowerCase()
     },
     printRoster() {
-      this.printPage(`${this.idx(this.canvasSite.name).replace(/\s/g, '-')}_roster`)
+      this.printPage(`${this.idx(this.roster.canvasSite.name).replace(/\s/g, '-')}_roster`)
     }
   }
 }

@@ -131,6 +131,7 @@ import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import Utils from '@/mixins/Utils'
 import {populateMailingList} from '@/api/mailing-list'
+import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'MailingListUpdate',
@@ -145,7 +146,7 @@ export default {
   created() {
     this.setAlert(undefined)
     if (this.mailingList && this.canvasSite) {
-      this.$putFocusNextTick('page-header')
+      putFocusNextTick('page-header')
       this.$ready()
     } else {
       this.goToPath('/mailing_list/select_course')
