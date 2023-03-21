@@ -31,7 +31,7 @@ from ripley.models.user import User
 
 @app.route('/api/user/my_profile')
 def my_profile():
-    return tolerant_jsonify(current_user.to_api_json())
+    return tolerant_jsonify(current_user.to_api_json(include_canvas_user_data=True))
 
 
 @app.route('/api/user/profile', methods=['POST'])
@@ -44,6 +44,6 @@ def get_user_profile():
             canvas_site_id=current_user.canvas_site_id,
             uid=uid,
         )
-        return tolerant_jsonify(User(user_id).to_api_json())
+        return tolerant_jsonify(User(user_id).to_api_json(include_canvas_user_data=True))
     else:
         raise BadRequestError('Invalid UID')

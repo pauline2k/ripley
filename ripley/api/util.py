@@ -29,7 +29,6 @@ from urllib.parse import urljoin, urlparse
 
 from flask import abort, current_app as app, redirect, request, Response
 from flask_login import current_user, login_user, logout_user
-from ripley.externals import canvas
 from ripley.lib.http import tolerant_jsonify
 from werkzeug.wrappers import ResponseStream
 
@@ -53,9 +52,9 @@ def canvas_role_required(*roles):
             if current_user.is_authenticated and current_user.is_admin:
                 authorized = True
             elif current_user.is_authenticated and current_user.canvas_user_id:
-                canvas_site_user = canvas.get_course_user(kw['canvas_site_id'], current_user.canvas_user_id)
-                if canvas_site_user and canvas_site_user.enrollments:
-                    if next((e for e in canvas_site_user.enrollments if e['role'] in roles), None):
+                canvas_site_id = str(kw['canvas_site_id'])
+                if canvas_site_id and canvas_site_id == str(current_user.canvas_site_id):
+                    if next((role for role in current_user.canvas_site_user_roles if role in roles), None):
                         authorized = True
             if authorized:
                 return func(*args, **kw)

@@ -51,16 +51,16 @@ class TestUserProfile:
 
     def test_unauthorized(self, client, fake_auth):
         """Denies unauthorized user."""
-        fake_auth.login(teacher_uid)
+        fake_auth.login(canvas_site_id=1234567, uid=teacher_uid)
         self._api_user_profile(client, expected_status_code=400, uid=student_uid)
 
     def test_user_can_view_own_profile(self, client, fake_auth):
         """User can view own profile."""
-        fake_auth.login(student_uid)
+        fake_auth.login(canvas_site_id=1234567, uid=student_uid)
         self._api_user_profile(client, uid=student_uid)
 
     def test_authorized_admin(self, client, fake_auth):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         api_json = self._api_user_profile(client, uid=student_uid)
         assert api_json['uid'] == student_uid
 
@@ -68,7 +68,8 @@ class TestUserProfile:
         """Masquerading user gets profile of masqueradee."""
         from flask_login import current_user
 
-        fake_auth.login(teacher_uid)
+        canvas_site_id = 1234567
+        fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
         assert current_user.uid == teacher_uid
         response = client.get('/api/user/my_profile')
         assert response.json['uid'] == teacher_uid
@@ -76,11 +77,11 @@ class TestUserProfile:
         user_sessions = [c for c in cookies if 'remember_ripley_token' in c]
         assert len(user_sessions) == 1
         user_session = parse_cookie(user_sessions[0])
-        assert '{"canvas_site_id": null, "uid": "30000"}' in user_session['remember_ripley_token']
+        assert '{"canvas_site_id": 1234567, "uid": "30000"}' in user_session['remember_ripley_token']
         assert 'Secure' in user_session
         assert user_session['SameSite'] == 'None'
 
-        fake_auth.login(student_uid)
+        fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
         assert current_user.uid == student_uid
         response = client.get('/api/user/my_profile')
         assert response.json['uid'] == student_uid
@@ -88,6 +89,6 @@ class TestUserProfile:
         user_sessions = [c for c in cookies if 'remember_ripley_token' in c]
         assert len(user_sessions) == 1
         user_session = parse_cookie(user_sessions[0])
-        assert '{"canvas_site_id": null, "uid": "40000"}' in user_session['remember_ripley_token']
+        assert '{"canvas_site_id": 1234567, "uid": "40000"}' in user_session['remember_ripley_token']
         assert 'Secure' in user_session
         assert user_session['SameSite'] == 'None'

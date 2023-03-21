@@ -33,20 +33,20 @@ from ripley.models.user_auth import UserAuth
 
 class User(UserMixin):
 
-    # We will lazy-load canvas_user_id.
-    __canvas_user_id = None
+    # We will lazy-load canvas_user site data.
+    __canvas_site_id = None
 
     def __init__(self, serialized_composite_key=None):
         composite_key = json.loads(serialized_composite_key) if serialized_composite_key else {}
         uid = composite_key.get('uid', None)
         canvas_site_id = str(composite_key.get('canvas_site_id', None)).strip()
-        canvas_site_id = int(canvas_site_id) if canvas_site_id and canvas_site_id.isnumeric() else None
+        self.__canvas_site_id = int(canvas_site_id) if canvas_site_id and canvas_site_id.isnumeric() else None
         if uid:
             try:
                 uid = str(int(uid))
             except ValueError:
                 pass
-        self.user = self._load_user(canvas_site_id=canvas_site_id, uid=uid)
+        self.user = self._load_user(uid=uid)
 
     def __repr__(self):
         return f"""<User
@@ -61,11 +61,17 @@ class User(UserMixin):
 
     @property
     def canvas_site_id(self):
-        return self.user['canvasSiteId']
+        return self.__canvas_site_id
+
+    @property
+    def canvas_site_user_roles(self):
+        self._load_canvas_user_data()
+        return self.user.get('canvasSiteUserRoles')
 
     @property
     def canvas_user_id(self):
-        return self._lazy_load_canvas_user_id()
+        self._load_canvas_user_data()
+        return self.user['canvasUserId']
 
     def get_id(self):
         return self.get_serialized_composite_key(canvas_site_id=self.canvas_site_id, uid=self.uid)
@@ -101,7 +107,9 @@ class User(UserMixin):
     def name(self):
         return self.user['name']
 
-    def to_api_json(self):
+    def to_api_json(self, include_canvas_user_data=False):
+        if include_canvas_user_data:
+            self._load_canvas_user_data()
         return self.user
 
     @classmethod
@@ -111,7 +119,29 @@ class User(UserMixin):
             'uid': uid,
         })
 
-    def _load_user(self, canvas_site_id=None, uid=None):
+    def _load_canvas_user_data(self):
+        if self.uid and 'canvasUserId' not in self.user:
+            p = canvas.get_sis_user_profile(self.uid) or {}
+            canvas_user_id = p.get('id')
+            self.user.update({
+                'canvasSiteId': self.__canvas_site_id,
+                'canvasSiteUserRoles': [],
+                'canvasUserId': canvas_user_id,
+                'canvasUserAvatarUrl': p.get('avatar_url'),
+                'canvasUserLoginId': p.get('login_id'),
+                'canvasUserName': p.get('name'),
+                'canvasUserPrimaryEmail': p.get('primary_email'),
+                'canvasUserShortName': p.get('short_name'),
+                'canvasUserSisUserId': p.get('sis_user_id'),
+                'canvasUserSortableName': p.get('sortable_name'),
+                'canvasUserTitle': p.get('title'),
+            })
+            if self.__canvas_site_id:
+                canvas_site_user = canvas.get_course_user(self.__canvas_site_id, canvas_user_id)
+                if canvas_site_user and canvas_site_user.enrollments:
+                    self.user['canvasSiteUserRoles'] = [e['role'] for e in canvas_site_user.enrollments]
+
+    def _load_user(self, uid=None):
         user = UserAuth.find_by_uid(uid) if uid else None
         calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
         expired = calnet_profile.get('isExpiredPerLdap', True)
@@ -126,9 +156,7 @@ class User(UserMixin):
             **calnet_profile,
             **{
                 'id': uid,
-                'canvasSiteId': canvas_site_id,
-                # Callable properties (eg, methods) will be invoked by custom serializer: LazyLoadingEncoder in http.py.
-                'canvasUserId': self._lazy_load_canvas_user_id,
+                'canvasSiteId': self.__canvas_site_id,
                 'emailAddress': calnet_profile.get('email'),
                 'isActive': is_active,
                 'isAdmin': is_admin,
@@ -140,10 +168,3 @@ class User(UserMixin):
                 'uid': uid,
             },
         }
-
-    def _lazy_load_canvas_user_id(self):
-        if self.uid and self.__canvas_user_id is None:
-            canvas_user_profile = canvas.get_sis_user_profile(self.uid)
-            if canvas_user_profile:
-                self.__canvas_user_id = canvas_user_profile['id']
-        return self.__canvas_user_id
