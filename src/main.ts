@@ -3,7 +3,7 @@ import App from './App.vue'
 import axios from 'axios'
 import moment from 'moment'
 import {createApp} from 'vue'
-import {putFocusNextTick, initializeAxios} from './utils'
+import {initializeAxios} from './utils'
 import {registerPlugins} from '@/plugins'
 import {useContextStore} from '@/stores/context'
 import router from '@/router'
@@ -17,10 +17,8 @@ initializeAxios(app, axios)
 
 // Globals
 app.config.globalProperties.$_ = _
-app.config.globalProperties.$loading = (label: string) => useContextStore().loadingStart(label)
 app.config.globalProperties.$moment = moment
 app.config.globalProperties.$ready = (label: string, focusTarget?: string) => useContextStore().loadingComplete(label, focusTarget)
-app.config.globalProperties.$putFocusNextTick = putFocusNextTick
 
 const apiBaseUrl = import.meta.env.VITE_APP_API_BASE_URL
 

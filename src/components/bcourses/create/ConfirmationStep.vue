@@ -89,6 +89,7 @@
 import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
 import Utils from '@/mixins/Utils'
+import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'ConfirmationStep',
@@ -120,7 +121,7 @@ export default {
     this.siteName = `${section.courseTitle} (${this.currentSemesterName})`
     this.siteAbbreviation = `${section.courseCode}-${section.instruction_format}-${section.section_number}`
     this.iframeScrollToTop()
-    this.$putFocusNextTick('confirm-course-site-details-header')
+    putFocusNextTick('confirm-course-site-details-header')
   },
   methods: {
     create() {

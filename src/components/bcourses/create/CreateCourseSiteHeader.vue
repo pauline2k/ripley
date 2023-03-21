@@ -113,6 +113,7 @@
 <script>
 import Context from '@/mixins/Context'
 import Utils from '@/mixins/Utils'
+import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CreateCourseSiteHeader',
@@ -174,10 +175,10 @@ export default {
       this.setAdminMode(mode)
       if (mode === 'by_ccn') {
         this.$announcer.polite('Input mode switched to section ID')
-        this.$putFocusNextTick('load-sections-by-ccn')
+        putFocusNextTick('load-sections-by-ccn')
       } else {
         this.$announcer.polite(`Input mode switched to ${mode === 'by_ccn' ? 'section ID' : 'UID'}`)
-        this.$putFocusNextTick(mode === 'by_ccn' ? 'load-sections-by-ccn' : 'instructor-uid')
+        putFocusNextTick(mode === 'by_ccn' ? 'load-sections-by-ccn' : 'instructor-uid')
       }
     },
     submit() {
@@ -187,7 +188,7 @@ export default {
         const notNumeric = this.$_.partition(split, ccn => /^\d+$/.test(this.$_.trim(ccn)))[1]
         if (notNumeric.length) {
           this.error = 'CCNs must be numeric.'
-          this.$putFocusNextTick('page-create-course-site-ccn-list')
+          putFocusNextTick('page-create-course-site-ccn-list')
         } else {
           this.setAdminByCcns(split)
           this.fetchFeed()
@@ -199,7 +200,7 @@ export default {
           this.fetchFeed()
         } else {
           this.error = 'UID must be numeric.'
-          this.$putFocusNextTick('instructor-uid')
+          putFocusNextTick('instructor-uid')
         }
       }
     }

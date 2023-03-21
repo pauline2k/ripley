@@ -56,6 +56,7 @@ import Context from '@/mixins/Context'
 import Utils from '@/mixins/Utils'
 import {devAuthLogIn} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
+import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'DevAuth',
@@ -102,7 +103,7 @@ export default {
     reportError(message, putFocus='basic-auth-uid') {
       this.error = this.$_.get(message, 'message')
       this.$announcer.polite(this.error)
-      this.$putFocusNextTick(putFocus)
+      putFocusNextTick(putFocus)
     }
   }
 }

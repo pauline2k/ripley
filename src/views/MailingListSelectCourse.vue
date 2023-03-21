@@ -54,6 +54,7 @@ import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import Utils from '@/mixins/Utils'
 import {getMailingList} from '@/api/mailing-list'
 import {getCanvasSite} from '@/api/canvas-course'
+import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'MailingListSelectCourse',
@@ -71,7 +72,7 @@ export default {
   },
   mounted() {
     this.init()
-    this.$putFocusNextTick('page-header')
+    putFocusNextTick('page-header')
     this.$ready()
   },
   methods: {

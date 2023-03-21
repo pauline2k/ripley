@@ -295,6 +295,7 @@ import OutboundLink from '@/components/utils/OutboundLink'
 import ProgressBar from '@/components/bcourses/shared/ProgressBar'
 import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/canvas-course'
 import {getCanvasSiteUserRoles} from '@/api/canvas-user'
+import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CourseGradeExport',
@@ -433,7 +434,7 @@ export default {
     switchToSelection() {
       this.iframeScrollToTop()
       this.appState = 'selection'
-      this.$putFocusNextTick('page-course-grade-export-header')
+      putFocusNextTick('page-course-grade-export-header')
     }
   },
   beforeUnmount() {

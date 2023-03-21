@@ -198,6 +198,7 @@ import {
   getMailingList,
   updateWelcomeEmail
 } from '@/api/mailing-list'
+import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'SendWelcomeEmail',
@@ -240,7 +241,7 @@ export default {
       this.isEditingWelcomeEmail = false
       this.mailingListMessage = this.mailingList.welcomeEmailBody
       this.mailingListSubject = this.mailingList.welcomeEmailSubject
-      this.$putFocusNextTick('send-welcome-email-header')
+      putFocusNextTick('send-welcome-email-header')
     },
     createMailingList() {
       this.$announcer.polite('Creating list')
@@ -263,7 +264,7 @@ export default {
       updateWelcomeEmail(this.currentUser.canvasSiteId, this.mailingListSubject, this.mailingListMessage).then(
         response => {
           this.updateDisplay(response)
-          this.$putFocusNextTick('send-welcome-email-header')
+          putFocusNextTick('send-welcome-email-header')
         },
         this.$errorHandler
       )
@@ -271,7 +272,7 @@ export default {
     setEditMode() {
       this.alertEmailActivated = false
       this.isEditingWelcomeEmail = true
-      this.$putFocusNextTick('page-site-mailing-list-subject-input')
+      putFocusNextTick('page-site-mailing-list-subject-input')
     },
     toggleEmailActivation() {
       this.alertEmailActivated = false

@@ -312,7 +312,6 @@ export default {
       section.parentClass.collapsed = false
     },
     fetchFeed() {
-      this.$loading()
       getCourseSections(this.currentUser.canvasSiteId).then(
         response => {
           this.percentCompleteRounded = null
