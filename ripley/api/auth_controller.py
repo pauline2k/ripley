@@ -77,7 +77,7 @@ def update_user_session():
         user = User(user_id)
         if user.is_active:
             start_login_session(user)
-            return tolerant_jsonify(current_user.to_api_json())
+            return tolerant_jsonify(current_user.to_api_json(include_canvas_user_data=True))
         else:
             msg = f'Sorry, {uid} is not authorized to use this tool.'
             return tolerant_jsonify({'message': msg}, 403)

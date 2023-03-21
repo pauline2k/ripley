@@ -42,7 +42,7 @@ class TestDisableJob:
 
     def test_unauthorized(self, client, fake_auth, mock_job):
         """Denies unauthorized user."""
-        fake_auth.login(non_admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=non_admin_uid)
         params = {
             'jobId': mock_job.id,
             'disable': True,
@@ -50,7 +50,7 @@ class TestDisableJob:
         _api_disable_job(client, params=params, expected_status_code=401)
 
     def test_authorized(self, client, fake_auth, mock_job):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         params = {
             'jobId': mock_job.id,
             'disable': True,
@@ -60,11 +60,11 @@ class TestDisableJob:
         assert response['disabled'] is True
 
     def test_empty_params(self, client, fake_auth):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         _api_disable_job(client, expected_status_code=400)
 
     def test_bad_job_id(self, client, fake_auth):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         params = {
             'jobId': 0,
             'disable': True,
@@ -90,11 +90,11 @@ class TestJobHistory:
 
     def test_unauthorized(self, client, fake_auth):
         """Denies unauthorized user."""
-        fake_auth.login(non_admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=non_admin_uid)
         _api_job_history(client, expected_status_code=401)
 
     def test_authorized(self, client, fake_auth):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         response = _api_job_history(client)
         assert response == []
 
@@ -113,11 +113,11 @@ class TestJobSchedule:
 
     def test_unauthorized(self, client, fake_auth):
         """Denies unauthorized user."""
-        fake_auth.login(non_admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=non_admin_uid)
         _api_job_schedule(client, expected_status_code=401)
 
     def test_authorized(self, client, fake_auth):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         response = _api_job_schedule(client)
         assert response['autoStart'] is False
         assert response['secondsBetweenJobsCheck'] == 0.5
@@ -147,16 +147,16 @@ class TestLastSuccessfulRun:
 
     def test_unauthorized(self, client, fake_auth):
         """Denies unauthorized user."""
-        fake_auth.login(non_admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=non_admin_uid)
         _api_last_successful_run(client, expected_status_code=401)
 
     def test_authorized(self, client, fake_auth, mock_job):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         response = _api_last_successful_run(client, job_key=mock_job.key)
         assert response is None
 
     def test_bad_job_key(self, client, fake_auth):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         response = _api_last_successful_run(client, job_key='ready to work')
         assert response is None
 
@@ -175,11 +175,11 @@ class TestStartJob:
 
     def test_unauthorized(self, client, fake_auth):
         """Denies unauthorized user."""
-        fake_auth.login(non_admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=non_admin_uid)
         _api_start_job(client, expected_status_code=401)
 
     def test_authorized(self, client, fake_auth, mock_job):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         response = _api_start_job(client, job_key=mock_job.key)
         assert response['class'] == 'TempJob'
         assert response['description'] == "I'm a mock job class"
@@ -187,7 +187,7 @@ class TestStartJob:
         assert response['name'] == 'Temp'
 
     def test_bad_job_key(self, client, fake_auth):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         _api_start_job(client, job_key='ready to work', expected_status_code=404)
 
 
@@ -209,12 +209,12 @@ class TestUpdateSchedule:
 
     def test_unauthorized(self, client, fake_auth):
         """Denies unauthorized user."""
-        fake_auth.login(non_admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=non_admin_uid)
         _api_update_schedule(client, expected_status_code=401)
 
     def test_authorized(self, client, fake_auth, mock_job):
         mock_job.disabled = True
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         params = {
             'jobId': mock_job.id,
             'type': 'minutes',
@@ -230,11 +230,11 @@ class TestUpdateSchedule:
         assert response['updatedAt']
 
     def test_empty_params(self, client, fake_auth):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         _api_update_schedule(client, expected_status_code=400)
 
     def test_enabled_job(self, client, fake_auth, mock_job):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         params = {
             'jobId': mock_job.id,
             'type': 'minutes',
@@ -243,7 +243,7 @@ class TestUpdateSchedule:
         _api_update_schedule(client, params, expected_status_code=400)
 
     def test_bad_job_key(self, client, fake_auth):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         params = {
             'jobId': 0,
             'type': 'minutes',
@@ -252,7 +252,7 @@ class TestUpdateSchedule:
         _api_update_schedule(client, params, expected_status_code=400)
 
     def test_invalid_schedule(self, client, fake_auth, mock_job):
-        fake_auth.login(admin_uid)
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
         params = {
             'jobId': mock_job.id,
             'type': 'eons',
