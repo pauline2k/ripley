@@ -30,6 +30,14 @@
       </div>
     </v-app-bar-title>
   </v-app-bar>
+  <v-snackbar
+    v-model="showError"
+    :close-delay="4000"
+    location="top"
+    variant="elevated"
+  >
+    {{ error }}
+  </v-snackbar>
 </template>
 
 <script>
@@ -40,6 +48,7 @@ import moment from 'moment'
 import Utils from '@/mixins/Utils'
 import {updateUserSession} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
+import {getMyUserProfile} from '@/api/user'
 
 export default {
   name: 'AppBar',
@@ -53,11 +62,20 @@ export default {
   },
   data: () => ({
     canvasSiteId: undefined,
+    error: undefined,
     isUpdatingCanvasSiteId: false
   }),
   computed: {
     isCanvasSiteIdValid() {
       return this.isValidCanvasSiteId(this.canvasSiteId)
+    },
+    showError: {
+      get() {
+        return !!this.error
+      },
+      set(flag) {
+        this.error = flag ? this.error : undefined
+      }
     }
   },
   created() {
@@ -69,14 +87,25 @@ export default {
   methods: {
     moment,
     updateCanvasSiteId() {
-      if (this.currentUser.isAuthenticated && this.canvasSiteId.match(/^\d+$/)) {
+      const isValid = Number.isInteger(this.canvasSiteId) || this.canvasSiteId.match(/^\d+$/)
+      if (isValid && this.currentUser.isAuthenticated) {
         this.isUpdatingCanvasSiteId = true
-        updateUserSession(this.canvasSiteId).then(data => {
-          useContextStore().setCurrentUser(data)
-          this.canvasSiteId = this.currentUser.canvasSiteId
-          this.isUpdatingCanvasSiteId = false
-          this.eventHub.emit('current-user-update')
-        })
+        updateUserSession(this.canvasSiteId).then(
+          data => {
+            useContextStore().setCurrentUser(data)
+            this.canvasSiteId = this.currentUser.canvasSiteId
+            this.isUpdatingCanvasSiteId = false
+            this.eventHub.emit('current-user-update')
+            this.$router.go()
+          },
+          error => {
+            this.error = error
+            getMyUserProfile().then(data => {
+              useContextStore().setCurrentUser(data)
+              this.$router.push({path: '/'})
+            })
+          }
+        )
       }
     }
   }

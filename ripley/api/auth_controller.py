@@ -73,14 +73,16 @@ def update_user_session():
         canvas_site_id = params.get('canvasSiteId')
         uid = current_user.uid
         logout_user()
+        # Re-authenticate
         user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
         user = User(user_id)
-        if user.is_active:
+        if user.is_active and (user.is_admin or len(user.canvas_site_user_roles)):
+            # User must be either an admin or a member of the course site.
             start_login_session(user)
-            return tolerant_jsonify(current_user.to_api_json(include_canvas_user_data=True))
+            return tolerant_jsonify(user.to_api_json(include_canvas_user_data=True))
         else:
-            msg = f'Sorry, {uid} is not authorized to use this tool.'
-            return tolerant_jsonify({'message': msg}, 403)
+            logout_user()
+            return tolerant_jsonify(f'Sorry, {uid} is not authorized to use this tool.', 403)
     else:
         raise ResourceNotFoundError('Unknown path')
 

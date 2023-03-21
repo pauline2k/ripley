@@ -16,6 +16,6 @@ export function logOut() {
   return utils.get('/api/auth/logout', true)
 }
 
-export function updateUserSession(canvasSiteId: number) {
-  return utils.post('/api/auth/update_user_session', {canvasSiteId}, true)
+export function updateUserSession(canvasSiteId: number, redirectOnError?: boolean) {
+  return utils.post('/api/auth/update_user_session', {canvasSiteId}, redirectOnError)
 }
