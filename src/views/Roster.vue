@@ -26,19 +26,7 @@
               aria-label="Search specific section (defaults to all sections)"
               :items="sections"
               variant="outlined"
-            >
-              <template #selection="{ item }">
-                {{ item.value }}
-                <span v-if="!item.value">
-                  All sections
-                </span>
-                <span
-                  v-if="item.value"
-                >
-                  {{ item.title }}
-                </span>
-              </template>
-            </v-select>
+            />
           </div>
         </v-col>
         <v-col cols="auto" sm="6">
@@ -98,24 +86,17 @@ export default {
     error: undefined,
     roster: undefined,
     search: undefined,
-    section: undefined,
+    section: '',
     sections: undefined,
     students: undefined,
     success: undefined
   }),
   watch: {
-    search(rosterSearch) {
-      const phrase = this.idx(rosterSearch)
-      if (phrase) {
-        this.students = []
-        this.students = this.$_.filter(this.roster.students, student => {
-          const idxMatch = student.idx.includes(phrase)
-          return idxMatch && (!this.section || this.$_.includes(student.section_ccns, this.section.toString()))
-        })
-        this.$announcer.polite(`${this.students.length} student${this.students.length === 1 ? '' : 's'} shown.`)
-      } else {
-        this.students = this.roster.students
-      }
+    search() {
+      this.recalculateStudents()
+    },
+    section() {
+      return this.recalculateStudents()
     }
   },
   created() {
@@ -125,13 +106,13 @@ export default {
           this.roster = data
           this.students = this.roster.students
           if (data.sections.length) {
-            this.sections = [{title: 'All sections', value: null}]
+            this.sections = [{title: 'All sections', value: ''}]
             this.$_.each(data.sections, section => {
               this.sections.push({
                 ...section,
                 ...{
                   title: section.name,
-                  value: section.ccn
+                  value: section.id
                 }
               })
             })
@@ -150,6 +131,21 @@ export default {
       getRosterCsv(this.currentUser.canvasSiteId).then(() => {
         this.$announcer.polite(`${this.roster.canvasSite.name} CSV downloaded`)
       })
+    },
+    recalculateStudents() {
+      const normalizedPhrase = this.idx(this.search)
+      if (normalizedPhrase || this.section) {
+        this.students = this.$_.filter(this.roster.students, student => {
+          let showStudent = !normalizedPhrase || student.idx.includes(normalizedPhrase)
+          if (this.section) {
+            showStudent = showStudent && this.$_.map(student.sections || [], 'id').includes(this.section)
+          }
+          return showStudent
+        })
+        this.$announcer.polite(`${this.students.length} student${this.students.length === 1 ? '' : 's'} shown.`)
+      } else {
+        this.students = this.roster.students
+      }
     },
     idx(value) {
       return value && this.$_.trim(value).replace(/[^\w\s]/gi, '').toLowerCase()
