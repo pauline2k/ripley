@@ -6,8 +6,8 @@
         You are about to create a {{ currentSemesterName }} course site with {{ pluralize('section', selectedSectionsList.length) }}:
       </strong>
       <ul id="page-create-course-site-section-list" class="page-create-course-site-section-list">
-        <li v-for="section in selectedSectionsList" :key="section.ccn">
-          {{ section.courseTitle }} - {{ section.courseCode }} {{ section.section_label }} ({{ section.ccn }})
+        <li v-for="section in selectedSectionsList" :key="section.sectionId">
+          {{ section.courseTitle }} - {{ section.courseCode }} {{ section.section_label }} ({{ section.sectionId }})
         </li>
       </ul>
     </div>

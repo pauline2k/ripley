@@ -1,15 +1,22 @@
 import utils from '@/api/api-utils'
 import _ from 'lodash'
 
-export function downloadGradeCsv(canvasSiteId: number, ccn: string, termCode: string, termYear: string, type: string, pnpCutoff: string) {
+export function downloadGradeCsv(
+    canvasSiteId: number,
+    sectionId: string,
+    termCode: string,
+    termYear: string,
+    type: string,
+    pnpCutoff: string
+) {
   const queryParams = [
-    `ccn=${ccn}`,
+    `sectionId=${sectionId}`,
     `term_cd=${termCode}`,
     `term_yr=${termYear}`,
     `type=${type}`,
     `pnp_cutoff=${pnpCutoff}`
   ].join('&')
-  const filename = `egrades-${type}-${ccn}-${utils.termCodeToName(termCode)}-${termYear}-${canvasSiteId}.csv`
+  const filename = `egrades-${type}-${sectionId}-${utils.termCodeToName(termCode)}-${termYear}-${canvasSiteId}.csv`
   return utils.downloadViaGet(`/api/canvas_site/${canvasSiteId}/egrade_export/download?${queryParams}`, filename, true)
 }
 
@@ -46,18 +53,18 @@ export function getCourseProvisioningMetadata() {
 
 export function courseCreate(
   adminActingAs: string,
-  adminByCcns: string[],
+  adminBySectionIds: string[],
   adminTermSlug: string,
-  ccns: string[],
+  sectionIds: string[],
   siteAbbreviation: string,
   siteName: string,
   termSlug: string
 ) {
   return utils.post('/api/canvas_site/provision/create', {
-    admin_acting_as: adminActingAs,
-    admin_by_ccns: adminByCcns,
-    admin_term_slug: adminTermSlug,
-    ccns,
+    adminActingAs: adminActingAs,
+    adminBySectionIds: adminBySectionIds,
+    adminTermSlug: adminTermSlug,
+    sectionIds,
     siteAbbreviation,
     siteName,
     termSlug
@@ -78,7 +85,7 @@ export function getCourseSections(canvasSiteId: number) {
 
 export function getSections(
   adminActingAs: string,
-  adminByCcns: number[],
+  adminBySectionIds: number[],
   adminMode: string,
   currentSemester: string,
   isAdmin: boolean
@@ -87,9 +94,9 @@ export function getSections(
   if (isAdmin) {
     if (adminMode === 'act_as' && adminActingAs) {
       feedUrl = '/api/canvas_site/provision_as/' + adminActingAs
-    } else if ((adminMode !== 'act_as') && adminByCcns) {
+    } else if ((adminMode !== 'act_as') && adminBySectionIds) {
       feedUrl = `/api/canvas_site/provision?admin_term_slug=${currentSemester}`
-      _.each(adminByCcns, ccn => feedUrl += `&admin_by_ccns[]=${ccn}`)
+      _.each(adminBySectionIds, sectionId => feedUrl += `&adminBySectionIds[]=${sectionId}`)
     }
   }
   return utils.get(feedUrl)
@@ -97,13 +104,13 @@ export function getSections(
 
 export function updateSiteSections(
   canvasSiteId: string,
-  addCcns: string[],
-  deleteCcns: string[],
-  updateCcns: string[]
+  sectionIdsToAdd: string[],
+  sectionIdsToRemove: string[],
+  sectionIdsToUpdate: string[]
 ) {
   return utils.post(`/api/canvas_site/${canvasSiteId}/provision/edit_sections`, {
-    ccns_to_remove: deleteCcns,
-    ccns_to_add: addCcns,
-    ccns_to_update: updateCcns
+    sectionIdsToAdd,
+    sectionIdsToRemove,
+    sectionIdsToUpdate
   })
 }

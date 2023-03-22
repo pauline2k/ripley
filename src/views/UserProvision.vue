@@ -32,10 +32,10 @@
                     <span class="sr-only">U I D</span>
                     .
                   </small>
-                  <small v-if="validationErrors.ccNumericList" role="alert" aria-live="polite">
+                  <small v-if="validationErrors.isNotNumeric" role="alert" aria-live="polite">
                     The following items in your list are not numeric: {{ invalidValues.join(', ') }}
                   </small>
-                  <small v-if="validationErrors.ccListLimit" role="alert" aria-live="polite">
+                  <small v-if="validationErrors.isExceedingLimit" role="alert" aria-live="polite">
                     Maximum IDs: 200. {{ listLength }} IDs found in list.
                   </small>
                 </v-col>
@@ -126,12 +126,12 @@ export default {
       }
       this.listLength = uids.length
       if (this.listLength > 200) {
-        this.validationErrors.ccListLimit = true
+        this.validationErrors.isExceedingLimit = true
       }
       this.$_.each(uids, uid => {
         if (isNaN(Number(uid))) {
           this.invalidValues.push(uid)
-          this.validationErrors.ccNumericList = true
+          this.validationErrors.isNotNumeric = true
         }
       })
       if (this.$_.isEmpty(this.validationErrors)) {

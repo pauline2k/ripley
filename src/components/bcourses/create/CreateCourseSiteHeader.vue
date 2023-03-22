@@ -5,12 +5,12 @@
       id="toggle-admin-mode-button"
       aria-controls="page-create-course-site-admin-section-loader-form"
       class="canvas-button canvas-button-small page-create-course-site-admin-mode-switch pb-2 ptl-3 pr-2 pt-2"
-      @click="setMode(adminMode === 'act_as' ? 'by_ccn' : 'act_as')"
+      @click="setMode(adminMode === 'actAs' ? 'bySectionId' : 'actAs')"
     >
-      Switch to {{ adminMode === 'act_as' ? 'CCN input' : 'acting as instructor' }}
+      Switch to {{ adminMode === 'actAs' ? 'Section ID input' : 'acting as instructor' }}
     </v-btn>
     <div id="page-create-course-site-admin-section-loader-form">
-      <div v-if="adminMode === 'act_as'">
+      <div v-if="adminMode === 'actAs'">
         <h3 class="sr-only">Load Sections By Instructor UID</h3>
         <form
           id="page-create-course-site-act-as-form"
@@ -44,9 +44,9 @@
           </v-row>
         </form>
       </div>
-      <div v-if="adminMode === 'by_ccn'">
-        <h3 id="load-sections-by-ccn" class="sr-only">Load Sections By Course Control Numbers (CCN)</h3>
-        <form id="load-sections-by-ccn-form" class="canvas-page-form" @submit.prevent="submit">
+      <div v-if="adminMode === 'bySectionId'">
+        <h3 id="load-sections-by-id" class="sr-only">Load Sections by ID</h3>
+        <form id="load-sections-by-id-form" class="canvas-page-form" @submit.prevent="submit">
           <div v-if="$_.size(adminSemesters)">
             <div class="buttonset">
               <span v-for="(semester, index) in adminSemesters" :key="index">
@@ -76,24 +76,24 @@
               </span>
             </div>
             <label
-              for="page-create-course-site-ccn-list"
+              for="page-create-course-site-section-id-list"
               class="sr-only"
             >
-              Provide CCN List Separated by Commas or Spaces
+              Provide Section ID List Separated by Commas or Spaces
             </label>
             <textarea
-              id="page-create-course-site-ccn-list"
-              v-model="ccns"
-              placeholder="Paste your list of CCNs here, separated by commas or spaces"
+              id="page-create-course-site-section-id-list"
+              v-model="sectionIds"
+              placeholder="Paste your list of Section IDs here, separated by commas or spaces"
             ></textarea>
             <v-btn
               id="sections-by-ids-button"
               class="canvas-button canvas-button-primary"
               aria-controls="page-create-course-site-steps-container"
-              :disabled="!$_.trim(ccns)"
+              :disabled="!$_.trim(sectionIds)"
               type="submit"
             >
-              Review matching CCNs
+              Review matching Section IDs
             </v-btn>
           </div>
         </form>
@@ -119,7 +119,7 @@ export default {
   name: 'CreateCourseSiteHeader',
   mixins: [Context, Utils],
   watch: {
-    ccns() {
+    sectionIds() {
       this.error = null
     },
     uid() {
@@ -148,7 +148,7 @@ export default {
       required: true,
       type: Function
     },
-    setAdminByCcns: {
+    setAdminBySectionIds: {
       required: true,
       type: Function
     },
@@ -166,31 +166,31 @@ export default {
     }
   },
   data: () => ({
-    ccns: '',
+    sectionIds: '',
     error: undefined,
     uid: undefined
   }),
   methods: {
     setMode(mode) {
       this.setAdminMode(mode)
-      if (mode === 'by_ccn') {
+      if (mode === 'bySectionId') {
         this.$announcer.polite('Input mode switched to section ID')
-        putFocusNextTick('load-sections-by-ccn')
+        putFocusNextTick('load-sections-by-id')
       } else {
-        this.$announcer.polite(`Input mode switched to ${mode === 'by_ccn' ? 'section ID' : 'UID'}`)
-        putFocusNextTick(mode === 'by_ccn' ? 'load-sections-by-ccn' : 'instructor-uid')
+        this.$announcer.polite(`Input mode switched to ${mode === 'bySectionId' ? 'section ID' : 'UID'}`)
+        putFocusNextTick(mode === 'bySectionId' ? 'load-sections-by-id' : 'instructor-uid')
       }
     },
     submit() {
-      if (this.adminMode === 'by_ccn') {
-        const trimmed = this.$_.trim(this.ccns)
+      if (this.adminMode === 'bySectionId') {
+        const trimmed = this.$_.trim(this.sectionIds)
         const split = this.$_.split(trimmed, /[,\r\n\t ]+/)
-        const notNumeric = this.$_.partition(split, ccn => /^\d+$/.test(this.$_.trim(ccn)))[1]
+        const notNumeric = this.$_.partition(split, sectionId => /^\d+$/.test(this.$_.trim(sectionId)))[1]
         if (notNumeric.length) {
-          this.error = 'CCNs must be numeric.'
-          putFocusNextTick('page-create-course-site-ccn-list')
+          this.error = 'Section IDs must be numeric.'
+          putFocusNextTick('page-create-course-site-section-id-list')
         } else {
-          this.setAdminByCcns(split)
+          this.setAdminBySectionIds(split)
           this.fetchFeed()
         }
       } else {

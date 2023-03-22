@@ -335,11 +335,11 @@ export default {
       this.courseSemesterClasses.forEach(classItem => {
         classItem.sections.forEach(section => {
           if (section.stagedState === 'add') {
-            sections.addSections.push(section.ccn)
+            sections.addSections.push(section.sectionId)
           } else if (section.stagedState === 'delete') {
-            sections.deleteSections.push(section.ccn)
+            sections.deleteSections.push(section.sectionId)
           } else if (section.stagedState === 'update') {
-            sections.updateSections.push(section.ccn)
+            sections.updateSections.push(section.sectionId)
           }
         })
       })
@@ -354,7 +354,7 @@ export default {
         this.usersClassCount = this.courseSemesterClasses.length
         this.existingCourseSections = []
         this.allSections = []
-        this.existingCcns = []
+        this.existingSectionIds = []
         this.courseSemesterClasses.forEach(classItem => {
           this.$set(classItem, 'collapsed', !classItem.containsCourseSections)
           classItem.sections.forEach(section => {
@@ -362,8 +362,8 @@ export default {
             this.allSections.push(section)
             section.stagedState = null
             this.canvasSite.officialSections.forEach(officialSection => {
-              if (officialSection.ccn === section.ccn && this.existingCcns.indexOf(section.ccn) === -1) {
-                this.existingCcns.push(section.ccn)
+              if (officialSection.sectionId === section.sectionId && this.existingSectionIds.indexOf(section.sectionId) === -1) {
+                this.existingSectionIds.push(section.sectionId)
                 this.existingCourseSections.push(section)
                 if (officialSection.name !== section.courseCode + ' ' + section.section_label) {
                   this.$set(section, 'nameDiscrepancy', true)
@@ -423,7 +423,7 @@ export default {
       )
     },
     sectionString(section) {
-      return section.courseCode + ' ' + section.section_label + ' (CCN: ' + section.ccn + ')'
+      return section.courseCode + ' ' + section.section_label + ' (Section ID: ' + section.sectionId + ')'
     },
     stageAdd(section) {
       if (!section.isCourseSection) {
@@ -440,7 +440,7 @@ export default {
         this.$set(section, 'stagedState', 'delete')
         this.$announcer.polite('Included in the list of sections to be deleted')
       } else {
-        this.displayError = 'Unable to delete CCN ' + this.sectionString(section) + ' which does not exist within the course site.'
+        this.displayError = 'Unable to delete Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
       }
       this.updateStagedCount()
     },
@@ -450,7 +450,7 @@ export default {
         this.$set(section, 'stagedState', 'update')
         this.$announcer.polite('Included in the list of sections to be updated')
       } else {
-        this.displayError = 'Unable to update CCN ' + this.sectionString(section) + ' which does not exist within the course site.'
+        this.displayError = 'Unable to update Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
       }
       this.updateStagedCount()
     },

@@ -12,13 +12,13 @@
         </div>
         <div>
           <CreateCourseSiteHeader
-            v-if="isAdmin && currentWorkflowStep !== 'monitoring_job'"
+            v-if="isAdmin && currentWorkflowStep !== 'monitoringJob'"
             :admin-mode="adminMode"
             :admin-semesters="adminSemesters"
             :current-admin-semester="currentAdminSemester"
             :fetch-feed="fetchFeed"
             :set-admin-acting-as="setAdminActingAs"
-            :set-admin-by-ccns="setAdminByCcns"
+            :set-admin-by-section-ids="setAdminBySectionIds"
             :set-admin-mode="setAdminMode"
             :show-maintenance-notice="showMaintenanceNotice"
             :switch-admin-semester="switchAdminSemester"
@@ -26,7 +26,7 @@
         </div>
       </div>
       <div v-if="isAdmin && !currentWorkflowStep">
-        Use inputs above to choose courses by CCN or as an instructor.
+        Use inputs above to choose courses by Section ID or as an instructor.
       </div>
       <div id="page-create-course-site-steps-container" class="p-0">
         <div
@@ -57,9 +57,9 @@
           />
         </div>
         <div
-          v-if="currentWorkflowStep === 'monitoring_job'"
+          v-if="currentWorkflowStep === 'monitoringJob'"
           id="page-create-course-site-monitor-step"
-          :aria-expanded="`${currentWorkflowStep === 'monitoring_job'}`"
+          :aria-expanded="`${currentWorkflowStep === 'monitoringJob'}`"
         >
           <MonitoringJob
             :fetch-feed="fetchFeed"
@@ -101,8 +101,8 @@ export default {
   },
   data: () => ({
     adminActingAs: undefined,
-    adminByCcns: undefined,
-    adminMode: 'act_as',
+    adminBySectionIds: undefined,
+    adminMode: 'actAs',
     adminSemesters: undefined,
     canvasSite: undefined,
     canvasSiteId: undefined,
@@ -166,10 +166,10 @@ export default {
         const canvasSiteId = this.canvasSite ? this.canvasSite.canvasSiteId : ''
         this.fillCourseSites(data.teachingSemesters, canvasSiteId)
         this.$announcer.polite('Course section loaded successfully')
-        if (this.adminMode === 'by_ccn' && this.adminByCcns) {
+        if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
           this.$_.each(this.coursesList, course => {
             this.$_.each(course.sections, section => {
-              section.selected = this.$_.includes(this.adminByCcns, section.ccn)
+              section.selected = this.$_.includes(this.adminBySectionIds, section.sectionId)
             })
           })
           this.updateSelected()
@@ -187,11 +187,11 @@ export default {
         return this.$errorHandler(data)
       }
 
-      const semester = (this.adminMode === 'by_ccn' ? this.currentAdminSemester : this.currentSemester)
+      const semester = (this.adminMode === 'bySectionId' ? this.currentAdminSemester : this.currentSemester)
 
       getSections(
         this.adminActingAs,
-        this.adminByCcns,
+        this.adminBySectionIds,
         this.adminMode,
         semester,
         this.isAdmin
@@ -203,16 +203,16 @@ export default {
           course.allSelected = false
           course.selectToggleText = 'All'
           let hasSites = false
-          let ccnToSites = {}
+          let sectionIdToSites = {}
           this.$_.each(course.class_sites, site => {
             if (site.emitter === 'bCourses') {
               if (site.id !== canvasSiteId) {
                 this.$_.each(site.sections, siteSection => {
                   hasSites = true
-                  if (!ccnToSites[siteSection.ccn]) {
-                    ccnToSites[siteSection.ccn] = []
+                  if (!sectionIdToSites[siteSection.sectionId]) {
+                    sectionIdToSites[siteSection.sectionId] = []
                   }
-                  ccnToSites[siteSection.ccn].push(site)
+                  sectionIdToSites[siteSection.sectionId].push(site)
                 })
               }
             }
@@ -220,9 +220,9 @@ export default {
           if (hasSites) {
             course.hasSites = hasSites
             this.$_.each(course.sections, section => {
-              let ccn = section.ccn
-              if (ccnToSites[ccn]) {
-                section.sites = ccnToSites[ccn]
+              let sectionId = section.sectionId
+              if (sectionIdToSites[sectionId]) {
+                section.sites = sectionIdToSites[sectionId]
               }
             })
           }
@@ -283,15 +283,15 @@ export default {
         // and flattened array of all sections for current sections staging table
         this.existingCourseSections = []
         this.allSections = []
-        const existingCcns = []
+        const existingSectionIds = []
         this.$_.each(this.courseSemester.classes, classItem => {
           this.$_.each(classItem.sections, section => {
             section.parentClass = classItem
             this.allSections.push(section)
             section.stagedState = null
             this.$_.each(this.canvasSite.officialSections, officialSection => {
-              if (officialSection.ccn === section.ccn && existingCcns.indexOf(section.ccn) === -1) {
-                existingCcns.push(section.ccn)
+              if (officialSection.sectionId === section.sectionId && existingSectionIds.indexOf(section.sectionId) === -1) {
+                existingSectionIds.push(section.sectionId)
                 this.existingCourseSections.push(section)
                 if (officialSection.name !== `${section.courseCode} ${section.section_label}`) {
                   section.nameDiscrepancy = true
@@ -319,10 +319,10 @@ export default {
     },
     setAdminActingAs(uid) {
       this.adminActingAs = uid
-      this.adminByCcns = null
+      this.adminBySectionIds = null
     },
-    setAdminByCcns(ccns) {
-      this.adminByCcns = ccns
+    setAdminBySectionIds(sectionIds) {
+      this.adminBySectionIds = sectionIds
       this.adminActingAs = null
     },
     setAdminMode(adminMode) {
@@ -339,15 +339,15 @@ export default {
     },
     startCourseSiteJob(siteName, siteAbbreviation) {
       this.percentComplete = 0
-      this.currentWorkflowStep = 'monitoring_job'
+      this.currentWorkflowStep = 'monitoringJob'
       this.$announcer.polite('Creating course site. Please wait.')
       this.showMaintenanceNotice = false
       this.updateSelected()
-      const ccns = this.$_.map(this.selectedSectionsList, 'ccn')
-      if (ccns.length > 0) {
+      const sectionIds = this.$_.map(this.selectedSectionsList, 'sectionId')
+      if (sectionIds.length > 0) {
         const onSuccess = data => {
           this.jobId = data.job_id
-          this.currentWorkflowStep = 'monitoring_job'
+          this.currentWorkflowStep = 'monitoringJob'
           this.$announcer.polite('Started course site creation.')
           this.completedFocus = true
           this.jobStatusLoader()
@@ -360,10 +360,10 @@ export default {
           return this.$errorHandler(error)
         }
         courseCreate(
-          this.isAdmin && this.adminMode === 'act_as' ? this.adminActingAs : null,
-          this.isAdmin && this.adminMode === 'by_ccn' ? this.adminByCcns : null,
-          this.isAdmin && this.adminMode === 'by_ccn' ? this.currentAdminSemester : null,
-          ccns,
+          this.isAdmin && this.adminMode === 'actAs' ? this.adminActingAs : null,
+          this.isAdmin && this.adminMode === 'bySectionId' ? this.adminBySectionIds : null,
+          this.isAdmin && this.adminMode === 'bySectionId' ? this.currentAdminSemester : null,
+          sectionIds,
           siteAbbreviation,
           siteName,
           this.currentSemester
@@ -374,7 +374,7 @@ export default {
       this.currentAdminSemester = semester.slug
       this.selectedSectionsList = []
       this.updateSelected()
-      this.$announcer.polite(`Switched to ${semester.name} for CCN input`)
+      this.$announcer.polite(`Switched to ${semester.name} for Section ID input`)
     },
     switchSemester(semester) {
       this.currentSemester = semester.slug
