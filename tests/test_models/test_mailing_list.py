@@ -33,7 +33,7 @@ class TestMailingList:
 
     def test_initialize(self, app):
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id']}, m)
+            register_canvas_uris(app, {'course': ['get_by_id_1234567']}, m)
             mailing_list = MailingList.create('1234567')
             feed = mailing_list.to_api_json()
 
@@ -51,7 +51,7 @@ class TestMailingList:
 
     def test_create(self, app):
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id']}, m)
+            register_canvas_uris(app, {'course': ['get_by_id_1234567']}, m)
 
             mailing_list = MailingList.create('1234567')
             feed = mailing_list.to_api_json()

@@ -37,59 +37,82 @@ class TestGetRoster:
 
     def test_anonymous(self, client):
         """Denies anonymous user."""
-        _api_get_roster(client, '1234567', expected_status_code=401)
+        _api_get_roster(client, '8876542', expected_status_code=401)
 
     def test_no_canvas_account(self, client, fake_auth):
         """Denies user with no Canvas account."""
-        canvas_site_id = '1234567'
+        canvas_site_id = '8876542'
         fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
         _api_get_roster(client, canvas_site_id, expected_status_code=401)
 
     def test_not_enrolled(self, client, app, fake_auth):
         """Denies user with no course enrollment."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id'], 'user': ['profile_20000']}, m)
-            canvas_site_id = '1234567'
+            register_canvas_uris(app, {'course': ['get_by_id_8876542'], 'user': ['profile_20000']}, m)
+            canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
             _api_get_roster(client, canvas_site_id, expected_status_code=401)
 
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id']}, m)
-            canvas_site_id = '1234567'
+            register_canvas_uris(app, {
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_students_8876542', 'get_enrollments_4567890'],
+                'user': ['profile_10000'],
+            }, m)
+            canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_get_roster(client, canvas_site_id)
 
-            assert response['canvasSite']['canvasSiteId'] == 1234567
-            assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
-            assert response['sections']
-            assert response['students']
+            assert response['canvasSite']['canvasSiteId'] == 8876542
+            assert response['canvasSite']['name'] == 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human'
+            assert len(response['sections']) == 1
+            section = response['sections'][0]
+            assert section['id'] == 'SEC:2023-B-32936'
+            assert section['name'] == 'Section A'
+            assert section['sisCourseId'] == 'CRS:ANTHRO-189-2023-B'
+            assert len(response['students']) == 1
+            student = response['students'][0]
+            assert student['email'] == 'xo.kane@berkeley.edu'
+            assert student['enrollStatus'] == 'active'
+            assert student['firstName'] == 'XO'
+            assert student['gradeOption'] == 'TODO'
+            assert student['id'] == 5678901
+            assert student['lastName'] == 'Kane'
+            assert student['loginId'] == '40000'
+            assert student['photoUrl'] == 'TODO'
+            assert student['sectionIds'] == 'TODO'
+            assert student['studentId'] == 'UID:40000'
+            assert student['units'] == 'TODO'
+            assert len(student['sections'])
+            assert student['sections'][0]['id'] == 'SEC:2023-B-32936'
+            assert student['sections'][0]['name'] == 'Section A'
+            assert student['sections'][0]['sisCourseId'] == 'CRS:ANTHRO-189-2023-B'
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id', 'get_user_1234567_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_students_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_30000'],
             }, m)
-            canvas_site_id = '1234567'
+            canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
             response = _api_get_roster(client, canvas_site_id)
 
-            assert response['canvasSite']['canvasSiteId'] == 1234567
-            assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
-            assert response['sections']
-            assert response['students']
+            assert response['canvasSite']['canvasSiteId'] == 8876542
+            assert response['canvasSite']['name'] == 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human'
+            assert len(response['sections']) == 1
+            assert len(response['students']) == 1
 
     def test_student(self, client, app, fake_auth):
         """Denies student."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id', 'get_user_1234567_5678901'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_students_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_40000'],
             }, m)
-            canvas_site_id = '1234567'
+            canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
             _api_get_roster(client, canvas_site_id, expected_status_code=401)
 

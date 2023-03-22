@@ -74,7 +74,7 @@ class TestUserProfile:
 
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id', 'get_user_1234567_4567890'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_4567890'],
                 'user': ['profile_30000'],
             }, m)
             # First, teacher logs in.
@@ -96,7 +96,7 @@ class TestUserProfile:
 
             # Student
             register_canvas_uris(app, {
-                'course': ['get_by_id', 'get_user_1234567_5678901'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_5678901'],
                 'user': ['profile_30000'],
             }, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
