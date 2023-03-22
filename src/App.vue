@@ -27,7 +27,7 @@ export default {
   components: {NotFound},
   mixins: [Context, IFrameMixin],
   methods: {
-    skipTo: anchor => '' // TODO: VueScrollTo.scrollTo(anchor, 400)
+    skipTo: anchor => console.log(`TODO: VueScrollTo.scrollTo(${anchor}, 400)`)
   }
 }
 </script>

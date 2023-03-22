@@ -5,21 +5,38 @@
         <div class="me-auto">
           <BuildSummary />
         </div>
-        <div v-if="currentUser.isAuthenticated" class="pr-5">
-          <v-text-field
-            id="update-canvas-course-id"
-            v-model="canvasSiteId"
-            :append-inner-icon="isUpdatingCanvasSiteId ? 'mdi-progress-check' : 'mdi-arrow-right-circle-outline'"
-            density="compact"
-            :disabled="isUpdatingCanvasSiteId"
-            hide-details
-            label="Canvas Course ID"
-            maxlength="10"
-            :error="!!$_.trim(canvasSiteId) && !isCanvasSiteIdValid"
-            style="width: 200px"
-            @click:append-inner="updateCanvasSiteId"
-            @keydown.enter="updateCanvasSiteId"
-          />
+        <div v-if="currentUser.isAuthenticated" class="align-center d-flex pr-5">
+          <div v-if="canvasSiteId" class="pr-2">
+            <a
+              :href="`${config.canvasApiUrl}/courses/${canvasSiteId}`"
+              target="_blank"
+              title="Open course site in new tab"
+            >
+              <v-img
+                alt="Logo of Canvas, by Instructure"
+                aspect-ratio="1"
+                src="@/assets/images/canvas-by-instructure.png"
+                width="30"
+              />
+            </a>
+          </div>
+          <div class="my-2">
+            <v-text-field
+              id="update-canvas-course-id"
+              v-model="canvasSiteId"
+              :append-inner-icon="isUpdatingCanvasSiteId ? 'mdi-progress-check' : 'mdi-arrow-right-circle-outline'"
+              density="compact"
+              :disabled="isUpdatingCanvasSiteId"
+              :error="!!$_.trim(canvasSiteId) && !isCanvasSiteIdValid"
+              hide-details
+              label="Canvas Course ID"
+              maxlength="10"
+              style="width: 200px"
+              variant="outlined"
+              @click:append-inner="updateCanvasSiteId"
+              @keydown.enter="updateCanvasSiteId"
+            />
+          </div>
         </div>
         <div class="float-right mr-3 text-body-2">
           <AppBarMenu v-if="currentUser.isAuthenticated" />

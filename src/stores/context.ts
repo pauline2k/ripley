@@ -47,6 +47,7 @@ export const useContextStore = defineStore('context', {
       }
     },
     loadingStart(label?: string) {
+      console.log(`TODO: Screen-reader announce "${label}"`)
       this.isLoading = true
     },
     resetApplicationState() {

@@ -1,35 +1,11 @@
 <template>
-  <!--
-  TODO: Sort out messaging with more elegant code.
-  <div v-if="!error">
-    <v-progress-circular
-      color="primary"
-      indeterminate
-    />
-    <div aria-live="polite" class="pt-5 text-center w-100" role="alert">
-      Downloading rosters. This may take a minute for larger classes.
-    </div>
+  <div style="background-color: lightgray" class="ma-2 pa-5">
+    Here is a sample
+    <a href="https://ucberkeley.test.instructure.com/courses/1461531/external_tools/36940" target="_blank">Roster photos</a>
+    view in Junction, the legacy platform.
   </div>
-  <div v-if="error" role="alert">
-    <v-icon icon="mdi-exclamation-triangle" class="icon-red" />
-    You must be a teacher in this bCourses course to view official student rosters.
-  </div>
-  <div v-if="!error && roster && !sections" role="alert">
-    <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
-    There are no currently maintained official sections in this course site.
-  </div>
-  <div v-if="!error && roster && sections && !students" role="alert">
-    <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
-    Students have not yet signed up for this class.
-  </div>
-  -->
   <Alert :closable="false" :error-message="error" />
   <div v-if="!isLoading && roster" class="page-roster">
-    <div style="background-color: lightgray" class="pa-5">
-      Here is a sample
-      <a href="https://ucberkeley.test.instructure.com/courses/1461531/external_tools/36940" target="_blank">Roster photos</a>
-      view in Junction, the legacy platform.
-    </div>
     <Alert :error-message="error" :success-message="success" />
     <v-container v-if="!error" fluid>
       <v-row align-v="start" class="page-roster print-hide roster-search pb-3" no-gutters>
@@ -49,6 +25,7 @@
               v-model="section"
               aria-label="Search specific section (defaults to all sections)"
               :items="sections"
+              variant="outlined"
             >
               <template #selection="{ item }">
                 {{ item.value }}
@@ -121,8 +98,8 @@ export default {
     error: undefined,
     roster: undefined,
     search: undefined,
-    sections: [{title: 'All sections', value: null}],
-    section: null,
+    section: undefined,
+    sections: undefined,
     students: undefined,
     success: undefined
   }),
@@ -139,9 +116,6 @@ export default {
       } else {
         this.students = this.roster.students
       }
-    },
-    section(selectedSection) {
-      console.log(selectedSection)
     }
   },
   created() {
@@ -150,15 +124,18 @@ export default {
         data => {
           this.roster = data
           this.students = this.roster.students
-          this.$_.each(data.sections, section => {
-            this.sections.push({
-              ...section,
-              ...{
-                title: section.name,
-                value: section.ccn
-              }
+          if (data.sections.length) {
+            this.sections = [{title: 'All sections', value: null}]
+            this.$_.each(data.sections, section => {
+              this.sections.push({
+                ...section,
+                ...{
+                  title: section.name,
+                  value: section.ccn
+                }
+              })
             })
-          })
+          }
           this.$_.each(this.students, s => s.idx = this.idx(`${s.firstName} ${s.lastName} ${s.id}`))
         },
         error => this.error = error
