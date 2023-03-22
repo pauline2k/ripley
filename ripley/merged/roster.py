@@ -32,12 +32,12 @@ def canvas_site_roster(canvas_site_id):
         },
         'sections': [
             {
-                'ccn': '31551',
+                'id': '31551',
                 'name': 'ASTRON 218 SEC 1',
                 'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
             },
             {
-                'ccn': '31552',
+                'id': '31552',
                 'name': 'ASTRON 218 SEC 2',
                 'sisCourseId': 'CRS:ASTRON-218-SEC-2-2023-B',
             },
@@ -52,10 +52,10 @@ def canvas_site_roster(canvas_site_id):
                 'lastName': 'Johnson',
                 'loginId': 'TODO',
                 'photoUrl': 'TODO',
-                'sectionCcns': 'TODO',
+                'sectionIds': 'TODO',
                 'sections': [
                     {
-                        'ccn': '31551',
+                        'id': '31551',
                         'name': 'ASTRON 218 SEC 1',
                         'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
                     },
@@ -72,10 +72,10 @@ def canvas_site_roster(canvas_site_id):
                 'lastName': 'Joplin',
                 'loginId': 'TODO',
                 'photoUrl': 'TODO',
-                'sectionCcns': 'TODO',
+                'sectionIds': 'TODO',
                 'sections': [
                     {
-                        'ccn': '31551',
+                        'id': '31551',
                         'name': 'ASTRON 218 SEC 1',
                         'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
                     },
@@ -92,10 +92,10 @@ def canvas_site_roster(canvas_site_id):
                 'lastName': 'Jiminez',
                 'loginId': 'TODO',
                 'photoUrl': 'TODO',
-                'sectionCcns': 'TODO',
+                'sectionIds': 'TODO',
                 'sections': [
                     {
-                        'ccn': '31551',
+                        'id': '31551',
                         'name': 'ASTRON 218 SEC 1',
                         'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
                     },
@@ -112,10 +112,10 @@ def canvas_site_roster(canvas_site_id):
                 'lastName': 'Jones',
                 'loginId': 'TODO',
                 'photoUrl': 'TODO',
-                'sectionCcns': 'TODO',
+                'sectionIds': 'TODO',
                 'sections': [
                     {
-                        'ccn': '31551',
+                        'id': '31551',
                         'name': 'ASTRON 218 SEC 1',
                         'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
                     },
@@ -132,10 +132,10 @@ def canvas_site_roster(canvas_site_id):
                 'lastName': 'Jackson',
                 'loginId': 'TODO',
                 'photoUrl': 'TODO',
-                'sectionCcns': 'TODO',
+                'sectionIds': 'TODO',
                 'sections': [
                     {
-                        'ccn': '31551',
+                        'id': '31551',
                         'name': 'ASTRON 218 SEC 1',
                         'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
                     },
@@ -152,10 +152,10 @@ def canvas_site_roster(canvas_site_id):
                 'lastName': 'Jacobs',
                 'loginId': 'TODO',
                 'photoUrl': 'TODO',
-                'sectionCcns': 'TODO',
+                'sectionIds': 'TODO',
                 'sections': [
                     {
-                        'ccn': '31552',
+                        'id': '31552',
                         'name': 'ASTRON 218 SEC 2',
                         'sisCourseId': 'CRS:ASTRON-218-SEC-2-2023-B',
                     },
