@@ -9,6 +9,7 @@ module.exports = {
     '@vue/eslint-config-typescript',
   ],
   rules: {
+    '@typescript-eslint/no-unused-vars': 2,
     'vue/multi-word-component-names': 'off',
     'vue/valid-v-slot': ['error', {
       'allowModifiers': true

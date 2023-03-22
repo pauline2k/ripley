@@ -193,7 +193,7 @@ export default {
       })
       startJob(job.key, {isDryRun: this.isDryRun}).then(() => {})
       const jobName = this.$_.find(this.jobSchedule.jobs, ['key', job.key]).name
-      // TODO: this.snackbarOpen(`${jobName} job started`)
+      console.log(`TODO: this.snackbarOpen(${jobName} job started)`)
     },
     scheduleEditCancel() {
       this.editJob = undefined
