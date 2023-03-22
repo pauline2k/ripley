@@ -325,7 +325,7 @@ export default {
       const pnpCutoff = this.enablePnpConversion === 'false' ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
       downloadGradeCsv(
         this.canvasSiteId,
-        this.selectedSection.course_cntl_num,
+        this.selectedSection.sectionId,
         this.selectedSection.term_cd,
         this.selectedSection.term_yr,
         this.selectedType,

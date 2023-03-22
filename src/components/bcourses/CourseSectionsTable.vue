@@ -2,7 +2,7 @@
   <div class="template-sections-table-container">
     <div v-if="mode === 'createCourseForm' && sections.length > 1" class="d-flex pl-2">
       <v-checkbox
-        :id="`select-all-toggle-${sections[0].ccn}`"
+        :id="`select-all-toggle-${sections[0].sectionId}`"
         v-model="allSelected"
         class="my-2"
         :indeterminate="indeterminate"
@@ -29,18 +29,18 @@
           </th>
         </tr>
       </thead>
-      <tbody v-for="section in displayableSections" :key="section.ccn">
-        <tr :id="`template-sections-table-row-${mode.toLowerCase()}-${section.ccn}`" :class="sectionDisplayClass[section.ccn]">
+      <tbody v-for="section in displayableSections" :key="section.sectionId">
+        <tr :id="`template-sections-table-row-${mode.toLowerCase()}-${section.sectionId}`" :class="sectionDisplayClass[section.sectionId]">
           <td v-if="mode === 'createCourseForm'" class="align-top template-sections-table-cell-checkbox pl-2">
             <v-checkbox
-              :id="`template-canvas-manage-sections-checkbox-${section.ccn}`"
+              :id="`template-canvas-manage-sections-checkbox-${section.sectionId}`"
               v-model="selected"
               :aria-checked="section.selected"
               :aria-label="`Checkbox for ${section.courseCode} ${section.section_label}`"
               class="ml-2"
-              name="section-ccn"
+              name="section-section-id"
               size="sm"
-              :value="section.ccn"
+              :value="section.sectionId"
             />
           </td>
           <td class="template-sections-table-cell-course-code">
@@ -50,7 +50,7 @@
             <label
               v-if="mode === 'createCourseForm'"
               class="template-sections-table-cell-section-label-label"
-              :for="`template-canvas-manage-sections-checkbox-${section.ccn}`"
+              :for="`template-canvas-manage-sections-checkbox-${section.sectionId}`"
             >
               {{ section.section_label }}
             </label>
@@ -60,7 +60,7 @@
               Use the "Update" button to rename your bCourses section name to match SIS.
             </span>
           </td>
-          <td class="template-sections-table-cell-section-ccn">{{ section.ccn }}</td>
+          <td class="template-sections-table-cell-section-id">{{ section.sectionId }}</td>
           <td class="template-sections-table-cell-section-timestamps d-none d-sm-none d-md-table-cell">
             <div v-for="(schedule, index) in section.schedules.recurring" :key="index">{{ schedule.schedule }}</div>
           </td>
@@ -139,7 +139,7 @@
         <tr
           v-if="mode === 'currentStaging' && section.nameDiscrepancy && section.stagedState !== 'update'"
           aria-hidden="true"
-          :class="sectionDisplayClass[section.ccn]"
+          :class="sectionDisplayClass[section.sectionId]"
         >
           <td colspan="7" class="template-sections-table-sites-cell">
             <div class="template-sections-table-sites-container">
@@ -151,7 +151,7 @@
         </tr>
         <tr
           v-if="(mode !== 'preview' && mode !== 'currentStaging' && section.sites)"
-          :class="sectionDisplayClass[section.ccn]"
+          :class="sectionDisplayClass[section.sectionId]"
         >
           <td colspan="7" class="template-sections-table-sites-cell">
             <div v-for="(site, index) in section.sites" :key="index" class="template-sections-table-sites-container">
@@ -241,7 +241,7 @@ export default {
         this.indeterminate = true
       }
       this.$_.each(this.sections, section => {
-        section.selected = this.$_.includes(this.selected, section.ccn)
+        section.selected = this.$_.includes(this.selected, section.sectionId)
       })
       this.updateSelected()
     }
@@ -254,7 +254,7 @@ export default {
     sectionDisplayClass: {}
   }),
   created() {
-    this.selected = this.$_.map(this.$_.filter(this.sections, 'selected'), 'ccn')
+    this.selected = this.$_.map(this.$_.filter(this.sections, 'selected'), 'sectionId')
     this.updateSectionDisplay()
     this.eventHub.on('sections-table-updated', this.updateSectionDisplay)
   },
@@ -280,12 +280,12 @@ export default {
       this.eventHub.emit('sections-table-updated')
     },
     toggleAll(checked) {
-      this.selected = checked ? this.$_.map(this.sections, 'ccn').slice() : []
+      this.selected = checked ? this.$_.map(this.sections, 'sectionId').slice() : []
     },
     updateSectionDisplay() {
       this.displayableSections = this.$_.filter(this.sections, s => this.rowDisplayLogic(this.mode, s))
       this.displayableSections.forEach(s => {
-        this.sectionDisplayClass[s.ccn] = this.rowClassLogic(this.mode, s)
+        this.sectionDisplayClass[s.sectionId] = this.rowClassLogic(this.mode, s)
       })
     },
     unstage(section) {
@@ -367,7 +367,7 @@ td {
   font-size: 13px;
   width: 115px;
 }
-.template-sections-table-cell-section-ccn {
+.template-sections-table-cell-section-id {
   width: 70px;
 }
 .template-sections-table-cell-section-timestamps {
