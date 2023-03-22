@@ -47,14 +47,14 @@ class TestFindMailingList:
     def test_not_enrolled(self, client, app, fake_auth):
         """Denies user with no course enrollment."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id'], 'user': ['profile_20000']}, m)
+            register_canvas_uris(app, {'course': ['get_by_id_1234567'], 'user': ['profile_20000']}, m)
             fake_auth.login(canvas_site_id=None, uid=not_enrolled_uid)
             _api_find_mailing_list(client, '1234567', expected_status_code=401)
 
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id']}, m)
+            register_canvas_uris(app, {'course': ['get_by_id_1234567']}, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             _api_create_mailing_list(client, canvas_site_id)
@@ -68,7 +68,7 @@ class TestFindMailingList:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id', 'get_user_1234567_4567890'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_4567890'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '1234567'
@@ -82,7 +82,7 @@ class TestFindMailingList:
         """Denies student."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id', 'get_user_1234567_5678901'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_5678901'],
                 'user': ['profile_40000'],
             }, m)
             canvas_site_id = '1234567'
@@ -111,7 +111,7 @@ class TestCreateMailingList:
     def test_not_enrolled(self, client, app, fake_auth):
         """Denies user with no course enrollment."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id'], 'user': ['profile_20000']}, m)
+            register_canvas_uris(app, {'course': ['get_by_id_1234567'], 'user': ['profile_20000']}, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
             _api_create_mailing_list(client, canvas_site_id, expected_status_code=401)
@@ -119,7 +119,7 @@ class TestCreateMailingList:
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id']}, m)
+            register_canvas_uris(app, {'course': ['get_by_id_1234567']}, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_create_mailing_list(client, canvas_site_id)
@@ -135,7 +135,7 @@ class TestCreateMailingList:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id', 'get_user_1234567_4567890'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_4567890'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '1234567'
@@ -148,7 +148,7 @@ class TestCreateMailingList:
         """Denies student."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id', 'get_user_1234567_5678901'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_5678901'],
                 'user': ['profile_40000'],
             }, m)
             canvas_site_id = '1234567'
@@ -171,7 +171,7 @@ class TestPopulateMailingList:
     def test_not_enrolled(self, client, app, fake_auth):
         """Denies user with no course enrollment."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id'], 'user': ['profile_20000']}, m)
+            register_canvas_uris(app, {'course': ['get_by_id_1234567'], 'user': ['profile_20000']}, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
             _api_populate_mailing_list(client, canvas_site_id, expected_status_code=401)
@@ -179,7 +179,7 @@ class TestPopulateMailingList:
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id', 'search_users_1234567', 'user_profile_10000']}, m)
+            register_canvas_uris(app, {'course': ['get_by_id_1234567', 'search_users_1234567', 'user_profile_10000']}, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             _api_create_mailing_list(client, canvas_site_id)
@@ -191,7 +191,7 @@ class TestPopulateMailingList:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id', 'get_user_1234567_4567890', 'search_users_1234567'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_4567890', 'search_users_1234567'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '1234567'
@@ -205,7 +205,7 @@ class TestPopulateMailingList:
         """Denies student."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id', 'get_user_1234567_5678901'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_5678901'],
                 'user': ['profile_40000'],
             }, m)
             canvas_site_id = '1234567'

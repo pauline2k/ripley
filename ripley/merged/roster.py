@@ -23,145 +23,47 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from ripley.externals import canvas
+
 
 def canvas_site_roster(canvas_site_id):
+    canvas_site = canvas.get_course(canvas_site_id)
+    canvas_sections = canvas.get_course_sections(canvas_site_id)
+    sections = [_section(cs) for cs in canvas_sections if cs.sis_section_id]
+    sections_by_id = {s['id']: s for s in sections}
+    canvas_students = canvas.get_course_students(canvas_site_id)
     return {
         'canvasSite': {
             'canvasSiteId': int(canvas_site_id),
-            'name': 'ASTRON 218: Stellar Dynamics and Galactic Structure',
+            'name': canvas_site.name,
         },
-        'sections': [
-            {
-                'id': '31551',
-                'name': 'ASTRON 218 SEC 1',
-                'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
-            },
-            {
-                'id': '31552',
-                'name': 'ASTRON 218 SEC 2',
-                'sisCourseId': 'CRS:ASTRON-218-SEC-2-2023-B',
-            },
-        ],
-        'students': [
-            {
-                'email': 'TODO',
-                'enrollStatus': 'TODO',
-                'firstName': 'John',
-                'gradeOption': 'TODO',
-                'id': '123',
-                'lastName': 'Johnson',
-                'loginId': 'TODO',
-                'photoUrl': 'TODO',
-                'sectionIds': 'TODO',
-                'sections': [
-                    {
-                        'id': '31551',
-                        'name': 'ASTRON 218 SEC 1',
-                        'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
-                    },
-                ],
-                'studentId': 'TODO',
-                'units': 'TODO',
-            },
-            {
-                'email': 'TODO',
-                'enrollStatus': 'TODO',
-                'firstName': 'Jane',
-                'gradeOption': 'TODO',
-                'id': '124',
-                'lastName': 'Joplin',
-                'loginId': 'TODO',
-                'photoUrl': 'TODO',
-                'sectionIds': 'TODO',
-                'sections': [
-                    {
-                        'id': '31551',
-                        'name': 'ASTRON 218 SEC 1',
-                        'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
-                    },
-                ],
-                'studentId': 'TODO',
-                'units': 'TODO',
-            },
-            {
-                'email': 'TODO',
-                'enrollStatus': 'TODO',
-                'firstName': 'Jim',
-                'gradeOption': 'TODO',
-                'id': '125',
-                'lastName': 'Jiminez',
-                'loginId': 'TODO',
-                'photoUrl': 'TODO',
-                'sectionIds': 'TODO',
-                'sections': [
-                    {
-                        'id': '31551',
-                        'name': 'ASTRON 218 SEC 1',
-                        'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
-                    },
-                ],
-                'studentId': 'TODO',
-                'units': 'TODO',
-            },
-            {
-                'email': 'TODO',
-                'enrollStatus': 'TODO',
-                'firstName': 'Jerry',
-                'gradeOption': 'TODO',
-                'id': '126',
-                'lastName': 'Jones',
-                'loginId': 'TODO',
-                'photoUrl': 'TODO',
-                'sectionIds': 'TODO',
-                'sections': [
-                    {
-                        'id': '31551',
-                        'name': 'ASTRON 218 SEC 1',
-                        'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
-                    },
-                ],
-                'studentId': 'TODO',
-                'units': 'TODO',
-            },
-            {
-                'email': 'TODO',
-                'enrollStatus': 'TODO',
-                'firstName': 'Jake',
-                'gradeOption': 'TODO',
-                'id': '127',
-                'lastName': 'Jackson',
-                'loginId': 'TODO',
-                'photoUrl': 'TODO',
-                'sectionIds': 'TODO',
-                'sections': [
-                    {
-                        'id': '31551',
-                        'name': 'ASTRON 218 SEC 1',
-                        'sisCourseId': 'CRS:ASTRON-218-SEC-1-2023-B',
-                    },
-                ],
-                'studentId': 'TODO',
-                'units': 'TODO',
-            },
-            {
-                'email': 'TODO',
-                'enrollStatus': 'TODO',
-                'firstName': 'Joseph',
-                'gradeOption': 'TODO',
-                'id': '128',
-                'lastName': 'Jacobs',
-                'loginId': 'TODO',
-                'photoUrl': 'TODO',
-                'sectionIds': 'TODO',
-                'sections': [
-                    {
-                        'id': '31552',
-                        'name': 'ASTRON 218 SEC 2',
-                        'sisCourseId': 'CRS:ASTRON-218-SEC-2-2023-B',
-                    },
-                ],
-                'studentId': 'TODO',
-                'units': 'TODO',
-            },
-        ],
+        'sections': sections,
+        'students': [_student(s, sections_by_id) for s in canvas_students],
+    }
+
+
+def _section(canvas_section):
+    return {
+        # TODO: extract CCN
+        'id': canvas_section.sis_section_id,
+        'name': canvas_section.name,
+        'sisCourseId': canvas_section.sis_course_id,
+    }
+
+
+def _student(canvas_student, sections_by_id):
+    names = canvas_student.sortable_name.split(', ')
+    return {
+        'email': canvas_student.email,
+        'enrollStatus': canvas_student.enrollments[0]['enrollment_state'],
+        'firstName': names[1],
+        'gradeOption': 'TODO',
+        'id': canvas_student.id,
+        'lastName': names[0],
+        'loginId': canvas_student.login_id,
+        'photoUrl': 'TODO',
+        'sectionIds': 'TODO',
+        'sections': [sections_by_id[e['sis_section_id']] for e in canvas_student.enrollments if e['sis_section_id']],
+        'studentId': canvas_student.sis_user_id,
+        'units': 'TODO',
     }

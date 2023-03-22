@@ -72,6 +72,22 @@ def get_course(course_id, api_call=True):
         return course
 
 
+def get_course_students(course_id):
+    try:
+        return get_course(course_id, api_call=False).get_users(enrollment_type=['student'], include=['enrollments'])
+    except Exception as e:
+        app.logger.error(f'Failed to retrieve Canvas course students (course_id={course_id})')
+        app.logger.exception(e)
+
+
+def get_course_sections(course_id):
+    try:
+        return get_course(course_id, api_call=False).get_sections()
+    except Exception as e:
+        app.logger.error(f'Failed to retrieve Canvas course sections (course_id={course_id})')
+        app.logger.exception(e)
+
+
 def get_course_user(course_id, user_id):
     try:
         return get_course(course_id, api_call=False).get_user(user_id, include='enrollments')

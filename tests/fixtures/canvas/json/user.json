@@ -1,4 +1,24 @@
 {
+    "profile_10000": {
+        "method": "GET",
+        "endpoint": "users/sis_login_id:10000/profile",
+        "data": {
+            "id": 2345678,
+            "name": "Ellen Ripley",
+            "short_name": "Ellen Ripley",
+            "sortable_name": "Ripley, Ellen",
+            "sis_user_id": "UID:10000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": null,
+            "bio": null,
+            "primar_email": "ellen.ripley@berkeley.edu",
+            "login_id": "10000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
+    },
     "profile_20000": {
         "method": "GET",
         "endpoint": "users/sis_login_id:20000/profile",

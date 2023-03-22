@@ -1,5 +1,5 @@
 {
-    "get_by_id": {
+    "get_by_id_1234567": {
         "method": "GET",
         "endpoint": "courses/1234567",
         "data": {
@@ -7,6 +7,28 @@
             "course_code": "ASTRON 218",
             "name": "ASTRON 218: Stellar Dynamics and Galactic Structure",
             "sis_course_id": "CRS:ASTRON-218-2023-B",
+            "account_id": 1,
+            "root_account_id": 1,
+            "enrollment_term_id": 1,
+            "grading_standard_id": 1,
+            "term": {
+                "id": 5538,
+                "name": "Spring 2023",
+                "sis_term_id": "TERM:2023-B"
+            },
+            "time_zone": "America/Los_Angeles",
+            "workflow_state": "available"
+        },
+        "status_code": 200
+    },
+    "get_by_id_8876542": {
+        "method": "GET",
+        "endpoint": "courses/8876542",
+        "data": {
+            "id": 8876542,
+            "course_code": "ANTHRO 189-LEC-001",
+            "name": "Our Dogs, Ourselves: Encounters between the Human and the Non-Human",
+            "sis_course_id": "CRS:ANTHRO-189-2023-B",
             "account_id": 1,
             "root_account_id": 1,
             "enrollment_term_id": 1,
@@ -193,6 +215,90 @@
             "not_selectable": false
           }
         ],
+        "status_code": 200
+    },
+    "get_sections_8876542": {
+        "method": "GET",
+        "endpoint": "courses/8876542/sections",
+        "data": [
+          {
+            "id": 1,
+            "name": "Section A",
+            "sis_section_id": "SEC:2023-B-32936",
+            "integration_id": null,
+            "sis_import_id": 47,
+            "course_id": 8876542,
+            "sis_course_id": "CRS:ANTHRO-189-2023-B",
+            "start_at": "2012-06-01T00:00:00-06:00",
+            "end_at": null,
+            "restrict_enrollments_to_section_dates": null,
+            "nonxlist_course_id": null,
+            "total_students": 1
+          }
+        ],
+        "status_code": 200
+    },
+    "get_students_8876542": {
+        "method": "GET",
+        "endpoint": "courses/8876542/search_users?enrollment_type%5B%5D=student&include%5B%5D=enrollments&per_page=100",
+        "data": [
+            {
+                "id": 5678901,
+                "name": "XO Kane",
+                "short_name": "XO Kane",
+                "sortable_name": "Kane, XO",
+                "integration_id": null,
+                "login_id": "40000",
+                "sis_user_id": "UID:40000",
+                "enrollments": [
+                    {
+                        "id": 100,
+                        "user_id": 5678901,
+                        "course_id": 8876542,
+                        "course_section_id": 1,
+                        "type": "StudentEnrollment",
+                        "enrollment_state": "active",
+                        "role": "StudentEnrollment",
+                        "last_activity_at": "2023-03-02T06:04:43Z",
+                        "sis_user_id": "UID:40000",
+                        "sis_course_id": "CRS:ANTHRO-189-2023-B",
+                        "sis_section_id": "SEC:2023-B-32936",
+                        "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/5678901"
+                    }
+                ],
+                "email": "xo.kane@berkeley.edu"
+            }
+        ],
+        "status_code": 200
+    },
+    "get_enrollments_4567890": {
+        "method": "GET",
+        "endpoint": "courses/8876542/users/4567890?include=enrollments",
+        "data": {
+            "id": 4567890,
+            "name": "Ash 🤖",
+            "short_name": "Ash 🤖",
+            "sortable_name": "🤖, Ash",
+            "integration_id": null,
+            "login_id": "30000",
+            "sis_user_id": "UID:300000",
+            "enrollments": [
+                {
+                    "id": 101,
+                    "user_id": 4567890,
+                    "course_id": 8876542,
+                    "course_section_id": 1,
+                    "type": "TeacherEnrollment",
+                    "enrollment_state": "active",
+                    "role": "TeacherEnrollment",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "UID:300000",
+                    "sis_course_id": "CRS:ANTHRO-189-2023-B",
+                    "sis_section_id": "SEC:2023-B-32936",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/4567890"
+                }
+            ]
+        },
         "status_code": 200
     },
     "get_tabs_1234567": {
