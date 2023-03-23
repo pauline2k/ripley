@@ -1,15 +1,14 @@
 <template>
-  <div>
-    <img
-      :id="`student-photo-${student.id}`"
-      :alt="`Photo of ${student.firstName} ${student.lastName}`"
-      :aria-label="`Photo of ${student.firstName} ${student.lastName}`"
-      class="photo"
-      :src="photoUrl"
-      :style="{backgroundImage: `url(${photoUnavailable})`}"
-      @error="imageError"
-    />
-  </div>
+  <v-img
+    :id="`student-photo-${student.id}`"
+    :alt="`Photo of ${student.firstName} ${student.lastName}`"
+    :aria-label="`Photo of ${student.firstName} ${student.lastName}`"
+    class="photo"
+    cover
+    width="72"
+    :src="photoUrl"
+    @error="imageError"
+  />
 </template>
 
 <script setup>
@@ -49,10 +48,7 @@ export default {
 
 <style scoped>
 .photo {
-  background-size: cover;
-  height: 96px;
   margin: 0 auto;
-  width: auto;
 }
 @media print {
   .photo {
