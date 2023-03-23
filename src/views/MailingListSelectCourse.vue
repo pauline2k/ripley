@@ -1,16 +1,6 @@
 <template>
   <div class="canvas-application pa-5">
     <h1 id="page-header" tabindex="-1">Manage course site mailing list</h1>
-    <v-alert
-      v-if="error"
-      id="manage-mailing-list-error"
-      class="mb-2"
-      density="compact"
-      role="alert"
-      type="warning"
-    >
-      {{ error }}
-    </v-alert>
     <Alert :closable="true" :error-message="error" />
     <div class="align-center d-flex flex-wrap pa-3">
       <div class="pr-3">
