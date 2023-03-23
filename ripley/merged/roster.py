@@ -27,16 +27,11 @@ from ripley.externals import canvas
 
 
 def canvas_site_roster(canvas_site_id):
-    canvas_site = canvas.get_course(canvas_site_id)
     canvas_sections = canvas.get_course_sections(canvas_site_id)
     sections = [_section(cs) for cs in canvas_sections if cs.sis_section_id]
     sections_by_id = {s['id']: s for s in sections}
-    canvas_students = canvas.get_course_students(canvas_site_id)
+    canvas_students = canvas.get_course_students(canvas_site_id, per_page=100)
     return {
-        'canvasSite': {
-            'canvasSiteId': int(canvas_site_id),
-            'name': canvas_site.name,
-        },
         'sections': sections,
         'students': [_student(s, sections_by_id) for s in canvas_students],
     }
@@ -44,7 +39,6 @@ def canvas_site_roster(canvas_site_id):
 
 def _section(canvas_section):
     return {
-        # TODO: extract CCN
         'id': canvas_section.sis_section_id,
         'name': canvas_section.name,
         'sisCourseId': canvas_section.sis_course_id,
@@ -52,19 +46,20 @@ def _section(canvas_section):
 
 
 def _student(canvas_student, sections_by_id):
+    def _get(attr):
+        value = None
+        if hasattr(canvas_student, attr):
+            value = getattr(canvas_student, attr)
+        return value
     names = canvas_student.sortable_name.split(', ')
     enrollments = canvas_student.enrollments if hasattr(canvas_student, 'enrollments') else []
     return {
-        'email': canvas_student.email if hasattr(canvas_student, 'email') else None,
+        'email': _get('email'),
         'enrollStatus': enrollments[0]['enrollment_state'] if enrollments else None,
         'firstName': names[1],
-        'gradeOption': 'TODO',
         'id': canvas_student.id,
         'lastName': names[0],
-        'loginId': canvas_student.login_id if hasattr(canvas_student, 'login_id') else None,
-        'photoUrl': 'TODO',
-        'sectionIds': 'TODO',
+        'loginId': _get('login_id'),
         'sections': [sections_by_id[e['sis_section_id']] for e in enrollments if e['sis_section_id']],
         'studentId': canvas_student.sis_user_id,
-        'units': 'TODO',
     }
