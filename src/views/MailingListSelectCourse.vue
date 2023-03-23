@@ -73,11 +73,11 @@ export default {
             this.error = undefined
             if (data) {
               this.setMailingList(data)
-              this.$router.push({path: '/mailing_list/update'})
+              this.$router.push('/mailing_list/update')
             } else {
               getCanvasSite(this.canvasSiteId).then(data => {
                 this.setCanvasSite(data)
-                this.$router.push({path: '/mailing_list/update'})
+                this.$router.push('/mailing_list/create')
               })
             }
           },
