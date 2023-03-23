@@ -1,85 +1,109 @@
 <template>
-  <div class="canvas-application page-site-mailing-list">
-    <h1 id="page-header" tabindex="-1">Manage course site mailing list</h1>
+  <div v-if="!isLoading" class="canvas-application page-site-mailing-list">
+    <h1 id="page-header" class="mt-0" tabindex="-1">Create Mailing List</h1>
     <Alert
       :closable="true"
       :error-message="error"
       :success-message="success"
     />
     <div class="mt-4">
-      <v-card id="mailing-list-details">
+      <v-card id="mailing-list-details" elevation="3">
+        <v-card-title>
+          <div class="pl-1 pt-2">
+            <h2>Canvas Course Site</h2>
+          </div>
+        </v-card-title>
         <v-card-text>
-          <h2 id="mailing-list-details-header" tabindex="-1">Mailing List</h2>
           <v-container>
-            <v-row>
-              <v-col>
-                Name:
+            <v-row no-gutters>
+              <v-col cols="2">
+                <div class="float-right font-weight-medium pr-3">
+                  Name:
+                </div>
               </v-col>
               <v-col>
-                <div>
-                  <span class="ellipsis">{{ canvasSite.name }}</span>
+                <OutboundLink
+                  id="mailing-list-course-site-name"
+                  class="pr-2"
+                  :href="canvasSite.url"
+                >
+                  {{ canvasSite.name }}
+                </OutboundLink>
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col cols="2">
+                <div class="float-right font-weight-medium pr-3">
+                  ID:
                 </div>
+              </v-col>
+              <v-col>
+                {{ canvasSite.canvasSiteId }}
+              </v-col>
+            </v-row>
+            <v-row no-gutters>
+              <v-col cols="2">
+                <div class="float-right font-weight-medium pr-3">
+                  Description:
+                </div>
+              </v-col>
+              <v-col>
+                {{ canvasSite.codeAndTerm }}
               </v-col>
             </v-row>
           </v-container>
-          <div class="d-flex flex-wrap justify-space-between mb-2">
-            <div id="mailing-list-canvas-code-and-term">{{ canvasSite.codeAndTerm }}</div>
-            <div id="mailing-list-canvas-course-id">
-              <span class="font-weight-medium">Site ID:</span>
-              {{ canvasSite.canvasSiteId }}
-            </div>
-          </div>
         </v-card-text>
-        <v-card-actions>
-          <OutboundLink
-            id="view-course-site-link"
-            class="mb-3 px-3"
-            :href="canvasSite.url"
-          >
-            View course site
-          </OutboundLink>
-        </v-card-actions>
       </v-card>
-      <div class="py-8">
+      <div class="mx-5 mt-8">
         <h2>Create Mailing List</h2>
-        <div class="align-center d-flex flex-wrap pt-2">
-          <div class="pr-3">
-            <label for="mailing-list-name-input">Name:</label>
-          </div>
-          <div class="w-75">
-            <v-text-field
-              id="mailing-list-name-input"
-              v-model="mailingListName"
-              aria-required="true"
-              hide-details
-              maxlength="255"
-              variant="outlined"
-              required
-              @keydown.enter="create"
-            />
-          </div>
-        </div>
-      </div>
-      <div class="d-flex justify-end mt-4">
-        <v-btn
-          id="btn-cancel"
-          class="mr-1"
-          variant="text"
-          @click="cancel"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          id="btn-create-mailing-list"
-          color="primary"
-          :disabled="isCreating"
-          @click="create"
-        >
-          <span v-if="!isCreating">Create mailing list</span>
-          <span v-if="isCreating">
-            <SpinnerWithinButton /> Creating...
-          </span>
-        </v-btn>
+        <v-container fluid>
+          <v-row no-gutters align="center">
+            <v-col cols="1">
+              <div class="float-right pr-3">
+                <label for="mailing-list-name-input">Name:</label>
+              </div>
+            </v-col>
+            <v-col cols="7">
+              <v-text-field
+                id="mailing-list-name-input"
+                v-model="mailingListName"
+                aria-required="true"
+                hide-details
+                maxlength="255"
+                variant="outlined"
+                required
+                @keydown.enter="create"
+              />
+            </v-col>
+            <v-col>
+              <div class="d-flex">
+                <div>
+                  <v-btn
+                    id="btn-cancel"
+                    class="mr-1"
+                    variant="text"
+                    @click="cancel"
+                  >
+                    Cancel
+                  </v-btn>
+                </div>
+                <div>
+                  <v-btn
+                    id="btn-create-mailing-list"
+                    color="primary"
+                    :disabled="isCreating"
+                    @click="create"
+                  >
+                    <span v-if="!isCreating">Create mailing list</span>
+                    <span v-if="isCreating">
+                      <SpinnerWithinButton /> Creating...
+                    </span>
+                  </v-btn>
+                </div>
+              </div>
+            </v-col>
+          </v-row>
+        </v-container>
       </div>
     </div>
   </div>
@@ -115,6 +139,7 @@ export default {
   methods: {
     cancel() {
       this.$announcer.polite('Canceled.')
+      this.$router.push({path: '/mailing_list/select_course'})
     },
     create() {
       this.error = this.success = null
@@ -134,3 +159,31 @@ export default {
   }
 }
 </script>
+
+<style scoped lang="scss">
+.page-site-mailing-list {
+  padding: 20px;
+
+  .page-site-mailing-list-button-primary {
+    margin: 0 4px;
+  }
+  .page-site-mailing-list-header3 {
+    font-size: 15px;
+    line-height: 22px;
+  }
+  .page-site-mailing-list-form {
+    margin: 20px 0;
+  }
+  .page-site-mailing-list-form-label-long {
+    display: inline;
+    font-weight: 300;
+    text-align: left;
+  }
+  .page-site-mailing-list-text {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.6;
+    margin: 15px;
+  }
+}
+</style>

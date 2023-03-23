@@ -18,7 +18,7 @@
     <div class="mt-4">
       <v-card id="mailing-list-details">
         <v-card-text>
-          <h2 id="mailing-list-details-header" tabindex="-1">Canvas Course Site</h2>
+          <h2>Canvas Course Site</h2>
           <v-container>
             <v-row no-gutters>
               <v-col cols="2">
@@ -58,7 +58,7 @@
             </v-row>
           </v-container>
 
-          <h2 id="mailing-list-details-header" tabindex="-1">Mailing List</h2>
+          <h2>Mailing List</h2>
           <v-container>
             <v-row no-gutters>
               <v-col cols="2">
