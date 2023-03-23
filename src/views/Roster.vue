@@ -8,47 +8,50 @@
   <div v-if="!isLoading && roster" class="page-roster">
     <Alert :error-message="error" :success-message="success" />
     <v-container v-if="!error" fluid>
-      <v-row align-v="start" class="page-roster print-hide roster-search pb-3" no-gutters>
-        <v-col class="pb-2 pr-2" sm="3">
+      <v-row align-v="center" class="page-roster pb-2 roster-search" no-gutters>
+        <v-col class="pr-2" sm="3">
           <v-text-field
             id="roster-search"
             v-model="search"
             aria-label="Search people by name or SID"
+            hide-details
             placeholder="Search People"
             variant="outlined"
           />
         </v-col>
-        <v-col class="pb-2" sm="3">
+        <v-col sm="3">
           <div v-if="sections">
             <v-select
               id="section-select"
               v-model="section"
               aria-label="Search specific section (defaults to all sections)"
+              hide-details
               :items="sections"
               variant="outlined"
             />
           </div>
         </v-col>
-        <v-col cols="auto" sm="6">
+        <v-col class="pt-3" cols="auto" sm="6">
           <div class="d-flex flex-wrap float-right">
             <div class="pr-2">
               <v-btn
                 id="download-csv"
-                class="text-light"
                 :disabled="!students.length"
                 variant="outlined"
                 @click="downloadCsv"
               >
-                <v-icon class="text-secondary" icon="download" /> Export<span class="sr-only"> CSV file</span>
+                <v-icon class="pr-2" icon="mdi-download" />
+                Export<span class="sr-only"> CSV file</span>
               </v-btn>
             </div>
             <div>
               <v-btn
                 id="print-roster"
-                variant="outlined"
+                color="primary"
                 @click="printRoster"
               >
-                <v-icon icon="print" variant="primary" /> Print<span class="sr-only"> roster of students</span>
+                <v-icon class="pr-2 text-white" icon="mdi-printer" />
+                Print<span class="sr-only"> roster of students</span>
               </v-btn>
             </div>
           </div>
@@ -56,7 +59,11 @@
       </v-row>
       <v-row no-gutters>
         <v-col sm="12">
-          <RosterPhotos v-if="students.length" :course-id="currentUser.canvasSiteId" :students="students" />
+          <RosterPhotos
+            v-if="students.length"
+            :course-id="currentUser.canvasSiteId"
+            :students="students"
+          />
           <div v-if="!roster.students.length">
             <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
             Students have not yet signed up for this class.
@@ -75,12 +82,12 @@
 import Alert from '@/components/utils/Alert'
 import Context from '@/mixins/Context'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
-import Utils from '@/mixins/Utils'
 import {getRoster, getRosterCsv} from '@/api/canvas-course'
+import {printPage} from '@/utils'
 
 export default {
   name: 'Roster',
-  mixins: [Context, Utils],
+  mixins: [Context],
   components: {Alert, RosterPhotos},
   data: () => ({
     error: undefined,
@@ -151,34 +158,15 @@ export default {
       return value && this.$_.trim(value).replace(/[^\w\s]/gi, '').toLowerCase()
     },
     printRoster() {
-      this.printPage(`${this.idx(this.roster.canvasSite.name).replace(/\s/g, '-')}_roster`)
+      printPage(`${this.idx(this.roster.canvasSite.name).replace(/\s/g, '-')}_roster`)
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
-button {
-  height: 38px;
-  width: 76px;
-}
 .page-roster {
-  background: $color-white;
-  overflow: hidden;
-  padding: 20px;
-
-  .roster-search {
-    background: transparent;
-    border: 0;
-    border-bottom: 1px solid $color-very-light-grey;
-    margin: 0 0 15px;
-    overflow: hidden;
-    padding: 7px 0 5px;
-  }
-
   @media print {
-    overflow: visible;
-    padding: 0;
     .roster-search {
       display: none;
     }

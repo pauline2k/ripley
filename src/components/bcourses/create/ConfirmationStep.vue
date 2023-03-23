@@ -88,12 +88,11 @@
 <script>
 import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
-import Utils from '@/mixins/Utils'
 import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'ConfirmationStep',
-  mixins: [Context, IFrameMixin, Utils],
+  mixins: [Context, IFrameMixin],
   props: {
     currentSemesterName: {
       required: true,

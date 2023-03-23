@@ -1,10 +1,14 @@
 <template>
-  <ul class="align-content-start page-roster-photos-list ml-3 pt-3">
-    <li v-for="student in students" :key="student.id" class="list-item pb-3 text-center">
+  <ul class="align-content-start page-roster-photos-list pl-3 pt-3">
+    <li
+      v-for="student in students"
+      :key="student.id"
+      class="list-item pb-3 pr-12 text-center"
+    >
       <div>
         <a
           :id="`student-profile-url-${student.id}`"
-          :href="`/${context}/${courseId}/profile/${student.loginId}`"
+          :href="student.profileUrl || `/${context}/${courseId}/profile/${student.loginId}`"
           target="_top"
         >
           <RosterPhoto :student="student" />
@@ -82,8 +86,6 @@ export default {
     display: block;
     float: left;
     height: auto;
-    padding: 5px;
-    width: 173px;
   }
 }
 
@@ -95,7 +97,7 @@ export default {
   .page-roster-student-name {
     font-size: 18px;
     overflow: visible;
-    text-overflow: string;
+    text-overflow: ellipsis;
     white-space: normal;
   }
 

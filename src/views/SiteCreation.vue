@@ -93,12 +93,11 @@
 import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
 import OutboundLink from '@/components/utils/OutboundLink'
-import Util from '@/mixins/Utils'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
 
 export default {
   name: 'SiteCreation',
-  mixins: [Context, IFrameMixin, Util],
+  mixins: [Context, IFrameMixin],
   components: {OutboundLink},
   data: () => ({
     canCreateCourseSite: undefined,

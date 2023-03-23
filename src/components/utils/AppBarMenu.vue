@@ -27,12 +27,11 @@
 
 <script>
 import Context from '@/mixins/Context.vue'
-import Utils from '@/mixins/Utils.vue'
 import {logOut} from '@/api/auth'
 
 export default {
   name: 'AppBarMenu',
-  mixins: [Context, Utils],
+  mixins: [Context],
   data: () => ({
     options: []
   }),
@@ -42,7 +41,7 @@ export default {
         id: 'my-profile',
         label: 'My Profile',
         onClick: () => {
-          this.goToPath(`/profile/${this.currentUser.uid}`)
+          this.$router.push({path: `/profile/${this.currentUser.uid}`})
         }
       },
       {

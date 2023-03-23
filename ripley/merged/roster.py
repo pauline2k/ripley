@@ -53,17 +53,18 @@ def _section(canvas_section):
 
 def _student(canvas_student, sections_by_id):
     names = canvas_student.sortable_name.split(', ')
+    enrollments = canvas_student.enrollments if hasattr(canvas_student, 'enrollments') else []
     return {
-        'email': canvas_student.email,
-        'enrollStatus': canvas_student.enrollments[0]['enrollment_state'],
+        'email': canvas_student.email if hasattr(canvas_student, 'email') else None,
+        'enrollStatus': enrollments[0]['enrollment_state'] if enrollments else None,
         'firstName': names[1],
         'gradeOption': 'TODO',
         'id': canvas_student.id,
         'lastName': names[0],
-        'loginId': canvas_student.login_id,
+        'loginId': canvas_student.login_id if hasattr(canvas_student, 'login_id') else None,
         'photoUrl': 'TODO',
         'sectionIds': 'TODO',
-        'sections': [sections_by_id[e['sis_section_id']] for e in canvas_student.enrollments if e['sis_section_id']],
+        'sections': [sections_by_id[e['sis_section_id']] for e in enrollments if e['sis_section_id']],
         'studentId': canvas_student.sis_user_id,
         'units': 'TODO',
     }

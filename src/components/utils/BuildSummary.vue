@@ -24,11 +24,10 @@
 
 <script>
 import Context from '@/mixins/Context'
-import Utils from '@/mixins/Utils'
 
 export default {
   name: 'BuildSummary',
-  mixins: [Context, Utils],
+  mixins: [Context],
   data: () => ({
     summary: undefined
   })

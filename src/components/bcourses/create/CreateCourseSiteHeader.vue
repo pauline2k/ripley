@@ -112,12 +112,11 @@
 
 <script>
 import Context from '@/mixins/Context'
-import Utils from '@/mixins/Utils'
 import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CreateCourseSiteHeader',
-  mixins: [Context, Utils],
+  mixins: [Context],
   watch: {
     sectionIds() {
       this.error = null
