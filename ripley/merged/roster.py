@@ -24,6 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from ripley.externals import canvas
+from ripley.lib.canvas_utils import section_id_from_canvas_sis_section_id
 
 
 def canvas_site_roster(canvas_site_id):
@@ -39,9 +40,9 @@ def canvas_site_roster(canvas_site_id):
 
 def _section(canvas_section):
     return {
-        'id': canvas_section.sis_section_id,
+        'id': section_id_from_canvas_sis_section_id(canvas_section.sis_section_id),
         'name': canvas_section.name,
-        'sisCourseId': canvas_section.sis_course_id,
+        'sisId': canvas_section.sis_section_id,
     }
 
 
@@ -53,6 +54,7 @@ def _student(canvas_student, sections_by_id):
         return value
     names = canvas_student.sortable_name.split(', ')
     enrollments = canvas_student.enrollments if hasattr(canvas_student, 'enrollments') else []
+    section_ids = [section_id_from_canvas_sis_section_id(e['sis_section_id']) for e in enrollments if e['sis_section_id']]
     return {
         'email': _get('email'),
         'enrollStatus': enrollments[0]['enrollment_state'] if enrollments else None,
@@ -60,6 +62,7 @@ def _student(canvas_student, sections_by_id):
         'id': canvas_student.id,
         'lastName': names[0],
         'loginId': _get('login_id'),
-        'sections': [sections_by_id[e['sis_section_id']] for e in enrollments if e['sis_section_id']],
+        'photoUrl': 'TODO',
+        'sections': [sections_by_id[section_id] for section_id in list(set(section_ids))],
         'studentId': canvas_student.sis_user_id,
     }
