@@ -27,6 +27,7 @@ import json
 import os
 
 from flask_login import logout_user
+from moto import mock_sts
 import pytest
 from ripley import std_commit
 import ripley.factory
@@ -148,6 +149,14 @@ def fake_loch(app):
     data_loch_db = create_engine(app.config['DATA_LOCH_RDS_URI'])
     with data_loch_db.connect():
         data_loch_db.execute(text(ddltext))
+
+
+@pytest.fixture(scope='session', autouse=True)
+def fake_sts(app):
+    """Fake the AWS security token service that BOA relies on to deliver S3 content."""
+    mock_sts().start()
+    yield
+    mock_sts().stop()
 
 
 class TempJob(BaseJob):
