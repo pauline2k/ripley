@@ -33,3 +33,8 @@ class TestCanvasUtils:
         assert canvas_utils.uid_from_canvas_login_id('inactive-666') == {'uid': '666', 'inactive': True}
         assert canvas_utils.uid_from_canvas_login_id('xenomorph') == {'uid': None, 'inactive': None}
         assert canvas_utils.uid_from_canvas_login_id('inactive-xenomorph') == {'uid': None, 'inactive': None}
+
+    def test_section_id_from_canvas_sis_section_id(self):
+        assert canvas_utils.section_id_from_canvas_sis_section_id(None) is None
+        assert canvas_utils.section_id_from_canvas_sis_section_id('666') is None
+        assert canvas_utils.section_id_from_canvas_sis_section_id('SEC:1234-A-12345') == '12345'

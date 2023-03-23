@@ -64,11 +64,11 @@ class TestGetRoster:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_get_roster(client, canvas_site_id)
 
-            assert len(response['sections']) == 1
+            assert len(response['sections']) == 2
             section = response['sections'][0]
-            assert section['id'] == 'SEC:2023-B-32936'
+            assert section['id'] == '32936'
             assert section['name'] == 'Section A'
-            assert section['sisCourseId'] == 'CRS:ANTHRO-189-2023-B'
+            assert section['sisId'] == 'SEC:2023-B-32936'
             assert len(response['students']) == 1
             student = response['students'][0]
             assert student['email'] == 'xo.kane@berkeley.edu'
@@ -77,11 +77,12 @@ class TestGetRoster:
             assert student['id'] == 5678901
             assert student['lastName'] == 'Kane'
             assert student['loginId'] == '40000'
+            assert student['photoUrl'] == 'TODO'
             assert student['studentId'] == 'UID:40000'
-            assert len(student['sections'])
-            assert student['sections'][0]['id'] == 'SEC:2023-B-32936'
+            assert len(student['sections']) == 1
+            assert student['sections'][0]['id'] == '32936'
             assert student['sections'][0]['name'] == 'Section A'
-            assert student['sections'][0]['sisCourseId'] == 'CRS:ANTHRO-189-2023-B'
+            assert student['sections'][0]['sisId'] == 'SEC:2023-B-32936'
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -92,9 +93,10 @@ class TestGetRoster:
             }, m)
             canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
-            api_json = _api_get_roster(client, canvas_site_id)
-            assert len(api_json['sections']) == 1
-            assert len(api_json['students']) == 1
+            response = _api_get_roster(client, canvas_site_id)
+
+            assert len(response['sections']) == 2
+            assert len(response['students']) == 1
 
     def test_student(self, client, app, fake_auth):
         """Denies student."""
