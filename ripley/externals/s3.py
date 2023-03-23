@@ -45,6 +45,11 @@ def get_object_text(key):
         return None
 
 
+def get_signed_urls(bucket, keys, expiration):
+    client = _get_s3_client()
+    return {key: _generate_signed_url(client, bucket, key, expiration) for key in keys}
+
+
 def put_binary_data_to_s3(key, binary_data, content_type):
     try:
         bucket = app.config['AWS_S3_BUCKET']
@@ -102,3 +107,14 @@ def _get_s3_client():
 
 def _get_session():
     return boto3.Session(profile_name=app.config['AWS_PROFILE'])
+
+
+def _generate_signed_url(client, bucket, key, expiration):
+    return client.generate_presigned_url(
+        ClientMethod='get_object',
+        Params={
+            'Bucket': bucket,
+            'Key': key,
+        },
+        ExpiresIn=expiration,
+    )

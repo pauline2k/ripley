@@ -77,7 +77,7 @@ class TestGetRoster:
             assert student['id'] == 5678901
             assert student['lastName'] == 'Kane'
             assert student['loginId'] == '40000'
-            assert student['photoUrl'] == 'TODO'
+            assert student['photoUrl'].startswith('https://photo-bucket.s3.amazonaws.com/photos/40000.jpg?AWSAccessKeyId=')
             assert student['studentId'] == 'UID:40000'
             assert len(student['sections']) == 1
             assert student['sections'][0]['id'] == '32936'
