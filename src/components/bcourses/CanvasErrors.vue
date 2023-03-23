@@ -19,11 +19,11 @@
 
 <script>
 import OutboundLink from '@/components/utils/OutboundLink'
-import Utils from '@/mixins/Utils'
+import {decamelize} from '@/utils'
 
 export default {
   name: 'CanvasErrors',
-  mixins: [Utils],
+  methods: {decamelize},
   components: {OutboundLink},
   props: {
     errorType: {

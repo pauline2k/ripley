@@ -53,14 +53,13 @@
 
 <script>
 import Context from '@/mixins/Context'
-import Utils from '@/mixins/Utils'
 import {devAuthLogIn} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
 import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'DevAuth',
-  mixins: [Context, Utils],
+  mixins: [Context],
   data: () => ({
     canvasSiteId: undefined,
     error: undefined,

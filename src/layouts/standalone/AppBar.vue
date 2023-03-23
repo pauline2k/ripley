@@ -62,14 +62,14 @@ import AppBarMenu from '@/components/utils/AppBarMenu.vue'
 import BuildSummary from '@/components/utils/BuildSummary'
 import Context from '@/mixins/Context'
 import moment from 'moment'
-import Utils from '@/mixins/Utils'
 import {updateUserSession} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
 import {getMyUserProfile} from '@/api/user'
+import {isValidCanvasSiteId} from '@/utils'
 
 export default {
   name: 'AppBar',
-  mixins: [Context, Utils],
+  mixins: [Context],
   components: {AppBarMenu, BuildSummary},
   props: {
     includeBuildSummary: {
@@ -84,7 +84,7 @@ export default {
   }),
   computed: {
     isCanvasSiteIdValid() {
-      return this.isValidCanvasSiteId(this.canvasSiteId)
+      return isValidCanvasSiteId(this.canvasSiteId)
     },
     showError: {
       get() {

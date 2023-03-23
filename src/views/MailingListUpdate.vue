@@ -129,14 +129,13 @@ import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
-import Utils from '@/mixins/Utils'
 import {populateMailingList} from '@/api/mailing-list'
-import {putFocusNextTick} from '@/utils'
+import {oxfordJoin, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'MailingListUpdate',
   components: {OutboundLink, SpinnerWithinButton},
-  mixins: [MailingList, Context, Utils],
+  mixins: [MailingList, Context],
   data: () => ({
     isUpdating: false,
     hasUpdatedSincePageLoad: false,
@@ -149,7 +148,7 @@ export default {
       putFocusNextTick('page-header')
       this.$ready()
     } else {
-      this.goToPath('/mailing_list/select_course')
+      this.$router.push({path: '/mailing_list/select_course'})
     }
   },
   methods: {
@@ -201,7 +200,7 @@ export default {
                 if (emailAddresses.length) {
                   const pastTense = action === 'add' ? 'added' : `${action}d`
                   const prefix = key === 'errors' ? `failed to ${action}` : `Successfully ${pastTense} `
-                  items.push(prefix + this.oxfordJoin(emailAddresses))
+                  items.push(prefix + oxfordJoin(emailAddresses))
                 }
               })
             })

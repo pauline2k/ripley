@@ -91,14 +91,13 @@ import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
-import Utils from '@/mixins/Utils'
 import {createMailingList} from '@/api/mailing-list'
 import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'MailingListCreate',
   components: {Alert, OutboundLink, SpinnerWithinButton},
-  mixins: [Context, MailingList, Utils],
+  mixins: [Context, MailingList],
   data: () => ({
     error: undefined,
     isCreating: false,
@@ -110,7 +109,7 @@ export default {
       putFocusNextTick('page-header')
       this.$ready()
     } else {
-      this.goToPath('/mailing_list/select_course')
+      this.$router.push({path: '/mailing_list/select_course'})
     }
   },
   methods: {

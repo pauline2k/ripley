@@ -189,7 +189,6 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
-import Utils from '@/mixins/Utils'
 import {
   activateWelcomeEmail,
   createSiteMailingList,
@@ -207,7 +206,7 @@ export default {
     ckeditor: CKEditor.component,
     OutboundLink
   },
-  mixins: [Context, Utils],
+  mixins: [Context],
   data: () => ({
     alertEmailActivated: false,
     alerts: {

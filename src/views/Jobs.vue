@@ -131,12 +131,11 @@
 import Context from '@/mixins/Context'
 import DisableJobToggle from '@/components/job/DisableJobToggle'
 import JobHistory from '@/components/job/JobHistory'
-import Utils from '@/mixins/Utils'
 import {getJobHistory, getJobSchedule, setJobDisabled, startJob, updateJobSchedule} from '@/api/job'
 
 export default {
   name: 'Jobs',
-  mixins: [Context, Utils],
+  mixins: [Context],
   components: {
     DisableJobToggle,
     JobHistory

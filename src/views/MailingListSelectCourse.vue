@@ -51,14 +51,13 @@ import Alert from '@/components/utils/Alert'
 import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
-import Utils from '@/mixins/Utils'
 import {getMailingList} from '@/api/mailing-list'
 import {getCanvasSite} from '@/api/canvas-course'
-import {putFocusNextTick} from '@/utils'
+import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'MailingListSelectCourse',
-  mixins: [Context, MailingList, Utils],
+  mixins: [Context, MailingList],
   components: {Alert, SpinnerWithinButton},
   data: () => ({
     error: undefined,
@@ -67,7 +66,7 @@ export default {
   }),
   computed: {
     isCanvasSiteIdValid() {
-      return this.isValidCanvasSiteId(this.canvasSiteId)
+      return isValidCanvasSiteId(this.canvasSiteId)
     }
   },
   mounted() {
