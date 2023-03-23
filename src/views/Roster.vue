@@ -8,7 +8,7 @@
   <div v-if="!isLoading && roster" class="page-roster">
     <Alert :error-message="error" :success-message="success" />
     <v-container v-if="!error" fluid>
-      <v-row align-v="center" class="page-roster pb-2 roster-search" no-gutters>
+      <v-row align-v="center" class="page-roster roster-search">
         <v-col class="pr-2" sm="3">
           <v-text-field
             id="roster-search"
@@ -57,7 +57,7 @@
           </div>
         </v-col>
       </v-row>
-      <v-row no-gutters>
+      <v-row>
         <v-col sm="12">
           <RosterPhotos
             v-if="students.length"
@@ -75,6 +75,19 @@
         </v-col>
       </v-row>
     </v-container>
+    <v-snackbar
+      v-model="screamInSpace"
+      class="mb-3"
+      close-on-content-click
+      timeout="5000"
+      variant="elevated"
+    >
+      <v-img
+        alt="In space, no one can hear you scream."
+        src="@/assets/images/in-space-no-one-can-hear-you-scream.jpg"
+        width="40vw"
+      />
+    </v-snackbar>
   </div>
 </template>
 
@@ -92,6 +105,7 @@ export default {
   data: () => ({
     error: undefined,
     roster: undefined,
+    screamInSpace: false,
     search: undefined,
     section: '',
     sections: undefined,
@@ -101,6 +115,7 @@ export default {
   watch: {
     search() {
       this.recalculateStudents()
+      this.screamInSpace = this.idx(this.search) === 'in space no one can hear you scream'
     },
     section() {
       return this.recalculateStudents()
