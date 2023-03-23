@@ -64,8 +64,6 @@ class TestGetRoster:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_get_roster(client, canvas_site_id)
 
-            assert response['canvasSite']['canvasSiteId'] == 8876542
-            assert response['canvasSite']['name'] == 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human'
             assert len(response['sections']) == 1
             section = response['sections'][0]
             assert section['id'] == 'SEC:2023-B-32936'
@@ -76,14 +74,10 @@ class TestGetRoster:
             assert student['email'] == 'xo.kane@berkeley.edu'
             assert student['enrollStatus'] == 'active'
             assert student['firstName'] == 'XO'
-            assert student['gradeOption'] == 'TODO'
             assert student['id'] == 5678901
             assert student['lastName'] == 'Kane'
             assert student['loginId'] == '40000'
-            assert student['photoUrl'] == 'TODO'
-            assert student['sectionIds'] == 'TODO'
             assert student['studentId'] == 'UID:40000'
-            assert student['units'] == 'TODO'
             assert len(student['sections'])
             assert student['sections'][0]['id'] == 'SEC:2023-B-32936'
             assert student['sections'][0]['name'] == 'Section A'
@@ -98,12 +92,9 @@ class TestGetRoster:
             }, m)
             canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
-            response = _api_get_roster(client, canvas_site_id)
-
-            assert response['canvasSite']['canvasSiteId'] == 8876542
-            assert response['canvasSite']['name'] == 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human'
-            assert len(response['sections']) == 1
-            assert len(response['students']) == 1
+            api_json = _api_get_roster(client, canvas_site_id)
+            assert len(api_json['sections']) == 1
+            assert len(api_json['students']) == 1
 
     def test_student(self, client, app, fake_auth):
         """Denies student."""

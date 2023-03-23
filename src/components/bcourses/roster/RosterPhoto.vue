@@ -32,8 +32,9 @@ export default {
     photoUrl: undefined
   }),
   created() {
-    if (this.student.photo) {
-      this.photoUrl = this.config.apiBaseUrl ? `${this.config.apiBaseUrl}${this.student.photo}` : this.student.photo
+    const photoUrl = this.$_.trim(this.student.photoUrl || '')
+    if (photoUrl) {
+      this.photoUrl = photoUrl.startsWith('http') ? photoUrl : `${this.config.apiBaseUrl}${photoUrl}`
     } else {
       this.imageError()
     }
