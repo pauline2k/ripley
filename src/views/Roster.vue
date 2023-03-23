@@ -68,7 +68,7 @@
             <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
             Students have not yet signed up for this class.
           </div>
-          <div v-if="!students.length">
+          <div v-if="roster.students.length && !students.length">
             <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
             No students found matching your query.
           </div>
@@ -122,7 +122,7 @@ export default {
     }
   },
   created() {
-    if (this.currentUser.isTeaching) {
+    if (this.currentUser.isTeaching || this.currentUser.isAdmin) {
       getRoster(this.currentUser.canvasSiteId).then(
         data => {
           this.roster = data
