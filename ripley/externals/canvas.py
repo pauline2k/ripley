@@ -65,7 +65,7 @@ def get_course(course_id, api_call=True):
     else:
         course = None
         try:
-            course = c.get_course(course_id, include='term')
+            course = c.get_course(course_id, include=['term'])
         except Exception as e:
             app.logger.error(f'Failed to retrieve Canvas course (id={course_id})')
             app.logger.exception(e)
