@@ -91,7 +91,7 @@
                   <v-btn
                     id="btn-create-mailing-list"
                     color="primary"
-                    :disabled="isCreating"
+                    :disabled="isCreating || !$_.trim(mailingListName)"
                     @click="create"
                   >
                     <span v-if="!isCreating">Create mailing list</span>

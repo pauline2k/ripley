@@ -74,15 +74,17 @@ export default {
             if (data) {
               this.setMailingList(data)
               this.$router.push('/mailing_list/update')
+              this.isProcessing = false
             } else {
               getCanvasSite(this.canvasSiteId).then(data => {
                 this.setCanvasSite(data)
                 this.$router.push('/mailing_list/create')
+                this.isProcessing = false
               })
             }
           },
           error => this.error = error
-        ).then(() => this.isProcessing = false)
+        )
       }
     }
   }
