@@ -37,63 +37,164 @@ class TestGetJwks:
             assert key in keyset
 
 
+class TestGetAddUserConfig:
+
+    def test_anonymous(self, client, app):
+        """Anonymous user can get the Add User tool config JSON."""
+        _api_get_tool_config(
+            client,
+            app,
+            config_uri='add_user.json',
+            target='launch_add_user',
+            expected_title='Find a Person to Add',
+            expected_description='Search and add users to course sections',
+            expected_placement='course_navigation',
+        )
+
+
+class TestGetCourseCapturesConfig:
+
+    def test_anonymous(self, client, app):
+        """Anonymous user can get the Course Captures tool config JSON."""
+        _api_get_tool_config(
+            client,
+            app,
+            config_uri='course_captures.json',
+            target='launch_course_captures',
+            expected_title='Course Captures',
+            expected_description='Recordings of this course',
+            expected_placement='course_navigation',
+        )
+
+
+class TestGetCreateSiteConfig:
+
+    def test_anonymous(self, client, app):
+        """Anonymous user can get the Create a Site tool config JSON."""
+        _api_get_tool_config(
+            client,
+            app,
+            config_uri='create_site.json',
+            target='launch_create_site',
+            expected_title='Create a Site',
+            expected_description='Provides access to Course and Project site creation',
+            expected_placement='user_navigation',
+        )
+
+
+class TestGetGradeExportConfig:
+
+    def test_anonymous(self, client, app):
+        """Anonymous user can get the Download E-Grades tool config JSON."""
+        _api_get_tool_config(
+            client,
+            app,
+            config_uri='export_grade.json',
+            target='launch_export_grade',
+            expected_title='Download E-Grades',
+            expected_description='Exports Course Grades to E-Grades CSV file',
+            expected_placement='course_navigation',
+        )
+
+
 class TestGetMailingListConfig:
 
     def test_anonymous(self, client, app):
-        """Anonymous user can get the Mailing List config JSON."""
-        response = client.get('api/lti/config/mailing_list.json')
-        assert response.status_code == 200
-        assert response.content_type == 'application/json'
-        config = response.json
-        assert config['title'] == 'Mailing List'
-        assert config['description'] == 'Create and manage a mailing list for a course site'
-        assert config['oidc_initiation_url'] == app.url_for('initiate_login', _external=True)
-        assert config['target_link_uri'] == app.url_for('launch_mailing_list', _external=True)
-        assert config['public_jwk_url'] == app.url_for('get_jwk_set', _external=True)
-        assert config['custom_fields'] == {
-            'canvas_user_id': '$Canvas.user.id',
-            'canvas_site_id': '$Canvas.course.id',
-            'canvas_user_login_id': '$Canvas.user.loginId',
-            'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
-        }
-        assert len(config['extensions']) == 1
-        tool = config['extensions'][0]
-        assert tool['platform'] == 'canvas.instructure.com'
-        assert tool['privacy_level'] == 'public'
-        assert len(tool['settings']['placements']) == 1
-        assert tool['settings']['placements'][0] == {
-            'text': 'Mailing List',
-            'placement': 'course_navigation',
-            'message_type': 'LtiResourceLinkRequest',
-        }
+        """Anonymous user can get the Mailing List tool config JSON."""
+        _api_get_tool_config(
+            client,
+            app,
+            config_uri='mailing_list.json',
+            target='launch_mailing_list',
+            expected_title='Mailing List',
+            expected_description='Create and manage a mailing list for a course site',
+            expected_placement='course_navigation',
+        )
+
+
+class TestGetMailingListsConfig:
+
+    def test_anonymous(self, client, app):
+        """Anonymous user can get the Mailing Lists tool config JSON."""
+        _api_get_tool_config(
+            client,
+            app,
+            config_uri='mailing_lists.json',
+            target='launch_mailing_lists',
+            expected_title='Mailing Lists',
+            expected_description='Create and manage mailing lists for all course sites',
+            expected_placement='account_navigation',
+        )
+
+
+class TestGetManageOfficialSectionsConfig:
+
+    def test_anonymous(self, client, app):
+        """Anonymous user can get the Manage Official Sections tool config JSON."""
+        _api_get_tool_config(
+            client,
+            app,
+            config_uri='manage_official_sections.json',
+            target='launch_manage_official_sections',
+            expected_title='Manage Official Sections',
+            expected_description='Provides management options for official course sections',
+            expected_placement='course_navigation',
+        )
+
+
+class TestGetRosterPhotosConfig:
+
+    def test_anonymous(self, client, app):
+        """Anonymous user can get the Roster Photos tool config JSON."""
+        _api_get_tool_config(
+            client,
+            app,
+            config_uri='roster_photos.json',
+            target='launch_roster_photos',
+            expected_title='Roster Photos',
+            expected_description='Browse and search official roster photos',
+            expected_placement='course_navigation',
+        )
 
 
 class TestGetUserProvisioningConfig:
 
     def test_anonymous(self, client, app):
-        """Anonymous user can get the User Provisioning config JSON."""
-        response = client.get('api/lti/config/provision_user.json')
-        assert response.status_code == 200
-        assert response.content_type == 'application/json'
-        config = response.json
-        assert config['title'] == 'User Provisioning'
-        assert config['description'] == 'Automated user provisioning'
-        assert config['oidc_initiation_url'] == app.url_for('initiate_login', _external=True)
-        assert config['target_link_uri'] == app.url_for('launch_provision_user', _external=True)
-        assert config['public_jwk_url'] == app.url_for('get_jwk_set', _external=True)
-        assert config['custom_fields'] == {
-            'canvas_user_id': '$Canvas.user.id',
-            'canvas_site_id': '$Canvas.course.id',
-            'canvas_user_login_id': '$Canvas.user.loginId',
-            'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
-        }
-        assert len(config['extensions']) == 1
-        tool = config['extensions'][0]
-        assert tool['platform'] == 'canvas.instructure.com'
-        assert tool['privacy_level'] == 'public'
-        assert len(tool['settings']['placements']) == 1
-        assert tool['settings']['placements'][0] == {
-            'text': 'User Provisioning',
-            'placement': 'account_navigation',
-            'message_type': 'LtiResourceLinkRequest',
-        }
+        """Anonymous user can get the User Provisioning tool config JSON."""
+        _api_get_tool_config(
+            client,
+            app,
+            config_uri='provision_user.json',
+            target='launch_provision_user',
+            expected_title='User Provisioning',
+            expected_description='Automated user provisioning',
+            expected_placement='account_navigation',
+        )
+
+
+def _api_get_tool_config(client, app, config_uri, target, expected_title, expected_description, expected_placement):
+    response = client.get(f'api/lti/config/{config_uri}')
+    assert response.status_code == 200
+    assert response.content_type == 'application/json'
+    config = response.json
+    assert config['title'] == expected_title
+    assert config['description'] == expected_description
+    assert config['oidc_initiation_url'] == app.url_for('initiate_login', _external=True)
+    assert config['target_link_uri'] == app.url_for(target, _external=True)
+    assert config['public_jwk_url'] == app.url_for('get_jwk_set', _external=True)
+    assert config['custom_fields'] == {
+        'canvas_user_id': '$Canvas.user.id',
+        'canvas_site_id': '$Canvas.course.id',
+        'canvas_user_login_id': '$Canvas.user.loginId',
+        'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
+    }
+    assert len(config['extensions']) == 1
+    tool = config['extensions'][0]
+    assert tool['platform'] == 'canvas.instructure.com'
+    assert tool['privacy_level'] == 'public'
+    assert len(tool['settings']['placements']) == 1
+    assert tool['settings']['placements'][0] == {
+        'text': expected_title,
+        'placement': expected_placement,
+        'message_type': 'LtiResourceLinkRequest',
+    }
