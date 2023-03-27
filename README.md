@@ -6,7 +6,7 @@ Ripley heroically supports UC Berkeley's Canvas LMS instance.
 
 ## Installation
 
-* Install Python 3.8
+* Install Python 3.9
 * Create your virtual environment (venv)
 * Install dependencies
 
