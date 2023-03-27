@@ -56,12 +56,62 @@ class MessageLaunch(FlaskMessageLaunch):
         return self
 
 
+@app.route('/api/lti/config/add_user.json')
+def config_add_user():
+    return _tool_config(
+        title='Find a Person to Add',
+        description='Search and add users to course sections',
+        target='launch_add_user',
+        placement='course_navigation',
+    )
+
+
+@app.route('/api/lti/config/create_site.json')
+def config_create_site():
+    return _tool_config(
+        title='Create a Site',
+        description='Provides access to Course and Project site creation',
+        target='launch_create_site',
+        placement='user_navigation',
+    )
+
+
+@app.route('/api/lti/config/export_grade.json')
+def config_export_grade():
+    return _tool_config(
+        title='Download E-Grades',
+        description='Exports Course Grades to E-Grades CSV file',
+        target='launch_export_grade',
+        placement='course_navigation',
+    )
+
+
 @app.route('/api/lti/config/mailing_list.json')
 def config_mailing_list():
     return _tool_config(
         title='Mailing List',
         description='Create and manage a mailing list for a course site',
         target='launch_mailing_list',
+        placement='course_navigation',
+    )
+
+
+@app.route('/api/lti/config/mailing_lists.json')
+def config_mailing_lists():
+    return _tool_config(
+        title='Mailing Lists',
+        description='Create and manage mailing lists for all course sites',
+        target='launch_mailing_lists',
+        placement='account_navigation',
+    )
+
+
+@app.route('/api/lti/config/manage_official_sections.json')
+def config_manage_official_sections():
+    return _tool_config(
+        title='Manage Official Sections',
+        description='Provides management options for official course sections',
+        target='launch_manage_official_sections',
         placement='course_navigation',
     )
 
@@ -73,6 +123,16 @@ def config_provision_user():
         description='Automated user provisioning',
         target='launch_provision_user',
         placement='account_navigation',
+    )
+
+
+@app.route('/api/lti/config/roster_photos.json')
+def config_roster_photos():
+    return _tool_config(
+        title='Roster Photos',
+        description='Browse and search official roster photos',
+        target='launch_roster_photos',
+        placement='course_navigation',
     )
 
 
@@ -108,14 +168,44 @@ def initiate_login():
         raise InternalServerError({'message': str(e)})
 
 
+@app.route('/api/lti/add_user', methods=['GET', 'POST'])
+def launch_add_user():
+    return _launch_tool('add_user')
+
+
+@app.route('/api/lti/create_site', methods=['GET', 'POST'])
+def launch_create_site():
+    return _launch_tool('create_site')
+
+
+@app.route('/api/lti/export_grade', methods=['GET', 'POST'])
+def launch_export_grade():
+    return _launch_tool('export_grade')
+
+
 @app.route('/api/lti/mailing_list', methods=['GET', 'POST'])
 def launch_mailing_list():
-    return _launch_tool('mailing_list/select_course')
+    return _launch_tool('mailing_list/manage')
+
+
+@app.route('/api/lti/mailing_lists', methods=['GET', 'POST'])
+def launch_mailing_lists():
+    return _launch_tool('mailing_lists')
+
+
+@app.route('/api/lti/manage_official_sections', methods=['GET', 'POST'])
+def launch_manage_official_sections():
+    return _launch_tool('manage_official_sections')
 
 
 @app.route('/api/lti/provision_user', methods=['GET', 'POST'])
 def launch_provision_user():
     return _launch_tool('provision_user')
+
+
+@app.route('/api/lti/roster_photos', methods=['GET', 'POST'])
+def launch_roster_photos():
+    return _launch_tool('roster')
 
 
 def _get_custom_param(lti_data, key):
