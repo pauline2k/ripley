@@ -52,21 +52,6 @@ class TestGetAddUserConfig:
         )
 
 
-class TestGetCourseCapturesConfig:
-
-    def test_anonymous(self, client, app):
-        """Anonymous user can get the Course Captures tool config JSON."""
-        _api_get_tool_config(
-            client,
-            app,
-            config_uri='course_captures.json',
-            target='launch_course_captures',
-            expected_title='Course Captures',
-            expected_description='Recordings of this course',
-            expected_placement='course_navigation',
-        )
-
-
 class TestGetCreateSiteConfig:
 
     def test_anonymous(self, client, app):

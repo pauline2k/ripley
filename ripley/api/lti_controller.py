@@ -66,16 +66,6 @@ def config_add_user():
     )
 
 
-@app.route('/api/lti/config/course_captures.json')
-def config_course_captures():
-    return _tool_config(
-        title='Course Captures',
-        description='Recordings of this course',
-        target='launch_course_captures',
-        placement='course_navigation',
-    )
-
-
 @app.route('/api/lti/config/create_site.json')
 def config_create_site():
     return _tool_config(
@@ -181,11 +171,6 @@ def initiate_login():
 @app.route('/api/lti/add_user', methods=['GET', 'POST'])
 def launch_add_user():
     return _launch_tool('add_user')
-
-
-@app.route('/api/lti/course_captures', methods=['GET', 'POST'])
-def launch_course_captures():
-    return _launch_tool('course_captures')
 
 
 @app.route('/api/lti/create_site', methods=['GET', 'POST'])
