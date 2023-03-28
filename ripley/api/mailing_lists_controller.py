@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from datetime import datetime
 
-from flask import current_app as app
+from flask import current_app as app, request
 from ripley.api.errors import BadRequestError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas
@@ -49,9 +49,21 @@ def mailing_lists(canvas_site_id):
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def create_mailing_lists(canvas_site_id):
     try:
-        return tolerant_jsonify(MailingList.create(canvas_site_id).to_api_json())
+        params = request.get_json()
+        list_name = params.get('name')
+        mailing_list = MailingList.create(
+            canvas_site_id=canvas_site_id,
+            list_name=(list_name or '').strip() or None,
+        )
+        return tolerant_jsonify(mailing_list.to_api_json())
     except ValueError as e:
         raise BadRequestError(str(e))
+
+
+@app.route('/api/mailing_lists/<canvas_site_id>/suggested_name')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+def get_suggested_mailing_list_name(canvas_site_id):
+    return tolerant_jsonify(MailingList.get_suggested_name(canvas_site_id))
 
 
 @app.route('/api/mailing_lists/<canvas_site_id>/download/welcome_email_log')

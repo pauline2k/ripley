@@ -6,7 +6,7 @@ export function activateWelcomeEmail(canvasSiteId: string) {
 }
 
 export function createMailingList(canvasSiteId: string, name: string, redirectOnError?: boolean) {
-  return utils.post(`/api/mailing_lists/${canvasSiteId}/create`, {listName: name}, redirectOnError)
+  return utils.post(`/api/mailing_lists/${canvasSiteId}/create`, {name}, redirectOnError)
 }
 
 export function createSiteMailingList(canvasSiteId: string) {
@@ -20,6 +20,10 @@ export function deactivateWelcomeEmail(canvasSiteId: string) {
 export function downloadWelcomeEmailCsv(canvasSiteId: string) {
   const filename = `${canvasSiteId}-welcome-messages-log-${moment().format('YYYY-MM-DD_hhmmss')}.csv`
   return utils.downloadViaGet(`/api/mailing_lists/${canvasSiteId}/download/welcome_email_log`, filename,true)
+}
+
+export function getSuggestedMailingListName(canvasSiteId: string) {
+  return utils.get(`/api/mailing_lists/${canvasSiteId}/suggested_name`, true)
 }
 
 export function getMailingList(canvasSiteId: string, redirectOnError?: boolean) {

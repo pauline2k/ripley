@@ -22,8 +22,10 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+import json
 
 import requests_mock
+from ripley.models.mailing_list import MailingList
 from tests.util import register_canvas_uris
 
 admin_uid = '10000'
@@ -116,20 +118,36 @@ class TestCreateMailingList:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
             _api_create_mailing_list(client, canvas_site_id, expected_status_code=401)
 
-    def test_admin(self, client, app, fake_auth):
+    def test_authorized(self, client, app, fake_auth):
         """Allows admin."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id_1234567']}, m)
-            canvas_site_id = '1234567'
-            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
-            response = _api_create_mailing_list(client, canvas_site_id)
+            mailing_list_id = None
+            for mailing_list_name in (None, 'I am a custom name.'):
+                if mailing_list_id:
+                    # Delete previous mailing_list test data.
+                    MailingList.delete(mailing_list_id)
+                register_canvas_uris(app, {'course': ['get_by_id_1234567']}, m)
+                canvas_site_id = '1234567'
+                fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+                api_json = _api_create_mailing_list(
+                    client=client,
+                    canvas_site_id=canvas_site_id,
+                    name=mailing_list_name,
+                )
+                mailing_list_id = api_json['id']
+                assert api_json['canvasSite']['canvasSiteId'] == 1234567
+                assert api_json['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
+                if mailing_list_name:
+                    assert api_json['name'] == mailing_list_name
+                else:
+                    assert api_json['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
-            assert response['canvasSite']['canvasSiteId'] == 1234567
-            assert response['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
-            assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
-
-            # But you can't step into the same mailing list twice.
-            _api_create_mailing_list(client, canvas_site_id, expected_status_code=400)
+                # But you can't step into the same mailing list twice.
+                _api_create_mailing_list(
+                    client=client,
+                    canvas_site_id=canvas_site_id,
+                    expected_status_code=400,
+                )
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -213,8 +231,18 @@ class TestPopulateMailingList:
             _api_populate_mailing_list(client, canvas_site_id, expected_status_code=401)
 
 
-def _api_create_mailing_list(client, canvas_site_id, expected_status_code=200):
-    response = client.post(f'/api/mailing_lists/{canvas_site_id}/create')
+def _api_create_mailing_list(
+        client,
+        canvas_site_id,
+        expected_status_code=200,
+        name=None,
+):
+    params = {'name': name} if name else {}
+    response = client.post(
+        f'/api/mailing_lists/{canvas_site_id}/create',
+        data=json.dumps(params),
+        content_type='application/json',
+    )
     assert response.status_code == expected_status_code
     return response.json
 

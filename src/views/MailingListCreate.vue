@@ -115,7 +115,7 @@ import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
-import {createMailingList} from '@/api/mailing-list'
+import {createMailingList, getSuggestedMailingListName} from '@/api/mailing-list'
 import {putFocusNextTick} from '@/utils'
 
 export default {
@@ -130,8 +130,11 @@ export default {
   }),
   mounted() {
     if (this.canvasSite) {
-      putFocusNextTick('page-header')
-      this.$ready()
+      getSuggestedMailingListName(this.canvasSite.canvasSiteId).then(data => {
+        this.mailingListName = data
+        putFocusNextTick('page-header')
+        this.$ready()
+      })
     } else {
       this.$router.push({path: '/mailing_list/select_course'})
     }
@@ -150,7 +153,7 @@ export default {
         createMailingList(this.canvasSite.canvasSiteId, name).then(
           data => {
             this.setMailingList(data)
-            putFocusNextTick('mailing-list-details-header')
+            this.$router.push('/mailing_list/update')
           },
           error => this.error = error
         ).then(() => this.isCreating = false)
