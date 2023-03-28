@@ -61,7 +61,7 @@
         <v-col sm="12">
           <RosterPhotos
             v-if="students.length"
-            :course-id="currentUser.canvasSiteId"
+            :canvas-site-id="currentUser.canvasSiteId"
             :students="students"
           />
           <div v-if="!roster.students.length">
