@@ -88,10 +88,8 @@ export default {
     loadTools() {
       const canvasSiteId = this.currentUser.canvasSiteId
       this.tools = this.$_.sortBy([
-        {disabled: false, icon: 'mdi-google-classroom', path: '/create_course_site', title: 'Create a Course Site'},
-        {disabled: false, icon: 'mdi-projector-screen-outline', path: '/create_project_site', title: 'Create a Project Site'},
         {disabled: false, icon: 'mdi-email-multiple-outline', path: '/mailing_list/select_course', title: 'Manage Mailing List'},
-        {disabled: false, icon: 'mdi-web', path: '/create_site', title: 'Site Creation'},
+        {disabled: false, icon: 'mdi-web', path: '/create_site', title: 'Create a Site'},
         {disabled: false, icon: 'mdi-account-plus-outline', path: '/provision_user', title: 'User Provision'},
         {disabled: !canvasSiteId, icon: 'mdi-export', path: `/grade_export/${canvasSiteId}`, title: 'E-Grade Export'},
         {disabled: !canvasSiteId, icon: 'mdi-account-school', path: `/add_user/${canvasSiteId}`, title: 'Find a User to Add'},

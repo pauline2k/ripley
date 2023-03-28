@@ -130,7 +130,7 @@ import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {populateMailingList} from '@/api/mailing-list'
-import {oxfordJoin, putFocusNextTick} from '@/utils'
+import {oxfordJoin, pluralize, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'MailingListUpdate',
@@ -169,6 +169,7 @@ export default {
       }
       return message
     },
+    pluralize,
     setAlert(message, items, type) {
       this.alert = {message, items: items || [], type}
     },

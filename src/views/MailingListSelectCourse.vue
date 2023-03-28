@@ -83,7 +83,10 @@ export default {
               })
             }
           },
-          error => this.error = error
+          error => {
+            this.error = error
+            this.isProcessing = false
+          }
         )
       }
     }
