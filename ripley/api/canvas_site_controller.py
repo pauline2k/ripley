@@ -23,7 +23,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from flask import current_app as app
+from flask import current_app as app, redirect
+from flask_login import login_required
 from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import canvas_role_required
 from ripley.externals import canvas
@@ -75,5 +76,16 @@ def get_roster(canvas_site_id):
     if course:
         roster = canvas_site_roster(canvas_site_id)
         return tolerant_jsonify(roster if roster else None)
+    else:
+        raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
+
+
+@app.route('/redirect/canvas/<canvas_site_id>/user/<canvas_user_id>')
+@login_required
+def redirect_to_canvas_profile(canvas_site_id, canvas_user_id):
+    canvas_site = canvas.get_course(canvas_site_id)
+    if canvas_site:
+        base_url = app.config['CANVAS_API_URL']
+        return redirect(f'{base_url}/courses/{canvas_site_id}/users/{canvas_user_id}')
     else:
         raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
