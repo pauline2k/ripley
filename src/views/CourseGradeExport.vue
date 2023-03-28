@@ -293,7 +293,7 @@ import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
 import OutboundLink from '@/components/utils/OutboundLink'
 import ProgressBar from '@/components/bcourses/shared/ProgressBar'
-import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/canvas-course'
+import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/canvas-site'
 import {getCanvasSiteUserRoles} from '@/api/canvas-user'
 import {putFocusNextTick} from '@/utils'
 

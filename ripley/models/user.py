@@ -121,10 +121,15 @@ class User(UserMixin):
 
     def _load_canvas_user_data(self):
         if self.uid and 'canvasUserId' not in self.user:
+            course = canvas.get_course(course_id=self.__canvas_site_id)
             p = canvas.get_sis_user_profile(self.uid) or {}
             canvas_user_id = p.get('id')
             self.user.update({
                 'canvasSiteId': self.__canvas_site_id,
+                'canvasSiteCourseCode': course.course_code if course else None,
+                'canvasSiteEnrollmentTermId': course.enrollment_term_id if course else None,
+                'canvasSiteName': course.name if course else None,
+                'canvasSiteSisCourseId': course.sis_course_id if course else None,
                 'canvasSiteUserRoles': [],
                 'canvasUserId': canvas_user_id,
                 'canvasUserAvatarUrl': p.get('avatar_url'),
@@ -160,7 +165,6 @@ class User(UserMixin):
         return {
             **calnet_profile,
             **{
-                'id': uid,
                 'canvasSiteId': self.__canvas_site_id,
                 'emailAddress': calnet_profile.get('email'),
                 'isActive': is_active,
