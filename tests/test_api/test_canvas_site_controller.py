@@ -76,7 +76,7 @@ class TestGetRoster:
             assert student['firstName'] == 'Joan'
             assert student['id'] == '20000'
             assert student['lastName'] == 'Lambert'
-            assert student['loginId'] == '20000'
+            assert student['uid'] == '20000'
             assert student['photoUrl'].startswith('https://photo-bucket.s3.amazonaws.com/photos/20000.jpg?AWSAccessKeyId=')
             assert student['studentId'] is None
             assert len(student['sections']) == 2
@@ -113,7 +113,13 @@ class TestGetRoster:
             _api_get_roster(client, canvas_site_id, expected_status_code=401)
 
 
+def _api_export_roster(client, canvas_site_id, expected_status_code=200):
+    response = client.get(f'/api/canvas_site/{canvas_site_id}/export_roster')
+    assert response.status_code == expected_status_code
+    return response.json
+
+
 def _api_get_roster(client, canvas_site_id, expected_status_code=200):
-    response = client.get(f'api/canvas_site/{canvas_site_id}/roster')
+    response = client.get(f'/api/canvas_site/{canvas_site_id}/roster')
     assert response.status_code == expected_status_code
     return response.json

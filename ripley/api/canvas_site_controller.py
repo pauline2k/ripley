@@ -23,10 +23,12 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from datetime import datetime
+
 from flask import current_app as app, redirect
 from flask_login import login_required
 from ripley.api.errors import ResourceNotFoundError
-from ripley.api.util import canvas_role_required
+from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas
 from ripley.lib.canvas_utils import canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
@@ -72,12 +74,30 @@ def canvas_egrade_export_status(canvas_site_id):
 @app.route('/api/canvas_site/<canvas_site_id>/roster')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def get_roster(canvas_site_id):
-    course = canvas.get_course(canvas_site_id)
-    if course:
-        roster = canvas_site_roster(canvas_site_id)
-        return tolerant_jsonify(roster if roster else None)
-    else:
-        raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
+    return tolerant_jsonify(canvas_site_roster(canvas_site_id))
+
+
+@app.route('/api/canvas_site/<canvas_site_id>/export_roster')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+def get_roster_csv(canvas_site_id):
+    rows = []
+    roster = canvas_site_roster(canvas_site_id)
+    for student in roster['students']:
+        sections = sorted([section['name'] for section in student['sections']])
+        rows.append({
+            'Name': f"{student['firstName']} {student['lastName']}",
+            'Student ID': student['studentId'],
+            'UID': student['uid'],
+            'Role': {'E': 'Student', 'W': 'Waitlist Student'}.get(student['enrollStatus'], None),
+            'Email address': student['email'],
+            'Sections': sections,
+        })
+    now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    return csv_download_response(
+        rows=rows,
+        filename=f'{canvas_site_id}-roster-{now}.csv',
+        fieldnames=['Name', 'Student ID', 'UID', 'Role', 'Email address', 'Sections'],
+    )
 
 
 @app.route('/redirect/canvas/<canvas_site_id>/user/<canvas_user_id>')

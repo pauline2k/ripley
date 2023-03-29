@@ -35,28 +35,25 @@ from ripley.lib.canvas_utils import parse_canvas_sis_section_id
 def canvas_site_roster(canvas_site_id):
     canvas_sections = canvas.get_course_sections(canvas_site_id)
     sections = [_section(cs) for cs in canvas_sections if cs.sis_section_id]
-    if len(sections) == 0:
-        return {}
-
-    term_id = sections[0]['termId']
-    section_ids = [s['id'] for s in sections]
-    enrollments = get_section_enrollments(term_id, section_ids)
-    if len(enrollments) == 0:
-        return {}
-
-    enrollments_by_section_id = defaultdict(list)
-    for e in enrollments:
-        enrollments_by_section_id[e['section_id']].append(e)
-    sections_by_uid = {}
-    for section in sections:
-        enrollments = enrollments_by_section_id[section['id']]
-        for enr in enrollments:
-            uid = enr['ldap_uid']
-            if uid not in sections_by_uid:
-                sections_by_uid[uid] = _student(enr)
-            sections_by_uid[uid]['sections'].append(section)
-    students = list(sections_by_uid.values())
-    _merge_photo_urls(students)
+    students = []
+    if len(sections):
+        term_id = sections[0]['termId']
+        section_ids = [s['id'] for s in sections]
+        enrollments = get_section_enrollments(term_id, section_ids)
+        if len(enrollments):
+            enrollments_by_section_id = defaultdict(list)
+            for e in enrollments:
+                enrollments_by_section_id[e['section_id']].append(e)
+            sections_by_uid = {}
+            for section in sections:
+                enrollments = enrollments_by_section_id[section['id']]
+                for enr in enrollments:
+                    uid = enr['ldap_uid']
+                    if uid not in sections_by_uid:
+                        sections_by_uid[uid] = _student(enr)
+                    sections_by_uid[uid]['sections'].append(section)
+            students = list(sections_by_uid.values())
+            _merge_photo_urls(students)
     return {
         'sections': sections,
         'students': students,
@@ -65,11 +62,11 @@ def canvas_site_roster(canvas_site_id):
 
 def _merge_photo_urls(students):
     def _photo_key(student):
-        return f"{app.config['DATA_LOCH_S3_PHOTO_PATH']}/{student['loginId']}.jpg"
+        return f"{app.config['DATA_LOCH_S3_PHOTO_PATH']}/{student['uid']}.jpg"
 
     photo_urls = get_signed_urls(
         bucket=app.config['DATA_LOCH_S3_PHOTO_BUCKET'],
-        keys=[_photo_key(student) for student in students if student['loginId']],
+        keys=[_photo_key(student) for student in students if student['uid']],
         expiration=app.config['PHOTO_SIGNED_URL_EXPIRES_IN_SECONDS'],
     )
     for student in students:
@@ -93,7 +90,7 @@ def _student(sis_enrollment):
         'firstName': sis_enrollment['first_name'],
         'id': sis_enrollment['ldap_uid'],
         'lastName': sis_enrollment['last_name'],
-        'loginId': sis_enrollment['ldap_uid'],
         'sections': [],
         'studentId': sis_enrollment['sid'],
+        'uid': sis_enrollment['ldap_uid'],
     }
