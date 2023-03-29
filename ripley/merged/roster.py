@@ -23,18 +23,39 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from collections import defaultdict
+
 from flask import current_app as app
 from ripley.externals import canvas
+from ripley.externals.data_loch import get_section_enrollments
 from ripley.externals.s3 import get_signed_urls
-from ripley.lib.canvas_utils import section_id_from_canvas_sis_section_id
+from ripley.lib.canvas_utils import parse_canvas_sis_section_id
 
 
 def canvas_site_roster(canvas_site_id):
     canvas_sections = canvas.get_course_sections(canvas_site_id)
     sections = [_section(cs) for cs in canvas_sections if cs.sis_section_id]
-    sections_by_id = {s['id']: s for s in sections}
-    canvas_students = canvas.get_course_students(canvas_site_id, per_page=100)
-    students = [_student(s, sections_by_id) for s in canvas_students]
+    if len(sections) == 0:
+        return {}
+
+    term_id = sections[0]['termId']
+    section_ids = [s['id'] for s in sections]
+    enrollments = get_section_enrollments(term_id, section_ids)
+    if len(enrollments) == 0:
+        return {}
+
+    enrollments_by_section_id = defaultdict(list)
+    for e in enrollments:
+        enrollments_by_section_id[e['section_id']].append(e)
+    sections_by_uid = {}
+    for section in sections:
+        enrollments = enrollments_by_section_id[section['id']]
+        for enr in enrollments:
+            uid = enr['ldap_uid']
+            if uid not in sections_by_uid:
+                sections_by_uid[uid] = _student(enr)
+            sections_by_uid[uid]['sections'].append(section)
+    students = list(sections_by_uid.values())
     _merge_photo_urls(students)
     return {
         'sections': sections,
@@ -56,29 +77,23 @@ def _merge_photo_urls(students):
 
 
 def _section(canvas_section):
+    section_id, berkeley_term = parse_canvas_sis_section_id(canvas_section.sis_section_id)
     return {
-        'id': section_id_from_canvas_sis_section_id(canvas_section.sis_section_id),
+        'id': section_id,
         'name': canvas_section.name,
         'sisId': canvas_section.sis_section_id,
+        'termId': berkeley_term.to_sis_term_id(),
     }
 
 
-def _student(canvas_student, sections_by_id):
-    def _get(attr):
-        value = None
-        if hasattr(canvas_student, attr):
-            value = getattr(canvas_student, attr)
-        return value
-    names = canvas_student.sortable_name.split(', ')
-    enrollments = canvas_student.enrollments if hasattr(canvas_student, 'enrollments') else []
-    section_ids = [section_id_from_canvas_sis_section_id(e['sis_section_id']) for e in enrollments if e['sis_section_id']]
+def _student(sis_enrollment):
     return {
-        'email': _get('email'),
-        'enrollStatus': enrollments[0]['enrollment_state'] if enrollments else None,
-        'firstName': names[1],
-        'id': canvas_student.id,
-        'lastName': names[0],
-        'loginId': _get('login_id'),
-        'sections': [sections_by_id[section_id] for section_id in list(set(section_ids))],
-        'studentId': canvas_student.sis_user_id,
+        'email': sis_enrollment['email_address'],
+        'enrollStatus': sis_enrollment['sis_enrollment_status'],
+        'firstName': sis_enrollment['first_name'],
+        'id': sis_enrollment['ldap_uid'],
+        'lastName': sis_enrollment['last_name'],
+        'loginId': sis_enrollment['ldap_uid'],
+        'sections': [],
+        'studentId': sis_enrollment['sid'],
     }

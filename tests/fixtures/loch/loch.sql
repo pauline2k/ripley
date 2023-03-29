@@ -20,7 +20,26 @@ VALUES
 ('10001', NULL, 'Dallas', '👨‍✈️', 'dallas@berkeley.edu', 'EMPLOYEE-TYPE-STAFF', 'S'),
 ('20000', NULL, 'Joan', 'Lambert', 'joan.lambert@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
 ('30000', NULL, 'Ash', '🤖', 'synthetic.ash@berkeley.edu', 'STUDENT-TYPE-NOT REGISTERED', 'S'),
-('40000', NULL, 'XO', 'Kane', 'xo.kane@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S');
+('40000', NULL, 'XO', 'Kane', 'xo.kane@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
+('50000', NULL, 'Dennis', 'Parker', 'dennis.parker@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
+('60000', NULL, 'Samuel', 'Brett', 'sam.brett@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S');
+
+CREATE TABLE sis_data.sis_enrollments
+(
+    sis_term_id VARCHAR,
+    sis_section_id VARCHAR,
+    ldap_uid VARCHAR,
+    sis_enrollment_status VARCHAR
+);
+
+INSERT INTO sis_data.sis_enrollments
+(sis_term_id, sis_section_id, ldap_uid, sis_enrollment_status)
+VALUES
+('2232', '32936', '20000', 'E'),
+('2232', '32936', '40000', 'E'),
+('2232', '32937', '20000', 'E'),
+('2232', '32937', '50000', 'E'),
+('2232', '32937', '60000', 'W');
 
 DROP SCHEMA IF EXISTS terms cascade;
 
