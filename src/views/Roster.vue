@@ -102,7 +102,7 @@
 import Alert from '@/components/utils/Alert'
 import Context from '@/mixins/Context'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
-import {getRoster, getRosterCsv} from '@/api/canvas-site'
+import {exportRoster, getRoster} from '@/api/canvas-site'
 import {printPage} from '@/utils'
 
 export default {
@@ -157,7 +157,7 @@ export default {
   },
   methods: {
     downloadCsv() {
-      getRosterCsv(this.currentUser.canvasSiteId).then(() => {
+      exportRoster(this.currentUser.canvasSiteId).then(() => {
         this.$announcer.polite(`${this.roster.canvasSiteName} CSV downloaded`)
       })
     },

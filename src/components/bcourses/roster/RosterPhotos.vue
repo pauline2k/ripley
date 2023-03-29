@@ -2,14 +2,14 @@
   <div class="d-flex flex-wrap text-center">
     <v-card
       v-for="student in students"
-      :key="student.id"
+      :key="student.studentId"
       :border="false"
       elevation="0"
       class="mb-2 text-center"
       width="150"
     >
       <a
-        :id="`student-profile-url-${student.id}`"
+        :id="`student-profile-url-${student.studentId}`"
         class="text-decoration-none"
         :href="student.profileUrl || `/redirect/canvas/${canvasSiteId}/user/${student.canvasUserId}`"
         target="_top"
@@ -17,12 +17,12 @@
         <RosterPhoto :student="student" />
       </a>
       <v-card-title class="py-0 text-subtitle-2">
-        <div v-if="!student.email" :id="`student-without-email-${student.id}`">
+        <div v-if="!student.email" :id="`student-without-email-${student.studentId}`">
           <div class="page-roster-student-name">{{ student.firstName }}</div>
           <div class="page-roster-student-name font-weight-bolder">{{ student.lastName }}</div>
         </div>
         <div v-if="student.email" class="pt-2">
-          <OutboundLink :id="`student-email-${student.id}`" :href="`mailto:${student.email}`">
+          <OutboundLink :id="`student-email-${student.studentId}`" :href="`mailto:${student.email}`">
             <div class="sr-only">Email</div>
             <div class="page-roster-student-name">{{ student.firstName }}</div>
             <div class="page-roster-student-name font-weight-bolder">{{ student.lastName }}</div>
@@ -30,20 +30,20 @@
         </div>
       </v-card-title>
       <v-card-text>
-        <div :id="`student-id-${student.id}`" class="print-hide">
+        <div :id="`student-id-${student.studentId}`" class="print-hide">
           <span class="sr-only">Student ID: </span>
-          {{ student.id }}
+          {{ student.studentId }}
         </div>
         <div
           v-if="student.terms_in_attendance"
-          :id="`student-terms-in-attendance-${student.id}`"
+          :id="`student-terms-in-attendance-${student.studentId}`"
           class="page-roster-student-terms print-hide"
         >
           Terms: {{ student.terms_in_attendance }}
         </div>
         <div
           v-if="student.majors"
-          :id="`student-majors-${student.id}`"
+          :id="`student-majors-${student.studentId}`"
           class="page-roster-student-majors print-hide"
         >
           {{ $_.truncate(student.majors.join(', '), {length: 50}) }}

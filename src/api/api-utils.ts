@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import axios from 'axios'
+import fileDownload from 'js-file-download'
 import {useContextStore} from '@/stores/context'
 
 const $_errorHandler = (error: any, redirectOnError?: boolean) => {
@@ -33,9 +34,11 @@ export default {
     )
   },
   downloadViaGet(path: string, filename: string, redirectOnError?: boolean) {
-    const fileDownload = require('js-file-download')
-    return axios.get(`${import.meta.env.VITE_APP_API_BASE_URL}${path}`).then(
-      data => fileDownload(data, filename),
+    return axios(
+      `${import.meta.env.VITE_APP_API_BASE_URL}${path}`,
+      {responseType: 'blob'}
+    ).then(
+      (response: any) => fileDownload(response.data, filename),
       error => $_errorHandler(error, redirectOnError)
     )
   },

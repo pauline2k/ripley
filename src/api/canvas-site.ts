@@ -1,5 +1,6 @@
-import utils from '@/api/api-utils'
 import _ from 'lodash'
+import moment from 'moment-timezone'
+import utils from '@/api/api-utils'
 
 export function downloadGradeCsv(
     canvasSiteId: number,
@@ -40,10 +41,10 @@ export function getRoster(canvasSiteId: number, redirectOnError?: boolean) {
   return utils.get(`/api/canvas_site/${canvasSiteId}/roster`, redirectOnError)
 }
 
-export function getRosterCsv(canvasSiteId: number) {
+export function exportRoster(canvasSiteId: number) {
   return utils.downloadViaGet(
-    `/api/canvas_site/${canvasSiteId}/roster_csv`,
-    `course_${canvasSiteId}_rosters.csv`
+    `/api/canvas_site/${canvasSiteId}/export_roster`,
+    `course_${canvasSiteId}_rosters-${moment().format('YYYY-MM-DD_hhmmss')}.csv`
   )
 }
 
