@@ -55,3 +55,12 @@ class BerkeleyTerm:
             'D': 'Fall',
         }
         return season_map[self.season] + ' ' + self.year
+
+    def to_sis_term_id(self):
+        season_map = {
+            'A': 0,
+            'B': 2,
+            'C': 5,
+            'D': 8,
+        }
+        return f'{self.year[0]}{self.year[2:]}{season_map[self.season]}'

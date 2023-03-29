@@ -57,7 +57,7 @@ class TestGetRoster:
         """Allows admin."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_students_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_10000'],
             }, m)
             canvas_site_id = '8876542'
@@ -69,26 +69,29 @@ class TestGetRoster:
             assert section['id'] == '32936'
             assert section['name'] == 'Section A'
             assert section['sisId'] == 'SEC:2023-B-32936'
-            assert len(response['students']) == 1
-            student = response['students'][0]
-            assert student['email'] == 'xo.kane@berkeley.edu'
-            assert student['enrollStatus'] == 'active'
-            assert student['firstName'] == 'XO'
-            assert student['id'] == 5678901
-            assert student['lastName'] == 'Kane'
-            assert student['loginId'] == '40000'
-            assert student['photoUrl'].startswith('https://photo-bucket.s3.amazonaws.com/photos/40000.jpg?AWSAccessKeyId=')
-            assert student['studentId'] == 'UID:40000'
-            assert len(student['sections']) == 1
+            assert len(response['students']) == 4
+            student = response['students'][1]
+            assert student['email'] == 'joan.lambert@berkeley.edu'
+            assert student['enrollStatus'] == 'E'
+            assert student['firstName'] == 'Joan'
+            assert student['id'] == '20000'
+            assert student['lastName'] == 'Lambert'
+            assert student['loginId'] == '20000'
+            assert student['photoUrl'].startswith('https://photo-bucket.s3.amazonaws.com/photos/20000.jpg?AWSAccessKeyId=')
+            assert student['studentId'] is None
+            assert len(student['sections']) == 2
             assert student['sections'][0]['id'] == '32936'
             assert student['sections'][0]['name'] == 'Section A'
             assert student['sections'][0]['sisId'] == 'SEC:2023-B-32936'
+            assert student['sections'][1]['id'] == '32937'
+            assert student['sections'][1]['name'] == 'Section B'
+            assert student['sections'][1]['sisId'] == '2023-B-32937'
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_students_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '8876542'
@@ -96,13 +99,13 @@ class TestGetRoster:
             response = _api_get_roster(client, canvas_site_id)
 
             assert len(response['sections']) == 2
-            assert len(response['students']) == 1
+            assert len(response['students']) == 4
 
     def test_student(self, client, app, fake_auth):
         """Denies student."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_students_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_40000'],
             }, m)
             canvas_site_id = '8876542'

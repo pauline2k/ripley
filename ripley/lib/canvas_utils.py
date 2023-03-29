@@ -29,11 +29,11 @@ from flask import current_app as app
 from ripley.lib.berkeley_term import BerkeleyTerm
 
 
-def section_id_from_canvas_sis_section_id(sis_section_id):
+def parse_canvas_sis_section_id(sis_section_id):
     if not sis_section_id:
         return None
     m = re.fullmatch(r'^(SEC:)?(?P<term_year>\d{4})-(?P<term_code>[A-D])-(?P<section_id>\d+)$', sis_section_id)
-    return m['section_id'] if m else None
+    return (m['section_id'], BerkeleyTerm(m['term_year'], m['term_code'])) if m else None
 
 
 def canvas_site_to_api_json(canvas_site):

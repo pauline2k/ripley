@@ -64,6 +64,21 @@ def get_current_term_index():
     return None if not rows or (len(rows) == 0) else rows[0]
 
 
+def get_section_enrollments(term_id, section_ids):
+    params = {
+        'term_id': term_id,
+        'section_ids': section_ids,
+    }
+    sql = """SELECT se.sis_section_id AS section_id, se.ldap_uid, ba.sid, ba.first_name, ba.last_name,
+            se.sis_enrollment_status, ba.email_address
+        FROM sis_data.sis_enrollments se
+        JOIN sis_data.basic_attributes ba on ba.ldap_uid = se.ldap_uid
+        WHERE se.sis_section_id = ANY(%(section_ids)s)
+        AND se.sis_term_id = %(term_id)s
+        ORDER BY se.sis_section_id, ba.last_name, ba.first_name, se.ldap_uid"""
+    return safe_execute_rds(sql, **params)
+
+
 def get_undergraduate_term(term_id):
     sql = f"""SELECT * FROM terms.term_definitions
               WHERE term_id = '{term_id}'

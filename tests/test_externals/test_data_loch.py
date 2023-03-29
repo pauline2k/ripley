@@ -37,6 +37,10 @@ class TestDataLoch:
         assert current_term_index['current_term_name'] == 'Spring 2023'
         assert current_term_index['future_term_name'] == 'Summer 2023'
 
+    def test_get_section_enrollments(self):
+        rosters = data_loch.get_section_enrollments('2232', ['32936', '32937'])
+        assert len(rosters) == 5
+
     def test_get_undergraduate_term(self, app):
         term = data_loch.get_undergraduate_term('2228')
         assert len(term) == 1
