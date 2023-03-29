@@ -85,7 +85,7 @@
               id="page-create-course-site-section-id-list"
               v-model="sectionIds"
               placeholder="Paste your list of Section IDs here, separated by commas or spaces"
-            ></textarea>
+            />
             <v-btn
               id="sections-by-ids-button"
               class="canvas-button canvas-button-primary"

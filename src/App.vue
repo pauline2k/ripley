@@ -1,7 +1,7 @@
 <template>
   <div>
     <VueAnnouncer class="sr-only" />
-    <div v-if="!isInIframe">
+    <div v-if="!$isInIframe">
       <a
         id="skip-to-content-link"
         href="#content"
@@ -19,13 +19,12 @@
 
 <script>
 import Context from '@/mixins/Context'
-import IFrameMixin from '@/mixins/IFrameMixin'
 import NotFound from '@/views/NotFound'
 
 export default {
   name: 'App',
   components: {NotFound},
-  mixins: [Context, IFrameMixin],
+  mixins: [Context],
   methods: {
     skipTo: anchor => console.log(`TODO: VueScrollTo.scrollTo(${anchor}, 400)`)
   }

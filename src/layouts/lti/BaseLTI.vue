@@ -8,11 +8,12 @@
 </template>
 
 <script>
-import IFrameMixin from '@/mixins/IFrameMixin'
+import Context from '@/mixins/Context'
+import {iframePostMessage} from '@/utils'
 
 export default {
   name: 'Embedded',
-  mixins: [IFrameMixin],
+  mixins: [Context],
   methods: {
     /**
      * Update the iframe height on a regular basis to avoid embedded scrollbars on
@@ -29,12 +30,12 @@ export default {
           subject: messageSubject,
           height: frameHeight
         }
-        this.iframePostMessage(JSON.stringify(message))
+        iframePostMessage(JSON.stringify(message))
       }
     }
   },
   mounted() {
-    if (this.isInIframe) {
+    if (this.$isInIframe) {
       setInterval(this.iframeUpdateHeight, 250)
     }
   }

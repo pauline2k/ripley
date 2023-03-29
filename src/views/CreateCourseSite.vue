@@ -81,15 +81,15 @@ import CanvasErrors from '@/components/bcourses/CanvasErrors'
 import ConfirmationStep from '@/components/bcourses/create/ConfirmationStep'
 import Context from '@/mixins/Context'
 import CreateCourseSiteHeader from '@/components/bcourses/create/CreateCourseSiteHeader'
-import IFrameMixin from '@/mixins/IFrameMixin'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import MonitoringJob from '@/components/bcourses/create/MonitoringJob'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
+import {iframeParentLocation} from '@/utils'
 
 export default {
   name: 'CreateCourseSite',
-  mixins: [Context, IFrameMixin],
+  mixins: [Context],
   components: {
     CanvasErrors,
     ConfirmationStep,
@@ -244,8 +244,8 @@ export default {
           const courseSiteUrl = this.$_.get(data.courseSite, 'url')
           if (this.jobStatus === 'Completed' && courseSiteUrl) {
             this.$announcer.polite('Done. Loading new course site now.')
-            if (this.isInIframe) {
-              this.iframeParentLocation(courseSiteUrl)
+            if (this.$isInIframe) {
+              iframeParentLocation(courseSiteUrl)
             } else {
               window.location.href = courseSiteUrl
             }

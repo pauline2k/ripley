@@ -274,16 +274,15 @@
 
 <script>
 import Context from '@/mixins/Context'
-import IFrameMixin from '@/mixins/IFrameMixin'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {addUser, getAddUserCourseSections, getCanvasSiteUserRoles, searchUsers} from '@/api/canvas-user'
-import {putFocusNextTick} from '@/utils'
+import {iframeScrollToTop, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CourseAddUser',
   components: {MaintenanceNotice, OutboundLink},
-  mixins: [Context, IFrameMixin],
+  mixins: [Context],
   data: () => ({
     additionFailureMessage: null,
     additionSuccessMessage: null,
@@ -391,7 +390,7 @@ export default {
       this.showErrorStatus('Authorization check failed.')
     },
     submitUser() {
-      this.iframeScrollToTop()
+      iframeScrollToTop()
       this.showUsersArea = false
       this.showSearchForm = false
       this.$announcer.polite('Adding user')

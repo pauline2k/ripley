@@ -290,17 +290,16 @@
 
 <script>
 import Context from '@/mixins/Context'
-import IFrameMixin from '@/mixins/IFrameMixin'
 import OutboundLink from '@/components/utils/OutboundLink'
 import ProgressBar from '@/components/bcourses/shared/ProgressBar'
 import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/canvas-site'
 import {getCanvasSiteUserRoles} from '@/api/canvas-user'
-import {putFocusNextTick} from '@/utils'
+import {iframeParentLocation, iframeScrollToTop, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CourseGradeExport',
   components: {OutboundLink, ProgressBar},
-  mixins: [Context, IFrameMixin],
+  mixins: [Context],
   data: () => ({
     appState: null,
     backgroundJobId: null,
@@ -334,8 +333,8 @@ export default {
     },
     goToGradebook() {
       const gradebookUrl = `${this.canvasRootUrl}/courses/${this.canvasSiteId}/grades`
-      if (this.isInIframe) {
-        this.iframeParentLocation(gradebookUrl)
+      if (this.$isInIframe) {
+        iframeParentLocation(gradebookUrl)
       } else {
         window.location.href = gradebookUrl
       }
@@ -391,7 +390,7 @@ export default {
       this.appState = 'loading'
       this.appfocus = true
       this.jobStatus = 'New'
-      this.iframeScrollToTop()
+      iframeScrollToTop()
       prepareGradesCacheJob(this.canvasSiteId).then(
         response => {
           if (response.jobRequestStatus === 'Success') {
@@ -432,7 +431,7 @@ export default {
       }, 2000)
     },
     switchToSelection() {
-      this.iframeScrollToTop()
+      iframeScrollToTop()
       this.appState = 'selection'
       putFocusNextTick('page-course-grade-export-header')
     }

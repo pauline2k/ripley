@@ -87,12 +87,11 @@
 
 <script>
 import Context from '@/mixins/Context'
-import IFrameMixin from '@/mixins/IFrameMixin'
-import {putFocusNextTick} from '@/utils'
+import {iframeScrollToTop, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'ConfirmationStep',
-  mixins: [Context, IFrameMixin],
+  mixins: [Context],
   props: {
     currentSemesterName: {
       required: true,
@@ -119,7 +118,7 @@ export default {
     const section = this.selectedSectionsList[0]
     this.siteName = `${section.courseTitle} (${this.currentSemesterName})`
     this.siteAbbreviation = `${section.courseCode}-${section.instruction_format}-${section.section_number}`
-    this.iframeScrollToTop()
+    iframeScrollToTop()
     putFocusNextTick('confirm-course-site-details-header')
   },
   methods: {

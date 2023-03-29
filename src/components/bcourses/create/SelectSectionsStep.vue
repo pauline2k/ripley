@@ -134,13 +134,11 @@
 
 <script>
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
-import IFrameMixin from '@/mixins/IFrameMixin'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {pluralize} from '@/utils'
 
 export default {
   name: 'SelectSectionsStep',
-  mixins: [IFrameMixin],
   components: {CourseSectionsTable, OutboundLink},
   props: {
     coursesList: {
@@ -181,7 +179,7 @@ export default {
   methods: {
     pluralize,
     cancel() {
-      const path = this.isInIframe ? '/lti/create_site' : '/create_site'
+      const path = this.$isInIframe ? '/lti/create_site' : '/create_site'
       this.$router.push({path})
     },
     toggleShowHide: course => course.visible = !course.visible
