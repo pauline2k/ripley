@@ -60,12 +60,12 @@
 <script>
 import CanvasErrors from '@/components/bcourses/CanvasErrors'
 import Context from '@/mixins/Context'
-import IFrameMixin from '@/mixins/IFrameMixin'
 import {createProjectSite} from '@/api/canvas-site'
+import {iframeParentLocation} from '@/utils'
 
 export default {
   name: 'CreateProjectSite',
-  mixins: [Context, IFrameMixin],
+  mixins: [Context],
   components: {CanvasErrors},
   data: () => ({
     isCreating: undefined,
@@ -77,7 +77,7 @@ export default {
   },
   methods: {
     cancel() {
-      const path = this.isInIframe ? '/lti/create_site' : '/create_site'
+      const path = this.$isInIframe ? '/lti/create_site' : '/create_site'
       this.$router.push({path})
     },
     createProjectSite() {
@@ -85,8 +85,8 @@ export default {
       this.$announcer.polite('Creating new project site...')
       createProjectSite(this.name).then(data => {
         if (data.projectSiteUrl) {
-          if (this.isInIframe) {
-            this.iframeParentLocation(data.projectSiteUrl)
+          if (this.$isInIframe) {
+            iframeParentLocation(data.projectSiteUrl)
           } else {
             window.location.href = data.projectSiteUrl
           }

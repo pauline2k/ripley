@@ -1,15 +1,10 @@
 import '@mdi/font/css/materialdesignicons.css'
 import {createVuetify} from 'vuetify'
-import {VDataTable, VDataTableVirtual} from 'vuetify/labs/VDataTable'
 
 // @ts-ignore
 import colors from 'vuetify/lib/util/colors'
 
 export default createVuetify({
-  components: {
-    VDataTable,
-    VDataTableVirtual
-  },
   theme: {
     themes: {
       light: {

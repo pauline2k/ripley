@@ -2,9 +2,43 @@ import _ from 'lodash'
 import {nextTick} from 'vue'
 import {useContextStore} from '@/stores/context'
 
+export const isInIframe = !!window.parent.frames.length
+
 export function decamelize(str: string, separator=' ') {
   const parsed = str.replace(/([a-z\d])([A-Z])/g, '$1' + separator + '$2')
   return _.capitalize(parsed.replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2'))
+}
+
+export function iframeParentLocation(location: string) {
+  if (isInIframe) {
+    const message = JSON.stringify(
+      {
+        subject: 'changeParent',
+        parentLocation: location
+      }
+    )
+    iframePostMessage(message)
+  }
+}
+
+export function iframePostMessage(message: string) {
+  if (window.parent) {
+    window.parent.postMessage(message, '*')
+  }
+}
+
+export function iframeScrollToTop() {
+  if (isInIframe) {
+    const message = JSON.stringify(
+      {
+        subject: 'changeParent',
+        scrollToTop: true
+      }
+    )
+    iframePostMessage(message)
+  } else {
+    window.scrollTo(0, 0)
+  }
 }
 
 export function initializeAxios(app: any, axios: any) {

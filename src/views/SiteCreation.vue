@@ -91,13 +91,12 @@
 
 <script>
 import Context from '@/mixins/Context'
-import IFrameMixin from '@/mixins/IFrameMixin'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
 
 export default {
   name: 'SiteCreation',
-  mixins: [Context, IFrameMixin],
+  mixins: [Context],
   components: {OutboundLink},
   data: () => ({
     canCreateCourseSite: undefined,
@@ -115,11 +114,11 @@ export default {
   },
   methods: {
     goCreateCourseSite() {
-      const path = this.isInIframe ? '/lti/create_course_site' : '/create_course_site'
+      const path = this.$isInIframe ? '/lti/create_course_site' : '/create_course_site'
       this.$router.push({path})
     },
     goCreateProjectSite() {
-      const path = this.isInIframe ? '/lti/create_project_site' : '/create_project_site'
+      const path = this.$isInIframe ? '/lti/create_project_site' : '/create_project_site'
       this.$router.push({path})
     }
   }
