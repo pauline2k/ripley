@@ -85,7 +85,7 @@ import IFrameMixin from '@/mixins/IFrameMixin'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import MonitoringJob from '@/components/bcourses/create/MonitoringJob'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
-import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-course'
+import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
 
 export default {
   name: 'CreateCourseSite',

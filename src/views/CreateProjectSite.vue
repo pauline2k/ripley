@@ -61,7 +61,7 @@
 import CanvasErrors from '@/components/bcourses/CanvasErrors'
 import Context from '@/mixins/Context'
 import IFrameMixin from '@/mixins/IFrameMixin'
-import {createProjectSite} from '@/api/canvas-course'
+import {createProjectSite} from '@/api/canvas-site'
 
 export default {
   name: 'CreateProjectSite',

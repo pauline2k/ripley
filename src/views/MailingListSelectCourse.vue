@@ -42,7 +42,7 @@ import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {getMailingList} from '@/api/mailing-list'
-import {getCanvasSite} from '@/api/canvas-course'
+import {getCanvasSite} from '@/api/canvas-site'
 import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 
 export default {
