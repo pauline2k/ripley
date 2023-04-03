@@ -1,11 +1,26 @@
 <template>
   <div v-if="!isLoading" class="canvas-application page-site-mailing-list">
     <h1 id="page-header" class="mt-0" tabindex="-1">Create Mailing List</h1>
-    <Alert
+    <v-alert
+      v-if="success"
+      class="ma-2"
       :closable="true"
-      :error-message="error"
-      :success-message="success"
-    />
+      density="compact"
+      role="alert"
+      type="success"
+    >
+      {{ success }}
+    </v-alert>
+    <v-alert
+      v-if="error"
+      class="ma-2"
+      :closable="true"
+      density="compact"
+      role="alert"
+      type="warning"
+    >
+      {{ error }}
+    </v-alert>
     <div class="mt-4">
       <v-card id="mailing-list-details" elevation="3">
         <v-card-title>
@@ -110,7 +125,6 @@
 </template>
 
 <script>
-import Alert from '@/components/utils/Alert'
 import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
@@ -120,7 +134,7 @@ import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'MailingListCreate',
-  components: {Alert, OutboundLink, SpinnerWithinButton},
+  components: {OutboundLink, SpinnerWithinButton},
   mixins: [Context, MailingList],
   data: () => ({
     error: undefined,

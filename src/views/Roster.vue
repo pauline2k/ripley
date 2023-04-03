@@ -6,13 +6,28 @@
         <a href="https://ucberkeley.test.instructure.com/courses/1461531/external_tools/36940" target="_blank">Roster photos</a>
         view in Junction, the legacy platform.
       </div>
-      <Alert
+      <v-alert
+        v-if="error"
+        class="ma-2"
         :closable="false"
-        :error-message="error"
-      />
+        density="compact"
+        role="alert"
+        type="warning"
+      >
+        {{ error }}
+      </v-alert>
     </div>
     <div v-if="!isLoading && roster">
-      <Alert :error-message="error" :success-message="success" />
+      <v-alert
+        v-if="success"
+        class="ma-2"
+        :closable="true"
+        density="compact"
+        role="alert"
+        type="success"
+      >
+        {{ success }}
+      </v-alert>
       <v-container v-if="!error" fluid>
         <v-row id="roster-search-filters" align-v="center" class="page-roster">
           <v-col class="pr-2" sm="3">
@@ -99,7 +114,6 @@
 </template>
 
 <script>
-import Alert from '@/components/utils/Alert'
 import Context from '@/mixins/Context'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
 import {exportRoster, getRoster} from '@/api/canvas-site'
@@ -108,7 +122,7 @@ import {printPage} from '@/utils'
 export default {
   name: 'Roster',
   mixins: [Context],
-  components: {Alert, RosterPhotos},
+  components: {RosterPhotos},
   data: () => ({
     error: undefined,
     roster: undefined,

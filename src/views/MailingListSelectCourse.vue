@@ -1,7 +1,16 @@
 <template>
   <div class="canvas-application pa-5">
     <h1 id="page-header" tabindex="-1">Manage course site mailing list</h1>
-    <Alert :closable="true" :error-message="error" />
+    <v-alert
+      v-if="error"
+      class="ma-2"
+      :closable="true"
+      density="compact"
+      role="alert"
+      type="warning"
+    >
+      {{ error }}
+    </v-alert>
     <div class="align-center d-flex flex-wrap pa-3">
       <div class="pr-3">
         <label for="page-site-mailing-list-site-id" class="sr-only">Course Site ID</label>
@@ -37,7 +46,6 @@
 </template>
 
 <script>
-import Alert from '@/components/utils/Alert'
 import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
@@ -48,7 +56,7 @@ import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 export default {
   name: 'MailingListSelectCourse',
   mixins: [Context, MailingList],
-  components: {Alert, SpinnerWithinButton},
+  components: {SpinnerWithinButton},
   data: () => ({
     error: undefined,
     isProcessing: false,
