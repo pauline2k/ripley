@@ -63,6 +63,7 @@ def config_add_user():
         description='Search and add users to course sections',
         target='launch_add_user',
         placement='course_navigation',
+        default='disabled',
     )
 
 
@@ -83,6 +84,7 @@ def config_export_grade():
         description='Exports Course Grades to E-Grades CSV file',
         target='launch_export_grade',
         placement='course_navigation',
+        default='disabled',
     )
 
 
@@ -93,6 +95,7 @@ def config_mailing_list():
         description='Create and manage a mailing list for a course site',
         target='launch_mailing_list',
         placement='course_navigation',
+        default='disabled',
     )
 
 
@@ -238,7 +241,7 @@ def _launch_tool(target_uri):
         raise InternalServerError({'message': str(e)})
 
 
-def _tool_config(title, description, target, placement):
+def _tool_config(title, description, target, placement, default='enabled'):
     return {
         'title': title,
         'description': description,
@@ -256,6 +259,8 @@ def _tool_config(title, description, target, placement):
                             'text': title,
                             'placement': placement,
                             'message_type': 'LtiResourceLinkRequest',
+                            'default': default,
+                            'enabled': True,
                         },
                     ],
                 },
