@@ -49,6 +49,7 @@ export default {
 <style scoped>
 .photo {
   margin: 0 auto;
+  min-height: 96px;
 }
 @media print {
   .photo {
