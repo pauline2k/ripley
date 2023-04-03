@@ -5,13 +5,24 @@
     :aria-label="`Photo of ${student.firstName} ${student.lastName}`"
     class="photo"
     cover
+    :lazy-src="photoPlaceholder"
     width="72"
     :src="photoUrl"
     @error="imageError"
-  />
+  >
+    <template #placeholder>
+      <div class="d-flex align-center justify-center fill-height">
+        <v-progress-circular
+          color="grey-lighten-4"
+          indeterminate
+        />
+      </div>
+    </template>
+  </v-img>
 </template>
 
 <script setup>
+import photoPlaceholder from '@/assets/images/roster_photo_placeholder.svg'
 import photoUnavailable from '@/assets/images/photo_unavailable.svg'
 </script>
 

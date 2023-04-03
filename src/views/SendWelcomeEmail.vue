@@ -207,6 +207,7 @@ export default {
     },
     editor: ClassicEditor,
     editorConfig: {
+      initialData: '',
       toolbar: ['bold', 'italic', 'bulletedList', 'numberedList', 'link']
     },
     errorMessages: [],
@@ -233,7 +234,7 @@ export default {
   methods: {
     cancelEditMode() {
       this.isEditingWelcomeEmail = false
-      this.mailingListMessage = this.mailingList.welcomeEmailBody
+      this.mailingListMessage = this.mailingList.welcomeEmailBody || ''
       this.mailingListSubject = this.mailingList.welcomeEmailSubject
       putFocusNextTick('send-welcome-email-header')
     },
@@ -288,7 +289,7 @@ export default {
     updateDisplay(data) {
       this.mailingList = data
       this.isWelcomeEmailActive = this.mailingList.welcomeEmailActive
-      this.mailingListMessage = this.mailingList.welcomeEmailBody
+      this.mailingListMessage = this.mailingList.welcomeEmailBody || ''
       this.mailingListSubject = this.mailingList.welcomeEmailSubject
       this.errorMessages = this.mailingList.errorMessages || []
       this.isEditingWelcomeEmail = !this.mailingListMessage && !this.mailingListSubject
