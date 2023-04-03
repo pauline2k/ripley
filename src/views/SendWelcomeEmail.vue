@@ -6,7 +6,6 @@
       <div v-for="error in alerts.error" :key="error">{{ error }}</div>
     </div>
     <div v-if="errorMessages.length" class="ma-2">
-      <div v-for="errorMessage in errorMessages" :key="errorMessage">{{ errorMessage }}</div>
       <v-alert
         v-for="error in errorMessages"
         :key="error"
@@ -63,31 +62,41 @@
         <h2 id="send-welcome-email-header" tabindex="-1">
           Send Welcome Email
         </h2>
-        <v-row no-gutters>
-          <div>
-            The Welcome Email tool automatically sends a customizable message by email to all members of your course site,
-            even if the site has not yet been published. For more information, visit
-            <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900">
-              https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900
-            </OutboundLink>.
-          </div>
-        </v-row>
-        <div v-if="emailFieldsPresent && !isWelcomeEmailActive" role="alert" class="alert alert-warning">
+        <div>
+          The Welcome Email tool automatically sends a customizable message by email to all members of your course site,
+          even if the site has not yet been published. For more information, visit
+          <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900">
+            https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900
+          </OutboundLink>.
+        </div>
+        <v-switch
+          v-if="emailFieldsPresent"
+          v-model="isWelcomeEmailActive"
+          label="Send email"
+          color="success"
+          hide-details
+        />
+        <v-alert
+          v-if="emailFieldsPresent && !isWelcomeEmailActive"
+          class="mx-2 my-3"
+          :closable="true"
+          density="compact"
+          role="alert"
+          type="warning"
+        >
           Sending welcome emails is paused until activation.
-        </div>
-        <div v-if="alertEmailActivated" role="alert" class="alert alert-success">
+        </v-alert>
+        <v-alert
+          v-if="alertEmailActivated"
+          class="mx-2 my-3"
+          :closable="true"
+          density="compact"
+          role="alert"
+          type="success"
+        >
           Welcome email activated.
-        </div>
+        </v-alert>
         <div v-if="emailFieldsPresent">
-          <label for="welcome-email-activation-toggle">
-            Send email:
-          </label>
-          <div v-if="isWelcomeEmailActive" class="email-status email-status-active toggle-on">
-            Active
-          </div>
-          <div v-if="!isWelcomeEmailActive" class="email-status email-status-paused">
-            Paused
-          </div>
           <div>
             <v-btn
               v-if="!isTogglingEmailActivation"
@@ -119,39 +128,31 @@
           </v-btn>
         </div>
         <div v-if="isEditingWelcomeEmail" class="pt-5">
-          <v-row no-gutters>
+          <div>
             <label class="mb-2" for="page-site-mailing-list-subject-input">
               Subject
             </label>
-          </v-row>
-          <v-row no-gutters>
-            <div class="pb-5 w-100">
-              <v-text-field
-                id="page-site-mailing-list-subject-input"
-                v-model="mailingListSubject"
-                density="compact"
-                hide-details
-                variant="outlined"
-                @keydown.enter="saveWelcomeEmail"
-              />
-            </div>
-          </v-row>
-          <v-row no-gutters>
-            <label class="mb-2" for="page-site-mailing-list-message-input">
-              Message
-            </label>
-          </v-row>
-          <v-row no-gutters>
-            <div id="page-site-mailing-list-message-input" class="w-100 mb-4">
-              <ckeditor
-                v-model="mailingListMessage"
-                class="w-100"
-                :config="editorConfig"
-                :editor="editor"
-              />
-            </div>
-          </v-row>
-          <v-row no-gutters>
+          </div>
+          <v-text-field
+            id="page-site-mailing-list-subject-input"
+            v-model="mailingListSubject"
+            class="pb-5 w-100"
+            density="compact"
+            hide-details
+            variant="outlined"
+            @keydown.enter="saveWelcomeEmail"
+          />
+          <label class="mb-2" for="page-site-mailing-list-message-input">
+            Message
+          </label>
+          <ckeditor
+            id="page-site-mailing-list-message-input"
+            v-model="mailingListMessage"
+            class="w-100 mb-4"
+            :config="editorConfig"
+            :editor="editor"
+          />
+          <div>
             <v-btn
               id="btn-save-welcome-email"
               color="primary"
@@ -170,31 +171,25 @@
             >
               Cancel
             </v-btn>
-          </v-row>
+          </div>
         </div>
         <div v-if="!isEditingWelcomeEmail" class="mt-3 pt-3">
-          <div>
-            <h3>
-              Subject
-            </h3>
-            <div id="page-site-mailing-list-subject">
-              {{ mailingList.welcomeEmailSubject }}
-            </div>
+          <h3>
+            Subject
+          </h3>
+          <div id="page-site-mailing-list-subject">
+            {{ mailingList.welcomeEmailSubject }}
           </div>
-          <div>
-            <h3>Message</h3>
-            <div id="page-site-mailing-list-body" v-html="mailingList.welcomeEmailBody"></div>
-          </div>
-          <div>
-            <v-btn
-              id="btn-edit-welcome-email"
-              variant="text"
-              class="p-0"
-              @click="setEditMode"
-            >
-              Edit welcome email
-            </v-btn>
-          </div>
+          <h3>Message</h3>
+          <div id="page-site-mailing-list-body" v-html="mailingList.welcomeEmailBody"></div>
+          <v-btn
+            id="btn-edit-welcome-email"
+            variant="text"
+            class="p-0"
+            @click="setEditMode"
+          >
+            Edit welcome email
+          </v-btn>
         </div>
       </div>
     </div>
