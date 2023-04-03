@@ -49,6 +49,7 @@ class TestGetAddUserConfig:
             expected_title='Find a Person to Add',
             expected_description='Search and add users to course sections',
             expected_placement='course_navigation',
+            expected_default='disabled',
         )
 
 
@@ -79,6 +80,7 @@ class TestGetGradeExportConfig:
             expected_title='Download E-Grades',
             expected_description='Exports Course Grades to E-Grades CSV file',
             expected_placement='course_navigation',
+            expected_default='disabled',
         )
 
 
@@ -94,6 +96,7 @@ class TestGetMailingListConfig:
             expected_title='Mailing List',
             expected_description='Create and manage a mailing list for a course site',
             expected_placement='course_navigation',
+            expected_default='disabled',
         )
 
 
@@ -157,7 +160,16 @@ class TestGetUserProvisioningConfig:
         )
 
 
-def _api_get_tool_config(client, app, config_uri, target, expected_title, expected_description, expected_placement):
+def _api_get_tool_config(
+    client,
+    app,
+    config_uri,
+    target,
+    expected_title,
+    expected_description,
+    expected_placement,
+    expected_default='enabled',
+):
     response = client.get(f'api/lti/config/{config_uri}')
     assert response.status_code == 200
     assert response.content_type == 'application/json'
@@ -182,4 +194,6 @@ def _api_get_tool_config(client, app, config_uri, target, expected_title, expect
         'text': expected_title,
         'placement': expected_placement,
         'message_type': 'LtiResourceLinkRequest',
+        'default': expected_default,
+        'enabled': True,
     }
