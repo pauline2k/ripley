@@ -35,7 +35,7 @@ class TestCanvasUtils:
         assert canvas_utils.uid_from_canvas_login_id('inactive-xenomorph') == {'uid': None, 'inactive': None}
 
     def test_parse_canvas_sis_section_id(self):
-        assert canvas_utils.parse_canvas_sis_section_id(None) is None
-        assert canvas_utils.parse_canvas_sis_section_id('666') is None
+        assert canvas_utils.parse_canvas_sis_section_id(None) == (None, None)
+        assert canvas_utils.parse_canvas_sis_section_id('666') == (None, None)
         assert canvas_utils.parse_canvas_sis_section_id('SEC:2023-B-12345')[0] == '12345'
         assert canvas_utils.parse_canvas_sis_section_id('SEC:2023-B-12345')[1].to_sis_term_id() == '2232'

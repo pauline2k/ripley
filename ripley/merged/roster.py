@@ -79,7 +79,7 @@ def _section(canvas_section):
         'id': section_id,
         'name': canvas_section.name,
         'sisId': canvas_section.sis_section_id,
-        'termId': berkeley_term.to_sis_term_id(),
+        'termId': berkeley_term.to_sis_term_id() if berkeley_term else None,
     }
 
 

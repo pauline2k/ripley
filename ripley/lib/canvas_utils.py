@@ -30,10 +30,12 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 
 
 def parse_canvas_sis_section_id(sis_section_id):
-    if not sis_section_id:
-        return None
-    m = re.fullmatch(r'^(SEC:)?(?P<term_year>\d{4})-(?P<term_code>[A-D])-(?P<section_id>\d+)$', sis_section_id)
-    return (m['section_id'], BerkeleyTerm(m['term_year'], m['term_code'])) if m else None
+    section_id, berkeley_term = None, None
+    if sis_section_id:
+        m = re.fullmatch(r'^(SEC:)?(?P<term_year>\d{4})-(?P<term_code>[A-D])-(?P<section_id>\d+)$', sis_section_id)
+        section_id = m['section_id'] if m else None
+        berkeley_term = BerkeleyTerm(m['term_year'], m['term_code']) if m else None
+    return section_id, berkeley_term
 
 
 def canvas_site_to_api_json(canvas_site):
