@@ -91,7 +91,7 @@ def get_roster_csv(canvas_site_id):
             'UID': student['uid'],
             'Role': {'E': 'Student', 'W': 'Waitlist Student'}.get(student['enrollStatus'], None),
             'Email address': student['email'],
-            'Sections': sections,
+            'Sections': ', '.join(sections),
         })
     now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     return csv_download_response(
