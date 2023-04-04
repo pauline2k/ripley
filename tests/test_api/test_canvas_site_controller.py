@@ -69,8 +69,16 @@ class TestGetRoster:
             assert section['id'] == '32936'
             assert section['name'] == 'Section A'
             assert section['sisId'] == 'SEC:2023-B-32936'
-            assert len(response['students']) == 4
-            student = response['students'][1]
+            students = response['students']
+            assert len(students) == 4
+
+            # Verify sort order
+            previous_last_name = ''
+            for student in students:
+                assert previous_last_name < student['lastName']
+            # Verify contents of sample student
+            student = next((s for s in students if s['id'] == '20000'), None)
+            assert student
             assert student['email'] == 'joan.lambert@berkeley.edu'
             assert student['enrollStatus'] == 'E'
             assert student['firstName'] == 'Joan'
