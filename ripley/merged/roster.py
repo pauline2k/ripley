@@ -54,6 +54,7 @@ def canvas_site_roster(canvas_site_id):
                     sections_by_uid[uid]['sections'].append(section)
             students = list(sections_by_uid.values())
             _merge_photo_urls(students)
+    students.sort(key=lambda s: f"{s['lastName']} {s['firstName']} {s['studentId']}")
     return {
         'sections': sections,
         'students': students,

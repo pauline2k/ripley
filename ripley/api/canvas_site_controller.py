@@ -30,6 +30,7 @@ from flask_login import login_required
 from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas
+from ripley.externals.canvas import get_course
 from ripley.lib.canvas_utils import canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
 from ripley.merged.roster import canvas_site_roster
@@ -100,12 +101,14 @@ def get_roster_csv(canvas_site_id):
     )
 
 
-@app.route('/redirect/canvas/<canvas_site_id>/user/<canvas_user_id>')
+@app.route('/redirect/canvas/<canvas_site_id>/user/<uid>')
 @login_required
-def redirect_to_canvas_profile(canvas_site_id, canvas_user_id):
-    canvas_site = canvas.get_course(canvas_site_id)
-    if canvas_site:
+def redirect_to_canvas_profile(canvas_site_id, uid):
+    # canvas_site = canvas.get_course(canvas_site_id)
+    users = get_course(canvas_site_id, api_call=False).get_users(enrollment_type='student')
+    user = next((user for user in users if getattr(user, 'login_id', None) == uid), None)
+    if user:
         base_url = app.config['CANVAS_API_URL']
-        return redirect(f'{base_url}/courses/{canvas_site_id}/users/{canvas_user_id}')
+        return redirect(f'{base_url}/courses/{canvas_site_id}/users/{user.id}')
     else:
         raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')

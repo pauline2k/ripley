@@ -11,7 +11,7 @@
       <a
         :id="`student-profile-url-${student.studentId}`"
         class="text-decoration-none"
-        :href="student.profileUrl || `/redirect/canvas/${canvasSiteId}/user/${student.canvasUserId}`"
+        :href="student.profileUrl || `${config.apiBaseUrl}/redirect/canvas/${canvasSiteId}/user/${student.uid}`"
         target="_top"
       >
         <RosterPhoto :student="student" />
@@ -54,11 +54,13 @@
 </template>
 
 <script>
+import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import RosterPhoto from '@/components/bcourses/roster/RosterPhoto'
 
 export default {
   name: 'RosterPhotos',
+  mixins: [Context],
   components: {OutboundLink, RosterPhoto},
   props: {
     canvasSiteId: {

@@ -60,7 +60,9 @@
       </div>
       <div v-if="mailingList" class="pt-2">
         <h2 id="send-welcome-email-header" tabindex="-1">
-          Send Welcome Email
+          <span v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject">Send</span>
+          <span v-if="!mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject">Send Welcome Email</span>
+          Welcome Email
         </h2>
         <div>
           The Welcome Email tool automatically sends a customizable message by email to all members of your course site,
@@ -70,14 +72,14 @@
           </OutboundLink>.
         </div>
         <v-switch
-          v-if="emailFieldsPresent"
+          v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject"
           v-model="isWelcomeEmailActive"
           label="Send email"
           color="success"
           hide-details
         />
         <v-alert
-          v-if="emailFieldsPresent && !isWelcomeEmailActive"
+          v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject && !isWelcomeEmailActive"
           class="mx-2 my-3"
           :closable="true"
           density="compact"
@@ -96,7 +98,7 @@
         >
           Welcome email activated.
         </v-alert>
-        <div v-if="emailFieldsPresent">
+        <div v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject">
           <div>
             <v-btn
               v-if="!isTogglingEmailActivation"
@@ -164,7 +166,7 @@
               </span>
             </v-btn>
             <v-btn
-              v-if="emailFieldsPresent"
+              v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject"
               id="btn-cancel-welcome-email-edit"
               color="secondary"
               @click="cancelEditMode"
@@ -242,9 +244,6 @@ export default {
     mailingListSubject: '',
   }),
   computed: {
-    emailFieldsPresent() {
-      return this.mailingList.welcomeEmailBody && this.mailingList.welcomeEmailSubject
-    },
     isWelcomeEmailValid() {
       return !!this.$_.trim(this.mailingListSubject) && !!this.$_.trim(this.mailingListMessage)
     }
