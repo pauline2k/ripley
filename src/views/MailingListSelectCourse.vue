@@ -1,6 +1,11 @@
 <template>
   <div class="canvas-application pa-5">
     <h1 id="page-header" tabindex="-1">Manage course site mailing list</h1>
+    <div v-if="config.isVueAppDebugMode" style="background-color: lightgray" class="ma-2 pa-5">
+      Here is a sample
+      <a href="https://ucberkeley.beta.instructure.com/courses/1461531/external_tools/58530" target="_blank">Mailing List</a>
+      view in Junction, the legacy platform.
+    </div>
     <v-alert
       v-if="error"
       class="ma-2"

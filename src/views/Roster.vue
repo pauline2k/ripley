@@ -69,6 +69,7 @@
                 <v-btn
                   id="print-roster"
                   color="primary"
+                  :disabled="disablePrintButton"
                   @click="printRoster"
                 >
                   <v-icon class="pr-2 text-white" icon="mdi-printer" />
@@ -140,6 +141,11 @@ export default {
     },
     section() {
       return this.recalculateStudents()
+    }
+  },
+  computed: {
+    disablePrintButton() {
+      return !!this.students.find(s => !s.hasRosterPhotoLoaded)
     }
   },
   created() {

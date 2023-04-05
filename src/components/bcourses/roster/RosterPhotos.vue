@@ -14,7 +14,10 @@
         :href="student.profileUrl || `${config.apiBaseUrl}/redirect/canvas/${canvasSiteId}/user/${student.uid}`"
         target="_top"
       >
-        <RosterPhoto :student="student" />
+        <RosterPhoto
+          :on-load="() => student.hasRosterPhotoLoaded = true"
+          :student="student"
+        />
       </a>
       <v-card-title class="py-0 text-subtitle-2">
         <div v-if="!student.email" :id="`student-without-email-${student.studentId}`">
