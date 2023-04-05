@@ -9,6 +9,7 @@
     width="72"
     :src="photoUrl"
     @error="imageError"
+    @load="onLoad"
   >
     <template #placeholder>
       <div class="d-flex align-center justify-center fill-height">
@@ -33,6 +34,11 @@ export default {
   name: 'RosterPhoto',
   mixins: [Context],
   props: {
+    onLoad: {
+      default: () => {},
+      required: false,
+      type: Function
+    },
     student: {
       required: true,
       type: Object

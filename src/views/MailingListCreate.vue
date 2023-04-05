@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="canvas-application page-site-mailing-list">
+  <div v-if="!isLoading" class="canvas-application mx-10 my-5">
     <h1 id="page-header" class="mt-0" tabindex="-1">Create Mailing List</h1>
     <v-alert
       v-if="success"
@@ -69,7 +69,7 @@
           </v-container>
         </v-card-text>
       </v-card>
-      <div class="mx-5 mt-8">
+      <div class="mt-8">
         <h2>Create Mailing List</h2>
         <v-container fluid>
           <v-row no-gutters align="start">
@@ -79,7 +79,11 @@
               </div>
             </v-col>
             <v-col cols="7">
+              <div v-if="currentUser.isTeaching && !currentUser.isAdmin">
+                {{ mailingListName }}
+              </div>
               <v-text-field
+                v-if="currentUser.isAdmin"
                 id="mailing-list-name-input"
                 v-model="mailingListName"
                 aria-required="true"
@@ -156,14 +160,18 @@ export default {
     }
   },
   mounted() {
-    if (this.canvasSite) {
-      getSuggestedMailingListName(this.canvasSite.canvasSiteId).then(data => {
-        this.mailingListName = data
-        putFocusNextTick('page-header')
-        this.$ready()
-      })
+    if (this.currentUser.isTeaching || this.currentUser.isAdmin) {
+      if (this.canvasSite) {
+        getSuggestedMailingListName(this.canvasSite.canvasSiteId).then(data => {
+          this.mailingListName = data
+          putFocusNextTick('page-header')
+          this.$ready()
+        })
+      } else {
+        this.$router.push({path: '/mailing_list/select_course'})
+      }
     } else {
-      this.$router.push({path: '/mailing_list/select_course'})
+      this.$router.push({path: '/404'})
     }
   },
   methods: {
@@ -192,31 +200,6 @@ export default {
 
 <style scoped lang="scss">
 .has-invalid-characters {
-  min-height: 32px;
-}
-.page-site-mailing-list {
-  padding: 20px;
-
-  .page-site-mailing-list-button-primary {
-    margin: 0 4px;
-  }
-  .page-site-mailing-list-header3 {
-    font-size: 15px;
-    line-height: 22px;
-  }
-  .page-site-mailing-list-form {
-    margin: 20px 0;
-  }
-  .page-site-mailing-list-form-label-long {
-    display: inline;
-    font-weight: 300;
-    text-align: left;
-  }
-  .page-site-mailing-list-text {
-    font-size: 14px;
-    font-weight: 300;
-    line-height: 1.6;
-    margin: 15px;
-  }
+  min-height: 24px;
 }
 </style>
