@@ -72,10 +72,10 @@
       <div class="mx-5 mt-8">
         <h2>Create Mailing List</h2>
         <v-container fluid>
-          <v-row no-gutters align="center">
+          <v-row no-gutters align="start">
             <v-col cols="1">
-              <div class="float-right pr-3">
-                <label for="mailing-list-name-input">Name:</label>
+              <div class="float-right pr-3 pt-4">
+                <label for="mailing-list-name-input" class="font-weight-medium">Name:</label>
               </div>
             </v-col>
             <v-col cols="7">
@@ -89,13 +89,19 @@
                 required
                 @keydown.enter="create"
               />
+              <div class="has-invalid-characters">
+                <div v-if="hasInvalidCharacters" class="d-flex text-red">
+                  <div class="pr-1 text-no-wrap">Name may contain neither spaces nor: </div>
+                  <div><pre>{{ $_.join([...$_.trim(invalidCharacters)], ' ') }}</pre></div>
+                </div>
+              </div>
             </v-col>
             <v-col>
-              <div class="d-flex">
+              <div class="d-flex pt-3">
                 <div>
                   <v-btn
                     id="btn-cancel"
-                    class="mr-1"
+                    class="mx-1"
                     variant="text"
                     @click="cancel"
                   >
@@ -106,7 +112,7 @@
                   <v-btn
                     id="btn-create-mailing-list"
                     color="primary"
-                    :disabled="isCreating || !$_.trim(mailingListName)"
+                    :disabled="isCreating || !$_.trim(mailingListName) || hasInvalidCharacters"
                     @click="create"
                   >
                     <span v-if="!isCreating">Create mailing list</span>
@@ -138,10 +144,17 @@ export default {
   mixins: [Context, MailingList],
   data: () => ({
     error: undefined,
+    invalidCharacters: ' "(),:;<>@[\\]',
     isCreating: false,
     mailingListName: undefined,
     success: undefined
   }),
+  computed: {
+    hasInvalidCharacters() {
+      const name = this.$_.trim(this.mailingListName)
+      return this.$_.intersection([...name], [...this.invalidCharacters]).length
+    }
+  },
   mounted() {
     if (this.canvasSite) {
       getSuggestedMailingListName(this.canvasSite.canvasSiteId).then(data => {
@@ -161,7 +174,7 @@ export default {
     create() {
       this.error = this.success = null
       const name = this.$_.trim(this.mailingListName)
-      if (name) {
+      if (name && !this.hasInvalidCharacters) {
         this.isCreating = true
         this.$announcer.polite('Creating list')
         createMailingList(this.canvasSite.canvasSiteId, name).then(
@@ -178,6 +191,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.has-invalid-characters {
+  min-height: 32px;
+}
 .page-site-mailing-list {
   padding: 20px;
 
