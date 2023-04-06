@@ -43,13 +43,22 @@ export default {
         onClick: () => {
           this.$router.push({path: `/profile/${this.currentUser.uid}`})
         }
-      },
-      {
-        id: 'log-out',
-        label: 'Log Out',
-        onClick: this.logOut
       }
     ]
+    if (this.currentUser.canvasSiteId && this.currentUser.isAdmin) {
+      this.options.push({
+        id: 'current-user-canvas-site',
+        label: `Canvas Site ${this.currentUser.canvasSiteId}`,
+        onClick: () => {
+          this.$router.push({path: `/canvas_site/${this.currentUser.canvasSiteId}`})
+        }
+      })
+    }
+    this.options.push({
+      id: 'log-out',
+      label: 'Log Out',
+      onClick: this.logOut
+    })
   },
   methods: {
     logOut() {

@@ -2,6 +2,7 @@ import _ from 'lodash'
 import auth from '@/auth'
 import BaseLTI from '@/layouts/lti/BaseLTI.vue'
 import BaseStandalone from '@/layouts/standalone/BaseStandalone.vue'
+import CanvasSiteSummary from '@/views/CanvasSiteSummary.vue'
 import CourseAddUser from '@/views/CourseAddUser.vue'
 import CourseGradeExport from '@/views/CourseGradeExport.vue'
 import CourseManageOfficialSections from '@/views/CourseManageOfficialSections.vue'
@@ -192,6 +193,10 @@ const routes:RouteRecordRaw[] = [
   {
     beforeEnter: auth.requiresAdmin,
     children: [
+      {
+        component: CanvasSiteSummary,
+        path: '/canvas_site/:id'
+      },
       {
         path: '/jobs',
         component: Jobs,
