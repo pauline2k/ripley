@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from datetime import datetime
 
-from flask import current_app as app, redirect
+from flask import current_app as app, redirect, request
 from flask_login import login_required
 from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
@@ -33,6 +33,7 @@ from ripley.externals import canvas
 from ripley.externals.canvas import get_course
 from ripley.lib.canvas_utils import canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
+from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster
 
 
@@ -45,7 +46,18 @@ def canvas_site_provision():
 def get_canvas_site_site(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
-        return tolerant_jsonify(canvas_site_to_api_json(course))
+        api_json = canvas_site_to_api_json(course)
+        include_users = to_bool_or_none(request.args.get('includeUsers', False))
+        if include_users:
+            api_json['users'] = []
+            for user in course.get_users(include=('email', 'enrollments')):
+                api_json['users'].append({
+                    'id': user.id,
+                    'enrollments': user.enrollments,
+                    'name': user.name,
+                    'uid': user.login_id,
+                })
+        return tolerant_jsonify(api_json)
     else:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
 
@@ -104,7 +116,6 @@ def get_roster_csv(canvas_site_id):
 @app.route('/redirect/canvas/<canvas_site_id>/user/<uid>')
 @login_required
 def redirect_to_canvas_profile(canvas_site_id, uid):
-    # canvas_site = canvas.get_course(canvas_site_id)
     users = get_course(canvas_site_id, api_call=False).get_users(enrollment_type='student')
     user = next((user for user in users if getattr(user, 'login_id', None) == uid), None)
     if user:

@@ -1,5 +1,9 @@
 import utils from './api-utils'
 
+export function becomeUser(canvasSiteId: number, uid: string) {
+  return utils.post('/api/auth/become_user', {canvasSiteId, uid}, true)
+}
+
 export function devAuthLogIn(canvasSiteId: number, uid: string, password: string) {
   return utils.post('/api/auth/dev_auth', {canvasSiteId, password, uid}, true)
 }

@@ -33,8 +33,8 @@ export function prepareGradesCacheJob(canvasSiteId: number) {
   return utils.post(`/api/canvas_site/${canvasSiteId}/egrade_export/prepare`, {}, true)
 }
 
-export function getCanvasSite(canvasSiteId: number) {
-  return utils.get(`/api/canvas_site/${canvasSiteId}`, false)
+export function getCanvasSite(canvasSiteId: number, includeUsers?: boolean) {
+  return utils.get(`/api/canvas_site/${canvasSiteId}?includeUsers=${!!includeUsers}`, false)
 }
 
 export function getRoster(canvasSiteId: number, redirectOnError?: boolean) {

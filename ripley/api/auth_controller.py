@@ -29,9 +29,21 @@ import cas
 from flask import current_app as app, flash, redirect, request, url_for
 from flask_login import current_user, login_required, logout_user
 from ripley.api.errors import ResourceNotFoundError
-from ripley.api.util import start_login_session
+from ripley.api.util import admin_required, start_login_session
 from ripley.lib.http import add_param_to_url, tolerant_jsonify
 from ripley.models.user import User
+
+
+@app.route('/api/auth/become_user', methods=['POST'])
+@admin_required
+def become():
+    logout_user()
+    params = request.get_json() or {}
+    return _dev_auth_login(
+        canvas_site_id=params.get('canvasSiteId'),
+        password=app.config['DEV_AUTH_PASSWORD'],
+        uid=params.get('uid'),
+    )
 
 
 @app.route('/api/auth/cas_login_url')
@@ -50,17 +62,7 @@ def dev_auth_login():
         uid = params.get('uid')
         app.logger.debug(f'Dev-auth login attempt by UID {uid}')
         password = params.get('password')
-        if password != app.config['DEV_AUTH_PASSWORD']:
-            app.logger.debug(f'UID {uid} failed dev-auth login: bad password.')
-            return tolerant_jsonify({'message': 'Invalid credentials'}, 401)
-        user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
-        user = User(user_id)
-        if not user.is_active:
-            msg = f'Sorry, {uid} is not authorized to use this tool.'
-            return tolerant_jsonify({'message': msg}, 403)
-        response = start_login_session(user)
-        app.logger.debug(f'Successful dev-auth login for UID {user.uid}.')
-        return response
+        return _dev_auth_login(canvas_site_id, password, uid)
     else:
         app.logger.debug('Dev-auth attempt when DEV_AUTH_ENABLED == False.')
         raise ResourceNotFoundError('Unknown path')
@@ -123,6 +125,20 @@ def _cas_client(target_url=None):
     if target_url:
         service_url = service_url + '?' + urlencode({'url': target_url})
     return cas.CASClientV3(server_url=cas_server, service_url=service_url)
+
+
+def _dev_auth_login(canvas_site_id, password, uid):
+    if password != app.config['DEV_AUTH_PASSWORD']:
+        app.logger.debug(f'UID {uid} failed dev-auth login: bad password.')
+        return tolerant_jsonify({'message': 'Invalid credentials'}, 401)
+    user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
+    user = User(user_id)
+    if not user.is_active:
+        msg = f'Sorry, {uid} is not authorized to use this tool.'
+        return tolerant_jsonify({'message': msg}, 403)
+    response = start_login_session(user)
+    app.logger.debug(f'Successful dev-auth login for UID {user.uid}.')
+    return response
 
 
 def _get_custom_param(lti_data, key):
