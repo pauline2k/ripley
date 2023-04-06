@@ -41,6 +41,41 @@ VALUES
 ('2232', '32937', '50000', 'E'),
 ('2232', '32937', '60000', 'W');
 
+CREATE TABLE sis_data.sis_sections (
+    sis_term_id VARCHAR,
+    sis_section_id VARCHAR,
+    is_primary BOOLEAN,
+    sis_course_name VARCHAR,
+    sis_course_title VARCHAR,
+    sis_instruction_format VARCHAR,
+    sis_section_num VARCHAR,
+    allowed_units NUMERIC,
+    cs_course_id VARCHAR,
+    session_code VARCHAR,
+    instruction_mode VARCHAR,
+    instructor_uid VARCHAR,
+    instructor_name VARCHAR,
+    instructor_role_code VARCHAR,
+    meeting_location VARCHAR,
+    meeting_days VARCHAR,
+    meeting_start_time VARCHAR,
+    meeting_end_time VARCHAR,
+    meeting_start_date VARCHAR,
+    meeting_end_date VARCHAR
+);
+
+INSERT INTO sis_data.sis_sections
+(sis_term_id, sis_section_id, is_primary, sis_course_name, sis_course_title, sis_instruction_format, sis_section_num, allowed_units, cs_course_id, session_code, instruction_mode, instructor_uid, instructor_name, instructor_role_code, meeting_location, meeting_days, meeting_start_time, meeting_end_time, meeting_start_date, meeting_end_date)
+VALUES
+('2232', '32936', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '001', NULL, '876543', 1, 'P', '', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2232', '32937', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '002', NULL, '876543', 1, 'P', '', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2228', '17275', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '001', NULL, '100726', 1, 'P', '', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2228', '17277', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '002', NULL, '100726', 1, 'P', '', 'Mufty Blauswater', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2232', '12345', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '001', NULL, '1234567', 1, 'P', '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2232', '12346', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '002', NULL, '1234567', 1, 'P', '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2228', '32290', TRUE, 'ASTRON C228', 'Extragalactic Astronomy and Cosmology', 'LEC', '001', NULL, '124009', 1, 'P', '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2228', '32291', TRUE, 'ASTRON C228', 'Extragalactic Astronomy and Cosmology', 'LEC', '002', NULL, '124009', 1, 'P', '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL);
+
 DROP SCHEMA IF EXISTS terms cascade;
 
 CREATE SCHEMA terms;

@@ -64,6 +64,21 @@ def get_current_term_index():
     return None if not rows or (len(rows) == 0) else rows[0]
 
 
+def get_instructing_sections(uid, term_ids):
+    params = {
+        'instructor_uid': uid,
+        'term_ids': term_ids,
+    }
+    sql = """SELECT sis_term_id AS term_id, cs_course_id AS course_id, sis_course_name AS course_name, sis_course_title AS course_title,
+            sis_section_id AS section_id, is_primary, sis_instruction_format AS instruction_format, sis_section_num AS section_number,
+            instruction_mode
+        FROM sis_data.sis_sections
+        WHERE instructor_uid = %(instructor_uid)s
+        AND sis_term_id = ANY(%(term_ids)s)
+        ORDER BY term_id DESC, sis_course_name, is_primary DESC, sis_instruction_format, sis_section_num"""
+    return safe_execute_rds(sql, **params)
+
+
 def get_section_enrollments(term_id, section_ids):
     params = {
         'term_id': term_id,

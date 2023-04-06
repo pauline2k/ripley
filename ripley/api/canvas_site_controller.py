@@ -26,12 +26,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from datetime import datetime
 
 from flask import current_app as app, redirect, request
-from flask_login import login_required
+from flask_login import current_user, login_required
 from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
-from ripley.externals import canvas
+from ripley.externals import canvas, data_loch
 from ripley.externals.canvas import get_course
-from ripley.lib.canvas_utils import canvas_site_to_api_json
+from ripley.lib.berkeley_term import BerkeleyTerm
+from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster
@@ -43,7 +44,7 @@ def canvas_site_provision():
 
 
 @app.route('/api/canvas_site/<canvas_site_id>')
-def get_canvas_site_site(canvas_site_id):
+def get_canvas_site(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
         api_json = canvas_site_to_api_json(course)
@@ -62,9 +63,56 @@ def get_canvas_site_site(canvas_site_id):
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
 
 
-@app.route('/api/canvas_site/<canvas_site_id>/provision/sections_feed')
-def canvas_site_provision_sections_feed(canvas_site_id):
-    return tolerant_jsonify([])
+@app.route('/api/canvas_site/<canvas_site_id>/provision/sections')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+def canvas_site_provision_sections(canvas_site_id):
+    canvas_sections = canvas.get_course_sections(canvas_site_id)
+    berkeley_terms = BerkeleyTerm.get_current_terms().values()
+    # canvas_terms = canvas.get_terms()
+    # TODO: find the intersection of berkeley_terms and canvas_terms
+    teaching_sections = data_loch.get_instructing_sections(current_user.uid, [t.to_sis_term_id() for t in berkeley_terms])
+    courses_by_term = {}
+    for section in teaching_sections:
+        course_id = section['course_id']
+        term_id = section['term_id']
+        if term_id not in courses_by_term:
+            courses_by_term[term_id] = {}
+        if course_id not in courses_by_term[term_id]:
+            courses_by_term[term_id][course_id] = {
+                'courseCode': section['course_name'],
+                'sections': [],
+                'title': section['course_title'],
+            }
+        courses_by_term[term_id][course_id]['sections'].append({
+            'id': section['section_id'],
+            'instructionFormat': section['instruction_format'],
+            'instructionMode': section['instruction_mode'],
+            'isPrimarySection': section['is_primary'],
+            'schedules': {
+                'oneTime': [],
+                'recurring': [],
+            },
+            'sectionNumber': section['section_number'],
+        })
+
+    def _term_courses(term_id, courses_by_id):
+        term = BerkeleyTerm.from_sis_term_id(term_id)
+        return {
+            'classes': list(courses_by_id.values()),
+            'name': term.to_english(),
+            'slug': term.to_slug(),
+            'termId': term_id,
+            'termYear': term.year,
+        }
+    official_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
+    term = BerkeleyTerm.from_sis_term_id(official_sections[0]['termId'])
+    return tolerant_jsonify({
+        'canvasSite': {
+            'officialSections': official_sections,
+            'term': term.to_api_json(),
+        },
+        'teachingTerms': [_term_courses(term_id, courses_by_id) for term_id, courses_by_id in courses_by_term.items()],
+    })
 
 
 @app.route('/api/canvas_site/provision/status')

@@ -33,6 +33,73 @@ teacher_uid = '30000'
 student_uid = '40000'
 
 
+class TestCanvasSiteProvisionSections:
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        _api_canvas_course_provision_sections(client, '8876542', expected_status_code=401)
+
+    def test_no_canvas_account(self, client, fake_auth):
+        """Denies user with no Canvas account."""
+        canvas_site_id = '8876542'
+        fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+        _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=401)
+
+    def test_not_enrolled(self, client, app, fake_auth):
+        """Denies user with no course enrollment."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {'course': ['get_by_id_8876542'], 'user': ['profile_20000']}, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
+            _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=401)
+
+    def test_teacher(self, client, app, fake_auth):
+        """Allows teacher."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'user': ['profile_30000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            response = _api_canvas_course_provision_sections(client, canvas_site_id)
+            assert response['canvasSite']
+            assert response['canvasSite']['term'] == {
+                'id': '2232',
+                'name': 'Spring 2023',
+                'season': 'B',
+                'year': '2023',
+            }
+            assert len(response['canvasSite']['officialSections']) == 2
+            section = response['canvasSite']['officialSections'][0]
+            assert section['id'] == '32936'
+            assert section['name'] == 'Section A'
+            assert section['sisId'] == 'SEC:2023-B-32936'
+            assert section['termId'] == '2232'
+            assert len(response['teachingTerms']) == 1
+            spring_term = response['teachingTerms'][0]
+            assert spring_term['name'] == 'Spring 2023'
+            assert spring_term['slug'] == 'spring-2023'
+            assert spring_term['termId'] == '2232'
+            assert spring_term['termYear'] == '2023'
+            assert len(spring_term['classes']) == 1
+            course = spring_term['classes'][0]
+            assert course['courseCode'] == 'ASTRON 218'
+            assert course['title'] == 'Stellar Dynamics and Galactic Structure'
+            assert len(course['sections']) == 2
+            section = course['sections'][0]
+            assert section['id'] == '12345'
+            assert section['instructionFormat'] == 'LEC'
+            assert section['instructionMode'] == 'P'
+            assert section['isPrimarySection'] is True
+            assert section['sectionNumber'] == '001'
+
+
+def _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=200):
+    response = client.get(f'/api/canvas_site/{canvas_site_id}/provision/sections')
+    assert response.status_code == expected_status_code
+    return response.json
+
+
 class TestGetRoster:
 
     def test_anonymous(self, client):

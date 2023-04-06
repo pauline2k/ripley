@@ -28,6 +28,12 @@ from datetime import date
 import pytest
 from ripley.externals import data_loch
 
+admin_uid = '10000'
+no_canvas_account_uid = '10001'
+not_enrolled_uid = '20000'
+teacher_uid = '30000'
+student_uid = '40000'
+
 
 @pytest.mark.usefixtures('db_session')
 class TestDataLoch:
@@ -36,6 +42,20 @@ class TestDataLoch:
         current_term_index = data_loch.get_current_term_index()
         assert current_term_index['current_term_name'] == 'Spring 2023'
         assert current_term_index['future_term_name'] == 'Summer 2023'
+
+    def test_get_instructing_sections(self):
+        sections = data_loch.get_instructing_sections(teacher_uid, ['2228', '2232'])
+        assert len(sections) == 4
+        section = sections[0]
+        assert section['term_id'] == '2232'
+        assert section['section_id'] == '12345'
+        assert section['is_primary'] is True
+        assert section['course_id'] == '1234567'
+        assert section['course_name'] == 'ASTRON 218'
+        assert section['course_title'] == 'Stellar Dynamics and Galactic Structure'
+        assert section['instruction_format'] == 'LEC'
+        assert section['section_number'] == '001'
+        assert section['instruction_mode'] == 'P'
 
     def test_get_section_enrollments(self):
         rosters = data_loch.get_section_enrollments('2232', ['32936', '32937'])
