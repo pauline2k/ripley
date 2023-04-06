@@ -5,6 +5,7 @@
     :aria-label="`Photo of ${student.firstName} ${student.lastName}`"
     class="photo"
     cover
+    eager
     :lazy-src="photoPlaceholder"
     width="72"
     :src="photoUrl"

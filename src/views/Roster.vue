@@ -66,15 +66,24 @@
                 </v-btn>
               </div>
               <div>
-                <v-btn
-                  id="print-roster"
-                  color="primary"
-                  :disabled="disablePrintButton"
-                  @click="printRoster"
+                <v-tooltip
+                  v-model="showPrintButtonTooltip"
+                  location="top"
+                  :text="printButtonTooltip"
                 >
-                  <v-icon class="pr-2 text-white" icon="mdi-printer" />
-                  Print<span class="sr-only"> roster of students</span>
-                </v-btn>
+                  <template #activator="{props}">
+                    <v-btn
+                      id="print-roster"
+                      color="primary"
+                      :disabled="!students.length || disablePrintButton"
+                      v-bind="props"
+                      @click="printRoster"
+                    >
+                      <v-icon class="pr-2 text-white" icon="mdi-printer" />
+                      Print<span class="sr-only"> roster of students</span>
+                    </v-btn>
+                  </template>
+                </v-tooltip>
               </div>
             </div>
           </v-col>
@@ -126,11 +135,13 @@ export default {
   components: {RosterPhotos},
   data: () => ({
     error: undefined,
+    printButtonTooltip: 'You can print when student images have loaded.',
     roster: undefined,
     screamInSpace: false,
     search: undefined,
     section: '',
     sections: undefined,
+    showTooltip: true,
     students: undefined,
     success: undefined
   }),
@@ -145,7 +156,17 @@ export default {
   },
   computed: {
     disablePrintButton() {
-      return !!this.students.find(s => !s.hasRosterPhotoLoaded)
+      return !this.$_.size(this.students) || !!this.students.find(s => !s.hasRosterPhotoLoaded)
+    },
+    showPrintButtonTooltip: {
+      get() {
+        return !this.isLoading && this.showTooltip && this.disablePrintButton
+      },
+      set(value) {
+        if (!value) {
+          this.showTooltip = false
+        }
+      }
     }
   },
   created() {
@@ -167,6 +188,10 @@ export default {
             })
           }
           this.$_.each(this.students, s => s.idx = this.idx(`${s.firstName} ${s.lastName} ${s.id}`))
+          // If student count is low then tooltip is not necessary.
+          const threshold = 36
+          this.showPrintButtonTooltip = (this.students.length >= threshold) && this.disablePrintButton
+          this.$announcer.polite(this.printButtonTooltip)
         },
         error => this.error = error
       ).finally(() => this.$ready('Roster'))
