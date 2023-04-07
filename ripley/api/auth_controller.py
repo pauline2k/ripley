@@ -29,13 +29,13 @@ import cas
 from flask import current_app as app, flash, redirect, request, url_for
 from flask_login import current_user, login_required, logout_user
 from ripley.api.errors import ResourceNotFoundError
-from ripley.api.util import admin_required, start_login_session
+from ripley.api.util import start_login_session
 from ripley.lib.http import add_param_to_url, tolerant_jsonify
 from ripley.models.user import User
 
 
 @app.route('/api/auth/become_user', methods=['POST'])
-@admin_required
+@login_required
 def become():
     logout_user()
     params = request.get_json() or {}

@@ -46,6 +46,10 @@ const routes:RouteRecordRaw[] = [
     path: '/',
     children: [
       {
+        component: CanvasSiteSummary,
+        path: '/canvas_site/:id'
+      },
+      {
         component: CourseAddUser,
         path: '/add_user/:id',
         meta: {
@@ -193,10 +197,6 @@ const routes:RouteRecordRaw[] = [
   {
     beforeEnter: auth.requiresAdmin,
     children: [
-      {
-        component: CanvasSiteSummary,
-        path: '/canvas_site/:id'
-      },
       {
         path: '/jobs',
         component: Jobs,
