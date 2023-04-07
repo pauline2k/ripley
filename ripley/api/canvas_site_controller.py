@@ -56,7 +56,9 @@ def get_canvas_site(canvas_site_id):
                     'id': user.id,
                     'enrollments': user.enrollments,
                     'name': user.name,
+                    'sortableName': user.sortable_name,
                     'uid': user.login_id,
+                    'url': f"{app.config['CANVAS_API_URL']}/courses/{canvas_site_id}/users/{user.id}",
                 })
         return tolerant_jsonify(api_json)
     else:

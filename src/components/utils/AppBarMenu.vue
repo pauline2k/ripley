@@ -45,7 +45,7 @@ export default {
         }
       }
     ]
-    if (this.currentUser.canvasSiteId && this.currentUser.isAdmin) {
+    if (this.currentUser.canvasSiteId) {
       this.options.push({
         id: 'current-user-canvas-site',
         label: `Canvas Site ${this.currentUser.canvasSiteId}`,

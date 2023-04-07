@@ -20,11 +20,21 @@
     <v-card-text>
       <div class="mt-3">
         <h3>Users</h3>
+        <v-alert
+          v-if="!this.config.isVueAppDebugMode && !this.currentUser.isAdmin"
+          class="ma-2"
+          :closable="true"
+          density="compact"
+          role="alert"
+          type="info"
+        >
+          You must be an Admin user to "become" any one of the users below.
+        </v-alert>
       </div>
       <v-container fluid>
         <v-row>
           <v-col cols="2">
-            Id
+            Canvas User ID
           </v-col>
           <v-col cols="2">
             UID
@@ -46,7 +56,13 @@
             {{ user.uid }}
           </v-col>
           <v-col cols="2">
-            {{ user.name }}
+            <a
+              :href="user.url"
+              target="_blank"
+              title="Open Canvas course user profile in new tab"
+            >
+              {{ user.sortableName }}
+            </a>
           </v-col>
           <v-col cols="4">
             <ul>
@@ -57,7 +73,7 @@
           </v-col>
           <v-col cols="2">
             <v-btn
-              v-if="config.devAuthEnabled && currentUser.isAdmin && currentUser.canvasSiteId && /^\d+$/.test(user.uid)"
+              v-if="canBecomeAnotherUser() && isNumeric(user.uid)"
               :id="`become-${user.uid}`"
               variant="text"
               @click="devAuth(user.uid)"
@@ -65,6 +81,10 @@
               <v-icon class="mr-2" icon="mdi-arrow-right-circle-outline" />
               Log in<span class="sr-only"> as {{ user.name }}</span>
             </v-btn>
+            <div v-if="canBecomeAnotherUser() && user.uid && user.uid.includes('inactive')" class="text-red">
+              <v-icon class="mr-2" icon="mdi-exclamation-circle" />
+              <span class="sr-only"> as {{ user.name }} is </span>Inactive
+            </div>
           </v-col>
         </v-row>
       </v-container>
@@ -87,10 +107,16 @@ export default {
     const canvasSiteId = this.$_.get(this.$route, 'params.id')
     getCanvasSite(canvasSiteId, true).then(data => {
       this.canvasSite = data
+      this.canvasSite.users = this.$_.sortBy(this.canvasSite.users, user => `${this.isNumeric(user.uid) ? '' : '_'} ${user.sortableName} ${user.uid}`)
       this.$ready()
     })
   },
   methods: {
+    canBecomeAnotherUser() {
+      return this.config.devAuthEnabled
+        && (this.config.isVueAppDebugMode || this.currentUser.isAdmin)
+        && this.currentUser.canvasSiteId
+    },
     describeEnrollment(e) {
       let role
       switch(e.role) {
@@ -110,6 +136,9 @@ export default {
     },
     devAuth(uid) {
       becomeUser(this.currentUser.canvasSiteId, uid).then(() => window.location.href = '/')
+    },
+    isNumeric(s) {
+      return /^\d+$/.test(s)
     }
   }
 }
