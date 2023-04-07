@@ -33,10 +33,33 @@ class BerkeleyTerm:
         self.season = season
 
     @classmethod
+    def get_current_terms(cls):
+        # TODO: replicate junction logic (https://github.com/ets-berkeley-edu/junction/blob/953bfb1d84881cf73fe6938cca2715eb7a6221eb/app/models/berkeley/terms.rb#L77) # noqa
+        return {
+            'current': cls('2023', 'B'),
+            'next': cls('2023', 'C'),
+            'future': cls('2023', 'D'),
+        }
+
+    @classmethod
     def from_canvas_sis_term_id(cls, canvas_sis_term_id):
         result = re.search('^TERM:([0-9]{4})-([A-Z])$', canvas_sis_term_id)
         if result:
             return cls(year=result.group(1), season=result.group(2))
+
+    @classmethod
+    def from_sis_term_id(cls, term_id):
+        if term_id:
+            term_id = str(term_id)
+            season_map = {
+                '0': 'A',
+                '2': 'B',
+                '5': 'C',
+                '8': 'D',
+            }
+            year = f'19{term_id[1:3]}' if term_id.startswith('1') else f'20{term_id[1:3]}'
+            season = season_map[term_id[3:4]]
+            return cls(year=year, season=season)
 
     def to_abbreviation(self):
         season_map = {
@@ -46,6 +69,14 @@ class BerkeleyTerm:
             'D': 'fa',
         }
         return season_map[self.season] + self.year[-2:]
+
+    def to_api_json(self):
+        return {
+            'id': self.to_sis_term_id(),
+            'name': self.to_english(),
+            'season': self.season,
+            'year': self.year,
+        }
 
     def to_english(self):
         season_map = {
@@ -64,3 +95,12 @@ class BerkeleyTerm:
             'D': 8,
         }
         return f'{self.year[0]}{self.year[2:]}{season_map[self.season]}'
+
+    def to_slug(self):
+        season_map = {
+            'A': 'winter',
+            'B': 'spring',
+            'C': 'summer',
+            'D': 'fall',
+        }
+        return f'{season_map[self.season]}-{self.year}'

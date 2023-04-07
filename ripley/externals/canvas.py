@@ -171,6 +171,16 @@ def get_teachers(course_id):
     return teachers
 
 
+def get_terms():
+    account = get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False)
+    try:
+        terms = account.get_enrollment_terms()
+    except Exception as e:
+        app.logger.error('Failed to retrieve Canvas terms')
+        app.logger.exception(e)
+    return terms
+
+
 def get_user(user_id, api_call=True):
     c = _get_canvas()
     if api_call is False:
