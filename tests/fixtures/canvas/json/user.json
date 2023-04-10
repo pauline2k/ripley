@@ -78,5 +78,25 @@
             "locale": null
         },
         "status_code": 200
+    },
+    "profile_50000": {
+        "method": "GET",
+        "endpoint": "users/sis_login_id:50000/profile",
+        "data": {
+            "id": 6789012,
+            "name": "Denis Parker",
+            "short_name": "Denis Parker",
+            "sortable_name": "Parker, Denis",
+            "sis_user_id": "UID:50000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": null,
+            "bio": null,
+            "primary_email": "dennis.monroe.parker@berkeley.edu",
+            "login_id": "50000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
     }
 }
