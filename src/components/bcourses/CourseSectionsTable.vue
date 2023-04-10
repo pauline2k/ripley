@@ -2,7 +2,7 @@
   <div class="template-sections-table-container">
     <div v-if="mode === 'createCourseForm' && sections.length > 1" class="d-flex pl-2">
       <v-checkbox
-        :id="`select-all-toggle-${sections[0].sectionId}`"
+        :id="`select-all-toggle-${sections[0].id}`"
         v-model="allSelected"
         class="my-2"
         :indeterminate="indeterminate"
@@ -29,18 +29,18 @@
           </th>
         </tr>
       </thead>
-      <tbody v-for="section in displayableSections" :key="section.sectionId">
-        <tr :id="`template-sections-table-row-${mode.toLowerCase()}-${section.sectionId}`" :class="sectionDisplayClass[section.sectionId]">
+      <tbody v-for="section in displayableSections" :key="section.id">
+        <tr :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}`" :class="sectionDisplayClass[section.id]">
           <td v-if="mode === 'createCourseForm'" class="align-top template-sections-table-cell-checkbox pl-2">
             <v-checkbox
-              :id="`template-canvas-manage-sections-checkbox-${section.sectionId}`"
+              :id="`template-canvas-manage-sections-checkbox-${section.id}`"
               v-model="selected"
               :aria-checked="section.selected"
-              :aria-label="`Checkbox for ${section.courseCode} ${section.section_label}`"
+              :aria-label="`Checkbox for ${section.courseCode} ${section.label}`"
               class="ml-2"
               name="section-section-id"
               size="sm"
-              :value="section.sectionId"
+              :value="section.id"
             />
           </td>
           <td class="template-sections-table-cell-course-code">
@@ -50,17 +50,17 @@
             <label
               v-if="mode === 'createCourseForm'"
               class="template-sections-table-cell-section-label-label"
-              :for="`template-canvas-manage-sections-checkbox-${section.sectionId}`"
+              :for="`template-canvas-manage-sections-checkbox-${section.id}`"
             >
-              {{ section.section_label }}
+              {{ section.label }}
             </label>
-            <span v-if="mode !== 'createCourseForm'">{{ section.section_label }}</span>
+            <span v-if="mode !== 'createCourseForm'">{{ section.label }}</span>
             <span v-if="mode === 'currentStaging' && section.nameDiscrepancy && section.stagedState !== 'update'" class="sr-only">
               The section name in bCourses no longer matches the Student Information System.
               Use the "Update" button to rename your bCourses section name to match SIS.
             </span>
           </td>
-          <td class="template-sections-table-cell-section-id">{{ section.sectionId }}</td>
+          <td class="template-sections-table-cell-section-id">{{ section.id }}</td>
           <td class="template-sections-table-cell-section-timestamps d-none d-sm-none d-md-table-cell">
             <div v-for="(schedule, index) in section.schedules.recurring" :key="index">{{ schedule.schedule }}</div>
           </td>
@@ -75,7 +75,7 @@
             <div v-if="mode === 'currentStaging' && section.isCourseSection">
               <button
                 v-if="section.nameDiscrepancy && section.stagedState !== 'update'"
-                :aria-label="`Include '${section.courseCode} ${section.section_label}' in the list of sections to be updated`"
+                :aria-label="`Include '${section.courseCode} ${section.label}' in the list of sections to be updated`"
                 class="canvas-button template-sections-table-button canvas-no-decoration"
                 @click="stageUpdate(section)"
               >
@@ -83,7 +83,7 @@
               </button>
               <button
                 v-if="section.stagedState === 'update'"
-                :aria-label="`Remove '${section.courseCode} ${section.section_label}' from list of sections to be updated from course site`"
+                :aria-label="`Remove '${section.courseCode} ${section.label}' from list of sections to be updated from course site`"
                 class="canvas-button template-sections-table-button template-sections-table-button-undo-delete canvas-no-decoration"
                 @click="unstage(section)"
               >
@@ -91,7 +91,7 @@
               </button>
               <button
                 v-if="section.stagedState !== 'update'"
-                :aria-label="`Include '${section.courseCode} ${section.section_label}' in the list of sections to be unlinked from course site`"
+                :aria-label="`Include '${section.courseCode} ${section.label}' in the list of sections to be unlinked from course site`"
                 class="canvas-button template-sections-table-button canvas-no-decoration"
                 @click="stageDelete(section)"
               >
@@ -102,7 +102,7 @@
             <div v-if="mode === 'currentStaging' && !section.isCourseSection">
               <button
                 class="canvas-button template-sections-table-button template-sections-table-button-undo-add canvas-no-decoration"
-                :aria-label="`Remove '${section.courseCode} ${section.section_label}' from list of sections to be linked to course site`"
+                :aria-label="`Remove '${section.courseCode} ${section.label}' from list of sections to be linked to course site`"
                 @click="unstage(section)"
               >
                 Undo Link
@@ -113,7 +113,7 @@
             <div v-if="mode === 'availableStaging' && section.isCourseSection && section.stagedState === 'delete'">
               <button
                 class="canvas-button template-sections-table-button template-sections-table-button-undo-delete canvas-no-decoration"
-                :aria-label="`Remove '${section.courseCode} ${section.section_label}' from list of sections to be unlinked from course site`"
+                :aria-label="`Remove '${section.courseCode} ${section.label}' from list of sections to be unlinked from course site`"
                 @click="unstage(section)"
               >
                 Undo Unlink
@@ -128,7 +128,7 @@
               <button
                 class="canvas-button canvas-button-primary template-sections-table-button canvas-no-decoration"
                 :class="{'template-sections-table-button-undo-add': section.stagedState === 'add'}"
-                :aria-label="`Include '${section.courseCode} ${section.section_label}' in the list of sections to be linked to course site`"
+                :aria-label="`Include '${section.courseCode} ${section.label}' in the list of sections to be linked to course site`"
                 @click="stageAdd(section)"
               >
                 Link
@@ -139,7 +139,7 @@
         <tr
           v-if="mode === 'currentStaging' && section.nameDiscrepancy && section.stagedState !== 'update'"
           aria-hidden="true"
-          :class="sectionDisplayClass[section.sectionId]"
+          :class="sectionDisplayClass[section.id]"
         >
           <td colspan="7" class="template-sections-table-sites-cell">
             <div class="template-sections-table-sites-container">
@@ -151,7 +151,7 @@
         </tr>
         <tr
           v-if="(mode !== 'preview' && mode !== 'currentStaging' && section.sites)"
-          :class="sectionDisplayClass[section.sectionId]"
+          :class="sectionDisplayClass[section.id]"
         >
           <td colspan="7" class="template-sections-table-sites-cell">
             <div v-for="(site, index) in section.sites" :key="index" class="template-sections-table-sites-container">
@@ -241,7 +241,7 @@ export default {
         this.indeterminate = true
       }
       this.$_.each(this.sections, section => {
-        section.selected = this.$_.includes(this.selected, section.sectionId)
+        section.selected = this.$_.includes(this.selected, section.id)
       })
       this.updateSelected()
     }
@@ -254,7 +254,7 @@ export default {
     sectionDisplayClass: {}
   }),
   created() {
-    this.selected = this.$_.map(this.$_.filter(this.sections, 'selected'), 'sectionId')
+    this.selected = this.$_.map(this.$_.filter(this.sections, 'selected'), 'id')
     this.updateSectionDisplay()
     this.eventHub.on('sections-table-updated', this.updateSectionDisplay)
   },
@@ -280,12 +280,12 @@ export default {
       this.eventHub.emit('sections-table-updated')
     },
     toggleAll(checked) {
-      this.selected = checked ? this.$_.map(this.sections, 'sectionId').slice() : []
+      this.selected = checked ? this.$_.map(this.sections, 'id').slice() : []
     },
     updateSectionDisplay() {
       this.displayableSections = this.$_.filter(this.sections, s => this.rowDisplayLogic(this.mode, s))
       this.displayableSections.forEach(s => {
-        this.sectionDisplayClass[s.sectionId] = this.rowClassLogic(this.mode, s)
+        this.sectionDisplayClass[s.id] = this.rowClassLogic(this.mode, s)
       })
     },
     unstage(section) {

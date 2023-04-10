@@ -60,6 +60,18 @@ def canvas_site_to_api_json(canvas_site):
     }
 
 
+def instruction_mode_description(instruction_mode):
+    mode_map = {
+        'EF': 'Flexible',
+        'EH': 'Hybrid',
+        'ER': 'Remote',
+        'P': 'In Person',
+        'O': 'Online',
+        'W': 'Web-based',
+    }
+    return mode_map.get(instruction_mode) or instruction_mode
+
+
 def uid_from_canvas_login_id(login_id):
     result = {'uid': None, 'inactive': None}
     match = re.match('^(inactive-)?([0-9]+)$', login_id)

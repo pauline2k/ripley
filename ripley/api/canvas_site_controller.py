@@ -32,7 +32,7 @@ from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas, data_loch
 from ripley.externals.canvas import get_course
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json
+from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, instruction_mode_description
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster
@@ -69,51 +69,17 @@ def get_canvas_site(canvas_site_id):
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def canvas_site_provision_sections(canvas_site_id):
     canvas_sections = canvas.get_course_sections(canvas_site_id)
-    berkeley_terms = BerkeleyTerm.get_current_terms().values()
-    # canvas_terms = canvas.get_terms()
-    # TODO: find the intersection of berkeley_terms and canvas_terms
-    teaching_sections = data_loch.get_instructing_sections(current_user.uid, [t.to_sis_term_id() for t in berkeley_terms])
-    courses_by_term = {}
-    for section in teaching_sections:
-        course_id = section['course_id']
-        term_id = section['term_id']
-        if term_id not in courses_by_term:
-            courses_by_term[term_id] = {}
-        if course_id not in courses_by_term[term_id]:
-            courses_by_term[term_id][course_id] = {
-                'courseCode': section['course_name'],
-                'sections': [],
-                'title': section['course_title'],
-            }
-        courses_by_term[term_id][course_id]['sections'].append({
-            'id': section['section_id'],
-            'instructionFormat': section['instruction_format'],
-            'instructionMode': section['instruction_mode'],
-            'isPrimarySection': section['is_primary'],
-            'schedules': {
-                'oneTime': [],
-                'recurring': [],
-            },
-            'sectionNumber': section['section_number'],
-        })
-
-    def _term_courses(term_id, courses_by_id):
-        term = BerkeleyTerm.from_sis_term_id(term_id)
-        return {
-            'classes': list(courses_by_id.values()),
-            'name': term.to_english(),
-            'slug': term.to_slug(),
-            'termId': term_id,
-            'termYear': term.year,
-        }
     official_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
     term = BerkeleyTerm.from_sis_term_id(official_sections[0]['termId'])
+    can_edit = bool(next((role for role in current_user.canvas_site_user_roles if role in ['TeacherEnrollment', 'Lead TA']), None))
+    teaching_terms = _get_teaching_terms()
     return tolerant_jsonify({
         'canvasSite': {
+            'canEdit': can_edit,
             'officialSections': official_sections,
             'term': term.to_api_json(),
         },
-        'teachingTerms': [_term_courses(term_id, courses_by_id) for term_id, courses_by_id in courses_by_term.items()],
+        'teachingTerms': teaching_terms,
     })
 
 
@@ -173,3 +139,50 @@ def redirect_to_canvas_profile(canvas_site_id, uid):
         return redirect(f'{base_url}/courses/{canvas_site_id}/users/{user.id}')
     else:
         raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
+
+
+def _get_teaching_terms():
+    berkeley_terms = BerkeleyTerm.get_current_terms().values()
+    # canvas_terms = canvas.get_terms()
+    # TODO: find the intersection of berkeley_terms and canvas_terms
+    teaching_sections = data_loch.get_instructing_sections(current_user.uid, [t.to_sis_term_id() for t in berkeley_terms])
+    courses_by_term = {}
+    for section in teaching_sections:
+        course_id = section['course_id']
+        term_id = section['term_id']
+        if term_id not in courses_by_term:
+            courses_by_term[term_id] = {}
+        if course_id not in courses_by_term[term_id]:
+            term = BerkeleyTerm.from_sis_term_id(term_id)
+            courses_by_term[term_id][course_id] = {
+                'courseCode': section['course_name'],
+                'sections': [],
+                'slug': '-'.join([
+                    section['course_name'].replace(' ', '-').lower(),
+                    term.to_session_slug(session_code=section['session_code']),
+                ]),
+                'title': section['course_title'],
+            }
+        # TODO: add schedules
+        courses_by_term[term_id][course_id]['sections'].append({
+            'id': section['section_id'],
+            'instructionFormat': section['instruction_format'],
+            'instructionMode': instruction_mode_description(section['instruction_mode']),
+            'isPrimarySection': section['is_primary'],
+            'schedules': {
+                'oneTime': [],
+                'recurring': [],
+            },
+            'sectionNumber': section['section_number'],
+        })
+
+    def _term_courses(term_id, courses_by_id):
+        term = BerkeleyTerm.from_sis_term_id(term_id)
+        return {
+            'classes': list(courses_by_id.values()),
+            'name': term.to_english(),
+            'slug': term.to_slug(),
+            'termId': term_id,
+            'termYear': term.year,
+        }
+    return [_term_courses(term_id, courses_by_id) for term_id, courses_by_id in courses_by_term.items()]

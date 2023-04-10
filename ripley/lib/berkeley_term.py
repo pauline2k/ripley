@@ -87,6 +87,19 @@ class BerkeleyTerm:
         }
         return season_map[self.season] + ' ' + self.year
 
+    def to_session_slug(self, session_code=None):
+        summer_sessions = {
+            '6W1': 'A',
+            '10W': 'B',
+            '8W': 'C',
+            '6W2': 'D',
+            '3W': 'E',
+        }
+        ids = [self.season, self.year]
+        if session_code and session_code in summer_sessions:
+            ids.append(summer_sessions[session_code])
+        return '-'.join(ids)
+
     def to_sis_term_id(self):
         season_map = {
             'A': 0,

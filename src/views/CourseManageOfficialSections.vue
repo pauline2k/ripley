@@ -38,7 +38,7 @@
             </v-col>
             <v-col md="8" class="text-right">
               <button
-                v-if="isTeacher"
+                v-if="canvasSite.canEdit"
                 class="canvas-button canvas-button-primary canvas-no-decoration page-course-official-sections-button"
                 @click="changeWorkflowStep('staging')"
               >
@@ -135,12 +135,12 @@
           </v-row>
 
           <div v-if="courseSemesterClasses.length > 0" class="page-course-official-sections-courses-container">
-            <div v-for="course in courseSemesterClasses" :key="course.course_code" class="sections-course-container-bottom-margin">
+            <div v-for="course in courseSemesterClasses" :key="course.courseCode" class="sections-course-container-bottom-margin">
               <div class="sections-course-container">
                 <button
                   type="button"
                   class="button-link page-course-official-sections-form-course-button"
-                  :aria-controls="course.course_id"
+                  :aria-controls="course.slug"
                   :aria-expanded="`${!course.collapsed}`"
                   aria-haspopup="true"
                   @click="toggleCollapse(course)"
@@ -150,7 +150,7 @@
                     :icon="course.collapsed ? 'mdi-caret-right' : 'mdi-caret-down'"
                   />
                   <h3 class="sections-course-title">
-                    {{ course.course_code }}
+                    {{ course.courseCode }}
                     <span v-if="course.title"> : {{ course.title }}</span>
                   </h3>
                   <span v-if="course.sections && (course.sections.length === 1)"> (1 section)</span>
@@ -158,7 +158,7 @@
                 </button>
                 <div
                   v-if="!course.collapsed"
-                  :id="course.course_id"
+                  :id="course.slug"
                   class="page-course-official-sections-form-collapsible-container"
                   role="region"
                 >
@@ -258,7 +258,6 @@ export default {
     feedFetched: false,
     isAdmin: false,
     isCourseCreator: false,
-    isTeacher: false,
     jobStatus: null,
     jobStatusMessage: '',
     percentCompleteRounded: 0,
@@ -315,9 +314,8 @@ export default {
       getCourseSections(this.currentUser.canvasSiteId).then(
         response => {
           this.percentCompleteRounded = null
-          if (response.canvas_site) {
-            this.canvasSite = response.canvas_site
-            this.isTeacher = this.canvasSite.canEdit
+          if (response.canvasSite) {
+            this.canvasSite = response.canvasSite
             this.refreshFromFeed(response)
           } else {
             this.displayError = 'Failed to retrieve section data.'
@@ -345,9 +343,9 @@ export default {
       })
       return sections
     },
-    loadCourseLists(teachingSemesters) {
-      const courseSemester = this.$_.find(teachingSemesters, semester => {
-        return (semester.termYear === this.canvasSite.term.term_yr) && (semester.termCode === this.canvasSite.term.term_cd)
+    loadCourseLists(teachingTerms) {
+      const courseSemester = this.$_.find(teachingTerms, semester => {
+        return (this.$_.toString(semester.termId) === this.$_.toString(this.canvasSite.term.id))
       })
       if (courseSemester) {
         this.courseSemesterClasses = courseSemester.classes
@@ -356,17 +354,18 @@ export default {
         this.allSections = []
         this.existingSectionIds = []
         this.courseSemesterClasses.forEach(classItem => {
-          this.$set(classItem, 'collapsed', !classItem.containsCourseSections)
+          this.$_.set(classItem, 'collapsed', !classItem.containsCourseSections)
           classItem.sections.forEach(section => {
             section.parentClass = classItem
             this.allSections.push(section)
             section.stagedState = null
             this.canvasSite.officialSections.forEach(officialSection => {
-              if (officialSection.sectionId === section.sectionId && this.existingSectionIds.indexOf(section.sectionId) === -1) {
-                this.existingSectionIds.push(section.sectionId)
+              if (officialSection.id === section.id && this.existingSectionIds.indexOf(section.id) === -1) {
+                this.existingSectionIds.push(section.id)
+                section.label = this.sectionLabel(classItem, section)
                 this.existingCourseSections.push(section)
-                if (officialSection.name !== section.courseCode + ' ' + section.section_label) {
-                  this.$set(section, 'nameDiscrepancy', true)
+                if (officialSection.name !== section.label) {
+                  this.$_.set(section, 'nameDiscrepancy', true)
                 }
               }
             })
@@ -377,8 +376,8 @@ export default {
       }
     },
     refreshFromFeed(feed) {
-      if (feed.teachingSemesters) {
-        this.loadCourseLists(feed.teachingSemesters)
+      if (feed.teachingTerms) {
+        this.loadCourseLists(feed.teachingTerms)
       }
       this.isAdmin = feed.is_admin
       this.adminActingAs = feed.admin_acting_as
@@ -422,12 +421,15 @@ export default {
         }
       )
     },
+    sectionLabel(course, section) {
+      return `${course.courseCode} ${section.instructionFormat} ${section.sectionNumber} (${section.instructionMode})`
+    },
     sectionString(section) {
       return section.courseCode + ' ' + section.section_label + ' (Section ID: ' + section.sectionId + ')'
     },
     stageAdd(section) {
       if (!section.isCourseSection) {
-        this.$set(section, 'stagedState', 'add')
+        this.$_.set(section, 'stagedState', 'add')
         this.$announcer.polite('Included in the list of sections to be added')
       } else {
         this.displayError = 'Unable to add ' + this.sectionString(section) + ', as it already exists within the course site.'
@@ -437,7 +439,7 @@ export default {
     stageDelete(section) {
       if (section.isCourseSection) {
         this.expandParentClass(section)
-        this.$set(section, 'stagedState', 'delete')
+        this.$_.set(section, 'stagedState', 'delete')
         this.$announcer.polite('Included in the list of sections to be deleted')
       } else {
         this.displayError = 'Unable to delete Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
@@ -447,7 +449,7 @@ export default {
     stageUpdate(section) {
       if (section.isCourseSection) {
         this.expandParentClass(section)
-        this.$set(section, 'stagedState', 'update')
+        this.$_.set(section, 'stagedState', 'update')
         this.$announcer.polite('Included in the list of sections to be updated')
       } else {
         this.displayError = 'Unable to update Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
@@ -476,7 +478,7 @@ export default {
       }, 2000)
     },
     toggleCollapse(course) {
-      this.$set(course, 'collapsed', !course.collapsed)
+      this.$_.set(course, 'collapsed', !course.collapsed)
     },
     unstage(section) {
       if (section.stagedState === 'add') {

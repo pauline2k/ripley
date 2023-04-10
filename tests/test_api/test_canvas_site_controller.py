@@ -29,6 +29,7 @@ from tests.util import register_canvas_uris
 admin_uid = '10000'
 no_canvas_account_uid = '10001'
 not_enrolled_uid = '20000'
+ta_uid = '50000'
 teacher_uid = '30000'
 student_uid = '40000'
 
@@ -52,6 +53,32 @@ class TestCanvasSiteProvisionSections:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
             _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=401)
 
+    def test_ta(self, client, app, fake_auth):
+        """Allows TA, read-only."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_6789012'],
+                'user': ['profile_50000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=ta_uid)
+            response = _api_canvas_course_provision_sections(client, canvas_site_id)
+            assert response['canvasSite']
+            assert response['canvasSite']['canEdit'] is False
+            assert response['canvasSite']['term'] == {
+                'id': '2232',
+                'name': 'Spring 2023',
+                'season': 'B',
+                'year': '2023',
+            }
+            assert len(response['canvasSite']['officialSections']) == 2
+            section = response['canvasSite']['officialSections'][0]
+            assert section['id'] == '32936'
+            assert section['name'] == 'Section A'
+            assert section['sisId'] == 'SEC:2023-B-32936'
+            assert section['termId'] == '2232'
+            assert len(response['teachingTerms']) == 0
+
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
         with requests_mock.Mocker() as m:
@@ -63,6 +90,7 @@ class TestCanvasSiteProvisionSections:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
             response = _api_canvas_course_provision_sections(client, canvas_site_id)
             assert response['canvasSite']
+            assert response['canvasSite']['canEdit'] is True
             assert response['canvasSite']['term'] == {
                 'id': '2232',
                 'name': 'Spring 2023',
@@ -89,9 +117,10 @@ class TestCanvasSiteProvisionSections:
             section = course['sections'][0]
             assert section['id'] == '12345'
             assert section['instructionFormat'] == 'LEC'
-            assert section['instructionMode'] == 'P'
+            assert section['instructionMode'] == 'In Person'
             assert section['isPrimarySection'] is True
             assert section['sectionNumber'] == '001'
+            assert course['slug'] == 'astron-218-B-2023'
 
 
 def _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=200):

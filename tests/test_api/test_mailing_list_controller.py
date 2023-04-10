@@ -197,7 +197,10 @@ class TestPopulateMailingList:
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id_1234567', 'search_users_1234567', 'user_profile_10000']}, m)
+            register_canvas_uris(app, {
+                'course': ['get_by_id_1234567', 'search_users_1234567'],
+                'user': ['profile_10000'],
+            }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             _api_create_mailing_list(client, canvas_site_id)
