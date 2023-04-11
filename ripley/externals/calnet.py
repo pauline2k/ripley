@@ -88,7 +88,7 @@ class Client:
         for attempt in range(idle_count + 1):
             with ldap_connection_pool.spawn(timeout=app.config['LDAP_TIMEOUT']) as conn:
                 try:
-                    results = conn.search('dc=berkeley,dc=edu', scope=2, filter_exp=search_filter)
+                    results = conn.paged_search('dc=berkeley,dc=edu', scope=2, filter_exp=search_filter)
                     return [_attributes_to_dict(entry, search_base, use_fallback_mail) for entry in results]
                 except (ConnectionError, LDAPError) as e:
                     conn.close()

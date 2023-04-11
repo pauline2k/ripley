@@ -49,7 +49,7 @@ class TestAddNewUsersJob:
             }, m)
 
             mock_connection = mock.Mock()
-            mock_connection.search.return_value = [
+            mock_connection.paged_search.return_value = [
                 {
                     'berkeleyEduAffiliations': bonsai.LDAPValueList(['GUEST-TYPE-SPONSORED']),
                     'givenName': bonsai.LDAPValueList(['Jonesy']),
