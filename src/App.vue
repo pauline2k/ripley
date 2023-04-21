@@ -42,19 +42,31 @@ export default {
   background-size: cover;
   min-height: 100vh;
 }
+.bg-white {
+  background: $color-white;
+}
+.canvas-button {
+  background: $color-button-background !important;
+  border: 1px solid $color-button-border !important;
+  box-shadow: none !important;
+  font-family: $body-font-family;
+  font-size: 14px !important;
+  line-height: 20px;
+  overflow: hidden;
+  transition: background-color .2s ease-in-out 0s;
+}
 .canvas-button-primary,
 .canvas-application .page-roster .roster-search .button-blue {
-  background: $color-button-primary-background;
-  border: 1px solid $color-button-primary-border;
-  color: $color-button-primary-color;
+  background: $color-button-primary-background !important;
+  color: $color-button-primary-color !important;
   &:hover, &:active, &:focus {
-    background: $color-button-primary-hover-background;
-    border-color: $color-button-primary-border;
-    box-shadow: none;
-    color: $color-button-primary-color;
+    background: $color-button-primary-hover-background !important;
+    border-color: $color-button-primary-border !important;
+    box-shadow: none !important;
+    color: $color-button-primary-color !important;
   }
   &[disabled] {
-    color: $color-button-primary-color;
+    color: $color-button-primary-color !important;
   }
 }
 .canvas-form {
@@ -116,6 +128,23 @@ h3 {
   font-family: $body-font-family;
   font-size: 18px;
   font-weight: normal;
+}
+.sections-course-container {
+  background: $color-container-grey-background !important;
+  border: 1px solid $color-container-grey-border !important;
+  border-radius: 3px !important;
+  padding: 9px !important;
+}
+.sections-course-title {
+  line-height: 20px;
+  h3 {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+  }
+  .sections-course-subtitle {
+    font-size: 14px !important;
+    font-weight: 400;
+  }
 }
 .sr-only {
   position: absolute;

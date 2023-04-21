@@ -68,11 +68,10 @@ def get_canvas_site(canvas_site_id):
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def canvas_site_provision_sections(canvas_site_id):
-    canvas_sections = canvas.get_course_sections(canvas_site_id)
-    official_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
+    official_sections, section_ids = _get_official_sections(canvas_site_id)
     term = BerkeleyTerm.from_sis_term_id(official_sections[0]['termId'])
     can_edit = bool(next((role for role in current_user.canvas_site_user_roles if role in ['TeacherEnrollment', 'Lead TA']), None))
-    teaching_terms = _get_teaching_terms()
+    teaching_terms = _get_teaching_terms(section_ids)
     return tolerant_jsonify({
         'canvasSite': {
             'canEdit': can_edit,
@@ -141,7 +140,30 @@ def redirect_to_canvas_profile(canvas_site_id, uid):
         raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
 
 
-def _get_teaching_terms():
+def _get_official_sections(canvas_site_id):
+    canvas_sections = canvas.get_course_sections(canvas_site_id)
+    canvas_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
+    section_ids = [section['id'] for section in canvas_sections]
+    term_id = canvas_sections[0]['termId']
+    sis_sections = data_loch.get_sections(term_id, section_ids)
+    sis_sections_by_id = {s['section_id']: s for s in sis_sections}
+
+    def _section(canvas_section):
+        sis_section = sis_sections_by_id[canvas_section['id']]
+        return {
+            **canvas_section,
+            'courseCode': sis_section['course_name'],
+            'instructionFormat': sis_section['instruction_format'],
+            'instructionMode': instruction_mode_description(sis_section['instruction_mode']),
+            'isPrimarySection': sis_section['is_primary'],
+            'sectionNumber': sis_section['section_number'],
+
+        }
+    official_sections = [_section(cs) for cs in canvas_sections]
+    return official_sections, section_ids
+
+
+def _get_teaching_terms(section_ids):
     berkeley_terms = BerkeleyTerm.get_current_terms().values()
     # canvas_terms = canvas.get_terms()
     # TODO: find the intersection of berkeley_terms and canvas_terms
@@ -165,9 +187,11 @@ def _get_teaching_terms():
             }
         # TODO: add schedules
         courses_by_term[term_id][course_id]['sections'].append({
+            'courseCode': section['course_name'],
             'id': section['section_id'],
             'instructionFormat': section['instruction_format'],
             'instructionMode': instruction_mode_description(section['instruction_mode']),
+            'isCourseSection': section['section_id'] in section_ids,
             'isPrimarySection': section['is_primary'],
             'schedules': {
                 'oneTime': [],
