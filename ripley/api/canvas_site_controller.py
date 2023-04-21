@@ -157,7 +157,6 @@ def _get_official_sections(canvas_site_id):
             'instructionMode': instruction_mode_description(sis_section['instruction_mode']),
             'isPrimarySection': sis_section['is_primary'],
             'sectionNumber': sis_section['section_number'],
-
         }
     official_sections = [_section(cs) for cs in canvas_sections]
     return official_sections, section_ids
