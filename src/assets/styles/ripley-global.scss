@@ -12,3 +12,8 @@ html, body {
   font-size: 14px;
   height: 100%;
 }
+
+.height-unset {
+  height: unset !important;
+  min-height: unset !important;
+}

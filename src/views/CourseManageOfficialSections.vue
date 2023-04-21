@@ -17,13 +17,13 @@
         >
           {{ jobStatusMessage }}
           <div class="alert-close-button-container">
-            <button
+            <v-btn
               class="fa fa-times-circle close-button"
               aria-controls="page-course-official-sections-job-status-notice"
               @click="jobStatusMessage = ''"
             >
               <span class="sr-only">Hide Notice</span>
-            </button>
+            </v-btn>
           </div>
         </div>
 
@@ -37,13 +37,13 @@
               </h3>
             </v-col>
             <v-col md="8" class="text-right">
-              <button
+              <v-btn
                 v-if="canvasSite.canEdit"
                 class="canvas-button canvas-button-primary canvas-no-decoration page-course-official-sections-button"
                 @click="changeWorkflowStep('staging')"
               >
                 Edit Sections
-              </button>
+              </v-btn>
             </v-col>
           </v-row>
           <v-row no-gutters class="page-course-official-sections-courses-container">
@@ -70,23 +70,21 @@
               </h3>
             </v-col>
             <v-col md="8" class="text-right">
-              <button
-                class="canvas-button canvas-no-decoration"
-                type="button"
+              <v-btn
+                class="canvas-button mx-1"
                 aria-label="Cancel section modifications for this course site"
                 @click="cancel"
               >
                 Cancel
-              </button>
-              <button
-                class="canvas-button canvas-button-primary canvas-no-decoration"
+              </v-btn>
+              <v-btn
+                class="canvas-button canvas-button-primary"
                 :disabled="totalStagedCount === 0"
-                type="button"
                 aria-label="Apply pending modifications to this course site"
                 @click="saveChanges"
               >
                 Save Changes
-              </button>
+              </v-btn>
             </v-col>
           </v-row>
 
@@ -106,21 +104,21 @@
 
           <v-row v-if="currentStagedCount() > 12" class="row">
             <v-col md="12" class="text-right">
-              <button
+              <v-btn
                 class="canvas-button canvas-no-decoration"
                 aria-label="Cancel section modifications for this course site"
                 @click="changeWorkflowStep('preview')"
               >
                 Cancel
-              </button>
-              <button
+              </v-btn>
+              <v-btn
                 :disabled="totalStagedCount === 0"
                 class="canvas-button canvas-button-primary canvas-no-decoration"
                 aria-label="Apply pending modifications to this course site"
                 @click="saveChanges"
               >
                 Save Changes
-              </button>
+              </v-btn>
             </v-col>
           </v-row>
         </div>
@@ -134,63 +132,52 @@
             </v-col>
           </v-row>
 
-          <div v-if="courseSemesterClasses.length > 0" class="page-course-official-sections-courses-container">
-            <div v-for="course in courseSemesterClasses" :key="course.courseCode" class="sections-course-container-bottom-margin">
-              <div class="sections-course-container">
-                <button
-                  type="button"
-                  class="button-link page-course-official-sections-form-course-button"
-                  :aria-controls="course.slug"
-                  :aria-expanded="`${!course.collapsed}`"
-                  aria-haspopup="true"
-                  @click="toggleCollapse(course)"
-                >
-                  <v-icon
-                    class="left sections-triangle-icon mr-2"
-                    :icon="course.collapsed ? 'mdi-caret-right' : 'mdi-caret-down'"
-                  />
-                  <h3 class="sections-course-title">
-                    {{ course.courseCode }}
-                    <span v-if="course.title"> : {{ course.title }}</span>
+          <v-expansion-panels
+            v-if="courseSemesterClasses.length > 0"
+            v-model="availableSectionsPanel"
+            multiple
+          >
+            <v-expansion-panel
+              v-for="course in courseSemesterClasses"
+              :key="course.courseCode"
+              class="sections-course-container px-1"
+            >
+              <v-expansion-panel-title class="d-flex flex-row-reverse height-unset pa-0">
+                <div class="sections-course-title d-flex flex-grow-1">
+                  <h3>
+                    {{ course.courseCode }}<span v-if="course.title"> : {{ course.title }}</span>
                   </h3>
-                  <span v-if="course.sections && (course.sections.length === 1)"> (1 section)</span>
-                  <span v-if="course.sections && (course.sections.length !== 1)"> ({{ course.sections.length }} sections)</span>
-                </button>
-                <div
-                  v-if="!course.collapsed"
-                  :id="course.slug"
-                  class="page-course-official-sections-form-collapsible-container"
-                  role="region"
-                >
-                  <div v-if="course.sections.length > 1" class="page-course-official-sections-form-select-all-option">
-                    <button
-                      v-if="!allSectionsAdded(course)"
-                      class="button-link page-course-official-sections-form-select-all-option-button"
-                      type="button"
-                      aria-label="Add all sections for this course to the list of sections to be added"
-                      @click="addAllSections(course)"
-                    >
-                      Add All
-                    </button>
-                    <span v-if="allSectionsAdded(course)">All Added</span>
-                  </div>
-
-                  <v-row no-gutters>
-                    <v-col md="12">
-                      <CourseSectionsTable
-                        mode="availableStaging"
-                        :sections="course.sections"
-                        :unstage-action="unstage"
-                        :stage-add-action="stageAdd"
-                        :row-class-logic="rowClassLogic"
-                        :row-display-logic="rowDisplayLogic"
-                      ></CourseSectionsTable>
-                    </v-col>
-                  </v-row>
+                  <span v-if="course.sections && (course.sections.length === 1)" class="sections-course-subtitle">&nbsp;(1 section)</span>
+                  <span v-if="course.sections && (course.sections.length !== 1)" class="sections-course-subtitle">&nbsp;({{ course.sections.length }} sections)</span>
                 </div>
-              </div>
-            </div>
-          </div>
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <div v-if="course.sections.length > 1" class="page-course-official-sections-form-select-all-option">
+                  <v-btn
+                    v-if="!allSectionsAdded(course)"
+                    class="button-link page-course-official-sections-form-select-all-option-button"
+                    aria-label="Add all sections for this course to the list of sections to be added"
+                    @click="addAllSections(course)"
+                  >
+                    Add All
+                  </v-btn>
+                  <span v-if="allSectionsAdded(course)">All Added</span>
+                </div>
+                <v-row no-gutters>
+                  <v-col md="12">
+                    <CourseSectionsTable
+                      mode="availableStaging"
+                      :sections="course.sections"
+                      :unstage-action="unstage"
+                      :stage-add-action="stageAdd"
+                      :row-class-logic="rowClassLogic"
+                      :row-display-logic="rowDisplayLogic"
+                    ></CourseSectionsTable>
+                  </v-col>
+                </v-row>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </div>
       </div>
 
@@ -250,6 +237,7 @@ export default {
     adminActingAs: null,
     adminSemesters: null,
     allSections: [],
+    availableSectionsPanel: false,
     canvasSite: {},
     courseSemesterClasses: [],
     currentWorkflowStep: null,
@@ -362,7 +350,6 @@ export default {
             this.canvasSite.officialSections.forEach(officialSection => {
               if (officialSection.id === section.id && this.existingSectionIds.indexOf(section.id) === -1) {
                 this.existingSectionIds.push(section.id)
-                section.label = this.sectionLabel(classItem, section)
                 this.existingCourseSections.push(section)
                 if (officialSection.name !== section.label) {
                   this.$_.set(section, 'nameDiscrepancy', true)
@@ -420,9 +407,6 @@ export default {
           this.trackSectionUpdateJob()
         }
       )
-    },
-    sectionLabel(course, section) {
-      return `${course.courseCode} ${section.instructionFormat} ${section.sectionNumber} (${section.instructionMode})`
     },
     sectionString(section) {
       return section.courseCode + ' ' + section.section_label + ' (Section ID: ' + section.sectionId + ')'
@@ -578,18 +562,6 @@ export default {
     margin-bottom: 15px;
   }
 
-  .page-course-official-sections-form-course-button {
-    color: $color-body-black;
-
-    &:focus, &:hover {
-      text-decoration: none;
-    }
-  }
-
-  .page-course-official-sections-form-collapsible-container {
-    margin-top: 7px;
-  }
-
   .page-course-official-sections-form-select-all-option {
     font-size: 12px;
     margin: 6px 0 4px 2px;
@@ -607,6 +579,17 @@ export default {
     .page-course-official-sections-small-only-align-left {
       text-align: left;
     }
+  }
+}
+</style>
+
+<style lang="scss">
+.page-course-official-sections {
+  .v-expansion-panel-title__overlay {
+    background-color: transparent !important;
+  }
+  .v-expansion-panel-text__wrapper {
+    padding: 6px 4px 0px 4px;
   }
 }
 </style>
