@@ -30,6 +30,7 @@ from time import sleep
 from canvasapi import Canvas
 from canvasapi.account import Account
 from canvasapi.course import Course
+from canvasapi.section import Section
 from canvasapi.user import User
 from flask import current_app as app
 
@@ -140,6 +141,20 @@ def get_external_tools(obj_type, obj_id=None):
         app.logger.error(f'Failed to retrieve Canvas external tools ({obj_type}_id={obj_id})')
         app.logger.exception(e)
     return tools
+
+
+def get_section(section_id, api_call=True):
+    c = _get_canvas()
+    if api_call is False:
+        return Section(c._Canvas__requester, {'id': section_id})
+    else:
+        section = None
+        try:
+            section = c.get_section(section_id, include=['term'])
+        except Exception as e:
+            app.logger.error(f'Failed to retrieve Canvas section (id={section_id})')
+            app.logger.exception(e)
+        return section
 
 
 def get_sis_user_profile(uid):

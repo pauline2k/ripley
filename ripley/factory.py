@@ -55,6 +55,7 @@ def create_app():
 def _register_jobs(app):
     from ripley.jobs.add_guest_users_job import AddGuestUsersJob  # noqa
     from ripley.jobs.add_new_users_job import AddNewUsersJob  # noqa
+    from ripley.jobs.export_term_enrollments_job import ExportTermEnrollmentsJob  # noqa
     from ripley.jobs.house_keeping_job import HouseKeepingJob  # noqa
     from ripley.jobs.lti_usage_report_job import LtiUsageReportJob  # noqa
 
