@@ -216,7 +216,7 @@
         "endpoint": "courses/8876542/sections",
         "data": [
           {
-            "id": 1,
+            "id": 10000,
             "name": "Section A",
             "sis_section_id": "SEC:2023-B-32936",
             "integration_id": null,
@@ -229,7 +229,7 @@
             "nonxlist_course_id": null
           },
           {
-            "id": 1,
+            "id": 20000,
             "name": "Section B",
             "sis_section_id": "2023-B-32937",
             "integration_id": null,
@@ -242,7 +242,7 @@
             "nonxlist_course_id": null
           },
           {
-            "id": 1,
+            "id": 30000,
             "name": "Section C",
             "sis_section_id": null,
             "integration_id": null,
@@ -274,7 +274,7 @@
                         "id": 99,
                         "user_id": 5678901,
                         "course_id": 8876542,
-                        "course_section_id": 1,
+                        "course_section_id": 10000,
                         "type": "StudentEnrollment",
                         "enrollment_state": "active",
                         "role": "StudentEnrollment",
@@ -288,7 +288,7 @@
                       "id": 100,
                       "user_id": 5678901,
                       "course_id": 8876542,
-                      "course_section_id": 1,
+                      "course_section_id": 10000,
                       "type": "TaEnrollment",
                       "enrollment_state": "active",
                       "role": "TaEnrollment",
@@ -320,7 +320,7 @@
                     "id": 101,
                     "user_id": 4567890,
                     "course_id": 8876542,
-                    "course_section_id": 1,
+                    "course_section_id": 10000,
                     "type": "TeacherEnrollment",
                     "enrollment_state": "active",
                     "role": "TeacherEnrollment",
@@ -350,7 +350,7 @@
                     "id": 102,
                     "user_id": 6789012,
                     "course_id": 8876542,
-                    "course_section_id": 1,
+                    "course_section_id": 10000,
                     "type": "TaEnrollment",
                     "enrollment_state": "active",
                     "role": "TaEnrollment",

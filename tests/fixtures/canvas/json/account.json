@@ -19,6 +19,16 @@
         },
         "status_code": 200
     },
+    "create_report_provisioning_csv_sections": {
+        "method": "POST",
+        "endpoint": "accounts/1/reports/provisioning_csv",
+        "requestBody": "parameters[sections]=1}",
+        "data": {
+            "id": "10003",
+            "report": "provisioning_csv"
+        },
+        "status_code": 200
+    },
     "create_report_provisioning_csv_users": {
         "method": "POST",
         "endpoint": "accounts/1/reports/provisioning_csv",
@@ -842,6 +852,19 @@
             "status": "complete",
             "attachment": {
                 "id": "20001"
+            }
+        },
+        "status_code": 200
+    },
+    "get_report_provisioning_csv_sections": {
+        "method": "GET",
+        "endpoint": "accounts/1/reports/provisioning_csv/10003",
+        "data": {
+            "id": "10003",
+            "report": "provisioning_csv",
+            "status": "complete",
+            "attachment": {
+                "id": "20003"
             }
         },
         "status_code": 200

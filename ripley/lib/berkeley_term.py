@@ -78,6 +78,9 @@ class BerkeleyTerm:
             'year': self.year,
         }
 
+    def to_canvas_sis_term_id(self):
+        return f'TERM:{self.year}-{self.season}'
+
     def to_english(self):
         season_map = {
             'A': 'Winter',
