@@ -26,8 +26,34 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import boto3
 from botocore.exceptions import ClientError, ConnectionError
 from flask import current_app as app
+from ripley.lib.util import utc_now
 import smart_open
 import zipstream
+
+
+def find_last_dated_csvs(folder, csv_names):
+    bucket = app.config['AWS_S3_BUCKET']
+    prefix = f"{folder}/{utc_now().strftime('%Y/%m')}"
+    csv_keys = {}
+
+    session = _get_session()
+    s3 = session.client('s3')
+
+    try:
+        paginator = s3.get_paginator('list_objects')
+        page_iterator = paginator.paginate(Bucket=bucket, Prefix=prefix)
+        for page in page_iterator:
+            if 'Contents' in page:
+                for o in page['Contents']:
+                    object_key = o.get('Key')
+                    for csv_name in csv_names:
+                        if csv_name in object_key:
+                            csv_keys[csv_name] = object_key
+    except Exception as e:
+        app.logger.error(f'Dated CSV search of S3 folder failed (s3://{bucket}/{prefix})')
+        app.logger.exception(e)
+
+    return csv_keys
 
 
 def get_object_text(key):
@@ -62,16 +88,6 @@ def put_binary_data_to_s3(key, binary_data, content_type):
         return None
 
 
-def stream_object_text(object_key):
-    s3_url = f"s3://{app.config['AWS_S3_BUCKET']}/{object_key}"
-    try:
-        return smart_open.open(s3_url, 'r', transport_params={'session': _get_session()})
-    except Exception as e:
-        app.logger.error(f'S3 stream operation failed (s3_url={s3_url})')
-        app.logger.exception(e)
-        return None
-
-
 def stream_folder_zipped(folder_key):
     bucket = app.config['AWS_S3_BUCKET']
     z = zipstream.ZipFile(mode='w', compression=zipstream.ZIP_DEFLATED)
@@ -92,6 +108,16 @@ def stream_folder_zipped(folder_key):
         return z
     except Exception as e:
         app.logger.error(f'Zip stream of S3 folder failed (s3://{bucket}/{folder_key})')
+        app.logger.exception(e)
+        return None
+
+
+def stream_object_text(object_key):
+    s3_url = f"s3://{app.config['AWS_S3_BUCKET']}/{object_key}"
+    try:
+        return smart_open.open(s3_url, 'r', transport_params={'session': _get_session()})
+    except Exception as e:
+        app.logger.error(f'S3 stream operation failed (s3_url={s3_url})')
         app.logger.exception(e)
         return None
 

@@ -22,11 +22,13 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+import csv
 
 from moto import mock_s3
 import requests_mock
+from ripley.externals.s3 import find_last_dated_csvs, stream_object_text
 from ripley.jobs.export_term_enrollments_job import ExportTermEnrollmentsJob
-from tests.util import mock_s3_bucket, read_s3_csv, register_canvas_uris
+from tests.util import mock_s3_bucket, register_canvas_uris
 
 
 class TestExportTermEnrollmentsJob:
@@ -49,10 +51,22 @@ class TestExportTermEnrollmentsJob:
                 ],
             }, m)
 
-            with mock_s3_bucket(app) as s3:
+            with mock_s3_bucket(app):
                 ExportTermEnrollmentsJob(app)._run(params={'sis_term_id': 'TERM:2023-B'})
-                provisioning_report = read_s3_csv(app, s3, 'TERM-2023-B-term-enrollments-export')
-                assert len(provisioning_report) == 2
-                assert provisioning_report[0] ==\
-                    'course_id,canvas_section_id,sis_section_id,canvas_user_id,sis_login_id,sis_user_id,role,sis_import_id,enrollment_state'
-                assert provisioning_report[1] == '8876542,10000,SEC:2023-B-32936,5678901,40000,UID:40000,TaEnrollment,,active'
+
+                csvs = find_last_dated_csvs('canvas_provisioning_reports', ['TERM-2023-B-term-enrollments-export'])
+                provisioning_report = csvs['TERM-2023-B-term-enrollments-export']
+                rows = [r for r in csv.DictReader(stream_object_text(provisioning_report))]
+
+                assert len(rows) == 1
+                assert rows[0] == {
+                    'course_id': '8876542',
+                    'canvas_section_id': '10000',
+                    'sis_section_id': 'SEC:2023-B-32936',
+                    'canvas_user_id': '5678901',
+                    'sis_login_id': '40000',
+                    'sis_user_id': 'UID:40000',
+                    'role': 'TaEnrollment',
+                    'sis_import_id': '',
+                    'enrollment_state': 'active',
+                }
