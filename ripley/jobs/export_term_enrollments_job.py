@@ -96,7 +96,7 @@ class ExportTermEnrollmentsJob(BaseJob):
                 ):
                     raise BackgroundJobError('New users import failed.')
 
-        CanvasSynchronization.update(enrollments=this_sync)
+        CanvasSynchronization.update(term_enrollment_csvs=this_sync)
         app.logger.info('Enrollemnts exported, job complete.')
 
     @classmethod
