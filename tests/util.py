@@ -53,6 +53,11 @@ def override_config(app, key, value):
         app.config[key] = old_value
 
 
+def assert_s3_key_not_found(app, s3, key):
+    obj = next((o for o in s3.Bucket(app.config['AWS_S3_BUCKET']).objects.all() if key in o.key), None)
+    assert obj is None
+
+
 def read_s3_csv(app, s3, key):
     obj = next(o for o in s3.Bucket(app.config['AWS_S3_BUCKET']).objects.all() if key in o.key)
     object_data = obj.get()['Body'].read()

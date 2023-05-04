@@ -33,7 +33,7 @@ from ripley.externals.data_loch import get_all_active_users
 from ripley.externals.s3 import upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.jobs.errors import BackgroundJobError
-from ripley.lib.canvas_utils import uid_from_canvas_login_id, user_id_from_attributes
+from ripley.lib.canvas_utils import csv_row_for_campus_user, uid_from_canvas_login_id
 
 
 class AddNewUsersJob(BaseJob):
@@ -66,15 +66,7 @@ class AddNewUsersJob(BaseJob):
                 canvas_import = csv.DictWriter(f, fieldnames=['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) # noqa
                 canvas_import.writeheader()
                 for user in new_users_by_uid.values():
-                    canvas_import.writerow({
-                        'user_id': user_id_from_attributes(user),
-                        'login_id': str(user['ldap_uid']),
-                        'first_name': user['first_name'],
-                        'last_name': user['last_name'],
-                        'email': user['email_address'],
-                        'status': 'active',
-                    })
-
+                    canvas_import.writerow(csv_row_for_campus_user(user))
             if dry_run:
                 app.logger.info('Dry run mode, will not post SIS import file to Canvas.')
             else:

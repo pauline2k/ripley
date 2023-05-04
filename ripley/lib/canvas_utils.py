@@ -60,6 +60,17 @@ def canvas_site_to_api_json(canvas_site):
     }
 
 
+def csv_row_for_campus_user(user):
+    return {
+        'user_id': user_id_from_attributes(user),
+        'login_id': str(user['ldap_uid']),
+        'first_name': user['first_name'],
+        'last_name': user['last_name'],
+        'email': user['email_address'],
+        'status': 'active',
+    }
+
+
 def instruction_mode_description(instruction_mode):
     mode_map = {
         'EF': 'Flexible',
