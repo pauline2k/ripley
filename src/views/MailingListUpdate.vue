@@ -145,6 +145,9 @@ export default {
   created() {
     this.setAlert(undefined)
     if (this.mailingList && this.canvasSite) {
+      if (this.updateSummary) {
+        this.showUpdateSummary()
+      }
       putFocusNextTick('page-header')
       this.$ready()
     } else {
@@ -173,6 +176,34 @@ export default {
     setAlert(message, items, type) {
       this.alert = {message, items: items || [], type}
     },
+    showUpdateSummary() {
+      const actions = ['add', 'remove', 'update']
+      const count = key => {
+        let count = 0
+        this.$_.each(actions, action => count += this.updateSummary[action][key].length)
+        return count
+      }
+      const errorCount = count('errors')
+      const successCount = count('successes')
+      let message
+      let items = []
+      if (errorCount || successCount) {
+        message = this.composeAlertMessage(errorCount, successCount)
+        this.$_.each(['errors', 'successes'], key => {
+          this.$_.each(actions, action => {
+            const emailAddresses = this.updateSummary[action][key]
+            if (emailAddresses.length) {
+              const pastTense = action === 'add' ? 'added' : `${action}d`
+              const prefix = key === 'errors' ? `failed to ${action}` : `Successfully ${pastTense} `
+              items.push(prefix + oxfordJoin(emailAddresses))
+            }
+          })
+        })
+      } else {
+        message = 'No changes made because no changes needed.'
+      }
+      this.setAlert(message, items, errorCount ? 'warning' : 'success')
+    },
     update() {
       this.setAlert(undefined)
       this.$announcer.polite('Updating')
@@ -182,33 +213,8 @@ export default {
       populateMailingList(this.canvasSite.canvasSiteId).then(
         data => {
           this.setMailingList(data.mailingList)
-          const summary = data.summary
-          const actions = ['add', 'remove', 'update']
-          const count = key => {
-            let count = 0
-            this.$_.each(actions, action => count += summary[action][key].length)
-            return count
-          }
-          const errorCount = count('errors')
-          const successCount = count('successes')
-          let message
-          let items = []
-          if (errorCount || successCount) {
-            message = this.composeAlertMessage(errorCount, successCount)
-            this.$_.each(['errors', 'successes'], key => {
-              this.$_.each(actions, action => {
-                const emailAddresses = summary[action][key]
-                if (emailAddresses.length) {
-                  const pastTense = action === 'add' ? 'added' : `${action}d`
-                  const prefix = key === 'errors' ? `failed to ${action}` : `Successfully ${pastTense} `
-                  items.push(prefix + oxfordJoin(emailAddresses))
-                }
-              })
-            })
-          } else {
-            message = 'No changes made because no changes needed.'
-          }
-          this.setAlert(message, items, errorCount ? 'warning' : 'success')
+          this.setUpdateSummary(data.summary)
+          this.showUpdateSummary()
         },
         error => {
           this.setAlert(error, 'warning', [])

@@ -3,7 +3,8 @@ import {defineStore} from 'pinia'
 export const useMailingListStore = defineStore('mailingList', {
   state: () => ({
     canvasSite: undefined,
-    mailingList: undefined
+    mailingList: undefined,
+    updateSummary: undefined
   }),
   actions: {
     init() {
@@ -25,6 +26,9 @@ export const useMailingListStore = defineStore('mailingList', {
       if (this.mailingList) {
         this.setCanvasSite(mailingList.canvasSite)
       }
+    },
+    setUpdateSummary(updateSummary: any) {
+      this.updateSummary = updateSummary
     }
   }
 })
