@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from contextlib import contextmanager
 import json
 import re
-from urllib.parse import urlencode
+from urllib.parse import quote
 
 import boto3
 import moto
@@ -113,11 +113,10 @@ def _register_object(app, requests_mocker, obj_name, obj):
         elif obj_data:
             kwargs['json'] = obj_data
 
-        if 'requestBody' in obj_data:
-
+        if 'requestBody' in obj:
             def match_request_body(request):
-                # request.body may be None, blank string fallback prevents a TypeError.
-                return urlencode(obj_data['requestBody']) in (request.text or '')
+                # request.text may be None, blank string fallback prevents a TypeError.
+                return quote(obj['requestBody'], safe='/=') in (request.text or '')
 
             kwargs['additional_matcher'] = match_request_body
 

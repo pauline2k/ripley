@@ -110,12 +110,16 @@ def _setup(app):
     with requests_mock.Mocker() as m:
         register_canvas_uris(app, {
             'account': [
+                'create_report_provisioning_csv_sections',
                 'create_report_provisioning_csv_users',
                 'get_by_id',
+                'get_report_provisioning_csv_sections',
                 'get_report_provisioning_csv_users',
                 'create_sis_import',
             ],
             'file': [
+                'download_provisioning_csv_sections',
+                'get_provisioning_csv_sections',
                 'download_provisioning_csv_users',
                 'get_provisioning_csv_users',
             ],
