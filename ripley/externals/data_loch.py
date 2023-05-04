@@ -53,9 +53,10 @@ def cursor_from_pool():
 
 
 def get_all_active_users():
-    sql = """select * from sis_data.basic_attributes
-        where (affiliations like '%-TYPE-%' and affiliations not like '%TYPE-SPA%')
-        and person_type != 'A'"""
+    # Beware CLC-7157 (the occasional active user with an 'A' person type).
+    sql = """SELECT * FROM sis_data.basic_attributes
+        WHERE (affiliations LIKE '%-TYPE-%' AND affiliations NOT LIKE '%TYPE-SPA%')
+        AND (person_type != 'A' OR affiliations LIKE '%-TYPE-REGISTERED%')"""
     return safe_execute_rds(sql)
 
 
@@ -122,7 +123,7 @@ def get_users(uids):
         SELECT * FROM sis_data.basic_attributes
         WHERE
             (affiliations LIKE '%-TYPE-%' AND affiliations NOT LIKE '%TYPE-SPA%')
-            AND person_type != 'A'
+            AND (person_type != 'A' OR affiliations LIKE '%-TYPE-REGISTERED%')
             AND ldap_uid IN ({uids_sql_fragment})
     """
     return safe_execute_rds(sql)

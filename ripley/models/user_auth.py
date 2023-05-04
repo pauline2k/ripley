@@ -71,6 +71,10 @@ class UserAuth(Base):
     def find_by_uid(cls, uid):
         return cls.query.filter_by(uid=uid).first()
 
+    @classmethod
+    def get_canvas_whitelist(cls):
+        return cls.query.filter_by(is_canvas_whitelisted=True).all()
+
     def to_api_json(self):
         return {
             'id': self.id,
