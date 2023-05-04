@@ -2,7 +2,7 @@
     "create_report_provisioning_csv_accounts": {
         "method": "POST",
         "endpoint": "accounts/1/reports/provisioning_csv",
-        "requestBody": "parameters[accounts]=1}",
+        "requestBody": "parameters[accounts]=1",
         "data": {
             "id": "10000",
             "report": "provisioning_csv"
@@ -12,7 +12,7 @@
     "create_report_provisioning_csv_courses": {
         "method": "POST",
         "endpoint": "accounts/1/reports/provisioning_csv",
-        "requestBody": "parameters[courses]=1}",
+        "requestBody": "parameters[courses]=1",
         "data": {
             "id": "10001",
             "report": "provisioning_csv"
@@ -22,7 +22,7 @@
     "create_report_provisioning_csv_sections": {
         "method": "POST",
         "endpoint": "accounts/1/reports/provisioning_csv",
-        "requestBody": "parameters[sections]=1}",
+        "requestBody": "parameters[sections]=1",
         "data": {
             "id": "10003",
             "report": "provisioning_csv"
@@ -32,7 +32,7 @@
     "create_report_provisioning_csv_users": {
         "method": "POST",
         "endpoint": "accounts/1/reports/provisioning_csv",
-        "requestBody": "parameters[users]=1}",
+        "requestBody": "parameters[users]=1",
         "data": {
             "id": "10002",
             "report": "provisioning_csv"

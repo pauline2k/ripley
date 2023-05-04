@@ -26,16 +26,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import collections
 from contextlib import contextmanager
 import csv
+from itertools import groupby
 import tempfile
 
 from flask import current_app as app
 from ripley.externals import canvas
 from ripley.externals.data_loch import get_all_active_users
-from ripley.externals.s3 import upload_dated_csv
+from ripley.externals.s3 import find_last_dated_csvs, upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.jobs.errors import BackgroundJobError
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import csv_row_for_campus_user, uid_from_canvas_login_id
+from ripley.lib.canvas_utils import csv_row_for_campus_user, format_term_enrollments_export, uid_from_canvas_login_id
 from ripley.lib.util import utc_now
 from ripley.models.canvas_synchronization import CanvasSynchronization
 from ripley.models.user_auth import UserAuth
@@ -60,6 +61,10 @@ class RefreshBcoursesJob(BaseJob):
         if not sis_term_ids:
             sis_term_ids = [t.to_canvas_sis_term_id() for t in BerkeleyTerm.get_current_terms().values()]
 
+        if self.mode == 'all':
+            export_filenames = [format_term_enrollments_export(term_id) for term_id in sis_term_ids]
+            self.enrollment_provisioning_reports = find_last_dated_csvs('canvas_provisioning_reports', export_filenames)
+
         with sis_import_csv_set(sis_term_ids) as csv_set:
             self.email_deletions = {}
             self.sis_user_id_changes = {}
@@ -69,9 +74,12 @@ class RefreshBcoursesJob(BaseJob):
             with open(canvas_users_file.name, 'r') as f:
                 canvas_users = csv.DictReader(f)
                 for row in canvas_users:
-                    new_row = self.process_row(row, all_users_by_uid)
+                    new_row = self.process_user(row, all_users_by_uid)
                     if _csv_data_changed(row, new_row):
                         csv_set.users.writerow(new_row)
+
+            if self.mode == 'all':
+                self.process_enrollments(csv_set)
 
             if self.sis_user_id_changes:
                 app.logger.warn(f'About to add {len(self.sis_user_id_changes)} SIS user ID changes to CSV')
@@ -89,7 +97,7 @@ class RefreshBcoursesJob(BaseJob):
             CanvasSynchronization.update(enrollments=this_sync, instructors=this_sync)
         app.logger.info(f'bCourses refresh job (mode={self.mode}) complete.')
 
-    def process_row(self, row, all_users_by_uid):
+    def process_user(self, row, all_users_by_uid):
         account_data = uid_from_canvas_login_id(row['login_id'])
         uid = account_data['uid']
         is_inactive = account_data['inactive']
@@ -142,6 +150,26 @@ class RefreshBcoursesJob(BaseJob):
             }
 
         return new_row
+
+    def process_enrollments(self, csv_set):
+        for term_id in csv_set.enrollment_terms.keys():
+            sections_report = canvas.get_csv_report('sections', term_id=term_id)
+            if not sections_report:
+                continue
+
+            def by_course_id(r):
+                return r['course_id']
+
+            for course_id, csv_rows in groupby(sorted(sections_report, key=by_course_id), key=by_course_id):
+                app.logger.debug(f'Refreshing Course ID {course_id}.')
+                if course_id:
+                    sis_section_ids = set(r['section_id'] for r in csv_rows if r['section_id'])
+                    self.process_course_enrollments(term_id, course_id, sis_section_ids, csv_set)
+
+    def process_course_enrollments(self, term_id, course_id, sis_section_ids, csv_set):
+        enrollment_provisioning_report = self.enrollment_provisioning_reports.get(format_term_enrollments_export(term_id), None) # noqa
+        enrollment_csv = csv_set.enrollment_terms[term_id] # noqa
+        # TODO Processing code equivalent to CanvasCsv::SiteMembershipsMaintainer
 
     def upload_results(self, csv_set, timestamp):
         if csv_set.sis_ids.count:

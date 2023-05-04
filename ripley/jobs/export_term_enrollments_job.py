@@ -32,6 +32,7 @@ from ripley.externals.s3 import upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.jobs.errors import BackgroundJobError
 from ripley.lib.berkeley_term import BerkeleyTerm
+from ripley.lib.canvas_utils import format_term_enrollments_export
 from ripley.lib.util import utc_now
 from ripley.models.canvas_synchronization import CanvasSynchronization
 
@@ -90,7 +91,7 @@ class ExportTermEnrollmentsJob(BaseJob):
 
                 if not upload_dated_csv(
                     export_file.name,
-                    f"{sis_term_id.replace(':', '-')}-term-enrollments-export",
+                    format_term_enrollments_export(sis_term_id),
                     'canvas_provisioning_reports',
                     this_sync.strftime('%F_%H-%M-%S'),
                 ):

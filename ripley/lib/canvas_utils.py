@@ -71,6 +71,10 @@ def csv_row_for_campus_user(user):
     }
 
 
+def format_term_enrollments_export(term_id):
+    return f"{term_id.replace(':', '-')}-term-enrollments-export"
+
+
 def instruction_mode_description(instruction_mode):
     mode_map = {
         'EF': 'Flexible',
