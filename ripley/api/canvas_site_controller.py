@@ -158,7 +158,7 @@ def _get_official_sections(canvas_site_id):
             'isPrimarySection': sis_section['is_primary'],
             'sectionNumber': sis_section['section_number'],
         }
-    official_sections = [_section(cs) for cs in canvas_sections]
+    official_sections = [_section(cs) for cs in canvas_sections if cs['id']]
     return official_sections, section_ids
 
 
@@ -166,7 +166,16 @@ def _get_teaching_terms(section_ids):
     berkeley_terms = BerkeleyTerm.get_current_terms().values()
     # canvas_terms = canvas.get_terms()
     # TODO: find the intersection of berkeley_terms and canvas_terms
-    teaching_sections = data_loch.get_instructing_sections(current_user.uid, [t.to_sis_term_id() for t in berkeley_terms])
+    teaching_sections = sorted(
+        data_loch.get_instructing_sections(current_user.uid, [t.to_sis_term_id() for t in berkeley_terms]),
+        key=lambda section: (
+            section['sort_key'][0],
+            int(section['sort_key'][2]),
+            section['sort_key'][1],
+            section['sort_key'][3],
+            section['sort_key'][4],
+        ),
+    )
     courses_by_term = {}
     for section in teaching_sections:
         course_id = section['course_id']

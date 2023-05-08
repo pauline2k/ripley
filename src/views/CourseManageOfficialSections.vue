@@ -139,16 +139,19 @@
           >
             <v-expansion-panel
               v-for="course in courseSemesterClasses"
+              :id="`sections-course-${course.slug}`"
               :key="course.courseCode"
-              class="sections-course-container px-1"
+              class="sections-course-container px-1 mt-4"
+              style="border-radius: 3px !important"
+              :value="course.slug"
             >
               <v-expansion-panel-title class="d-flex flex-row-reverse height-unset pa-0">
-                <div class="sections-course-title d-flex flex-grow-1">
-                  <h3>
+                <div class="d-flex flex-wrap flex-grow-1">
+                  <h3 class="sections-course-title">
                     {{ course.courseCode }}<span v-if="course.title"> : {{ course.title }}</span>
                   </h3>
-                  <span v-if="course.sections && (course.sections.length === 1)" class="sections-course-subtitle">&nbsp;(1 section)</span>
-                  <span v-if="course.sections && (course.sections.length !== 1)" class="sections-course-subtitle">&nbsp;({{ course.sections.length }} sections)</span>
+                  <span v-if="course.sections && (course.sections.length === 1)" class="sections-course-subtitle text-no-wrap">&nbsp;(1 section)</span>
+                  <span v-if="course.sections && (course.sections.length !== 1)" class="sections-course-subtitle text-no-wrap">&nbsp;({{ course.sections.length }} sections)</span>
                 </div>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
@@ -237,7 +240,7 @@ export default {
     adminActingAs: null,
     adminSemesters: null,
     allSections: [],
-    availableSectionsPanel: false,
+    availableSectionsPanel: [],
     canvasSite: {},
     courseSemesterClasses: [],
     currentWorkflowStep: null,
@@ -336,17 +339,20 @@ export default {
         return (this.$_.toString(semester.termId) === this.$_.toString(this.canvasSite.term.id))
       })
       if (courseSemester) {
+        this.availableSectionsPanel = []
         this.courseSemesterClasses = courseSemester.classes
         this.usersClassCount = this.courseSemesterClasses.length
         this.existingCourseSections = []
         this.allSections = []
         this.existingSectionIds = []
         this.courseSemesterClasses.forEach(classItem => {
-          this.$_.set(classItem, 'collapsed', !classItem.containsCourseSections)
           classItem.sections.forEach(section => {
             section.parentClass = classItem
             this.allSections.push(section)
             section.stagedState = null
+            if (section.isCourseSection) {
+              this.availableSectionsPanel = [classItem.slug]
+            }
             this.canvasSite.officialSections.forEach(officialSection => {
               if (officialSection.id === section.id && this.existingSectionIds.indexOf(section.id) === -1) {
                 this.existingSectionIds.push(section.id)
@@ -500,6 +506,7 @@ export default {
 <style scoped lang="scss">
 .page-course-official-sections {
   background-color: $color-white;
+  font-family: $body-font-family;
   padding: 25px;
   .button {
     padding: 10px;
@@ -580,6 +587,17 @@ export default {
       text-align: left;
     }
   }
+  h3.sections-course-title {
+    display: inline !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    line-height: 20px;
+  }
+  .sections-course-subtitle {
+    font-size: 14px !important;
+    font-weight: 400;
+    line-height: 20px;
+  }
 }
 </style>
 
@@ -590,6 +608,12 @@ export default {
   }
   .v-expansion-panel-text__wrapper {
     padding: 6px 4px 0px 4px;
+  }
+  .v-expansion-panel__shadow {
+    display: none !important;
+  }
+  .v-expansion-panel::after {
+    border: none !important;
   }
 }
 </style>
