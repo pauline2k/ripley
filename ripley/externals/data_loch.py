@@ -70,9 +70,9 @@ def get_instructing_sections(uid, term_ids):
         'instructor_uid': uid,
         'term_ids': term_ids,
     }
-    sql = """SELECT sis_term_id AS term_id, cs_course_id AS course_id, sis_course_name AS course_name, sis_course_title AS course_title,
+    sql = r"""SELECT sis_term_id AS term_id, cs_course_id AS course_id, sis_course_name AS course_name, sis_course_title AS course_title,
             sis_section_id AS section_id, is_primary, sis_instruction_format AS instruction_format, sis_section_num AS section_number,
-            instruction_mode, session_code
+            instruction_mode, session_code, regexp_matches(sis_course_name, '([A-Z]+)\s([A-Z]?)(\d+)([A-Z]?)([A-Z]?)') AS sort_key
         FROM sis_data.sis_sections
         WHERE instructor_uid = %(instructor_uid)s
         AND sis_term_id = ANY(%(term_ids)s)

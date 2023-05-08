@@ -135,16 +135,11 @@ h3 {
   border-radius: 3px !important;
   padding: 9px !important;
 }
-.sections-course-title {
+h3.sections-course-title {
+  display: inline !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
   line-height: 20px;
-  h3 {
-    font-size: 15px !important;
-    font-weight: 500 !important;
-  }
-  .sections-course-subtitle {
-    font-size: 14px !important;
-    font-weight: 400;
-  }
 }
 .sr-only {
   position: absolute;

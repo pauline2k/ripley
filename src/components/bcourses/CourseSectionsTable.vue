@@ -15,16 +15,16 @@
       </v-checkbox>
     </div>
     <table id="template-sections-table" class="template-sections-table bg-white">
-      <thead class="sr-only">
+      <thead>
         <tr>
-          <th v-if="mode === 'createCourseForm'">Action</th>
-          <th>Course Code</th>
-          <th>Section Label</th>
-          <th>Course Control Number</th>
-          <th>Schedule</th>
-          <th>Location</th>
-          <th>Instructors</th>
-          <th v-if="mode !== 'createCourseForm' && mode !== 'preview'">
+          <th v-if="mode === 'createCourseForm'" class="template-sections-table-cell-checkbox">Action</th>
+          <th class="template-sections-table-cell-course-code">Course Code</th>
+          <th class="template-sections-table-cell-section-label">Section Label</th>
+          <th class="template-sections-table-cell-section-id">Course Control Number</th>
+          <th class="template-sections-table-cell-section-timestamps d-none d-sm-none d-md-table-cell">Schedule</th>
+          <th class="template-sections-table-cell-section-locations d-none d-sm-none d-md-table-cell">Location</th>
+          <th class="template-sections-table-cell-section-instructors d-none d-sm-none d-lg-table-cell">Instructors</th>
+          <th v-if="mode !== 'createCourseForm' && mode !== 'preview'" class="template-sections-table-cell-section-action-option">
             <span v-if="mode !== 'preview'">Actions</span>
           </th>
         </tr>
@@ -49,7 +49,6 @@
           <td class="template-sections-table-cell-section-label">
             <label
               v-if="mode === 'createCourseForm'"
-              class="template-sections-table-cell-section-label-label"
               :for="`template-canvas-manage-sections-checkbox-${section.id}`"
             >
               {{ sectionLabel(section) }}
@@ -310,20 +309,30 @@ td {
   border-spacing: 0;
   margin: 0;
   width: 100%;
-
   // disable alternating row color
   tr:nth-of-type(even) {
     background: inherit;
   }
-
   tbody tr:last-child td {
     border-bottom: $color-item-group-item-border solid 1px;
     vertical-align: top;
   }
-
   tbody:last-child tr:last-child td {
     border-bottom: 0;
     vertical-align: top;
+  }
+  tbody tr td {
+    color: $color-body-black;
+    font-size: 14px;
+    font-weight: 300;
+    padding-left: 14px;
+  }
+  thead tr th {
+    color: $color-body-black;
+    font-size: 13px;
+    font-weight: 400;
+    padding-left: 14px;
+    text-align: start;
   }
 }
 .template-sections-table-cell-checkbox {
@@ -340,7 +349,10 @@ td {
 }
 .template-sections-table-cell-section-action-option {
   height: 45px;
-  text-align: right;
+  min-width: 70px;
+  padding-right: 10px;
+  text-align: right !important;
+  width: 10%
 }
 .template-sections-table-button {
   font-size: 13px !important;
@@ -367,26 +379,28 @@ td {
   }
 }
 .template-sections-table-cell-course-code {
-  font-size: 13px;
-  width: 115px;
+  min-width: 115px;
+  width: 15%
 }
 .template-sections-table-cell-section-id {
-  width: 70px;
+  min-width: 70px;
+  width: 10%
 }
 .template-sections-table-cell-section-timestamps {
-  width: 155px;
+  min-width: 155px;
+  width: 15%
 }
 .template-sections-table-cell-section-locations {
-  width: 150px;
+  min-width: 150px;
+  width: 15%
 }
 .template-sections-table-cell-section-instructors {
-  width: 183px;
+  min-width: 183px;
+  width: 15%
 }
-.template-sections-table-cell-section-label-label {
-  cursor: pointer;
-  font-size: 13px;
-  margin: 0;
-  text-align: left;
+.template-sections-table-cell-section-label {
+  min-width: 115px;
+  width: 15%
 }
 .template-sections-table-sited-icon {
   color: $color-help-link-blue;
