@@ -56,6 +56,12 @@ class TestDataLoch:
         assert section['instruction_format'] == 'LEC'
         assert section['section_number'] == '001'
         assert section['instruction_mode'] == 'P'
+        assert section['meeting_location'] == 'Sevastopol Station'
+        assert section['meeting_days'] == 'SAMOWE'
+        assert section['meeting_start_time'] == '09:00'
+        assert section['meeting_end_time'] == '11:00'
+        assert section['meeting_start_date'] == '2023-02-17'
+        assert section['meeting_end_date'] == '2023-02-17'
 
     def test_get_section_enrollments(self):
         rosters = data_loch.get_section_enrollments('2232', ['32936', '32937'])

@@ -97,12 +97,21 @@ class TestCanvasSiteProvisionSections:
                 'season': 'B',
                 'year': '2023',
             }
+            # Official sections
             assert len(response['canvasSite']['officialSections']) == 2
             section = response['canvasSite']['officialSections'][0]
+            assert section['courseCode'] == 'ANTHRO 189'
             assert section['id'] == '32936'
+            assert section['instructionFormat'] == 'LEC'
+            assert section['instructionMode'] == 'In Person'
+            assert section['isPrimarySection'] is True
             assert section['name'] == 'Section A'
+            assert section['schedules']
+            assert section['sectionNumber'] == '001'
             assert section['sisId'] == 'SEC:2023-B-32936'
             assert section['termId'] == '2232'
+
+            # All available sections
             assert len(response['teachingTerms']) == 1
             spring_term = response['teachingTerms'][0]
             assert spring_term['name'] == 'Spring 2023'
@@ -114,12 +123,35 @@ class TestCanvasSiteProvisionSections:
             assert course['courseCode'] == 'ASTRON 218'
             assert course['title'] == 'Stellar Dynamics and Galactic Structure'
             assert len(course['sections']) == 2
-            section = course['sections'][0]
-            assert section['id'] == '12345'
-            assert section['instructionFormat'] == 'LEC'
-            assert section['instructionMode'] == 'In Person'
-            assert section['isPrimarySection'] is True
-            assert section['sectionNumber'] == '001'
+            sections = course['sections']
+            assert sections[0]['courseCode'] == 'ASTRON 218'
+            assert sections[0]['id'] == '12345'
+            assert sections[0]['instructionFormat'] == 'LEC'
+            assert sections[0]['instructionMode'] == 'In Person'
+            assert sections[0]['isPrimarySection'] is True
+            assert sections[0]['schedules']['oneTime'] == [
+                {
+                    'buildingName': 'Sevastopol Station',
+                    'date': 'SaMW 2023-02-17',
+                },
+            ]
+            assert sections[0]['schedules']['recurring'] == []
+            assert sections[0]['sectionNumber'] == '001'
+
+            assert sections[1]['courseCode'] == 'ASTRON 218'
+            assert sections[1]['id'] == '12346'
+            assert sections[1]['instructionFormat'] == 'LEC'
+            assert sections[1]['instructionMode'] == 'In Person'
+            assert sections[1]['isPrimarySection'] is True
+            assert sections[1]['schedules']['oneTime'] == []
+            assert sections[1]['schedules']['recurring'] == [
+                {
+                    'buildingName': 'Acheron LV',
+                    'roomNumber': '426',
+                    'schedule': 'TuTh 9:00A-1:30P',
+                },
+            ]
+            assert sections[1]['sectionNumber'] == '002'
             assert course['slug'] == 'astron-218-B-2023'
 
 

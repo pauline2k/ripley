@@ -349,7 +349,7 @@ td {
 }
 .template-sections-table-cell-section-action-option {
   height: 45px;
-  min-width: 70px;
+  min-width: 150px;
   padding-right: 10px;
   text-align: right !important;
   width: 10%

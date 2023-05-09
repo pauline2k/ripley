@@ -31,8 +31,9 @@ from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas, data_loch
 from ripley.externals.canvas import get_course
+from ripley.lib.berkeley_course import course_to_api_json, section_to_api_json, sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, instruction_mode_description
+from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster
@@ -143,20 +144,18 @@ def redirect_to_canvas_profile(canvas_site_id, uid):
 def _get_official_sections(canvas_site_id):
     canvas_sections = canvas.get_course_sections(canvas_site_id)
     canvas_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
-    section_ids = [section['id'] for section in canvas_sections]
+    section_ids = [section['id'] for section in canvas_sections if section['id']]
     term_id = canvas_sections[0]['termId']
-    sis_sections = data_loch.get_sections(term_id, section_ids)
+    sis_sections = sort_course_sections(
+        data_loch.get_sections(term_id, section_ids),
+    )
     sis_sections_by_id = {s['section_id']: s for s in sis_sections}
 
     def _section(canvas_section):
         sis_section = sis_sections_by_id[canvas_section['id']]
         return {
             **canvas_section,
-            'courseCode': sis_section['course_name'],
-            'instructionFormat': sis_section['instruction_format'],
-            'instructionMode': instruction_mode_description(sis_section['instruction_mode']),
-            'isPrimarySection': sis_section['is_primary'],
-            'sectionNumber': sis_section['section_number'],
+            **section_to_api_json(sis_section),
         }
     official_sections = [_section(cs) for cs in canvas_sections if cs['id']]
     return official_sections, section_ids
@@ -166,15 +165,8 @@ def _get_teaching_terms(section_ids):
     berkeley_terms = BerkeleyTerm.get_current_terms().values()
     # canvas_terms = canvas.get_terms()
     # TODO: find the intersection of berkeley_terms and canvas_terms
-    teaching_sections = sorted(
+    teaching_sections = sort_course_sections(
         data_loch.get_instructing_sections(current_user.uid, [t.to_sis_term_id() for t in berkeley_terms]),
-        key=lambda section: (
-            section['sort_key'][0],
-            int(section['sort_key'][2]),
-            section['sort_key'][1],
-            section['sort_key'][3],
-            section['sort_key'][4],
-        ),
     )
     courses_by_term = {}
     for section in teaching_sections:
@@ -184,28 +176,10 @@ def _get_teaching_terms(section_ids):
             courses_by_term[term_id] = {}
         if course_id not in courses_by_term[term_id]:
             term = BerkeleyTerm.from_sis_term_id(term_id)
-            courses_by_term[term_id][course_id] = {
-                'courseCode': section['course_name'],
-                'sections': [],
-                'slug': '-'.join([
-                    section['course_name'].replace(' ', '-').lower(),
-                    term.to_session_slug(session_code=section['session_code']),
-                ]),
-                'title': section['course_title'],
-            }
-        # TODO: add schedules
+            courses_by_term[term_id][course_id] = course_to_api_json(term, section)
         courses_by_term[term_id][course_id]['sections'].append({
-            'courseCode': section['course_name'],
-            'id': section['section_id'],
-            'instructionFormat': section['instruction_format'],
-            'instructionMode': instruction_mode_description(section['instruction_mode']),
+            **section_to_api_json(section),
             'isCourseSection': section['section_id'] in section_ids,
-            'isPrimarySection': section['is_primary'],
-            'schedules': {
-                'oneTime': [],
-                'recurring': [],
-            },
-            'sectionNumber': section['section_number'],
         })
 
     def _term_courses(term_id, courses_by_id):
