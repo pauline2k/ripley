@@ -60,6 +60,14 @@ def canvas_site_to_api_json(canvas_site):
     }
 
 
+def csv_formatted_course_role(role):
+    return {
+        'StudentEnrollment': 'student',
+        'TaEnrollment': 'ta',
+        'TeacherEnrollment': 'teacher',
+    }.get(role, role)
+
+
 def csv_row_for_campus_user(user):
     return {
         'user_id': user_id_from_attributes(user),
@@ -73,6 +81,14 @@ def csv_row_for_campus_user(user):
 
 def format_term_enrollments_export(term_id):
     return f"{term_id.replace(':', '-')}-term-enrollments-export"
+
+
+def sis_enrollment_status_to_canvas_course_role(sis_enrollment_status):
+    return {
+        'E': 'StudentEnrollment',
+        'W': 'Waitlist Student',
+        'C': 'StudentEnrollment',
+    }.get(sis_enrollment_status, None)
 
 
 def uid_from_canvas_login_id(login_id):
