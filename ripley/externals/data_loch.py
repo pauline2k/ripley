@@ -31,6 +31,25 @@ import psycopg2
 import psycopg2.extras
 from psycopg2.pool import ThreadedConnectionPool
 
+COURSE_NAME_REGEX = r'([A-Z]+)\s([A-Z]?)(\d+)([A-Z]?)([A-Z]?)'
+SECTION_COLUMNS = f"""
+    sis_term_id AS term_id,
+    cs_course_id AS course_id,
+    sis_course_name AS course_name,
+    sis_course_title AS course_title,
+    sis_section_id AS section_id,
+    is_primary,
+    sis_instruction_format AS instruction_format,
+    sis_section_num AS section_number,
+    instruction_mode,
+    session_code,
+    meeting_location,
+    meeting_days,
+    meeting_start_time,
+    meeting_end_time,
+    meeting_start_date,
+    meeting_end_date,
+    regexp_matches(sis_course_name, '{COURSE_NAME_REGEX}') AS sort_key"""
 
 connection_pool = None
 
@@ -70,9 +89,7 @@ def get_instructing_sections(uid, term_ids):
         'instructor_uid': uid,
         'term_ids': term_ids,
     }
-    sql = r"""SELECT sis_term_id AS term_id, cs_course_id AS course_id, sis_course_name AS course_name, sis_course_title AS course_title,
-            sis_section_id AS section_id, is_primary, sis_instruction_format AS instruction_format, sis_section_num AS section_number,
-            instruction_mode, session_code, regexp_matches(sis_course_name, '([A-Z]+)\s([A-Z]?)(\d+)([A-Z]?)([A-Z]?)') AS sort_key
+    sql = f"""SELECT {SECTION_COLUMNS}
         FROM sis_data.sis_sections
         WHERE instructor_uid = %(instructor_uid)s
         AND sis_term_id = ANY(%(term_ids)s)
@@ -85,9 +102,7 @@ def get_sections(term_id, section_ids):
         'section_ids': section_ids,
         'term_id': term_id,
     }
-    sql = """SELECT sis_term_id AS term_id, cs_course_id AS course_id, sis_course_name AS course_name, sis_course_title AS course_title,
-            sis_section_id AS section_id, is_primary, sis_instruction_format AS instruction_format, sis_section_num AS section_number,
-            instruction_mode, session_code
+    sql = f"""SELECT {SECTION_COLUMNS}
         FROM sis_data.sis_sections
         WHERE sis_section_id = ANY(%(section_ids)s)
         AND sis_term_id = %(term_id)s

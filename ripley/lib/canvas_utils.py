@@ -32,7 +32,7 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 def parse_canvas_sis_section_id(sis_section_id):
     section_id, berkeley_term = None, None
     if sis_section_id:
-        m = re.fullmatch(r'^(SEC:)?(?P<term_year>\d{4})-(?P<term_code>[A-D])-(?P<section_id>\d+)$', sis_section_id)
+        m = re.fullmatch(r'^(SEC:)?(?P<term_year>\d{4})-(?P<term_code>[A-D])-(?P<section_id>\d+).*?$', sis_section_id)
         section_id = m['section_id'] if m else None
         berkeley_term = BerkeleyTerm(m['term_year'], m['term_code']) if m else None
     return section_id, berkeley_term
@@ -73,18 +73,6 @@ def csv_row_for_campus_user(user):
 
 def format_term_enrollments_export(term_id):
     return f"{term_id.replace(':', '-')}-term-enrollments-export"
-
-
-def instruction_mode_description(instruction_mode):
-    mode_map = {
-        'EF': 'Flexible',
-        'EH': 'Hybrid',
-        'ER': 'Remote',
-        'P': 'In Person',
-        'O': 'Online',
-        'W': 'Web-based',
-    }
-    return mode_map.get(instruction_mode) or instruction_mode
 
 
 def uid_from_canvas_login_id(login_id):

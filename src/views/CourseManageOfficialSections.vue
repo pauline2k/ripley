@@ -87,7 +87,6 @@
               </v-btn>
             </v-col>
           </v-row>
-
           <v-row no-gutters class="page-course-official-sections-courses-container">
             <v-col md="12" class="page-course-official-sections-current-course">
               <CourseSectionsTable
@@ -101,7 +100,6 @@
               ></CourseSectionsTable>
             </v-col>
           </v-row>
-
           <v-row v-if="currentStagedCount() > 12" class="row">
             <v-col md="12" class="text-right">
               <v-btn
@@ -122,7 +120,6 @@
             </v-col>
           </v-row>
         </div>
-
         <div class="page-course-official-sections-sections-area">
           <v-row no-gutters>
             <v-col md="12">
@@ -131,7 +128,6 @@
               </h3>
             </v-col>
           </v-row>
-
           <v-expansion-panels
             v-if="courseSemesterClasses.length > 0"
             v-model="availableSectionsPanel"
@@ -342,7 +338,7 @@ export default {
         this.availableSectionsPanel = []
         this.courseSemesterClasses = courseSemester.classes
         this.usersClassCount = this.courseSemesterClasses.length
-        this.existingCourseSections = []
+        this.existingCourseSections = this.canvasSite.officialSections
         this.allSections = []
         this.existingSectionIds = []
         this.courseSemesterClasses.forEach(classItem => {
@@ -356,7 +352,6 @@ export default {
             this.canvasSite.officialSections.forEach(officialSection => {
               if (officialSection.id === section.id && this.existingSectionIds.indexOf(section.id) === -1) {
                 this.existingSectionIds.push(section.id)
-                this.existingCourseSections.push(section)
                 if (officialSection.name !== section.label) {
                   this.$_.set(section, 'nameDiscrepancy', true)
                 }
