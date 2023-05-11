@@ -24,6 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from collections import defaultdict
+from datetime import datetime
 
 from flask import current_app as app
 from ripley.externals import canvas
@@ -58,6 +59,27 @@ def canvas_site_roster(canvas_site_id):
     return {
         'sections': sections,
         'students': students,
+    }
+
+
+def canvas_site_roster_csv(canvas_site_id):
+    rows = []
+    roster = canvas_site_roster(canvas_site_id)
+    for student in roster['students']:
+        sections = sorted([section['name'] for section in student['sections']])
+        rows.append({
+            'Name': f"{student['firstName']} {student['lastName']}",
+            'Student ID': student['studentId'],
+            'UID': student['uid'],
+            'Role': {'E': 'Student', 'W': 'Waitlist Student'}.get(student['enrollStatus'], None),
+            'Email address': student['email'],
+            'Sections': ', '.join(sections),
+        })
+    now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    return {
+        'rows': rows,
+        'filename': f'{canvas_site_id}-roster-{now}.csv',
+        'fieldnames': ['Name', 'Student ID', 'UID', 'Role', 'Email address', 'Sections'],
     }
 
 

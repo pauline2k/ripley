@@ -1,5 +1,15 @@
 $color-alert-background: #fef6e6;
+$color-alert-error-background: #f2dede;
 $color-alert-error-foreground: #b94a48;
+$color-alert-foreground: #bc8006;
+$color-alert-foreground-selected: #a07f46;
+$color-alert-info-foreground: #3a87ad;
+$color-alert-info-background: #d9edf7;
+$color-alert-info-background-dark: #3a87ad;
+$color-alert-success-background: #dff0d8;
+$color-alert-success-foreground: #468847;
+
+
 $color-black: #000;
 $color-body-black: #474747;
 $color-button-background: #f7f7f7;
@@ -39,6 +49,7 @@ $color-very-light-grey: #ccc;
 $color-whisper: #eee;
 $color-white: #fff;
 $color-white-smoke: #f6f6f6;
+$color-white-translucent: rgba(255, 255, 255, .5);
 $color-yellow-row-highlighted: #fefae4;
 
 $primary-color: #2683bc;
