@@ -343,20 +343,19 @@ export default {
         this.usersClassCount = this.courseSemesterClasses.length
         this.existingCourseSections = this.canvasSite.officialSections
         this.allSections = []
-        this.existingSectionIds = []
+        const existingSectionIds = this.$_.map(this.existingCourseSections, 'id')
         this.courseSemesterClasses.forEach(classItem => {
-          classItem.sections.forEach(section => {
-            section.parentClass = classItem
-            this.allSections.push(section)
-            section.stagedState = null
-            if (section.isCourseSection) {
+          classItem.sections.forEach(teachingSection => {
+            teachingSection.parentClass = classItem
+            this.allSections.push(teachingSection)
+            teachingSection.stagedState = null
+            if (teachingSection.isCourseSection) {
               this.availableSectionsPanel = [classItem.slug]
             }
             this.canvasSite.officialSections.forEach(officialSection => {
-              if (officialSection.id === section.id && this.existingSectionIds.indexOf(section.id) === -1) {
-                this.existingSectionIds.push(section.id)
-                if (officialSection.name !== section.label) {
-                  this.$_.set(section, 'nameDiscrepancy', true)
+              if (officialSection.id === teachingSection.id && existingSectionIds.indexOf(teachingSection.id) === -1) {
+                if (officialSection.canvasName !== `${teachingSection.courseCode} ${teachingSection.name}`) {
+                  this.$_.set(teachingSection, 'nameDiscrepancy', true)
                 }
               }
             })
