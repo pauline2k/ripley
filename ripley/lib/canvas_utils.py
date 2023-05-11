@@ -42,7 +42,7 @@ def canvas_section_to_api_json(canvas_section):
     section_id, berkeley_term = parse_canvas_sis_section_id(canvas_section.sis_section_id)
     return {
         'id': section_id,
-        'name': canvas_section.name,
+        'canvasName': canvas_section.name,
         'sisId': canvas_section.sis_section_id,
         'termId': berkeley_term.to_sis_term_id() if berkeley_term else None,
     }

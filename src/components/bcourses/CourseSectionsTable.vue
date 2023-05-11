@@ -36,7 +36,7 @@
               :id="`template-canvas-manage-sections-checkbox-${section.id}`"
               v-model="selected"
               :aria-checked="section.selected"
-              :aria-label="`Checkbox for ${section.courseCode} ${sectionLabel(section)}`"
+              :aria-label="`Checkbox for ${section.courseCode} ${section.name}`"
               class="ml-2"
               name="section-section-id"
               size="sm"
@@ -51,9 +51,9 @@
               v-if="mode === 'createCourseForm'"
               :for="`template-canvas-manage-sections-checkbox-${section.id}`"
             >
-              {{ sectionLabel(section) }}
+              {{ section.name }}
             </label>
-            <span v-if="mode !== 'createCourseForm'">{{ sectionLabel(section) }}</span>
+            <span v-if="mode !== 'createCourseForm'">{{ section.name }}</span>
             <span v-if="mode === 'currentStaging' && section.nameDiscrepancy && section.stagedState !== 'update'" class="sr-only">
               The section name in bCourses no longer matches the Student Information System.
               Use the "Update" button to rename your bCourses section name to match SIS.
@@ -74,7 +74,7 @@
             <div v-if="mode === 'currentStaging' && section.isCourseSection">
               <v-btn
                 v-if="section.nameDiscrepancy && section.stagedState !== 'update'"
-                :aria-label="`Include '${section.courseCode} ${sectionLabel(section)}' in the list of sections to be updated`"
+                :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be updated`"
                 class="canvas-button template-sections-table-button canvas-no-decoration ml-1"
                 @click="stageUpdate(section)"
               >
@@ -82,7 +82,7 @@
               </v-btn>
               <v-btn
                 v-if="section.stagedState === 'update'"
-                :aria-label="`Remove '${section.courseCode} ${sectionLabel(section)}' from list of sections to be updated from course site`"
+                :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be updated from course site`"
                 class="canvas-button template-sections-table-button template-sections-table-button-undo-delete canvas-no-decoration ml-1"
                 @click="unstage(section)"
               >
@@ -90,7 +90,7 @@
               </v-btn>
               <v-btn
                 v-if="section.stagedState !== 'update'"
-                :aria-label="`Include '${section.courseCode} ${sectionLabel(section)}' in the list of sections to be unlinked from course site`"
+                :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be unlinked from course site`"
                 class="canvas-button template-sections-table-button canvas-no-decoration ml-1"
                 @click="stageDelete(section)"
               >
@@ -101,7 +101,7 @@
             <div v-if="mode === 'currentStaging' && !section.isCourseSection">
               <v-btn
                 class="canvas-button template-sections-table-button template-sections-table-button-undo-add canvas-no-decoration ml-1"
-                :aria-label="`Remove '${section.courseCode} ${sectionLabel(section)}' from list of sections to be linked to course site`"
+                :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be linked to course site`"
                 @click="unstage(section)"
               >
                 Undo Link
@@ -112,7 +112,7 @@
             <div v-if="mode === 'availableStaging' && section.isCourseSection && section.stagedState === 'delete'">
               <v-btn
                 class="canvas-button template-sections-table-button template-sections-table-button-undo-delete canvas-no-decoration ml-1"
-                :aria-label="`Remove '${section.courseCode} ${sectionLabel(section)}' from list of sections to be unlinked from course site`"
+                :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be unlinked from course site`"
                 @click="unstage(section)"
               >
                 Undo Unlink
@@ -127,7 +127,7 @@
               <v-btn
                 class="canvas-button canvas-button-primary template-sections-table-button canvas-no-decoration ml-1"
                 :class="{'template-sections-table-button-undo-add': section.stagedState === 'add'}"
-                :aria-label="`Include '${section.courseCode} ${sectionLabel(section)}' in the list of sections to be linked to course site`"
+                :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be linked to course site`"
                 @click="stageAdd(section)"
               >
                 Link
@@ -265,9 +265,6 @@ export default {
       return !this.sections.some(section => {
         return (section.isCourseSection && section.stagedState !== 'delete') || (!section.isCourseSection && section.stagedState === 'add')
       })
-    },
-    sectionLabel(section) {
-      return `${section.instructionFormat} ${section.sectionNumber} (${section.instructionMode})`
     },
     stageAdd(section) {
       this.stageAddAction(section)

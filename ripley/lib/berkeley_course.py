@@ -39,6 +39,12 @@ def course_to_api_json(berkeley_term, section):
     }
 
 
+def course_section_name(section):
+    section_name = ' '.join([section['instruction_format'], section['section_number']])
+    section_name += f" ({instruction_mode_description(section['instruction_mode'])})"
+    return section_name
+
+
 def instruction_mode_description(instruction_mode):
     mode_map = {
         'EF': 'Flexible',
@@ -81,6 +87,7 @@ def section_to_api_json(section):
         'instructionFormat': section['instruction_format'],
         'instructionMode': instruction_mode_description(section['instruction_mode']),
         'isPrimarySection': section['is_primary'],
+        'name': course_section_name(section),
         'schedules': schedules,
         'sectionNumber': section['section_number'],
     }

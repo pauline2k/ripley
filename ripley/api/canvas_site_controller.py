@@ -29,7 +29,7 @@ from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotF
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas, data_loch
 from ripley.externals.canvas import get_course
-from ripley.lib.berkeley_course import course_to_api_json, section_to_api_json, sort_course_sections
+from ripley.lib.berkeley_course import course_section_name, course_to_api_json, section_to_api_json, sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
@@ -86,12 +86,10 @@ def canvas_site_edit_sections(canvas_site_id):
         raise ResourceNotFoundError(f'No sections found with IDs {section_ids}')
 
     def _section(section):
-        section_name = ' '.join([section['course_name'], section['instruction_format'], section['section_number']])
-        section_name += f" ({section['instruction_mode']})"
         return {
             'section_id': section['section_id'],
             'course_id': section['course_id'],
-            'name': section_name,
+            'name': course_section_name(section),
             'status': 'deleted' if section['section_id'] in sections_to_remove else 'active',
             'start_date': None,
             'end_date': None,

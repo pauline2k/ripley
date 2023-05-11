@@ -132,8 +132,9 @@ class TestCanvasSiteProvisionSections:
             }
             assert len(response['canvasSite']['officialSections']) == 2
             section = response['canvasSite']['officialSections'][0]
+            assert section['canvasName'] == 'Section A'
             assert section['id'] == '32936'
-            assert section['name'] == 'Section A'
+            assert section['name'] == 'LEC 001 (In Person)'
             assert section['sisId'] == 'SEC:2023-B-32936'
             assert section['termId'] == '2232'
             assert len(response['teachingTerms']) == 0
@@ -159,12 +160,13 @@ class TestCanvasSiteProvisionSections:
             # Official sections
             assert len(response['canvasSite']['officialSections']) == 2
             section = response['canvasSite']['officialSections'][0]
+            assert section['canvasName'] == 'Section A'
             assert section['courseCode'] == 'ANTHRO 189'
             assert section['id'] == '32936'
             assert section['instructionFormat'] == 'LEC'
             assert section['instructionMode'] == 'In Person'
             assert section['isPrimarySection'] is True
-            assert section['name'] == 'Section A'
+            assert section['name'] == 'LEC 001 (In Person)'
             assert section['schedules']
             assert section['sectionNumber'] == '001'
             assert section['sisId'] == 'SEC:2023-B-32936'
