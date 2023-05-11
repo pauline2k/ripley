@@ -37,6 +37,7 @@ from ripley.jobs.base_job import BaseJob
 from ripley.jobs.errors import BackgroundJobError
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import csv_row_for_campus_user, format_term_enrollments_export, uid_from_canvas_login_id
+from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from ripley.models.canvas_synchronization import CanvasSynchronization
 from ripley.models.user_auth import UserAuth
@@ -235,21 +236,6 @@ def sis_import_csv_set(sis_term_ids):
     finally:
         for _csv in all_csvs:
             _csv.tempfile.close()
-
-
-class SisImportCsv:
-
-    def __init__(self, fieldnames):
-        self.fieldnames = fieldnames
-        self.tempfile = tempfile.NamedTemporaryFile(suffix='.csv')
-        self.filehandle = open(self.tempfile.name, 'w')
-        self.writer = csv.DictWriter(self.filehandle, fieldnames=self.fieldnames)
-        self.writer.writeheader()
-        self.count = 0
-
-    def writerow(self, row):
-        self.writer.writerow(row)
-        self.count += 1
 
 
 def _csv_data_changed(row, new_row):

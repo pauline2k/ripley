@@ -901,5 +901,18 @@
         "method": "GET",
         "endpoint": "accounts/1",
         "status_code": 404
+    },
+    "get_sis_import": {
+        "method": "GET",
+        "endpoint": "accounts/1/sis_imports/2",
+        "data": {
+            "id": 2,
+            "progress": 100,
+            "workflow_state": "imported",
+            "data": {
+                "import_type": "instructure_csv"
+            }
+        },
+        "status_code": 200
     }
 }

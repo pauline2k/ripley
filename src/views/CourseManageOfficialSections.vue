@@ -8,24 +8,19 @@
       <h1 class="page-course-official-sections-header1">Official Sections</h1>
 
       <div v-if="currentWorkflowStep === 'preview'">
-        <div
-          v-if="jobStatusMessage !== ''"
+        <v-alert
           id="page-course-official-sections-job-status-notice"
-          class="alert"
-          :class="{'notice-error': (jobStatus !== 'sectionEditsCompleted'), 'alert-success': (jobStatus === 'sectionEditsCompleted')}"
+          v-model="showAlert"
+          class="d-flex align-center justify-space-between my-2"
+          closable
+          close-label="Hide notice"
+          :color="jobStatus !== 'sectionEditsCompleted' ? 'error' : 'success'"
+          density="compact"
           role="alert"
+          variant="tonal"
         >
           {{ jobStatusMessage }}
-          <div class="alert-close-button-container">
-            <v-btn
-              class="fa fa-times-circle close-button"
-              aria-controls="page-course-official-sections-job-status-notice"
-              @click="jobStatusMessage = ''"
-            >
-              <span class="sr-only">Hide Notice</span>
-            </v-btn>
-          </div>
-        </div>
+        </v-alert>
 
         <h2 class="sr-only">Viewing Sections</h2>
 
@@ -248,11 +243,19 @@ export default {
     jobStatus: null,
     jobStatusMessage: '',
     percentCompleteRounded: 0,
+    showAlert: false,
     totalStagedCount: 0
   }),
   created() {
     this.fetchFeed()
     this.$ready()
+  },
+  watch: {
+    jobStatusMessage(msg) {
+      if (msg.length) {
+        this.showAlert = true
+      }
+    }
   },
   methods: {
     addAllSections(course) {
@@ -320,11 +323,11 @@ export default {
       this.courseSemesterClasses.forEach(classItem => {
         classItem.sections.forEach(section => {
           if (section.stagedState === 'add') {
-            sections.addSections.push(section.sectionId)
+            sections.addSections.push(section.id)
           } else if (section.stagedState === 'delete') {
-            sections.deleteSections.push(section.sectionId)
+            sections.deleteSections.push(section.id)
           } else if (section.stagedState === 'update') {
-            sections.updateSections.push(section.sectionId)
+            sections.updateSections.push(section.id)
           }
         })
       })
@@ -405,12 +408,18 @@ export default {
       ).then(
         response => {
           this.backgroundJobId = response.job_id
-          this.trackSectionUpdateJob()
+          // this.trackSectionUpdateJob()
+          this.jobStatus = response.jobStatus
+        }
+      ).catch(
+        error => {
+          this.jobStatus = 'error'
+          this.jobStatusMessage = error
         }
       )
     },
     sectionString(section) {
-      return section.courseCode + ' ' + section.section_label + ' (Section ID: ' + section.sectionId + ')'
+      return section.courseCode + ' ' + section.section_label + ' (Section ID: ' + section.id + ')'
     },
     stageAdd(section) {
       if (!section.isCourseSection) {

@@ -23,6 +23,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+import json
+
 import requests_mock
 from tests.util import register_canvas_uris
 
@@ -34,16 +36,73 @@ teacher_uid = '30000'
 student_uid = '40000'
 
 
+class TestCanvasSiteEditSections:
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        _api_canvas_site_edit_sections(client, '8876542', expected_status_code=401)
+
+    def test_no_canvas_account(self, client, app, fake_auth):
+        """Denies user with no Canvas account."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {'course': ['get_by_id_8876542']}, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+            _api_canvas_site_edit_sections(client, canvas_site_id, expected_status_code=401)
+
+    def test_teacher(self, client, app, fake_auth):
+        """Allows teacher."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['create_sis_import', 'get_by_id', 'get_sis_import'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'user': ['profile_30000'],
+            }, m)
+            canvas_site_id = '8876542'
+            params = {
+                'sectionIdsToAdd': ['12345'],
+            }
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            _api_canvas_site_edit_sections(client, canvas_site_id, params=params)
+
+    def test_teacher_no_section_ids(self, client, app, fake_auth):
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'user': ['profile_30000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            _api_canvas_site_edit_sections(client, canvas_site_id, expected_status_code=400)
+
+
+def _api_canvas_site_edit_sections(client, canvas_site_id, params=None, expected_status_code=200):
+    data = {
+        'sectionIdsToAdd': [],
+        'sectionIdsToRemove': [],
+        'sectionIdsToUpdate': [],
+    }
+    data.update(params or {})
+    response = client.post(
+        f'/api/canvas_site/{canvas_site_id}/provision/sections',
+        data=json.dumps(data),
+        content_type='application/json',
+    )
+    assert response.status_code == expected_status_code
+    return response.json
+
+
 class TestCanvasSiteProvisionSections:
     def test_anonymous(self, client):
         """Denies anonymous user."""
         _api_canvas_course_provision_sections(client, '8876542', expected_status_code=401)
 
-    def test_no_canvas_account(self, client, fake_auth):
+    def test_no_canvas_account(self, client, app, fake_auth):
         """Denies user with no Canvas account."""
-        canvas_site_id = '8876542'
-        fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
-        _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=401)
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {'course': ['get_by_id_8876542']}, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+            _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=401)
 
     def test_not_enrolled(self, client, app, fake_auth):
         """Denies user with no course enrollment."""

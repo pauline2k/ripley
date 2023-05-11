@@ -23,11 +23,9 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from datetime import datetime
-
 from flask import current_app as app, redirect, request
 from flask_login import current_user, login_required
-from ripley.api.errors import ResourceNotFoundError
+from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas, data_loch
 from ripley.externals.canvas import get_course
@@ -35,8 +33,9 @@ from ripley.lib.berkeley_course import course_to_api_json, section_to_api_json, 
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json
 from ripley.lib.http import tolerant_jsonify
+from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import to_bool_or_none
-from ripley.merged.roster import canvas_site_roster
+from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
 
 @app.route('/api/canvas_site/provision')
@@ -64,6 +63,46 @@ def get_canvas_site(canvas_site_id):
         return tolerant_jsonify(api_json)
     else:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
+
+
+@app.route('/api/canvas_site/<canvas_site_id>/provision/sections', methods=['POST'])
+@canvas_role_required('TeacherEnrollment', 'Lead TA')
+def canvas_site_edit_sections(canvas_site_id):
+    course = canvas.get_course(canvas_site_id)
+    if not course:
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
+    params = request.get_json()
+    sections_to_add = params.get('sectionIdsToAdd', [])
+    sections_to_remove = params.get('sectionIdsToRemove', [])
+    sections_to_update = params.get('sectionIdsToUpdate', [])
+    section_ids = sections_to_add + sections_to_remove + sections_to_update
+    if not len(section_ids):
+        raise BadRequestError('Required parameters are missing.')
+
+    canvas_sis_term_id = course.term['sis_term_id']
+    term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
+    sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=section_ids)
+    if not (sis_sections and len(sis_sections)):
+        raise ResourceNotFoundError(f'No sections found with IDs {section_ids}')
+
+    def _section(section):
+        section_name = ' '.join([section['course_name'], section['instruction_format'], section['section_number']])
+        section_name += f" ({section['instruction_mode']})"
+        return {
+            'section_id': section['section_id'],
+            'course_id': section['course_id'],
+            'name': section_name,
+            'status': 'deleted' if section['section_id'] in sections_to_remove else 'active',
+            'start_date': None,
+            'end_date': None,
+        }
+    sections = [_section(s) for s in sis_sections]
+    with SisImportCsv.create(fieldnames=['section_id', 'course_id', 'name', 'status', 'start_date', 'end_date']) as sis_import:
+        sis_import.writerows(sections)
+        sis_import.filehandle.close()
+        if not canvas.post_sis_import(attachment=sis_import.tempfile.name):
+            raise InternalServerError('Course sections SIS import failed.')
+    return tolerant_jsonify({'jobStatus': 'Completed'})
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections')
@@ -109,24 +148,7 @@ def get_roster(canvas_site_id):
 @app.route('/api/canvas_site/<canvas_site_id>/export_roster')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def get_roster_csv(canvas_site_id):
-    rows = []
-    roster = canvas_site_roster(canvas_site_id)
-    for student in roster['students']:
-        sections = sorted([section['name'] for section in student['sections']])
-        rows.append({
-            'Name': f"{student['firstName']} {student['lastName']}",
-            'Student ID': student['studentId'],
-            'UID': student['uid'],
-            'Role': {'E': 'Student', 'W': 'Waitlist Student'}.get(student['enrollStatus'], None),
-            'Email address': student['email'],
-            'Sections': ', '.join(sections),
-        })
-    now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    return csv_download_response(
-        rows=rows,
-        filename=f'{canvas_site_id}-roster-{now}.csv',
-        fieldnames=['Name', 'Student ID', 'UID', 'Role', 'Email address', 'Sections'],
-    )
+    return csv_download_response(**canvas_site_roster_csv(canvas_site_id))
 
 
 @app.route('/redirect/canvas/<canvas_site_id>/user/<uid>')

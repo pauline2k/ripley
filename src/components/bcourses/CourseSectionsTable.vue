@@ -349,7 +349,7 @@ td {
 }
 .template-sections-table-cell-section-action-option {
   height: 45px;
-  min-width: 150px;
+  min-width: 160px;
   padding-right: 10px;
   text-align: right !important;
   width: 10%
@@ -361,21 +361,21 @@ td {
   white-space: nowrap;
 }
 .template-sections-table-button-undo-add {
-  background-color: $color-orange-button-bg;
-  border: $color-orange-button-border solid 1px;
-  color: $color-white;
+  background-color: $color-orange-button-bg !important;
+  border: $color-orange-button-border solid 1px !important;
+  color: $color-white !important;
   &:hover, &:active, &:focus, &:link {
-    background: $color-orange-button-bg-selected;
-    border-color: $color-orange-button-border-selected;
+    background: $color-orange-button-bg-selected !important;
+    border-color: $color-orange-button-border-selected !important;
   }
 }
 .template-sections-table-button-undo-delete {
-  background-color: $color-red-button-bg;
-  border: $color-red-button-border solid 1px;
-  color: $color-white;
+  background-color: $color-red-button-bg !important;
+  border: $color-red-button-border solid 1px !important;
+  color: $color-white !important;
   &:hover, &:active, &:focus, &:link {
-    background: $color-red-button-bg-selected;
-    border-color: $color-red-button-border-selected;
+    background: $color-red-button-bg-selected !important;
+    border-color: $color-red-button-border-selected !important;
   }
 }
 .template-sections-table-cell-course-code {

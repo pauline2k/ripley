@@ -109,7 +109,7 @@ export function updateSiteSections(
   sectionIdsToRemove: string[],
   sectionIdsToUpdate: string[]
 ) {
-  return utils.post(`/api/canvas_site/${canvasSiteId}/provision/edit_sections`, {
+  return utils.post(`/api/canvas_site/${canvasSiteId}/provision/sections`, {
     sectionIdsToAdd,
     sectionIdsToRemove,
     sectionIdsToUpdate
