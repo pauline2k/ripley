@@ -31,7 +31,7 @@ import tempfile
 
 from flask import current_app as app
 from ripley.externals import canvas
-from ripley.externals.data_loch import get_all_active_users, get_section_enrollments, get_sections, get_users
+from ripley.externals.data_loch import get_all_active_users, get_section_enrollments, get_section_instructors, get_sections, get_users
 from ripley.externals.s3 import find_last_dated_csvs, upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.jobs.errors import BackgroundJobError
@@ -203,8 +203,7 @@ class RefreshBcoursesJob(BaseJob):
             existing_section_enrollments[ldap_uid] = list(rows)
 
         self.process_student_enrollments(term_id, course_id, sis_section_id, csv_set, existing_section_enrollments)
-
-        # TODO process instructor enrollments
+        self.process_instructor_enrollments(term_id, course_id, sis_section_id, primary_sections, csv_set, existing_section_enrollments)
 
         # Remove existing enrollments not found in SIS
         for ldap_uid, enrollment_rows in existing_section_enrollments.items():
@@ -219,6 +218,16 @@ class RefreshBcoursesJob(BaseJob):
             if course_role and enrollment_row['ldap_uid']:
                 self.process_section_enrollment(
                     term_id, course_id, sis_section_id, enrollment_row['ldap_uid'], course_role, csv_set, existing_section_enrollments)
+
+    def process_instructor_enrollments(self, term_id, course_id, sis_section_id, primary_sections, csv_set, existing_section_enrollments):
+        section_id, berkeley_term = parse_canvas_sis_section_id(sis_section_id)
+        instructor_rows = get_section_instructors(berkeley_term.to_sis_term_id(), [section_id])
+        app.logger.debug(f'{len(instructor_rows)} instructor enrollments found for section {sis_section_id}')
+        for instructor_row in instructor_rows:
+            course_role = _determine_instructor_role(sis_section_id, primary_sections, instructor_row['instructor_role_code'])
+            if course_role and instructor_row['instructor_uid']:
+                self.process_section_enrollment(
+                    term_id, course_id, sis_section_id, instructor_row['instructor_uid'], course_role, csv_set, existing_section_enrollments)
 
     def process_section_enrollment(self, term_id, course_id, sis_section_id, ldap_uid, course_role, csv_set, existing_enrollments):
         enrollment_csv = csv_set.enrollment_terms[term_id]
@@ -240,7 +249,7 @@ class RefreshBcoursesJob(BaseJob):
         else:
             self.add_user_if_new(ldap_uid, users_csv)
 
-        sis_user_id = self.known_users[ldap_uid] or self.get_canvas_csv_row(ldap_uid).get('user_id', None)
+        sis_user_id = self.known_users.get(ldap_uid, None) or self.get_canvas_csv_row(ldap_uid).get('user_id', None)
         if sis_user_id:
             app.logger.info(f'Adding UID {ldap_uid} to section {sis_section_id} with role {course_role}')
             enrollment_csv.writerow({
@@ -293,7 +302,7 @@ class RefreshBcoursesJob(BaseJob):
                         enrollment_csv.tempfile.name, f"enrollments-{term_id.replace(':', '-')}-sis-import", 'canvas_sis_imports', timestamp)
 
     def add_user_if_new(self, uid, users_csv):
-        if not self.known_users[uid]:
+        if not self.known_users.get(uid, None):
             csv_row = _get_canvas_csv_row(uid)
             if csv_row:
                 self.known_users[uid] = csv_row['user_id']
@@ -353,6 +362,27 @@ def _csv_data_changed(row, new_row):
         # Canvas interprets an empty 'email' column as 'Do not change.'
         or (row['email'] and row['email'] != new_row['email'])
         or (row['full_name'] != f"{new_row['first_name']} {new_row['last_name']}"))
+
+
+def _determine_instructor_role(sis_section_id, primary_sections, role_code):
+    campus_section_id = parse_canvas_sis_section_id(sis_section_id)[0]
+    if primary_sections:
+        if next((s for s in primary_sections if str(s['section_id']) == str(campus_section_id)), None):
+            # Teacher permissions for the course site are generally determined by primary section assignment.
+            # Administrative Proxy assignments (instructor role "APRX"/"5") are treated as Lead TAs.
+            if role_code == 'APRX':
+                return 'Lead TA'
+            else:
+                return 'TeacherEnrollment'
+        else:
+            # Although SIS marks them as 'instructors', when someone is explicitly assigned to a secondary
+            # section, they are generally a GSI, and top-level bCourses Teacher access will be determined by assignment
+            # to a primary section.
+            return 'TaEnrollment'
+    else:
+        # However, if there are no primary sections in the course site, the site still needs at least one
+        # member with Teacher access.
+        return 'TeacherEnrollment'
 
 
 def _get_canvas_csv_row(uid):

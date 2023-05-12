@@ -67,8 +67,8 @@ CREATE TABLE sis_data.sis_sections (
 INSERT INTO sis_data.sis_sections
 (sis_term_id, sis_section_id, is_primary, sis_course_name, sis_course_title, sis_instruction_format, sis_section_num, allowed_units, cs_course_id, session_code, instruction_mode, instructor_uid, instructor_name, instructor_role_code, meeting_location, meeting_days, meeting_start_time, meeting_end_time, meeting_start_date, meeting_end_date)
 VALUES
-('2232', '32936', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '001', NULL, '876543', 1, 'P', '', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
-('2232', '32937', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '002', NULL, '876543', 1, 'P', '', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2232', '32936', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '001', NULL, '876543', 1, 'P', '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2232', '32937', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '002', NULL, '876543', 1, 'P', '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
 ('2228', '17275', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '001', NULL, '100726', 1, 'P', '', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
 ('2228', '17277', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '002', NULL, '100726', 1, 'P', '', 'Mufty Blauswater', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
 ('2232', '12345', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '001', NULL, '1234567', 1, 'P', '30000', 'Ash', 'PI', 'Sevastopol Station', 'SAMOWE', '09:00', '11:00', '2023-02-17', '2023-02-17'),

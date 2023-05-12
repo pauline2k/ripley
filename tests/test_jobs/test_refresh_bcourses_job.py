@@ -103,10 +103,11 @@ class TestRefreshBcoursesJob:
         with _setup(app) as s3:
             RefreshBcoursesJob(app)._run(params={'mode': 'all'})
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-sis-import')
-            assert len(spring_2023_enrollments_imported) == 3
+            assert len(spring_2023_enrollments_imported) == 4
             assert spring_2023_enrollments_imported[0] == 'course_id,user_id,role,section_id,status,associated_user_id'
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,UID:40000,student,SEC:2023-B-32936,active,'
             assert spring_2023_enrollments_imported[2] == 'CRS:ANTHRO-189-2023-B,UID:20000,student,SEC:2023-B-32936,active,'
+            assert spring_2023_enrollments_imported[3] == 'CRS:ANTHRO-189-2023-B,UID:30000,teacher,SEC:2023-B-32936,active,'
 
     @pytest.fixture(scope='function')
     def campus_users(self, app):
