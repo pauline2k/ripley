@@ -45,7 +45,7 @@ class TestDataLoch:
 
     def test_get_instructing_sections(self):
         sections = data_loch.get_instructing_sections(teacher_uid, ['2228', '2232'])
-        assert len(sections) == 6
+        assert len(sections) == 8
         section = next(s for s in sections if s['section_id'] == '12345')
         assert section['term_id'] == '2232'
         assert section['is_primary'] is True
@@ -61,6 +61,8 @@ class TestDataLoch:
         assert section['meeting_end_time'] == '11:00'
         assert section['meeting_start_date'] == '2023-02-17'
         assert section['meeting_end_date'] == '2023-02-17'
+        assert section['instructor_uid'] == '30000'
+        assert section['instructor_name'] == 'Ash'
 
     def test_get_section_enrollments(self):
         rosters = data_loch.get_section_enrollments('2232', ['32936', '32937'])

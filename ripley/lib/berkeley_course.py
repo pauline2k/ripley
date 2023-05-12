@@ -57,7 +57,13 @@ def instruction_mode_description(instruction_mode):
     return mode_map.get(instruction_mode) or instruction_mode
 
 
-def section_to_api_json(section):
+def section_to_api_json(section, co_instructor_sections=None):
+
+    def _instructor(section):
+        return {
+            'name': section['instructor_name'],
+            'uid': section['instructor_uid'],
+        }
     schedules = {
         'oneTime': [],
         'recurring': [],
@@ -87,6 +93,7 @@ def section_to_api_json(section):
         'instructionFormat': section['instruction_format'],
         'instructionMode': instruction_mode_description(section['instruction_mode']),
         'isPrimarySection': section['is_primary'],
+        'instructors': [_instructor(s) for s in ([section] + (co_instructor_sections or []))],
         'name': course_section_name(section),
         'schedules': schedules,
         'sectionNumber': section['section_number'],
@@ -99,7 +106,15 @@ def sort_course_sections(sections):
 
 def _course_sort_key(section):
     dept_name, catalog_prefix, catalog_root, catalog_suffix_1, catalog_suffix_2 = section['sort_key']
-    return (dept_name, int(catalog_root), catalog_prefix, catalog_suffix_1, catalog_suffix_2)
+    return (
+        dept_name,
+        int(catalog_root),
+        catalog_prefix,
+        catalog_suffix_1,
+        catalog_suffix_2,
+        not section['is_primary'],
+        section.get('is_co_instructor', False),
+    )
 
 
 def _meeting_days(section):
