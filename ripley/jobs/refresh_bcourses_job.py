@@ -249,7 +249,7 @@ class RefreshBcoursesJob(BaseJob):
         else:
             self.add_user_if_new(ldap_uid, users_csv)
 
-        sis_user_id = self.known_users.get(ldap_uid, None) or self.get_canvas_csv_row(ldap_uid).get('user_id', None)
+        sis_user_id = self.known_users.get(ldap_uid, None) or _get_canvas_csv_row(ldap_uid).get('user_id', None)
         if sis_user_id:
             app.logger.info(f'Adding UID {ldap_uid} to section {sis_section_id} with role {course_role}')
             enrollment_csv.writerow({

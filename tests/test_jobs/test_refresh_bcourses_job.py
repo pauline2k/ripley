@@ -33,7 +33,7 @@ from ripley.jobs.refresh_bcourses_job import RefreshBcoursesJob
 from tests.util import assert_s3_key_not_found, mock_s3_bucket, read_s3_csv, register_canvas_uris
 
 
-class TestRefreshBcoursesJob:
+class TestRefreshBcoursesUsers:
 
     @mock_s3
     def test_no_changes(self, app):
@@ -99,7 +99,15 @@ class TestRefreshBcoursesJob:
 
             assert_s3_key_not_found(app, s3, 'user-sis-import')
 
-    def test_student_enrollments(self, app):
+    @pytest.fixture(scope='function')
+    def campus_users(self, app):
+        from ripley.externals.data_loch import get_all_active_users
+        return get_all_active_users()
+
+
+class TestRefreshBcoursesEnrollments:
+
+    def test_no_change(self, app):
         with _setup(app) as s3:
             RefreshBcoursesJob(app)._run(params={'mode': 'all'})
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-sis-import')
@@ -109,10 +117,69 @@ class TestRefreshBcoursesJob:
             assert spring_2023_enrollments_imported[2] == 'CRS:ANTHRO-189-2023-B,UID:20000,student,SEC:2023-B-32936,active,'
             assert spring_2023_enrollments_imported[3] == 'CRS:ANTHRO-189-2023-B,UID:30000,teacher,SEC:2023-B-32936,active,'
 
+    @mock.patch('ripley.jobs.refresh_bcourses_job.get_section_enrollments')
+    def test_student_added(self, mock_section_enrollments, app, section_enrollments):
+        with _setup(app) as s3:
+            section_enrollments.append({
+                'sis_section_id': '32936',
+                'ldap_uid': '60000',
+                'sid': '',
+                'first_name': 'Samuel',
+                'last_name': 'Brett',
+                'sis_enrollment_status': 'E',
+                'email_address': 'samuel.brett@berkeley.edu',
+            })
+            mock_section_enrollments.return_value = section_enrollments
+
+            RefreshBcoursesJob(app)._run(params={'mode': 'all'})
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-sis-import')
+            assert len(spring_2023_enrollments_imported) == 5
+            assert spring_2023_enrollments_imported[3] == 'CRS:ANTHRO-189-2023-B,UID:60000,student,SEC:2023-B-32936,active,'
+
+    @mock.patch('ripley.jobs.refresh_bcourses_job.get_section_enrollments')
+    def test_student_removed(self, mock_section_enrollments, app, section_enrollments):
+        with _setup(app) as s3:
+            section_enrollments.pop()
+            mock_section_enrollments.return_value = section_enrollments
+
+            RefreshBcoursesJob(app)._run(params={'mode': 'all'})
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-sis-import')
+            assert len(spring_2023_enrollments_imported) == 3
+            assert spring_2023_enrollments_imported[0] == 'course_id,user_id,role,section_id,status,associated_user_id'
+            assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,UID:40000,student,SEC:2023-B-32936,active,'
+            assert spring_2023_enrollments_imported[2] == 'CRS:ANTHRO-189-2023-B,UID:30000,teacher,SEC:2023-B-32936,active,'
+
+    @mock.patch('ripley.jobs.refresh_bcourses_job.get_section_enrollments')
+    @mock.patch('ripley.jobs.refresh_bcourses_job.get_section_instructors')
+    def test_student_becomes_ta(self, mock_section_instructors, mock_section_enrollments, app, section_enrollments, section_instructors):
+        with _setup(app) as s3:
+            section_enrollments.pop()
+            mock_section_enrollments.return_value = section_enrollments
+            section_instructors.append({
+                'sis_section_id': '32936',
+                'instructor_uid': '20000',
+                'instructor_name': 'Joan Lambert',
+                'instructor_role_code': 'APRX',
+            })
+            mock_section_instructors.return_value = section_instructors
+
+            RefreshBcoursesJob(app)._run(params={'mode': 'all'})
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-sis-import')
+            assert len(spring_2023_enrollments_imported) == 4
+            assert spring_2023_enrollments_imported[0] == 'course_id,user_id,role,section_id,status,associated_user_id'
+            assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,UID:40000,student,SEC:2023-B-32936,active,'
+            assert spring_2023_enrollments_imported[2] == 'CRS:ANTHRO-189-2023-B,UID:30000,teacher,SEC:2023-B-32936,active,'
+            assert spring_2023_enrollments_imported[3] == 'CRS:ANTHRO-189-2023-B,UID:20000,Lead TA,SEC:2023-B-32936,active,'
+
     @pytest.fixture(scope='function')
-    def campus_users(self, app):
-        from ripley.externals.data_loch import get_all_active_users
-        return get_all_active_users()
+    def section_enrollments(self, app):
+        from ripley.externals.data_loch import get_section_enrollments
+        return get_section_enrollments('2232', ['32936'])
+
+    @pytest.fixture(scope='function')
+    def section_instructors(self, app):
+        from ripley.externals.data_loch import get_section_instructors
+        return get_section_instructors('2232', ['32936'])
 
 
 @contextmanager
