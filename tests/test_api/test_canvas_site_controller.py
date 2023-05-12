@@ -179,9 +179,8 @@ class TestCanvasSiteProvisionSections:
             assert spring_term['slug'] == 'spring-2023'
             assert spring_term['termId'] == '2232'
             assert spring_term['termYear'] == '2023'
-            assert len(spring_term['classes']) == 1
-            course = spring_term['classes'][0]
-            assert course['courseCode'] == 'ASTRON 218'
+            assert len(spring_term['classes']) == 2
+            course = next(c for c in spring_term['classes'] if c['courseCode'] == 'ASTRON 218')
             assert course['title'] == 'Stellar Dynamics and Galactic Structure'
             assert len(course['sections']) == 2
             sections = course['sections']

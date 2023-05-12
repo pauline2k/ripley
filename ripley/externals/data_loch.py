@@ -125,6 +125,19 @@ def get_section_enrollments(term_id, section_ids):
     return safe_execute_rds(sql, **params)
 
 
+def get_section_instructors(term_id, section_ids):
+    params = {
+        'term_id': term_id,
+        'section_ids': section_ids,
+    }
+    sql = """SELECT DISTINCT sis_section_id, instructor_uid, instructor_name, instructor_role_code
+        FROM sis_data.sis_sections
+        WHERE sis_section_id = ANY(%(section_ids)s)
+        AND sis_term_id = %(term_id)s
+        ORDER BY sis_section_id, instructor_uid, instructor_name"""
+    return safe_execute_rds(sql, **params)
+
+
 def get_undergraduate_term(term_id):
     sql = f"""SELECT * FROM terms.term_definitions
               WHERE term_id = '{term_id}'
