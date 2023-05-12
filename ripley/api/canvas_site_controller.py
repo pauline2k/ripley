@@ -23,6 +23,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from itertools import groupby
+
 from flask import current_app as app, redirect, request
 from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
@@ -164,20 +166,22 @@ def redirect_to_canvas_profile(canvas_site_id, uid):
 def _get_official_sections(canvas_site_id):
     canvas_sections = canvas.get_course_sections(canvas_site_id)
     canvas_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
-    section_ids = [section['id'] for section in canvas_sections if section['id']]
+    canvas_sections_by_id = {cs['id']: cs for cs in canvas_sections if cs['id']}
+    section_ids = list(canvas_sections_by_id.keys())
     term_id = canvas_sections[0]['termId']
     sis_sections = sort_course_sections(
         data_loch.get_sections(term_id, section_ids),
     )
-    sis_sections_by_id = {s['section_id']: s for s in sis_sections}
+    if len(sis_sections) != len(section_ids):
+        app.logger.warn(f'Canvas site ID {canvas_site_id} has {len(section_ids)} sections, but SIS has {len(sis_sections)} sections.')
 
-    def _section(canvas_section):
-        sis_section = sis_sections_by_id[canvas_section['id']]
+    def _section(sis_section):
+        canvas_section = canvas_sections_by_id[sis_section['section_id']]
         return {
             **canvas_section,
             **section_to_api_json(sis_section),
         }
-    official_sections = [_section(cs) for cs in canvas_sections if cs['id']]
+    official_sections = [_section(s) for s in sis_sections]
     return official_sections, section_ids
 
 
@@ -189,7 +193,9 @@ def _get_teaching_terms(section_ids):
         data_loch.get_instructing_sections(current_user.uid, [t.to_sis_term_id() for t in berkeley_terms]),
     )
     courses_by_term = {}
-    for section in teaching_sections:
+    for section_id, sections in groupby(teaching_sections, lambda s: s['section_id']):
+        section = next(s for s in sections if s['is_co_instructor'] is False)
+        co_instructor_sections = [s for s in sections if s['is_co_instructor'] is True]
         course_id = section['course_id']
         term_id = section['term_id']
         if term_id not in courses_by_term:
@@ -198,8 +204,8 @@ def _get_teaching_terms(section_ids):
             term = BerkeleyTerm.from_sis_term_id(term_id)
             courses_by_term[term_id][course_id] = course_to_api_json(term, section)
         courses_by_term[term_id][course_id]['sections'].append({
-            **section_to_api_json(section),
-            'isCourseSection': section['section_id'] in section_ids,
+            **section_to_api_json(section, co_instructor_sections),
+            'isCourseSection': section_id in section_ids,
         })
 
     def _term_courses(term_id, courses_by_id):

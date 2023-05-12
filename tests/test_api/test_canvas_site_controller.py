@@ -182,12 +182,18 @@ class TestCanvasSiteProvisionSections:
             assert len(spring_term['classes']) == 2
             course = next(c for c in spring_term['classes'] if c['courseCode'] == 'ASTRON 218')
             assert course['title'] == 'Stellar Dynamics and Galactic Structure'
-            assert len(course['sections']) == 2
+            assert len(course['sections']) == 3
             sections = course['sections']
             assert sections[0]['courseCode'] == 'ASTRON 218'
             assert sections[0]['id'] == '12345'
             assert sections[0]['instructionFormat'] == 'LEC'
             assert sections[0]['instructionMode'] == 'In Person'
+            assert sections[0]['instructors'] == [
+                {
+                    'name': 'Ash',
+                    'uid': '30000',
+                },
+            ]
             assert sections[0]['isPrimarySection'] is True
             assert sections[0]['schedules']['oneTime'] == [
                 {
@@ -202,6 +208,16 @@ class TestCanvasSiteProvisionSections:
             assert sections[1]['id'] == '12346'
             assert sections[1]['instructionFormat'] == 'LEC'
             assert sections[1]['instructionMode'] == 'In Person'
+            assert sections[1]['instructors'] == [
+                {
+                    'name': 'Ash',
+                    'uid': '30000',
+                },
+                {
+                    'name': 'Fitzi Ritz',
+                    'uid': '13579',
+                },
+            ]
             assert sections[1]['isPrimarySection'] is True
             assert sections[1]['schedules']['oneTime'] == []
             assert sections[1]['schedules']['recurring'] == [
@@ -212,6 +228,23 @@ class TestCanvasSiteProvisionSections:
                 },
             ]
             assert sections[1]['sectionNumber'] == '002'
+            assert sections[2]['id'] == '12347'
+            assert sections[2]['instructionFormat'] == 'DIS'
+            assert sections[2]['isPrimarySection'] is False
+            assert sections[2]['instructors'] == [
+                {
+                    'name': 'Mufty Blauswater',
+                    'uid': '200122',
+                },
+            ]
+            assert sections[2]['schedules']['oneTime'] == []
+            assert sections[2]['schedules']['recurring'] == [
+                {
+                    'buildingName': 'Sevastopol Station',
+                    'schedule': 'Tu 2:00P-3:00P',
+                },
+            ]
+            assert sections[2]['sectionNumber'] == '101'
             assert course['slug'] == 'astron-218-B-2023'
 
 

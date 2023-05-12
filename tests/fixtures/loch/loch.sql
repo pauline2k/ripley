@@ -69,10 +69,12 @@ INSERT INTO sis_data.sis_sections
 VALUES
 ('2232', '32936', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '001', NULL, '876543', 1, 'P', '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
 ('2232', '32937', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '002', NULL, '876543', 1, 'P', '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
-('2228', '17275', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '001', NULL, '100726', 1, 'P', '', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
-('2228', '17277', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '002', NULL, '100726', 1, 'P', '', 'Mufty Blauswater', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2228', '17275', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '001', NULL, '100726', 1, 'P', '13579', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2228', '17277', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '002', NULL, '100726', 1, 'P', '200122', 'Mufty Blauswater', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
 ('2232', '12345', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '001', NULL, '1234567', 1, 'P', '30000', 'Ash', 'PI', 'Sevastopol Station', 'SAMOWE', '09:00', '11:00', '2023-02-17', '2023-02-17'),
+('2232', '12347', FALSE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'DIS', '101', NULL, '1234567', 1, 'P', '200122', 'Mufty Blauswater', 'PI', 'Sevastopol Station', 'TU', '14:00', '15:00', '2023-01-17', '2023-05-17'),
 ('2232', '12346', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '002', NULL, '1234567', 1, 'P', '30000', 'Ash', 'PI', 'Acheron LV 426', 'TUTH', '09:00', '13:30', '2023-01-17', '2023-05-05'),
+('2232', '12346', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '002', NULL, '1234567', 1, 'P', '13579', 'Fitzi Ritz', 'PI', 'Acheron LV 426', 'TUTH', '09:00', '13:30', '2023-01-17', '2023-05-05'),
 ('2228', '32290', TRUE, 'ASTRON C228', 'Extragalactic Astronomy and Cosmology', 'LEC', '001', NULL, '124009', 1, 'P', '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
 ('2228', '32291', TRUE, 'ASTRON C228', 'Extragalactic Astronomy and Cosmology', 'LEC', '002', NULL, '124009', 1, 'P', '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL);
 
