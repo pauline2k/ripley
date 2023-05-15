@@ -58,7 +58,10 @@ def _register_jobs(app):
     from ripley.jobs.export_term_enrollments_job import ExportTermEnrollmentsJob  # noqa
     from ripley.jobs.house_keeping_job import HouseKeepingJob  # noqa
     from ripley.jobs.lti_usage_report_job import LtiUsageReportJob  # noqa
-    from ripley.jobs.refresh_bcourses_job import RefreshBcoursesJob  # noqa
+    from ripley.jobs.refresh_bcourses_accounts_job import RefreshBcoursesAccountsJob  # noqa
+    from ripley.jobs.refresh_bcourses_full_job import RefreshBcoursesFullJob  # noqa
+    from ripley.jobs.refresh_bcourses_inactivate_job import RefreshBcoursesInactivateJob  # noqa
+    from ripley.jobs.refresh_bcourses_incremental_job import RefreshBcoursesIncrementalJob  # noqa
 
     if app.config['JOBS_AUTO_START'] and (not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true'):
         background_job_manager.start(app)
