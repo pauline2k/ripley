@@ -44,11 +44,24 @@ from ripley.models.canvas_synchronization import CanvasSynchronization
 from ripley.models.user_auth import UserAuth
 
 
-class RefreshBcoursesJob(BaseJob):
+class RefreshBcoursesBaseJob(BaseJob):
+
+    JobFlags = collections.namedtuple('JobFlags', 'enrollments inactivate incremental')
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self._set_job_flags()
+
+    def _set_job_flags(self):
+        # Subclasses override.
+        self.job_flags = self.JobFlags(
+            enrollments=False,
+            inactivate=False,
+            incremental=False,
+        )
 
     def _run(self, params={}):
         self.dry_run = params.get('isDryRun', None) or False
-        self.mode = params.get('mode', None)
 
         this_sync = utc_now()
 
@@ -63,7 +76,7 @@ class RefreshBcoursesJob(BaseJob):
         if not sis_term_ids:
             sis_term_ids = [t.to_canvas_sis_term_id() for t in BerkeleyTerm.get_current_terms().values()]
 
-        if self.mode == 'all':
+        if self.job_flags.enrollments:
             self.initialize_enrollment_provisioning_reports(sis_term_ids)
 
         with sis_import_csv_set(sis_term_ids) as csv_set:
@@ -79,7 +92,7 @@ class RefreshBcoursesJob(BaseJob):
                     if _csv_data_changed(row, new_row):
                         csv_set.users.writerow(new_row)
 
-            if self.mode == 'all':
+            if self.job_flags.enrollments:
                 self.process_enrollments(csv_set)
 
             if self.sis_user_id_changes:
@@ -94,9 +107,9 @@ class RefreshBcoursesJob(BaseJob):
 
         app.logger.info('Job complete.')
 
-        if self.mode in ('all', 'recent'):
+        if self.job_flags.enrollments:
             CanvasSynchronization.update(enrollments=this_sync, instructors=this_sync)
-        app.logger.info(f'bCourses refresh job (mode={self.mode}) complete.')
+        app.logger.info(f'bCourses refresh job (mode={self.__class__.__name__}) complete.')
 
     def initialize_enrollment_provisioning_reports(self, sis_term_ids):
         self.enrollment_provisioning_reports = {}
@@ -134,9 +147,9 @@ class RefreshBcoursesJob(BaseJob):
                 new_row['login_id'] = uid
             else:
                 # Check if there are obsolete email addresses to (potentially) delete.
-                if account_data['email'] and (is_inactive or self.mode == 'inactivate'):
+                if account_data['email'] and (is_inactive or self.job_flags.inactivate):
                     self.email_deletions.append(account_data['canvas_user_id'])
-                if self.mode == 'inactivate':
+                if self.job_flags.inactivate:
                     # This LDAP UID no longer appears in campus data. Mark the Canvas user account as inactive.
                     if not is_inactive:
                         app.logger.warn(f'Inactivating account for LDAP UID {uid}.')
@@ -295,7 +308,7 @@ class RefreshBcoursesJob(BaseJob):
                 if not canvas.post_sis_import(csv_set.users.tempfile.name):
                     raise BackgroundJobError('Changed users import failed.')
 
-        if self.mode == 'all':
+        if self.job_flags.enrollments:
             for term_id, enrollment_csv in csv_set.enrollment_terms.items():
                 if enrollment_csv.count:
                     upload_dated_csv(

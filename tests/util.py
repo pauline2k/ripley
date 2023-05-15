@@ -91,6 +91,33 @@ def register_canvas_uris(app, requirements, requests_mocker):
             _register_object(app, requests_mocker, obj_name, obj)
 
 
+@contextmanager
+def setup_bcourses_refresh_job(app):
+    with requests_mock.Mocker() as m:
+        register_canvas_uris(app, {
+            'account': [
+                'create_report_provisioning_csv_sections',
+                'create_report_provisioning_csv_users',
+                'get_by_id',
+                'get_report_provisioning_csv_sections',
+                'get_report_provisioning_csv_users',
+                'create_sis_import',
+            ],
+            'file': [
+                'download_provisioning_csv_sections',
+                'get_provisioning_csv_sections',
+                'download_provisioning_csv_users',
+                'get_provisioning_csv_users',
+            ],
+            'sis_import': [
+                'get_by_id',
+            ],
+        }, m)
+
+        with mock_s3_bucket(app) as s3:
+            yield s3
+
+
 def _register_object(app, requests_mocker, obj_name, obj):
     method = requests_mock.ANY if obj['method'] == 'ANY' else obj['method']
     base_url = f"{app.config['CANVAS_API_URL']}/api/v1/"
