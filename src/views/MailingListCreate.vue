@@ -187,7 +187,8 @@ export default {
         this.$announcer.polite('Creating list')
         createMailingList(this.canvasSite.canvasSiteId, name).then(
           data => {
-            this.setMailingList(data)
+            this.setMailingList(data.mailingList)
+            this.setUpdateSummary(data.summary)
             this.$router.push('/mailing_list/update')
           },
           error => this.error = error

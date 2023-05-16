@@ -55,7 +55,11 @@ def create_mailing_lists(canvas_site_id):
             canvas_site_id=canvas_site_id,
             list_name=(list_name or '').strip() or None,
         )
-        return tolerant_jsonify(mailing_list.to_api_json())
+        mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
+        return tolerant_jsonify({
+            'mailingList': mailing_list.to_api_json(),
+            'summary': update_summary,
+        })
     except ValueError as e:
         raise BadRequestError(str(e))
 

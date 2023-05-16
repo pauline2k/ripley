@@ -56,7 +56,7 @@ class TestFindMailingList:
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id_1234567']}, m)
+            register_canvas_uris(app, {'course': ['get_by_id_1234567', 'search_users_1234567']}, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             _api_create_mailing_list(client, canvas_site_id)
@@ -70,7 +70,7 @@ class TestFindMailingList:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id_1234567', 'get_user_1234567_4567890'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_4567890', 'search_users_1234567'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '1234567'
@@ -126,7 +126,7 @@ class TestCreateMailingList:
                 if mailing_list_id:
                     # Delete previous mailing_list test data.
                     MailingList.delete(mailing_list_id)
-                register_canvas_uris(app, {'course': ['get_by_id_1234567']}, m)
+                register_canvas_uris(app, {'course': ['get_by_id_1234567', 'search_users_1234567']}, m)
                 canvas_site_id = '1234567'
                 fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
                 api_json = _api_create_mailing_list(
@@ -134,13 +134,13 @@ class TestCreateMailingList:
                     canvas_site_id=canvas_site_id,
                     name=mailing_list_name,
                 )
-                mailing_list_id = api_json['id']
-                assert api_json['canvasSite']['canvasSiteId'] == 1234567
-                assert api_json['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
+                mailing_list_id = api_json['mailingList']['id']
+                assert api_json['mailingList']['canvasSite']['canvasSiteId'] == 1234567
+                assert api_json['mailingList']['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
                 if mailing_list_name:
-                    assert api_json['name'] == mailing_list_name
+                    assert api_json['mailingList']['name'] == mailing_list_name
                 else:
-                    assert api_json['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+                    assert api_json['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
                 # But you can't step into the same mailing list twice.
                 _api_create_mailing_list(
@@ -153,20 +153,20 @@ class TestCreateMailingList:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id_1234567', 'get_user_1234567_4567890'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_4567890', 'search_users_1234567'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
             response = _api_create_mailing_list(client, canvas_site_id)
 
-            assert response['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+            assert response['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
     def test_student(self, client, app, fake_auth):
         """Denies student."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'course': ['get_by_id_1234567', 'get_user_1234567_5678901'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_5678901', 'search_users_1234567'],
                 'user': ['profile_40000'],
             }, m)
             canvas_site_id = '1234567'

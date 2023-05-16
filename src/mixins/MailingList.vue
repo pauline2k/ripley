@@ -8,14 +8,16 @@ export default {
   computed: {
     ...mapState(useMailingListStore, [
       'canvasSite',
-      'mailingList'
+      'mailingList',
+      'updateSummary'
     ]),
   },
   methods: {
     ...mapActions(useMailingListStore, [
       'init',
       'setCanvasSite',
-      'setMailingList'
+      'setMailingList',
+      'setUpdateSummary'
     ])
   }
 }
