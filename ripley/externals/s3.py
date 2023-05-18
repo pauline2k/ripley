@@ -31,28 +31,16 @@ import smart_open
 import zipstream
 
 
+def find_all_dated_csvs(folder, csv_name):
+    return [key for key in iterate_monthly_folder(folder) if csv_name in key]
+
+
 def find_last_dated_csvs(folder, csv_names):
-    bucket = app.config['AWS_S3_BUCKET']
-    prefix = f"{folder}/{utc_now().strftime('%Y/%m')}"
     csv_keys = {}
-
-    session = _get_session()
-    s3 = session.client('s3')
-
-    try:
-        paginator = s3.get_paginator('list_objects')
-        page_iterator = paginator.paginate(Bucket=bucket, Prefix=prefix)
-        for page in page_iterator:
-            if 'Contents' in page:
-                for o in page['Contents']:
-                    object_key = o.get('Key')
-                    for csv_name in csv_names:
-                        if csv_name in object_key:
-                            csv_keys[csv_name] = object_key
-    except Exception as e:
-        app.logger.error(f'Dated CSV search of S3 folder failed (s3://{bucket}/{prefix})')
-        app.logger.exception(e)
-
+    for object_key in iterate_monthly_folder(folder):
+        for csv_name in csv_names:
+            if csv_name in object_key:
+                csv_keys[csv_name] = object_key
     return csv_keys
 
 
@@ -74,6 +62,25 @@ def get_object_text(key):
 def get_signed_urls(bucket, keys, expiration):
     client = _get_s3_client()
     return {key: _generate_signed_url(client, bucket, key, expiration) for key in keys}
+
+
+def iterate_monthly_folder(folder):
+    bucket = app.config['AWS_S3_BUCKET']
+    prefix = f"{folder}/{utc_now().strftime('%Y/%m')}"
+    session = _get_session()
+    s3 = session.client('s3')
+
+    try:
+        paginator = s3.get_paginator('list_objects')
+        page_iterator = paginator.paginate(Bucket=bucket, Prefix=prefix)
+        for page in page_iterator:
+            if 'Contents' in page:
+                for o in page['Contents']:
+                    object_key = o.get('Key')
+                    yield object_key
+    except Exception as e:
+        app.logger.error(f'Search of S3 folder failed (s3://{bucket}/{prefix})')
+        app.logger.exception(e)
 
 
 def put_binary_data_to_s3(key, binary_data, content_type):

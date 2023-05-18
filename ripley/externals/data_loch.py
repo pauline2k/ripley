@@ -128,6 +128,54 @@ def get_instructing_sections(uid, term_ids):
     return safe_execute_rds(sql, **params)
 
 
+def get_edo_instructor_updates(since_timestamp):
+    params = {
+        'since_timestamp': since_timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+    }
+    sql = """SELECT DISTINCT
+            sis_term_id,
+            sis_course_id,
+            sis_section_id,
+            ldap_uid,
+            sis_id,
+            role_code,
+            is_primary,
+            last_updated
+        FROM sis_data.edo_instructor_updates
+        WHERE last_updated >= %(since_timestamp)s
+        ORDER BY sis_term_id, sis_course_id, sis_section_id,
+            ldap_uid, last_updated DESC"""
+    return safe_execute_rds(sql, **params)
+
+
+def get_edo_enrollment_updates(since_timestamp):
+    params = {
+        'since_timestamp': since_timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+    }
+    sql = """SELECT DISTINCT
+            sis_term_id,
+            sis_section_id,
+            ldap_uid,
+            sis_id,
+            sis_enrollment_status,
+            course_career,
+            last_updated
+        FROM sis_data.edo_enrollment_updates
+        WHERE last_updated >= %(since_timestamp)s
+        ORDER BY sis_term_id,
+            -- In case the number of results exceeds our processing cutoff, set priority within terms by the academic
+            -- career type for the course.
+            CASE
+                WHEN course_career = 'UGRD' THEN 1
+                WHEN course_career = 'GRAD' THEN 2
+                WHEN course_career = 'LAW' THEN 3
+                WHEN course_career = 'UCBX' THEN 4
+                ELSE 5
+            END,
+            sis_section_id, ldap_uid, last_updated DESC"""
+    return safe_execute_rds(sql, **params)
+
+
 def get_sections(term_id, section_ids):
     params = {
         'section_ids': section_ids,

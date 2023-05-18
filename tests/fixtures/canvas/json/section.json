@@ -20,7 +20,7 @@
                 "limit_privileges_to_course_section": false,
                 "role": "TaEnrollment",
                 "root_account_id": 1,
-                "sis_import_id": null,
+                "sis_import_id": "10000000",
                 "sis_section_id": "SEC:2023-B-32936",
                 "type": "TaEnrollment",
                 "updated_at": "2023-01-31T00:09:55Z",

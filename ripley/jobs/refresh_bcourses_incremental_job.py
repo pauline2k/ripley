@@ -30,7 +30,7 @@ class RefreshBcoursesIncrementalJob(RefreshBcoursesBaseJob):
 
     def _set_job_flags(self):
         self.job_flags = self.JobFlags(
-            enrollments=False,
-            inactivate=True,
-            incremental=False,
+            enrollments=True,
+            inactivate=False,
+            incremental=True,
         )

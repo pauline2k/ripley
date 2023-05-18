@@ -23,10 +23,14 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from contextlib import contextmanager
+import tempfile
 from unittest import mock
 
 import pytest
+from ripley.externals.s3 import upload_dated_csv
 from ripley.jobs.refresh_bcourses_full_job import RefreshBcoursesFullJob
+from ripley.lib.util import utc_now
 from tests.util import read_s3_csv, setup_bcourses_refresh_job
 
 
@@ -41,6 +45,17 @@ class TestRefreshBcoursesFull:
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,UID:40000,student,SEC:2023-B-32936,active,'
             assert spring_2023_enrollments_imported[2] == 'CRS:ANTHRO-189-2023-B,UID:20000,student,SEC:2023-B-32936,active,'
             assert spring_2023_enrollments_imported[3] == 'CRS:ANTHRO-189-2023-B,UID:30000,teacher,SEC:2023-B-32936,active,'
+
+    def test_previous_term_export(self, app):
+        with self.setup_term_enrollments_export(app, ['8876542,10000,SEC:2023-B-32936,5678901,40000,UID:40000,TaEnrollment,10000000,active']) as s3:
+            RefreshBcoursesFullJob(app)._run()
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-sis-import')
+            assert len(spring_2023_enrollments_imported) == 5
+            assert spring_2023_enrollments_imported[0] == 'course_id,user_id,role,section_id,status,associated_user_id'
+            assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,UID:40000,student,SEC:2023-B-32936,active,'
+            assert spring_2023_enrollments_imported[2] == 'CRS:ANTHRO-189-2023-B,UID:20000,student,SEC:2023-B-32936,active,'
+            assert spring_2023_enrollments_imported[3] == 'CRS:ANTHRO-189-2023-B,UID:30000,teacher,SEC:2023-B-32936,active,'
+            assert spring_2023_enrollments_imported[4] == 'CRS:ANTHRO-189-2023-B,UID:40000,TaEnrollment,SEC:2023-B-32936,deleted,'
 
     @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_section_enrollments')
     def test_student_added(self, mock_section_enrollments, app, section_enrollments):
@@ -95,6 +110,22 @@ class TestRefreshBcoursesFull:
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,UID:40000,student,SEC:2023-B-32936,active,'
             assert spring_2023_enrollments_imported[2] == 'CRS:ANTHRO-189-2023-B,UID:30000,teacher,SEC:2023-B-32936,active,'
             assert spring_2023_enrollments_imported[3] == 'CRS:ANTHRO-189-2023-B,UID:20000,Lead TA,SEC:2023-B-32936,active,'
+
+    @contextmanager
+    def setup_term_enrollments_export(self, app, rows):
+        with setup_bcourses_refresh_job(app) as s3:
+            export_file = tempfile.NamedTemporaryFile(suffix='.csv')
+            headers = 'course_id,canvas_section_id,sis_section_id,canvas_user_id,sis_login_id,sis_user_id,role,sis_import_id,enrollment_state'
+            with open(export_file.name, 'wb') as f:
+                strr = bytes('\n'.join([headers] + rows) + '\n', encoding='utf-8')
+                f.write(strr)
+            upload_dated_csv(
+                export_file.name,
+                'TERM-2023-B-term-enrollments-export',
+                'canvas_provisioning_reports',
+                utc_now().strftime('%F_%H-%M-%S'),
+            )
+            yield s3
 
     @pytest.fixture(scope='function')
     def section_enrollments(self, app):
