@@ -65,7 +65,7 @@ class TestExportTermEnrollmentsJob:
                     'sis_section_id': 'SEC:2023-B-32936',
                     'canvas_user_id': '5678901',
                     'sis_login_id': '40000',
-                    'sis_user_id': 'UID:40000',
+                    'sis_user_id': '30040000',
                     'role': 'TaEnrollment',
                     'sis_import_id': '10000000',
                     'enrollment_state': 'active',

@@ -133,12 +133,12 @@ def get_edo_instructor_updates(since_timestamp):
         'since_timestamp': since_timestamp.strftime('%Y-%m-%d %H:%M:%S'),
     }
     sql = """SELECT DISTINCT
-            sis_term_id,
+            sis_term_id AS term_id,
             sis_course_id,
-            sis_section_id,
-            ldap_uid,
+            sis_section_id AS section_id,
+            ldap_uid AS instructor_uid,
             sis_id,
-            role_code,
+            role_code AS instructor_role_code,
             is_primary,
             last_updated
         FROM sis_data.edo_instructor_updates
@@ -153,16 +153,11 @@ def get_edo_enrollment_updates(since_timestamp):
         'since_timestamp': since_timestamp.strftime('%Y-%m-%d %H:%M:%S'),
     }
     sql = """SELECT DISTINCT
-            sis_term_id,
-            sis_section_id,
+            sis_term_id AS term_id,
+            sis_section_id AS section_id,
             ldap_uid,
             sis_id,
             sis_enrollment_status,
-            course_career,
-            last_updated
-        FROM sis_data.edo_enrollment_updates
-        WHERE last_updated >= %(since_timestamp)s
-        ORDER BY sis_term_id,
             -- In case the number of results exceeds our processing cutoff, set priority within terms by the academic
             -- career type for the course.
             CASE
@@ -171,7 +166,11 @@ def get_edo_enrollment_updates(since_timestamp):
                 WHEN course_career = 'LAW' THEN 3
                 WHEN course_career = 'UCBX' THEN 4
                 ELSE 5
-            END,
+            END AS course_career_numeric,
+            last_updated
+        FROM sis_data.edo_enrollment_updates
+        WHERE last_updated >= %(since_timestamp)s
+        ORDER BY sis_term_id, course_career_numeric,
             sis_section_id, ldap_uid, last_updated DESC"""
     return safe_execute_rds(sql, **params)
 

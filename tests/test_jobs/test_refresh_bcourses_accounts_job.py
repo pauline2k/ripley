@@ -54,7 +54,7 @@ class TestRefreshBcoursesAccounts:
             users_imported = read_s3_csv(app, s3, 'user-sis-import')
             assert len(users_imported) == 2
             assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
-            assert users_imported[1] == 'UID:30000,30000,Definitely-not-a-synthetic-Ash,🤖,synthetic.ash@berkeley.edu,active'
+            assert users_imported[1] == '30030000,30000,Definitely-not-a-synthetic-Ash,🤖,synthetic.ash@berkeley.edu,active'
 
     @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_all_active_users')
     def test_email_change(self, mock_all_users, app, campus_users):
@@ -72,7 +72,7 @@ class TestRefreshBcoursesAccounts:
             users_imported = read_s3_csv(app, s3, 'user-sis-import')
             assert len(users_imported) == 2
             assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
-            assert users_imported[1] == 'UID:30000,30000,Ash,🤖,definitely.no.robots.here@berkeley.edu,active'
+            assert users_imported[1] == '30030000,30000,Ash,🤖,definitely.no.robots.here@berkeley.edu,active'
 
     @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_all_active_users')
     def test_sis_id_change(self, mock_all_users, app, campus_users):
@@ -88,7 +88,7 @@ class TestRefreshBcoursesAccounts:
             sis_id_changes_imported = read_s3_csv(app, s3, 'sis-id-sis-import')
             assert len(sis_id_changes_imported) == 2
             assert sis_id_changes_imported[0] == 'old_id,new_id,old_integration_id,new_integration_id,type'
-            assert sis_id_changes_imported[1] == 'UID:30000,1337,,,user'
+            assert sis_id_changes_imported[1] == '30030000,1337,,,user'
 
             assert_s3_key_not_found(app, s3, 'user-sis-import')
 

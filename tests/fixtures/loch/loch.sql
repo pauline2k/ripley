@@ -16,13 +16,50 @@ CREATE TABLE sis_data.basic_attributes
 INSERT INTO sis_data.basic_attributes
 (ldap_uid, sid, first_name, last_name, email_address, affiliations, person_type)
 VALUES
-('10000', NULL, 'Ellen', 'Ripley', 'ellen.ripley@berkeley.edu', 'EMPLOYEE-TYPE-ACADEMIC', 'S'),
-('10001', NULL, 'Dallas', '👨‍✈️', 'dallas@berkeley.edu', 'EMPLOYEE-TYPE-STAFF', 'S'),
-('20000', NULL, 'Joan', 'Lambert', 'joan.lambert@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
-('30000', NULL, 'Ash', '🤖', 'synthetic.ash@berkeley.edu', 'STUDENT-TYPE-NOT REGISTERED', 'S'),
-('40000', NULL, 'XO', 'Kane', 'xo.kane@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
-('50000', NULL, 'Dennis', 'Parker', 'dennis.parker@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
-('60000', NULL, 'Samuel', 'Brett', 'sam.brett@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S');
+('10000', '30010000', 'Ellen', 'Ripley', 'ellen.ripley@berkeley.edu', 'EMPLOYEE-TYPE-ACADEMIC', 'S'),
+('10001', '30010001', 'Dallas', '👨‍✈️', 'dallas@berkeley.edu', 'EMPLOYEE-TYPE-STAFF', 'S'),
+('20000', '30020000', 'Joan', 'Lambert', 'joan.lambert@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
+('30000', '30030000', 'Ash', '🤖', 'synthetic.ash@berkeley.edu', 'STUDENT-TYPE-NOT REGISTERED', 'S'),
+('40000', '30040000', 'XO', 'Kane', 'xo.kane@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
+('50000', '30050000', 'Dennis', 'Parker', 'dennis.parker@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
+('60000', '30060000', 'Samuel', 'Brett', 'sam.brett@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S');
+
+CREATE TABLE sis_data.edo_enrollment_updates
+(
+    sis_term_id VARCHAR,
+    sis_section_id VARCHAR,
+    ldap_uid VARCHAR,
+    sis_id VARCHAR,
+    sis_enrollment_status VARCHAR,
+    course_career VARCHAR,
+    last_updated VARCHAR
+);
+
+INSERT INTO sis_data.edo_enrollment_updates
+(sis_term_id, sis_section_id, ldap_uid, sis_id, sis_enrollment_status, course_career, last_updated)
+VALUES
+('2232', '32936', '20000', '30020000', 'E', 'UGRD', now()),
+('2232', '32936', '40000', '30040000', 'E', 'UGRD', now()),
+('2232', '32937', '20000', '30020000', 'E', 'UGRD', now()),
+('2232', '32937', '50000', '30050000', 'E', 'UGRD', now()),
+('2232', '32937', '60000', '30060000', 'W', 'UGRD', now());
+
+CREATE TABLE sis_data.edo_instructor_updates
+(
+    sis_term_id VARCHAR,
+    sis_course_id VARCHAR,
+    sis_section_id VARCHAR,
+    ldap_uid VARCHAR,
+    sis_id VARCHAR,
+    role_code VARCHAR,
+    is_primary BOOLEAN,
+    last_updated VARCHAR
+);
+
+INSERT INTO sis_data.edo_instructor_updates
+(sis_term_id, sis_section_id, ldap_uid, sis_id, role_code, is_primary, last_updated)
+VALUES
+('2232', '32936', '30000', '30030000', 'PI', TRUE, now());
 
 CREATE TABLE sis_data.sis_enrollments
 (

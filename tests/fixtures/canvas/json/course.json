@@ -57,7 +57,7 @@
                     "enrollment_state": "active",
                     "role": "TeacherEnrollment",
                     "last_activity_at": "2023-03-02T06:04:43Z",
-                    "sis_user_id": "UID:300000",
+                    "sis_user_id": "300300000",
                     "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
                     }
                 ],
@@ -268,7 +268,7 @@
                 "sortable_name": "Kane, XO",
                 "integration_id": null,
                 "login_id": "40000",
-                "sis_user_id": "UID:40000",
+                "sis_user_id": "30040000",
                 "enrollments": [
                     {
                         "id": 99,
@@ -279,7 +279,7 @@
                         "enrollment_state": "active",
                         "role": "StudentEnrollment",
                         "last_activity_at": "2023-03-02T06:04:43Z",
-                        "sis_user_id": "UID:40000",
+                        "sis_user_id": "30040000",
                         "sis_course_id": "CRS:ANTHRO-189-2023-B",
                         "sis_section_id": "SEC:2023-B-32936",
                         "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/5678901"
@@ -293,7 +293,7 @@
                       "enrollment_state": "active",
                       "role": "TaEnrollment",
                       "last_activity_at": "2023-03-02T06:04:43Z",
-                      "sis_user_id": "UID:40000",
+                      "sis_user_id": "30040000",
                       "sis_course_id": "CRS:ANTHRO-189-2023-B",
                       "sis_section_id": "SEC:2023-B-32936",
                       "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/5678901"
@@ -314,7 +314,7 @@
             "sortable_name": "🤖, Ash",
             "integration_id": null,
             "login_id": "30000",
-            "sis_user_id": "UID:300000",
+            "sis_user_id": "300300000",
             "enrollments": [
                 {
                     "id": 101,
@@ -325,7 +325,7 @@
                     "enrollment_state": "active",
                     "role": "TeacherEnrollment",
                     "last_activity_at": "2023-03-02T06:04:43Z",
-                    "sis_user_id": "UID:300000",
+                    "sis_user_id": "300300000",
                     "sis_course_id": "CRS:ANTHRO-189-2023-B",
                     "sis_section_id": "2023-B-32936",
                     "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/4567890"
@@ -344,7 +344,7 @@
             "sortable_name": "Parker, Denis",
             "integration_id": null,
             "login_id": "50000",
-            "sis_user_id": "UID:50000",
+            "sis_user_id": "30050000",
             "enrollments": [
                 {
                     "id": 102,
@@ -355,7 +355,7 @@
                     "enrollment_state": "active",
                     "role": "TaEnrollment",
                     "last_activity_at": "2023-03-02T06:04:43Z",
-                    "sis_user_id": "UID:50000",
+                    "sis_user_id": "30050000",
                     "sis_course_id": "CRS:ANTHRO-189-2023-B",
                     "sis_section_id": "2023-B-32936",
                     "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/6789012"
@@ -1202,7 +1202,7 @@
                     "enrollment_state": "active",
                     "role": "TeacherEnrollment",
                     "last_activity_at": "2023-03-02T06:04:43Z",
-                    "sis_user_id": "UID:300000",
+                    "sis_user_id": "300300000",
                     "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
                 }
             ],
@@ -1228,7 +1228,7 @@
                     "enrollment_state": "active",
                     "role": "StudentEnrollment",
                     "last_activity_at": "2023-03-02T06:04:43Z",
-                    "sis_user_id": "UID:400000",
+                    "sis_user_id": "300400000",
                     "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/5678901"
                 }
             ],
