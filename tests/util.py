@@ -58,8 +58,20 @@ def assert_s3_key_not_found(app, s3, key):
     assert obj is None
 
 
-def read_s3_csv(app, s3, key):
-    obj = next(o for o in s3.Bucket(app.config['AWS_S3_BUCKET']).objects.all() if key in o.key)
+def count_s3_csvs(app, s3, key):
+    count = 0
+    for o in s3.Bucket(app.config['AWS_S3_BUCKET']).objects.all():
+        if key in o.key:
+            count += 1
+    return count
+
+
+def read_s3_csv(app, s3, key, get_latest=False):
+    objects = s3.Bucket(app.config['AWS_S3_BUCKET']).objects.all()
+    if get_latest:
+        objects = list(objects)
+        objects.reverse()
+    obj = next(o for o in objects if key in o.key)
     object_data = obj.get()['Body'].read()
     rows = re.split('[\r\n]+', object_data.decode('utf-8'))
     if rows[-1] == '':

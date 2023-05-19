@@ -38,6 +38,14 @@ def parse_canvas_sis_section_id(sis_section_id):
     return section_id, berkeley_term
 
 
+def api_formatted_course_role(role):
+    return {
+        'student': 'StudentEnrollment',
+        'ta': 'TaEnrollment',
+        'teacher': 'TeacherEnrollment',
+    }.get(role, role)
+
+
 def canvas_section_to_api_json(canvas_section):
     section_id, berkeley_term = parse_canvas_sis_section_id(canvas_section.sis_section_id)
     return {
