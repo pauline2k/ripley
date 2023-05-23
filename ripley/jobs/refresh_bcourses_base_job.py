@@ -88,7 +88,7 @@ class RefreshBcoursesBaseJob(BaseJob):
             self.initialize_enrollment_provisioning_reports(sis_term_ids, users_by_uid)
 
         with sis_import_csv_set(sis_term_ids) as csv_set:
-            self.email_deletions = {}
+            self.email_deletions = []
             self.sis_user_id_changes = {}
             self.known_sis_id_updates = {}
             self.known_users = {}
@@ -214,7 +214,11 @@ class RefreshBcoursesBaseJob(BaseJob):
     def process_user(self, row, users_by_uid):
         account_data = uid_from_canvas_login_id(row['login_id'])
         uid = account_data['uid']
-        is_inactive = account_data['inactive']
+
+        # We have two ways that users could be marked inactive in Canvas; the old hacky way, which involved
+        # prepending an 'inactive-' prefix to their login id so as to defeat CAS login, or the newer
+        # Canvas-supported way, which is to give them the status 'suspended'.
+        is_inactive = account_data['inactivePrefix'] or row['status'] == 'suspended'
 
         if not uid:
             return
@@ -229,23 +233,7 @@ class RefreshBcoursesBaseJob(BaseJob):
                 app.logger.warn(f'Reactivating account for LDAP UID {uid}.')
             new_row = csv_row_for_campus_user(campus_user)
         else:
-            new_row = row.copy()
-            if uid in self.whitelisted_uids and is_inactive:
-                app.logger.warn(f'Reactivating account for unknown LDAP UID {uid}.')
-                new_row['login_id'] = uid
-            else:
-                # Check if there are obsolete email addresses to (potentially) delete.
-                if row['email'] and (is_inactive or self.job_flags.inactivate):
-                    self.email_deletions.append(account_data['canvas_user_id'])
-                if self.job_flags.inactivate:
-                    # This LDAP UID no longer appears in campus data. Mark the Canvas user account as inactive.
-                    if not is_inactive:
-                        app.logger.warn(f'Inactivating account for LDAP UID {uid}.')
-                    new_row.update({
-                        'login_id': 'inactive-{uid}',
-                        'user_id': f'UID:{uid}',
-                        'email': None,
-                    })
+            new_row = self.inactivate_user(uid, row, is_inactive)
 
         self.known_users[uid] = new_row['user_id']
 
@@ -262,6 +250,33 @@ class RefreshBcoursesBaseJob(BaseJob):
                 'new_integration_id': None,
                 'type': 'user',
             }
+
+        return new_row
+
+    def inactivate_user(self, uid, user_row, is_inactive):
+        new_row = {k: user_row[k] for k in ('user_id', 'login_id', 'first_name', 'last_name', 'email', 'status')}
+
+        # Force user reactivation if already inactive and in our whitelist.
+        if uid in self.whitelisted_uids and is_inactive:
+            app.logger.warn(f'Reactivating account for unknown LDAP UID {uid}.')
+            new_row.update({
+                'login_id': uid,
+                'status': 'active',
+            })
+        # Otherwise, if the inactivate flavor of the job is running, proceed to mark the Canvas user account as inactive.
+        elif self.job_flags.inactivate:
+            if not is_inactive:
+                app.logger.warn(f'Inactivating account for LDAP UID {uid}.')
+            new_row.update({
+                'login_id': uid,
+                'user_id': f'UID:{uid}',
+                'email': None,
+                'status': 'suspended',
+            })
+
+        # Check if there are obsolete email addresses to delete, either from this round of inactivation or a previois one.
+        if user_row['email'] and (self.job_flags.inactivate or is_inactive):
+            self.email_deletions.append(user_row['canvas_user_id'])
 
         return new_row
 

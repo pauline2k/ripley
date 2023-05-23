@@ -29,10 +29,10 @@ from ripley.lib import canvas_utils
 class TestCanvasUtils:
 
     def test_parse_login_id_inactive(self):
-        assert canvas_utils.uid_from_canvas_login_id('666') == {'uid': '666', 'inactive': False}
-        assert canvas_utils.uid_from_canvas_login_id('inactive-666') == {'uid': '666', 'inactive': True}
-        assert canvas_utils.uid_from_canvas_login_id('xenomorph') == {'uid': None, 'inactive': None}
-        assert canvas_utils.uid_from_canvas_login_id('inactive-xenomorph') == {'uid': None, 'inactive': None}
+        assert canvas_utils.uid_from_canvas_login_id('666') == {'uid': '666', 'inactivePrefix': False}
+        assert canvas_utils.uid_from_canvas_login_id('inactive-666') == {'uid': '666', 'inactivePrefix': True}
+        assert canvas_utils.uid_from_canvas_login_id('xenomorph') == {'uid': None, 'inactivePrefix': None}
+        assert canvas_utils.uid_from_canvas_login_id('inactive-xenomorph') == {'uid': None, 'inactivePrefix': None}
 
     def test_parse_canvas_sis_section_id(self):
         assert canvas_utils.parse_canvas_sis_section_id(None) == (None, None)
