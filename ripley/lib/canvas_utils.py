@@ -100,11 +100,11 @@ def sis_enrollment_status_to_canvas_course_role(sis_enrollment_status):
 
 
 def uid_from_canvas_login_id(login_id):
-    result = {'uid': None, 'inactive': None}
+    result = {'uid': None, 'inactivePrefix': None}
     match = re.match('^(inactive-)?([0-9]+)$', login_id)
     if match:
         try:
-            result = {'uid': str(match.group(2)), 'inactive': bool(match.group(1))}
+            result = {'uid': str(match.group(2)), 'inactivePrefix': bool(match.group(1))}
         except Exception:
             pass
     return result
