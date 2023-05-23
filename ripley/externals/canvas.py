@@ -59,6 +59,15 @@ def get_account(account_id, api_call=True):
         return account
 
 
+def get_communication_channels(canvas_user_id):
+    try:
+        user = get_user(canvas_user_id, api_call=False)
+        return user.get_communication_channels()
+    except Exception as e:
+        app.logger.error(f'Failed to retrieve Canvas communication channels (canvas_user_id={canvas_user_id})')
+        app.logger.exception(e)
+
+
 def get_course(course_id, api_call=True):
     c = _get_canvas()
     if api_call is False:

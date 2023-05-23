@@ -26,12 +26,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from ripley.jobs.refresh_bcourses_base_job import RefreshBcoursesBaseJob
 
 
-class RefreshBcoursesInactivateJob(RefreshBcoursesBaseJob):
+class RefreshBcoursesDeleteEmailAddressesJob(RefreshBcoursesBaseJob):
 
     def _set_job_flags(self):
         self.job_flags = self.JobFlags(
-            delete_email_addresses=False,
+            delete_email_addresses=True,
             enrollments=False,
-            inactivate=True,
+            inactivate=False,
             incremental=False,
         )

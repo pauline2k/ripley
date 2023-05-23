@@ -59,6 +59,7 @@ def _register_jobs(app):
     from ripley.jobs.house_keeping_job import HouseKeepingJob  # noqa
     from ripley.jobs.lti_usage_report_job import LtiUsageReportJob  # noqa
     from ripley.jobs.refresh_bcourses_accounts_job import RefreshBcoursesAccountsJob  # noqa
+    from ripley.jobs.refresh_bcourses_delete_email_addresses_job import RefreshBcoursesDeleteEmailAddressesJob  # noqa
     from ripley.jobs.refresh_bcourses_full_job import RefreshBcoursesFullJob  # noqa
     from ripley.jobs.refresh_bcourses_inactivate_job import RefreshBcoursesInactivateJob  # noqa
     from ripley.jobs.refresh_bcourses_incremental_job import RefreshBcoursesIncrementalJob  # noqa

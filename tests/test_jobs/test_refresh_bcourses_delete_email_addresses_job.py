@@ -26,21 +26,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from unittest import mock
 
 import pytest
-from ripley.jobs.refresh_bcourses_inactivate_job import RefreshBcoursesInactivateJob
-from tests.util import assert_s3_key_not_found, read_s3_csv, setup_bcourses_refresh_job
+from ripley.jobs.refresh_bcourses_delete_email_addresses_job import RefreshBcoursesDeleteEmailAddressesJob
+from tests.util import assert_s3_key_not_found, setup_bcourses_refresh_job
 
 
-class TestRefreshBcoursesInactivate:
+class TestRefreshBcoursesDeleteEmailAddressesJob:
 
     def test_no_changes(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
-            RefreshBcoursesInactivateJob(app)._run()
+            RefreshBcoursesDeleteEmailAddressesJob(app)._run()
             assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
             assert_s3_key_not_found(app, s3, 'user-sis-import')
 
     def test_no_enrollments_in_inactivate_job(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
-            RefreshBcoursesInactivateJob(app)._run()
+            RefreshBcoursesDeleteEmailAddressesJob(app)._run()
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
 
     @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_all_active_users')
@@ -50,17 +50,11 @@ class TestRefreshBcoursesInactivate:
             campus_users.remove(ash)
             mock_all_users.return_value = campus_users
 
-            RefreshBcoursesInactivateJob(app)._run()
+            RefreshBcoursesDeleteEmailAddressesJob(app)._run()
 
-            sis_id_changes_imported = read_s3_csv(app, s3, 'sis-id-sis-import')
-            assert len(sis_id_changes_imported) == 2
-            assert sis_id_changes_imported[0] == 'old_id,new_id,old_integration_id,new_integration_id,type'
-            assert sis_id_changes_imported[1] == '30030000,UID:30000,,,user'
-
-            user_changes_imported = read_s3_csv(app, s3, 'user-sis-import')
-            assert len(user_changes_imported) == 2
-            assert user_changes_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
-            assert user_changes_imported[1] == 'UID:30000,30000,Ash,🤖,,suspended'
+            assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
+            assert_s3_key_not_found(app, s3, 'user-sis-import')
+            assert next(r for r in m.request_history if r.method == 'DELETE' and 'users/4567890/communication_channels' in r.url)
 
     @pytest.fixture(scope='function')
     def campus_users(self, app):

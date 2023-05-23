@@ -40,7 +40,7 @@ from tests.util import assert_s3_key_not_found, count_s3_csvs, read_s3_csv, setu
 class TestRefreshBcoursesIncremental:
 
     def test_no_previous_export(self, app):
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             RefreshBcoursesIncrementalJob(app)._run()
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import')
             assert len(spring_2023_enrollments_imported) == 4
@@ -50,7 +50,7 @@ class TestRefreshBcoursesIncremental:
             assert spring_2023_enrollments_imported[3] == 'CRS:ANTHRO-189-2023-B,30030000,teacher,SEC:2023-B-32936,active,'
 
     def test_incremental_job_does_not_duplicate_full_job(self, app):
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             RefreshBcoursesFullJob(app)._run()
             assert read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full-sis-import')
             RefreshBcoursesIncrementalJob(app)._run()
@@ -81,7 +81,7 @@ class TestRefreshBcoursesIncremental:
 
     @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_edo_enrollment_updates')
     def test_multiple_incremental_jobs_do_not_duplicate(self, mock_edo_enrollment_updates, app, edo_enrollment_updates):
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             mock_edo_enrollment_updates.return_value = edo_enrollment_updates
             assert count_s3_csvs(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import') == 0
             RefreshBcoursesIncrementalJob(app)._run()
@@ -150,7 +150,7 @@ class TestRefreshBcoursesIncremental:
             '8876542,10000,SEC:2023-B-32936,5678901,30000,30030000,TeacherEnrollment,10000000,active',
             '8876542,10000,SEC:2023-B-32936,5678901,40000,30040000,StudentEnrollment,10000000,active',
         ]
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             export_file = tempfile.NamedTemporaryFile(suffix='.csv')
             with open(export_file.name, 'wb') as f:
                 f.write(bytes('\n'.join(csv_rows) + '\n', encoding='utf-8'))

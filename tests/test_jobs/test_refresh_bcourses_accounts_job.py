@@ -33,14 +33,14 @@ from tests.util import assert_s3_key_not_found, read_s3_csv, setup_bcourses_refr
 class TestRefreshBcoursesAccounts:
 
     def test_no_changes(self, app):
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             RefreshBcoursesAccountsJob(app)._run()
             assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
             assert_s3_key_not_found(app, s3, 'user-sis-import')
 
     @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_all_active_users')
     def test_name_change(self, mock_all_users, app, campus_users):
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             for u in campus_users:
                 if u['first_name'] == 'Ash':
                     u['first_name'] = 'Definitely-not-a-synthetic-Ash'
@@ -58,7 +58,7 @@ class TestRefreshBcoursesAccounts:
 
     @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_all_active_users')
     def test_email_change(self, mock_all_users, app, campus_users):
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             for u in campus_users:
                 if u['email_address'] == 'synthetic.ash@berkeley.edu':
                     u['email_address'] = 'definitely.no.robots.here@berkeley.edu'
@@ -76,7 +76,7 @@ class TestRefreshBcoursesAccounts:
 
     @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_all_active_users')
     def test_sis_id_change(self, mock_all_users, app, campus_users):
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             for u in campus_users:
                 if u['ldap_uid'] == '30000':
                     u['sid'] = '1337'
@@ -93,7 +93,7 @@ class TestRefreshBcoursesAccounts:
             assert_s3_key_not_found(app, s3, 'user-sis-import')
 
     def test_no_enrollments_in_accounts_job(self, app):
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             RefreshBcoursesAccountsJob(app)._run()
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
 
