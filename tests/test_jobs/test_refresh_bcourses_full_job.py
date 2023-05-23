@@ -37,7 +37,7 @@ from tests.util import assert_s3_key_not_found, read_s3_csv, setup_bcourses_refr
 class TestRefreshBcoursesFull:
 
     def test_no_previous_export(self, app):
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             RefreshBcoursesFullJob(app)._run()
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full-sis-import')
             assert len(spring_2023_enrollments_imported) == 4
@@ -109,7 +109,7 @@ class TestRefreshBcoursesFull:
             '8876542,10000,SEC:2023-B-32936,5678901,30000,30030000,TeacherEnrollment,10000000,active',
             '8876542,10000,SEC:2023-B-32936,5678901,40000,30040000,StudentEnrollment,10000000,active',
         ]
-        with setup_bcourses_refresh_job(app) as s3:
+        with setup_bcourses_refresh_job(app) as (s3, m):
             export_file = tempfile.NamedTemporaryFile(suffix='.csv')
             with open(export_file.name, 'wb') as f:
                 f.write(bytes('\n'.join(csv_rows) + '\n', encoding='utf-8'))

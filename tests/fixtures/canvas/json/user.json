@@ -1,4 +1,19 @@
 {
+    "communication_channels_4567890": {
+        "method": "GET",
+        "endpoint": "users/4567890/communication_channels",
+        "data": [
+            {
+                "id": 12,
+                "address": "ash@nostromo.mil",
+                "type": "email",
+                "position": 1,
+                "user_id": 4567890,
+                "workflow_state": "active"
+            }
+        ],
+        "status_code": 200
+    },
     "profile_10000": {
         "method": "GET",
         "endpoint": "users/sis_login_id:10000/profile",

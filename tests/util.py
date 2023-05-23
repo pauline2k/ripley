@@ -115,6 +115,9 @@ def setup_bcourses_refresh_job(app):
                 'get_report_provisioning_csv_users',
                 'create_sis_import',
             ],
+            'communication_channel': [
+                'delete_channel_4567890',
+            ],
             'file': [
                 'download_provisioning_csv_sections',
                 'get_provisioning_csv_sections',
@@ -124,10 +127,13 @@ def setup_bcourses_refresh_job(app):
             'sis_import': [
                 'get_by_id',
             ],
+            'user': [
+                'communication_channels_4567890',
+            ],
         }, m)
 
         with mock_s3_bucket(app) as s3:
-            yield s3
+            yield (s3, m)
 
 
 def _register_object(app, requests_mocker, obj_name, obj):

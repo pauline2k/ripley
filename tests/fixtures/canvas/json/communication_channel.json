@@ -1,0 +1,15 @@
+{
+	"delete_channel_4567890": {
+		"method": "DELETE",
+		"endpoint": "users/4567890/communication_channels/12",
+		"data": {
+			"id": 12,
+			"address": "ash@nostromo.mil",
+			"type": "email",
+			"position": 1,
+			"user_id": 4567890,
+			"workflow_state": "deleted"
+		},
+		"status_code": 200
+	}
+}

@@ -30,6 +30,7 @@ class RefreshBcoursesAccountsJob(RefreshBcoursesBaseJob):
 
     def _set_job_flags(self):
         self.job_flags = self.JobFlags(
+            delete_email_addresses=False,
             enrollments=False,
             inactivate=False,
             incremental=False,

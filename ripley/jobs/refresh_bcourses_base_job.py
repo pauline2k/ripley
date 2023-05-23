@@ -49,7 +49,7 @@ from ripley.models.user_auth import UserAuth
 
 class RefreshBcoursesBaseJob(BaseJob):
 
-    JobFlags = collections.namedtuple('JobFlags', 'enrollments inactivate incremental')
+    JobFlags = collections.namedtuple('JobFlags', 'delete_email_addresses enrollments inactivate incremental')
 
     def __init__(self, *args):
         super().__init__(*args)
@@ -58,6 +58,7 @@ class RefreshBcoursesBaseJob(BaseJob):
     def _set_job_flags(self):
         # Subclasses override.
         self.job_flags = self.JobFlags(
+            delete_email_addresses=False,
             enrollments=False,
             inactivate=False,
             incremental=False,
@@ -88,10 +89,12 @@ class RefreshBcoursesBaseJob(BaseJob):
             self.initialize_enrollment_provisioning_reports(sis_term_ids, users_by_uid)
 
         with sis_import_csv_set(sis_term_ids) as csv_set:
-            self.email_deletions = []
             self.sis_user_id_changes = {}
             self.known_sis_id_updates = {}
             self.known_users = {}
+
+            if self.job_flags.delete_email_addresses:
+                self.email_deletions = []
 
             with open(canvas_users_file.name, 'r') as f:
                 canvas_users = csv.DictReader(f)
@@ -263,8 +266,8 @@ class RefreshBcoursesBaseJob(BaseJob):
                 'login_id': uid,
                 'status': 'active',
             })
-        # Otherwise, if the inactivate flavor of the job is running, proceed to mark the Canvas user account as inactive.
-        elif self.job_flags.inactivate:
+        # Otherwise, if an inactivation or email deletion job is running, proceed to mark the Canvas user account as inactive.
+        elif self.job_flags.inactivate or self.job_flags.delete_email_addresses:
             if not is_inactive:
                 app.logger.warn(f'Inactivating account for LDAP UID {uid}.')
             new_row.update({
@@ -273,9 +276,9 @@ class RefreshBcoursesBaseJob(BaseJob):
                 'email': None,
                 'status': 'suspended',
             })
+            is_inactive = True
 
-        # Check if there are obsolete email addresses to delete, either from this round of inactivation or a previois one.
-        if user_row['email'] and (self.job_flags.inactivate or is_inactive):
+        if user_row['email'] and is_inactive and self.job_flags.delete_email_addresses:
             self.email_deletions.append(user_row['canvas_user_id'])
 
         return new_row
@@ -417,6 +420,11 @@ class RefreshBcoursesBaseJob(BaseJob):
                 })
 
     def upload_results(self, csv_set, timestamp):
+        # The email deletion job runs an API loop and does not post a SIS import to Canvas.
+        if self.job_flags.delete_email_addresses:
+            self.handle_email_deletions()
+            return
+
         if csv_set.sis_ids.count:
             upload_dated_csv(csv_set.sis_ids.tempfile.name, 'sis-id-sis-import', 'canvas_sis_imports', timestamp)
             if self.dry_run:
@@ -453,6 +461,17 @@ class RefreshBcoursesBaseJob(BaseJob):
                 self.known_users[uid] = csv_row['user_id']
                 app.logger.debug(f"Adding new user (uid={uid}, sis id={csv_row['user_id']}")
                 users_csv.writerow(csv_row)
+
+    def handle_email_deletions(self):
+        app.logger.warn(f'About to delete email addresses for {len(self.email_deletions)} inactive users: {self.email_deletions}')
+        for canvas_user_id in self.email_deletions:
+            for channel in canvas.get_communication_channels(canvas_user_id):
+                if channel.type == 'email':
+                    if self.dry_run:
+                        app.logger.info(f'Dry run mode, would delete communication channel {channel}.')
+                    else:
+                        app.logger.info(f'Deleting communication channel {channel}.')
+                        channel.delete()
 
     @classmethod
     def description(cls):
