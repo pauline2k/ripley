@@ -35,7 +35,7 @@ from flask import current_app as app
 from ripley.externals import canvas
 from ripley.externals.data_loch import get_all_active_users, get_edo_enrollment_updates, get_edo_instructor_updates, \
     get_section_enrollments, get_section_instructors, get_sections, get_users
-from ripley.externals.s3 import find_all_dated_csvs, find_last_dated_csvs, stream_object_text, upload_dated_csv
+from ripley.externals.s3 import find_all_dated_csvs, find_last_dated_csv, find_last_dated_csvs, stream_object_text, upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.jobs.errors import BackgroundJobError
 from ripley.lib.berkeley_term import BerkeleyTerm
@@ -68,20 +68,16 @@ class RefreshBcoursesBaseJob(BaseJob):
         self.dry_run = params.get('isDryRun', None) or False
 
         this_sync = utc_now()
-
-        # TODO The incremental flavor of the refresh job will want to pull a stashed user report from S3 rather than generate a new one.
-        # It will also pull only a subset of UIDs from campus.
-        canvas_users_file = tempfile.NamedTemporaryFile()
-        canvas.get_csv_report('users', download_path=canvas_users_file.name)
-        self.whitelisted_uids = [user.uid for user in UserAuth.get_canvas_whitelist()]
+        timestamp = this_sync.strftime('%F_%H-%M-%S')
 
         sis_term_ids = params.get('sis_term_ids', None)
         if not sis_term_ids:
             sis_term_ids = [t.to_canvas_sis_term_id() for t in BerkeleyTerm.get_current_terms().values()]
 
         if self.job_flags.incremental:
-            self.initialize_recent_updates(sis_term_ids)
-            users_by_uid = {r['ldap_uid']: r for r in get_users(self.uids_for_updates)}
+            uids_for_updates = set()
+            self.initialize_recent_updates(sis_term_ids, uids_for_updates)
+            users_by_uid = {r['ldap_uid']: r for r in get_users(uids_for_updates)}
         else:
             users_by_uid = {r['ldap_uid']: r for r in get_all_active_users()}
 
@@ -89,17 +85,15 @@ class RefreshBcoursesBaseJob(BaseJob):
             self.initialize_enrollment_provisioning_reports(sis_term_ids, users_by_uid)
 
         with sis_import_csv_set(sis_term_ids) as csv_set:
-            self.sis_user_id_changes = {}
-            self.known_sis_id_updates = {}
             self.known_users = {}
+            self.known_sis_id_updates = {}
+            self.sis_user_id_changes = {}
+            self.email_deletions = []
 
-            if self.job_flags.delete_email_addresses:
-                self.email_deletions = []
-
-            with open(canvas_users_file.name, 'r') as f:
-                canvas_users = csv.DictReader(f)
-                for row in canvas_users:
-                    new_row = self.process_user(row, users_by_uid)
+            with self.get_canvas_user_report(timestamp) as user_report:
+                whitelisted_uids = [user.uid for user in UserAuth.get_canvas_whitelist()]
+                for row in csv.DictReader(user_report):
+                    new_row = self.process_user(row, users_by_uid, whitelisted_uids)
                     if _csv_data_changed(row, new_row):
                         csv_set.users.writerow(new_row)
 
@@ -114,7 +108,7 @@ class RefreshBcoursesBaseJob(BaseJob):
             for _csv in csv_set.all:
                 _csv.filehandle.close()
 
-            self.upload_results(csv_set, this_sync.strftime('%F_%H-%M-%S'))
+            self.upload_results(csv_set, timestamp)
 
         app.logger.info('Job complete.')
 
@@ -187,8 +181,28 @@ class RefreshBcoursesBaseJob(BaseJob):
                             if report_row['sis_login_id'] == uid and report_row['role'] == api_role:
                                 term_report[sis_section_id].remove(report_row)
 
-    def initialize_recent_updates(self, sis_term_ids):
-        def _collect_updates(updates, status_column):
+    def patch_user_updates(self, previous_user_report):
+        if not previous_user_report:
+            return
+        timestamp_match = re.search('\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}', previous_user_report)
+        if not timestamp_match:
+            return
+        last_user_report_timestamp = timestamp_match.group(0)
+
+        for user_import_csv in find_all_dated_csvs('canvas_sis_imports', 'user-sis-import'):
+            timestamp_match = re.search('\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}', user_import_csv)
+            if timestamp_match and timestamp_match.group(0) > last_user_report_timestamp:
+                for row in csv.DictReader(stream_object_text(user_import_csv)):
+                    self.known_users[str(row['login_id'])] = str(row['user_id'])
+
+        for sis_id_import_csv in find_all_dated_csvs('canvas_sis_imports', 'sis-id-sis-import'):
+            timestamp_match = re.search('\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}', user_import_csv)
+            if timestamp_match and timestamp_match.group(0) > last_user_report_timestamp:
+                for row in csv.DictReader(stream_object_text(sis_id_import_csv)):
+                    self.known_sis_id_updates[str(row['old_id'].to_s)] = str(row['new_id'])
+
+    def initialize_recent_updates(self, sis_term_ids, uids_for_updates):
+        def _collect_enrollment_updates(updates, status_column):
             collector = {}
             for term_id, term_rows in groupby(updates, key=itemgetter('term_id')):
                 canvas_term_id = BerkeleyTerm.from_sis_term_id(term_id).to_canvas_sis_term_id()
@@ -204,17 +218,29 @@ class RefreshBcoursesBaseJob(BaseJob):
 
                     for uid, uid_rows in groupby(section_rows, key=_get_uid):
                         if uid:
-                            self.uids_for_updates.add(uid)
+                            uids_for_updates.add(uid)
                             collector[canvas_term_id][section_id].append(list(uid_rows)[0])
             return collector
 
-        self.uids_for_updates = set()
         instructor_results = get_edo_instructor_updates(CanvasSynchronization.get_last_instructor_sync())
-        self.instructor_updates = _collect_updates(instructor_results, 'role_code')
+        self.instructor_updates = _collect_enrollment_updates(instructor_results, 'role_code')
         enrollment_results = get_edo_enrollment_updates(CanvasSynchronization.get_last_enrollment_sync())
-        self.enrollment_updates = _collect_updates(enrollment_results, 'sis_enrollment_status')
+        self.enrollment_updates = _collect_enrollment_updates(enrollment_results, 'sis_enrollment_status')
 
-    def process_user(self, row, users_by_uid):
+    @contextmanager
+    def get_canvas_user_report(self, timestamp):
+        if self.job_flags.incremental:
+            previous_user_report = find_last_dated_csv('canvas_provisioning_reports', 'user-provision-report')
+            self.patch_user_updates(previous_user_report)
+            yield stream_object_text(previous_user_report)
+        else:
+            canvas_users_file = tempfile.NamedTemporaryFile()
+            canvas.get_csv_report('users', download_path=canvas_users_file.name)
+            upload_dated_csv(canvas_users_file.name, 'user-provision-report', 'canvas_provisioning_reports', timestamp)
+            with open(canvas_users_file.name, 'r') as f:
+                yield f
+
+    def process_user(self, row, users_by_uid, whitelisted_uids):
         account_data = uid_from_canvas_login_id(row['login_id'])
         uid = account_data['uid']
 
@@ -225,7 +251,7 @@ class RefreshBcoursesBaseJob(BaseJob):
 
         if not uid:
             return
-        if uid in self.known_users:
+        if str(uid) in self.known_users:
             app.logger.info(f'User account for UID {uid} already processed, will not attempt to re-process.')
             return
 
@@ -236,13 +262,13 @@ class RefreshBcoursesBaseJob(BaseJob):
                 app.logger.warn(f'Reactivating account for LDAP UID {uid}.')
             new_row = csv_row_for_campus_user(campus_user)
         else:
-            new_row = self.inactivate_user(uid, row, is_inactive)
+            new_row = self.inactivate_user(uid, row, is_inactive, whitelisted_uids)
 
-        self.known_users[uid] = new_row['user_id']
+        self.known_users[str(uid)] = str(new_row['user_id'])
 
         # Update user SIS ID if required.
         if row['user_id'] != new_row['user_id']:
-            if row['user_id'] in self.known_sis_id_updates:
+            if str(row['user_id']) in self.known_sis_id_updates:
                 app.logger.debug(f"SIS ID change from {row['user_id']} to {new_row['user_id']} already processed, will not attempt to re-process.")
             else:
                 app.logger.warn(f"Will change SIS ID for user sis_login_id:{row['login_id']} from {row['user_id']} to {new_row['user_id']}")
@@ -256,11 +282,11 @@ class RefreshBcoursesBaseJob(BaseJob):
 
         return new_row
 
-    def inactivate_user(self, uid, user_row, is_inactive):
+    def inactivate_user(self, uid, user_row, is_inactive, whitelisted_uids):
         new_row = {k: user_row[k] for k in ('user_id', 'login_id', 'first_name', 'last_name', 'email', 'status')}
 
         # Force user reactivation if already inactive and in our whitelist.
-        if uid in self.whitelisted_uids and is_inactive:
+        if uid in whitelisted_uids and is_inactive:
             app.logger.warn(f'Reactivating account for unknown LDAP UID {uid}.')
             new_row.update({
                 'login_id': uid,
@@ -455,10 +481,10 @@ class RefreshBcoursesBaseJob(BaseJob):
                     )
 
     def add_user_if_new(self, uid, users_csv):
-        if not self.known_users.get(uid, None):
+        if not self.known_users.get(str(uid), None):
             csv_row = _get_canvas_csv_row(uid)
             if csv_row:
-                self.known_users[uid] = csv_row['user_id']
+                self.known_users[str(uid)] = csv_row['user_id']
                 app.logger.debug(f"Adding new user (uid={uid}, sis id={csv_row['user_id']}")
                 users_csv.writerow(csv_row)
 
