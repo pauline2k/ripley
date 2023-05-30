@@ -94,7 +94,7 @@ class RefreshBcoursesBaseJob(BaseJob):
                 whitelisted_uids = [user.uid for user in UserAuth.get_canvas_whitelist()]
                 for row in csv.DictReader(user_report):
                     new_row = self.process_user(row, users_by_uid, whitelisted_uids)
-                    if _csv_data_changed(row, new_row):
+                    if new_row and _csv_data_changed(row, new_row):
                         csv_set.users.writerow(new_row)
 
             if self.job_flags.enrollments:
