@@ -35,3 +35,11 @@ class RefreshBcoursesAccountsJob(RefreshBcoursesBaseJob):
             inactivate=False,
             incremental=False,
         )
+
+    @classmethod
+    def description(cls):
+        return 'Refresh bCourses accounts from campus data.'
+
+    @classmethod
+    def key(cls):
+        return 'refresh_bcourses_accounts'

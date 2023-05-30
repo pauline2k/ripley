@@ -35,3 +35,11 @@ class RefreshBcoursesDeleteEmailAddressesJob(RefreshBcoursesBaseJob):
             inactivate=False,
             incremental=False,
         )
+
+    @classmethod
+    def description(cls):
+        return 'Delete email addresses in bCourses for inactive accounts.'
+
+    @classmethod
+    def key(cls):
+        return 'delete_bcourses_email_addresses'
