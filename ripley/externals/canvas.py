@@ -121,7 +121,11 @@ def get_csv_report(report_type, download_path=None, term_id=None):
             if not download_path:
                 return csv.DictReader(io.StringIO(file.get_contents()))
             else:
-                file.download(download_path)
+                # We use this lower-level workaround to canvasapi's File.download in order to avoid memory-intensive
+                # logging on a large file response.
+                file_response = canvas._Canvas__requester._get_request(file.url, {})
+                with open(download_path, 'wb') as f:
+                    f.write(file_response.content)
                 return True
 
         elif report.status == 'error':
