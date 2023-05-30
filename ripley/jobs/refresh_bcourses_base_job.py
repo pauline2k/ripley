@@ -501,11 +501,11 @@ class RefreshBcoursesBaseJob(BaseJob):
 
     @classmethod
     def description(cls):
-        return 'Refreshes bCourses accounts and enrollments from campus data.'
+        return 'Base class for bCourses refresh jobs. Jobs should be run via a subclass.'
 
     @classmethod
     def key(cls):
-        return 'refresh_bcourses'
+        return '_refresh_bcourses_base'
 
 
 @contextmanager
