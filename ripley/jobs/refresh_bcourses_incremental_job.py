@@ -35,3 +35,11 @@ class RefreshBcoursesIncrementalJob(RefreshBcoursesBaseJob):
             inactivate=False,
             incremental=True,
         )
+
+    @classmethod
+    def description(cls):
+        return 'Refresh a subset of recently changed bCourses accounts and enrollments from campus data. Intended for hourly runs.'
+
+    @classmethod
+    def key(cls):
+        return 'refresh_bcourses_incremental'
