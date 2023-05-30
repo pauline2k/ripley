@@ -40,7 +40,7 @@ from tests.util import assert_s3_key_not_found, count_s3_csvs, read_s3_csv, setu
 class TestRefreshBcoursesIncremental:
 
     def test_no_previous_export(self, app):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with self.setup_incremental_refresh_job(app) as s3:
             RefreshBcoursesIncrementalJob(app)._run()
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import')
             assert len(spring_2023_enrollments_imported) == 4
@@ -81,7 +81,7 @@ class TestRefreshBcoursesIncremental:
 
     @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_edo_enrollment_updates')
     def test_multiple_incremental_jobs_do_not_duplicate(self, mock_edo_enrollment_updates, app, edo_enrollment_updates):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with self.setup_incremental_refresh_job(app) as s3:
             mock_edo_enrollment_updates.return_value = edo_enrollment_updates
             assert count_s3_csvs(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import') == 0
             RefreshBcoursesIncrementalJob(app)._run()
@@ -143,6 +143,26 @@ class TestRefreshBcoursesIncremental:
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30020000,Lead TA,SEC:2023-B-32936,active,'
 
     @contextmanager
+    def setup_incremental_refresh_job(self, app):
+        with setup_bcourses_refresh_job(app) as (s3, m):
+            csv_rows = [
+                'canvas_user_id,user_id,login_id,first_name,last_name,full_name,email,status',
+                '3456789,30020000,20000,Joan,Lambert,Joan Lambert,joan.lambert@berkeley.edu,active',
+                '4567890,30030000,30000,Ash,🤖,Ash 🤖,synthetic.ash@berkeley.edu,active',
+                '5678901,30040000,40000,XO,Kane,XO Kane,xo.kane@berkeley.edu,active',
+            ]
+            export_file = tempfile.NamedTemporaryFile(suffix='.csv')
+            with open(export_file.name, 'wb') as f:
+                f.write(bytes('\n'.join(csv_rows) + '\n', encoding='utf-8'))
+            upload_dated_csv(
+                export_file.name,
+                'user-provision-report',
+                'canvas_provisioning_reports',
+                utc_now().strftime('%F_%H-%M-%S'),
+            )
+            yield s3
+
+    @contextmanager
     def setup_term_enrollments_export(self, app):
         csv_rows = [
             'course_id,canvas_section_id,sis_section_id,canvas_user_id,sis_login_id,sis_user_id,role,sis_import_id,enrollment_state',
@@ -150,7 +170,7 @@ class TestRefreshBcoursesIncremental:
             '8876542,10000,SEC:2023-B-32936,5678901,30000,30030000,TeacherEnrollment,10000000,active',
             '8876542,10000,SEC:2023-B-32936,5678901,40000,30040000,StudentEnrollment,10000000,active',
         ]
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with self.setup_incremental_refresh_job(app) as s3:
             export_file = tempfile.NamedTemporaryFile(suffix='.csv')
             with open(export_file.name, 'wb') as f:
                 f.write(bytes('\n'.join(csv_rows) + '\n', encoding='utf-8'))

@@ -35,13 +35,19 @@ def find_all_dated_csvs(folder, csv_name):
     return [key for key in iterate_monthly_folder(folder) if csv_name in key]
 
 
+def find_last_dated_csv(folder, csv_name):
+    csv_dict = find_last_dated_csvs(folder, [csv_name])
+    if csv_name in csv_dict:
+        return csv_dict[csv_name]
+
+
 def find_last_dated_csvs(folder, csv_names):
-    csv_keys = {}
+    csvs_by_name = {}
     for object_key in iterate_monthly_folder(folder):
         for csv_name in csv_names:
             if csv_name in object_key:
-                csv_keys[csv_name] = object_key
-    return csv_keys
+                csvs_by_name[csv_name] = object_key
+    return csvs_by_name
 
 
 def get_object_text(key):
