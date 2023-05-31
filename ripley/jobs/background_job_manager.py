@@ -29,8 +29,8 @@ import time
 
 from ripley.externals import rds
 from ripley.jobs.base_job import BaseJob
+from ripley.jobs.bcourses_refresh_base_job import BcoursesRefreshBaseJob
 from ripley.jobs.errors import BackgroundJobError
-from ripley.jobs.refresh_bcourses_base_job import RefreshBcoursesBaseJob
 from ripley.models.job import Job
 from ripley.models.job_history import JobHistory
 import schedule
@@ -123,7 +123,7 @@ class BackgroundJobManager:
 
     @classmethod
     def available_job_classes(cls):
-        return BaseJob.__subclasses__() + RefreshBcoursesBaseJob.__subclasses__()
+        return BaseJob.__subclasses__() + BcoursesRefreshBaseJob.__subclasses__()
 
     def _load_job(self, app, job_key, schedule_type, schedule_value):
         job_class = next((job for job in self.available_job_classes() if job.key() == job_key), None)

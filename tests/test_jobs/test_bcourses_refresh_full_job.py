@@ -29,16 +29,16 @@ from unittest import mock
 
 import pytest
 from ripley.externals.s3 import upload_dated_csv
-from ripley.jobs.refresh_bcourses_full_job import RefreshBcoursesFullJob
+from ripley.jobs.bcourses_refresh_full_job import BcoursesRefreshFullJob
 from ripley.lib.util import utc_now
 from tests.util import assert_s3_key_not_found, read_s3_csv, setup_bcourses_refresh_job
 
 
-class TestRefreshBcoursesFull:
+class TestBcoursesRefreshFullJob:
 
     def test_no_previous_export(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
-            RefreshBcoursesFullJob(app)._run()
+            BcoursesRefreshFullJob(app)._run()
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full-sis-import')
             assert len(spring_2023_enrollments_imported) == 4
             assert spring_2023_enrollments_imported[0] == 'course_id,user_id,role,section_id,status,associated_user_id'
@@ -48,10 +48,10 @@ class TestRefreshBcoursesFull:
 
     def test_previous_export_no_change(self, app):
         with self.setup_term_enrollments_export(app) as s3:
-            RefreshBcoursesFullJob(app)._run()
+            BcoursesRefreshFullJob(app)._run()
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-full-sis-import')
 
-    @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_section_enrollments')
+    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_section_enrollments')
     def test_previous_export_student_added(self, mock_section_enrollments, app, section_enrollments):
         with self.setup_term_enrollments_export(app) as s3:
             section_enrollments.append({
@@ -65,24 +65,24 @@ class TestRefreshBcoursesFull:
             })
             mock_section_enrollments.return_value = section_enrollments
 
-            RefreshBcoursesFullJob(app)._run()
+            BcoursesRefreshFullJob(app)._run()
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full-sis-import')
             assert len(spring_2023_enrollments_imported) == 2
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30060000,student,SEC:2023-B-32936,active,'
 
-    @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_section_enrollments')
+    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_section_enrollments')
     def test_student_removed(self, mock_section_enrollments, app, section_enrollments):
         with self.setup_term_enrollments_export(app) as s3:
             section_enrollments.pop()
             mock_section_enrollments.return_value = section_enrollments
 
-            RefreshBcoursesFullJob(app)._run()
+            BcoursesRefreshFullJob(app)._run()
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full-sis-import')
             assert len(spring_2023_enrollments_imported) == 2
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30020000,student,SEC:2023-B-32936,deleted,'
 
-    @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_section_enrollments')
-    @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_section_instructors')
+    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_section_enrollments')
+    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_section_instructors')
     def test_student_becomes_ta(self, mock_section_instructors, mock_section_enrollments, app, section_enrollments, section_instructors):
         with self.setup_term_enrollments_export(app) as s3:
             section_enrollments.pop()
@@ -95,7 +95,7 @@ class TestRefreshBcoursesFull:
             })
             mock_section_instructors.return_value = section_instructors
 
-            RefreshBcoursesFullJob(app)._run()
+            BcoursesRefreshFullJob(app)._run()
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full-sis-import')
             assert len(spring_2023_enrollments_imported) == 3
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30020000,Lead TA,SEC:2023-B-32936,active,'

@@ -23,23 +23,23 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from ripley.jobs.refresh_bcourses_base_job import RefreshBcoursesBaseJob
+from ripley.jobs.bcourses_refresh_base_job import BcoursesRefreshBaseJob
 
 
-class RefreshBcoursesIncrementalJob(RefreshBcoursesBaseJob):
+class BcoursesInactivateAccountsJob(BcoursesRefreshBaseJob):
 
     def _set_job_flags(self):
         self.job_flags = self.JobFlags(
             delete_email_addresses=False,
-            enrollments=True,
-            inactivate=False,
-            incremental=True,
+            enrollments=False,
+            inactivate=True,
+            incremental=False,
         )
 
     @classmethod
     def description(cls):
-        return 'Refresh a subset of recently changed bCourses accounts and enrollments from campus data. Intended for hourly runs.'
+        return 'Inactivate bCourses accounts for users no longer present in campus data.'
 
     @classmethod
     def key(cls):
-        return 'refresh_bcourses_incremental'
+        return 'bcourses_inactivate_accounts'

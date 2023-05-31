@@ -240,7 +240,8 @@ def post_sis_import(attachment):
                 attempts += 1
                 sleep(BACKGROUND_STATUS_CHECK_INTERVAL)
             elif not sis_import.workflow_state or sis_import.progress < 100 or sis_import.workflow_state.startswith('failed'):
-                raise RuntimeError(f'Canvas SIS import failed or incompletely processed (attachment={attachment}, id={sis_import.id})')
+                app.logger.info(f'Canvas SIS import failed or incompletely processed (attachment={attachment}, id={sis_import.id})')
+                return False
             elif sis_import.workflow_state == 'imported':
                 app.logger.info(f'SIS import succeeded (attachment={attachment}, id={sis_import.id}, results={sis_import.data})')
                 return sis_import
