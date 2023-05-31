@@ -61,7 +61,7 @@ INSERT INTO sis_data.edo_instructor_updates
 VALUES
 ('2232', '32936', '30000', '30030000', 'PI', TRUE, now());
 
-CREATE TABLE sis_data.sis_enrollments
+CREATE TABLE sis_data.edo_enrollments
 (
     sis_term_id VARCHAR,
     sis_section_id VARCHAR,
@@ -69,7 +69,7 @@ CREATE TABLE sis_data.sis_enrollments
     sis_enrollment_status VARCHAR
 );
 
-INSERT INTO sis_data.sis_enrollments
+INSERT INTO sis_data.edo_enrollments
 (sis_term_id, sis_section_id, ldap_uid, sis_enrollment_status)
 VALUES
 ('2232', '32936', '20000', 'E'),
@@ -78,7 +78,7 @@ VALUES
 ('2232', '32937', '50000', 'E'),
 ('2232', '32937', '60000', 'W');
 
-CREATE TABLE sis_data.sis_sections (
+CREATE TABLE sis_data.edo_sections (
     sis_term_id VARCHAR,
     sis_section_id VARCHAR,
     is_primary BOOLEAN,
@@ -101,7 +101,7 @@ CREATE TABLE sis_data.sis_sections (
     meeting_end_date VARCHAR
 );
 
-INSERT INTO sis_data.sis_sections
+INSERT INTO sis_data.edo_sections
 (sis_term_id, sis_section_id, is_primary, sis_course_name, sis_course_title, sis_instruction_format, sis_section_num, allowed_units, cs_course_id, session_code, instruction_mode, instructor_uid, instructor_name, instructor_role_code, meeting_location, meeting_days, meeting_start_time, meeting_end_time, meeting_start_date, meeting_end_date)
 VALUES
 ('2232', '32936', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '001', NULL, '876543', 1, 'P', '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
