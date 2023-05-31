@@ -93,14 +93,14 @@ def get_instructing_sections(uid, term_ids):
     }
     sql = f"""WITH instructing_courses AS (
             SELECT DISTINCT sis_term_id, cs_course_id
-            FROM sis_data.sis_sections
+            FROM sis_data.edo_sections
             WHERE instructor_uid = %(instructor_uid)s
             AND sis_term_id = ANY(%(term_ids)s)
         ),
         course_sections AS (
             SELECT DISTINCT ss.sis_term_id, ss.cs_course_id, ss.sis_section_id,
             ss.sis_section_num, ss.instructor_uid
-            FROM sis_data.sis_sections ss
+            FROM sis_data.edo_sections ss
             JOIN instructing_courses ic
               ON ss.sis_term_id = ic.sis_term_id
              AND ss.cs_course_id = ic.cs_course_id
@@ -110,7 +110,7 @@ def get_instructing_sections(uid, term_ids):
                 THEN TRUE ELSE FALSE
             END AS is_co_instructor
         FROM course_sections cs
-        JOIN sis_data.sis_sections ss
+        JOIN sis_data.edo_sections ss
           ON cs.cs_course_id = ss.cs_course_id
          AND cs.sis_term_id = ss.sis_term_id
          AND cs.sis_section_id = ss.sis_section_id
@@ -181,7 +181,7 @@ def get_sections(term_id, section_ids):
         'term_id': term_id,
     }
     sql = f"""SELECT {SECTION_COLUMNS}
-        FROM sis_data.sis_sections ss
+        FROM sis_data.edo_sections ss
         WHERE sis_section_id = ANY(%(section_ids)s)
         AND sis_term_id = %(term_id)s
         ORDER BY sis_section_id"""
@@ -195,7 +195,7 @@ def get_section_enrollments(term_id, section_ids):
     }
     sql = """SELECT se.sis_section_id AS section_id, se.ldap_uid, ba.sid, ba.first_name, ba.last_name,
             se.sis_enrollment_status, ba.email_address
-        FROM sis_data.sis_enrollments se
+        FROM sis_data.edo_enrollments se
         JOIN sis_data.basic_attributes ba on ba.ldap_uid = se.ldap_uid
         WHERE se.sis_section_id = ANY(%(section_ids)s)
         AND se.sis_term_id = %(term_id)s
@@ -209,7 +209,7 @@ def get_section_instructors(term_id, section_ids):
         'section_ids': section_ids,
     }
     sql = """SELECT DISTINCT sis_section_id, instructor_uid, instructor_name, instructor_role_code
-        FROM sis_data.sis_sections
+        FROM sis_data.edo_sections
         WHERE sis_section_id = ANY(%(section_ids)s)
         AND sis_term_id = %(term_id)s
         ORDER BY sis_section_id, instructor_uid, instructor_name"""

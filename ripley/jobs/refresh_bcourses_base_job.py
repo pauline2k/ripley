@@ -404,7 +404,7 @@ class RefreshBcoursesBaseJob(BaseJob):
 
         existing_user_enrollments = existing_enrollments.get(str(ldap_uid), None)
         if existing_user_enrollments:
-            app.logger.debug(f'Found {existing_user_enrollments.count} existing enrollments for UID #{ldap_uid} in section #{sis_section_id}')
+            app.logger.debug(f'Found {len(existing_user_enrollments)} existing enrollments for UID #{ldap_uid} in section #{sis_section_id}')
             # If the user already has the same role, remove the old enrollment from the cleanup list.
             matching_enrollment = next((e for e in existing_user_enrollments if e['role'] == course_role), None)
             if matching_enrollment:
