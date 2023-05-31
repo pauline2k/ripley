@@ -37,7 +37,6 @@ from ripley.externals.data_loch import get_all_active_users, get_edo_enrollment_
     get_section_enrollments, get_section_instructors, get_sections, get_users
 from ripley.externals.s3 import find_all_dated_csvs, find_last_dated_csv, find_last_dated_csvs, stream_object_text, upload_dated_csv
 from ripley.jobs.base_job import BaseJob
-from ripley.jobs.errors import BackgroundJobError
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import api_formatted_course_role, csv_formatted_course_role, csv_row_for_campus_user, format_term_enrollments_export, \
     parse_canvas_sis_section_id, sis_enrollment_status_to_canvas_course_role, uid_from_canvas_login_id
@@ -47,7 +46,7 @@ from ripley.models.canvas_synchronization import CanvasSynchronization
 from ripley.models.user_auth import UserAuth
 
 
-class RefreshBcoursesBaseJob(BaseJob):
+class BcoursesRefreshBaseJob(BaseJob):
 
     JobFlags = collections.namedtuple('JobFlags', 'delete_email_addresses enrollments inactivate incremental')
 
@@ -317,7 +316,8 @@ class RefreshBcoursesBaseJob(BaseJob):
             ):
                 continue
 
-            sections_report = canvas.get_csv_report('sections', term_id=term_id)
+            canvas_sections_file = tempfile.NamedTemporaryFile()
+            sections_report = canvas.get_csv_report('sections', download_path=canvas_sections_file.name, term_id=term_id)
             if not sections_report:
                 continue
 
@@ -326,19 +326,20 @@ class RefreshBcoursesBaseJob(BaseJob):
                 enrollment_update_ccns = self.enrollment_updates.get(term_id, {}).keys()
                 ccns_with_updates = set(instructor_update_ccns).union(enrollment_update_ccns)
 
-            for course_id, csv_rows in groupby(sorted(sections_report, key=itemgetter('course_id')), key=itemgetter('course_id')):
-                if course_id:
-                    has_incremental_updates = False
-                    sis_section_ids = set()
-                    for r in csv_rows:
-                        canvas_sis_section_id = r.get('section_id', None)
-                        section_id, berkeley_term = parse_canvas_sis_section_id(canvas_sis_section_id)
-                        if berkeley_term and berkeley_term.to_canvas_sis_term_id() == term_id:
-                            sis_section_ids.add(canvas_sis_section_id)
-                            if self.job_flags.incremental and section_id in ccns_with_updates:
-                                has_incremental_updates = True
-                    if has_incremental_updates or not self.job_flags.incremental:
-                        self.process_course_enrollments(term_id, course_id, sis_section_ids, csv_set)
+            with open(canvas_sections_file.name, 'r') as f:
+                for course_id, csv_rows in groupby(sorted(csv.DictReader(f), key=itemgetter('course_id')), key=itemgetter('course_id')):
+                    if course_id:
+                        has_incremental_updates = False
+                        sis_section_ids = set()
+                        for r in csv_rows:
+                            canvas_sis_section_id = r.get('section_id', None)
+                            section_id, berkeley_term = parse_canvas_sis_section_id(canvas_sis_section_id)
+                            if berkeley_term and berkeley_term.to_canvas_sis_term_id() == term_id:
+                                sis_section_ids.add(canvas_sis_section_id)
+                                if self.job_flags.incremental and section_id in ccns_with_updates:
+                                    has_incremental_updates = True
+                        if has_incremental_updates or not self.job_flags.incremental:
+                            self.process_course_enrollments(term_id, course_id, sis_section_ids, csv_set)
 
     def process_course_enrollments(self, term_id, course_id, sis_section_ids, csv_set):
         app.logger.debug(f'Refreshing course {course_id}')
@@ -445,7 +446,7 @@ class RefreshBcoursesBaseJob(BaseJob):
                     'status': 'deleted',
                 })
 
-    def upload_results(self, csv_set, timestamp):
+    def upload_results(self, csv_set, timestamp):  # noqa
         # The email deletion job runs an API loop and does not post a SIS import to Canvas.
         if self.job_flags.delete_email_addresses:
             self.handle_email_deletions()
@@ -458,7 +459,7 @@ class RefreshBcoursesBaseJob(BaseJob):
             else:
                 app.logger.info(f'Will post {csv_set.sis_ids.count} SIS ID changes to Canvas.')
                 if not canvas.post_sis_import(csv_set.sis_ids.tempfile.name):
-                    raise BackgroundJobError('SIS id changes import failed.')
+                    app.logger.warning('SIS id changes import timed out or incompletely processed.')
 
         if csv_set.users.count:
             upload_dated_csv(csv_set.users.tempfile.name, 'user-sis-import', 'canvas_sis_imports', timestamp)
@@ -467,7 +468,7 @@ class RefreshBcoursesBaseJob(BaseJob):
             else:
                 app.logger.info(f'Will post {csv_set.users.count} user updates to Canvas.')
                 if not canvas.post_sis_import(csv_set.users.tempfile.name):
-                    raise BackgroundJobError('Changed users import failed.')
+                    app.logger.warning('Changed users import timed out or incompletely processed.')
 
         if self.job_flags.enrollments:
             for term_id, enrollment_csv in csv_set.enrollment_terms.items():
@@ -479,6 +480,12 @@ class RefreshBcoursesBaseJob(BaseJob):
                         'canvas_sis_imports',
                         timestamp,
                     )
+                if self.dry_run:
+                    app.logger.info(f'Dry run mode, will not post enrollment update files to Canvas (term_id={term_id}).')
+                else:
+                    app.logger.info(f'Will post {enrollment_csv.count} enrollment updates to Canvas (term_id={term_id}).')
+                    if not canvas.post_sis_import(enrollment_csv.tempfile.name):
+                        app.logger.warning(f'Term enrollments import timed out or incompletely processed (term_id={term_id}).')
 
     def add_user_if_new(self, uid, users_csv):
         if not self.known_users.get(str(uid), None):
@@ -505,7 +512,7 @@ class RefreshBcoursesBaseJob(BaseJob):
 
     @classmethod
     def key(cls):
-        return '_refresh_bcourses_base'
+        return '_bcourses_refresh_base'
 
 
 @contextmanager

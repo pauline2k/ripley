@@ -23,10 +23,10 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from ripley.jobs.refresh_bcourses_base_job import RefreshBcoursesBaseJob
+from ripley.jobs.bcourses_refresh_base_job import BcoursesRefreshBaseJob
 
 
-class RefreshBcoursesFullJob(RefreshBcoursesBaseJob):
+class BcoursesRefreshFullJob(BcoursesRefreshBaseJob):
 
     def _set_job_flags(self):
         self.job_flags = self.JobFlags(
@@ -42,4 +42,4 @@ class RefreshBcoursesFullJob(RefreshBcoursesBaseJob):
 
     @classmethod
     def key(cls):
-        return 'refresh_bcourses_full'
+        return 'bcourses_refresh_full'

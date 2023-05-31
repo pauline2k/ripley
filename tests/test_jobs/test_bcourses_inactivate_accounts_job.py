@@ -26,31 +26,31 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from unittest import mock
 
 import pytest
-from ripley.jobs.refresh_bcourses_inactivate_job import RefreshBcoursesInactivateJob
+from ripley.jobs.bcourses_inactivate_accounts_job import BcoursesInactivateAccountsJob
 from tests.util import assert_s3_key_not_found, read_s3_csv, setup_bcourses_refresh_job
 
 
-class TestRefreshBcoursesInactivate:
+class TestBcoursesInactivateAccountsJob:
 
     def test_no_changes(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
-            RefreshBcoursesInactivateJob(app)._run()
+            BcoursesInactivateAccountsJob(app)._run()
             assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
             assert_s3_key_not_found(app, s3, 'user-sis-import')
 
     def test_no_enrollments_in_inactivate_job(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
-            RefreshBcoursesInactivateJob(app)._run()
+            BcoursesInactivateAccountsJob(app)._run()
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
 
-    @mock.patch('ripley.jobs.refresh_bcourses_base_job.get_all_active_users')
+    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_all_active_users')
     def test_vanishing_user(self, mock_all_users, app, campus_users):
         with setup_bcourses_refresh_job(app) as (s3, m):
             ash = next(u for u in campus_users if u['ldap_uid'] == '30000')
             campus_users.remove(ash)
             mock_all_users.return_value = campus_users
 
-            RefreshBcoursesInactivateJob(app)._run()
+            BcoursesInactivateAccountsJob(app)._run()
 
             sis_id_changes_imported = read_s3_csv(app, s3, 'sis-id-sis-import')
             assert len(sis_id_changes_imported) == 2
