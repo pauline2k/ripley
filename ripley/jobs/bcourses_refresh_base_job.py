@@ -28,8 +28,10 @@ from contextlib import contextmanager
 import csv
 from itertools import groupby
 from operator import itemgetter
+import os
 import re
 import tempfile
+import zipfile
 
 from flask import current_app as app
 from ripley.externals import canvas
@@ -39,7 +41,7 @@ from ripley.externals.s3 import find_all_dated_csvs, find_last_dated_csv, find_l
 from ripley.jobs.base_job import BaseJob
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import api_formatted_course_role, csv_formatted_course_role, csv_row_for_campus_user, format_term_enrollments_export, \
-    parse_canvas_sis_section_id, sis_enrollment_status_to_canvas_course_role, uid_from_canvas_login_id
+    parse_canvas_sis_section_id, sis_enrollment_status_to_canvas_course_role, uid_from_canvas_login_id, user_id_from_attributes
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from ripley.models.canvas_synchronization import CanvasSynchronization
@@ -132,7 +134,7 @@ class BcoursesRefreshBaseJob(BaseJob):
     def patch_enrollment_provisioning_reports(self, users_by_uid):  # noqa C901
         # Having looped through the enrollment provisioning reports, we also need to loop through our
         # recent exports so that we don't repeat changes picked up in a previous incremental job.
-        users_by_sis_id = {u['sid']: u for u in users_by_uid.values()}
+        users_by_user_id = {user_id_from_attributes(u): u for u in users_by_uid.values()}
         last_sync_timestamp = CanvasSynchronization.get_latest_term_enrollment_csv_set().strftime('%F_%H-%M-%S')
         for enrollment_export_csv in find_all_dated_csvs('canvas_sis_imports', 'enrollments-TERM'):
             timestamp_match = re.search('\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}', enrollment_export_csv)
@@ -155,7 +157,7 @@ class BcoursesRefreshBaseJob(BaseJob):
                     for uid, rows in groupby(sorted(term_report[sis_section_id], key=itemgetter('sis_login_id')), key=itemgetter('sis_login_id'))
                 }
                 for row in section_rows:
-                    uid = users_by_sis_id.get(row['user_id'], {}).get('ldap_uid', None)
+                    uid = users_by_user_id.get(row['user_id'], {}).get('ldap_uid', None)
                     if not uid:
                         continue
                     uid_rows = section_report_by_uid.get(uid, [])
@@ -190,15 +192,17 @@ class BcoursesRefreshBaseJob(BaseJob):
 
         for user_import_csv in find_all_dated_csvs('canvas_sis_imports', 'user-sis-import'):
             timestamp_match = re.search('\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}', user_import_csv)
-            if timestamp_match and timestamp_match.group(0) > last_user_report_timestamp:
+            if timestamp_match and timestamp_match.group(0) >= last_user_report_timestamp:
                 for row in csv.DictReader(stream_object_text(user_import_csv)):
-                    self.known_users[str(row['login_id'])] = str(row['user_id'])
+                    account_data = uid_from_canvas_login_id(row['login_id'])
+                    uid = account_data['uid']
+                    self.known_users[uid] = str(row['user_id'])
 
         for sis_id_import_csv in find_all_dated_csvs('canvas_sis_imports', 'sis-id-sis-import'):
             timestamp_match = re.search('\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}', user_import_csv)
-            if timestamp_match and timestamp_match.group(0) > last_user_report_timestamp:
+            if timestamp_match and timestamp_match.group(0) >= last_user_report_timestamp:
                 for row in csv.DictReader(stream_object_text(sis_id_import_csv)):
-                    self.known_sis_id_updates[str(row['old_id'].to_s)] = str(row['new_id'])
+                    self.known_sis_id_updates[str(row['old_id'])] = str(row['new_id'])
 
     def initialize_recent_updates(self, sis_term_ids, uids_for_updates):
         def _collect_enrollment_updates(updates, status_column):
@@ -250,7 +254,7 @@ class BcoursesRefreshBaseJob(BaseJob):
 
         if not uid:
             return
-        if str(uid) in self.known_users:
+        if uid in self.known_users:
             app.logger.info(f'User account for UID {uid} already processed, will not attempt to re-process.')
             return
 
@@ -263,7 +267,7 @@ class BcoursesRefreshBaseJob(BaseJob):
         else:
             new_row = self.inactivate_user(uid, row, is_inactive, whitelisted_uids)
 
-        self.known_users[str(uid)] = str(new_row['user_id'])
+        self.known_users[uid] = str(new_row['user_id'])
 
         # Update user SIS ID if required.
         if row['user_id'] != new_row['user_id']:
@@ -402,10 +406,9 @@ class BcoursesRefreshBaseJob(BaseJob):
     def process_section_enrollment(self, term_id, course_id, sis_section_id, ldap_uid, course_role, csv_set, existing_enrollments):
         enrollment_csv = csv_set.enrollment_terms[term_id]
         users_csv = csv_set.users
-
         existing_user_enrollments = existing_enrollments.get(str(ldap_uid), None)
         if existing_user_enrollments:
-            app.logger.debug(f'Found {len(existing_user_enrollments)} existing enrollments for UID #{ldap_uid} in section #{sis_section_id}')
+            app.logger.debug(f'Found {len(existing_user_enrollments)} existing enrollments for UID {ldap_uid} in section {sis_section_id}')
             # If the user already has the same role, remove the old enrollment from the cleanup list.
             matching_enrollment = next((e for e in existing_user_enrollments if e['role'] == course_role), None)
             if matching_enrollment:
@@ -446,46 +449,55 @@ class BcoursesRefreshBaseJob(BaseJob):
                     'status': 'deleted',
                 })
 
-    def upload_results(self, csv_set, timestamp):  # noqa
+    def upload_results(self, csv_set, timestamp):  # noqa C901
         # The email deletion job runs an API loop and does not post a SIS import to Canvas.
         if self.job_flags.delete_email_addresses:
             self.handle_email_deletions()
             return
 
-        if csv_set.sis_ids.count:
-            upload_dated_csv(csv_set.sis_ids.tempfile.name, 'sis-id-sis-import', 'canvas_sis_imports', timestamp)
+        z = zipfile.ZipFile(f'canvas-sis-import-{timestamp}.zip', 'w')
+        data_to_upload = False
+
+        def _write_csv_to_zip(csv):
+            z.write(csv.tempfile.name, os.path.basename(csv.tempfile.name))
+
+        try:
+            if csv_set.sis_ids.count:
+                app.logger.info(f'Will post {csv_set.sis_ids.count} SIS ID changes to Canvas.')
+                upload_dated_csv(csv_set.sis_ids.tempfile.name, 'sis-id-sis-import', 'canvas_sis_imports', timestamp)
+                _write_csv_to_zip(csv_set.sis_ids)
+                data_to_upload = True
+
+            if csv_set.users.count:
+                app.logger.info(f'Will post {csv_set.users.count} user updates to Canvas.')
+                upload_dated_csv(csv_set.users.tempfile.name, 'user-sis-import', 'canvas_sis_imports', timestamp)
+                _write_csv_to_zip(csv_set.users)
+                data_to_upload = True
+
+            if self.job_flags.enrollments:
+                for term_id, enrollment_csv in csv_set.enrollment_terms.items():
+                    if enrollment_csv.count:
+                        job_type = 'incremental' if self.job_flags.incremental else 'full'
+                        app.logger.info(f'Will post {enrollment_csv.count} enrollment updates to Canvas (term_id={term_id}).')
+                        upload_dated_csv(
+                            enrollment_csv.tempfile.name,
+                            f"enrollments-{term_id.replace(':', '-')}-{job_type}-sis-import",
+                            'canvas_sis_imports',
+                            timestamp,
+                        )
+                        _write_csv_to_zip(enrollment_csv)
+                        data_to_upload = True
+        finally:
+            z.close()
+
+        try:
             if self.dry_run:
                 app.logger.info('Dry run mode, will not post SIS import files to Canvas.')
-            else:
-                app.logger.info(f'Will post {csv_set.sis_ids.count} SIS ID changes to Canvas.')
-                if not canvas.post_sis_import(csv_set.sis_ids.tempfile.name):
-                    app.logger.warning('SIS id changes import timed out or incompletely processed.')
-
-        if csv_set.users.count:
-            upload_dated_csv(csv_set.users.tempfile.name, 'user-sis-import', 'canvas_sis_imports', timestamp)
-            if self.dry_run:
-                app.logger.info('Dry run mode, will not post user import files to Canvas.')
-            else:
-                app.logger.info(f'Will post {csv_set.users.count} user updates to Canvas.')
-                if not canvas.post_sis_import(csv_set.users.tempfile.name):
-                    app.logger.warning('Changed users import timed out or incompletely processed.')
-
-        if self.job_flags.enrollments:
-            for term_id, enrollment_csv in csv_set.enrollment_terms.items():
-                if enrollment_csv.count:
-                    job_type = 'incremental' if self.job_flags.incremental else 'full'
-                    upload_dated_csv(
-                        enrollment_csv.tempfile.name,
-                        f"enrollments-{term_id.replace(':', '-')}-{job_type}-sis-import",
-                        'canvas_sis_imports',
-                        timestamp,
-                    )
-                if self.dry_run:
-                    app.logger.info(f'Dry run mode, will not post enrollment update files to Canvas (term_id={term_id}).')
-                else:
-                    app.logger.info(f'Will post {enrollment_csv.count} enrollment updates to Canvas (term_id={term_id}).')
-                    if not canvas.post_sis_import(enrollment_csv.tempfile.name):
-                        app.logger.warning(f'Term enrollments import timed out or incompletely processed (term_id={term_id}).')
+            elif data_to_upload:
+                if not canvas.post_sis_import(z.filename, extension='zip'):
+                    app.logger.warning('SIS import timed out or failed.')
+        finally:
+            os.remove(z.filename)
 
     def add_user_if_new(self, uid, users_csv):
         if not self.known_users.get(str(uid), None):

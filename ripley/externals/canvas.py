@@ -25,12 +25,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 import csv
 import io
+import os
 from time import sleep
 
 from canvasapi import Canvas
 from canvasapi.account import Account
 from canvasapi.course import Course
 from canvasapi.section import Section
+from canvasapi.sis_import import SisImport
 from canvasapi.user import User
 from flask import current_app as app
 
@@ -223,14 +225,21 @@ def get_user(user_id, api_call=True):
         return user
 
 
-def post_sis_import(attachment):
+def post_sis_import(attachment, extension='csv'):
     c = _get_canvas()
+    content_type = 'application/zip' if extension == 'zip' else 'text/csv'
 
     try:
         account = c.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False)
-        sis_import = account.create_sis_import(attachment, import_type='instructure_csv', extension='csv')
-        if not sis_import:
-            raise RuntimeError(f'Failed to create Canvas SIS import (attachment={attachment})')
+        with open(attachment, 'rb') as f:
+            response = c._Canvas__requester.request(
+                'POST',
+                f'accounts/{account.id}/sis_imports.json?import_type=instructure_csv&extension={extension}',
+                file={'attachment': (os.path.basename(attachment), f, content_type)},
+            )
+        response_json = response.json()
+        response_json.update({'account_id': account.id})
+        sis_import = SisImport(c._Canvas__requester, response_json)
 
         attempts = 0
 
@@ -240,8 +249,8 @@ def post_sis_import(attachment):
                 attempts += 1
                 sleep(BACKGROUND_STATUS_CHECK_INTERVAL)
             elif not sis_import.workflow_state or sis_import.progress < 100 or sis_import.workflow_state.startswith('failed'):
-                app.logger.info(f'Canvas SIS import failed or incompletely processed (attachment={attachment}, id={sis_import.id})')
-                return False
+                app.logger.warning(sis_import)
+                raise RuntimeError(f'Canvas SIS import failed or incompletely processed (attachment={attachment}, id={sis_import.id})')
             elif sis_import.workflow_state == 'imported':
                 app.logger.info(f'SIS import succeeded (attachment={attachment}, id={sis_import.id}, results={sis_import.data})')
                 return sis_import
@@ -252,7 +261,6 @@ def post_sis_import(attachment):
                 raise RuntimeError(f'Could not parse SIS import status (attachment={attachment}, id={sis_import.id})')
 
     except Exception as e:
-        app.logger.error(e.message)
         app.logger.exception(e)
 
 
