@@ -41,7 +41,7 @@
     },
     "create_sis_import": {
         "method": "POST",
-        "endpoint": "accounts/1/sis_imports",
+        "endpoint": "accounts/1/sis_imports.json",
         "data": {
             "id": 2,
             "progress": 100,

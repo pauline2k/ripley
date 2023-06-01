@@ -23,6 +23,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from datetime import timedelta
+
 import boto3
 from botocore.exceptions import ClientError, ConnectionError
 from flask import current_app as app
@@ -72,21 +74,29 @@ def get_signed_urls(bucket, keys, expiration):
 
 def iterate_monthly_folder(folder):
     bucket = app.config['AWS_S3_BUCKET']
-    prefix = f"{folder}/{utc_now().strftime('%Y/%m')}"
     session = _get_session()
     s3 = session.client('s3')
 
-    try:
-        paginator = s3.get_paginator('list_objects')
-        page_iterator = paginator.paginate(Bucket=bucket, Prefix=prefix)
-        for page in page_iterator:
-            if 'Contents' in page:
-                for o in page['Contents']:
-                    object_key = o.get('Key')
-                    yield object_key
-    except Exception as e:
-        app.logger.error(f'Search of S3 folder failed (s3://{bucket}/{prefix})')
-        app.logger.exception(e)
+    def _iterate_folder(timestamp):
+        prefix = f"{folder}/{timestamp.strftime('%Y/%m')}"
+        try:
+            paginator = s3.get_paginator('list_objects')
+            page_iterator = paginator.paginate(Bucket=bucket, Prefix=prefix)
+            for page in page_iterator:
+                if 'Contents' in page:
+                    for o in page['Contents']:
+                        object_key = o.get('Key')
+                        yield object_key
+        except Exception as e:
+            app.logger.error(f'Search of S3 folder failed (s3://{bucket}/{prefix})')
+            app.logger.exception(e)
+
+    # The first of the month is a special case under which we'll want to check last month's folder as well.
+    if utc_now().day == 1:
+        for key in _iterate_folder(utc_now() - timedelta(days=1)):
+            yield key
+    for key in _iterate_folder(utc_now()):
+        yield key
 
 
 def put_binary_data_to_s3(key, binary_data, content_type):
