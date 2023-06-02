@@ -36,9 +36,8 @@ class BerkeleyTerm:
     def get_current_terms(cls):
         # TODO: replicate junction logic (https://github.com/ets-berkeley-edu/junction/blob/953bfb1d84881cf73fe6938cca2715eb7a6221eb/app/models/berkeley/terms.rb#L77) # noqa
         return {
-            'current': cls('2023', 'B'),
-            'next': cls('2023', 'C'),
-            'future': cls('2023', 'D'),
+            'current': cls('2023', 'C'),
+            'next': cls('2023', 'D'),
         }
 
     @classmethod
