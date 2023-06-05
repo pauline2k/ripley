@@ -25,12 +25,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 import os
 
+from fakeredis import FakeStrictRedis
 from flask import Flask
+import redis
 from ripley import cache, db
 from ripley.configs import load_configs
 from ripley.jobs.background_job_manager import BackgroundJobManager
 from ripley.logger import initialize_logger
 from ripley.routes import register_routes
+from rq import Connection, Queue
 
 
 background_job_manager = BackgroundJobManager()
@@ -44,12 +47,20 @@ def create_app():
     cache.init_app(app)
     cache.clear()
     db.init_app(app)
+    _initialize_queue(app)
 
     with app.app_context():
         register_routes(app)
         _register_jobs(app)
 
     return app
+
+
+def _initialize_queue(app):
+    global q
+    redis_conn = FakeStrictRedis() if app.config['TESTING'] else redis.from_url(app.config['REDIS_URL'])
+    with Connection(redis_conn):
+        q = Queue()
 
 
 def _register_jobs(app):

@@ -23,37 +23,37 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from flask import current_app as app
-from flask_caching import Cache
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError
+import redis
+from ripley.factory import create_app
+from rq import Connection, Queue, Worker
+from rq.command import send_shutdown_command
 
-__version__ = '0.1'
+"""On Mac OS 10.13 and later, disable the fork() crash behavior:
+(see https://github.com/rq/rq/issues/1418)
 
-cache = Cache()
+>>> export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 
-db = SQLAlchemy()
+Start the worker:
+
+>>> rq worker
+"""
 
 
-def std_commit(allow_test_environment=False):
-    """Commit failures in SQLAlchemy must be explicitly handled.
+def start_worker():
+    app = create_app()
+    redis_conn = redis.from_url(app.config['REDIS_URL'])
 
-    This function follows the suggested default, which is to roll back and close the active session, letting the pooled
-    connection start a new transaction cleanly. WARNING: Session closure will invalidate any in-memory DB entities. Rows
-    will have to be reloaded from the DB to be read or updated.
-    """
-    # Give a hoot, don't pollute.
-    if app.config['TESTING'] and not allow_test_environment:
-        # When running tests, session flush generates id and timestamps that would otherwise show up during a commit.
-        db.session.flush()
-        return
-    successful_commit = False
-    try:
-        db.session.commit()
-        successful_commit = True
-    except SQLAlchemyError:
-        db.session.rollback()
-        raise
-    finally:
-        if not successful_commit:
-            db.session.close()
+    # Kill predecessor
+    existing_workers = Worker.all(connection=redis_conn)
+    if len(existing_workers):
+        print(f'Attempting to shut down {len(existing_workers)} existing workers.')
+        for w in existing_workers:
+            send_shutdown_command(redis_conn, w.name)
+
+    with Connection(redis_conn), app.app_context():
+        queue = Queue(connection=redis_conn)
+        print(f'Using queue {queue.name}')
+        print(Worker.all(connection=redis_conn))
+        worker = Worker(queue)
+        worker.work()
+        print(f'Worker {worker.name} listening on queue {queue.name}.')

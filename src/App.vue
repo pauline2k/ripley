@@ -99,6 +99,9 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.font-size-16 {
+  font-size: 16px;
+}
 a {
   color: $primary-color;
   text-decoration: none;

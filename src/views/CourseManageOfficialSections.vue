@@ -14,12 +14,16 @@
           class="d-flex align-center justify-space-between my-2"
           closable
           close-label="Hide notice"
-          :color="jobStatus !== 'sectionEditsCompleted' ? 'error' : 'success'"
+          :type="jobStatus !== 'finished' ? 'error' : 'success'"
           density="compact"
           role="alert"
           variant="tonal"
         >
-          {{ jobStatusMessage }}
+          <div class="font-size-16">{{ jobStatusMessage }}</div>
+          <div v-if="$_.size(jobStatusDetails)" class="font-weight-bold py-2">Messages:</div>
+          <ul class="px-4" aria-label="error messages">
+            <li v-for="(msg, index) in jobStatusDetails" :key="index">{{ msg }}</li>
+          </ul>
         </v-alert>
 
         <h2 class="sr-only">Viewing Sections</h2>
@@ -95,7 +99,7 @@
               ></CourseSectionsTable>
             </v-col>
           </v-row>
-          <v-row v-if="currentStagedCount() > 12" class="row">
+          <v-row v-if="totalStagedCount > 12" class="row">
             <v-col md="12" class="text-right">
               <v-btn
                 class="canvas-button canvas-no-decoration"
@@ -179,25 +183,21 @@
         <h2 class="page-course-official-sections-existing-sections-header-label">
           Updating Official Sections in Course Site
         </h2>
-        <div v-if="jobStatus === 'sendingRequest'" class="page-course-official-sections-pending-request">
-          <v-progress-circular
-            class="mr-2"
-            color="primary"
-            indeterminate
-          />
+        <div v-if="jobStatus === 'sendingRequest'" class="pending-request-step">
           Sending request...
         </div>
-        <div v-if="jobStatus === 'New'" class="page-course-official-sections-pending-request">
-          <v-progress-circular
-            class="mr-2"
-            color="primary"
-            indeterminate
-          />
-          Request sent. Awaiting processing....
+        <div v-if="$_.includes(['queued', 'initializing', 'created'], jobStatus)" class="pending-request-step">
+          Request sent. Awaiting processing...
         </div>
-        <div v-if="jobStatus">
-          <ProgressBar :percent-complete-rounded="percentCompleteRounded" />
+        <div v-if="$_.includes(['started', 'importing'], jobStatus)" class="pending-request-step">
+          Request received. Updating sections...
         </div>
+        <v-progress-linear
+          class="mx-4"
+          color="primary"
+          height="10"
+          indeterminate
+        />
       </div>
     </div>
 
@@ -215,7 +215,6 @@
 import Context from '@/mixins/Context'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
-import ProgressBar from '@/components/bcourses/shared/ProgressBar'
 
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
 
@@ -223,14 +222,12 @@ export default {
   name: 'CourseManageOfficialSections',
   components: {
     CourseSectionsTable,
-    MaintenanceNotice,
-    ProgressBar
+    MaintenanceNotice
   },
   mixins: [Context],
   data: () => ({
     adminActingAs: null,
     adminSemesters: null,
-    allSections: [],
     availableSectionsPanel: [],
     canvasSite: {},
     courseSemesterClasses: [],
@@ -241,10 +238,9 @@ export default {
     isAdmin: false,
     isCourseCreator: false,
     jobStatus: null,
+    jobStatusDetails: [],
     jobStatusMessage: '',
-    percentCompleteRounded: 0,
-    showAlert: false,
-    totalStagedCount: 0
+    showAlert: false
   }),
   created() {
     this.fetchFeed()
@@ -255,6 +251,18 @@ export default {
       if (msg.length) {
         this.showAlert = true
       }
+    }
+  },
+  computed: {
+    allSections() {
+      return this.$_.flatMap(this.courseSemesterClasses, classItem => {
+        return classItem.sections
+      })
+    },
+    totalStagedCount() {
+      return this.$_.size(this.$_.filter(this.allSections, section => {
+        return (section.isCourseSection && this.$_.includes(this.$_.keys(section), 'stagedState')) || (!section.isCourseSection && section.stagedState === 'add')
+      }))
     }
   },
   methods: {
@@ -288,22 +296,10 @@ export default {
       }
       this.currentWorkflowStep = step
     },
-    currentStagedCount() {
-      var stagedCount = 0
-      this.allSections.forEach(section => {
-        if ((section.isCourseSection && section.stagedState === null) || (!section.isCourseSection && section.stagedState === 'add')) {
-          stagedCount++
-        }
-      })
-      return stagedCount
-    },
-    expandParentClass(section) {
-      section.parentClass.collapsed = false
-    },
     fetchFeed() {
       getCourseSections(this.currentUser.canvasSiteId).then(
         response => {
-          this.percentCompleteRounded = null
+          this.jobProgress = null
           if (response.canvasSite) {
             this.canvasSite = response.canvasSite
             this.refreshFromFeed(response)
@@ -320,18 +316,22 @@ export default {
         deleteSections: [],
         updateSections: []
       }
+      let valid = false
       this.courseSemesterClasses.forEach(classItem => {
         classItem.sections.forEach(section => {
           if (section.stagedState === 'add') {
             sections.addSections.push(section.id)
+            valid = true
           } else if (section.stagedState === 'delete') {
             sections.deleteSections.push(section.id)
+            valid = true
           } else if (section.stagedState === 'update') {
             sections.updateSections.push(section.id)
+            valid = true
           }
         })
       })
-      return sections
+      return valid ? sections : false
     },
     loadCourseLists(teachingTerms) {
       const courseSemester = this.$_.find(teachingTerms, semester => {
@@ -342,18 +342,14 @@ export default {
         this.courseSemesterClasses = courseSemester.classes
         this.usersClassCount = this.courseSemesterClasses.length
         this.existingCourseSections = this.canvasSite.officialSections
-        this.allSections = []
-        const existingSectionIds = this.$_.map(this.existingCourseSections, 'id')
         this.courseSemesterClasses.forEach(classItem => {
           classItem.sections.forEach(teachingSection => {
-            teachingSection.parentClass = classItem
-            this.allSections.push(teachingSection)
-            teachingSection.stagedState = null
+            teachingSection.courseSlug = classItem.slug
             if (teachingSection.isCourseSection) {
               this.availableSectionsPanel = [classItem.slug]
             }
             this.canvasSite.officialSections.forEach(officialSection => {
-              if (officialSection.id === teachingSection.id && existingSectionIds.indexOf(teachingSection.id) === -1) {
+              if (officialSection.id === teachingSection.id) {
                 if (officialSection.canvasName !== `${teachingSection.courseCode} ${teachingSection.name}`) {
                   this.$_.set(teachingSection, 'nameDiscrepancy', true)
                 }
@@ -396,29 +392,31 @@ export default {
         (listMode === 'currentStaging' && section && !section.isCourseSection && section.stagedState === 'add')
     },
     saveChanges() {
-      this.changeWorkflowStep('processing')
-      this.jobStatus = 'sendingRequest'
       const update = this.getStagedSections()
-      updateSiteSections(
-        this.currentUser.canvasSiteId,
-        update.addSections,
-        update.deleteSections,
-        update.updateSections
-      ).then(
-        response => {
-          this.backgroundJobId = response.job_id
-          // this.trackSectionUpdateJob()
-          this.jobStatus = response.jobStatus
-        }
-      ).catch(
-        error => {
-          this.jobStatus = 'error'
-          this.jobStatusMessage = error
-        }
-      )
+      if (update) {
+        this.changeWorkflowStep('processing')
+        this.jobStatus = 'sendingRequest'
+        updateSiteSections(
+          this.currentUser.canvasSiteId,
+          update.addSections,
+          update.deleteSections,
+          update.updateSections
+        ).then(
+          response => {
+            this.backgroundJobId = response.jobId
+            this.jobStatus = response.jobStatus
+            this.trackSectionUpdateJob()
+          }
+        ).catch(
+          error => {
+            this.jobStatus = 'error'
+            this.jobStatusMessage = error
+          }
+        )
+      }
     },
     sectionString(section) {
-      return section.courseCode + ' ' + section.section_label + ' (Section ID: ' + section.id + ')'
+      return section.courseCode + ' ' + section.name
     },
     stageAdd(section) {
       if (!section.isCourseSection) {
@@ -427,55 +425,53 @@ export default {
       } else {
         this.displayError = 'Unable to add ' + this.sectionString(section) + ', as it already exists within the course site.'
       }
-      this.updateStagedCount()
     },
     stageDelete(section) {
       if (section.isCourseSection) {
-        this.expandParentClass(section)
+        this.availableSectionsPanel = this.$_.union(this.availableSectionsPanel, [section.courseSlug])
         this.$_.set(section, 'stagedState', 'delete')
         this.$announcer.polite('Included in the list of sections to be deleted')
       } else {
         this.displayError = 'Unable to delete Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
       }
-      this.updateStagedCount()
     },
     stageUpdate(section) {
       if (section.isCourseSection) {
-        this.expandParentClass(section)
+        this.availableSectionsPanel = this.$_.union(this.availableSectionsPanel, [section.courseSlug])
         this.$_.set(section, 'stagedState', 'update')
         this.$announcer.polite('Included in the list of sections to be updated')
       } else {
         this.displayError = 'Unable to update Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
       }
-      this.updateStagedCount()
     },
     trackSectionUpdateJob() {
       this.exportTimer = setInterval(() => {
         courseProvisionJobStatus(this.backgroundJobId).then(
           response => {
             this.jobStatus = response.jobStatus
-            this.percentCompleteRounded = Math.round(response.percentComplete * 100)
-            if (this.jobStatus !== 'New' && this.jobStatus !== 'Processing') {
-              this.percentCompleteRounded = null
+            if (!this.jobStatus || !this.$_.includes(['started', 'queued', 'initializing', 'created', 'importing'], this.jobStatus)) {
               clearInterval(this.exportTimer)
-              if (this.jobStatus === 'Completed') {
+              if (this.$_.includes(['imported', 'finished'], this.jobStatus) && response.workflowState === 'imported') {
                 this.jobStatusMessage = 'The sections in this course site have been updated successfully.'
               } else {
                 this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
+                if (response.workflowState === 'imported_with_messages' && this.$_.size(response.messages)) {
+                  this.jobStatusDetails = this.$_.map(response.messages, message => this.$_.last(message))
+                }
               }
               this.fetchFeed()
             }
           },
-          this.$errorHandler
+          (error, vm, info) => {
+            clearInterval(this.exportTimer)
+            this.$errorHandler((error, vm, info))
+          }
         )
       }, 2000)
     },
-    toggleCollapse(course) {
-      this.$_.set(course, 'collapsed', !course.collapsed)
-    },
     unstage(section) {
       if (section.stagedState === 'add') {
-        this.expandParentClass(section)
+        this.availableSectionsPanel = this.$_.union(this.availableSectionsPanel, [section.courseSlug])
         this.$announcer.polite('Removed section from the list of sections to be added')
       } else if (section.stagedState === 'delete') {
         this.$announcer.polite('Removed section from the list of sections to be deleted')
@@ -483,30 +479,19 @@ export default {
         this.$announcer.polite('Removed section from the list of sections to be updated')
       }
       section.stagedState = null
-      this.updateStagedCount()
     },
     unstageAll() {
-      this.courseSemesterClasses.forEach(classItem => {
-        classItem.sections.forEach(section => {
-          section.stagedState = null
-        })
-      })
-      this.updateStagedCount()
-    },
-    updateStagedCount() {
-      var stagedCount = 0
-      this.allSections.forEach(section => {
-        if (section.stagedState !== null) {
-          stagedCount++
-        }
-      })
-      this.totalStagedCount = stagedCount
+      this.existingCourseSections = this.canvasSite.officialSections
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
+.pending-request-step {
+  margin: 20px 0;
+  text-align: center;
+}
 .page-course-official-sections {
   background-color: $color-white;
   font-family: $body-font-family;
@@ -579,10 +564,6 @@ export default {
 
   .page-course-official-sections-form-select-all-option-button {
     outline: none;
-  }
-
-  .page-course-official-sections-pending-request {
-    margin: 20px 0;
   }
 
   @media #{$small-only} {
