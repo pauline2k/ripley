@@ -99,6 +99,8 @@ PHOTO_SIGNED_URL_EXPIRES_IN_SECONDS = 15 * 60
 REMEMBER_COOKIE_NAME = 'remember_ripley_token'
 REMEMBER_COOKIE_SECURE = True
 
+REDIS_URL = 'redis://localhost:6379'
+
 # Used to encrypt session cookie.
 SECRET_KEY = 'secret'
 

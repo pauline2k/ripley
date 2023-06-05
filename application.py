@@ -30,11 +30,11 @@ from ripley.factory import create_app
 
 """Usage mode A:
 
->>> python run.py
+>>> python application.py
 
 Usage mode B:
 
->>> export FLASK_APP=run.py
+>>> export FLASK_APP=application.py
 >>> flask run --help
 >>> flask run --debugger
 >>> flask initdb

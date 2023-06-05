@@ -10,6 +10,8 @@ PyLTI1p3==2.0.0
 python-cas==1.6.0
 python-dateutil==2.8.2
 pytz==2022.7.1
+redis==4.5.5
+rq==1.14.1
 schedule==1.1.0
 simplejson==3.18.4
 smart-open==4.1.2
@@ -20,6 +22,7 @@ zipstream-new==1.1.8
 
 # For testing
 
+fakeredis==2.14.0
 moto==3.0.7
 pytest==7.2.2
 pytest-flask==1.2.0

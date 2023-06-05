@@ -17,11 +17,11 @@ export default createVuetify({
       light: {
         colors: {
           error: '#b94a48',
-          info: '#dff0d8',
+          info: '#3a87ad',
           primary: '#3b7ea1',
           red: colors.red.darken1,
           secondary: '#eee',
-          success: '#dff0d8'
+          success: '#468847'
         },
       },
     },

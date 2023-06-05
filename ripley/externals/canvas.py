@@ -225,6 +225,16 @@ def get_user(user_id, api_call=True):
         return user
 
 
+def get_sis_import(sis_import_id):
+    c = _get_canvas()
+    try:
+        account = c.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False)
+        return account.get_sis_import(sis_import_id)
+    except Exception as e:
+        app.logger.error(f'Failed to retrieve Canvas SIS import (sis_import_id={sis_import_id})')
+        app.logger.exception(e)
+
+
 def post_sis_import(attachment, extension='csv'):
     c = _get_canvas()
     content_type = 'application/zip' if extension == 'zip' else 'text/csv'

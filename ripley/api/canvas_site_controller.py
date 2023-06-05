@@ -27,17 +27,19 @@ from itertools import groupby
 
 from flask import current_app as app, redirect, request
 from flask_login import current_user, login_required
-from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
+import redis
+from ripley.api.errors import BadRequestError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas, data_loch
-from ripley.externals.canvas import get_course
-from ripley.lib.berkeley_course import course_section_name, course_to_api_json, section_to_api_json, sort_course_sections
+from ripley.factory import q
+from ripley.lib.berkeley_course import course_to_api_json, section_to_api_json, sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json
+from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, update_canvas_sections
 from ripley.lib.http import tolerant_jsonify
-from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
+from rq import Connection
+from rq.job import Job
 
 
 @app.route('/api/canvas_site/provision')
@@ -81,37 +83,26 @@ def canvas_site_edit_sections(canvas_site_id):
     if not len(section_ids):
         raise BadRequestError('Required parameters are missing.')
 
-    canvas_sis_term_id = course.term['sis_term_id']
-    term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
-    sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=section_ids)
-    if not (sis_sections and len(sis_sections)):
-        raise ResourceNotFoundError(f'No sections found with IDs {section_ids}')
-
-    def _section(section):
-        return {
-            'section_id': section['section_id'],
-            'course_id': section['course_id'],
-            'name': course_section_name(section),
-            'status': 'deleted' if section['section_id'] in sections_to_remove else 'active',
-            'start_date': None,
-            'end_date': None,
-        }
-    sections = [_section(s) for s in sis_sections]
-    with SisImportCsv.create(fieldnames=['section_id', 'course_id', 'name', 'status', 'start_date', 'end_date']) as sis_import:
-        sis_import.writerows(sections)
-        sis_import.filehandle.close()
-        if not canvas.post_sis_import(attachment=sis_import.tempfile.name):
-            raise InternalServerError('Course sections SIS import failed.')
-    return tolerant_jsonify({'jobStatus': 'Completed'})
+    redis_conn = redis.from_url(app.config['REDIS_URL'])
+    with Connection(redis_conn):
+        job = q.enqueue_call(func=update_canvas_sections, args=(course, section_ids, sections_to_remove))
+        return tolerant_jsonify({
+            'jobId': job.id,
+            'jobStatus': job.get_status(),
+        })
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def canvas_site_provision_sections(canvas_site_id):
-    official_sections, section_ids = _get_official_sections(canvas_site_id)
-    term = BerkeleyTerm.from_sis_term_id(official_sections[0]['termId'])
+def canvas_site_official_sections(canvas_site_id):
     can_edit = bool(next((role for role in current_user.canvas_site_user_roles if role in ['TeacherEnrollment', 'Lead TA']), None))
-    teaching_terms = _get_teaching_terms(section_ids)
+    course = canvas.get_course(canvas_site_id)
+    if not (course):
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
+    canvas_sis_term_id = course.term['sis_term_id']
+    term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
+    official_sections, section_ids = _get_official_sections(canvas_site_id)
+    teaching_terms = [] if not len(section_ids) else _get_teaching_terms(section_ids)
     return tolerant_jsonify({
         'canvasSite': {
             'canEdit': can_edit,
@@ -124,8 +115,27 @@ def canvas_site_provision_sections(canvas_site_id):
 
 @app.route('/api/canvas_site/provision/status')
 def canvas_site_provision_status():
-    # TODO: ?jobId=${jobId}
-    return tolerant_jsonify([])
+    job_id = request.args.get('jobId', None)
+    if not job_id:
+        raise BadRequestError('Required parameters are missing.')
+
+    redis_conn = redis.from_url(app.config['REDIS_URL'])
+    job = Job.fetch(job_id, connection=redis_conn)
+    job_status = job.get_status(refresh=True)
+    job_data = job.get_meta(refresh=True)
+
+    if 'sis_import_id' in job_data:
+        sis_import = canvas.get_sis_import(job_data['sis_import_id'])
+        if not sis_import:
+            raise ResourceNotFoundError(f'No SIS import with {job_data} was found.')
+        return tolerant_jsonify({
+            'jobStatus': job_status,
+            'workflowState': sis_import.workflow_state,
+            'messages': getattr(sis_import, 'processing_warnings', []),
+        })
+    return tolerant_jsonify({
+        'jobStatus': job_status,
+    })
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/egrade_export/options')
@@ -154,7 +164,7 @@ def get_roster_csv(canvas_site_id):
 @app.route('/redirect/canvas/<canvas_site_id>/user/<uid>')
 @login_required
 def redirect_to_canvas_profile(canvas_site_id, uid):
-    users = get_course(canvas_site_id, api_call=False).get_users(enrollment_type='student')
+    users = canvas.get_course(canvas_site_id, api_call=False).get_users(enrollment_type='student')
     user = next((user for user in users if getattr(user, 'login_id', None) == uid), None)
     if user:
         base_url = app.config['CANVAS_API_URL']
