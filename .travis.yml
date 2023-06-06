@@ -2,9 +2,6 @@ sudo: required
 language: python
 python: "3.9"
 
-addons:
-  postgresql: "9.6"
-
 before_install:
   - cd ${TRAVIS_BUILD_DIR}
   - nvm install 16
@@ -22,4 +19,5 @@ script:
   - tox --parallel || travis_terminate 1
 
 services:
+  - postgresql
   - redis-server
