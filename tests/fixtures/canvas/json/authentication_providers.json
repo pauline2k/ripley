@@ -1,0 +1,31 @@
+{
+	"get_authentication_providers": {
+		"method": "GET",
+		"endpoint": "accounts/1/authentication_providers",
+		"data": [
+			{
+				"id": 1,
+				"auth_type": "cas",
+				"auth_base": "https://wrong-url.example.com",
+				"position": 1
+			},
+			{
+				"id": 2,
+				"auth_type": "canvas",
+				"position": 2
+			}
+		],
+		"status_code": 200
+	},
+	"update_authentication_providers": {
+		"method": "PUT",
+		"endpoint": "accounts/1/authentication_providers/1",
+		"data": {
+			"id": 1,
+			"auth_type": "cas",
+			"auth_base": "https://auth-test.berkeley.edu/cas",
+			"position": 1
+		},
+		"status_code": 200
+	}
+}
