@@ -5,6 +5,7 @@ Flask==2.2.3
 Flask-Caching==2.0.2
 Flask-Login==0.6.2
 Flask-SQLAlchemy==3.0.3
+hiredis==2.2.3
 psycopg2==2.9.5
 PyLTI1p3==2.0.0
 python-cas==1.6.0
