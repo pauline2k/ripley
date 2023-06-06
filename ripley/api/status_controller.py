@@ -23,15 +23,19 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from datetime import datetime
+
 from canvasapi.exceptions import CanvasException
 from flask import current_app as app
 import psycopg2
+import redis
 from ripley import db
 from ripley.externals import data_loch
 from ripley.externals.canvas import ping_canvas
 from ripley.externals.rds import log_db_error
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.http import tolerant_jsonify
+from rq import Connection, Queue, Worker
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import text
 
@@ -45,6 +49,7 @@ def ping():
             'canvas': _ping_canvas(),
             'data_loch': _data_loch_status(),
             'db': _db_status(),
+            'rq': _redis_queue_status(),
         },
     )
 
@@ -93,5 +98,22 @@ def _ping_canvas():
         return ping_canvas()
     except CanvasException as e:
         app.logger.error('Canvas error during /api/ping')
+        app.logger.exception(e)
+        return False
+
+
+def _redis_queue_status():
+    try:
+        redis_conn = redis.from_url(app.config['REDIS_URL'])
+        with Connection(redis_conn):
+            q = Queue()
+            workers = Worker.all(redis_conn)
+            now = datetime.utcnow()
+            active_workers = [w for w in workers if (now - w.last_heartbeat).seconds < 60]
+            return {
+                'redis': q is not None,
+                'workers': len(active_workers),
+            }
+    except Exception as e:
         app.logger.exception(e)
         return False
