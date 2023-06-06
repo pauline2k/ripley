@@ -121,11 +121,12 @@ class User(UserMixin):
 
     def _load_canvas_user_data(self):
         if self.uid and 'canvasUserId' not in self.user:
-            course = canvas.get_course(course_id=self.__canvas_site_id)
+            canvas_site_id = self.__canvas_site_id
+            course = canvas.get_course(course_id=canvas_site_id) if canvas_site_id else None
             p = canvas.get_sis_user_profile(self.uid) or {}
             canvas_user_id = p.get('id')
             self.user.update({
-                'canvasSiteId': self.__canvas_site_id,
+                'canvasSiteId': canvas_site_id,
                 'canvasSiteCourseCode': course.course_code if course else None,
                 'canvasSiteEnrollmentTermId': course.enrollment_term_id if course else None,
                 'canvasSiteName': course.name if course else None,
@@ -142,8 +143,8 @@ class User(UserMixin):
                 'canvasUserTitle': p.get('title'),
             })
             is_teaching = False
-            if self.__canvas_site_id:
-                canvas_site_user = canvas.get_course_user(self.__canvas_site_id, canvas_user_id)
+            if canvas_site_id:
+                canvas_site_user = canvas.get_course_user(canvas_site_id, canvas_user_id)
                 if canvas_site_user and canvas_site_user.enrollments:
                     roles = [e['role'] for e in canvas_site_user.enrollments]
                     self.user['canvasSiteUserRoles'] = roles
