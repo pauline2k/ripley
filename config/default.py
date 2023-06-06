@@ -39,6 +39,8 @@ CANVAS_ACCESS_TOKEN = 'a token'
 CANVAS_API_URL = 'https://hard_knocks_api.instructure.com'
 CANVAS_BERKELEY_ACCOUNT_ID = 1
 CANVAS_EXPORT_PATH = 'tmp/canvas'
+CANVAS_TEST_CAS_URL = 'https://auth-test.berkeley.edu/cas'
+CANVAS_TEST_SERVERS = ['https://hard_knocks_api.instructure.com']
 
 CURRENT_TERM_ID = '2023-B'
 

@@ -47,8 +47,8 @@ def ping_canvas():
     return get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID']) is not None
 
 
-def get_account(account_id, api_call=True):
-    c = _get_canvas()
+def get_account(account_id, api_call=True, api_url=None):
+    c = _get_canvas(api_url)
     if api_call is False:
         return Account(c._Canvas__requester, {'id': account_id})
     else:
@@ -59,6 +59,11 @@ def get_account(account_id, api_call=True):
             app.logger.error(f'Failed to retrieve Canvas account (id={account_id})')
             app.logger.exception(e)
         return account
+
+
+def get_authentication_providers(api_url):
+    account = get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False)
+    return account.get_authentication_providers()
 
 
 def get_communication_channels(canvas_user_id):
@@ -274,8 +279,10 @@ def post_sis_import(attachment, extension='csv'):
         app.logger.exception(e)
 
 
-def _get_canvas():
+def _get_canvas(api_url=None):
+    if not api_url:
+        api_url = app.config['CANVAS_API_URL']
     return Canvas(
-        base_url=app.config['CANVAS_API_URL'],
+        base_url=api_url,
         access_token=app.config['CANVAS_ACCESS_TOKEN'],
     )
