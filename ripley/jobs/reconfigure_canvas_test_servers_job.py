@@ -26,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from flask import current_app as app
 from ripley.externals import canvas
 from ripley.jobs.base_job import BaseJob
+from ripley.jobs.errors import BackgroundJobError
 
 
 class ReconfigureCanvasTestServersJob(BaseJob):
@@ -33,11 +34,21 @@ class ReconfigureCanvasTestServersJob(BaseJob):
     def _run(self):
         test_servers = app.config['CANVAS_TEST_SERVERS']
         for server in test_servers:
-            auth_providers = canvas.get_authentication_providers(server)
+            account = canvas.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False, api_url=server)
+
+            auth_providers = account.get_authentication_providers()
             for provider in auth_providers:
                 if provider.auth_type == 'cas' and provider.auth_base != app.config['CANVAS_TEST_CAS_URL']:
                     app.logger.info(f"Updating CAS auth base on {server} to {app.config['CANVAS_TEST_CAS_URL']}.")
                     provider.update(auth_base=app.config['CANVAS_TEST_CAS_URL'])
+
+            test_admin = next((a for a in account.get_admins() if a.user['login_id'] == app.config['CANVAS_TEST_ADMIN_ID']), None)
+            if not test_admin:
+                profile = canvas.get_sis_user_profile(app.config['CANVAS_TEST_ADMIN_ID'], api_url=server)
+                if not profile:
+                    raise BackgroundJobError(f"SIS profile for test admin {app.config['CANVAS_TEST_ADMIN_ID']} not found on {server}")
+                app.logger.info(f"Adding test admin to {server} (id={profile['id']}, login_id={profile['login_id']})")
+                account.create_admin(profile['id'])
 
         app.logger.info(f'Adjusted configuration on test servers: {test_servers}, job complete.')
 
