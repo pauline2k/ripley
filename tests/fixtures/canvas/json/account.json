@@ -1,4 +1,24 @@
 {
+    "create_admin": {
+        "method": "POST",
+        "endpoint": "accounts/1/admins",
+        "data": {
+            "id": 100,
+            "role": "AccountAdmin",
+            "role_id": 1,
+            "user": {
+                "id": 123,
+                "name": "Test Admin",
+                "short_name": "Test Admin",
+                "sortable_name": "Admin, Test",
+                "sis_user_id": null,
+                "integration_id": null,
+                "sis_import_id": null,
+                "login_id": "test_admin_id"
+            },
+            "workflow_state": "active"
+        }
+    },
     "create_report_provisioning_csv_accounts": {
         "method": "POST",
         "endpoint": "accounts/1/reports/provisioning_csv",
@@ -72,6 +92,28 @@
             },
             "account_id": 1
         },
+        "status_code": 200
+    },
+    "get_admins": {
+        "method": "GET",
+        "endpoint": "accounts/1/admins",
+        "data": [
+            {
+                "id": 12,
+                "role": "AccountAdmin",
+                "role_id": 1,
+                "user": {
+                    "id": 6000,
+                    "name": "MU-TH-UR 6000",
+                    "sortable_name": "MU-TH-UR 6000",
+                    "sis_user_id": null,
+                    "integration_id": null,
+                    "sis_import_id": null,
+                    "login_id": "mother"
+                },
+                "workflow_state": "active"
+            }
+        ],
         "status_code": 200
     },
     "get_external_tools_1": {

@@ -61,11 +61,6 @@ def get_account(account_id, api_call=True, api_url=None):
         return account
 
 
-def get_authentication_providers(api_url):
-    account = get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False)
-    return account.get_authentication_providers()
-
-
 def get_communication_channels(canvas_user_id):
     try:
         user = get_user(canvas_user_id, api_call=False)
@@ -177,9 +172,9 @@ def get_section(section_id, api_call=True):
         return section
 
 
-def get_sis_user_profile(uid):
+def get_sis_user_profile(uid, api_url=None):
     try:
-        user = get_user(f'sis_login_id:{uid}', api_call=False)
+        user = get_user(f'sis_login_id:{uid}', api_call=False, api_url=api_url)
         return user.get_profile() if user else None
     except Exception as e:
         app.logger.error(f'Failed to retrieve Canvas user profile (uid={uid})')
@@ -216,8 +211,8 @@ def get_terms():
     return terms
 
 
-def get_user(user_id, api_call=True):
-    c = _get_canvas()
+def get_user(user_id, api_call=True, api_url=None):
+    c = _get_canvas(api_url)
     if api_call is False:
         return User(c._Canvas__requester, {'id': user_id})
     else:

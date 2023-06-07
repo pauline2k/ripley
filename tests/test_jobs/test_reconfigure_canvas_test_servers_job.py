@@ -34,7 +34,12 @@ class TestReconfigureCanvasTestServersJob:
 
     def test_job_run(self, app, caplog):
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'authentication_providers': ['get_authentication_providers', 'update_authentication_providers']}, m)
+            register_canvas_uris(app, {
+                'account': ['create_admin', 'get_admins'],
+                'authentication_provider': ['get_authentication_providers', 'update_authentication_providers'],
+                'user': ['profile_test_admin_id'],
+            }, m)
             with caplog.at_level(logging.INFO):
                 ReconfigureCanvasTestServersJob(app)._run()
                 assert 'Updating CAS auth base on https://hard_knocks_api.instructure.com to https://auth-test.berkeley.edu/cas' in caplog.text
+                assert 'Adding test admin to https://hard_knocks_api.instructure.com (id=123, login_id=test_admin_id)' in caplog.text
