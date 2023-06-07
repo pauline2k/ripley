@@ -119,6 +119,7 @@ def update_canvas_sections(course, section_ids, sections_to_remove):
     from ripley.factory import create_app
     app = create_app()
     with app.app_context():
+        app.logger.debug(f'Preparing course sections SIS import (canvas_site_id={course.id}).')
         canvas_sis_term_id = course.term['sis_term_id']
         term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
         sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=section_ids)

@@ -1,2 +1,2 @@
 #!/bin/bash
-sudo rq worker
+sudo rq worker -c xenomorph

@@ -83,7 +83,7 @@ LOGGING_FORMAT = '[%(asctime)s] - %(levelname)s: %(message).10000s [in %(pathnam
 LOGGING_LOCATION = 'ripley.log'
 LOGGING_LEVEL = logging.DEBUG
 LOGGING_PROPAGATION_LEVEL = logging.WARN
-LOGGING_PROPAGATION_TARGETS = ['boto3', 'botocore', 'canvasapi', 's3transfer', 'werkzeug']
+LOGGING_PROPAGATION_TARGETS = ['boto3', 'botocore', 'canvasapi', 'rq.worker', 's3transfer', 'werkzeug']
 
 MAILGUN_API_KEY = None
 MAILGUN_BASE_URL = 'https://api.mailgun.net/v3'
@@ -99,7 +99,9 @@ PHOTO_SIGNED_URL_EXPIRES_IN_SECONDS = 15 * 60
 REMEMBER_COOKIE_NAME = 'remember_ripley_token'
 REMEMBER_COOKIE_SECURE = True
 
-REDIS_URL = 'redis://localhost:6379'
+REDIS_HOST = None
+REDIS_PASSWORD = None
+REDIS_PORT = '6379'
 
 # Used to encrypt session cookie.
 SECRET_KEY = 'secret'

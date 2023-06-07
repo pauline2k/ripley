@@ -45,6 +45,22 @@ mkdir /Volumes/XYZ/ripley_config
 export RIPLEY_LOCAL_CONFIGS=/Volumes/XYZ/ripley_config
 ```
 
+### Listen on the queue for jobs
+
+![Close-up image of the Xenomorph from the movie Alien.](src/assets/images/xenomorph.png)
+
+On Mac OS 10.13 and later, disable the fork() crash behavior (see https://github.com/rq/rq/issues/1418):
+
+```
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+```
+
+Start the worker:
+
+```
+rq worker -c xenomorph
+```
+
 ## Run tests, lint the code
 
 We use [Tox](https://tox.readthedocs.io) for continuous integration. Under the hood, you'll find [PyTest](https://docs.pytest.org), [Flake8](http://flake8.pycqa.org) and [ESLint](https://eslint.org/). Please install NPM dependencies (see above) before running tests.
