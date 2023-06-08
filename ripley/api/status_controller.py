@@ -28,11 +28,11 @@ from datetime import datetime
 from canvasapi.exceptions import CanvasException
 from flask import current_app as app
 import psycopg2
-import redis
 from ripley import db
 from ripley.externals import data_loch
 from ripley.externals.canvas import ping_canvas
 from ripley.externals.rds import log_db_error
+from ripley.externals.redis import get_redis_conn
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.http import tolerant_jsonify
 from rq import Connection, Queue, Worker
@@ -104,7 +104,7 @@ def _ping_canvas():
 
 def _redis_queue_status():
     try:
-        redis_conn = redis.from_url(app.config['REDIS_URL'])
+        redis_conn = get_redis_conn(app)
         with Connection(redis_conn):
             q = Queue()
             workers = Worker.all(redis_conn)

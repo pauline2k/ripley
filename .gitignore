@@ -28,6 +28,9 @@ scripts/*-local.sh
 __pycache__/
 dist
 
+# Redis backup
+dump.rdb
+
 # Temporary files
 tmp/
 .DS_Store

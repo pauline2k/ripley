@@ -27,10 +27,10 @@ from itertools import groupby
 
 from flask import current_app as app, redirect, request
 from flask_login import current_user, login_required
-import redis
 from ripley.api.errors import BadRequestError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas, data_loch
+from ripley.externals.redis import get_redis_conn
 from ripley.factory import q
 from ripley.lib.berkeley_course import course_to_api_json, section_to_api_json, sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
@@ -83,7 +83,7 @@ def canvas_site_edit_sections(canvas_site_id):
     if not len(section_ids):
         raise BadRequestError('Required parameters are missing.')
 
-    redis_conn = redis.from_url(app.config['REDIS_URL'])
+    redis_conn = get_redis_conn(app)
     with Connection(redis_conn):
         job = q.enqueue_call(func=update_canvas_sections, args=(course, section_ids, sections_to_remove))
         return tolerant_jsonify({
@@ -119,7 +119,7 @@ def canvas_site_provision_status():
     if not job_id:
         raise BadRequestError('Required parameters are missing.')
 
-    redis_conn = redis.from_url(app.config['REDIS_URL'])
+    redis_conn = get_redis_conn(app)
     job = Job.fetch(job_id, connection=redis_conn)
     job_status = job.get_status(refresh=True)
     job_data = job.get_meta(refresh=True)
