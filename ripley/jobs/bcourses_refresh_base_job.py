@@ -36,7 +36,7 @@ import zipfile
 from flask import current_app as app
 from ripley.externals import canvas
 from ripley.externals.data_loch import get_all_active_users, get_edo_enrollment_updates, get_edo_instructor_updates, \
-    get_section_enrollments, get_section_instructors, get_sections, get_users
+    get_section_enrollments, get_section_instructors, get_sections, get_sections_count, get_users
 from ripley.externals.s3 import find_all_dated_csvs, find_last_dated_csv, find_last_dated_csvs, stream_object_text, upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.lib.berkeley_term import BerkeleyTerm
@@ -320,6 +320,11 @@ class BcoursesRefreshBaseJob(BaseJob):
             ):
                 continue
 
+            sis_term_id = BerkeleyTerm.from_canvas_sis_term_id(term_id).to_sis_term_id()
+            if not get_sections_count(sis_term_id):
+                app.logger.error(f'No section data found in loch for term {term_id}, will not process enrollments.')
+                continue
+
             canvas_sections_file = tempfile.NamedTemporaryFile()
             sections_report = canvas.get_csv_report('sections', download_path=canvas_sections_file.name, term_id=term_id)
             if not sections_report:
@@ -477,6 +482,17 @@ class BcoursesRefreshBaseJob(BaseJob):
             if self.job_flags.enrollments:
                 for term_id, enrollment_csv in csv_set.enrollment_terms.items():
                     if enrollment_csv.count:
+                        with open(enrollment_csv.tempfile.name, 'r') as f:
+                            deletion_count = 0
+                            for row in csv.DictReader(f):
+                                if row['status'] == 'deleted':
+                                    deletion_count += 1
+                        if deletion_count > app.config['CANVAS_REFRESH_MAX_DELETED_ENROLLMENTS']:
+                            app.logger.error(
+                                f'Term {term_id} has {deletion_count} deleted enrollments, will not upload CSV. '
+                                'Adjust threshold and re-run job if desired.')
+                            continue
+
                         job_type = 'incremental' if self.job_flags.incremental else 'full'
                         app.logger.info(f'Will post {enrollment_csv.count} enrollment updates to Canvas (term_id={term_id}).')
                         upload_dated_csv(

@@ -188,6 +188,17 @@ def get_sections(term_id, section_ids):
     return safe_execute_rds(sql, **params)
 
 
+def get_sections_count(term_id):
+    params = {
+        'term_id': str(term_id),
+    }
+    sql = """SELECT COUNT(*)
+        FROM sis_data.edo_sections ss
+        WHERE sis_term_id = %(term_id)s"""
+    result = safe_execute_rds(sql, **params)
+    return result and result[0]['count']
+
+
 def get_section_enrollments(term_id, section_ids):
     params = {
         'term_id': term_id,
