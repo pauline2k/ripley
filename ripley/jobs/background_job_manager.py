@@ -137,7 +137,8 @@ class BackgroundJobManager:
         elif schedule_type == 'seconds':
             schedule.every(int(schedule_value)).seconds.do(task_runner.run)
         elif schedule_type == 'day_at':
-            schedule.every().day.at(schedule_value).do(task_runner.run)
+            for daily_value in schedule_value.split(','):
+                schedule.every().day.at(daily_value).do(task_runner.run)
         else:
             raise BackgroundJobError(f'Unrecognized schedule type: {schedule_type}')
 

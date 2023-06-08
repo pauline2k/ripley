@@ -104,7 +104,7 @@
                   v-model="editJob.schedule.value"
                   required
                   :suffix="editJob.schedule.type === 'day_at' ? 'UTC' : ''"
-                  :type="editJob.schedule.type === 'day_at' ? 'time' : 'number'"
+                  :type="editJob.schedule.type === 'day_at' ? 'text' : 'number'"
                 ></v-text-field>
               </v-col>
             </v-row>
