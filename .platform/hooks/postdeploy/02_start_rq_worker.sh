@@ -18,8 +18,7 @@ if [ -e "${local_app_config}" ]; then
     echo "[ERROR] REDIS_PASSWORD not found in ${local_app_config}. Please report the problem."; echo
     exit 1
   elif [ -z "${redis_port}" ]; then
-    echo "[ERROR] REDIS_PORT not found in ${local_app_config}. Please report the problem."; echo
-    exit 1
+    redis_port='6379'
   else
     echo "REDIS_HOST is '${redis_host}' according to ${local_app_config}"; echo
   fi
