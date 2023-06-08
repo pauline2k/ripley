@@ -28,4 +28,4 @@ else
 fi
 
 PYTHONPATH=$(/opt/elasticbeanstalk/bin/get-config environment -k PYTHONPATH)
-sudo ${PYTHONPATH}/rq worker -n xenomorph -u "rediss://default:${redis_pw}@${redis_host}:${redis_port}"
+sudo ${PYTHONPATH}/rq worker -n xenomorph -u "rediss://default:${redis_pw}@${redis_host}:${redis_port}" > /dev/null 2> /dev/null < /dev/null &
