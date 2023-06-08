@@ -3,7 +3,6 @@
 # Abort immediately if a command fails
 set -e
 
-echo $(pwd)
 local_app_config="/var/app/current/config/production-local.py"
 
 if [ -e "${local_app_config}" ]; then
@@ -29,4 +28,4 @@ else
 fi
 
 PYTHONPATH=$(/opt/elasticbeanstalk/bin/get-config environment -k PYTHONPATH)
-sudo ${PYTHONPATH}/rq worker -c xenomorph -u "rediss://default:${redis_pw}@${redis_host}:${redis_port}"
+sudo ${PYTHONPATH}/rq worker -n xenomorph -u "rediss://default:${redis_pw}@${redis_host}:${redis_port}"
