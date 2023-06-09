@@ -39,7 +39,7 @@ class BaseJob:
         self.app_context = app_context
 
     def run_async(self, force_run=False, params={}):
-        if os.environ.get('NESSIE_ENV') in ['test', 'testext']:
+        if os.environ.get('RIPLEY_ENV') in ['test', 'testext']:
             app.logger.info('Test run in progress; will not muddy the waters by actually kicking off a background thread.')
             self.run(force_run=force_run, params=params)
         else:
