@@ -64,6 +64,14 @@ class MailingList(Base):
         self.welcome_email_active = False
 
     @classmethod
+    def set_welcome_email_active(cls, is_active, mailing_list_id):
+        mailing_list = cls.query.filter_by(id=mailing_list_id).first()
+        if mailing_list:
+            mailing_list.welcome_email_active = is_active
+            std_commit()
+            return mailing_list
+
+    @classmethod
     def find_by_canvas_site_id(cls, canvas_site_id):
         return cls.query.filter_by(canvas_site_id=canvas_site_id).first()
 
@@ -77,12 +85,20 @@ class MailingList(Base):
         return name
 
     @classmethod
-    def create(cls, canvas_site_id, list_name=None):
+    def create(
+            cls,
+            canvas_site_id,
+            list_name=None,
+            welcome_email_body=None,
+            welcome_email_subject=None,
+    ):
         mailing_list = cls.query.filter_by(canvas_site_id=canvas_site_id).first()
         if mailing_list:
             raise ValueError(f'List with id {canvas_site_id} already exists')
         mailing_list = cls(canvas_site_id=canvas_site_id)
         mailing_list.list_name = list_name or cls.get_suggested_name(canvas_site_id)
+        mailing_list.welcome_email_body = welcome_email_body
+        mailing_list.welcome_email_subject = welcome_email_subject
         db.session.add(mailing_list)
         std_commit()
         return mailing_list

@@ -92,12 +92,6 @@ class TestFindMailingList:
             _api_find_mailing_list(client, canvas_site_id, expected_status_code=401)
 
 
-def _api_find_mailing_list(client, canvas_site_id, expected_status_code=200):
-    response = client.get(f'api/mailing_lists/{canvas_site_id}')
-    assert response.status_code == expected_status_code
-    return response.json
-
-
 class TestCreateMailingList:
 
     def test_anonymous(self, client):
@@ -174,6 +168,58 @@ class TestCreateMailingList:
             _api_create_mailing_list(client, canvas_site_id, expected_status_code=401)
 
 
+class TestActivateMailingList:
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        _api_activate_mailing_list(
+            activate=True,
+            canvas_site_id='1234567',
+            client=client,
+            expected_status_code=401,
+        )
+
+    def test_unauthorized(self, client, fake_auth):
+        """Student cannot activate a mailing list."""
+        canvas_site_id = '1234567'
+        fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
+        _api_activate_mailing_list(
+            activate=True,
+            canvas_site_id='1234567',
+            client=client,
+            expected_status_code=401,
+        )
+
+    def test_authorized(self, app, client, fake_auth):
+        """Teacher can activate a mailing list."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'user': ['profile_30000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            mailing_list = MailingList.create(
+                canvas_site_id=canvas_site_id,
+                list_name='Wonder Twin powers activate!',
+                welcome_email_body='Body',
+                welcome_email_subject='Subject',
+            )
+            assert mailing_list.welcome_email_active is False
+            api_json = _api_activate_mailing_list(
+                activate=True,
+                canvas_site_id=canvas_site_id,
+                client=client,
+            )
+            assert api_json['welcomeEmailActive'] is True
+            api_json = _api_activate_mailing_list(
+                activate=False,
+                canvas_site_id=canvas_site_id,
+                client=client,
+            )
+            assert api_json['welcomeEmailActive'] is False
+
+
 class TestPopulateMailingList:
 
     def test_anonymous(self, client):
@@ -234,6 +280,18 @@ class TestPopulateMailingList:
             _api_populate_mailing_list(client, canvas_site_id, expected_status_code=401)
 
 
+def _api_activate_mailing_list(
+        activate,
+        canvas_site_id,
+        client,
+        expected_status_code=200,
+):
+    operation = 'activate' if activate else 'deactivate'
+    response = client.get(f'/api/mailing_lists/{canvas_site_id}/welcome_email/{operation}')
+    assert response.status_code == expected_status_code
+    return response.json
+
+
 def _api_create_mailing_list(
         client,
         canvas_site_id,
@@ -246,6 +304,12 @@ def _api_create_mailing_list(
         data=json.dumps(params),
         content_type='application/json',
     )
+    assert response.status_code == expected_status_code
+    return response.json
+
+
+def _api_find_mailing_list(client, canvas_site_id, expected_status_code=200):
+    response = client.get(f'api/mailing_lists/{canvas_site_id}')
     assert response.status_code == expected_status_code
     return response.json
 
