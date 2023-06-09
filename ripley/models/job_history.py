@@ -67,10 +67,11 @@ class JobHistory(db.Model):
     @classmethod
     def job_finished(cls, id_, failed=False):
         row = cls.query.filter_by(id=id_).first()
-        row.failed = failed
-        row.finished_at = datetime.now()
-        db.session.add(row)
-        std_commit()
+        if row:
+            row.failed = failed
+            row.finished_at = datetime.now()
+            db.session.add(row)
+            std_commit()
         return row
 
     @classmethod
