@@ -45,6 +45,23 @@ def mailing_lists(canvas_site_id):
         raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
 
 
+@app.route('/api/mailing_lists/<canvas_site_id>/welcome_email/activate')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+def welcome_email_activate(canvas_site_id):
+    mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id)
+    if mailing_list:
+        if mailing_list.welcome_email_subject and mailing_list.welcome_email_body:
+            mailing_list = MailingList.set_welcome_email_active(
+                is_active=True,
+                mailing_list_id=mailing_list.id,
+            )
+            return tolerant_jsonify(mailing_list.to_api_json())
+        else:
+            raise BadRequestError('Welcome email requires subject and body to be activated')
+    else:
+        raise ResourceNotFoundError(f'bCourses site {canvas_site_id} has no mailing list.')
+
+
 @app.route('/api/mailing_lists/<canvas_site_id>/create', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def create_mailing_lists(canvas_site_id):
@@ -62,6 +79,20 @@ def create_mailing_lists(canvas_site_id):
         })
     except ValueError as e:
         raise BadRequestError(str(e))
+
+
+@app.route('/api/mailing_lists/<canvas_site_id>/welcome_email/deactivate')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+def deactivate_welcome_email(canvas_site_id):
+    mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id)
+    if mailing_list:
+        mailing_list = MailingList.set_welcome_email_active(
+            is_active=False,
+            mailing_list_id=mailing_list.id,
+        )
+        return tolerant_jsonify(mailing_list.to_api_json())
+    else:
+        raise ResourceNotFoundError(f'bCourses site {canvas_site_id} has no mailing list.')
 
 
 @app.route('/api/mailing_lists/<canvas_site_id>/suggested_name')
