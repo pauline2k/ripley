@@ -145,8 +145,9 @@ def update_canvas_sections(course, section_ids, sections_to_remove):
             if not sis_import:
                 raise InternalServerError(f'Course sections SIS import failed (canvas_site_id={course.id}).')
             job = get_current_job()
-            job.meta['sis_import_id'] = sis_import.id
-            job.save_meta()
+            if job:
+                job.meta['sis_import_id'] = sis_import.id
+                job.save_meta()
             return sis_import
 
 

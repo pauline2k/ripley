@@ -27,19 +27,16 @@ from itertools import groupby
 
 from flask import current_app as app, redirect, request
 from flask_login import current_user, login_required
-from ripley.api.errors import BadRequestError, ResourceNotFoundError
+from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas, data_loch
-from ripley.externals.redis import get_redis_conn
-from ripley.factory import q
+from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_course import course_to_api_json, section_to_api_json, sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, update_canvas_sections
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
-from rq import Connection
-from rq.job import Job
 
 
 @app.route('/api/canvas_site/provision')
@@ -82,14 +79,15 @@ def canvas_site_edit_sections(canvas_site_id):
     section_ids = sections_to_add + sections_to_remove + sections_to_update
     if not len(section_ids):
         raise BadRequestError('Required parameters are missing.')
-
-    redis_conn = get_redis_conn(app)
-    with Connection(redis_conn):
-        job = q.enqueue_call(func=update_canvas_sections, args=(course, section_ids, sections_to_remove))
-        return tolerant_jsonify({
+    job = enqueue(func=update_canvas_sections, args=(course, section_ids, sections_to_remove))
+    if not job:
+        raise InternalServerError('Updates cannot be completed at this time.')
+    return tolerant_jsonify(
+        {
             'jobId': job.id,
             'jobStatus': job.get_status(),
-        })
+        },
+    )
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections')
@@ -119,8 +117,7 @@ def canvas_site_provision_status():
     if not job_id:
         raise BadRequestError('Required parameters are missing.')
 
-    redis_conn = get_redis_conn(app)
-    job = Job.fetch(job_id, connection=redis_conn)
+    job = get_job(job_id)
     job_status = job.get_status(refresh=True)
     job_data = job.get_meta(refresh=True)
 

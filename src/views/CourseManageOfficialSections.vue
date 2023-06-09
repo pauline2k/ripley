@@ -408,9 +408,11 @@ export default {
             this.trackSectionUpdateJob()
           }
         ).catch(
-          error => {
+          () => {
+            this.currentWorkflowStep = 'preview'
             this.jobStatus = 'error'
-            this.jobStatusMessage = error
+            this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
+            clearInterval(this.exportTimer)
           }
         )
       }
@@ -461,8 +463,12 @@ export default {
               }
               this.fetchFeed()
             }
-          },
+          }
+        ).catch(
           (error, vm, info) => {
+            this.currentWorkflowStep = 'preview'
+            this.jobStatus = 'error'
+            this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
             clearInterval(this.exportTimer)
             this.$errorHandler((error, vm, info))
           }
