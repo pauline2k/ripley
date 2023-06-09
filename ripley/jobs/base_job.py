@@ -23,6 +23,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 import os
+from threading import Thread
 
 from flask import current_app as app
 from ripley import db
@@ -36,6 +37,16 @@ class BaseJob:
 
     def __init__(self, app_context):
         self.app_context = app_context
+
+    def run_async(self, force_run=False, params={}):
+        if os.environ.get('NESSIE_ENV') in ['test', 'testext']:
+            app.logger.info('Test run in progress; will not muddy the waters by actually kicking off a background thread.')
+            self.run(force_run=force_run, params=params)
+        else:
+            app.logger.info('About to start background thread.')
+            kwargs = {'force_run': force_run, 'params': params}
+            thread = Thread(target=self.run, kwargs=kwargs, daemon=True)
+            thread.start()
 
     def run(self, force_run=False, params={}):
         with self.app_context():

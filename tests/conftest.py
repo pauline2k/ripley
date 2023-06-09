@@ -181,7 +181,7 @@ class TempJob(BaseJob):
     def key(cls):
         return 'TempJob'
 
-    def _run(self):
+    def _run(self, params={}):
         from flask import current_app as app
         app.logger.info('TempJob has started.')
 
