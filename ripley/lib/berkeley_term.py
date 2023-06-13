@@ -25,6 +25,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 import re
 
+from flask import current_app as app
+from ripley.externals import data_loch
+
 
 class BerkeleyTerm:
 
@@ -34,10 +37,19 @@ class BerkeleyTerm:
 
     @classmethod
     def get_current_terms(cls):
-        # TODO: replicate junction logic (https://github.com/ets-berkeley-edu/junction/blob/953bfb1d84881cf73fe6938cca2715eb7a6221eb/app/models/berkeley/terms.rb#L77) # noqa
+        index = data_loch.get_current_term_index()
+        current_term_name = app.config['CANVAS_CURRENT_ENROLLMENT_TERM']
+        future_term_name = app.config['CANVAS_FUTURE_ENROLLMENT_TERM']
+
+        if current_term_name == 'auto' and index:
+            current_term_name = index['current_term_name']
+        if future_term_name == 'auto' and index:
+            future_term_name = index['future_term_name']
+
         return {
-            'current': cls('2023', 'C'),
-            'next': cls('2023', 'D'),
+            'current': cls.from_term_name(current_term_name),
+            'next': cls.from_term_name(current_term_name).next_term(),
+            'future': cls.from_term_name(future_term_name),
         }
 
     @classmethod
@@ -59,6 +71,26 @@ class BerkeleyTerm:
             year = f'19{term_id[1:3]}' if term_id.startswith('1') else f'20{term_id[1:3]}'
             season = season_map[term_id[3:4]]
             return cls(year=year, season=season)
+
+    @classmethod
+    def from_term_name(cls, term_name=None):
+        if term_name:
+            match = re.match(r'\A(Spring|Summer|Fall) (\d{4})\Z', term_name)
+            if match:
+                season_codes = {
+                    'Spring': '2',
+                    'Summer': '5',
+                    'Fall': '8',
+                }
+                return cls(match.group(2), season_codes[match.group(1)])
+
+    def next_term(self):
+        if self.season == '8':
+            year = str(int(self.year) + 1)
+            season = '2'
+        else:
+            season = str(int(self.season) + 3)
+        return type(self)(year, season)
 
     def to_abbreviation(self):
         season_map = {
