@@ -41,7 +41,7 @@ class TestDataLoch:
     def test_get_current_term_index(self, app):
         current_term_index = data_loch.get_current_term_index()
         assert current_term_index['current_term_name'] == 'Spring 2023'
-        assert current_term_index['future_term_name'] == 'Summer 2023'
+        assert current_term_index['future_term_name'] == 'Fall 2023'
 
     def test_get_instructing_sections(self):
         sections = data_loch.get_instructing_sections(teacher_uid, ['2228', '2232'])
