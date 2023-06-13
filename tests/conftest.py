@@ -112,19 +112,6 @@ def db_session(db):
     return _session
 
 
-@pytest.fixture(scope='session', autouse=True)
-def static_term():
-    from ripley.lib.berkeley_term import BerkeleyTerm
-
-    def _mock_terms():
-        return {
-            'current': BerkeleyTerm('2023', 'B'),
-            'next': BerkeleyTerm('2023', 'C'),
-            'future': BerkeleyTerm('2023', 'D'),
-        }
-    BerkeleyTerm.get_current_terms = _mock_terms
-
-
 class FakeAuth(object):
     def __init__(self, the_app, the_client):
         self.app = the_app

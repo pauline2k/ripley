@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import re
 
 from flask import current_app as app
-from ripley.externals import data_loch
+from ripley.externals.data_loch import get_current_term_index
 
 
 class BerkeleyTerm:
@@ -37,7 +37,7 @@ class BerkeleyTerm:
 
     @classmethod
     def get_current_terms(cls):
-        index = data_loch.get_current_term_index()
+        index = get_current_term_index()
         current_term_name = app.config['CANVAS_CURRENT_ENROLLMENT_TERM']
         future_term_name = app.config['CANVAS_FUTURE_ENROLLMENT_TERM']
 
@@ -46,11 +46,14 @@ class BerkeleyTerm:
         if future_term_name == 'auto' and index:
             future_term_name = index['future_term_name']
 
-        return {
+        terms = {
             'current': cls.from_term_name(current_term_name),
             'next': cls.from_term_name(current_term_name).next_term(),
-            'future': cls.from_term_name(future_term_name),
         }
+        if future_term_name != terms['next'].to_english():
+            terms['future'] = cls.from_term_name(future_term_name)
+
+        return terms
 
     @classmethod
     def from_canvas_sis_term_id(cls, canvas_sis_term_id):
@@ -78,18 +81,19 @@ class BerkeleyTerm:
             match = re.match(r'\A(Spring|Summer|Fall) (\d{4})\Z', term_name)
             if match:
                 season_codes = {
-                    'Spring': '2',
-                    'Summer': '5',
-                    'Fall': '8',
+                    'Spring': 'B',
+                    'Summer': 'C',
+                    'Fall': 'D',
                 }
                 return cls(match.group(2), season_codes[match.group(1)])
 
     def next_term(self):
-        if self.season == '8':
+        if self.season == 'D':
             year = str(int(self.year) + 1)
-            season = '2'
+            season = 'B'
         else:
-            season = str(int(self.season) + 3)
+            year = self.year
+            season = chr(ord(self.season) + 1)
         return type(self)(year, season)
 
     def to_abbreviation(self):

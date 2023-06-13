@@ -23,13 +23,37 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from unittest import mock
+
 from ripley.lib.berkeley_term import BerkeleyTerm
 
 
 class TestBerkeleyTerm:
 
-    def test_current_terms(self):
+    def test_current_terms_spring(self):
         current_terms = BerkeleyTerm.get_current_terms()
         assert current_terms['current'].to_english() == 'Spring 2023'
         assert current_terms['next'].to_english() == 'Summer 2023'
         assert current_terms['future'].to_english() == 'Fall 2023'
+
+    @mock.patch('ripley.lib.berkeley_term.get_current_term_index')
+    def test_current_terms_summer(self, mock_current_term_index):
+        mock_current_term_index.return_value = {
+            'current_term_name': 'Summer 2023',
+            'future_term_name': 'Fall 2023',
+        }
+        current_terms = BerkeleyTerm.get_current_terms()
+        assert current_terms['current'].to_english() == 'Summer 2023'
+        assert current_terms['next'].to_english() == 'Fall 2023'
+        assert 'future' not in current_terms
+
+    @mock.patch('ripley.lib.berkeley_term.get_current_term_index')
+    def test_current_terms_fall(self, mock_current_term_index):
+        mock_current_term_index.return_value = {
+            'current_term_name': 'Fall 2023',
+            'future_term_name': 'Spring 2024',
+        }
+        current_terms = BerkeleyTerm.get_current_terms()
+        assert current_terms['current'].to_english() == 'Fall 2023'
+        assert current_terms['next'].to_english() == 'Spring 2024'
+        assert 'future' not in current_terms

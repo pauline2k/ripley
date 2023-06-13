@@ -136,7 +136,7 @@ CREATE TABLE terms.term_definitions
 INSERT INTO terms.current_term_index
 (current_term_name, future_term_name)
 VALUES
-('Spring 2023', 'Summer 2023');
+('Spring 2023', 'Fall 2023');
 
 INSERT INTO terms.term_definitions
 (term_id, term_name, term_begins, term_ends)
