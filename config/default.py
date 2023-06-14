@@ -105,8 +105,8 @@ PHOTO_SIGNED_URL_EXPIRES_IN_SECONDS = 15 * 60
 REMEMBER_COOKIE_NAME = 'remember_ripley_token'
 REMEMBER_COOKIE_SECURE = True
 
-REDIS_HOST = None
-REDIS_PASSWORD = None
+REDIS_HOST = ''
+REDIS_PASSWORD = ''
 REDIS_PORT = '6379'
 
 # Used to encrypt session cookie.

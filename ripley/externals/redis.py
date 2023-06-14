@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from fakeredis import FakeStrictRedis
 from flask import current_app
 import redis
-from rq import Callback, Connection, Queue, Worker
+from rq import Connection, Queue, Worker
 from rq.job import Job
 
 
@@ -45,8 +45,6 @@ def enqueue(func, args):
         job = q.enqueue(
             f=func,
             args=args,
-            on_failure=Callback(report_failure),
-            on_stopped=Callback(report_stopped),
         )
         return job
 
@@ -61,10 +59,10 @@ def get_redis_conn(app):
     if redis_conn is None:
         if app.config['TESTING']:
             redis_conn = FakeStrictRedis()
-        elif app.config['REDIS_HOST'] is None:
-            redis_conn = redis.from_url('redis://localhost:6379')
-        else:
+        elif app.config['REDIS_PASSWORD']:
             redis_conn = redis.from_url(f"rediss://default:{app.config['REDIS_PASSWORD']}@{app.config['REDIS_HOST']}:{app.config['REDIS_PORT']}")
+        else:
+            redis_conn = redis.from_url('redis://localhost:6379')
     return redis_conn
 
 
@@ -76,15 +74,6 @@ def redis_status():
         'redis': q is not None,
         'workers': [_worker_to_api_json(w) for w in workers],
     }
-
-
-def report_failure(job, connection, type, value, traceback):  # noqa
-    current_app.logger.error(f'Job {job.id} failed with {value}.')
-    current_app.logger.error(traceback)
-
-
-def report_stopped(job, connection):  # noqa
-    current_app.logger.error(f'Job {job.id} stopped.')
 
 
 def _worker_to_api_json(worker):

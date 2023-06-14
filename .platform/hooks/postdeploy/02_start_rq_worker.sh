@@ -3,29 +3,103 @@
 # Abort immediately if a command fails
 set -e
 
-local_app_config="/var/app/current/config/production-local.py"
+config_dir="/var/app/current/config"
+local_app_config="${config_dir}/production-local.py"
+default_app_config="${config_dir}/default.py"
+PYTHONPATH=$(/opt/elasticbeanstalk/bin/get-config environment -k PYTHONPATH)
 
-if [ -e "${local_app_config}" ]; then
-  redis_host=$(sudo grep REDIS_HOST "${local_app_config}" | sed "s/^REDIS_HOST[ ]*=[ ]*'//" | sed "s/'[ ]*//")
-  redis_pw=$(sudo grep REDIS_PASSWORD "${local_app_config}" | sed "s/^REDIS_PASSWORD[ ]*=[ ]*'//" | sed "s/'[ ]*//")
-  redis_port=$(sudo grep REDIS_PORT "${local_app_config}" | sed "s/^REDIS_PORT[ ]*=[ ]*'//" | sed "s/'[ ]*//")
+cat ${local_app_config} ${default_app_config} > "${config_dir}/merged.py";
+if [ -e "${config_dir}/merged.py" ]; then
+  log_format=$(sudo grep -m 1 LOGGING_FORMAT "${config_dir}/merged.py" | sed "s/^LOGGING_FORMAT[ ]*=[ ]*'//" | sed "s/'[ ]*//")
+  log_level=$(sudo grep -m 1 LOGGING_LEVEL "${config_dir}/merged.py" | sed "s/^LOGGING_LEVEL[ ]*=[ ]*logging.//" | sed "s/[ ]*//")
+  log_location=$(sudo grep -m 1 LOGGING_LOCATION "${config_dir}/merged.py" | sed "s/^LOGGING_LOCATION[ ]*=[ ]*'//" | sed "s/'[ ]*//")
+  redis_host=$(sudo grep -m 1 REDIS_HOST "${config_dir}/merged.py" | sed "s/^REDIS_HOST[ ]*=[ ]*'//" | sed "s/'[ ]*//")
+  redis_pw=$(sudo grep -m 1 REDIS_PASSWORD "${config_dir}/merged.py" | sed "s/^REDIS_PASSWORD[ ]*=[ ]*'//" | sed "s/'[ ]*//")
+  redis_port=$(sudo grep -m 1 REDIS_PORT "${config_dir}/merged.py" | sed "s/^REDIS_PORT[ ]*=[ ]*'//" | sed "s/'[ ]*//")
 
   if [ -z "${redis_host}" ]; then
-    echo "[ERROR] REDIS_HOST not found in ${local_app_config}. Please report the problem."; echo
+    echo "[ERROR] REDIS_HOST not found in ${config_dir}/merged.py. Please report the problem."; echo
     exit 1
-  elif [ -z "${redis_pw}" ]; then
-    echo "[ERROR] REDIS_PASSWORD not found in ${local_app_config}. Please report the problem."; echo
-    exit 1
-  elif [ -z "${redis_port}" ]; then
-    redis_port='6379'
-  else
-    echo "REDIS_HOST is '${redis_host}' according to ${local_app_config}"; echo
   fi
 
+  if [ -z "${redis_port}" ]; then
+    redis_port='6379'
+  fi
+
+  # Clean up
+  rm "${config_dir}/merged.py";
+
 else
-  echo "File not found: ${local_app_config}"; echo
+  echo "File not found: ${config_dir}/merged.py"; echo
   exit 1
 fi
 
-PYTHONPATH=$(/opt/elasticbeanstalk/bin/get-config environment -k PYTHONPATH)
-sudo ${PYTHONPATH}/rq worker -n xenomorph -u "rediss://default:${redis_pw}@${redis_host}:${redis_port}" > /dev/null 2> /dev/null < /dev/null &
+if [ "${redis_pw}" ]; then
+  redis_url="rediss://default:${redis_pw}@${redis_host}:${redis_port}"
+else
+  redis_url="redis://${redis_host}:${redis_port}"
+fi
+
+echo "Connecting to ${redis_url}."; echo
+
+attempt=0
+until [ -z "$(sudo ps | grep rq:worker:xenomorph)" ];
+do
+  (( attempt++ ))
+  if (( count <= 3 ))
+  then
+    echo "Stopping existing worker (attempt ${attempt} of 3)."
+    sudo ${PYTHONPATH}/python -c "from xenomorph import stop_workers; stop_workers('${redis_url}')" >> "${log_location}" 2>&1
+    sleep 1
+  else
+    break
+  fi
+done
+
+echo; echo "Starting worker."; echo
+sudo ${PYTHONPATH}/python -c "from xenomorph import start_worker; start_worker('${redis_url}', '${log_format}', '${log_level}')" >> "${log_location}" 2>&1 &
+sleep 1
+
+cat <<'ascii_end'
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@                                                                @@
+@@    __   __ _____ _   _ ________  ____________________ _   _    @@
+@@    \ \ / /|  ___| \ | |  _  |  \/  |  _  | ___ \ ___ \ | | |   @@
+@@     \ V / | |__ |  \| | | | | .  . | | | | |_/ / |_/ / |_| |   @@
+@@     /   \ |  __|| . ` | | | | |\/| | | | |    /|  __/|  _  |   @@
+@@    / /^\ \| |___| |\  \ \_/ / |  | \ \_/ / |\ \| |   | | | |   @@
+@@    \/   \/\____/\_| \_/\___/\_|  |_/\___/\_| \_\_|   \_| |_/   @@
+@@                                                                @@
+@@          ___________  ___  _    _ _   _  ___________ _         @@
+@@         /  ___| ___ \/ _ \| |  | | \ | ||  ___|  _  \ |        @@
+@@         \ `--.| |_/ / /_\ \ |  | |  \| || |__ | | | | |        @@
+@@          `--. \  __/|  _  | |/\| | . ` ||  __|| | | | |        @@
+@@         /\__/ / |   | | | \  /\  / |\  || |___| |/ /|_|        @@
+@@         \____/\_|   \_| |_/\/  \/\_| \_/\____/|___/ (_)        @@
+@@                                                                @@
+@@                     ___--=--------___                          @@
+@@                    /. \___\____   _, \_      /-\               @@
+@@                   /. .  _______     __/=====@                  @@
+@@                   \----/  |  / \______/      \-/               @@
+@@               _/         _/ o \                                @@
+@@              / |    o   /  ___ \                               @@
+@@             / /    o\\ |  / O \ /|      __-_                   @@
+@@            |o|     o\\\   |  \ \ /__--o/o___-_                 @@
+@@            | |      \\\-_  \____  ----  o___-                  @@
+@@            |o|       \_ \     /\______-o\_-                    @@
+@@            | \       _\ \  _/ / |                              @@
+@@            \o \_   _/      __/ /                               @@
+@@             \   \-/   _       /|_                              @@
+@@              \_      / |   - \  |\                             @@
+@@                \____/  \ | /  \   |\                           @@
+@@                        | o |   | \ |                           @@
+@@                        | | |    \ | \                          @@
+@@                       / | /      \ \ \                         @@
+@@                     /|  \o|\--\  /  o |\--\                    @@
+@@                     \----------' \---------'                   @@
+@@                                                                @@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ascii_end
+
+echo; echo "Worker status:"
+echo $(rq info -W)
