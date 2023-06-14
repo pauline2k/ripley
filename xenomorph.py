@@ -77,5 +77,5 @@ def _request_stop(w):
     print(f'[{datetime.utcnow()}] - INFO: Sending stop request to worker {w.name} (PID {w.pid}).')
     try:
         w.request_stop(signum=signal.SIGINT, frame=None)
-    except StopRequested as e:
+    except StopRequested:
         print(f'[{datetime.utcnow()}] - INFO: Stop request received.')

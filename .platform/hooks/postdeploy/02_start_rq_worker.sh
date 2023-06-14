@@ -3,10 +3,20 @@
 # Abort immediately if a command fails
 set -e
 
-config_dir="/var/app/current/config"
-local_app_config="${config_dir}/production-local.py"
+if [ $(command -v /opt/elasticbeanstalk/bin/get-config) ]; then
+  PYTHONPATH=$(/opt/elasticbeanstalk/bin/get-config environment -k PYTHONPATH)
+  RIPLEY_ENV=$(/opt/elasticbeanstalk/bin/get-config environment -k RIPLEY_ENV)
+  config_dir="/var/app/current/config"
+else
+  PYTHONPATH=$(which python | sed "s/\/python//")
+  RIPLEY_ENV=development
+  config_dir="config"
+fi
+
+
+local_app_config="${config_dir}/${RIPLEY_ENV}-local.py"
 default_app_config="${config_dir}/default.py"
-PYTHONPATH=$(/opt/elasticbeanstalk/bin/get-config environment -k PYTHONPATH)
+
 
 cat ${local_app_config} ${default_app_config} > "${config_dir}/merged.py";
 if [ -e "${config_dir}/merged.py" ]; then
@@ -40,7 +50,7 @@ else
   redis_url="redis://${redis_host}:${redis_port}"
 fi
 
-echo "Connecting to ${redis_url}."; echo
+echo "Connecting to ${redis_host}:${redis_port}."; echo
 
 attempt=0
 until [ -z "$(sudo ps | grep rq:worker:xenomorph)" ];
@@ -48,7 +58,7 @@ do
   (( attempt++ ))
   if (( count <= 3 ))
   then
-    echo "Stopping existing worker (attempt ${attempt} of 3)."
+    echo "Stopping existing worker (attempt ${attempt} of 3)."; echo
     sudo ${PYTHONPATH}/python -c "from xenomorph import stop_workers; stop_workers('${redis_url}')" >> "${log_location}" 2>&1
     sleep 1
   else
@@ -56,50 +66,50 @@ do
   fi
 done
 
-echo; echo "Starting worker."; echo
+echo "Starting worker..."; echo
 sudo ${PYTHONPATH}/python -c "from xenomorph import start_worker; start_worker('${redis_url}', '${log_format}', '${log_level}')" >> "${log_location}" 2>&1 &
 sleep 1
 
 cat <<'ascii_end'
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@@                                                                @@
-@@    __   __ _____ _   _ ________  ____________________ _   _    @@
-@@    \ \ / /|  ___| \ | |  _  |  \/  |  _  | ___ \ ___ \ | | |   @@
-@@     \ V / | |__ |  \| | | | | .  . | | | | |_/ / |_/ / |_| |   @@
-@@     /   \ |  __|| . ` | | | | |\/| | | | |    /|  __/|  _  |   @@
-@@    / /^\ \| |___| |\  \ \_/ / |  | \ \_/ / |\ \| |   | | | |   @@
-@@    \/   \/\____/\_| \_/\___/\_|  |_/\___/\_| \_\_|   \_| |_/   @@
-@@                                                                @@
-@@          ___________  ___  _    _ _   _  ___________ _         @@
-@@         /  ___| ___ \/ _ \| |  | | \ | ||  ___|  _  \ |        @@
-@@         \ `--.| |_/ / /_\ \ |  | |  \| || |__ | | | | |        @@
-@@          `--. \  __/|  _  | |/\| | . ` ||  __|| | | | |        @@
-@@         /\__/ / |   | | | \  /\  / |\  || |___| |/ /|_|        @@
-@@         \____/\_|   \_| |_/\/  \/\_| \_/\____/|___/ (_)        @@
-@@                                                                @@
-@@                     ___--=--------___                          @@
-@@                    /. \___\____   _, \_      /-\               @@
-@@                   /. .  _______     __/=====@                  @@
-@@                   \----/  |  / \______/      \-/               @@
-@@               _/         _/ o \                                @@
-@@              / |    o   /  ___ \                               @@
-@@             / /    o\\ |  / O \ /|      __-_                   @@
-@@            |o|     o\\\   |  \ \ /__--o/o___-_                 @@
-@@            | |      \\\-_  \____  ----  o___-                  @@
-@@            |o|       \_ \     /\______-o\_-                    @@
-@@            | \       _\ \  _/ / |                              @@
-@@            \o \_   _/      __/ /                               @@
-@@             \   \-/   _       /|_                              @@
-@@              \_      / |   - \  |\                             @@
-@@                \____/  \ | /  \   |\                           @@
-@@                        | o |   | \ |                           @@
-@@                        | | |    \ | \                          @@
-@@                       / | /      \ \ \                         @@
-@@                     /|  \o|\--\  /  o |\--\                    @@
-@@                     \----------' \---------'                   @@
-@@                                                                @@
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@                                                                 @@
+@@    __   __ _____ _   _ ________  ____________________ _   _     @@
+@@    \ \ / /|  ___| \ | |  _  |  \/  |  _  | ___ \ ___ \ | | |    @@
+@@     \ V / | |__ |  \| | | | | .  . | | | | |_/ / |_/ / |_| |    @@
+@@     /   \ |  __|| . ` | | | | |\/| | | | |    /|  __/|  _  |    @@
+@@    / /^\ \| |___| |\  \ \_/ / |  | \ \_/ / |\ \| |   | | | |    @@
+@@    \/   \/\____/\_| \_/\___/\_|  |_/\___/\_| \_\_|   \_| |_/    @@
+@@                                                                 @@
+@@          ___________  ___  _    _ _   _  ___________ _          @@
+@@         /  ___| ___ \/ _ \| |  | | \ | ||  ___|  _  \ |         @@
+@@         \ `--.| |_/ / /_\ \ |  | |  \| || |__ | | | | |         @@
+@@          `--. \  __/|  _  | |/\| | . ` ||  __|| | | | |         @@
+@@         /\__/ / |   | | | \  /\  / |\  || |___| |/ /|_|         @@
+@@         \____/\_|   \_| |_/\/  \/\_| \_/\____/|___/ (_)         @@
+@@                                                                 @@
+@@                     ___--=--------___                           @@
+@@                    /. \___\____   _, \_      /-\                @@
+@@                   /. .  _______     __/=====@                   @@
+@@                   \----/  |  / \______/      \-/                @@
+@@               _/         _/ o \                                 @@
+@@              / |    o   /  ___ \                                @@
+@@             / /    o\\ |  / O \ /|      __-_                    @@
+@@            |o|     o\\\   |  \ \ /__--o/o___-_                  @@
+@@            | |      \\\-_  \____  ----  o___-                   @@
+@@            |o|       \_ \     /\______-o\_-                     @@
+@@            | \       _\ \  _/ / |                               @@
+@@            \o \_   _/      __/ /                                @@
+@@             \   \-/   _       /|_                               @@
+@@              \_      / |   - \  |\                              @@
+@@                \____/  \ | /  \   |\                            @@
+@@                        | o |   | \ |                            @@
+@@                        | | |    \ | \                           @@
+@@                       / | /      \ \ \                          @@
+@@                     /|  \o|\--\  /  o |\--\                     @@
+@@                     \----------' \---------'                    @@
+@@                                                                 @@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ascii_end
 
 echo; echo "Worker status:"
-echo $(rq info -W)
+echo $(${PYTHONPATH}/rq info -W -u ${redis_url})
