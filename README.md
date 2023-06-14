@@ -58,7 +58,7 @@ export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 Start the worker:
 
 ```
-rq worker -c xenomorph
+.platform/hooks/postdeploy/02_start_rq_worker.sh
 ```
 
 ## Run tests, lint the code
