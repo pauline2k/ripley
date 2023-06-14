@@ -116,39 +116,35 @@ def uid_from_canvas_login_id(login_id):
 
 
 def update_canvas_sections(course, section_ids, sections_to_remove):
-    from ripley.factory import create_app
-    app = create_app()
-    with app.app_context():
-        app.logger.debug(f'Preparing course sections SIS import (canvas_site_id={course.id}).')
-        canvas_sis_term_id = course.term['sis_term_id']
-        term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
-        sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=section_ids)
-        if not (sis_sections and len(sis_sections)):
-            raise ResourceNotFoundError(f'No sections found with IDs {", ".join(section_ids)}')
-        canvas_course_id = course.sis_course_id
+    canvas_sis_term_id = course.term['sis_term_id']
+    term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
+    sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=section_ids)
+    if not (sis_sections and len(sis_sections)):
+        raise ResourceNotFoundError(f'No sections found with IDs {", ".join(section_ids)}')
+    canvas_course_id = course.sis_course_id
 
-        def _section(section):
-            return {
-                'section_id': section['section_id'],
-                'course_id': canvas_course_id,
-                'name': course_section_name(section),
-                'status': 'deleted' if section['section_id'] in sections_to_remove else 'active',
-                'start_date': None,
-                'end_date': None,
-            }
-        sections = [_section(s) for s in sis_sections]
-        with SisImportCsv.create(fieldnames=['section_id', 'course_id', 'name', 'status', 'start_date', 'end_date']) as sections_csv:
-            sections_csv.writerows(sections)
-            sections_csv.filehandle.close()
-            app.logger.debug(f'Posting course sections SIS import (canvas_site_id={course.id}).')
-            sis_import = canvas.post_sis_import(attachment=sections_csv.tempfile.name)
-            if not sis_import:
-                raise InternalServerError(f'Course sections SIS import failed (canvas_site_id={course.id}).')
-            job = get_current_job()
-            if job:
-                job.meta['sis_import_id'] = sis_import.id
-                job.save_meta()
-            return sis_import
+    def _section(section):
+        return {
+            'section_id': section['section_id'],
+            'course_id': canvas_course_id,
+            'name': course_section_name(section),
+            'status': 'deleted' if section['section_id'] in sections_to_remove else 'active',
+            'start_date': None,
+            'end_date': None,
+        }
+    sections = [_section(s) for s in sis_sections]
+    with SisImportCsv.create(fieldnames=['section_id', 'course_id', 'name', 'status', 'start_date', 'end_date']) as sections_csv:
+        sections_csv.writerows(sections)
+        sections_csv.filehandle.close()
+        app.logger.debug(f'Posting course sections SIS import (canvas_site_id={course.id}).')
+        sis_import = canvas.post_sis_import(attachment=sections_csv.tempfile.name)
+        if not sis_import:
+            raise InternalServerError(f'Course sections SIS import failed (canvas_site_id={course.id}).')
+        job = get_current_job()
+        if job:
+            job.meta['sis_import_id'] = sis_import.id
+            job.save_meta()
+        return sis_import
 
 
 def user_id_from_attributes(attributes):

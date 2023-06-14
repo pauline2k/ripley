@@ -23,19 +23,37 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from datetime import datetime
 import os
 import signal
 import time
 
+from flask import Flask
 import redis
+from ripley import cache, db
+from ripley.configs import load_configs
+from ripley.logger import initialize_logger
 from rq import Connection, Queue, Worker
-from rq.worker import StopRequested
+from rq.command import send_shutdown_command
 
 
-def start_worker(redis_url, log_format, log_level, name='xenomorph'):
+app = None
+
+
+def create_app():
+    app = Flask(__name__.split('.')[0])
+    load_configs(app)
+    initialize_logger(app)
+    cache.init_app(app)
+    cache.clear()
+    db.init_app(app)
+    return app
+
+
+def start_worker(redis_url, name='xenomorph'):
+    global app
+    app = create_app()
     redis_conn = redis.from_url(redis_url)
-    with Connection(redis_conn):
+    with Connection(redis_conn), app.app_context():
         q = Queue()
         w = Worker(
             queues=[q],
@@ -44,20 +62,24 @@ def start_worker(redis_url, log_format, log_level, name='xenomorph'):
             work_horse_killed_handler=work_horse_killed_handler,
         )
         w.work(
-            logging_level=log_level,
+            logging_level=app.config['LOGGING_LEVEL'],
             date_format='%Y-%m-%d %H:%M:%S,%f',
-            log_format=log_format,
+            log_format=app.config['LOGGING_FORMAT'],
         )
+        app.logger.info('Initialized xenomorph.')
 
 
 def stop_workers(redis_url):
+    global app
+    if not app:
+        app = create_app()
     redis_conn = redis.from_url(redis_url)
     with Connection(redis_conn):
         wait_seconds = 10
         workers = Worker.all(redis_conn)
-        print(f'[{datetime.utcnow()}] - INFO: {Worker.count(redis_conn)} existing workers need to be shut down.')
+        app.logger.info(f'{Worker.count(redis_conn)} existing worker(s) need to be shut down.')
         for w in workers:
-            _request_stop(w)
+            _request_stop(redis_conn, w)
 
         # Wait for worker to gracefully shut down.
         time.sleep(wait_seconds)
@@ -69,13 +91,9 @@ def stop_workers(redis_url):
 
 
 def work_horse_killed_handler(job, pid, stat, rusage):
-    # TODO: better handling: notify Ops or restart automatically
-    print(f'[{datetime.utcnow()}] - ERROR: Job {job.id} (PID {pid}) failed: work horse killed. Resource usage detail: {rusage}')
+    app.logger.error(f'Job {job.id} (PID {pid}) failed: work horse killed. Resource usage detail: {rusage}')
 
 
-def _request_stop(w):
-    print(f'[{datetime.utcnow()}] - INFO: Sending stop request to worker {w.name} (PID {w.pid}).')
-    try:
-        w.request_stop(signum=signal.SIGINT, frame=None)
-    except StopRequested:
-        print(f'[{datetime.utcnow()}] - INFO: Stop request received.')
+def _request_stop(redis_conn, worker):
+    app.logger.info(f'Sending stop request to worker {worker.name} (PID {worker.pid}).')
+    send_shutdown_command(redis_conn, worker.name)

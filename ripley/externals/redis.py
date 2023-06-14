@@ -24,10 +24,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from fakeredis import FakeStrictRedis
-from flask import current_app
+from flask import current_app as app
 import redis
 from rq import Connection, Queue, Worker
-from rq.job import Job
+from rq.job import Job, Retry
 
 
 redis_conn = None
@@ -35,22 +35,23 @@ redis_conn = None
 
 def enqueue(func, args):
     from ripley.factory import q
-    get_redis_conn(current_app)
+    get_redis_conn(app)
     status = redis_status()
     queue_ready = len(status['workers']) or not q.is_async
     if not (status['redis'] and queue_ready):
-        current_app.logger.exception(f'Job queue unavailable! Status: {status}')
+        app.logger.exception(f'Job queue unavailable! Status: {status}')
         return False
     with Connection(redis_conn):
         job = q.enqueue(
             f=func,
             args=args,
+            retry=Retry(max=3),
         )
         return job
 
 
 def get_job(job_id):
-    get_redis_conn(current_app)
+    get_redis_conn(app)
     return Job.fetch(job_id, connection=redis_conn)
 
 
@@ -67,7 +68,7 @@ def get_redis_conn(app):
 
 
 def redis_status():
-    get_redis_conn(current_app)
+    get_redis_conn(app)
     q = Queue(connection=redis_conn)
     workers = Worker.all(redis_conn)
     return {
@@ -81,7 +82,6 @@ def _worker_to_api_json(worker):
         'currentJobWorkingTime': worker.current_job_working_time,
         'failedJobCount': worker.failed_job_count,
         'lastHeartbeat': worker.last_heartbeat,
-        'logger': worker.log,
         'name': worker.name,
         'pid': worker.pid,
         'state': worker.get_state(),
