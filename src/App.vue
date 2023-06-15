@@ -35,6 +35,55 @@ export default {
 * {
   text-transform: none !important;
 }
+.alert {
+  background-color: $color-alert-background;
+  border: 0;
+  border-radius: 3px;
+  color: $color-alert-foreground;
+  font-size: 14px;
+  font-weight: normal;
+  margin: 10px 0;
+  padding: 8px 15px 8px 14px;
+  text-shadow: 0 1px 0 $color-white-translucent;
+}
+.alert-info {
+  background-color: $color-alert-info-background;
+  color: $color-alert-info-foreground;
+}
+.alert-success {
+  background-color: $color-alert-success-background;
+  color: $color-alert-success-foreground;
+}
+.alert-error {
+  background-color: $color-alert-error-background;
+  color: $color-alert-error-foreground;
+}
+.alert-container {
+  margin: 10px 0;
+}
+.alert-error-icon {
+  float: left;
+  font-size: 38px;
+  line-height: 45px;
+  margin-right: 5px;
+}
+.alert-close-button-container {
+  display: inline-block;
+  float: right;
+
+  .close-button {
+    background-color: transparent;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    &, &:hover, &:focus, &:active, &:visited {
+      color: inherit;
+      font-family: FontAwesome;
+      font-size: 20px;
+      text-decoration: none;
+    }
+  }
+}
 .background-splash {
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -88,6 +137,11 @@ export default {
     }
   }
 }
+.canvas-notice-icon {
+  font-size: 20px;
+  line-height: 20px;
+  margin-right: 5px;
+}
 .canvas-page-form {
   background: transparent;
   border: 0;
@@ -101,6 +155,20 @@ export default {
 }
 .font-size-16 {
   font-size: 16px;
+}
+.icon-gold {
+  color: $color-dark-tangerine;
+}
+.notice-text-container {
+  line-height: 18px;
+  margin-left: 52px;
+}
+.notice-text-header {
+  color: $color-off-black;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 20px;
+  margin: 4px 0;
 }
 a {
   color: $primary-color;
