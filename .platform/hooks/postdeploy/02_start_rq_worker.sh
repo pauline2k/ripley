@@ -13,15 +13,14 @@ else
   config_dir="config"
 fi
 
+export RIPLEY_ENV=${RIPLEY_ENV}
+export RIPLEY_LOCAL_CONFIGS=${config_dir}
 
 local_app_config="${config_dir}/${RIPLEY_ENV}-local.py"
 default_app_config="${config_dir}/default.py"
 
-
 cat ${local_app_config} ${default_app_config} > "${config_dir}/merged.py";
 if [ -e "${config_dir}/merged.py" ]; then
-  log_format=$(sudo grep -m 1 LOGGING_FORMAT "${config_dir}/merged.py" | sed "s/^LOGGING_FORMAT[ ]*=[ ]*'//" | sed "s/'[ ]*//")
-  log_level=$(sudo grep -m 1 LOGGING_LEVEL "${config_dir}/merged.py" | sed "s/^LOGGING_LEVEL[ ]*=[ ]*logging.//" | sed "s/[ ]*//")
   log_location=$(sudo grep -m 1 LOGGING_LOCATION "${config_dir}/merged.py" | sed "s/^LOGGING_LOCATION[ ]*=[ ]*'//" | sed "s/'[ ]*//")
   redis_host=$(sudo grep -m 1 REDIS_HOST "${config_dir}/merged.py" | sed "s/^REDIS_HOST[ ]*=[ ]*'//" | sed "s/'[ ]*//")
   redis_pw=$(sudo grep -m 1 REDIS_PASSWORD "${config_dir}/merged.py" | sed "s/^REDIS_PASSWORD[ ]*=[ ]*'//" | sed "s/'[ ]*//")
@@ -50,7 +49,7 @@ else
   redis_url="redis://${redis_host}:${redis_port}"
 fi
 
-echo "Connecting to ${redis_host}:${redis_port}."; echo
+echo "Connecting to ${redis_host}:${redis_port} from ${RIPLEY_ENV} environment."; echo
 
 attempt=0
 until [ -z "$(sudo ps | grep rq:worker:xenomorph)" ];
@@ -67,7 +66,7 @@ do
 done
 
 echo "Starting worker..."; echo
-sudo ${PYTHONPATH}/python -c "from xenomorph import start_worker; start_worker('${redis_url}', '${log_format}', '${log_level}')" >> "${log_location}" 2>&1 &
+sudo ${PYTHONPATH}/python -c "import os; from xenomorph import start_worker; os.environ['RIPLEY_ENV'] = '${RIPLEY_ENV}'; os.environ['RIPLEY_LOCAL_CONFIGS'] = '${RIPLEY_LOCAL_CONFIGS}'; start_worker('${redis_url}')" >> "${log_location}" 2>&1 &
 sleep 1
 
 cat <<'ascii_end'
