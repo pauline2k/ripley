@@ -59,7 +59,7 @@ class MessageLaunch(FlaskMessageLaunch):
 @app.route('/api/lti/config/add_user.json')
 def config_add_user():
     return _tool_config(
-        title='Find a Person to Add',
+        title='Find a Person to Add (LTI 1.3)',
         description='Search and add users to course sections',
         target='launch_add_user',
         placement='course_navigation',
@@ -70,7 +70,7 @@ def config_add_user():
 @app.route('/api/lti/config/create_site.json')
 def config_create_site():
     return _tool_config(
-        title='Create a Site',
+        title='Create a Site (LTI 1.3)',
         description='Provides access to Course and Project site creation',
         target='launch_create_site',
         placement='user_navigation',
@@ -80,7 +80,7 @@ def config_create_site():
 @app.route('/api/lti/config/export_grade.json')
 def config_export_grade():
     return _tool_config(
-        title='Download E-Grades',
+        title='Download E-Grades (LTI 1.3)',
         description='Exports Course Grades to E-Grades CSV file',
         target='launch_export_grade',
         placement='course_navigation',
@@ -91,7 +91,7 @@ def config_export_grade():
 @app.route('/api/lti/config/mailing_list.json')
 def config_mailing_list():
     return _tool_config(
-        title='Mailing List',
+        title='Mailing List (LTI 1.3)',
         description='Create and manage a mailing list for a course site',
         target='launch_mailing_list',
         placement='course_navigation',
@@ -102,7 +102,7 @@ def config_mailing_list():
 @app.route('/api/lti/config/mailing_lists.json')
 def config_mailing_lists():
     return _tool_config(
-        title='Mailing Lists',
+        title='Mailing Lists (LTI 1.3)',
         description='Create and manage mailing lists for all course sites',
         target='launch_mailing_lists',
         placement='account_navigation',
@@ -112,7 +112,7 @@ def config_mailing_lists():
 @app.route('/api/lti/config/manage_official_sections.json')
 def config_manage_official_sections():
     return _tool_config(
-        title='Manage Official Sections',
+        title='Manage Official Sections (LTI 1.3)',
         description='Provides management options for official course sections',
         target='launch_manage_official_sections',
         placement='course_navigation',
@@ -122,7 +122,7 @@ def config_manage_official_sections():
 @app.route('/api/lti/config/provision_user.json')
 def config_provision_user():
     return _tool_config(
-        title='User Provisioning',
+        title='User Provisioning (LTI 1.3)',
         description='Automated user provisioning',
         target='launch_provision_user',
         placement='account_navigation',
@@ -132,7 +132,7 @@ def config_provision_user():
 @app.route('/api/lti/config/roster_photos.json')
 def config_roster_photos():
     return _tool_config(
-        title='Roster Photos',
+        title='Roster Photos (LTI 1.3)',
         description='Browse and search official roster photos',
         target='launch_roster_photos',
         placement='course_navigation',
