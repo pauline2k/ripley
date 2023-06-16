@@ -9,11 +9,18 @@
       @click="maintenanceCollapsed = !maintenanceCollapsed"
     >
       <v-icon
-        :icon="maintenanceCollapsed ? 'mdi-caret-right' : 'mdi-caret-down'"
-        class="left template-canvas-maintenance-notice-collapse-icon"
+        :icon="maintenanceCollapsed ? 'mdi-menu-right' : 'mdi-menu-down'"
+        class="pr-1"
         aria-hidden="true"
+        size="large"
+        start
       />
-      <v-icon icon="mdi-exclamation-triangle" class="icon-gold" aria-hidden="true" />
+      <v-icon
+        icon="mdi-alert"
+        class="icon-gold mr-0"
+        aria-hidden="true"
+        start
+      />
       <span class="template-canvas-maintenance-notice-text">
         From 8 - 9 AM, you may experience delays of up to 10 minutes before your {{ courseActionVerb }}.
       </span>
@@ -48,3 +55,21 @@ export default {
   })
 }
 </script>
+
+<style scoped lang="scss">
+button.template-canvas-maintenance-notice-button {
+  &, &:hover, &:focus {
+    color: $color-alert-foreground;
+    text-decoration: none;
+  }
+}
+.template-canvas-maintenance-notice-details {
+  font-size: 14px;
+  font-weight: normal;
+  margin: 10px 26px 0;
+
+  p {
+    margin-bottom: 5px;
+  }
+}
+</style>

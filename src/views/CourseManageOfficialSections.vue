@@ -5,7 +5,7 @@
         <MaintenanceNotice course-action-verb="site is updated" />
       </div>
 
-      <h1 class="page-course-official-sections-header1">Official Sections</h1>
+      <h1 id="page-header" class="page-course-official-sections-header1">Official Sections</h1>
 
       <div v-if="currentWorkflowStep === 'preview'">
         <v-alert
@@ -26,16 +26,14 @@
           </ul>
         </v-alert>
 
-        <h2 class="sr-only">Viewing Sections</h2>
+        <h2 id="sr-context-header" class="sr-only">Viewing Sections</h2>
 
         <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-white-border">
-          <v-row no-gutters class="page-course-official-sections-current-sections-header">
-            <v-col md="4">
-              <h3 class="page-course-official-sections-existing-sections-header-label">
-                Sections in this Course Site
-              </h3>
-            </v-col>
-            <v-col md="8" class="text-right">
+          <div class="d-flex justify-space-between pb-1">
+            <h3 id="course-site-sections-header" class="my-4 pb-4">
+              Sections in this Course Site
+            </h3>
+            <div class="d-flex align-end">
               <v-btn
                 v-if="canvasSite.canEdit"
                 class="canvas-button canvas-button-primary canvas-no-decoration page-course-official-sections-button"
@@ -43,8 +41,8 @@
               >
                 Edit Sections
               </v-btn>
-            </v-col>
-          </v-row>
+            </div>
+          </div>
           <v-row no-gutters class="page-course-official-sections-courses-container">
             <v-col md="12" class="page-course-official-sections-current-course">
               <CourseSectionsTable
@@ -60,15 +58,13 @@
 
       <div v-if="currentWorkflowStep === 'staging'">
         <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-grey-border">
-          <h2 class="sr-only">Managing Sections</h2>
+          <h2 id="sr-context-header" class="sr-only">Managing Sections</h2>
 
-          <v-row no-gutters class="row page-course-official-sections-current-sections-header">
-            <v-col md="4">
-              <h3 class="page-course-official-sections-existing-sections-header-label">
-                Sections in this Course Site
-              </h3>
-            </v-col>
-            <v-col md="8" class="text-right">
+          <div class="page-course-official-sections-current-sections-header">
+            <h3 id="course-site-sections" class="page-course-official-sections-existing-sections-header-label">
+              Sections in this Course Site
+            </h3>
+            <div class="text-right">
               <v-btn
                 class="canvas-button mx-1"
                 aria-label="Cancel section modifications for this course site"
@@ -84,8 +80,8 @@
               >
                 Save Changes
               </v-btn>
-            </v-col>
-          </v-row>
+            </div>
+          </div>
           <v-row no-gutters class="page-course-official-sections-courses-container">
             <v-col md="12" class="page-course-official-sections-current-course">
               <CourseSectionsTable
@@ -122,7 +118,7 @@
         <div class="page-course-official-sections-sections-area">
           <v-row no-gutters>
             <v-col md="12">
-              <h3 class="page-course-official-sections-available-sections-header-label">
+              <h3 id="available-sections-header" class="page-course-official-sections-available-sections-header-label">
                 All sections available to add to this Course Site
               </h3>
             </v-col>
@@ -140,11 +136,15 @@
               style="border-radius: 3px !important"
               :value="course.slug"
             >
-              <v-expansion-panel-title class="d-flex flex-row-reverse height-unset pa-0">
+              <v-expansion-panel-title
+                class="d-flex flex-row-reverse height-unset pa-0"
+                collapse-icon="mdi-menu-down"
+                expand-icon="mdi-menu-right"
+              >
                 <div class="d-flex flex-wrap flex-grow-1">
-                  <h3 class="sections-course-title">
+                  <h4 id="available-course-header" class="sections-course-title d-flex align-center">
                     {{ course.courseCode }}<span v-if="course.title"> : {{ course.title }}</span>
-                  </h3>
+                  </h4>
                   <span v-if="course.sections && (course.sections.length === 1)" class="sections-course-subtitle text-no-wrap">&nbsp;(1 section)</span>
                   <span v-if="course.sections && (course.sections.length !== 1)" class="sections-course-subtitle text-no-wrap">&nbsp;({{ course.sections.length }} sections)</span>
                 </div>
@@ -153,8 +153,10 @@
                 <div v-if="course.sections.length > 1" class="page-course-official-sections-form-select-all-option">
                   <v-btn
                     v-if="!allSectionsAdded(course)"
-                    class="button-link page-course-official-sections-form-select-all-option-button"
+                    id="page-course-official-sections-form-select-all-option-button"
                     aria-label="Add all sections for this course to the list of sections to be added"
+                    color="primary"
+                    variant="link"
                     @click="addAllSections(course)"
                   >
                     Add All
@@ -180,7 +182,7 @@
       </div>
 
       <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
-        <h2 class="page-course-official-sections-existing-sections-header-label">
+        <h2 id="updating-sections-header" class="page-course-official-sections-existing-sections-header-label">
           Updating Official Sections in Course Site
         </h2>
         <div v-if="jobStatus === 'sendingRequest'" class="pending-request-step">
@@ -204,7 +206,7 @@
     <div v-if="displayError" class="alert-container" role="alert">
       <i class="fa fa-warning canvas-notice-icon"></i>
       <div class="notice-text-container">
-        <h1 class="notice-text-header">Error</h1>
+        <h1 id="notice-text-header" class="notice-text-header">Error</h1>
         <p>{{ displayError }}</p>
       </div>
     </div>
@@ -505,73 +507,44 @@ export default {
   .button {
     padding: 10px;
   }
-
   .page-course-official-sections-header1 {
     font-size: 24px;
     font-weight: 400;
     line-height: 30px;
     margin: 15px 0 16px;
   }
-
   .page-course-official-sections-button {
     white-space: nowrap;
   }
-
   .page-course-official-sections-courses-container {
     margin: 0;
   }
-
   .page-course-official-sections-current-sections-grey-border {
     border: $color-grey-area-border-dark solid 1px;
     .page-course-official-sections-courses-container {
       margin-bottom: 15px;
     }
-
-    .page-course-official-sections-existing-sections-header-label {
-      margin-top: 3px;
-    }
   }
-
   .page-course-official-sections-current-course {
     margin-left: 0;
     margin-top: 10px;
   }
-
-  .page-course-official-sections-current-sections-header {
-    margin-bottom: 5px;
-  }
-
   .page-course-official-sections-current-sections-white-border {
     border: $color-white solid 1px;
   }
-
   .page-course-official-sections-sections-area.page-course-official-sections-current-sections-grey-border {
     padding: 15px;
   }
-
   .page-course-official-sections-sections-area + .page-course-official-sections-sections-area {
     margin-top: 25px;
   }
-
-  .page-course-official-sections-existing-sections-header-label {
-    font-size: 19px;
-    margin-top: 10px;
-  }
-
   .page-course-official-sections-available-sections-header-label {
     font-size: 19px;
-    margin-bottom: 15px;
   }
-
   .page-course-official-sections-form-select-all-option {
     font-size: 12px;
     margin: 6px 0 4px 2px;
   }
-
-  .page-course-official-sections-form-select-all-option-button {
-    outline: none;
-  }
-
   @media #{$small-only} {
     .page-course-official-sections-small-only-align-left {
       text-align: left;

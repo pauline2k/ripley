@@ -69,10 +69,11 @@ def get_redis_conn(app):
 
 def redis_status():
     get_redis_conn(app)
+    redis_ping = redis_conn.ping()
     q = Queue(connection=redis_conn)
     workers = Worker.all(redis_conn)
     return {
-        'redis': q is not None,
+        'redis': redis_ping and (q is not None),
         'workers': [_worker_to_api_json(w) for w in workers],
     }
 

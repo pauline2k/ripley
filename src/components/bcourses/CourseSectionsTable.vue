@@ -71,7 +71,7 @@
           </td>
           <td v-if="mode !== 'createCourseForm' && mode !== 'preview'" class="template-sections-table-cell-section-action-option">
             <!-- Current Staging Actions -->
-            <div v-if="mode === 'currentStaging' && section.isCourseSection">
+            <div v-if="mode === 'currentStaging' && section.isCourseSection" class="d-flex flex-nowrap justify-end">
               <v-btn
                 v-if="section.nameDiscrepancy && section.stagedState !== 'update'"
                 :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be updated`"
@@ -346,7 +346,7 @@ td {
 }
 .template-sections-table-cell-section-action-option {
   height: 45px;
-  min-width: 160px;
+  min-width: 80px;
   padding-right: 10px;
   text-align: right !important;
   width: 10%
