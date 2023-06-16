@@ -90,6 +90,16 @@ def canvas_site_edit_sections(canvas_site_id):
     )
 
 
+@app.route('/api/canvas_site/<canvas_site_id>/grade_distribution')
+@canvas_role_required('TeacherEnrollment', 'Lead TA')
+def canvas_site_grade_distribution(canvas_site_id):
+    import json
+    base_dir = app.config['BASE_DIR']
+    with open(f'{base_dir}/tests/fixtures/canvas/json/grade_distro.temp.json') as file:
+        data = json.loads(file.read())
+    return tolerant_jsonify(data)
+
+
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def canvas_site_official_sections(canvas_site_id):

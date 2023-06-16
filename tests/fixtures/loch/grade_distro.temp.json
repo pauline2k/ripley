@@ -1,0 +1,580 @@
+{
+    "A+":
+    {
+        "ethnicities":
+        {
+            "Asian / Asian American": 6
+        },
+        "genders":
+        {
+            "Male": 5,
+            "Female": 1
+        },
+        "termsInAttendance":
+        {
+            "7": 1,
+            "5": 3,
+            "3": 2
+        },
+        "transferStatus":
+        {
+            "true": 0,
+            "false": 6
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 0,
+            "false": 6
+        },
+        "visaTypes":
+        {
+            "none": 5,
+            "F1": 1
+        },
+        "total": 6
+    },
+    "A":
+    {
+        "ethnicities":
+        {
+            "Asian / Asian American": 108,
+            "Not Specified": 9,
+            "White": 32,
+            "Hispanic / Latinx": 14,
+            "Pacific Islander": 2,
+            "American Indian / Alaska Native": 1,
+            "African-American / Black": 1
+        },
+        "genders":
+        {
+            "Male": 64,
+            "Female": 97,
+            "Decline to State": 2,
+            "Genderqueer/Gender Non-Conform": 1
+        },
+        "termsInAttendance":
+        {
+            "8": 2,
+            "7": 5,
+            "5": 130,
+            "3": 26,
+            "4": 1
+        },
+        "transferStatus":
+        {
+            "true": 1,
+            "false": 163
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 16,
+            "false": 148
+        },
+        "visaTypes":
+        {
+            "none": 129,
+            "F1": 24,
+            "OT": 1,
+            "PR": 7,
+            "L2": 1,
+            "E2": 1,
+            "H4": 1
+        },
+        "total": 164
+    },
+    "A-":
+    {
+        "ethnicities":
+        {
+            "Hispanic / Latinx": 6,
+            "White": 14,
+            "Asian / Asian American": 49,
+            "Not Specified": 4,
+            "African-American / Black": 3
+        },
+        "genders":
+        {
+            "Male": 23,
+            "Female": 49,
+            "Decline to State": 1
+        },
+        "termsInAttendance":
+        {
+            "8": 1,
+            "7": 3,
+            "5": 64,
+            "3": 5
+        },
+        "transferStatus":
+        {
+            "true": 0,
+            "false": 73
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 8,
+            "false": 65
+        },
+        "visaTypes":
+        {
+            "none": 64,
+            "F1": 7,
+            "PR": 2
+        },
+        "total": 73
+    },
+    "B+":
+    {
+        "ethnicities":
+        {
+            "Asian / Asian American": 37,
+            "White": 12,
+            "Hispanic / Latinx": 6,
+            "Pacific Islander": 1,
+            "African-American / Black": 1
+        },
+        "genders":
+        {
+            "Male": 14,
+            "Female": 39,
+            "Genderqueer/Gender Non-Conform": 1
+        },
+        "termsInAttendance":
+        {
+            "5": 48,
+            "3": 5,
+            "7": 1
+        },
+        "transferStatus":
+        {
+            "true": 1,
+            "false": 53
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 7,
+            "false": 47
+        },
+        "visaTypes":
+        {
+            "none": 49,
+            "PR": 2,
+            "F1": 3
+        },
+        "total": 54
+    },
+    "B":
+    {
+        "ethnicities":
+        {
+            "Hispanic / Latinx": 4,
+            "Asian / Asian American": 50,
+            "Not Specified": 3,
+            "White": 17,
+            "Pacific Islander": 1,
+            "African-American / Black": 2
+        },
+        "genders":
+        {
+            "Female": 63,
+            "Male": 13
+        },
+        "termsInAttendance":
+        {
+            "6": 1,
+            "5": 69,
+            "7": 1,
+            "8": 1,
+            "3": 4
+        },
+        "transferStatus":
+        {
+            "true": 1,
+            "false": 75
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 6,
+            "false": 70
+        },
+        "visaTypes":
+        {
+            "none": 68,
+            "PR": 2,
+            "F1": 6
+        },
+        "total": 76
+    },
+    "B-":
+    {
+        "ethnicities":
+        {
+            "Asian / Asian American": 38,
+            "White": 19,
+            "Not Specified": 6,
+            "Hispanic / Latinx": 12,
+            "Pacific Islander": 1,
+            "American Indian / Alaska Native": 1,
+            "African-American / Black": 1
+        },
+        "genders":
+        {
+            "Male": 19,
+            "Female": 54,
+            "Genderqueer/Gender Non-Conform": 2
+        },
+        "termsInAttendance":
+        {
+            "7": 6,
+            "5": 60,
+            "4": 1,
+            "8": 1,
+            "3": 7
+        },
+        "transferStatus":
+        {
+            "true": 2,
+            "false": 73
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 12,
+            "false": 63
+        },
+        "visaTypes":
+        {
+            "none": 69,
+            "F1": 3,
+            "PR": 2,
+            "OT": 1
+        },
+        "total": 75
+    },
+    "C+":
+    {
+        "ethnicities":
+        {
+            "Not Specified": 3,
+            "African-American / Black": 4,
+            "White": 9,
+            "Asian / Asian American": 25,
+            "Hispanic / Latinx": 3,
+            "Pacific Islander": 1
+        },
+        "genders":
+        {
+            "Female": 33,
+            "Male": 12
+        },
+        "termsInAttendance":
+        {
+            "5": 41,
+            "8": 1,
+            "3": 2,
+            "7": 1
+        },
+        "transferStatus":
+        {
+            "true": 2,
+            "false": 43
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 7,
+            "false": 38
+        },
+        "visaTypes":
+        {
+            "none": 38,
+            "F1": 4,
+            "PR": 3
+        },
+        "total": 45
+    },
+    "C":
+    {
+        "ethnicities":
+        {
+            "Hispanic / Latinx": 20,
+            "Asian / Asian American": 46,
+            "White": 12,
+            "Pacific Islander": 3,
+            "American Indian / Alaska Native": 2,
+            "African-American / Black": 2,
+            "Not Specified": 1
+        },
+        "genders":
+        {
+            "Female": 58,
+            "Male": 20,
+            "Genderqueer/Gender Non-Conform": 2
+        },
+        "termsInAttendance":
+        {
+            "8": 3,
+            "7": 8,
+            "5": 64,
+            "6": 1,
+            "4": 2,
+            "3": 2
+        },
+        "transferStatus":
+        {
+            "true": 3,
+            "false": 77
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 22,
+            "false": 58
+        },
+        "visaTypes":
+        {
+            "none": 75,
+            "F1": 3,
+            "PR": 2
+        },
+        "total": 80
+    },
+    "C-":
+    {
+        "ethnicities":
+        {
+            "Hispanic / Latinx": 31,
+            "American Indian / Alaska Native": 3,
+            "Asian / Asian American": 17,
+            "White": 2,
+            "Pacific Islander": 3,
+            "African-American / Black": 4,
+            "Not Specified": 1
+        },
+        "genders":
+        {
+            "Male": 14,
+            "Female": 38
+        },
+        "termsInAttendance":
+        {
+            "8": 1,
+            "7": 7,
+            "6": 2,
+            "5": 41,
+            "3": 1
+        },
+        "transferStatus":
+        {
+            "true": 0,
+            "false": 52
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 35,
+            "false": 17
+        },
+        "visaTypes":
+        {
+            "none": 51,
+            "F1": 1
+        },
+        "total": 52
+    },
+    "D+":
+    {
+        "ethnicities":
+        {
+            "Hispanic / Latinx": 3,
+            "African-American / Black": 1,
+            "Asian / Asian American": 1
+        },
+        "genders":
+        {
+            "Female": 5
+        },
+        "termsInAttendance":
+        {
+            "5": 5
+        },
+        "transferStatus":
+        {
+            "true": 0,
+            "false": 5
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 4,
+            "false": 1
+        },
+        "visaTypes":
+        {
+            "none": 5
+        },
+        "total": 5
+    },
+    "D":
+    {
+        "ethnicities":
+        {
+            "Hispanic / Latinx": 1,
+            "American Indian / Alaska Native": 1
+        },
+        "genders":
+        {
+            "Female": 1
+        },
+        "termsInAttendance":
+        {
+            "7": 1
+        },
+        "transferStatus":
+        {
+            "true": 0,
+            "false": 1
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 1,
+            "false": 0
+        },
+        "visaTypes":
+        {
+            "none": 1
+        },
+        "total": 1
+    },
+    "F":
+    {
+        "ethnicities":
+        {
+            "Pacific Islander": 1,
+            "Asian / Asian American": 2
+        },
+        "genders":
+        {
+            "Male": 1,
+            "Female": 1
+        },
+        "termsInAttendance":
+        {
+            "7": 1,
+            "5": 1
+        },
+        "transferStatus":
+        {
+            "true": 0,
+            "false": 2
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 0,
+            "false": 2
+        },
+        "visaTypes":
+        {
+            "none": 1,
+            "F1": 1
+        },
+        "total": 2
+    },
+    "P":
+    {
+        "ethnicities":
+        {
+            "Hispanic / Latinx": 2,
+            "African-American / Black": 1,
+            "Asian / Asian American": 2,
+            "White": 1
+        },
+        "genders":
+        {
+            "Female": 5,
+            "Male": 1
+        },
+        "termsInAttendance":
+        {
+            "7": 3,
+            "5": 3
+        },
+        "transferStatus":
+        {
+            "true": 1,
+            "false": 5
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 3,
+            "false": 3
+        },
+        "visaTypes":
+        {
+            "none": 6
+        },
+        "total": 6
+    },
+    "NP":
+    {
+        "ethnicities":
+        {
+            "Hispanic / Latinx": 3,
+            "Asian / Asian American": 4,
+            "African-American / Black": 1,
+            "Not Specified": 1
+        },
+        "genders":
+        {
+            "Male": 5,
+            "Female": 4
+        },
+        "termsInAttendance":
+        {
+            "8": 1,
+            "5": 7,
+            "7": 1
+        },
+        "transferStatus":
+        {
+            "true": 0,
+            "false": 9
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 4,
+            "false": 5
+        },
+        "visaTypes":
+        {
+            "none": 9
+        },
+        "total": 9
+    },
+    "I":
+    {
+        "ethnicities":
+        {
+            "Asian / Asian American": 2
+        },
+        "genders":
+        {
+            "Female": 2
+        },
+        "termsInAttendance":
+        {
+            "6": 1,
+            "5": 1
+        },
+        "transferStatus":
+        {
+            "true": 0,
+            "false": 2
+        },
+        "underrepresentedMinorityStatus":
+        {
+            "true": 0,
+            "false": 2
+        },
+        "visaTypes":
+        {
+            "none": 2
+        },
+        "total": 2
+    }
+}
