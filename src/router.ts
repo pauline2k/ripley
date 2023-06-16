@@ -4,6 +4,7 @@ import BaseLTI from '@/layouts/lti/BaseLTI.vue'
 import BaseStandalone from '@/layouts/standalone/BaseStandalone.vue'
 import CanvasSiteSummary from '@/views/CanvasSiteSummary.vue'
 import CourseAddUser from '@/views/CourseAddUser.vue'
+import CourseGradeDistribution from '@/views/CourseGradeDistribution.vue'
 import CourseGradeExport from '@/views/CourseGradeExport.vue'
 import CourseManageOfficialSections from '@/views/CourseManageOfficialSections.vue'
 import CreateCourseSite from '@/views/CreateCourseSite.vue'
@@ -54,6 +55,13 @@ const routes:RouteRecordRaw[] = [
         path: '/add_user/:id',
         meta: {
           title: 'Find a User to Add'
+        }
+      },
+      {
+        component: CourseGradeDistribution,
+        path: '/grade_distribution/:id',
+        meta: {
+          title: 'Grade Distribution'
         }
       },
       {
@@ -155,6 +163,10 @@ const routes:RouteRecordRaw[] = [
       {
         component: CourseAddUser,
         path: '/add_user'
+      },
+      {
+        component: CourseGradeDistribution,
+        path: '/grade_distribution'
       },
       {
         component: CourseGradeExport,

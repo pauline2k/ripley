@@ -92,6 +92,7 @@ export default {
         {disabled: false, icon: 'mdi-web', path: '/create_site', title: 'Create a Site'},
         {disabled: false, icon: 'mdi-account-plus-outline', path: '/provision_user', title: 'User Provision'},
         {disabled: !canvasSiteId, icon: 'mdi-export', path: `/grade_export/${canvasSiteId}`, title: 'E-Grade Export'},
+        {disabled: !canvasSiteId, icon: 'mdi-chart-bar-stacked', path: `/grade_distribution/${canvasSiteId}`, title: 'Grade Distribution'},
         {disabled: !canvasSiteId, icon: 'mdi-account-school', path: `/add_user/${canvasSiteId}`, title: 'Find a User to Add'},
         {disabled: !canvasSiteId, icon: 'mdi-email-fast-outline', path: `/welcome_email/mailing_list/${canvasSiteId}`, title: 'Send Welcome Email'},
         {disabled: !canvasSiteId, icon: 'mdi-google-classroom', path: `/manage_official_sections/${canvasSiteId}`, title: 'Official Sections'},

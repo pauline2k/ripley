@@ -29,6 +29,10 @@ export function getExportJobStatus(canvasSiteId: number, jobId: string) {
   return utils.get(`/api/canvas_site/${canvasSiteId}/egrade_export/status?jobId=${jobId}`, true)
 }
 
+export function getGradeDistribution(canvasSiteId: number) {
+  return utils.get(`/api/canvas_site/${canvasSiteId}/grade_distribution`, true)
+}
+
 export function prepareGradesCacheJob(canvasSiteId: number) {
   return utils.post(`/api/canvas_site/${canvasSiteId}/egrade_export/prepare`, {}, true)
 }
