@@ -178,6 +178,11 @@ class MailingList(Base):
                 'successes': [],
                 'total': 0,
             },
+            'restore': {
+                'errors': [],
+                'successes': [],
+                'total': 0,
+            },
             'update': {
                 'errors': [],
                 'successes': [],
@@ -230,7 +235,7 @@ class MailingList(Base):
                         existing_member = mailing_list_members_by_email.get(preferred_email)
                         if existing_member:
                             if existing_member.deleted_at:
-                                summary['add']['total'] += 1
+                                summary['restore']['total'] += 1
                                 app.logger.debug(f'Reactivating previously deleted address {preferred_email}')
                                 success = MailingListMembers.update(
                                     can_send=user['canSend'],
@@ -240,7 +245,7 @@ class MailingList(Base):
                                     mailing_list_member_id=existing_member.id,
                                 )
                                 key = 'successes' if success else 'errors'
-                                summary['add'][key].append(preferred_email)
+                                summary['restore'][key].append(preferred_email)
                             else:
                                 update_required = user['canSend'] != existing_member.can_send or \
                                     user['firstName'] != existing_member.first_name or \
@@ -292,7 +297,7 @@ class MailingList(Base):
             populated_at=utc_now(),
         )
         mailing_list = cls.query.filter_by(id=mailing_list.id).first()
-        _log_summary_of_mailing_list_updates(mailing_list, summary)
+        app.logger.info('\n' + f'Mailing list {mailing_list.list_name} update: {summary}' + '\n')
         return mailing_list, summary
 
 
@@ -313,36 +318,6 @@ def _get_preferred_email(canvas_user_email, loch_user_email):
     elif preferred_email_source == 'CANVAS':
         preferred_email = canvas_user_email or loch_user_email
     return preferred_email.lower() if preferred_email else None
-
-
-def _log_summary_of_mailing_list_updates(mailing_list, summary):
-    info_log = []
-    list_name = mailing_list.list_name
-
-    add_errors = summary['add']['errors']
-    remove_errors = summary['remove']['errors']
-    remove_successes = summary['remove']['successes']
-    update_errors = summary['update']['errors']
-    update_successes = summary['update']['successes']
-    update_total = summary['update']['total']
-
-    def _log(statement):
-        info_log.append(statement)
-
-    _log(f'Finished population of mailing list {list_name}.')
-    if add_errors:
-        fails = ', '.join(add_errors)
-        app.logger.error(f'[ERROR] Failed to add {len(add_errors)} addresses to {list_name}: {fails}')
-    _log(f"Removed {remove_successes} of {summary['remove']['total']} former site members.")
-    if remove_errors:
-        fails = ', '.join(remove_errors)
-        app.logger.error(f'[ERROR] Failed to remove {remove_errors.count} addresses from {list_name}: {fails}')
-    _log(f'Updated {update_successes} of {update_total} new site members.')
-    if update_errors:
-        fails = ', '.join(update_errors)
-        app.logger.error(f'[ERROR] Failed to update {update_errors.count} addresses in {list_name}: {fails}')
-    # Log it all.
-    app.logger.info('\n' + '\n'.join(info_log) + '\n')
 
 
 def _remove_from_list_safely(item, list_of_items):

@@ -73,6 +73,7 @@ export default {
     }
   },
   mounted() {
+    this.canvasSiteId = this.currentUser.canvasSiteId
     this.init()
     putFocusNextTick('page-header')
     this.$ready()

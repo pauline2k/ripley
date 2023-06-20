@@ -177,7 +177,7 @@ export default {
       this.alert = {message, items: items || [], type}
     },
     showUpdateSummary() {
-      const actions = ['add', 'remove', 'update']
+      const actions = ['add', 'remove', 'restore', 'update']
       const count = key => {
         let count = 0
         this.$_.each(actions, action => count += this.updateSummary[action][key].length)
