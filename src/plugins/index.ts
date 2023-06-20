@@ -1,5 +1,6 @@
 import axios from '@/plugins/axios'
 import type {App} from 'vue'
+import HighchartsVue from 'highcharts-vue'
 import VueAnnouncer from '@vue-a11y/announcer'
 import vuetify from './vuetify'
 import {createPinia} from 'pinia'
@@ -10,6 +11,7 @@ export function registerPlugins (app: App) {
   app
     .use(axios, {baseUrl: import.meta.env.VITE_APP_API_BASE_URL})
     .use(createPinia())
+    .use(HighchartsVue)
     .use(VueAnnouncer)
     .use(vuetify)
 }

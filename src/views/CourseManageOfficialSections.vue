@@ -132,7 +132,7 @@
               v-for="course in courseSemesterClasses"
               :id="`sections-course-${course.slug}`"
               :key="course.courseCode"
-              class="sections-course-container px-1 mt-4"
+              class="container px-1 mt-4"
               style="border-radius: 3px !important"
               :value="course.slug"
             >
