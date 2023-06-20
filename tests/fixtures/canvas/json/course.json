@@ -1,4 +1,25 @@
 {
+    "get_by_id_1010101": {
+        "method": "GET",
+        "endpoint": "courses/1010101",
+        "data": {
+            "id": 1010101,
+            "course_code": "ASTRON 218",
+            "name": "ASTRON 218: Stellar Dynamics and Galactic Structure",
+            "sis_course_id": "CRS:ASTRON-218-2022-D",
+            "account_id": 1,
+            "root_account_id": 1,
+            "enrollment_term_id": 1,
+            "grading_standard_id": 1,
+            "term": {
+                "name": "Fall 2022",
+                "sis_term_id": "TERM:2022-D"
+            },
+            "time_zone": "America/Los_Angeles",
+            "workflow_state": "available"
+        },
+        "status_code": 200
+    },
     "get_by_id_1234567": {
         "method": "GET",
         "endpoint": "courses/1234567",
@@ -211,6 +232,25 @@
         ],
         "status_code": 200
     },
+    "get_sections_1010101": {
+        "method": "GET",
+        "endpoint": "courses/1010101/sections",
+        "data": [
+          {
+            "id": 500,
+            "name": "Section A",
+            "sis_section_id": "SEC:2022-D-99999",
+            "integration_id": null,
+            "sis_import_id": 47,
+            "course_id": 1010101,
+            "sis_course_id": "CRS:ANTHRO-189-2023-B",
+            "start_at": "2012-06-01T00:00:00-06:00",
+            "end_at": null,
+            "restrict_enrollments_to_section_dates": null,
+            "nonxlist_course_id": null
+          }
+        ]
+    },
     "get_sections_8876542": {
         "method": "GET",
         "endpoint": "courses/8876542/sections",
@@ -329,6 +369,36 @@
                     "sis_course_id": "CRS:ANTHRO-189-2023-B",
                     "sis_section_id": "2023-B-32936",
                     "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/4567890"
+                }
+            ]
+        },
+        "status_code": 200
+    },
+    "get_enrollments_4567890_past": {
+        "method": "GET",
+        "endpoint": "courses/1010101/users/4567890?include=enrollments",
+        "data": {
+            "id": 4567890,
+            "name": "Ash 🤖",
+            "short_name": "Ash 🤖",
+            "sortable_name": "🤖, Ash",
+            "integration_id": null,
+            "login_id": "30000",
+            "sis_user_id": "300300000",
+            "enrollments": [
+                {
+                    "id": 202,
+                    "user_id": 4567890,
+                    "course_id": 1010101,
+                    "course_section_id": 500,
+                    "type": "TeacherEnrollment",
+                    "enrollment_state": "active",
+                    "role": "TeacherEnrollment",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "300300000",
+                    "sis_course_id": "CRS:ASTRON-218-2022-D",
+                    "sis_section_id": "2022-D-99999",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/1010101/users/4567890"
                 }
             ]
         },

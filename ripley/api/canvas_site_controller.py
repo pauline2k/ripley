@@ -36,6 +36,7 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, update_canvas_sections
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
+from ripley.merged.grade_distributions import get_grade_distribution_with_demographics
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
 
@@ -93,11 +94,13 @@ def canvas_site_edit_sections(canvas_site_id):
 @app.route('/api/canvas_site/<canvas_site_id>/grade_distribution')
 @canvas_role_required('TeacherEnrollment', 'Lead TA')
 def canvas_site_grade_distribution(canvas_site_id):
-    import json
-    base_dir = app.config['BASE_DIR']
-    with open(f'{base_dir}/tests/fixtures/canvas/json/grade_distro.temp.json') as file:
-        data = json.loads(file.read())
-    return tolerant_jsonify(data)
+    canvas_sections = canvas.get_course_sections(canvas_site_id)
+    sis_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
+    if sis_sections:
+        distribution = get_grade_distribution_with_demographics(sis_sections[0]['termId'], [s['id'] for s in sis_sections])
+    else:
+        distribution = {}
+    return tolerant_jsonify(distribution)
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections')

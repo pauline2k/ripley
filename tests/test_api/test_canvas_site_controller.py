@@ -352,3 +352,77 @@ def _api_get_roster(client, canvas_site_id, expected_status_code=200):
     response = client.get(f'/api/canvas_site/{canvas_site_id}/roster')
     assert response.status_code == expected_status_code
     return response.json
+
+
+class TestGradeDistributions:
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        _api_get_grade_distributions(client, '1010101', expected_status_code=401)
+
+    def test_no_canvas_account(self, client, fake_auth):
+        """Denies user with no Canvas account."""
+        canvas_site_id = '1010101'
+        fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+        _api_get_grade_distributions(client, canvas_site_id, expected_status_code=401)
+
+    def test_not_enrolled(self, client, app, fake_auth):
+        """Denies user with no course enrollment."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {'course': ['get_by_id_1010101'], 'user': ['profile_20000']}, m)
+            canvas_site_id = '1010101'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
+            _api_get_grade_distributions(client, canvas_site_id, expected_status_code=401)
+
+    def test_student(self, client, app, fake_auth):
+        """Denies student."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'course': ['get_by_id_1010101', 'get_sections_1010101'],
+                'user': ['profile_40000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
+            _api_get_grade_distributions(client, canvas_site_id, expected_status_code=401)
+
+    def test_admin_no_grades(self, client, app, fake_auth):
+        """Allows admin, returns no grades if not present."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'course': ['get_by_id_8876542', 'get_sections_8876542'],
+                'user': ['profile_10000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            response = _api_get_grade_distributions(client, canvas_site_id)
+            assert response == {}
+
+    def test_admin_grades(self, client, app, fake_auth):
+        """Allows admin, returns grades if present."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'course': ['get_by_id_1010101', 'get_sections_1010101'],
+                'user': ['profile_10000'],
+            }, m)
+            canvas_site_id = '1010101'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            response = _api_get_grade_distributions(client, canvas_site_id)
+            assert response['A+']['genders'] == {'Male': 5, 'Female': 11}
+
+    def test_teacher(self, client, app, fake_auth):
+        """Allows teacher."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'course': ['get_by_id_1010101', 'get_sections_1010101', 'get_enrollments_4567890_past'],
+                'user': ['profile_30000'],
+            }, m)
+            canvas_site_id = '1010101'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            response = _api_get_grade_distributions(client, canvas_site_id)
+            assert response['A+']['genders'] == {'Male': 5, 'Female': 11}
+
+
+def _api_get_grade_distributions(client, canvas_site_id, expected_status_code=200):
+    response = client.get(f'/api/canvas_site/{canvas_site_id}/grade_distribution')
+    assert response.status_code == expected_status_code
+    return response.json
