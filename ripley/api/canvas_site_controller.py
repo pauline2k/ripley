@@ -36,7 +36,7 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, update_canvas_sections
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
-from ripley.merged.grade_distributions import get_grade_distribution_with_demographics
+from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, get_grade_distribution_with_enrollments
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
 
@@ -96,10 +96,15 @@ def canvas_site_edit_sections(canvas_site_id):
 def canvas_site_grade_distribution(canvas_site_id):
     canvas_sections = canvas.get_course_sections(canvas_site_id)
     sis_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
+    distribution = {}
     if sis_sections:
-        distribution = get_grade_distribution_with_demographics(sis_sections[0]['termId'], [s['id'] for s in sis_sections])
+        term_id = sis_sections[0]['termId']
+        section_ids = [s['id'] for s in sis_sections]
+        distribution['demographics'] = get_grade_distribution_with_demographics(term_id, section_ids)
+        distribution['enrollments'] = get_grade_distribution_with_enrollments(term_id, section_ids)
     else:
-        distribution = {}
+        distribution['demographics'] = {}
+        distribution['enrollments'] = {}
     return tolerant_jsonify(distribution)
 
 

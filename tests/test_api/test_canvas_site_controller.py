@@ -395,7 +395,10 @@ class TestGradeDistributions:
             canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_get_grade_distributions(client, canvas_site_id)
-            assert response == {}
+            assert response == {
+                'demographics': {},
+                'enrollments': {},
+            }
 
     def test_admin_grades(self, client, app, fake_auth):
         """Allows admin, returns grades if present."""
@@ -407,7 +410,8 @@ class TestGradeDistributions:
             canvas_site_id = '1010101'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_get_grade_distributions(client, canvas_site_id)
-            assert response['A+']['genders'] == {'Male': 5, 'Female': 11}
+            assert response['demographics']['A+']['genders'] == {'Male': 5, 'Female': 11}
+            assert response['enrollments']['ANTHRO 197'] == {'A': 2, 'A+': 2, 'F': 1, 'P': 4}
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -419,7 +423,8 @@ class TestGradeDistributions:
             canvas_site_id = '1010101'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
             response = _api_get_grade_distributions(client, canvas_site_id)
-            assert response['A+']['genders'] == {'Male': 5, 'Female': 11}
+            assert response['demographics']['A+']['genders'] == {'Male': 5, 'Female': 11}
+            assert response['enrollments']['ANTHRO 197'] == {'A': 2, 'A+': 2, 'F': 1, 'P': 4}
 
 
 def _api_get_grade_distributions(client, canvas_site_id, expected_status_code=200):
