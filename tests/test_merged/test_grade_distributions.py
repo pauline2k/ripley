@@ -23,7 +23,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from ripley.merged.grade_distributions import get_grade_distribution_with_demographics
+from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, \
+    get_grade_distribution_with_enrollments
 
 
 class TestGradeDistributions:
@@ -221,5 +222,23 @@ class TestGradeDistributions:
                     'OT': 1,
                 },
                 'total': 1,
+            },
+        }
+
+    def test_enrollment_distribution(self):
+        d = get_grade_distribution_with_enrollments('2228', ['99999'])
+        assert d == {
+            'ANTHRO 197': {
+                'A': 2,
+                'A+': 2,
+                'F': 1,
+                'P': 4,
+            },
+            'ASTRON 218': {
+                'A': 1,
+                'A-': 1,
+                'A+': 1,
+                'F': 1,
+                'P': 2,
             },
         }
