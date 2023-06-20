@@ -74,7 +74,7 @@
         <v-container fluid>
           <v-row no-gutters align="start">
             <v-col cols="1">
-              <div class="float-right pr-3 pt-4">
+              <div class="float-right pr-3">
                 <label for="mailing-list-name-input" class="font-weight-medium">Name:</label>
               </div>
             </v-col>
@@ -156,7 +156,7 @@ export default {
   computed: {
     hasInvalidCharacters() {
       const name = this.$_.trim(this.mailingListName)
-      return this.$_.intersection([...name], [...this.invalidCharacters]).length
+      return !!this.$_.intersection([...name], [...this.invalidCharacters]).length
     }
   },
   mounted() {
