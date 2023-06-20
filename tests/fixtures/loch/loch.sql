@@ -73,6 +73,21 @@ CREATE TABLE sis_data.edo_enrollments
 INSERT INTO sis_data.edo_enrollments
 (sis_term_id, sis_section_id, ldap_uid, sis_enrollment_status, grade)
 VALUES
+('2225', '10000', '1000001', 'E', 'P'),
+('2225', '10000', '1000002', 'E', 'P'),
+('2225', '10000', '1000003', 'E', 'P'),
+('2225', '10000', '1000004', 'E', 'P'),
+('2225', '10000', '1000005', 'E', 'P'),
+('2225', '10000', '1000006', 'E', 'P'),
+('2225', '10000', '1000007', 'E', 'P'),
+('2225', '10000', '1000008', 'E', 'P'),
+('2225', '10000', '1000009', 'E', 'P'),
+('2225', '20000', '1000006', 'E', 'P'),
+('2225', '20000', '1000007', 'E', 'P'),
+('2225', '20000', '1000008', 'E', 'P'),
+('2225', '20000', '1000009', 'E', 'P'),
+('2225', '20000', '1000010', 'E', 'P'),
+('2225', '20000', '1000011', 'E', 'P'),
 ('2228', '99999', '1000001', 'E', 'A+'),
 ('2228', '99999', '1000002', 'E', 'P'),
 ('2228', '99999', '1000003', 'E', 'A'),
@@ -198,8 +213,10 @@ INSERT INTO sis_data.edo_sections
 VALUES
 ('2232', '32936', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '001', NULL, '876543', 1, 'P', '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
 ('2232', '32937', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '002', NULL, '876543', 1, 'P', '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2225', '10000', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '001', NULL, '100726', 1, 'P', '13579', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
 ('2228', '17275', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '001', NULL, '100726', 1, 'P', '13579', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
 ('2228', '17277', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '002', NULL, '100726', 1, 'P', '200122', 'Mufty Blauswater', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2225', '20000', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '001', NULL, '1234567', 1, 'P', '30000', 'Ash', 'PI', 'Sevastopol Station', 'SAMOWE', '09:00', '11:00', '2023-02-17', '2023-02-17'),
 ('2232', '12345', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '001', NULL, '1234567', 1, 'P', '30000', 'Ash', 'PI', 'Sevastopol Station', 'SAMOWE', '09:00', '11:00', '2023-02-17', '2023-02-17'),
 ('2232', '12347', FALSE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'DIS', '101', NULL, '1234567', 1, 'P', '200122', 'Mufty Blauswater', 'PI', 'Sevastopol Station', 'TU', '14:00', '15:00', '2023-01-17', '2023-05-17'),
 ('2232', '12346', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '002', NULL, '1234567', 1, 'P', '30000', 'Ash', 'PI', 'Acheron LV 426', 'TUTH', '09:00', '13:30', '2023-01-17', '2023-05-05'),

@@ -23,8 +23,10 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from itertools import groupby
 
-from ripley.externals.data_loch import get_grades_with_demographics
+from flask import current_app as app
+from ripley.externals.data_loch import get_grades_with_demographics, get_grades_with_enrollments
 
 
 COLLAPSE_ETHNICITIES = {
@@ -90,5 +92,25 @@ def get_grade_distribution_with_demographics(term_id, section_ids):
         collapsed_ethnicities = set(COLLAPSE_ETHNICITIES.get(e) or e for e in row['ethnicities'])
         for ethnicity in collapsed_ethnicities:
             _count_string_value(ethnicity, 'ethnicities')
+
+    return distribution
+
+
+def get_grade_distribution_with_enrollments(term_id, section_ids):
+    grades_by_course_name = {}
+    for course_name, rows in groupby(get_grades_with_enrollments(term_id, section_ids), key=lambda x: x['sis_course_name']):
+        grades_by_course_name[course_name] = [r for r in rows if r['grade']]
+
+    courses_by_popularity = sorted(grades_by_course_name.items(), key=lambda r: len(r[1]), reverse=True)
+    courses_by_popularity = courses_by_popularity[0:app.config['GRADE_DISTRIBUTION_MAX_DISTINCT_COURSES']]
+
+    distribution = {}
+    for course_name, course_rows in courses_by_popularity:
+        distribution[course_name] = {}
+        for r in course_rows:
+            if r['grade'] not in distribution[course_name]:
+                distribution[course_name][r['grade']] = 1
+            else:
+                distribution[course_name][r['grade']] += 1
 
     return distribution
