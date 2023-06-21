@@ -147,6 +147,12 @@ export default {
   border: 0;
   padding: 0;
 }
+.container {
+  background: $color-container-grey-background !important;
+  border: 1px solid $color-container-grey-border !important;
+  border-radius: 3px !important;
+  padding: 9px !important;
+}
 .ellipsis {
   display: block;
   overflow: hidden;
@@ -169,6 +175,14 @@ export default {
   font-weight: 500;
   line-height: 20px;
   margin: 4px 0;
+}
+.sr-only {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
 }
 a {
   color: $primary-color;
@@ -200,24 +214,19 @@ h3 {
   font-size: 18px;
   font-weight: normal;
 }
-.sections-course-container {
-  background: $color-container-grey-background !important;
-  border: 1px solid $color-container-grey-border !important;
-  border-radius: 3px !important;
-  padding: 9px !important;
-}
 h3.sections-course-title {
   display: inline !important;
   font-size: 15px !important;
   font-weight: 500 !important;
   line-height: 20px;
 }
-.sr-only {
-  position: absolute;
-  left: -10000px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
+select {
+  appearance: auto !important;
+  background: field !important;
+  border: 1px solid $color-button-border !important;
+  border-radius: 4px;
+  color: $color-off-black;
+  line-height: 20px !important;
+  padding: 4px;
 }
 </style>

@@ -77,7 +77,7 @@
       <div>
         <form class="canvas-page-form" @submit="showConfirmation">
           <ul class="page-create-course-site-section-margin">
-            <li v-for="course in coursesList" :key="course.course_id" class="sections-course-container sections-course-container-bottom-margin">
+            <li v-for="course in coursesList" :key="course.course_id" class="container sections-course-container-bottom-margin">
               <v-btn
                 :aria-expanded="`${course.visible}`"
                 class="d-flex p-0"
