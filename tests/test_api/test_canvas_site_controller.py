@@ -412,7 +412,7 @@ class TestGradeDistributions:
             response = _api_get_grade_distributions(client, canvas_site_id)
             assert response['demographics'][0]['grade'] == 'A+'
             response['demographics'][0]['genders'] == {'Male': {'count': 5, 'percentage': 22.7}, 'Female': {'count': 11, 'percentage': 16.2}}
-            assert response['enrollments']['ANTHRO 197'] == {'A': 2, 'A+': 2, 'F': 1, 'P': 4}
+            assert response['enrollments']['ANTHRO 197'][0] == {'grade': 'A+', 'count': 2, 'percentage': 22.2}
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -426,7 +426,7 @@ class TestGradeDistributions:
             response = _api_get_grade_distributions(client, canvas_site_id)
             assert response['demographics'][0]['grade'] == 'A+'
             response['demographics'][0]['genders'] == {'Male': {'count': 5, 'percentage': 22.7}, 'Female': {'count': 11, 'percentage': 16.2}}
-            assert response['enrollments']['ANTHRO 197'] == {'A': 2, 'A+': 2, 'F': 1, 'P': 4}
+            assert response['enrollments']['ANTHRO 197'][0] == {'grade': 'A+', 'count': 2, 'percentage': 22.2}
 
 
 def _api_get_grade_distributions(client, canvas_site_id, expected_status_code=200):

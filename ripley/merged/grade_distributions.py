@@ -128,12 +128,25 @@ def get_grade_distribution_with_enrollments(term_id, section_ids):
 
     distribution = {}
     for course_name, course_rows in courses_by_popularity:
-        distribution[course_name] = {}
+        distribution[course_name] = {'total': 0}
         for r in course_rows:
             if r['grade'] not in distribution[course_name]:
                 distribution[course_name][r['grade']] = 1
             else:
                 distribution[course_name][r['grade']] += 1
+            distribution[course_name]['total'] += 1
+
+    for course_name, course_distribution in distribution.items():
+        sorted_distribution = []
+        for grade in sorted(course_distribution.keys(), key=_grade_ordering_index):
+            if grade == 'total':
+                continue
+            sorted_distribution.append({
+                'grade': grade,
+                'count': course_distribution[grade],
+                'percentage': round(course_distribution[grade] * 100 / float(course_distribution['total']), 1),
+            })
+        distribution[course_name] = sorted_distribution
 
     return distribution
 

@@ -492,18 +492,55 @@ class TestGradeDistributions:
 
     def test_enrollment_distribution(self):
         d = get_grade_distribution_with_enrollments('2228', ['99999'])
+        print(d)
         assert d == {
-            'ANTHRO 197': {
-                'A': 2,
-                'A+': 2,
-                'F': 1,
-                'P': 4,
-            },
-            'ASTRON 218': {
-                'A': 1,
-                'A-': 1,
-                'A+': 1,
-                'F': 1,
-                'P': 2,
-            },
+            'ANTHRO 197': [
+                {
+                    'grade': 'A+',
+                    'count': 2,
+                    'percentage': 22.2,
+                },
+                {
+                    'grade': 'A',
+                    'count': 2,
+                    'percentage': 22.2,
+                },
+                {
+                    'grade': 'F',
+                    'count': 1,
+                    'percentage': 11.1,
+                },
+                {
+                    'grade': 'P',
+                    'count': 4,
+                    'percentage': 44.4,
+                },
+            ],
+            'ASTRON 218': [
+                {
+                    'grade': 'A+',
+                    'count': 1,
+                    'percentage': 16.7,
+                },
+                {
+                    'grade': 'A',
+                    'count': 1,
+                    'percentage': 16.7,
+                },
+                {
+                    'grade': 'A-',
+                    'count': 1,
+                    'percentage': 16.7,
+                },
+                {
+                    'grade': 'F',
+                    'count': 1,
+                    'percentage': 16.7,
+                },
+                {
+                    'grade': 'P',
+                    'count': 2,
+                    'percentage': 33.3,
+                },
+            ],
         }
