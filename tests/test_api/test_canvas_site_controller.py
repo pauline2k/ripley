@@ -395,10 +395,10 @@ class TestGradeDistributions:
             canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_get_grade_distributions(client, canvas_site_id)
-            assert response == {
-                'demographics': [],
-                'enrollments': {},
-            }
+            assert response['canvasSite']['courseCode'] == 'ANTHRO 189-LEC-001'
+            assert response['officialSections'][0]['sisId'] == 'SEC:2023-B-32936'
+            assert response['demographics'] == []
+            assert response['enrollments'] == {}
 
     def test_admin_grades(self, client, app, fake_auth):
         """Allows admin, returns grades if present."""
@@ -410,8 +410,9 @@ class TestGradeDistributions:
             canvas_site_id = '1010101'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_get_grade_distributions(client, canvas_site_id)
-            assert response['demographics'][0]['grade'] == 'A+'
-            response['demographics'][0]['genders'] == {'Male': {'count': 5, 'percentage': 22.7}, 'Female': {'count': 11, 'percentage': 16.2}}
+            assert response['canvasSite']['courseCode'] == 'ASTRON 218'
+            assert response['officialSections'][0]['sisId'] == 'SEC:2022-D-99999'
+            assert response['demographics'][0]['genders'] == {'Male': {'count': 5, 'percentage': 22.7}, 'Female': {'count': 11, 'percentage': 16.2}}
             assert response['enrollments']['ANTHRO 197'][0] == {'grade': 'A+', 'count': 2, 'percentage': 22.2}
 
     def test_teacher(self, client, app, fake_auth):
@@ -424,8 +425,9 @@ class TestGradeDistributions:
             canvas_site_id = '1010101'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
             response = _api_get_grade_distributions(client, canvas_site_id)
-            assert response['demographics'][0]['grade'] == 'A+'
-            response['demographics'][0]['genders'] == {'Male': {'count': 5, 'percentage': 22.7}, 'Female': {'count': 11, 'percentage': 16.2}}
+            assert response['canvasSite']['courseCode'] == 'ASTRON 218'
+            assert response['officialSections'][0]['sisId'] == 'SEC:2022-D-99999'
+            assert response['demographics'][0]['genders'] == {'Male': {'count': 5, 'percentage': 22.7}, 'Female': {'count': 11, 'percentage': 16.2}}
             assert response['enrollments']['ANTHRO 197'][0] == {'grade': 'A+', 'count': 2, 'percentage': 22.2}
 
 
