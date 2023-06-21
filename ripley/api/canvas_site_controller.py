@@ -94,16 +94,20 @@ def canvas_site_edit_sections(canvas_site_id):
 @app.route('/api/canvas_site/<canvas_site_id>/grade_distribution')
 @canvas_role_required('TeacherEnrollment', 'Lead TA')
 def canvas_site_grade_distribution(canvas_site_id):
+    course = canvas.get_course(canvas_site_id)
     canvas_sections = canvas.get_course_sections(canvas_site_id)
     sis_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
-    distribution = {}
+    distribution = {
+        'canvasSite': canvas_site_to_api_json(course),
+        'officialSections': sis_sections,
+    }
     if sis_sections:
         term_id = sis_sections[0]['termId']
         section_ids = [s['id'] for s in sis_sections]
         distribution['demographics'] = get_grade_distribution_with_demographics(term_id, section_ids)
         distribution['enrollments'] = get_grade_distribution_with_enrollments(term_id, section_ids)
     else:
-        distribution['demographics'] = {}
+        distribution['demographics'] = []
         distribution['enrollments'] = {}
     return tolerant_jsonify(distribution)
 
