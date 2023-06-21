@@ -23,6 +23,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from copy import deepcopy
 from itertools import groupby
 
 from flask import current_app as app
@@ -44,36 +45,41 @@ COLLAPSE_ETHNICITIES = {
 }
 
 
-def get_grade_distribution_with_demographics(term_id, section_ids):
+EMPTY_DISTRIBUTION = {
+    'ethnicities': {},
+    'genders': {},
+    'termsInAttendance': {},
+    'transferStatus': {
+        'true': 0,
+        'false': 0,
+    },
+    'underrepresentedMinorityStatus': {
+        'true': 0,
+        'false': 0,
+    },
+    'visaTypes': {},
+    'total': 0,
+}
+
+
+def get_grade_distribution_with_demographics(term_id, section_ids):  # noqa
     distribution = {}
+    totals = deepcopy(EMPTY_DISTRIBUTION)
 
     for row in get_grades_with_demographics(term_id, section_ids):
         if not row['grade']:
             continue
         if row['grade'] not in distribution:
-            distribution[row['grade']] = {
-                'ethnicities': {},
-                'genders': {},
-                'termsInAttendance': {},
-                'transferStatus': {
-                    'true': 0,
-                    'false': 0,
-                },
-                'underrepresentedMinorityStatus': {
-                    'true': 0,
-                    'false': 0,
-                },
-                'visaTypes': {},
-                'total': 1,
-            }
-        else:
-            distribution[row['grade']]['total'] += 1
+            distribution[row['grade']] = deepcopy(EMPTY_DISTRIBUTION)
+        distribution[row['grade']]['total'] += 1
 
         def _count_boolean_value(column, distribution_key):
             if row[column]:
                 distribution[row['grade']][distribution_key]['true'] += 1
+                totals[distribution_key]['true'] += 1
             else:
                 distribution[row['grade']][distribution_key]['false'] += 1
+                totals[distribution_key]['false'] += 1
 
         _count_boolean_value('transfer', 'transferStatus')
         _count_boolean_value('minority', 'underrepresentedMinorityStatus')
@@ -81,9 +87,12 @@ def get_grade_distribution_with_demographics(term_id, section_ids):
         def _count_string_value(value, distribution_key):
             value = str(value) if value else 'none'
             if value not in distribution[row['grade']][distribution_key]:
-                distribution[row['grade']][distribution_key][value] = 1
-            else:
-                distribution[row['grade']][distribution_key][value] += 1
+                distribution[row['grade']][distribution_key][value] = 0
+            if value not in totals[distribution_key]:
+                totals[distribution_key][value] = 0
+                totals[distribution_key][value] = 0
+            distribution[row['grade']][distribution_key][value] += 1
+            totals[distribution_key][value] += 1
 
         _count_string_value(row['gender'], 'genders')
         _count_string_value(row['terms_in_attendance'], 'termsInAttendance')
@@ -93,7 +102,20 @@ def get_grade_distribution_with_demographics(term_id, section_ids):
         for ethnicity in collapsed_ethnicities:
             _count_string_value(ethnicity, 'ethnicities')
 
-    return distribution
+    sorted_distribution = []
+    for grade in sorted(distribution.keys(), key=_grade_ordering_index):
+        for distribution_key, values in distribution[grade].items():
+            if distribution_key == 'total':
+                continue
+            for distribution_value, count in values.items():
+                distribution[grade][distribution_key][distribution_value] = {
+                    'count': count,
+                    'percentage': round(count * 100 / float(totals[distribution_key][distribution_value]), 1),
+                }
+        distribution[grade].update({'grade': grade})
+        sorted_distribution.append(distribution[grade])
+
+    return sorted_distribution
 
 
 def get_grade_distribution_with_enrollments(term_id, section_ids):
@@ -114,3 +136,13 @@ def get_grade_distribution_with_enrollments(term_id, section_ids):
                 distribution[course_name][r['grade']] += 1
 
     return distribution
+
+
+GRADE_ORDERING = ('A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'P', 'NP', 'I')
+
+
+def _grade_ordering_index(grade):
+    try:
+        return GRADE_ORDERING.index(grade)
+    except ValueError:
+        return len(GRADE_ORDERING)
