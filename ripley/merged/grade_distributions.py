@@ -28,6 +28,7 @@ from itertools import groupby
 
 from flask import current_app as app
 from ripley.externals.data_loch import get_grades_with_demographics, get_grades_with_enrollments
+from ripley.lib.util import to_percentage
 
 
 COLLAPSE_ETHNICITIES = {
@@ -64,6 +65,7 @@ EMPTY_DISTRIBUTION = {
 
 def get_grade_distribution_with_demographics(term_id, section_ids):  # noqa
     distribution = {}
+    class_size = 0
     totals = deepcopy(EMPTY_DISTRIBUTION)
 
     for row in get_grades_with_demographics(term_id, section_ids):
@@ -72,6 +74,7 @@ def get_grade_distribution_with_demographics(term_id, section_ids):  # noqa
         if row['grade'] not in distribution:
             distribution[row['grade']] = deepcopy(EMPTY_DISTRIBUTION)
         distribution[row['grade']]['total'] += 1
+        class_size += 1
 
         def _count_boolean_value(column, distribution_key):
             if row[column]:
@@ -110,9 +113,10 @@ def get_grade_distribution_with_demographics(term_id, section_ids):  # noqa
             for distribution_value, count in values.items():
                 distribution[grade][distribution_key][distribution_value] = {
                     'count': count,
-                    'percentage': round(count * 100 / float(totals[distribution_key][distribution_value]), 1),
+                    'percentage': to_percentage(count, totals[distribution_key][distribution_value]),
                 }
         distribution[grade].update({'grade': grade})
+        distribution[grade].update({'percentage': to_percentage(distribution[grade]['total'], class_size)})
         sorted_distribution.append(distribution[grade])
 
     return sorted_distribution

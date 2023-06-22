@@ -64,6 +64,10 @@ def to_isoformat(value):
     return value and value.astimezone(tzutc()).isoformat()
 
 
+def to_percentage(count, total):
+    return round(count * 100 / float(total), 1)
+
+
 def utc_now():
     return datetime.utcnow().replace(tzinfo=pytz.utc)
 

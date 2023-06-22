@@ -89,9 +89,7 @@ export default {
           const pointValue = this.$_.get(item[group][option], 'percentage', 0)
           secondarySeries.data.push({
             dataLabels: {
-              enabled: true,
-              format: '{y}%',
-              y: pointValue < 20 ? 0 : 20
+              enabled: false
             },
             y: pointValue
           })
