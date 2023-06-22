@@ -40,7 +40,7 @@ def canvas_site_roster(canvas_site_id):
     if len(sections):
         term_id = sections[0]['termId']
         section_ids = [s['id'] for s in sections]
-        enrollments = get_section_enrollments(term_id, section_ids)
+        enrollments = get_section_enrollments(term_id, section_ids, include_dropped=False)
         if len(enrollments):
             enrollments_by_section_id = defaultdict(list)
             for e in enrollments:

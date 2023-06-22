@@ -234,16 +234,17 @@ def get_sections_count(term_id):
     return result and result[0]['count']
 
 
-def get_section_enrollments(term_id, section_ids):
+def get_section_enrollments(term_id, section_ids, include_dropped=True):
     params = {
         'term_id': term_id,
         'section_ids': section_ids,
     }
-    sql = """SELECT se.sis_section_id AS section_id, se.ldap_uid, ba.sid, ba.first_name, ba.last_name,
+    drop_clause = "AND se.sis_enrollment_status != 'D'" if not include_dropped else ''
+    sql = f"""SELECT se.sis_section_id AS section_id, se.ldap_uid, ba.sid, ba.first_name, ba.last_name,
             se.sis_enrollment_status, ba.email_address
         FROM sis_data.edo_enrollments se
         JOIN sis_data.basic_attributes ba on ba.ldap_uid = se.ldap_uid
-        WHERE se.sis_section_id = ANY(%(section_ids)s)
+        WHERE se.sis_section_id = ANY(%(section_ids)s) {drop_clause}
         AND se.sis_term_id = %(term_id)s
         ORDER BY se.sis_section_id, ba.last_name, ba.first_name, se.ldap_uid"""
     return safe_execute_rds(sql, **params)
