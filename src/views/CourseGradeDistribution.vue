@@ -112,14 +112,23 @@ export default {
       chartSettings.colors[0] = primarySeriesColor
       this.$_.each(primarySeries.data, item => {
         item.color = primarySeriesColor
-        item.dataLabels.color = item.y < 20 ? primarySeriesColor : 'white'
+        item.dataLabels = this.getDataLabel(item.y, primarySeriesColor)
+        item.dataLabels.enabled = !secondarySeries
       })
       if (secondarySeries) {
         secondarySeries.color = this.colors.secondary
         this.$_.each(this.$_.get(secondarySeries, 'data', []), item => {
           item.color = this.colors.secondary
-          item.dataLabels.color = item.y < 20 ? this.colors.secondary : 'white'
         })
+      }
+    },
+    getDataLabel(yVal, color) {
+      const displayAboveColumn = yVal < 2
+      return {
+        color: displayAboveColumn ? color : 'white',
+        enabled: true,
+        format: '{y}%',
+        y: displayAboveColumn ? 2 : 22
       }
     },
     loadPrimarySeries() {
@@ -129,13 +138,8 @@ export default {
       this.$_.each(this.gradeDistribution.demographics, item => {
         this.chartDefaults.series[0].data.push({
           color: this.colors.default,
-          dataLabels: {
-            color: item.total < 20 ? this.colors.default : 'white',
-            enabled: true,
-            format: '{y}%',
-            y: item.total < 20 ? 0 : 20
-          },
-          y: item.total
+          dataLabels: this.getDataLabel(item.percentage, this.colors.default),
+          y: item.percentage
         })
         this.chartDefaults.xAxis.categories.push(item.grade)
       })

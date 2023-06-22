@@ -58,6 +58,7 @@ class TestGradeDistributions:
                     },
                 },
                 'grade': 'A+',
+                'percentage': 17.6,
                 'termsInAttendance': {
                     '8': {
                         'count': 2,
@@ -138,6 +139,7 @@ class TestGradeDistributions:
                     },
                 },
                 'grade': 'A',
+                'percentage': 57.1,
                 'termsInAttendance': {
                     '8': {
                         'count': 2,
@@ -218,6 +220,7 @@ class TestGradeDistributions:
                     },
                 },
                 'grade': 'A-',
+                'percentage': 8.8,
                 'termsInAttendance': {
                     '8': {
                         'count': 1,
@@ -282,6 +285,7 @@ class TestGradeDistributions:
                     },
                 },
                 'grade': 'B+',
+                'percentage': 5.5,
                 'termsInAttendance': {
                     '5': {
                         'count': 3,
@@ -334,6 +338,7 @@ class TestGradeDistributions:
                     },
                 },
                 'grade': 'C+',
+                'percentage': 1.1,
                 'termsInAttendance': {
                     '8': {
                         'count': 1,
@@ -382,6 +387,7 @@ class TestGradeDistributions:
                     },
                 },
                 'grade': 'F',
+                'percentage': 1.1,
                 'termsInAttendance': {
                     '8': {
                         'count': 1,
@@ -442,6 +448,7 @@ class TestGradeDistributions:
                     },
                 },
                 'grade': 'P',
+                'percentage': 8.8,
                 'termsInAttendance': {
                     '8': {
                         'count': 3,
