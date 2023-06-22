@@ -36,6 +36,8 @@ SET row_security = off;
 
 ALTER TABLE IF EXISTS ONLY public.canvas_site_mailing_list_members
     DROP CONSTRAINT IF EXISTS canvas_site_mailing_list_members_unique_constraint;
+ALTER TABLE IF EXISTS ONLY public.canvas_site_mailing_list_members
+    DROP CONSTRAINT IF EXISTS canvas_site_mailing_list_members_mailing_list_id_fkey;
 ALTER TABLE IF EXISTS ONLY public.canvas_site_mailing_lists
     DROP CONSTRAINT IF EXISTS canvas_site_mailing_lists_unique_constraint;
 ALTER TABLE IF EXISTS ONLY public.canvas_synchronization

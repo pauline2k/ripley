@@ -165,3 +165,9 @@ CREATE TABLE user_auths (
 );
 
 ALTER TABLE ONLY user_auths ADD CONSTRAINT user_auths_unique_constraint UNIQUE (uid);
+
+--
+
+ALTER TABLE ONLY canvas_site_mailing_list_members
+    ADD CONSTRAINT canvas_site_mailing_list_members_mailing_list_id_fkey FOREIGN KEY (mailing_list_id) REFERENCES canvas_site_mailing_lists(id) ON DELETE CASCADE;
+
