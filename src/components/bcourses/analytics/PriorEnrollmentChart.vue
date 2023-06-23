@@ -8,7 +8,7 @@
       class="my-4"
       @change="onSelectCourse"
     >
-      <option value="">Select Prior Enrollment</option>
+      <option :value="null">Select Prior Enrollment</option>
       <option
         v-for="(option, index) in courses"
         :id="`grade-distribution-enrollment-option-${index}`"
@@ -48,12 +48,11 @@ export default {
   data: () => ({
     chartSettings: {},
     courses: [],
-    selectedCourse: undefined
+    selectedCourse: null
   }),
   created() {
     this.chartSettings = this.$_.cloneDeep(this.chartDefaults)
     this.courses = this.$_.keys(this.gradeDistribution)
-    this.selectedCourse = ''
   },
   methods: {
     onSelectCourse() {
@@ -63,12 +62,12 @@ export default {
           name: this.selectedCourse
         }
         this.$_.each(this.gradeDistribution[this.selectedCourse], item => {
-          const pointValue = this.$_.get(item, 'percentage', 0)
           secondarySeries.data.push({
+            custom: {total: this.$_.get(item, 'count', 0)},
             dataLabels: {
               enabled: false
             },
-            y: pointValue
+            y: this.$_.get(item, 'percentage', 0)
           })
         })
         this.chartSettings.series[1] = secondarySeries

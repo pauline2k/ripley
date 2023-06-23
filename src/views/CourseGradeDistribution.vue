@@ -67,7 +67,7 @@ export default {
       ],
       title: false,
       tooltip: {
-        format: '<div class="chart-tooltip-key">{key} Grade</div><div class="chart-tooltip-name">{series.name}</div><div class="chart-tooltip-value">{y}% of class</div>',
+        format: '<div class="chart-tooltip-key">{key} Grade</div><div class="chart-tooltip-name">{series.name}</div><div class="chart-tooltip-value">{point.options.custom.total} students</div><div class="chart-tooltip-value">{y}% of class</div>',
         stickOnContact: true,
         useHTML: true
       },
@@ -138,6 +138,7 @@ export default {
       this.$_.each(this.gradeDistribution.demographics, item => {
         this.chartDefaults.series[0].data.push({
           color: this.colors.default,
+          custom: {total: item.total},
           dataLabels: this.getDataLabel(item.percentage, this.colors.default),
           y: item.percentage
         })
