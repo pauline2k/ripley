@@ -2,9 +2,9 @@
     "https://canvas.beta.instructure.com": [{
         "default": true,
         "client_id": "10720000000000650",
-        "auth_login_url": "TODO",
-        "auth_token_url": "TODO",
-        "key_set_url": "/api/auth/jwks",
+        "auth_login_url": "https://fake.bcourses.com/api/lti/authorize_redirect",
+        "auth_token_url": "https://fake.bcourses.com/login/oauth2/token",
+        "key_set_url": "https://fake.bcourses.com/api/lti/security/jwks",
         "key_set": null,
         "private_key_file": "test_lti_rsa",
         "public_key_file": "test_lti_rsa.pub",

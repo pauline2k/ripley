@@ -84,6 +84,22 @@ class TestGetGradeExportConfig:
         )
 
 
+class TestGetGradeDistributionConfig:
+
+    def test_anonymous(self, client, app):
+        """Anonymous user can get the Grade Distribution tool config JSON."""
+        _api_get_tool_config(
+            client,
+            app,
+            config_uri='grade_distribution.json',
+            target='launch_grade_distribution',
+            expected_title='Grade Distribution (LTI 1.3)',
+            expected_description='',
+            expected_placement='course_navigation',
+            expected_default='disabled',
+        )
+
+
 class TestGetMailingListConfig:
 
     def test_anonymous(self, client, app):
