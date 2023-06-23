@@ -132,8 +132,16 @@ def _set_session(response):
         cookie_value = request.cookies[cookie_name]
         composite_key = json.loads(cookie_value.split('|')[0])
         app.logger.debug(f'cookie: {composite_key}')
+        current_user_key = current_user.get_serialized_composite_key(canvas_site_id=current_user.canvas_site_id, uid=current_user.uid)
+        app.logger.debug(f'current_user: {current_user_key}')
         if composite_key['uid'] == current_user.uid and composite_key['canvas_site_id'] == current_user.canvas_site_id:
-            response.set_cookie(cookie_name, cookie_value, samesite='None', secure=True)
+            _set_cookie(response, cookie_name, cookie_value)
+        elif current_user.is_authenticated:
+            _set_cookie(response, cookie_name, current_user_key)
+
+
+def _set_cookie(response, name, value):
+    response.set_cookie(name, value, samesite='None', secure=True)
 
 
 def _user_loader(user_id=None):
