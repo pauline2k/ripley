@@ -88,6 +88,17 @@ def config_export_grade():
     )
 
 
+@app.route('/api/lti/config/grade_distribution.json')
+def config_grade_distribution():
+    return _tool_config(
+        title='Grade Distribution (LTI 1.3)',
+        description='',
+        target='launch_grade_distribution',
+        placement='course_navigation',
+        default='disabled',
+    )
+
+
 @app.route('/api/lti/config/mailing_list.json')
 def config_mailing_list():
     return _tool_config(
@@ -184,6 +195,11 @@ def launch_create_site():
 @app.route('/api/lti/export_grade', methods=['GET', 'POST'])
 def launch_export_grade():
     return _launch_tool('export_grade')
+
+
+@app.route('/api/lti/grade_distribution', methods=['GET', 'POST'])
+def launch_grade_distribution():
+    return _launch_tool('grade_distribution')
 
 
 @app.route('/api/lti/mailing_list', methods=['GET', 'POST'])
