@@ -85,6 +85,8 @@ CREATE TABLE canvas_site_mailing_lists (
 );
 ALTER TABLE ONLY canvas_site_mailing_lists
     ADD CONSTRAINT canvas_site_mailing_lists_unique_constraint UNIQUE (canvas_site_id);
+ALTER TABLE ONLY canvas_site_mailing_lists
+    ADD CONSTRAINT canvas_site_mailing_lists_name_unique_constraint UNIQUE (list_name);
 
 --
 

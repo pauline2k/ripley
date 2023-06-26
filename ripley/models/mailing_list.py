@@ -96,7 +96,12 @@ class MailingList(Base):
         if mailing_list:
             raise ValueError(f'List with id {canvas_site_id} already exists')
         mailing_list = cls(canvas_site_id=canvas_site_id)
+
         mailing_list.list_name = list_name or cls.get_suggested_name(canvas_site_id)
+        name_conflict = cls.query.filter_by(list_name=mailing_list.list_name).first()
+        if name_conflict:
+            raise ValueError(f'List with name {mailing_list.list_name} already exists')
+
         mailing_list.welcome_email_body = welcome_email_body
         mailing_list.welcome_email_subject = welcome_email_subject
         db.session.add(mailing_list)

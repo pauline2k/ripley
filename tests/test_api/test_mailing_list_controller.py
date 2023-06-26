@@ -143,6 +143,14 @@ class TestCreateMailingList:
                     expected_status_code=400,
                 )
 
+                # Name conflicts also disallowed.
+                _api_create_mailing_list(
+                    client=client,
+                    canvas_site_id='1234568',
+                    name='astron-218-stellar-dynamics-and-galactic-stru-sp23',
+                    expected_status_code=400,
+                )
+
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
         with requests_mock.Mocker() as m:
