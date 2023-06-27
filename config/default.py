@@ -114,6 +114,10 @@ REDIS_PORT = '6379'
 # Used to encrypt session cookie.
 SECRET_KEY = 'secret'
 
+# Preserve flask-login session inside iframes.
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
+
 # Override in local configs.
 SQLALCHEMY_DATABASE_URI = 'postgresql://ripley:ripley@localhost:5432/nostromo'
 
