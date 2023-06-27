@@ -186,7 +186,7 @@ export default {
               })
             })
           }
-          this.$_.each(this.students, s => s.idx = this.idx(`${s.firstName} ${s.lastName} ${s.id}`))
+          this.$_.each(this.students, s => s.idx = this.idx(`${s.firstName} ${s.lastName} ${s.studentId}`))
           // If student count is low then tooltip is not necessary.
           const threshold = 36
           this.showPrintButtonTooltip = (this.students.length >= threshold) && this.disablePrintButton
