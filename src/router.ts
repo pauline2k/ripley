@@ -52,28 +52,28 @@ const routes:RouteRecordRaw[] = [
       },
       {
         component: CourseAddUser,
-        path: '/add_user/:id',
+        path: '/add_user',
         meta: {
           title: 'Find a User to Add'
         }
       },
       {
         component: CourseGradeDistribution,
-        path: '/grade_distribution/:id',
+        path: '/grade_distribution',
         meta: {
           title: 'Grade Distribution'
         }
       },
       {
         component: CourseGradeExport,
-        path: '/export_grade/:id',
+        path: '/export_grade',
         meta: {
           title: 'E-Grade Export'
         }
       },
       {
         component: CourseManageOfficialSections,
-        path: '/manage_official_sections/:id',
+        path: '/manage_official_sections',
         meta: {
           title: 'Official Sections'
         }
@@ -87,7 +87,7 @@ const routes:RouteRecordRaw[] = [
       },
       {
         component: Roster,
-        path: '/roster/:id',
+        path: '/roster',
         meta: {
           title: 'Roster Photos'
         }
@@ -136,7 +136,7 @@ const routes:RouteRecordRaw[] = [
       },
       {
         component: SendWelcomeEmail,
-        path: '/welcome_email/mailing_list/:id',
+        path: '/welcome_email/mailing_list',
         meta: {
           title: 'Send Welcome Email'
         }

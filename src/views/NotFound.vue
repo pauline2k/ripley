@@ -37,7 +37,7 @@
                   role="alert"
                 >
                   <span v-if="$route.redirectedFrom">
-                    The requested URL {{ this.$route.redirectedFrom }} was not found.
+                    The requested URL {{ $route.redirectedFrom }} was not found.
                   </span>
                   <span v-if="!$route.redirectedFrom">
                     Page not found.

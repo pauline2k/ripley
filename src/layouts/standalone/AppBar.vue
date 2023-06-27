@@ -64,7 +64,6 @@ import Context from '@/mixins/Context'
 import moment from 'moment'
 import {updateUserSession} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
-import {getMyUserProfile} from '@/api/user'
 import {isValidCanvasSiteId} from '@/utils'
 
 export default {
@@ -112,15 +111,11 @@ export default {
             useContextStore().setCurrentUser(data)
             this.canvasSiteId = this.currentUser.canvasSiteId
             this.isUpdatingCanvasSiteId = false
-            this.eventHub.emit('current-user-update')
             this.$router.go()
           },
           error => {
             this.error = error
-            getMyUserProfile().then(data => {
-              useContextStore().setCurrentUser(data)
-              this.$router.push({path: '/'})
-            })
+            this.$router.push({path: '/'})
           }
         )
       }
