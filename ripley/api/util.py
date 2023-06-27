@@ -89,7 +89,7 @@ def start_login_session(user, redirect_path=None):
     if not _is_safe_url(request.args.get('next')):
         return abort(400)
     if authenticated:
-        return redirect(redirect_path) if redirect_path else tolerant_jsonify(current_user.to_api_json())
+        return redirect(redirect_path) if redirect_path else tolerant_jsonify(current_user.to_api_json(include_canvas_user_data=True))
     else:
         return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)
 
