@@ -11,7 +11,7 @@
       <a
         :id="`student-profile-url-${student.studentId}`"
         class="text-decoration-none"
-        :href="student.profileUrl || `${config.apiBaseUrl}/redirect/canvas/${canvasSiteId}/user/${student.uid}`"
+        :href="student.profileUrl || `${config.apiBaseUrl}/redirect/canvas/${currentUser.canvasSiteId}/user/${student.uid}`"
         target="_top"
       >
         <RosterPhoto
@@ -66,10 +66,6 @@ export default {
   mixins: [Context],
   components: {OutboundLink, RosterPhoto},
   props: {
-    canvasSiteId: {
-      required: true,
-      type: Number
-    },
     students: {
       required: true,
       type: Array

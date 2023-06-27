@@ -21,9 +21,9 @@
         <label for="page-site-mailing-list-site-id" class="sr-only">Course Site ID</label>
         <v-text-field
           id="page-site-mailing-list-site-id"
-          v-model="canvasSiteId"
+          v-model="currentUser.canvasSiteId"
           aria-required="true"
-          :error="!!$_.trim(canvasSiteId) && !isCanvasSiteIdValid"
+          :error="!!$_.trim(currentUser.canvasSiteId) && !isCanvasSiteIdValid"
           hide-details
           maxlength="10"
           label="Canvas Course ID"
@@ -65,24 +65,22 @@ export default {
   data: () => ({
     error: undefined,
     isProcessing: false,
-    canvasSiteId: undefined
   }),
   computed: {
     isCanvasSiteIdValid() {
-      return isValidCanvasSiteId(this.canvasSiteId)
+      return isValidCanvasSiteId(this.currentUser.canvasSiteId)
     }
   },
   mounted() {
-    this.canvasSiteId = this.currentUser.canvasSiteId
     this.init()
     putFocusNextTick('page-header')
     this.$ready()
   },
   methods: {
     submit() {
-      if (!this.isProcessing && this.canvasSiteId) {
+      if (!this.isProcessing && this.currentUser.canvasSiteId) {
         this.isProcessing = true
-        getMailingList(this.canvasSiteId).then(
+        getMailingList(this.currentUser.canvasSiteId).then(
           data => {
             this.error = undefined
             if (data) {
@@ -90,7 +88,7 @@ export default {
               this.$router.push('/mailing_list/update')
               this.isProcessing = false
             } else {
-              getCanvasSite(this.canvasSiteId).then(data => {
+              getCanvasSite(this.currentUser.canvasSiteId).then(data => {
                 this.setCanvasSite(data)
                 this.$router.push('/mailing_list/create')
                 this.isProcessing = false

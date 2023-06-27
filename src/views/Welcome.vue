@@ -41,7 +41,7 @@
                 <v-list-item
                   v-for="(utility, index) in utilities"
                   :key="index"
-                  active-color="primary"
+                  color="primary"
                 >
                   <template #prepend>
                     <v-icon class="mr-4" :icon="utility.icon" />
@@ -91,12 +91,12 @@ export default {
         {disabled: false, icon: 'mdi-email-multiple-outline', path: '/mailing_list/select_course', title: 'Manage Mailing List'},
         {disabled: false, icon: 'mdi-web', path: '/create_site', title: 'Create a Site'},
         {disabled: false, icon: 'mdi-account-plus-outline', path: '/provision_user', title: 'User Provision'},
-        {disabled: !canvasSiteId, icon: 'mdi-export', path: `/grade_export/${canvasSiteId}`, title: 'E-Grade Export'},
-        {disabled: !canvasSiteId, icon: 'mdi-chart-bar-stacked', path: `/grade_distribution/${canvasSiteId}`, title: 'Grade Distribution'},
-        {disabled: !canvasSiteId, icon: 'mdi-account-school', path: `/add_user/${canvasSiteId}`, title: 'Find a User to Add'},
-        {disabled: !canvasSiteId, icon: 'mdi-email-fast-outline', path: `/welcome_email/mailing_list/${canvasSiteId}`, title: 'Send Welcome Email'},
-        {disabled: !canvasSiteId, icon: 'mdi-google-classroom', path: `/manage_official_sections/${canvasSiteId}`, title: 'Official Sections'},
-        {disabled: !canvasSiteId, icon: 'mdi-account-multiple', path: `/roster/${canvasSiteId}`, title: 'Roster Photos'}
+        {disabled: !canvasSiteId, icon: 'mdi-export', path: '/grade_export', title: 'E-Grade Export'},
+        {disabled: !canvasSiteId, icon: 'mdi-chart-bar-stacked', path: '/grade_distribution', title: 'Grade Distribution'},
+        {disabled: !canvasSiteId, icon: 'mdi-account-school', path: '/add_user', title: 'Find a User to Add'},
+        {disabled: !canvasSiteId, icon: 'mdi-email-fast-outline', path: '/welcome_email/mailing_list', title: 'Send Welcome Email'},
+        {disabled: !canvasSiteId, icon: 'mdi-google-classroom', path: '/manage_official_sections', title: 'Official Sections'},
+        {disabled: !canvasSiteId, icon: 'mdi-account-multiple', path: '/roster', title: 'Roster Photos'}
       ], tool => tool.title)
     }
   }
