@@ -33,6 +33,7 @@ class TestGradeDistributions:
         d = get_grade_distribution_with_demographics('2228', ['99999'])
         assert d == [
             {
+                'classSize': 91,
                 'ethnicities': {
                     'Asian / Asian American': {
                         'count': 6,
@@ -107,9 +108,10 @@ class TestGradeDistributions:
                         'percentage': 16.7,
                     },
                 },
-                'total': 16,
+                'count': 16,
             },
             {
+                'classSize': 91,
                 'ethnicities': {
                     'Hispanic / Latinx': {
                         'count': 32,
@@ -192,9 +194,10 @@ class TestGradeDistributions:
                         'percentage': 83.3,
                     },
                 },
-                'total': 52,
+                'count': 52,
             },
             {
+                'classSize': 91,
                 'ethnicities': {
                     'Hispanic / Latinx': {
                         'count': 6,
@@ -261,9 +264,10 @@ class TestGradeDistributions:
                         'percentage': 9.6,
                     },
                 },
-                'total': 8,
+                'count': 8,
             },
             {
+                'classSize': 91,
                 'ethnicities': {
                     'Hispanic / Latinx': {
                         'count': 4,
@@ -322,9 +326,10 @@ class TestGradeDistributions:
                         'percentage': 6.0,
                     },
                 },
-                'total': 5,
+                'count': 5,
             },
             {
+                'classSize': 91,
                 'ethnicities': {
                     'Hispanic / Latinx': {
                         'count': 1,
@@ -371,9 +376,10 @@ class TestGradeDistributions:
                         'percentage': 1.2,
                     },
                 },
-                'total': 1,
+                'count': 1,
             },
             {
+                'classSize': 91,
                 'ethnicities': {
                     'White': {
                         'count': 1,
@@ -420,9 +426,10 @@ class TestGradeDistributions:
                         'percentage': 100.0,
                     },
                 },
-                'total': 1,
+                'count': 1,
             },
             {
+                'classSize': 91,
                 'ethnicities': {
                     'White': {
                         'count': 5,
@@ -493,61 +500,133 @@ class TestGradeDistributions:
                         'percentage': 9.6,
                     },
                 },
-                'total': 8,
+                'count': 8,
             },
         ]
 
     def test_enrollment_distribution(self):
-        d = get_grade_distribution_with_enrollments('2228', ['99999'])
-        print(d)
+        grades = {
+            'A+': {
+                'percentage': 17.6,
+                'classSize': 91,
+                'count': 16,
+            },
+            'A': {
+                'percentage': 57.1,
+                'classSize': 91,
+                'count': 52,
+            },
+            'A-': {
+                'percentage': 8.8,
+                'classSize': 91,
+                'count': 8,
+            },
+            'B+': {
+                'percentage': 5.5,
+                'classSize': 91,
+                'count': 5,
+            },
+            'C+': {
+                'percentage': 1.1,
+                'classSize': 91,
+                'count': 1,
+            },
+            'F': {
+                'percentage': 1.1,
+                'classSize': 91,
+                'count': 1,
+            },
+            'P': {
+                'percentage': 8.8,
+                'classSize': 91,
+                'count': 8,
+            },
+        }
+        d = get_grade_distribution_with_enrollments('2228', ['99999'], grades)
         assert d == {
             'ANTHRO 197': [
                 {
                     'grade': 'A+',
-                    'count': 2,
-                    'percentage': 22.2,
+                    'noPriorEnrollCount': 14,
+                    'noPriorEnrollPercentage': 17.1,
+                    'priorEnrollCount': 2,
+                    'priorEnrollPercentage': 22.2,
+                    'totalCount': 16,
+                    'totalPercentage': 17.6,
                 },
                 {
                     'grade': 'A',
-                    'count': 2,
-                    'percentage': 22.2,
+                    'noPriorEnrollCount': 50,
+                    'noPriorEnrollPercentage': 61.0,
+                    'priorEnrollCount': 2,
+                    'priorEnrollPercentage': 22.2,
+                    'totalCount': 52,
+                    'totalPercentage': 57.1,
                 },
                 {
                     'grade': 'F',
-                    'count': 1,
-                    'percentage': 11.1,
+                    'noPriorEnrollCount': 0,
+                    'noPriorEnrollPercentage': 0.0,
+                    'priorEnrollCount': 1,
+                    'priorEnrollPercentage': 11.1,
+                    'totalCount': 1,
+                    'totalPercentage': 1.1,
                 },
                 {
                     'grade': 'P',
-                    'count': 4,
-                    'percentage': 44.4,
+                    'noPriorEnrollCount': 4,
+                    'noPriorEnrollPercentage': 4.9,
+                    'priorEnrollCount': 4,
+                    'priorEnrollPercentage': 44.4,
+                    'totalCount': 8,
+                    'totalPercentage': 8.8,
                 },
             ],
             'ASTRON 218': [
                 {
                     'grade': 'A+',
-                    'count': 1,
-                    'percentage': 16.7,
+                    'noPriorEnrollCount': 15,
+                    'noPriorEnrollPercentage': 17.6,
+                    'priorEnrollCount': 1,
+                    'priorEnrollPercentage': 16.7,
+                    'totalCount': 16,
+                    'totalPercentage': 17.6,
                 },
                 {
                     'grade': 'A',
-                    'count': 1,
-                    'percentage': 16.7,
+                    'noPriorEnrollCount': 51,
+                    'noPriorEnrollPercentage': 60.0,
+                    'priorEnrollCount': 1,
+                    'priorEnrollPercentage': 16.7,
+                    'totalCount': 52,
+                    'totalPercentage': 57.1,
                 },
                 {
                     'grade': 'A-',
-                    'count': 1,
-                    'percentage': 16.7,
+                    'noPriorEnrollCount': 7,
+                    'noPriorEnrollPercentage': 8.2,
+                    'priorEnrollCount': 1,
+                    'priorEnrollPercentage': 16.7,
+                    'totalCount': 8,
+                    'totalPercentage': 8.8,
                 },
                 {
                     'grade': 'F',
-                    'count': 1,
-                    'percentage': 16.7,
+                    'noPriorEnrollCount': 0,
+                    'noPriorEnrollPercentage': 0.0,
+                    'priorEnrollCount': 1,
+                    'priorEnrollPercentage': 16.7,
+                    'totalCount': 1,
+                    'totalPercentage': 1.1,
                 },
                 {
                     'grade': 'P',
-                    'count': 2,
-                    'percentage': 33.3,
+                    'noPriorEnrollCount': 6,
+                    'noPriorEnrollPercentage': 7.1,
+                    'priorEnrollCount': 2,
+                    'priorEnrollPercentage': 33.3,
+                    'totalCount': 8,
+                    'totalPercentage': 8.8,
                 },
             ],
         }

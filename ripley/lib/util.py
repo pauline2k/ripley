@@ -65,7 +65,7 @@ def to_isoformat(value):
 
 
 def to_percentage(count, total):
-    return round(count * 100 / float(total), 1)
+    return round(count * 100 / float(total), 1) if total else 0
 
 
 def utc_now():

@@ -413,7 +413,15 @@ class TestGradeDistributions:
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
             assert response['officialSections'][0]['sisId'] == 'SEC:2022-D-99999'
             assert response['demographics'][0]['genders'] == {'Male': {'count': 5, 'percentage': 22.7}, 'Female': {'count': 11, 'percentage': 16.2}}
-            assert response['enrollments']['ANTHRO 197'][0] == {'grade': 'A+', 'count': 2, 'percentage': 22.2}
+            assert response['enrollments']['ANTHRO 197'][0] == {
+                'grade': 'A+',
+                'noPriorEnrollCount': 14,
+                'noPriorEnrollPercentage': 17.1,
+                'priorEnrollCount': 2,
+                'priorEnrollPercentage': 22.2,
+                'totalCount': 16,
+                'totalPercentage': 17.6,
+            }
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -428,7 +436,15 @@ class TestGradeDistributions:
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
             assert response['officialSections'][0]['sisId'] == 'SEC:2022-D-99999'
             assert response['demographics'][0]['genders'] == {'Male': {'count': 5, 'percentage': 22.7}, 'Female': {'count': 11, 'percentage': 16.2}}
-            assert response['enrollments']['ANTHRO 197'][0] == {'grade': 'A+', 'count': 2, 'percentage': 22.2}
+            assert response['enrollments']['ANTHRO 197'][0] == {
+                'grade': 'A+',
+                'noPriorEnrollCount': 14,
+                'noPriorEnrollPercentage': 17.1,
+                'priorEnrollCount': 2,
+                'priorEnrollPercentage': 22.2,
+                'totalCount': 16,
+                'totalPercentage': 17.6,
+            }
 
 
 def _api_get_grade_distributions(client, canvas_site_id, expected_status_code=200):

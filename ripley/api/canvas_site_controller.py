@@ -104,8 +104,14 @@ def canvas_site_grade_distribution(canvas_site_id):
     if sis_sections:
         term_id = sis_sections[0]['termId']
         section_ids = [s['id'] for s in sis_sections]
-        distribution['demographics'] = get_grade_distribution_with_demographics(term_id, section_ids)
-        distribution['enrollments'] = get_grade_distribution_with_enrollments(term_id, section_ids)
+        demographics = get_grade_distribution_with_demographics(term_id, section_ids)
+        distribution['demographics'] = demographics
+        grades = {d['grade']: {
+            'classSize': d['classSize'],
+            'count': d['count'],
+            'percentage': d['percentage'],
+        } for d in demographics}
+        distribution['enrollments'] = get_grade_distribution_with_enrollments(term_id, section_ids, grades)
     else:
         distribution['demographics'] = []
         distribution['enrollments'] = {}
