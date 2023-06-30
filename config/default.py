@@ -83,6 +83,7 @@ LTI_CONFIG_PATH = 'path/to/lti-config.json'
 
 # background_job_manager configs.
 JOB_HISTORY_DAYS_UNTIL_EXPIRE = 7
+JOB_TIMEOUT_HOURS = 4
 JOBS_AUTO_START = False
 JOBS_SECONDS_BETWEEN_PENDING_CHECK = 60
 

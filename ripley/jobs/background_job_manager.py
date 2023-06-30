@@ -69,6 +69,7 @@ class BackgroundJobManager:
                 while self.monitor.is_running():
                     schedule.run_pending()
                     time.sleep(interval)
+                    JobHistory.fail_orphans(timeout_only=True)
                 schedule.clear()
                 cls.active = False
 
