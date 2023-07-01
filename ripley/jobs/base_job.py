@@ -28,6 +28,7 @@ from threading import Thread
 from flask import current_app as app
 from ripley import db
 from ripley.jobs.errors import BackgroundJobError
+from ripley.lib.util import utc_now
 from ripley.models.job import Job
 from ripley.models.job_history import JobHistory
 from sqlalchemy import text
@@ -61,10 +62,17 @@ class BaseJob:
                 elif current_instance_id and current_instance_id != job_runner_id:
                     app.logger.warn(f'Skipping job because current instance {current_instance_id} is not job runner {job_runner_id}')
 
-                elif JobHistory.is_job_running(job_key=self.key()):
-                    app.logger.warn(f'Skipping job {self.key()} because an older instance is still running')
-
                 else:
+                    running_job = JobHistory.get_running_job(job_key=self.key())
+                    if running_job:
+                        hours_running = (utc_now() - running_job.started_at).total_seconds() / 3600
+                        if hours_running >= app.config['JOB_TIMEOUT_HOURS']:
+                            app.logger.warn(f'Older instance of job {self.key()} has timed out.')
+                            JobHistory.job_finished(id_=running_job.id, failed=True)
+                        else:
+                            app.logger.warn(f'Skipping job {self.key()} because an older instance is still running')
+                            return
+
                     app.logger.info(f'Job {self.key()} is starting.')
                     job_tracker = JobHistory.job_started(job_key=self.key())
                     try:

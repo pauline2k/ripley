@@ -24,7 +24,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 from datetime import datetime
 
-from flask import current_app as app
 from ripley import db, std_commit
 from ripley.lib.util import to_isoformat
 from sqlalchemy import and_, text
@@ -56,7 +55,11 @@ class JobHistory(db.Model):
 
     @classmethod
     def is_job_running(cls, job_key):
-        return cls.query.filter_by(job_key=job_key, finished_at=None).first() is not None
+        return cls.get_running_job(job_key) is not None
+
+    @classmethod
+    def get_running_job(cls, job_key):
+        return cls.query.filter_by(job_key=job_key, finished_at=None).first()
 
     @classmethod
     def job_started(cls, job_key):
@@ -85,13 +88,11 @@ class JobHistory(db.Model):
         return cls.query.filter(criteria).order_by(desc(cls.finished_at)).limit(1).first()
 
     @staticmethod
-    def fail_orphans(timeout_only=False):
+    def fail_orphans():
         sql = """
             UPDATE job_history
             SET failed = TRUE, finished_at = now()
             WHERE finished_at IS NULL"""
-        if timeout_only:
-            sql += f" AND started_at < (now() - INTERVAL '{app.config['JOB_TIMEOUT_HOURS']} HOURS')"
         db.session.execute(text(sql))
 
     @staticmethod
