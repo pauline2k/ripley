@@ -67,7 +67,19 @@ export default {
       ],
       title: false,
       tooltip: {
-        format: '<div class="chart-tooltip-key">{key} Grade</div><div class="chart-tooltip-name">{series.name}</div><div class="chart-tooltip-value">{point.options.custom.count} students</div><div class="chart-tooltip-value">{y}% of class</div>',
+        formatter: function () {
+          const header = `<div class="chart-tooltip-key">${this.x} Grade</div>`
+          return (this.points || []).reduce((tooltipText, point, index) => {
+            return `${tooltipText}${index === 1 ? '<hr class="my-2"/>' : ''}
+              <div class="chart-tooltip-series">
+                <div class="chart-tooltip-name"><span style="color:${point.color}">\u25CF</span>${point.series.name}</div>
+                <div class="chart-tooltip-value">Ratio of Class: <span class="font-weight-bold">${point.y}%</span></div>
+                <div class="chart-tooltip-value">Student Count: <span class="font-weight-bold">${point.point.custom.count}</span></div>
+              </div>`
+          }, header)
+
+        },
+        shared: true,
         stickOnContact: true,
         useHTML: true
       },
@@ -105,16 +117,24 @@ export default {
   },
   methods: {
     changeSeriesColor(chartSettings) {
-      const primarySeries = chartSettings.series[0]
-      const secondarySeries = this.$_.get(chartSettings.series, 1)
-      const primarySeriesColor = secondarySeries ? this.colors.primary : this.colors.default
-      primarySeries.color = primarySeriesColor
-      chartSettings.colors[0] = primarySeriesColor
-      this.$_.each(primarySeries.data, item => {
-        item.color = primarySeriesColor
-        item.dataLabels = this.getDataLabel(item.y, primarySeriesColor)
+      const defaultSeries = chartSettings.series[0]
+      const primarySeries = this.$_.get(chartSettings.series, 1)
+      const secondarySeries = this.$_.get(chartSettings.series, 2)
+      const defaultSeriesColor = (primarySeries && !secondarySeries) ? this.colors.primary : this.colors.default
+      defaultSeries.color = defaultSeriesColor
+      chartSettings.colors[0] = defaultSeriesColor
+      this.$_.each(defaultSeries.data, item => {
+        item.color = defaultSeriesColor
+        item.dataLabels = this.getDataLabel(item.y, defaultSeriesColor)
         item.dataLabels.enabled = !secondarySeries
       })
+      if (primarySeries) {
+        const primarySeriesColor = secondarySeries ? this.colors.primary : this.colors.secondary
+        primarySeries.color = primarySeriesColor
+        this.$_.each(this.$_.get(primarySeries, 'data', []), item => {
+          item.color = primarySeriesColor
+        })
+      }
       if (secondarySeries) {
         secondarySeries.color = this.colors.secondary
         this.$_.each(this.$_.get(secondarySeries, 'data', []), item => {
@@ -151,15 +171,28 @@ export default {
 
 <style lang="scss">
 .chart-tooltip-key {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: bold;
+  padding: 0 4px
 }
 .chart-tooltip-name {
+  align-items: center;
   color: $color-grey-disabled;
-  margin: 2px 0;
+  display: flex;
+  font-size: 13px;
+  font-weight: bold;
+  height: 10px;
+  margin: 4px 0;
   text-transform: uppercase !important;
+  span {
+    font-size: 24px;
+    padding-right: 2px;
+  }
+}
+.chart-tooltip-series {
+  padding: 2px 4px 4px;
 }
 .chart-tooltip-value {
-  font-size: 13px;
+  font-size: 14px;
 }
 </style>

@@ -57,11 +57,24 @@ export default {
   methods: {
     onSelectCourse() {
       if (this.selectedCourse) {
+        const gradesWithoutPriorEnroll = {
+          data: [],
+          name: `Have not taken ${this.selectedCourse}`
+        }
         const gradesWithPriorEnroll = {
           data: [],
-          name: this.selectedCourse
+          name: `Have taken ${this.selectedCourse}`
         }
         this.$_.each(this.gradeDistribution[this.selectedCourse], item => {
+          gradesWithoutPriorEnroll.data.push({
+            custom: {
+              count: this.$_.get(item, 'noPriorEnrollCount', 0)
+            },
+            dataLabels: {
+              enabled: false
+            },
+            y: this.$_.get(item, 'noPriorEnrollPercentage', 0)
+          })
           gradesWithPriorEnroll.data.push({
             custom: {
               count: this.$_.get(item, 'priorEnrollCount', 0)
@@ -72,9 +85,12 @@ export default {
             y: this.$_.get(item, 'priorEnrollPercentage', 0)
           })
         })
-        this.chartSettings.series[1] = gradesWithPriorEnroll
+        this.chartSettings.series[0].type = 'spline'
+        this.chartSettings.series[1] = gradesWithoutPriorEnroll
+        this.chartSettings.series[2] = gradesWithPriorEnroll
       } else if (this.chartSettings.series.length > 1) {
-        this.chartSettings.series = [this.chartSettings.series[0]]
+        this.chartSettings.series.splice(1, 2)
+        this.chartSettings.series[0].type = 'column'
       }
       this.changeSeriesColor(this.chartSettings)
     }

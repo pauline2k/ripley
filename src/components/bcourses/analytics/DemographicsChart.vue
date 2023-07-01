@@ -125,7 +125,7 @@ export default {
         }
         this.$_.each(this.gradeDistribution, item => {
           secondarySeries.data.push({
-            custom: {total: this.$_.get(item[group][option], 'count', 0)},
+            custom: {count: this.$_.get(item[group][option], 'count', 0)},
             dataLabels: {
               enabled: false
             },
