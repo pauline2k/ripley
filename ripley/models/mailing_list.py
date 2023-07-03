@@ -203,7 +203,11 @@ class MailingList(Base):
         active_mailing_list_members = list(filter(lambda m: not m.deleted_at, mailing_list_members))
         email_addresses_of_active_mailing_list_members = [m.email_address.lower() for m in active_mailing_list_members]
 
-        active_canvas_site_users = list(filter(lambda u: str(u.login_id).strip().isnumeric(), canvas_site_users))
+        active_canvas_site_users = []
+        for canvas_site_user in canvas_site_users:
+            login_id = str(canvas_site_user.login_id).strip() if hasattr(canvas_site_user, 'login_id') else None
+            if login_id and login_id.isnumeric():
+                active_canvas_site_users.append(canvas_site_user)
         count_per_chunk = 10000
         for chunk in range(0, len(active_canvas_site_users), count_per_chunk):
             canvas_user_chunk = canvas_site_users[chunk:chunk + count_per_chunk]

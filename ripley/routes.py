@@ -147,8 +147,10 @@ def _set_cookie(response, name, value):
 def _user_loader(user_id=None):
     from ripley.models.user import User
 
-    composite_key = json.loads(user_id) if user_id else {}
-    canvas_site_id = composite_key.get('canvas_site_id', None)
-    uid = composite_key.get('uid', None)
-    user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
-    return User(user_id)
+    serialized_composite_key = None
+    composite_key = json.loads(user_id) if user_id else None
+    if isinstance(composite_key, dict):
+        canvas_site_id = composite_key.get('canvas_site_id', None)
+        uid = composite_key.get('uid', None)
+        serialized_composite_key = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
+    return User(serialized_composite_key)
