@@ -49,6 +49,7 @@ CANVAS_TEST_SERVERS = ['https://hard_knocks_api.instructure.com']
 CURRENT_TERM_ID = '2023-B'
 
 # The Data Loch provides read-only Postgres access.
+DATA_LOCH_BASIC_ATTRIBUTES_TABLE = 'edo_basic_attributes'
 DATA_LOCH_RDS_URI = 'postgresql://nessie:secret@secret-rds-url.com:5432/db'
 DATA_LOCH_MAX_CONNECTIONS = 50
 

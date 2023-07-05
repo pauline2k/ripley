@@ -75,7 +75,7 @@ def cursor_from_pool():
 
 def get_all_active_users():
     # Beware CLC-7157 (the occasional active user with an 'A' person type).
-    sql = """SELECT * FROM sis_data.basic_attributes
+    sql = f"""SELECT * FROM sis_data.{_basic_attributes_table()}
         WHERE (affiliations LIKE '%-TYPE-%' AND affiliations NOT LIKE '%TYPE-SPA%')
         AND (person_type != 'A' OR affiliations LIKE '%-TYPE-REGISTERED%')"""
     return safe_execute_rds(sql)
@@ -243,7 +243,7 @@ def get_section_enrollments(term_id, section_ids, include_dropped=True):
     sql = f"""SELECT se.sis_section_id AS section_id, se.ldap_uid, ba.sid, ba.first_name, ba.last_name,
             se.sis_enrollment_status, ba.email_address
         FROM sis_data.edo_enrollments se
-        JOIN sis_data.basic_attributes ba on ba.ldap_uid = se.ldap_uid
+        JOIN sis_data.{_basic_attributes_table()} ba on ba.ldap_uid = se.ldap_uid
         WHERE se.sis_section_id = ANY(%(section_ids)s) {drop_clause}
         AND se.sis_term_id = %(term_id)s
         ORDER BY se.sis_section_id, ba.last_name, ba.first_name, se.ldap_uid"""
@@ -273,7 +273,7 @@ def get_undergraduate_term(term_id):
 def get_users(uids):
     uids_sql_fragment = "'" + "', '".join(uids) + "'"
     sql = f"""
-        SELECT * FROM sis_data.basic_attributes
+        SELECT * FROM sis_data.{_basic_attributes_table()}
         WHERE
             (affiliations LIKE '%-TYPE-%' AND affiliations NOT LIKE '%TYPE-SPA%')
             AND (person_type != 'A' OR affiliations LIKE '%-TYPE-REGISTERED%')
@@ -293,3 +293,7 @@ def _safe_execute(sql, cursor, **kwargs):
     rows = [dict(r) for r in cursor.fetchall()]
     app.logger.debug(f'Query returned {len(rows)} rows in {query_time} seconds:\n{sql}\n{kwargs}')
     return rows
+
+
+def _basic_attributes_table():
+    return app.config['DATA_LOCH_BASIC_ATTRIBUTES_TABLE']
