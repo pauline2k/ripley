@@ -586,7 +586,7 @@ def _csv_data_changed(row, new_row):
         row['login_id'] != new_row['login_id']
         # Canvas interprets an empty 'email' column as 'Do not change.'
         or (row['email'] and row['email'] != new_row['email'])
-        or (row['full_name'] != f"{new_row['first_name']} {new_row['last_name']}"))
+        or (row['full_name'] != f"{new_row['first_name'] or ''} {new_row['last_name'] or ''}"))
 
 
 def _determine_instructor_role(sis_section_id, primary_sections, role_code):
