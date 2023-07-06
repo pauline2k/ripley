@@ -73,11 +73,28 @@ def cursor_from_pool():
         connection_pool.putconn(connection)
 
 
+# Query to identify new users for adding to bCourses, scoped to active users only.
 def get_all_active_users():
     # Beware CLC-7157 (the occasional active user with an 'A' person type).
     sql = f"""SELECT * FROM sis_data.{_basic_attributes_table()}
         WHERE (affiliations LIKE '%-TYPE-%' AND affiliations NOT LIKE '%TYPE-SPA%')
         AND (person_type != 'A' OR affiliations LIKE '%-TYPE-REGISTERED%')"""
+    return safe_execute_rds(sql)
+
+
+# Query to retrieve user data for maintenance within bCourses, more broadly scoped to
+# include inactive users.
+def get_users(uids=None):
+    uids_sql_fragment = "ldap_uid IN ('" + "', '".join(uids) + "') AND" if uids else ''
+    sql = f"""
+        SELECT * FROM sis_data.{_basic_attributes_table()}
+        WHERE {uids_sql_fragment} (
+            person_type != 'A' OR
+            affiliations LIKE '%STUDENT-TYPE%' OR
+            affiliations LIKE '%EMPLOYEE-TYPE%' OR
+            affiliations LIKE '%GUEST-TYPE%'
+        )
+    """
     return safe_execute_rds(sql)
 
 
@@ -267,18 +284,6 @@ def get_undergraduate_term(term_id):
     sql = f"""SELECT * FROM terms.term_definitions
               WHERE term_id = '{term_id}'
            """
-    return safe_execute_rds(sql)
-
-
-def get_users(uids):
-    uids_sql_fragment = "'" + "', '".join(uids) + "'"
-    sql = f"""
-        SELECT * FROM sis_data.{_basic_attributes_table()}
-        WHERE
-            (affiliations LIKE '%-TYPE-%' AND affiliations NOT LIKE '%TYPE-SPA%')
-            AND (person_type != 'A' OR affiliations LIKE '%-TYPE-REGISTERED%')
-            AND ldap_uid IN ({uids_sql_fragment})
-    """
     return safe_execute_rds(sql)
 
 
