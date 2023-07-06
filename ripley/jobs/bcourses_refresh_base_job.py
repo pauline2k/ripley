@@ -35,7 +35,7 @@ import zipfile
 
 from flask import current_app as app
 from ripley.externals import canvas
-from ripley.externals.data_loch import get_all_active_users, get_edo_enrollment_updates, get_edo_instructor_updates, \
+from ripley.externals.data_loch import get_edo_enrollment_updates, get_edo_instructor_updates, \
     get_section_enrollments, get_section_instructors, get_sections, get_sections_count, get_users
 from ripley.externals.s3 import find_all_dated_csvs, find_last_dated_csv, find_last_dated_csvs, stream_object_text, upload_dated_csv
 from ripley.jobs.base_job import BaseJob
@@ -80,7 +80,7 @@ class BcoursesRefreshBaseJob(BaseJob):
             self.initialize_recent_updates(sis_term_ids, uids_for_updates)
             users_by_uid = {r['ldap_uid']: r for r in get_users(uids_for_updates)}
         else:
-            users_by_uid = {r['ldap_uid']: r for r in get_all_active_users()}
+            users_by_uid = {r['ldap_uid']: r for r in get_users()}
 
         if self.job_flags.enrollments:
             self.initialize_enrollment_provisioning_reports(sis_term_ids, users_by_uid)

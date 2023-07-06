@@ -43,12 +43,12 @@ class TestBcoursesDeleteEmailAddressesJob:
             BcoursesDeleteEmailAddressesJob(app)._run()
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_all_active_users')
-    def test_vanishing_user(self, mock_all_users, app, campus_users):
+    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_users')
+    def test_vanishing_user(self, mock_users, app, campus_users):
         with setup_bcourses_refresh_job(app) as (s3, m):
             ash = next(u for u in campus_users if u['ldap_uid'] == '30000')
             campus_users.remove(ash)
-            mock_all_users.return_value = campus_users
+            mock_users.return_value = campus_users
 
             BcoursesDeleteEmailAddressesJob(app)._run()
 
@@ -58,5 +58,5 @@ class TestBcoursesDeleteEmailAddressesJob:
 
     @pytest.fixture(scope='function')
     def campus_users(self, app):
-        from ripley.externals.data_loch import get_all_active_users
-        return get_all_active_users()
+        from ripley.externals.data_loch import get_users
+        return get_users()

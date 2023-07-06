@@ -38,14 +38,14 @@ class TestBcoursesRefreshAccountsJob:
             assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
             assert_s3_key_not_found(app, s3, 'user-sis-import')
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_all_active_users')
-    def test_name_change(self, mock_all_users, app, campus_users):
+    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_users')
+    def test_name_change(self, mock_users, app, campus_users):
         with setup_bcourses_refresh_job(app) as (s3, m):
             for u in campus_users:
                 if u['first_name'] == 'Ash':
                     u['first_name'] = 'Definitely-not-a-synthetic-Ash'
                     break
-            mock_all_users.return_value = campus_users
+            mock_users.return_value = campus_users
 
             BcoursesRefreshAccountsJob(app)._run()
 
@@ -56,14 +56,14 @@ class TestBcoursesRefreshAccountsJob:
             assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
             assert users_imported[1] == '30030000,30000,Definitely-not-a-synthetic-Ash,🤖,synthetic.ash@berkeley.edu,active'
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_all_active_users')
-    def test_email_change(self, mock_all_users, app, campus_users):
+    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_users')
+    def test_email_change(self, mock_users, app, campus_users):
         with setup_bcourses_refresh_job(app) as (s3, m):
             for u in campus_users:
                 if u['email_address'] == 'synthetic.ash@berkeley.edu':
                     u['email_address'] = 'definitely.no.robots.here@berkeley.edu'
                     break
-            mock_all_users.return_value = campus_users
+            mock_users.return_value = campus_users
 
             BcoursesRefreshAccountsJob(app)._run()
 
@@ -74,14 +74,14 @@ class TestBcoursesRefreshAccountsJob:
             assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
             assert users_imported[1] == '30030000,30000,Ash,🤖,definitely.no.robots.here@berkeley.edu,active'
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_all_active_users')
-    def test_sis_id_change(self, mock_all_users, app, campus_users):
+    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_users')
+    def test_sis_id_change(self, mock_users, app, campus_users):
         with setup_bcourses_refresh_job(app) as (s3, m):
             for u in campus_users:
                 if u['ldap_uid'] == '30000':
                     u['sid'] = '1337'
                     break
-            mock_all_users.return_value = campus_users
+            mock_users.return_value = campus_users
 
             BcoursesRefreshAccountsJob(app)._run()
 
@@ -99,5 +99,5 @@ class TestBcoursesRefreshAccountsJob:
 
     @pytest.fixture(scope='function')
     def campus_users(self, app):
-        from ripley.externals.data_loch import get_all_active_users
-        return get_all_active_users()
+        from ripley.externals.data_loch import get_users
+        return get_users()
