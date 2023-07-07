@@ -90,7 +90,8 @@ def get_users(uids=None):
         SELECT * FROM sis_data.{_basic_attributes_table()}
         WHERE {uids_sql_fragment} (
             person_type != 'A' OR
-            affiliations LIKE '%STUDENT-TYPE%' OR
+            affiliations LIKE '%STUDENT-TYPE-REGISTERED%' OR
+            affiliations LIKE '%STUDENT-TYPE-NOT REGISTERED%' OR
             affiliations LIKE '%EMPLOYEE-TYPE%' OR
             affiliations LIKE '%GUEST-TYPE%'
         )
