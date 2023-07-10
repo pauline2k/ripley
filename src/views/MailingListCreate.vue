@@ -74,7 +74,7 @@
         <v-container fluid>
           <v-row no-gutters align="start">
             <v-col cols="1">
-              <div class="float-right pr-3">
+              <div class="float-right mt-1 pr-3 pt-4">
                 <label for="mailing-list-name-input" class="font-weight-medium">Name:</label>
               </div>
             </v-col>
@@ -89,8 +89,8 @@
                 aria-required="true"
                 hide-details
                 maxlength="255"
-                variant="outlined"
                 required
+                variant="outlined"
                 @keydown.enter="create"
               />
               <div class="has-invalid-characters">
