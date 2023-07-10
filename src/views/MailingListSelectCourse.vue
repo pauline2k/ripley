@@ -21,9 +21,9 @@
         <label for="page-site-mailing-list-site-id" class="sr-only">Course Site ID</label>
         <v-text-field
           id="page-site-mailing-list-site-id"
-          v-model="currentUser.canvasSiteId"
+          v-model="canvasSiteId"
           aria-required="true"
-          :error="!!$_.trim(currentUser.canvasSiteId) && !isCanvasSiteIdValid"
+          :error="!!$_.trim(canvasSiteId) && !isCanvasSiteIdValid"
           hide-details
           maxlength="10"
           label="Canvas Course ID"
@@ -63,12 +63,13 @@ export default {
   mixins: [Context, MailingList],
   components: {SpinnerWithinButton},
   data: () => ({
+    canvasSiteId: undefined,
     error: undefined,
     isProcessing: false,
   }),
   computed: {
     isCanvasSiteIdValid() {
-      return isValidCanvasSiteId(this.currentUser.canvasSiteId)
+      return isValidCanvasSiteId(this.canvasSiteId)
     }
   },
   mounted() {
@@ -78,9 +79,9 @@ export default {
   },
   methods: {
     submit() {
-      if (!this.isProcessing && this.currentUser.canvasSiteId) {
+      if (!this.isProcessing && this.canvasSiteId) {
         this.isProcessing = true
-        getMailingList(this.currentUser.canvasSiteId).then(
+        getMailingList(this.canvasSiteId).then(
           data => {
             this.error = undefined
             if (data) {
@@ -88,7 +89,7 @@ export default {
               this.$router.push('/mailing_list/update')
               this.isProcessing = false
             } else {
-              getCanvasSite(this.currentUser.canvasSiteId).then(data => {
+              getCanvasSite(this.canvasSiteId).then(data => {
                 this.setCanvasSite(data)
                 this.$router.push('/mailing_list/create')
                 this.isProcessing = false
