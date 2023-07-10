@@ -162,7 +162,7 @@ def _canvas_site_term_json(canvas_site):
     api_json = None
     if canvas_site:
         canvas_sis_term_id = canvas_site.term['sis_term_id']
-        term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
+        term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id) if canvas_sis_term_id else None
         if term:
             api_json = {
                 'term_yr': term.year,

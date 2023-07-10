@@ -78,11 +78,15 @@ class MailingList(Base):
     @classmethod
     def get_suggested_name(cls, canvas_site_id):
         canvas_site = canvas.get_course(canvas_site_id)
-        term = BerkeleyTerm.from_canvas_sis_term_id(canvas_site.term['sis_term_id'])
-        name = unidecode(canvas_site.name.strip().lower())
-        name = '-'.join([word for word in re.split('[^a-z0-9]+', name) if word])[0:45]
-        name += '-' + term.to_abbreviation() if term else '-list'
-        return name
+        sis_term_id = canvas_site.term['sis_term_id']
+        term = BerkeleyTerm.from_canvas_sis_term_id(sis_term_id) if sis_term_id else None
+        if term:
+            name = unidecode(canvas_site.name.strip().lower())
+            name = '-'.join([word for word in re.split('[^a-z0-9]+', name) if word])[0:45]
+            name += '-' + term.to_abbreviation() if term else '-list'
+            return name
+        else:
+            return None
 
     @classmethod
     def create(
