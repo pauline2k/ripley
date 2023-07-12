@@ -29,7 +29,7 @@ from ripley.externals import calnet
 
 
 def get_calnet_attributes_for_uids(app, uids):
-    users = _get_calnet_users(app, uids)
+    users = _get_calnet_users(app, list(uids))
 
     # Update dictionary format to be interchangeable with loch basic_attributes query results.
     def _transform_user(user):
