@@ -34,6 +34,8 @@ ldap_connection_pool = None
 SCHEMA_DICT = {
     'berkeleyEduAffiliations': 'affiliations',
     'berkeleyEduAlternateID': 'email',
+    'berkeleyEduCSID': 'csid',
+    'berkeleyEduStuID': 'sid',
     'berkeleyEduPrimaryDeptUnit': 'primary_dept_code',
     'departmentNumber': 'dept_code',
     'givenName': 'first_name',

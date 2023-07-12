@@ -1,9 +1,12 @@
 {
+    "affiliations": "STUDENT-TYPE-REGISTERED",
+    "csid": "30040000",
     "deptCode": "SYPSY",
     "email": "xo.kane@berkeley.edu",
     "firstName": "XO",
     "isExpiredPerLdap": false,
     "lastName": "Kane",
     "name": "XO",
+    "sid": "30040000",
     "uid": "40000"
 }

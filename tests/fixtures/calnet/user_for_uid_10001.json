@@ -1,9 +1,12 @@
 {
+    "affiliations": "EMPLOYEE-TYPE-STAFF",
+    "csid": "30010000",
     "deptCode": "SYPSY",
     "email": "____________berkeley.edu",
     "firstName": "Dallas",
     "isExpiredPerLdap": false,
     "lastName": "👨‍✈️",
     "name": "Dallas 👨‍✈️",
+    "sid": "30010000",
     "uid": "10001"
 }

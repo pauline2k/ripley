@@ -40,6 +40,7 @@ from ripley.externals.data_loch import get_edo_enrollment_updates, get_edo_instr
 from ripley.externals.s3 import find_all_dated_csvs, find_last_dated_csv, find_last_dated_csvs, stream_object_text, upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.lib.berkeley_term import BerkeleyTerm
+from ripley.lib.calnet_utils import get_calnet_attributes_for_uids
 from ripley.lib.canvas_utils import api_formatted_course_role, csv_formatted_course_role, csv_row_for_campus_user, format_term_enrollments_export, \
     parse_canvas_sis_section_id, sis_enrollment_status_to_canvas_course_role, uid_from_canvas_login_id, user_id_from_attributes
 from ripley.lib.sis_import_csv import SisImportCsv
@@ -78,9 +79,9 @@ class BcoursesRefreshBaseJob(BaseJob):
         if self.job_flags.incremental:
             uids_for_updates = set()
             self.initialize_recent_updates(sis_term_ids, uids_for_updates)
-            users_by_uid = {r['ldap_uid']: r for r in get_users(uids_for_updates)}
+            users_by_uid = _get_calnet_users(uids_for_updates)
         else:
-            users_by_uid = {r['ldap_uid']: r for r in get_users()}
+            users_by_uid = _get_calnet_users()
 
         if self.job_flags.enrollments:
             self.initialize_enrollment_provisioning_reports(sis_term_ids, users_by_uid)
@@ -91,7 +92,7 @@ class BcoursesRefreshBaseJob(BaseJob):
             self.sis_user_id_changes = {}
             self.email_deletions = []
 
-            with self.get_canvas_user_report(timestamp) as user_report:
+            with self.get_canvas_user_report(timestamp, users_by_uid) as user_report:
                 whitelisted_uids = [user.uid for user in UserAuth.get_canvas_whitelist()]
                 for row in csv.DictReader(user_report):
                     new_row = self.process_user(row, users_by_uid, whitelisted_uids)
@@ -231,7 +232,7 @@ class BcoursesRefreshBaseJob(BaseJob):
         self.enrollment_updates = _collect_enrollment_updates(enrollment_results, 'sis_enrollment_status')
 
     @contextmanager
-    def get_canvas_user_report(self, timestamp):
+    def get_canvas_user_report(self, timestamp, users_by_uid):
         if self.job_flags.incremental:
             previous_user_report = find_last_dated_csv('canvas_provisioning_reports', 'user-provision-report')
             self.patch_user_updates(previous_user_report)
@@ -240,6 +241,24 @@ class BcoursesRefreshBaseJob(BaseJob):
             canvas_users_file = tempfile.NamedTemporaryFile()
             canvas.get_csv_report('users', download_path=canvas_users_file.name)
             upload_dated_csv(canvas_users_file.name, 'user-provision-report', 'canvas_provisioning_reports', timestamp)
+
+            # If the job flag is not incremental, then we haven't yet called directly to LDAP for any users missing from
+            # the data loch snapshot, and need a preliminary loop through the users report to flag any UIDs that
+            # might be missing.
+
+            missing_uids = set()
+            with open(canvas_users_file.name, 'r') as f:
+                for row in csv.DictReader(f):
+                    account_data = uid_from_canvas_login_id(row['login_id'])
+                    uid = account_data['uid']
+                    if uid not in users_by_uid:
+                        missing_uids.add(uid)
+
+            if missing_uids:
+                ldap_users_by_uid = {u['ldap_uid']: u for u in get_calnet_attributes_for_uids(app, missing_uids)}
+                users_by_uid.update(ldap_users_by_uid)
+
+            # Having looped once through the report for UIDs, we restart the loop for actual processing.
             with open(canvas_users_file.name, 'r') as f:
                 yield f
 
@@ -612,9 +631,9 @@ def _determine_instructor_role(sis_section_id, primary_sections, role_code):
 
 
 def _get_canvas_csv_row(uid):
-    user_results = get_users([uid])
+    user_results = _get_calnet_users([uid])
     if len(user_results):
-        return csv_row_for_campus_user(user_results[0])
+        return csv_row_for_campus_user(next(iter(user_results.values())))
     else:
         return {}
 
@@ -624,3 +643,16 @@ def _get_primary_sections(term_id, sis_section_ids):
     campus_section_ids = [parse_canvas_sis_section_id(s)[0] for s in sis_section_ids]
     loch_sections = get_sections(campus_term_id, campus_section_ids)
     return [s for s in loch_sections if s['is_primary']]
+
+
+def _get_calnet_users(uids=None):
+    # First, call out the CalNet snapshot in the data loch.
+    users_by_uid = {r['ldap_uid']: r for r in get_users(uids)}
+    # If we've been given an specific set of UIDs to look for, then we can do a follow-up-call to LDAP for anyone the
+    # snapshot didn't capture.
+    if uids:
+        missing_uids = set(u for u in uids if u not in users_by_uid.keys())
+        if missing_uids:
+            ldap_users_by_uid = {u['ldap_uid']: u for u in get_calnet_attributes_for_uids(app, missing_uids)}
+            users_by_uid.update(ldap_users_by_uid)
+    return users_by_uid
