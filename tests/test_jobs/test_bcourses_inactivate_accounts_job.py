@@ -43,12 +43,14 @@ class TestBcoursesInactivateAccountsJob:
             BcoursesInactivateAccountsJob(app)._run()
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
 
+    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_calnet_attributes_for_uids')
     @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_users')
-    def test_vanishing_user(self, mock_users, app, campus_users):
+    def test_vanishing_user(self, mock_loch_users, mock_calnet_users, app, loch_campus_users):
         with setup_bcourses_refresh_job(app) as (s3, m):
-            ash = next(u for u in campus_users if u['ldap_uid'] == '30000')
-            campus_users.remove(ash)
-            mock_users.return_value = campus_users
+            ash = next(u for u in loch_campus_users if u['ldap_uid'] == '30000')
+            loch_campus_users.remove(ash)
+            mock_loch_users.return_value = loch_campus_users
+            mock_calnet_users.return_value = []
 
             BcoursesInactivateAccountsJob(app)._run()
 
@@ -63,6 +65,6 @@ class TestBcoursesInactivateAccountsJob:
             assert user_changes_imported[1] == 'UID:30000,30000,Ash,🤖,,suspended'
 
     @pytest.fixture(scope='function')
-    def campus_users(self, app):
+    def loch_campus_users(self, app):
         from ripley.externals.data_loch import get_users
         return get_users()

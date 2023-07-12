@@ -1,9 +1,12 @@
 {
+    "affiliations": "STUDENT-TYPE-REGISTERED",
+    "csid": "30020000",
     "deptCode": "SYPSY",
     "email": "joan.lambert@berkeley.edu",
     "firstName": "Joan",
     "isExpiredPerLdap": false,
     "lastName": "Lambert",
     "name": "Joan Lambert",
+    "sid": "30020000",
     "uid": "20000"
 }

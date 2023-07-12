@@ -1,9 +1,12 @@
 {
+    "affiliations": "EMPLOYEE-TYPE-ACADEMIC",
+    "csid": "30010000",
     "deptCode": "SYPSY",
     "email": "____________berkeley.edu",
     "firstName": "Ellen",
     "isExpiredPerLdap": false,
     "lastName": "Ripley",
     "name": "Ellen Ripley",
+    "sid": "30010000",
     "uid": "10000"
 }

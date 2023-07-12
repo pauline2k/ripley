@@ -28,13 +28,25 @@ from os import path
 from ripley.externals import calnet
 
 
+def get_calnet_attributes_for_uids(app, uids):
+    users = _get_calnet_users(app, uids)
+
+    # Update dictionary format to be interchangeable with loch basic_attributes query results.
+    def _transform_user(user):
+        return {
+            'ldap_uid': user['uid'],
+            'sid': user['sid'] or user['csid'],
+            'first_name': user['firstName'],
+            'last_name': user['lastName'],
+            'email_address': user['email'],
+            'affiliations': user['affiliations'],
+        }
+    return [_transform_user(u) for u in users.values()]
+
+
 def get_calnet_user_for_uid(app, uid):
     users = _get_calnet_users(app, [uid])
     return users[uid] if users else None
-
-
-def get_calnet_users_for_uids(app, uids):
-    return _get_calnet_users(app, uids)
 
 
 def _get_calnet_users(app, uids):
@@ -75,12 +87,14 @@ def _calnet_user_api_feed(person):
 
     return {
         'affiliations': affiliations,
+        'csid': _get('csid'),
         'deptCode': _get('primary_dept_code') or _get('dept_code'),
         'email': _get('email'),
         'firstName': first_name,
         'isExpiredPerLdap': _get('expired'),
         'lastName': last_name,
         'name': f'{first_name} {last_name}'.strip() if (first_name or last_name) else uid,
+        'sid': _get('sid'),
         'uid': uid,
     }
 
@@ -89,4 +103,4 @@ def _get_attribute(person, key):
     if not person:
         return None
     else:
-        return person[key]
+        return person.get(key)
