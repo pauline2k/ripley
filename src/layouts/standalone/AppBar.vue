@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar flat>
+  <v-app-bar class="display-none-when-print" flat>
     <v-app-bar-title>
       <div class="align-center d-flex flex-wrap justify-space-between">
         <div class="me-auto">
