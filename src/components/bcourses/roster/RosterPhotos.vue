@@ -5,7 +5,7 @@
       :key="student.studentId"
       :border="false"
       elevation="0"
-      class="mb-2 text-center"
+      class="avoid-break-inside-when-print mb-2 text-center"
       width="150"
     >
       <a
@@ -86,36 +86,15 @@ export default {
   white-space: nowrap;
 }
 
-.page-roster-photos-list {
-  display: block;
-  overflow: hidden;
-  width: 100%;
-  li {
-    display: block;
-    float: left;
-    height: auto;
-  }
-}
-
 @media print {
   a[href]::after {
     content: none;
   }
-
   .page-roster-student-name {
     font-size: 18px;
     overflow: visible;
     text-overflow: ellipsis;
     white-space: normal;
-  }
-
-  .page-roster-photos-list {
-    li {
-      height: auto;
-      margin-top: 15px;
-      page-break-inside: avoid;
-      width: 220px;
-    }
   }
 }
 </style>

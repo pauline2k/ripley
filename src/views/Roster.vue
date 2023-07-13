@@ -1,6 +1,6 @@
 <template>
-  <div class="page-roster">
-    <div id="alerts-container">
+  <div>
+    <div class="display-none-when-print">
       <div v-if="config.isVueAppDebugMode" style="background-color: lightgray" class="ma-2 pa-5">
         Here is a sample
         <a href="https://ucberkeley.test.instructure.com/courses/1461531/external_tools/36940" target="_blank">Roster photos</a>
@@ -29,7 +29,7 @@
         {{ success }}
       </v-alert>
       <v-container v-if="!error" fluid>
-        <v-row id="roster-search-filters" align-v="center" class="page-roster">
+        <v-row align-v="center" class="display-none-when-print">
           <v-col class="pr-2" sm="3">
             <v-text-field
               id="roster-search"
@@ -231,16 +231,3 @@ export default {
   }
 }
 </script>
-
-<style scoped lang="scss">
-.page-roster {
-  @media print {
-    #alerts-container {
-      display: none;
-    }
-    #roster-search-filters {
-      display: none;
-    }
-  }
-}
-</style>

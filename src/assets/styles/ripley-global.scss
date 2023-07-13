@@ -25,3 +25,16 @@ html, body {
   height: unset !important;
   min-height: unset !important;
 }
+
+@media print {
+  html,
+  body {
+    height: fit-content;
+    *.display-none-when-print {
+      display: none;
+    }
+    *.avoid-break-inside-when-print {
+      page-break-inside: avoid;
+    }
+  }
+}
