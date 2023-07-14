@@ -46,7 +46,7 @@ export default {
         labelFormat: '{name} Grades',
         layout: 'vertical',
         verticalAlign: 'top',
-        y: 50
+        y: -50
       },
       plotOptions: {
         series: {
@@ -126,7 +126,7 @@ export default {
       this.$_.each(defaultSeries.data, item => {
         item.color = defaultSeriesColor
         item.dataLabels = this.getDataLabel(item.y, defaultSeriesColor)
-        item.dataLabels.enabled = !secondarySeries
+        item.dataLabels.enabled = !primarySeries
       })
       if (primarySeries) {
         const primarySeriesColor = secondarySeries ? this.colors.primary : this.colors.secondary

@@ -144,10 +144,8 @@ def get_grade_distribution_with_enrollments(term_id, section_ids, grades):
     for course_name, course_distribution in distribution.items():
         total_prior_enroll_count = course_distribution['count']
         sorted_distribution = []
-        for grade in sorted(course_distribution.keys(), key=_grade_ordering_index):
-            if grade == 'count':
-                continue
-            grade_prior_enroll_count = course_distribution[grade]
+        for grade in grades.keys():
+            grade_prior_enroll_count = course_distribution.get(grade, 0)
             grade_no_prior_enroll_count = grades[grade]['count'] - grade_prior_enroll_count
             total_no_prior_enroll_count = grades[grade]['classSize'] - total_prior_enroll_count
             sorted_distribution.append({
