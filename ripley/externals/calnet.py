@@ -43,7 +43,7 @@ SCHEMA_DICT = {
     'uid': 'uid',
 }
 
-BATCH_QUERY_MAXIMUM = 500
+BATCH_QUERY_MAXIMUM = 20
 
 
 def client(app):
@@ -76,11 +76,17 @@ class Client:
         return self._search(search_filter, use_fallback_mail=True)
 
     def search_uids(self, uids, search_base=None):
+        from flask import current_app as app
         all_out = []
         for i in range(0, len(uids), BATCH_QUERY_MAXIMUM):
+            app.logger.debug(f'Executing LDAP UID search ({i} to {i + BATCH_QUERY_MAXIMUM} of {len(uids)})')
             uids_batch = uids[i:i + BATCH_QUERY_MAXIMUM]
-            _filter = _ldap_search_filter({'uid': uids_batch}, search_base)
-            all_out += self._search(_filter, search_base)
+            try:
+                _filter = _ldap_search_filter({'uid': uids_batch}, search_base)
+                all_out += self._search(_filter, search_base)
+            except Exception as e:
+                app.logger.error('LDAP UID search query failed')
+                app.logger.exception(e)
         return all_out
 
     def _search(self, search_filter, search_base=None, use_fallback_mail=False):
@@ -128,6 +134,8 @@ def _ldap_search_filter(attributes, search_base, comparator='='):
         ou_scope = '(ou=expired people)'
     elif search_base == 'guests':
         ou_scope = '(ou=guests)'
+    elif search_base == 'active':
+        ou_scope = '(ou=people) (ou=guests)'
     else:
         ou_scope = '(ou=people) (ou=advcon people)'
     return f"""(&

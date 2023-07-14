@@ -29,7 +29,7 @@ from ripley.externals import calnet
 
 
 def get_calnet_attributes_for_uids(app, uids):
-    users = _get_calnet_users(app, list(uids))
+    users = _get_calnet_users(app, list(uids), search_base='active')
 
     # Update dictionary format to be interchangeable with loch basic_attributes query results.
     def _transform_user(user):
@@ -49,7 +49,7 @@ def get_calnet_user_for_uid(app, uid):
     return users[uid] if users else None
 
 
-def _get_calnet_users(app, uids):
+def _get_calnet_users(app, uids, search_base=None):
     users_by_uid = {}
     if app.config['RIPLEY_ENV'] == 'test':
         for uid in uids:
@@ -61,14 +61,15 @@ def _get_calnet_users(app, uids):
                 users_by_uid[uid] = {'uid': uid}
     else:
         calnet_client = calnet.client(app)
-        calnet_results = calnet_client.search_uids(uids)
+        calnet_results = calnet_client.search_uids(uids, search_base)
         for uid in uids:
             calnet_result = next((r for r in calnet_results if str(r['uid']) == str(uid)), None)
-            feed = {
-                **_calnet_user_api_feed(calnet_result),
-                **{'uid': uid},
-            }
-            users_by_uid[uid] = feed
+            if calnet_result:
+                feed = {
+                    **_calnet_user_api_feed(calnet_result),
+                    **{'uid': uid},
+                }
+                users_by_uid[uid] = feed
     return users_by_uid
 
 
