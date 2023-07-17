@@ -30,7 +30,7 @@
       </v-alert>
       <v-container v-if="!error" fluid>
         <v-row align-v="center" class="display-none-when-print">
-          <v-col class="pr-2" sm="3">
+          <v-col class="pr-2 roster-column-when-print" sm="3">
             <v-text-field
               id="roster-search"
               v-model="search"
@@ -231,3 +231,11 @@ export default {
   }
 }
 </script>
+
+<style scoped lang="scss">
+@media print {
+  .roster-column-when-print {
+    padding: 0;
+  }
+}
+</style>

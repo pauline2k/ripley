@@ -4,9 +4,8 @@
       v-for="student in students"
       :key="student.studentId"
       :border="false"
+      class="avoid-break-inside-when-print mb-2 text-center v-card-roster-photo"
       elevation="0"
-      class="avoid-break-inside-when-print mb-2 text-center"
-      width="150"
     >
       <a
         :id="`student-profile-url-${student.studentId}`"
@@ -85,6 +84,9 @@ export default {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.v-card-roster-photo {
+  width: 140px !important;
+}
 
 @media print {
   a[href]::after {
@@ -95,6 +97,10 @@ export default {
     overflow: visible;
     text-overflow: ellipsis;
     white-space: normal;
+  }
+  *.v-card-roster-photo {
+    margin: 0 !important;
+    width: 132px !important;
   }
 }
 </style>
