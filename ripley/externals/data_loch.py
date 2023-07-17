@@ -257,7 +257,22 @@ def get_section_enrollments(term_id, section_ids, include_dropped=True):
         'term_id': term_id,
         'section_ids': section_ids,
     }
-    drop_clause = "AND se.sis_enrollment_status != 'D'" if not include_dropped else ''
+    drop_clause = ''
+    if not include_dropped:
+        drop_clause = """AND se.sis_enrollment_status != 'D' AND
+        CASE se.grading_basis WHEN 'NON' THEN (
+        SELECT MIN(prim_enr.grade)
+          FROM sis_data.edo_sections sec
+          LEFT JOIN sis_data.edo_enrollments prim_enr
+            ON prim_enr.sis_section_id = sec.primary_associated_section_id
+            AND prim_enr.sis_term_id = se.sis_term_id
+            AND prim_enr.ldap_uid = se.ldap_uid
+            AND prim_enr.sis_enrollment_status != 'D'
+          WHERE sec.sis_section_id = se.sis_section_id
+            AND sec.sis_term_id = se.sis_term_id
+            AND prim_enr.ldap_uid IS NOT NULL
+        )
+        ELSE se.grade END IS DISTINCT FROM 'W'"""
     sql = f"""SELECT se.sis_section_id AS section_id, se.ldap_uid, ba.sid, ba.first_name, ba.last_name,
             se.sis_enrollment_status, ba.email_address
         FROM sis_data.edo_enrollments se
