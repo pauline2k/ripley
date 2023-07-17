@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <DefaultBar />
-    <v-main>
+    <v-main class="v-main-when-print">
       <PageLoadProgress v-if="isLoading" />
       <router-view />
     </v-main>
@@ -19,3 +19,11 @@ export default {
   mixins: [Context]
 }
 </script>
+
+<style scoped lang="scss">
+@media print {
+  .v-main-when-print {
+    padding: 0;
+  }
+}
+</style>

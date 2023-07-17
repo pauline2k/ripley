@@ -71,7 +71,7 @@ export default {
 }
 @media print {
   .photo {
-    height: 147px;
+    height: 72px;
   }
 }
 </style>
