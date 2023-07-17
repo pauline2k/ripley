@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import auth from '@/auth'
-import BaseLTI from '@/layouts/lti/BaseLTI.vue'
 import BaseStandalone from '@/layouts/standalone/BaseStandalone.vue'
 import CanvasSiteSummary from '@/views/CanvasSiteSummary.vue'
 import CourseAddUser from '@/views/CourseAddUser.vue'
@@ -24,6 +23,7 @@ import Welcome from '@/views/Welcome.vue'
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 import {useContextStore} from '@/stores/context'
 
+const BaseView = () => import(window.parent.frames.length ? '@/layouts/lti/BaseLTI.vue' : '@/layouts/standalone/BaseStandalone.vue')
 
 const routes:RouteRecordRaw[] = [
   {
@@ -43,7 +43,7 @@ const routes:RouteRecordRaw[] = [
   },
   {
     beforeEnter: auth.requiresAuthenticated,
-    component: BaseStandalone,
+    component: BaseView,
     path: '/',
     children: [
       {
@@ -151,58 +151,7 @@ const routes:RouteRecordRaw[] = [
       {
         component: Welcome,
         name: 'Welcome',
-        path: '/welcome',
-      }
-    ]
-  },
-  {
-    beforeEnter: auth.requiresAuthenticated,
-    component: BaseLTI,
-    path: '/lti',
-    children: [
-      {
-        component: CourseAddUser,
-        path: '/add_user'
-      },
-      {
-        component: CourseGradeDistribution,
-        path: '/grade_distribution'
-      },
-      {
-        component: CourseGradeExport,
-        path: '/export_grade'
-      },
-      {
-        component: CourseManageOfficialSections,
-        path: '/manage_official_sections'
-      },
-      {
-        component: CreateCourseSite,
-        path: '/create_course_site'
-      },
-      {
-        component: CreateProjectSite,
-        path: '/create_project_site'
-      },
-      {
-        component: Roster,
-        path: '/roster'
-      },
-      {
-        component: SiteCreation,
-        path: '/create_site'
-      },
-      {
-        component: SendWelcomeEmail,
-        path: '/mailing_list'
-      },
-      {
-        component: MailingListSelectCourse,
-        path: '/mailing_list/manage'
-      },
-      {
-        component: UserProvision,
-        path: '/provision_user'
+        path: '/welcome'
       }
     ]
   },

@@ -3,7 +3,7 @@ import App from './App.vue'
 import axios from 'axios'
 import moment from 'moment'
 import {createApp} from 'vue'
-import {initializeAxios, isInIframe} from './utils'
+import {initializeAxios} from './utils'
 import {registerPlugins} from '@/plugins'
 import {useContextStore} from '@/stores/context'
 import router from '@/router'
@@ -17,7 +17,11 @@ initializeAxios(app, axios)
 
 // Globals
 app.config.globalProperties.$_ = _
-app.config.globalProperties.$isInIframe = isInIframe
+app.config.globalProperties.$isInIframe = !!window.parent.frames.length
+
+// Remove the following when debugging is done.
+console.log(`$isInIframe: ${app.config.globalProperties.$isInIframe}`)
+
 app.config.globalProperties.$moment = moment
 app.config.globalProperties.$ready = (label: string, focusTarget?: string) => useContextStore().loadingComplete(label, focusTarget)
 
