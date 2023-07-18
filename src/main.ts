@@ -18,10 +18,6 @@ initializeAxios(app, axios)
 // Globals
 app.config.globalProperties.$_ = _
 app.config.globalProperties.$isInIframe = !!window.parent.frames.length
-
-// Remove the following when debugging is done.
-console.log(`$isInIframe: ${app.config.globalProperties.$isInIframe}`)
-
 app.config.globalProperties.$moment = moment
 app.config.globalProperties.$ready = (label: string, focusTarget?: string) => useContextStore().loadingComplete(label, focusTarget)
 

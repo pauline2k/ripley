@@ -128,13 +128,13 @@ class TestCreateMailingList:
                     canvas_site_id=canvas_site_id,
                     name=mailing_list_name,
                 )
-                mailing_list_id = api_json['mailingList']['id']
-                assert api_json['mailingList']['canvasSite']['canvasSiteId'] == 1234567
-                assert api_json['mailingList']['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
+                mailing_list_id = api_json['id']
+                assert api_json['canvasSite']['canvasSiteId'] == 1234567
+                assert api_json['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
                 if mailing_list_name:
-                    assert api_json['mailingList']['name'] == mailing_list_name
+                    assert api_json['name'] == mailing_list_name
                 else:
-                    assert api_json['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+                    assert api_json['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
                 # But you can't step into the same mailing list twice.
                 _api_create_mailing_list(
@@ -160,9 +160,8 @@ class TestCreateMailingList:
             }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
-            response = _api_create_mailing_list(client, canvas_site_id)
-
-            assert response['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+            api_json = _api_create_mailing_list(client, canvas_site_id)
+            assert api_json['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
     def test_student(self, client, app, fake_auth):
         """Denies student."""

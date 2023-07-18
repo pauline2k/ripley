@@ -94,7 +94,7 @@ export default {
         {disabled: !canvasSiteId, icon: 'mdi-export', path: '/grade_export', title: 'E-Grade Export'},
         {disabled: !canvasSiteId, icon: 'mdi-chart-bar-stacked', path: '/grade_distribution', title: 'Grade Distribution'},
         {disabled: !canvasSiteId, icon: 'mdi-account-school', path: '/add_user', title: 'Find a User to Add'},
-        {disabled: !canvasSiteId, icon: 'mdi-email-fast-outline', path: '/welcome_email/mailing_list', title: 'Send Welcome Email'},
+        {disabled: !canvasSiteId, icon: 'mdi-email-fast-outline', path: '/mailing_list/send_welcome_email', title: 'Send Welcome Email'},
         {disabled: !canvasSiteId, icon: 'mdi-google-classroom', path: '/manage_official_sections', title: 'Official Sections'},
         {disabled: !canvasSiteId, icon: 'mdi-account-multiple', path: '/roster', title: 'Roster Photos'}
       ], tool => tool.title)
