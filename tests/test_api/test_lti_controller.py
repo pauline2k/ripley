@@ -207,9 +207,10 @@ def _api_get_tool_config(
     assert tool['privacy_level'] == 'public'
     assert len(tool['settings']['placements']) == 1
     assert tool['settings']['placements'][0] == {
-        'text': expected_title,
-        'placement': expected_placement,
-        'message_type': 'LtiResourceLinkRequest',
         'default': expected_default,
         'enabled': True,
+        'message_type': 'LtiResourceLinkRequest',
+        'placement': expected_placement,
+        'required_permissions': 'manage_course_visibility',
+        'text': expected_title,
     }

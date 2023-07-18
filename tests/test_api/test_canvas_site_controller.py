@@ -137,7 +137,7 @@ class TestCanvasSiteProvisionSections:
             assert section['name'] == 'LEC 001 (In Person)'
             assert section['sisId'] == 'SEC:2023-B-32936'
             assert section['termId'] == '2232'
-            assert len(response['teachingTerms']) == 0
+            assert len(response['teachingTerms']) == 1
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
