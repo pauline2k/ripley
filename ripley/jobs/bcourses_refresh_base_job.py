@@ -406,7 +406,7 @@ class BcoursesRefreshBaseJob(BaseJob):
         if self.job_flags.incremental:
             enrollment_rows = self.enrollment_updates.get(term_id, {}).get(section_id, [])
         else:
-            enrollment_rows = get_section_enrollments(berkeley_term.to_sis_term_id(), [section_id])
+            enrollment_rows = get_section_enrollments(berkeley_term.to_sis_term_id(), [section_id], include_dropped=False)
         app.logger.debug(f'{len(enrollment_rows)} student enrollments found for section {sis_section_id}')
         for enrollment_row in enrollment_rows:
             course_role = sis_enrollment_status_to_canvas_course_role(enrollment_row['sis_enrollment_status'])
