@@ -19,11 +19,3 @@ export default {
   mixins: [Context]
 }
 </script>
-
-<style scoped lang="scss">
-@media print {
-  .v-main-when-print {
-    padding: 0;
-  }
-}
-</style>
