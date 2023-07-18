@@ -1305,5 +1305,31 @@
             "email": "xo.kane@berkeley.edu"
         },
         "status_code": 200
+    },
+    "get_user_8876542_5678901": {
+        "method": "GET",
+        "endpoint": "courses/8876542/users/5678901?include=enrollments",
+        "data": {
+            "id": 5678901,
+            "name": "Ash 🤖",
+            "short_name": "Ash 🤖",
+            "sortable_name": "🤖, Ash",
+            "integration_id": null,
+            "login_id": "30000",
+            "enrollments": [
+                {
+                    "user_id": 5678901,
+                    "course_id": 8876542,
+                    "type": "StudentEnrollment",
+                    "enrollment_state": "active",
+                    "role": "StudentEnrollment",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "300300000",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/5678901"
+                }
+            ],
+            "email": "synthetic.ash@berkeley.edu"
+        },
+        "status_code": 200
     }
 }

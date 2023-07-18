@@ -27,7 +27,7 @@
             "integration_id": null,
             "title": null,
             "bio": null,
-            "primar_email": "ellen.ripley@berkeley.edu",
+            "primary_email": "ellen.ripley@berkeley.edu",
             "login_id": "10000",
             "time_zone": "America/Los_Angeles",
             "locale": null

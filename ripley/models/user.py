@@ -65,12 +65,10 @@ class User(UserMixin):
 
     @property
     def canvas_site_user_roles(self):
-        self._load_canvas_user_data()
         return self.user.get('canvasSiteUserRoles')
 
     @property
     def canvas_user_id(self):
-        self._load_canvas_user_data()
         return self.user['canvasUserId']
 
     def get_id(self):
@@ -107,9 +105,7 @@ class User(UserMixin):
     def name(self):
         return self.user['name']
 
-    def to_api_json(self, include_canvas_user_data=False):
-        if include_canvas_user_data:
-            self._load_canvas_user_data()
+    def to_api_json(self):
         return self.user
 
     @classmethod
@@ -119,62 +115,79 @@ class User(UserMixin):
             'uid': uid,
         })
 
-    def _load_canvas_user_data(self):
-        if self.uid and 'canvasUserId' not in self.user:
-            canvas_site_id = self.__canvas_site_id
-            course = canvas.get_course(course_id=canvas_site_id) if canvas_site_id else None
-            p = canvas.get_sis_user_profile(self.uid) or {}
-            canvas_user_id = p.get('id')
-            self.user.update({
-                'canvasSiteId': canvas_site_id,
+    def _load_canvas_user_data(self, uid):
+        canvas_user_data = None
+        user_profile = canvas.get_sis_user_profile(uid) if uid else None
+        if user_profile:
+            course = canvas.get_course(course_id=self.__canvas_site_id) if uid and self.__canvas_site_id else None
+            canvas_user_id = user_profile.get('id')
+            canvas_user_data = {
+                'canvasSiteId': self.__canvas_site_id,
                 'canvasSiteCourseCode': course.course_code if course else None,
                 'canvasSiteEnrollmentTermId': course.enrollment_term_id if course else None,
                 'canvasSiteName': course.name if course else None,
                 'canvasSiteSisCourseId': course.sis_course_id if course else None,
                 'canvasSiteUserRoles': [],
                 'canvasUserId': canvas_user_id,
-                'canvasUserAvatarUrl': p.get('avatar_url'),
-                'canvasUserLoginId': p.get('login_id'),
-                'canvasUserName': p.get('name'),
-                'canvasUserPrimaryEmail': p.get('primary_email'),
-                'canvasUserShortName': p.get('short_name'),
-                'canvasUserSisUserId': p.get('sis_user_id'),
-                'canvasUserSortableName': p.get('sortable_name'),
-                'canvasUserTitle': p.get('title'),
-            })
+                'canvasUserAvatarUrl': user_profile.get('avatar_url'),
+                'canvasUserLoginId': user_profile.get('login_id'),
+                'canvasUserName': user_profile.get('name'),
+                'canvasUserPrimaryEmail': user_profile.get('primary_email'),
+                'canvasUserShortName': user_profile.get('short_name'),
+                'canvasUserSisUserId': user_profile.get('sis_user_id'),
+                'canvasUserSortableName': user_profile.get('sortable_name'),
+                'canvasUserTitle': user_profile.get('title'),
+            }
             is_teaching = False
-            if canvas_site_id:
-                canvas_site_user = canvas.get_course_user(canvas_site_id, canvas_user_id)
-                if canvas_site_user and canvas_site_user.enrollments:
-                    roles = [e['role'] for e in canvas_site_user.enrollments]
-                    self.user['canvasSiteUserRoles'] = roles
-                    roles_that_teach = ['TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader']
-                    is_teaching = bool(next((role for role in roles if role in roles_that_teach), None))
-            self.user['isTeaching'] = is_teaching
+            canvas_site_user = canvas.get_course_user(self.__canvas_site_id, canvas_user_id)
+            if canvas_site_user and canvas_site_user.enrollments:
+                roles = [e['role'] for e in canvas_site_user.enrollments]
+                canvas_user_data['canvasSiteUserRoles'] = roles
+                roles_that_teach = ['TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader']
+                is_teaching = bool(next((role for role in roles if role in roles_that_teach), None))
+            canvas_user_data['isTeaching'] = is_teaching
+        return canvas_user_data
 
     def _load_user(self, uid=None):
-        user = UserAuth.find_by_uid(uid) if uid else None
-        calnet_profile = get_calnet_user_for_uid(app, uid) if uid else {}
-        expired = calnet_profile.get('isExpiredPerLdap', True)
-        is_active = not expired and (user.active if user else True)
-        is_admin = is_active and (user.is_superuser if user else False)
-
-        affiliations = calnet_profile.get('affiliations', []) or []
-        affiliations = set(affiliations if calnet_profile else [])
-        is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
-        is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
+        calnet_profile = None
+        canvas_user_data = None
+        email_address = None
+        is_active = False
+        is_admin = False
+        is_faculty = False
+        is_staff = False
+        is_teaching = False
+        name = None
+        # Deduce user metadata.
+        if uid:
+            calnet_profile = get_calnet_user_for_uid(app, uid)
+            user_auth = UserAuth.find_by_uid(uid)
+            if calnet_profile:
+                name = calnet_profile.get('name') or f'UID {uid}'
+                email_address = calnet_profile.get('email') or None
+                if not calnet_profile.get('isExpiredPerLdap', True):
+                    is_admin = user_auth.is_superuser if user_auth and user_auth.active else False
+                    canvas_user_data = self._load_canvas_user_data(uid) or {}
+                    canvas_site_user_roles = canvas_user_data.get('canvasSiteUserRoles') if canvas_user_data else None
+                    is_active = bool(is_admin or canvas_site_user_roles)
+                    affiliations = set(calnet_profile.get('affiliations', []) or [])
+                    is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
+                    is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
+                    is_teaching = bool(canvas_user_data and canvas_user_data['isTeaching'])
         return {
-            **calnet_profile,
             **{
                 'canvasSiteId': self.__canvas_site_id,
-                'emailAddress': calnet_profile.get('email'),
+                'emailAddress': email_address,
                 'isActive': is_active,
                 'isAdmin': is_admin,
                 'isAnonymous': not is_active,
                 'isAuthenticated': is_active,
                 'isFaculty': is_faculty,
                 'isStaff': is_staff,
-                'name': calnet_profile.get('name') or f'UID {uid}',
+                'isTeaching': is_teaching,
+                'name': name,
                 'uid': uid,
             },
+            **(calnet_profile or {}),
+            **(canvas_user_data or {}),
         }

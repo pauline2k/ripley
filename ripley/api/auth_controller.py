@@ -81,7 +81,7 @@ def update_user_session():
         if user.is_active and (user.is_admin or len(user.canvas_site_user_roles)):
             # User must be either an admin or a member of the course site.
             start_login_session(user)
-            return tolerant_jsonify(user.to_api_json(include_canvas_user_data=True))
+            return tolerant_jsonify(user.to_api_json())
         else:
             logout_user()
             return tolerant_jsonify(f'Sorry, {uid} is not authorized to use this tool.', 403)

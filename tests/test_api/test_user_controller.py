@@ -54,13 +54,18 @@ class TestUserProfile:
     def test_unauthorized(self, client, fake_auth):
         """Denies unauthorized user."""
         fake_auth.login(canvas_site_id=1234567, uid=teacher_uid)
-        self._api_user_profile(client, expected_status_code=400, uid=student_uid)
+        self._api_user_profile(client, expected_status_code=401, uid=student_uid)
 
-    def test_user_can_view_own_profile(self, client, fake_auth):
+    def test_user_can_view_own_profile(self, app, client, fake_auth):
         """User can view own profile."""
-        fake_auth.login(canvas_site_id=1234567, uid=student_uid)
-        api_json = self._api_user_profile(client, uid=student_uid)
-        assert api_json['isTeaching'] is False
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'course': ['get_by_id_8876542', 'get_user_8876542_5678901'],
+                'user': ['profile_40000'],
+            }, m)
+            fake_auth.login(canvas_site_id=8876542, uid=student_uid)
+            api_json = self._api_user_profile(client, uid=student_uid)
+            assert api_json['isTeaching'] is False
 
     def test_authorized_admin(self, client, fake_auth):
         fake_auth.login(canvas_site_id=None, uid=admin_uid)
@@ -97,7 +102,7 @@ class TestUserProfile:
             # Student
             register_canvas_uris(app, {
                 'course': ['get_by_id_1234567', 'get_user_1234567_5678901'],
-                'user': ['profile_30000'],
+                'user': ['profile_40000'],
             }, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
             assert current_user.uid == student_uid
