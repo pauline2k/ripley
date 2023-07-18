@@ -36,5 +36,8 @@ html, body {
     *.avoid-break-inside-when-print {
       page-break-inside: avoid;
     }
+    *.v-main-when-print {
+      padding: 0;
+    }
   }
 }
