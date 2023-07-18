@@ -2,6 +2,14 @@
   <div v-if="!isLoading" class="canvas-application mx-10 my-5">
     <h1 id="page-header" class="mt-0" tabindex="-1">Create Mailing List</h1>
     <v-alert
+      v-if="!error && !isCreating && !success"
+      density="compact"
+      role="alert"
+      type="info"
+    >
+      No Mailing List has yet been created for this site.
+    </v-alert>
+    <v-alert
       v-if="success"
       class="ma-2"
       :closable="true"
@@ -31,7 +39,7 @@
         <v-card-text>
           <v-container>
             <v-row no-gutters>
-              <v-col cols="2">
+              <v-col cols="2" align="center">
                 <div class="float-right font-weight-medium pr-3">
                   Name:
                 </div>
@@ -73,35 +81,39 @@
         <h2>Create Mailing List</h2>
         <v-container fluid>
           <v-row no-gutters align="start">
-            <v-col cols="1">
-              <div class="float-right mt-1 pr-3 pt-4">
-                <label for="mailing-list-name-input" class="font-weight-medium">Name:</label>
-              </div>
-            </v-col>
-            <v-col cols="7">
-              <div v-if="currentUser.isTeaching && !currentUser.isAdmin">
-                {{ mailingListName }}
-              </div>
-              <v-text-field
-                v-if="currentUser.isAdmin"
-                id="mailing-list-name-input"
-                v-model="mailingListName"
-                aria-required="true"
-                hide-details
-                maxlength="255"
-                required
-                variant="outlined"
-                @keydown.enter="create"
-              />
-              <div class="has-invalid-characters">
-                <div v-if="hasInvalidCharacters" class="d-flex text-red">
-                  <div class="pr-1 text-no-wrap">Name may contain neither spaces nor: </div>
-                  <div><pre>{{ $_.join([...$_.trim(invalidCharacters)], ' ') }}</pre></div>
+            <v-col cols="8">
+              <div class="d-flex pt-1 text-subtitle-1">
+                <div class="float-right pr-3">
+                  <label for="mailing-list-name-input" class="font-weight-bold">Name:</label>
+                </div>
+                <div>
+                  <div v-if="currentUser.isTeaching && !currentUser.isAdmin">
+                    {{ mailingListName }}
+                  </div>
+                  <div>
+                    <v-text-field
+                      v-if="currentUser.isAdmin"
+                      id="mailing-list-name-input"
+                      v-model="mailingListName"
+                      aria-required="true"
+                      hide-details
+                      maxlength="255"
+                      required
+                      variant="outlined"
+                      @keydown.enter="create"
+                    />
+                    <div class="has-invalid-characters">
+                      <div v-if="hasInvalidCharacters" class="d-flex text-red">
+                        <div class="pr-1 text-no-wrap">Name may contain neither spaces nor: </div>
+                        <div><pre>{{ $_.join([...$_.trim(invalidCharacters)], ' ') }}</pre></div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </v-col>
             <v-col>
-              <div class="d-flex pt-3">
+              <div class="d-flex">
                 <div>
                   <v-btn
                     id="btn-cancel"
@@ -187,9 +199,8 @@ export default {
         this.$announcer.polite('Creating list')
         createMailingList(this.canvasSite.canvasSiteId, name).then(
           data => {
-            this.setMailingList(data.mailingList)
-            this.setUpdateSummary(data.summary)
-            this.$router.push('/mailing_list/update')
+            this.setMailingList(data)
+            this.$router.push('/mailing_list/send_welcome_email')
           },
           error => this.error = error
         ).then(() => this.isCreating = false)

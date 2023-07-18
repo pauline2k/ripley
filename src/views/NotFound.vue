@@ -14,37 +14,23 @@
               class="mx-auto"
               :max-width="applicationState.stacktrace ? 640 : 480"
             >
-              <v-card-title>
-                {{ isError ? 'Error' : 'Page Not Found' }}
+              <v-card-title class="ml-2 mt-3">
+                {{ isError ? 'Error' : applicationState.message || 'Page Not Found' }}
               </v-card-title>
-              <v-card-text>
-                <div v-if="isError">
-                  <span
-                    id="error-message"
-                    aria-live="polite"
-                    role="alert"
-                  >
-                    {{ applicationState.message || 'Uh oh, there was a problem.' }}
-                    <div v-if="applicationState.stacktrace" class="py-3">
-                      <pre>{{ applicationState.stacktrace }}</pre>
-                    </div>
-                  </span>
-                </div>
+              <v-card-text v-if="isError || !applicationState.message">
                 <div
-                  v-if="!isError"
-                  id="page-not-found"
+                  v-if="isError"
+                  id="error-message"
                   aria-live="polite"
                   role="alert"
                 >
-                  <span v-if="$route.redirectedFrom">
-                    The requested URL {{ $route.redirectedFrom }} was not found.
-                  </span>
-                  <span v-if="!$route.redirectedFrom">
-                    Page not found.
-                  </span>
+                  {{ applicationState.message || 'Uh oh, there was a problem.' }}
+                  <div v-if="applicationState.stacktrace" class="py-3">
+                    <pre>{{ applicationState.stacktrace }}</pre>
+                  </div>
                 </div>
               </v-card-text>
-              <v-card-subtitle class="pb-5">
+              <v-card-subtitle class="ml-2 mb-7">
                 <ContactUsPrompt />
               </v-card-subtitle>
             </v-card>

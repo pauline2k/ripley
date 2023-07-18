@@ -1,11 +1,6 @@
 <template>
   <div>
     <div class="display-none-when-print">
-      <div v-if="config.isVueAppDebugMode" style="background-color: lightgray" class="ma-2 pa-5">
-        Here is a sample
-        <a href="https://ucberkeley.test.instructure.com/courses/1461531/external_tools/36940" target="_blank">Roster photos</a>
-        view in Junction, the legacy platform.
-      </div>
       <v-alert
         v-if="error"
         class="ma-2"

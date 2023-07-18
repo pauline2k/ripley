@@ -136,7 +136,7 @@ const routes:RouteRecordRaw[] = [
       },
       {
         component: SendWelcomeEmail,
-        path: '/welcome_email/mailing_list',
+        path: '/mailing_list/send_welcome_email',
         meta: {
           title: 'Send Welcome Email'
         }
