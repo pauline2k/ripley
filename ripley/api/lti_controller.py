@@ -272,11 +272,12 @@ def _tool_config(title, description, target, placement, default='enabled'):
                     'platform': 'canvas.instructure.com',
                     'placements': [
                         {
-                            'text': title,
-                            'placement': placement,
-                            'message_type': 'LtiResourceLinkRequest',
                             'default': default,
                             'enabled': True,
+                            'placement': placement,
+                            'message_type': 'LtiResourceLinkRequest',
+                            'required_permissions': 'manage_course_visibility',
+                            'text': title,
                         },
                     ],
                 },

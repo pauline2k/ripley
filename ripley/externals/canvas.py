@@ -95,9 +95,8 @@ def get_course_sections(course_id):
 def get_course_user(course_id, user_id):
     try:
         return get_course(course_id, api_call=False).get_user(user_id, include='enrollments')
-    except Exception as e:
+    except Exception:
         app.logger.error(f'Failed to retrieve Canvas course user (course_id={course_id}, user_id={user_id})')
-        app.logger.exception(e)
 
 
 def get_csv_report(report_type, download_path=None, term_id=None):

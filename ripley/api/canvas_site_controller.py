@@ -69,7 +69,7 @@ def get_canvas_site(canvas_site_id):
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'Lead TA')
-def canvas_site_edit_sections(canvas_site_id):
+def edit_sections(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if not course:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
@@ -93,7 +93,7 @@ def canvas_site_edit_sections(canvas_site_id):
 
 @app.route('/api/canvas_site/<canvas_site_id>/grade_distribution')
 @canvas_role_required('TeacherEnrollment', 'Lead TA')
-def canvas_site_grade_distribution(canvas_site_id):
+def get_grade_distribution(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     canvas_sections = canvas.get_course_sections(canvas_site_id)
     sis_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
@@ -119,16 +119,16 @@ def canvas_site_grade_distribution(canvas_site_id):
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections')
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def canvas_site_official_sections(canvas_site_id):
+@canvas_role_required('DesignerEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+def get_official_sections(canvas_site_id):
     can_edit = bool(next((role for role in current_user.canvas_site_user_roles if role in ['TeacherEnrollment', 'Lead TA']), None))
     course = canvas.get_course(canvas_site_id)
     if not (course):
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
     canvas_sis_term_id = course.term['sis_term_id']
     term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
-    official_sections, section_ids = _get_official_sections(canvas_site_id)
-    teaching_terms = [] if not len(section_ids) else _get_teaching_terms(section_ids)
+    official_sections, section_ids, sections = _get_official_sections(canvas_site_id)
+    teaching_terms = [] if not len(section_ids) else _get_teaching_terms(section_ids, sections)
     return tolerant_jsonify({
         'canvasSite': {
             'canEdit': can_edit,
@@ -140,7 +140,7 @@ def canvas_site_official_sections(canvas_site_id):
 
 
 @app.route('/api/canvas_site/provision/status')
-def canvas_site_provision_status():
+def get_provision_status():
     job_id = request.args.get('jobId', None)
     if not job_id:
         raise BadRequestError('Required parameters are missing.')
@@ -217,20 +217,22 @@ def _get_official_sections(canvas_site_id):
             **section_to_api_json(sis_section),
         }
     official_sections = [_section(s) for s in sis_sections]
-    return official_sections, section_ids
+    return official_sections, section_ids, sis_sections
 
 
-def _get_teaching_terms(section_ids):
+def _get_teaching_terms(section_ids, sections):
     berkeley_terms = BerkeleyTerm.get_current_terms().values()
     # canvas_terms = canvas.get_terms()
     # TODO: find the intersection of berkeley_terms and canvas_terms
     teaching_sections = sort_course_sections(
         data_loch.get_instructing_sections(current_user.uid, [t.to_sis_term_id() for t in berkeley_terms]),
     )
+    if not len(teaching_sections):
+        teaching_sections = sections
     courses_by_term = {}
     for section_id, sections in groupby(teaching_sections, lambda s: s['section_id']):
-        section = next(s for s in sections if s['is_co_instructor'] is False)
-        co_instructor_sections = [s for s in sections if s['is_co_instructor'] is True]
+        section = next(s for s in sections if s.get('is_co_instructor', False) is False)
+        co_instructor_sections = [s for s in sections if s.get('is_co_instructor', False) is True]
         course_id = section['course_id']
         term_id = section['term_id']
         if term_id not in courses_by_term:
