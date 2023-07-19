@@ -1,20 +1,48 @@
 <template>
   <div v-if="!isLoading" class="canvas-application page-site-mailing-list">
     <h1 id="page-header" tabindex="-1">Update Mailing List</h1>
-    <v-alert
-      v-if="alert.message || $_.size(alert.items)"
+    <v-expansion-panels
+      v-if="alerts.length"
       id="mailing-list-update-alert"
-      class="mb-2"
-      closable
-      density="compact"
-      role="alert"
-      :type="alert.type"
+      v-model="openPanelIndex"
+      color="info"
     >
-      <div v-if="alert.message">{{ alert.message }}</div>
-      <ul v-if="$_.size(alert.items)">
-        <li v-for="item in alert.items" :key="item">{{ item }}</li>
-      </ul>
-    </v-alert>
+      <v-expansion-panel
+        v-for="(alert, index) in alerts"
+        :key="index"
+      >
+        <v-expansion-panel-title :color="alert.type === 'errors' ? 'red' : 'success'">
+          {{ alert.message }}
+          [<span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> users</span>]
+          <template #actions>
+            <v-icon
+              color="white"
+              :icon="alert.type === 'errors' ? 'mdi-alert-circle' : 'mdi-check'"
+            />
+          </template>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <v-list class="py-0" density="compact">
+            <v-list-item
+              v-for="emailAddress in alert.emailAddresses"
+              :key="emailAddress"
+              class="py-0"
+              density="compact"
+              rounded
+            >
+              <template #prepend>
+                <v-icon
+                  class="mr-4"
+                  :color="alert.type === 'errors' ? 'red' : 'primary'"
+                  icon="mdi-account"
+                />
+              </template>
+              <v-list-item-subtitle>{{ emailAddress }}</v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
     <div class="mt-4">
       <v-card id="mailing-list-details">
         <v-card-text>
@@ -130,20 +158,21 @@ import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {populateMailingList} from '@/api/mailing-list'
-import {oxfordJoin, pluralize, putFocusNextTick} from '@/utils'
+import {pluralize, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'MailingListUpdate',
   components: {OutboundLink, SpinnerWithinButton},
   mixins: [MailingList, Context],
   data: () => ({
-    isUpdating: false,
+    alerts: [],
     hasUpdatedSincePageLoad: false,
-    alert: undefined,
-    messageType: undefined
+    isUpdating: false,
+    messageType: undefined,
+    openPanelIndex: [],
+    showAlertDetails: false
   }),
   created() {
-    this.setAlert(undefined)
     if (this.mailingList && this.canvasSite) {
       if (this.updateSummary) {
         this.showUpdateSummary()
@@ -159,23 +188,7 @@ export default {
       this.$announcer.polite('Canceled')
       this.$router.push({path: '/mailing_list/select_course'})
     },
-    composeAlertMessage(errorCount, successCount) {
-      let message
-      if (errorCount > 1 && successCount > 1) {
-        const describe = (count, noun, pluralize) => {
-          return count ? `${count === 1 ? 'one' : count} ${noun}${count === 1 ? '' : pluralize}` : ''
-        }
-        const prefix = 'The update resulted in '
-        message = prefix + describe(errorCount, 'error', 's')
-        message += errorCount && successCount ? ' and ' : ''
-        message += describe(successCount, 'success', 'es')
-      }
-      return message
-    },
     pluralize,
-    setAlert(message, items, type) {
-      this.alert = {message, items: items || [], type}
-    },
     showUpdateSummary() {
       const actions = ['add', 'remove', 'restore', 'update']
       const count = key => {
@@ -185,31 +198,30 @@ export default {
       }
       const errorCount = count('errors')
       const successCount = count('successes')
-      let message
-      let items = []
       if (errorCount || successCount) {
-        message = this.composeAlertMessage(errorCount, successCount)
-        this.$_.each(['errors', 'successes'], key => {
+        this.alerts = []
+        this.$_.each(['errors', 'successes'], type => {
           this.$_.each(actions, action => {
-            const emailAddresses = this.updateSummary[action][key]
+            const summary = this.updateSummary[action]
+            const emailAddresses = summary[type]
             if (emailAddresses.length) {
-              const pastTense = action === 'add' ? 'added' : `${action}d`
-              const prefix = key === 'errors' ? `failed to ${action}` : `Successfully ${pastTense} `
-              items.push(prefix + oxfordJoin(emailAddresses))
+              const prefix = type === 'errors' ? `failed to ${action}` : (action === 'add' ? 'added ' : `${action}d `)
+              const message = this.$_.capitalize(prefix + pluralize('user', emailAddresses.length) + '.')
+              this.alerts.push({action, emailAddresses, message, summary, type})
             }
           })
         })
       } else {
-        message = 'No changes made because no changes needed.'
+        this.alerts = [{
+          message: 'Everything is up-to-date. No changes necessary.',
+          type: 'info'
+        }]
       }
-      this.setAlert(message, items, errorCount ? 'warning' : 'success')
     },
     update() {
-      this.setAlert(undefined)
       this.$announcer.polite('Updating')
+      this.alerts = []
       this.isUpdating = true
-      this.alerts = {error: [], success: []}
-
       populateMailingList(this.canvasSite.canvasSiteId).then(
         data => {
           this.setMailingList(data.mailingList)
@@ -217,7 +229,7 @@ export default {
           this.showUpdateSummary()
         },
         error => {
-          this.setAlert(error, [], 'warning')
+          this.setAlert(error, 'warning')
         }
       ).then(() => {
         this.isUpdating = false
@@ -252,6 +264,16 @@ export default {
     font-weight: 300;
     line-height: 1.6;
     margin: 15px;
+  }
+  }
+.toggle-show-hide {
+  color: lightblue;
+  text-decoration: none;
+  &:hover {
+    cursor: pointer;
+  }
+  &:hover, &:focus {
+    text-decoration: underline;
   }
 }
 </style>
