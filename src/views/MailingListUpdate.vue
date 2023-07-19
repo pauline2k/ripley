@@ -217,7 +217,7 @@ export default {
           this.showUpdateSummary()
         },
         error => {
-          this.setAlert(error, 'warning', [])
+          this.setAlert(error, [], 'warning')
         }
       ).then(() => {
         this.isUpdating = false

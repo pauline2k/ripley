@@ -1,4 +1,5 @@
 <template>
+  <AppBar  v-if="!$isInIframe" />
   <v-container
     class="background-splash"
     fill-height
@@ -41,13 +42,14 @@ import derelictOnAlienPlanet from '@/assets/images/derelict-on-alien-planet.jpg'
 </script>
 
 <script>
+import AppBar from '@/layouts/standalone/AppBar.vue'
 import Context from '@/mixins/Context'
 import ContactUsPrompt from '@/components/utils/ContactUsPrompt'
 
 export default {
   name: 'NotFound',
   mixins: [Context],
-  components: {ContactUsPrompt},
+  components: {AppBar, ContactUsPrompt},
   data: () => ({
     isError: false
   }),

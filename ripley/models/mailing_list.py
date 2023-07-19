@@ -215,7 +215,7 @@ class MailingList(Base):
         count_per_chunk = 10000
         for chunk in range(0, len(active_canvas_site_users), count_per_chunk):
             canvas_user_chunk = canvas_site_users[chunk:chunk + count_per_chunk]
-            uids = [u.login_id for u in canvas_user_chunk]
+            uids = [u.login_id for u in filter(lambda u: hasattr(u, 'login_id'), canvas_user_chunk)]
             loch_users_by_uid = {u['ldap_uid']: u for u in data_loch.get_users(uids=uids)}
 
             for course_user in canvas_user_chunk:
