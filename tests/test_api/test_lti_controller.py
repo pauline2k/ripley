@@ -211,6 +211,6 @@ def _api_get_tool_config(
         'enabled': True,
         'message_type': 'LtiResourceLinkRequest',
         'placement': expected_placement,
-        'required_permissions': 'manage_course_visibility',
         'text': expected_title,
+        'visibility': 'admins',
     }
