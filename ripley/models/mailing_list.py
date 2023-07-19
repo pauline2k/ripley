@@ -219,8 +219,8 @@ class MailingList(Base):
             loch_users_by_uid = {u['ldap_uid']: u for u in data_loch.get_users(uids=uids)}
 
             for course_user in canvas_user_chunk:
-                uid = course_user.login_id
-                loch_user = loch_users_by_uid.get(uid)
+                uid = course_user.login_id if hasattr(course_user, 'login_id') else None
+                loch_user = loch_users_by_uid.get(uid) if uid else None
                 if loch_user:
                     loch_user_email = loch_user['email_address']
                     preferred_email = _get_preferred_email(
