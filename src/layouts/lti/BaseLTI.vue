@@ -1,19 +1,14 @@
 <template>
-  <v-main class="v-main-when-print">
-    <PageLoadProgress v-if="isLoading" />
-    <router-view />
-  </v-main>
+  <router-view />
 </template>
 
 <script>
 import Context from '@/mixins/Context'
-import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
 import {iframePostMessage} from '@/utils'
 
 export default {
   name: 'Embedded',
   mixins: [Context],
-  components: {PageLoadProgress},
   methods: {
     /**
      * Update the iframe height on a regular basis to avoid embedded scrollbars on
