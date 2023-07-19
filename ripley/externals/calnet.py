@@ -116,7 +116,7 @@ def _attributes_to_dict(entry, search_base, use_fallback_mail=False):
     if search_base == 'expired':
         out['expired'] = True
     else:
-        if 'expired' in entry.get('dn', ''):
+        if 'expired' in str(entry.get('dn', '')):
             return None
         else:
             out['expired'] = False
