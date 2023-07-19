@@ -1,5 +1,5 @@
 <template>
-  <div class="canvas-application pa-5">
+  <div v-if="!isLoading" class="canvas-application pa-5">
     <h1 id="page-header" tabindex="-1">Manage course site mailing list</h1>
     <v-alert
       v-if="error"
@@ -25,7 +25,7 @@
           required
           style="width: 200px"
           variant="outlined"
-          @keydown.enter="submit"
+          @keydown.enter="proceed"
         />
       </div>
       <div>
@@ -33,7 +33,7 @@
           id="btn-get-mailing-list"
           color="primary"
           :disabled="isProcessing || !isCanvasSiteIdValid"
-          @click="submit"
+          @click="proceed"
         >
           <span v-if="!isProcessing">Get Mailing List</span>
           <span v-if="isProcessing">
@@ -60,7 +60,7 @@ export default {
   data: () => ({
     canvasSiteId: undefined,
     error: undefined,
-    isProcessing: false,
+    isProcessing: false
   }),
   computed: {
     isCanvasSiteIdValid() {
@@ -69,11 +69,16 @@ export default {
   },
   mounted() {
     this.init()
-    putFocusNextTick('page-header')
-    this.$ready()
+    this.canvasSiteId = this.currentUser.canvasSiteId
+    if (this.canvasSiteId) {
+      this.proceed()
+    } else {
+      putFocusNextTick('page-header')
+      this.$ready()
+    }
   },
   methods: {
-    submit() {
+    proceed() {
       if (!this.isProcessing && this.canvasSiteId) {
         this.isProcessing = true
         getMailingList(this.canvasSiteId).then(
