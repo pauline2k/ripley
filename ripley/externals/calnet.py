@@ -97,7 +97,12 @@ class Client:
             with ldap_connection_pool.spawn(timeout=app.config['LDAP_TIMEOUT']) as conn:
                 try:
                     results = conn.paged_search('dc=berkeley,dc=edu', scope=2, filter_exp=search_filter)
-                    return [_attributes_to_dict(entry, search_base, use_fallback_mail) for entry in results]
+                    all_attributes = []
+                    for entry in results:
+                        attributes = _attributes_to_dict(entry, search_base, use_fallback_mail)
+                        if attributes:
+                            all_attributes.append(attributes)
+                    return all_attributes
                 except (ConnectionError, LDAPError) as e:
                     conn.close()
                     # If we've been through all idle connections in the pool and are still getting errors, something is more deeply wrong.
@@ -108,7 +113,13 @@ class Client:
 
 def _attributes_to_dict(entry, search_base, use_fallback_mail=False):
     out = dict.fromkeys(SCHEMA_DICT.values(), None)
-    out['expired'] = True if search_base == 'expired' else False
+    if search_base == 'expired':
+        out['expired'] = True
+    else:
+        if 'expired' in entry.get('dn', ''):
+            return None
+        else:
+            out['expired'] = False
     keys = entry.keys()
 
     def _unwrap_value(value):
