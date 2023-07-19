@@ -80,30 +80,30 @@
       <div class="mt-8">
         <h2>Create Mailing List</h2>
         <v-container fluid>
-          <v-row no-gutters align="start">
+          <v-row no-gutters align="center">
             <v-col cols="8">
               <div class="d-flex pt-1 text-subtitle-1">
-                <div class="float-right pr-3">
-                  <label for="mailing-list-name-input" class="font-weight-bold">Name:</label>
+                <div class="float-right mailing-list-name-input">
+                  <label for="mailing-list-name-input">Name:</label>
                 </div>
-                <div>
+                <div class="w-100">
                   <div v-if="currentUser.isTeaching && !currentUser.isAdmin">
                     {{ mailingListName }}
                   </div>
-                  <div>
+                  <div v-if="currentUser.isAdmin">
                     <v-text-field
-                      v-if="currentUser.isAdmin"
                       id="mailing-list-name-input"
                       v-model="mailingListName"
                       aria-required="true"
+                      density="comfortable"
                       hide-details
                       maxlength="255"
                       required
                       variant="outlined"
                       @keydown.enter="create"
                     />
-                    <div class="has-invalid-characters">
-                      <div v-if="hasInvalidCharacters" class="d-flex text-red">
+                    <div v-if="hasInvalidCharacters" class="has-invalid-characters">
+                      <div class="d-flex text-red">
                         <div class="pr-1 text-no-wrap">Name may contain neither spaces nor: </div>
                         <div><pre>{{ $_.join([...$_.trim(invalidCharacters)], ' ') }}</pre></div>
                       </div>
@@ -213,5 +213,8 @@ export default {
 <style scoped lang="scss">
 .has-invalid-characters {
   min-height: 24px;
+}
+.mailing-list-name-input {
+  padding: 10px 8px 0 0;
 }
 </style>
