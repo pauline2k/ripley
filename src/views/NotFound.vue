@@ -1,48 +1,42 @@
 <template>
-  <v-app>
-    <DefaultBar />
-    <v-main>
-      <v-container
-        class="background-splash"
-        fill-height
-        fluid
-        :style="{backgroundImage: `url(${derelictOnAlienPlanet})`}"
-      >
-        <v-row class="mt-4 pt-4">
-          <v-col>
-            <v-card
-              class="mx-auto"
-              :max-width="applicationState.stacktrace ? 640 : 480"
+  <v-container
+    class="background-splash"
+    fill-height
+    fluid
+    :style="{backgroundImage: `url(${derelictOnAlienPlanet})`}"
+  >
+    <v-row class="mt-4 pt-4">
+      <v-col>
+        <v-card
+          class="mx-auto"
+          :max-width="applicationState.stacktrace ? 640 : 480"
+        >
+          <v-card-title class="ml-2 mt-3">
+            {{ isError ? 'Error' : applicationState.message || 'Page Not Found' }}
+          </v-card-title>
+          <v-card-text v-if="isError || !applicationState.message">
+            <div
+              v-if="isError"
+              id="error-message"
+              aria-live="polite"
+              role="alert"
             >
-              <v-card-title class="ml-2 mt-3">
-                {{ isError ? 'Error' : applicationState.message || 'Page Not Found' }}
-              </v-card-title>
-              <v-card-text v-if="isError || !applicationState.message">
-                <div
-                  v-if="isError"
-                  id="error-message"
-                  aria-live="polite"
-                  role="alert"
-                >
-                  {{ applicationState.message || 'Uh oh, there was a problem.' }}
-                  <div v-if="applicationState.stacktrace" class="py-3">
-                    <pre>{{ applicationState.stacktrace }}</pre>
-                  </div>
-                </div>
-              </v-card-text>
-              <v-card-subtitle class="ml-2 mb-7">
-                <ContactUsPrompt />
-              </v-card-subtitle>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-main>
-  </v-app>
+              {{ applicationState.message || 'Uh oh, there was a problem.' }}
+              <div v-if="applicationState.stacktrace" class="py-3">
+                <pre>{{ applicationState.stacktrace }}</pre>
+              </div>
+            </div>
+          </v-card-text>
+          <v-card-subtitle class="ml-2 mb-7">
+            <ContactUsPrompt />
+          </v-card-subtitle>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script setup>
-import DefaultBar from '@/layouts/standalone/AppBar.vue'
 import derelictOnAlienPlanet from '@/assets/images/derelict-on-alien-planet.jpg'
 </script>
 

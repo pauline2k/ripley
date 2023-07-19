@@ -1,21 +1,15 @@
 <template>
-  <v-app>
-    <DefaultBar />
-    <v-main class="v-main-when-print">
-      <PageLoadProgress v-if="isLoading" />
-      <router-view />
-    </v-main>
-  </v-app>
+  <AppBar />
+  <router-view />
 </template>
 
 <script>
 import Context from '@/mixins/Context'
-import DefaultBar from './AppBar.vue'
-import PageLoadProgress from '@/components/utils/PageLoadProgress'
+import AppBar from './AppBar.vue'
 
 export default {
   name: 'BaseStandalone',
-  components: {DefaultBar, PageLoadProgress},
+  components: {AppBar},
   mixins: [Context]
 }
 </script>

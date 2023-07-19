@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <v-app>
     <VueAnnouncer class="sr-only" />
     <div v-if="!$isInIframe">
       <a
@@ -12,18 +12,22 @@
         Skip to content
       </a>
     </div>
-    <router-view v-if="applicationState.status === 200" />
-    <NotFound v-if="applicationState.status !== 200" />
-  </div>
+    <v-main class="v-main-when-print">
+      <PageLoadProgress v-if="isLoading" />
+      <router-view v-if="applicationState.status === 200" />
+      <NotFound v-if="applicationState.status !== 200" />
+    </v-main>
+  </v-app>
 </template>
 
 <script>
 import Context from '@/mixins/Context'
 import NotFound from '@/views/NotFound'
+import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
 
 export default {
   name: 'App',
-  components: {NotFound},
+  components: {NotFound, PageLoadProgress},
   mixins: [Context],
   methods: {
     skipTo: anchor => console.log(`TODO: VueScrollTo.scrollTo(${anchor}, 400)`)
