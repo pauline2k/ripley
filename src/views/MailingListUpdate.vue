@@ -10,12 +10,19 @@
       <v-expansion-panel
         v-for="(alert, index) in alerts"
         :key="index"
+        :disabled="!$_.size(alert.emailAddresses)"
       >
         <v-expansion-panel-title :color="alert.type === 'errors' ? 'red' : 'success'">
-          {{ alert.message }}
-          [<span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> users</span>]
+          <span v-if="$_.size(alert.emailAddresses)">
+            {{ alert.message }}
+            [<span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> users</span>]
+          </span>
+          <span v-if="!$_.size(alert.emailAddresses)" class="alert-message-without-email-addresses">
+            {{ alert.message }}
+          </span>
           <template #actions>
             <v-icon
+              v-if="$_.size(alert.emailAddresses)"
               color="white"
               :icon="alert.type === 'errors' ? 'mdi-alert-circle' : 'mdi-check'"
             />
@@ -241,6 +248,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.alert-message-without-email-addresses {
+  color: black !important;
+  font-size: 16px;
+  font-weight: 700;
+}
 .page-site-mailing-list {
   padding: 20px;
 
