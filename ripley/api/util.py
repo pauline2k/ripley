@@ -52,8 +52,8 @@ def canvas_role_required(*roles):
             if current_user.is_authenticated and current_user.is_admin:
                 authorized = True
             elif current_user.is_authenticated and current_user.canvas_user_id:
-                canvas_site_id = str(kw['canvas_site_id'])
-                if canvas_site_id and canvas_site_id == str(current_user.canvas_site_id):
+                canvas_site_id = str(current_user.canvas_site_id)
+                if canvas_site_id:
                     if next((role for role in current_user.canvas_site_user_roles if role in roles), None):
                         authorized = True
             if authorized:

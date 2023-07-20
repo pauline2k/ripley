@@ -26,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from datetime import datetime
 
 from flask import current_app as app, request
+from flask_login import current_user
 from ripley.api.errors import BadRequestError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas
@@ -34,21 +35,21 @@ from ripley.models.mailing_list import MailingList
 from ripley.models.mailing_list_members import MailingListMembers
 
 
-@app.route('/api/mailing_lists/<canvas_site_id>')
+@app.route('/api/mailing_list/my')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def mailing_lists(canvas_site_id):
-    course = canvas.get_course(canvas_site_id)
+def mailing_lists():
+    course = canvas.get_course(current_user.canvas_site_id)
     if course:
-        mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id) if course else None
+        mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id) if course else None
         return tolerant_jsonify(mailing_list.to_api_json() if mailing_list else None)
     else:
-        raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
+        raise ResourceNotFoundError(f'No bCourses site with ID "{current_user.canvas_site_id}" was found.')
 
 
-@app.route('/api/mailing_lists/<canvas_site_id>/welcome_email/activate')
+@app.route('/api/mailing_list/welcome_email/activate')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def welcome_email_activate(canvas_site_id):
-    mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id)
+def welcome_email_activate():
+    mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
     if mailing_list:
         if mailing_list.welcome_email_subject and mailing_list.welcome_email_body:
             mailing_list = MailingList.set_welcome_email_active(
@@ -59,17 +60,19 @@ def welcome_email_activate(canvas_site_id):
         else:
             raise BadRequestError('Welcome email requires subject and body to be activated')
     else:
-        raise ResourceNotFoundError(f'bCourses site {canvas_site_id} has no mailing list.')
+        raise ResourceNotFoundError(f'bCourses site {current_user.canvas_site_id} has no mailing list.')
 
 
-@app.route('/api/mailing_lists/<canvas_site_id>/create', methods=['POST'])
+@app.route('/api/mailing_list/create', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def create_mailing_lists(canvas_site_id):
+def create_mailing_lists():
     try:
         params = request.get_json()
         list_name = params.get('name')
+        if list_name is None:
+            list_name = MailingList.get_suggested_name(current_user.canvas_site_id)
         mailing_list = MailingList.create(
-            canvas_site_id=canvas_site_id,
+            canvas_site_id=current_user.canvas_site_id,
             list_name=(list_name or '').strip() or None,
         )
         mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
@@ -78,10 +81,10 @@ def create_mailing_lists(canvas_site_id):
         raise BadRequestError(str(e))
 
 
-@app.route('/api/mailing_lists/<canvas_site_id>/welcome_email/deactivate')
+@app.route('/api/mailing_list/welcome_email/deactivate')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def deactivate_welcome_email(canvas_site_id):
-    mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id)
+def deactivate_welcome_email():
+    mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
     if mailing_list:
         mailing_list = MailingList.set_welcome_email_active(
             is_active=False,
@@ -89,19 +92,33 @@ def deactivate_welcome_email(canvas_site_id):
         )
         return tolerant_jsonify(mailing_list.to_api_json())
     else:
-        raise ResourceNotFoundError(f'bCourses site {canvas_site_id} has no mailing list.')
+        raise ResourceNotFoundError(f'bCourses site {current_user.canvas_site_id} has no mailing list.')
 
 
-@app.route('/api/mailing_lists/<canvas_site_id>/suggested_name')
+@app.route('/api/mailing_list/welcome_email/update')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def get_suggested_mailing_list_name(canvas_site_id):
-    return tolerant_jsonify(MailingList.get_suggested_name(canvas_site_id))
+def update_welcome_email():
+    mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
+    if mailing_list:
+        mailing_list = MailingList.set_welcome_email_active(
+            is_active=False,
+            mailing_list_id=mailing_list.id,
+        )
+        return tolerant_jsonify(mailing_list.to_api_json())
+    else:
+        raise ResourceNotFoundError(f'bCourses site {current_user.canvas_site_id} has no mailing list.')
 
 
-@app.route('/api/mailing_lists/<canvas_site_id>/download/welcome_email_log')
+@app.route('/api/mailing_list/suggested_name')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def download_welcome_email_log(canvas_site_id):
-    mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id)
+def get_suggested_mailing_list_name():
+    return tolerant_jsonify(MailingList.get_suggested_name(current_user.canvas_site_id))
+
+
+@app.route('/api/mailing_list/download/welcome_email_log')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+def download_welcome_email_log():
+    mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
     if mailing_list:
         now = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         rows = []
@@ -115,17 +132,17 @@ def download_welcome_email_log(canvas_site_id):
             })
         return csv_download_response(
             rows=rows,
-            filename=f'{canvas_site_id}-welcome-messages-log-{now}.csv',
+            filename=f'{current_user.canvas_site_id}-welcome-messages-log-{now}.csv',
             fieldnames=['Name', 'Email address', 'Message sent', 'Current member'],
         )
     else:
-        raise ResourceNotFoundError(f'No mailing list found for Canvas course {canvas_site_id}')
+        raise ResourceNotFoundError(f'No mailing list found for Canvas course {current_user.canvas_site_id}')
 
 
-@app.route('/api/mailing_lists/<canvas_site_id>/populate', methods=['POST'])
+@app.route('/api/mailing_list/populate', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def populate_mailing_lists(canvas_site_id):
-    mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id)
+def populate_mailing_lists():
+    mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
     if mailing_list:
         mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
         return tolerant_jsonify({
@@ -133,4 +150,4 @@ def populate_mailing_lists(canvas_site_id):
             'summary': update_summary,
         })
     else:
-        raise ResourceNotFoundError(f'No mailing list found for Canvas course {canvas_site_id}')
+        raise ResourceNotFoundError(f'No mailing list found for Canvas course {current_user.canvas_site_id}')

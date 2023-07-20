@@ -229,7 +229,7 @@ export default {
       this.$announcer.polite('Updating')
       this.alerts = []
       this.isUpdating = true
-      populateMailingList(this.canvasSite.canvasSiteId).then(
+      populateMailingList().then(
         data => {
           this.setMailingList(data.mailingList)
           this.setUpdateSummary(data.summary)

@@ -174,7 +174,7 @@ export default {
   mounted() {
     if (this.currentUser.isTeaching || this.currentUser.isAdmin) {
       if (this.canvasSite) {
-        getSuggestedMailingListName(this.canvasSite.canvasSiteId).then(data => {
+        getSuggestedMailingListName().then(data => {
           this.mailingListName = data
           putFocusNextTick('page-header')
           this.$ready()
@@ -197,7 +197,7 @@ export default {
       if (name && !this.hasInvalidCharacters) {
         this.isCreating = true
         this.$announcer.polite('Creating list')
-        createMailingList(this.canvasSite.canvasSiteId, name).then(
+        createMailingList(name).then(
           data => {
             this.setMailingList(data)
             this.$router.push('/mailing_list/send_welcome_email')
