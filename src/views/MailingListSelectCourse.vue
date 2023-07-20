@@ -18,7 +18,7 @@
           id="page-site-mailing-list-site-id"
           v-model="canvasSiteId"
           aria-required="true"
-          :error="!!$_.trim(canvasSiteId) && !isCanvasSiteIdValid"
+          :error="!!$_.trim(this.currentUser.canvasSiteId) && !isCanvasSiteIdValid"
           hide-details
           maxlength="10"
           label="Canvas Course ID"
@@ -49,7 +49,7 @@
 import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
-import {getMailingList} from '@/api/mailing-list'
+import {getMyMailingList} from '@/api/mailing-list'
 import {getCanvasSite} from '@/api/canvas-site'
 import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 
@@ -58,19 +58,17 @@ export default {
   mixins: [Context, MailingList],
   components: {SpinnerWithinButton},
   data: () => ({
-    canvasSiteId: undefined,
     error: undefined,
     isProcessing: false
   }),
   computed: {
     isCanvasSiteIdValid() {
-      return isValidCanvasSiteId(this.canvasSiteId)
+      return isValidCanvasSiteId(this.currentUser.canvasSiteId)
     }
   },
   mounted() {
     this.init()
-    this.canvasSiteId = this.currentUser.canvasSiteId
-    if (this.canvasSiteId) {
+    if (this.currentUser.canvasSiteId) {
       this.proceed()
     } else {
       putFocusNextTick('page-header')
@@ -79,9 +77,9 @@ export default {
   },
   methods: {
     proceed() {
-      if (!this.isProcessing && this.canvasSiteId) {
+      if (!this.isProcessing) {
         this.isProcessing = true
-        getMailingList(this.canvasSiteId).then(
+        getMyMailingList().then(
           data => {
             this.error = undefined
             if (data) {
@@ -89,7 +87,7 @@ export default {
               this.$router.push('/mailing_list/update')
               this.isProcessing = false
             } else {
-              getCanvasSite(this.canvasSiteId).then(data => {
+              getCanvasSite(this.currentUser.canvasSiteId).then(data => {
                 this.setCanvasSite(data)
                 this.$router.push('/mailing_list/create')
                 this.isProcessing = false

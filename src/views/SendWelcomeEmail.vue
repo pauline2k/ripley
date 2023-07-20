@@ -111,6 +111,7 @@
             id="btn-save-welcome-email"
             color="primary"
             :disabled="!isWelcomeEmailValid"
+            @click="saveWelcomeEmail"
           >
             <span v-if="!isSavingWelcomeEmail">Save welcome email</span>
             <span v-if="isSavingWelcomeEmail">
@@ -158,7 +159,7 @@ import {
   activateWelcomeEmail,
   deactivateWelcomeEmail,
   downloadWelcomeEmailCsv,
-  getMailingList,
+  getMyMailingList,
   updateWelcomeEmail
 } from '@/api/mailing-list'
 import {putFocusNextTick} from '@/utils'
@@ -198,7 +199,7 @@ export default {
     }
   },
   created() {
-    getMailingList(this.currentUser.canvasSiteId).then(
+    getMyMailingList().then(
       data => {
         this.updateDisplay(data)
         this.$ready('Mailing List', 'page-header')
@@ -215,13 +216,13 @@ export default {
     },
     downloadMessageLog() {
       this.$announcer.polite('Downloading message log')
-      downloadWelcomeEmailCsv(this.currentUser.canvasSiteId)
+      downloadWelcomeEmailCsv()
     },
     saveWelcomeEmail() {
       if (this.isWelcomeEmailValid) {
         this.$announcer.polite('Saving welcome email')
         this.isSavingWelcomeEmail = true
-        updateWelcomeEmail(this.currentUser.canvasSiteId, this.mailingListSubject, this.mailingListMessage).then(
+        updateWelcomeEmail(this.mailingListSubject, this.mailingListMessage).then(
           response => {
             this.updateDisplay(response)
             putFocusNextTick('send-welcome-email-header')
@@ -241,7 +242,7 @@ export default {
       this.alertEmailActivated = false
       this.isTogglingEmailActivation = true
       const toggleEmailActivation = this.isWelcomeEmailActive ? deactivateWelcomeEmail : activateWelcomeEmail
-      toggleEmailActivation(this.currentUser.canvasSiteId).then((data) => {
+      toggleEmailActivation().then((data) => {
         this.isWelcomeEmailActive = !!data.welcomeEmailActive
         this.isTogglingEmailActivation = false
         if (this.isWelcomeEmailActive) {

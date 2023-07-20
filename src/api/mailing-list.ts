@@ -1,39 +1,37 @@
-import utils from '@/api/api-utils'
 import moment from 'moment-timezone'
+import utils from '@/api/api-utils'
+import {useContextStore} from '@/stores/context'
 
-export function activateWelcomeEmail(canvasSiteId: string) {
-  return utils.post(`/api/mailing_lists/${canvasSiteId}/welcome_email/activate`, true)
+export function activateWelcomeEmail() {
+  return utils.post('/api/mailing_list/welcome_email/activate', true)
 }
 
-export function createMailingList(canvasSiteId: string, name: string, redirectOnError?: boolean) {
-  return utils.post(`/api/mailing_lists/${canvasSiteId}/create`, {name}, redirectOnError)
+export function createMailingList(name: string, redirectOnError?: boolean) {
+  return utils.post('/api/mailing_list/create', {name}, redirectOnError)
 }
 
-export function createSiteMailingList(canvasSiteId: string) {
-  return utils.post(`/api/mailing_lists/${canvasSiteId}/create`, {}, true)
+export function deactivateWelcomeEmail() {
+  return utils.post('/api/mailing_list/welcome_email/deactivate', {}, true)
 }
 
-export function deactivateWelcomeEmail(canvasSiteId: string) {
-  return utils.post(`/api/mailing_lists/${canvasSiteId}/welcome_email/deactivate`, {}, true)
+export function downloadWelcomeEmailCsv() {
+  const currentUser = useContextStore().currentUser
+  const filename = `${currentUser.canvasSiteId}-welcome-messages-log-${moment().format('YYYY-MM-DD_hhmmss')}.csv`
+  return utils.downloadViaGet('/api/mailing_list/download/welcome_email_log', filename,true)
 }
 
-export function downloadWelcomeEmailCsv(canvasSiteId: string) {
-  const filename = `${canvasSiteId}-welcome-messages-log-${moment().format('YYYY-MM-DD_hhmmss')}.csv`
-  return utils.downloadViaGet(`/api/mailing_lists/${canvasSiteId}/download/welcome_email_log`, filename,true)
+export function getSuggestedMailingListName() {
+  return utils.get('/api/mailing_list/suggested_name', true)
 }
 
-export function getSuggestedMailingListName(canvasSiteId: string) {
-  return utils.get(`/api/mailing_lists/${canvasSiteId}/suggested_name`, true)
+export function getMyMailingList(redirectOnError?: boolean) {
+  return utils.get('/api/mailing_list/my', redirectOnError)
 }
 
-export function getMailingList(canvasSiteId: string, redirectOnError?: boolean) {
-  return utils.get(`/api/mailing_lists/${canvasSiteId}`, redirectOnError)
+export function populateMailingList(redirectOnError?: boolean) {
+  return utils.post('/api/mailing_list/populate', {}, redirectOnError)
 }
 
-export function populateMailingList(canvasSiteId: string, redirectOnError?: boolean) {
-  return utils.post(`/api/mailing_lists/${canvasSiteId}/populate`, {}, redirectOnError)
-}
-
-export function updateWelcomeEmail(canvasSiteId: string, subject: string, body: string) {
-  return utils.post(`/api/mailing_lists/${canvasSiteId}/welcome_email/update`, {body, subject}, true)
+export function updateWelcomeEmail(subject: string, body: string) {
+  return utils.post('/api/mailing_list/welcome_email/update', {body, subject}, true)
 }
