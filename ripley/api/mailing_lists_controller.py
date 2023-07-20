@@ -95,14 +95,23 @@ def deactivate_welcome_email():
         raise ResourceNotFoundError(f'bCourses site {current_user.canvas_site_id} has no mailing list.')
 
 
-@app.route('/api/mailing_list/welcome_email/update')
+@app.route('/api/mailing_list/welcome_email/update', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def update_welcome_email():
     mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
     if mailing_list:
-        mailing_list = MailingList.set_welcome_email_active(
-            is_active=False,
+        params = request.get_json()
+        active = None if params.get('active') is None else params.get('active')
+        body = params.get('body').strip() if params.get('body') else None
+        subject = params.get('subject').strip() if params.get('subject') else None
+        if None in [body, active, subject]:
+            raise BadRequestError('Required parameters are missing.')
+
+        mailing_list = MailingList.update(
             mailing_list_id=mailing_list.id,
+            welcome_email_active=bool(active),
+            welcome_email_body=body,
+            welcome_email_subject=subject,
         )
         return tolerant_jsonify(mailing_list.to_api_json())
     else:

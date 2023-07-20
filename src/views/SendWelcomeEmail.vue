@@ -89,7 +89,7 @@
         </label>
         <v-text-field
           id="input-subject"
-          v-model="mailingListSubject"
+          v-model="subject"
           density="compact"
           hide-details
           variant="outlined"
@@ -101,7 +101,7 @@
           </label>
           <ckeditor
             id="input-message"
-            v-model="mailingListMessage"
+            v-model="body"
             :config="editorConfig"
             :editor="editor"
           />
@@ -178,6 +178,7 @@ export default {
       error: [],
       success: []
     },
+    body: '',
     editor: ClassicEditor,
     editorConfig: {
       initialData: '',
@@ -190,12 +191,11 @@ export default {
     isTogglingEmailActivation: false,
     isWelcomeEmailActive: false,
     mailingList: undefined,
-    mailingListMessage: '',
-    mailingListSubject: '',
+    subject: ''
   }),
   computed: {
     isWelcomeEmailValid() {
-      return !!this.$_.trim(this.mailingListSubject) && !!this.$_.trim(this.mailingListMessage)
+      return !!this.$_.trim(this.subject) && !!this.$_.trim(this.body)
     }
   },
   created() {
@@ -210,8 +210,8 @@ export default {
   methods: {
     cancelEditMode() {
       this.isEditingWelcomeEmail = false
-      this.mailingListMessage = this.mailingList.welcomeEmailBody || ''
-      this.mailingListSubject = this.mailingList.welcomeEmailSubject
+      this.body = this.mailingList.welcomeEmailBody || ''
+      this.subject = this.mailingList.welcomeEmailSubject
       putFocusNextTick('send-welcome-email-header')
     },
     downloadMessageLog() {
@@ -222,7 +222,7 @@ export default {
       if (this.isWelcomeEmailValid) {
         this.$announcer.polite('Saving welcome email')
         this.isSavingWelcomeEmail = true
-        updateWelcomeEmail(this.mailingListSubject, this.mailingListMessage).then(
+        updateWelcomeEmail(false, this.body, this.subject).then(
           response => {
             this.updateDisplay(response)
             putFocusNextTick('send-welcome-email-header')
@@ -254,10 +254,10 @@ export default {
     updateDisplay(data) {
       this.mailingList = data
       this.isWelcomeEmailActive = this.mailingList.welcomeEmailActive
-      this.mailingListMessage = this.mailingList.welcomeEmailBody || ''
-      this.mailingListSubject = this.mailingList.welcomeEmailSubject
+      this.body = this.mailingList.welcomeEmailBody || ''
+      this.subject = this.mailingList.welcomeEmailSubject
       this.errorMessages = this.mailingList.errorMessages || []
-      this.isEditingWelcomeEmail = !this.mailingListMessage && !this.mailingListSubject
+      this.isEditingWelcomeEmail = !this.body && !this.subject
       this.isCreating = false
     }
   }

@@ -137,6 +137,23 @@ class MailingList(Base):
         return mailing_list, update_summary
 
     @classmethod
+    def update(
+            cls,
+            mailing_list_id,
+            welcome_email_active,
+            welcome_email_body,
+            welcome_email_subject,
+    ):
+        mailing_list = cls.query.filter_by(id=mailing_list_id).first()
+        if mailing_list:
+            mailing_list.welcome_email_active = welcome_email_active
+            mailing_list.welcome_email_body = welcome_email_body
+            mailing_list.welcome_email_subject = welcome_email_subject
+            db.session.add(mailing_list)
+            std_commit()
+        return mailing_list
+
+    @classmethod
     def update_population_metadata(
             cls,
             mailing_list_id,

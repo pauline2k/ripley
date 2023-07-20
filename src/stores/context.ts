@@ -15,9 +15,9 @@ export const useContextStore = defineStore('context', {
     applicationState: DEFAULT_APPLICATION_STATE,
     config: undefined,
     currentUser: {
+      canvasSiteId: undefined,
       isAdmin: false,
-      isAuthenticated: false,
-      canvasSiteId: undefined
+      isAuthenticated: false
     },
     eventHub: mitt(),
     isLoading: false
