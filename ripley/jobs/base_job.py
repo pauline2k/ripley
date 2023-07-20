@@ -49,7 +49,7 @@ class BaseJob:
             thread = Thread(target=self.run, kwargs=kwargs, daemon=True)
             thread.start()
 
-    def run(self, force_run=False, params={}):
+    def run(self, force_run=False, params=None):
         with self.app_context():
             job = Job.get_job_by_key(self.key())
             if job:
@@ -76,6 +76,10 @@ class BaseJob:
                     app.logger.info(f'Job {self.key()} is starting.')
                     job_tracker = JobHistory.job_started(job_key=self.key())
                     try:
+                        if not params:
+                            params = {}
+                        if app.config['FORCE_DRY_RUN']:
+                            params['isDryRun'] = True
                         self._run(params)
                         JobHistory.job_finished(id_=job_tracker.id)
                         app.logger.info(f'Job {self.key()} finished successfully.')

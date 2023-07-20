@@ -64,6 +64,9 @@ EMAIL_RIPLEY_SUPPORT = 'bcourseshelp@berkeley.edu'
 # Directory to search for mock fixtures, if running in "test" or "demo" mode.
 FIXTURES_PATH = None
 
+# Enforce dry run mode on all jobs.
+FORCE_DRY_RUN = False
+
 GRADE_DISTRIBUTION_MAX_DISTINCT_COURSES = 20
 
 # Minutes of inactivity before session cookie is destroyed
