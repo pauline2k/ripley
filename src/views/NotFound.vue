@@ -20,6 +20,7 @@
               v-if="isError"
               id="error-message"
               aria-live="polite"
+              class="ml-2"
               role="alert"
             >
               {{ applicationState.message || 'Uh oh, there was a problem.' }}

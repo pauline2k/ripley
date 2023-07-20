@@ -32,6 +32,6 @@ export function populateMailingList(redirectOnError?: boolean) {
   return utils.post('/api/mailing_list/populate', {}, redirectOnError)
 }
 
-export function updateWelcomeEmail(subject: string, body: string) {
-  return utils.post('/api/mailing_list/welcome_email/update', {body, subject}, true)
+export function updateWelcomeEmail(active: boolean, body: string, subject: string) {
+  return utils.post('/api/mailing_list/welcome_email/update', {active, body, subject}, true)
 }
