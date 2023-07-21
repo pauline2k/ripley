@@ -45,8 +45,7 @@ export default {
         floating: true,
         labelFormat: '{name} Grades',
         layout: 'vertical',
-        verticalAlign: 'top',
-        y: -50
+        verticalAlign: 'top'
       },
       plotOptions: {
         series: {
