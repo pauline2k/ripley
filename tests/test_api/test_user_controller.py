@@ -60,6 +60,7 @@ class TestUserProfile:
         """User can view own profile."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_8876542', 'get_user_8876542_5678901'],
                 'user': ['profile_40000'],
             }, m)
@@ -79,6 +80,7 @@ class TestUserProfile:
 
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_1234567', 'get_user_1234567_4567890'],
                 'user': ['profile_30000'],
             }, m)
@@ -95,7 +97,7 @@ class TestUserProfile:
             user_sessions = [c for c in cookies if 'remember_ripley_token' in c]
             assert len(user_sessions) == 1
             user_session = parse_cookie(user_sessions[0])
-            assert '{"canvas_site_id": 1234567, "uid": "30000"}' in user_session['remember_ripley_token']
+            assert '{"canvas_site_id": 1234567, "uid": "30000", "acting_as_uid": null}' in user_session['remember_ripley_token']
             assert 'Secure' in user_session
             assert user_session['SameSite'] == 'None'
 
@@ -115,6 +117,6 @@ class TestUserProfile:
             user_sessions = [c for c in cookies if 'remember_ripley_token' in c]
             assert len(user_sessions) == 1
             user_session = parse_cookie(user_sessions[0])
-            assert '{"canvas_site_id": 1234567, "uid": "40000"}' in user_session['remember_ripley_token']
+            assert '{"canvas_site_id": 1234567, "uid": "40000", "acting_as_uid": null}' in user_session['remember_ripley_token']
             assert 'Secure' in user_session
             assert user_session['SameSite'] == 'None'

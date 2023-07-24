@@ -248,7 +248,11 @@ def _launch_tool(target_uri):
         masquerade = f'Canvas ID {canvas_masquerading_user_id} acting as ' if canvas_masquerading_user_id else ''
         course_context = f', course id {canvas_site_id}' if canvas_site_id else ''
 
-        user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
+        user_id = User.get_serialized_composite_key(
+            canvas_site_id=canvas_site_id,
+            uid=uid,
+            acting_as_uid=canvas_masquerading_user_id,
+        )
         user = User(user_id)
         app.logger.info(f"""Logged in during LTI launch as {masquerade}UID {uid}, Canvas ID {canvas_user_id}{course_context}""")
         return start_login_session(user, redirect_path=f'/{target_uri}')

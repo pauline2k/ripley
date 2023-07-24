@@ -71,6 +71,7 @@ class TestGetMyMailingList:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_1234567', 'get_user_1234567_4567890', 'search_users_1234567'],
                 'user': ['profile_30000'],
             }, m)
@@ -150,6 +151,7 @@ class TestCreateMailingList:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_1234567', 'get_user_1234567_4567890', 'search_users_1234567'],
                 'user': ['profile_30000'],
             }, m)
@@ -242,6 +244,7 @@ class TestPopulateMailingList:
         """Allows admin."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_1234567', 'search_users_1234567'],
                 'user': ['profile_10000'],
             }, m)
@@ -256,6 +259,7 @@ class TestPopulateMailingList:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_1234567', 'get_user_1234567_4567890', 'search_users_1234567'],
                 'user': ['profile_30000'],
             }, m)

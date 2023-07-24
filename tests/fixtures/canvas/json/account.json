@@ -956,5 +956,68 @@
             }
         },
         "status_code": 200
+    },
+    "get_terms": {
+        "method": "GET",
+        "endpoint": "accounts/1/terms",
+        "data": {
+            "enrollment_terms": [
+                {
+                    "id": 1818,
+                    "name": "Default Term",
+                    "start_at": null,
+                    "end_at": null,
+                    "created_at": "2012-04-04T15:58:56Z",
+                    "workflow_state": "active",
+                    "grading_period_group_id": null,
+                    "sis_term_id": null,
+                    "sis_import_id": null
+                },
+                {
+                    "id": 5541,
+                    "name": "Fall 2023",
+                    "start_at": "2023-08-01T07:00:00Z",
+                    "end_at": null,
+                    "created_at": "2019-12-17T18:08:13Z",
+                    "workflow_state": "active",
+                    "grading_period_group_id": null,
+                    "sis_term_id": "TERM:2023-D",
+                    "sis_import_id": 7023117
+                },
+                {
+                    "id": 5540,
+                    "name": "Summer 2023",
+                    "start_at": "2023-05-01T07:00:00Z",
+                    "end_at": null,
+                    "created_at": "2019-12-17T18:08:13Z",
+                    "workflow_state": "active",
+                    "grading_period_group_id": null,
+                    "sis_term_id": "TERM:2023-C",
+                    "sis_import_id": 7023117
+                },
+                {
+                    "id": 5539,
+                    "name": "Spring 2023",
+                    "start_at": "2023-01-01T08:00:00Z",
+                    "end_at": null,
+                    "created_at": "2019-12-17T18:08:13Z",
+                    "workflow_state": "active",
+                    "grading_period_group_id": null,
+                    "sis_term_id": "TERM:2023-B",
+                    "sis_import_id": 7023117
+                },
+                {
+                    "id": 5538,
+                    "name": "Fall 2022",
+                    "start_at": "2022-08-01T07:00:00Z",
+                    "end_at": null,
+                    "created_at": "2019-12-17T18:07:57Z",
+                    "workflow_state": "active",
+                    "grading_period_group_id": null,
+                    "sis_term_id": "TERM:2022-D",
+                    "sis_import_id": 7023116
+                }
+            ]
+        }
     }
 }

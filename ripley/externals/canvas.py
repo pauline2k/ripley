@@ -61,6 +61,17 @@ def get_account(account_id, api_call=True, api_url=None):
         return account
 
 
+def get_admins():
+    account = get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False)
+    admins = None
+    try:
+        admins = account.get_admins()
+    except Exception as e:
+        app.logger.error('Failed to retrieve Canvas admins')
+        app.logger.exception(e)
+    return admins
+
+
 def get_communication_channels(canvas_user_id):
     try:
         user = get_user(canvas_user_id, api_call=False)

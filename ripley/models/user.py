@@ -28,6 +28,7 @@ from flask import current_app as app
 from flask_login import UserMixin
 from ripley.externals import canvas
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
+from ripley.lib.canvas_authorization import can_administrate_canvas
 from ripley.models.user_auth import UserAuth
 
 
@@ -41,6 +42,8 @@ class User(UserMixin):
         uid = composite_key.get('uid', None)
         canvas_site_id = str(composite_key.get('canvas_site_id', None)).strip()
         self.__canvas_site_id = int(canvas_site_id) if canvas_site_id and canvas_site_id.isnumeric() else None
+        acting_as_uid = composite_key.get('acting_as_uid', None)
+        self.__acting_as_uid = acting_as_uid
         if uid:
             try:
                 uid = str(int(uid))
@@ -50,6 +53,7 @@ class User(UserMixin):
 
     def __repr__(self):
         return f"""<User
+                    acting_as_uid={self.__acting_as_uid},
                     canvas_site_id={self.user['canvasSiteId']},
                     email_address={self.email_address},
                     is_active={self.is_active},
@@ -58,6 +62,10 @@ class User(UserMixin):
                     is_authenticated={self.is_authenticated},
                     uid={self.user['uid']},
                 """
+
+    @property
+    def acting_as_uid(self):
+        return self.__acting_as_uid
 
     @property
     def canvas_site_id(self):
@@ -72,7 +80,11 @@ class User(UserMixin):
         return self.user['canvasUserId']
 
     def get_id(self):
-        return self.get_serialized_composite_key(canvas_site_id=self.canvas_site_id, uid=self.uid)
+        return self.get_serialized_composite_key(
+            canvas_site_id=self.canvas_site_id,
+            uid=self.uid,
+            acting_as_uid=self.acting_as_uid,
+        )
 
     @property
     def uid(self):
@@ -98,6 +110,14 @@ class User(UserMixin):
     def is_admin(self):
         return self.user['isAdmin']
 
+    @property
+    def is_canvas_admin(self):
+        return self.user['isCanvasAdmin']
+
+    @property
+    def is_teaching(self):
+        return self.user['isTeaching']
+
     def logout(self):
         self.user = self._load_user()
 
@@ -109,10 +129,11 @@ class User(UserMixin):
         return self.user
 
     @classmethod
-    def get_serialized_composite_key(cls, canvas_site_id, uid):
+    def get_serialized_composite_key(cls, canvas_site_id, uid, acting_as_uid=None):
         return json.dumps({
             'canvas_site_id': canvas_site_id,
             'uid': uid,
+            'acting_as_uid': acting_as_uid,
         })
 
     def _load_canvas_user_data(self, uid):
@@ -137,6 +158,7 @@ class User(UserMixin):
                 'canvasUserSisUserId': user_profile.get('sis_user_id'),
                 'canvasUserSortableName': user_profile.get('sortable_name'),
                 'canvasUserTitle': user_profile.get('title'),
+                'isCanvasAdmin': can_administrate_canvas(uid),
             }
             is_teaching = False
             canvas_site_user = canvas.get_course_user(self.__canvas_site_id, canvas_user_id)
@@ -176,6 +198,7 @@ class User(UserMixin):
                     is_teaching = bool(canvas_user_data and canvas_user_data['isTeaching'])
         return {
             **{
+                'canvasActingAsUid': self.__acting_as_uid,
                 'canvasSiteId': self.__canvas_site_id,
                 'emailAddress': email_address,
                 'isActive': is_active,

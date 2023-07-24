@@ -35,6 +35,9 @@ class BerkeleyTerm:
         self.year = year
         self.season = season
 
+    def __repr__(self):
+        return f"""<BerkeleyTerm year={self.year}, season={self.season}, sis_id={self.to_sis_term_id()}>"""
+
     @classmethod
     def get_current_terms(cls):
         index = get_current_term_index()

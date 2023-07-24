@@ -43,6 +43,7 @@ def get_user_profile():
         user_id = User.get_serialized_composite_key(
             canvas_site_id=current_user.canvas_site_id,
             uid=uid,
+            acting_as_uid=current_user.acting_as_uid,
         )
         return tolerant_jsonify(User(user_id).to_api_json())
     else:
