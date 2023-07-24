@@ -53,7 +53,7 @@ class TestCanvasSiteEditSections:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
-                'account': ['create_sis_import', 'get_by_id', 'get_sis_import'],
+                'account': ['create_sis_import', 'get_admins', 'get_by_id', 'get_sis_import'],
                 'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_30000'],
             }, m)
@@ -67,6 +67,7 @@ class TestCanvasSiteEditSections:
     def test_teacher_no_section_ids(self, client, app, fake_auth):
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_30000'],
             }, m)
@@ -116,6 +117,7 @@ class TestCanvasSiteProvisionSections:
         """Allows TA, read-only."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
                 'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_6789012'],
                 'user': ['profile_50000'],
             }, m)
@@ -143,6 +145,7 @@ class TestCanvasSiteProvisionSections:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
                 'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_30000'],
             }, m)
@@ -278,6 +281,7 @@ class TestGetRoster:
         """Allows admin."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_10000'],
             }, m)
@@ -320,6 +324,7 @@ class TestGetRoster:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_30000'],
             }, m)
@@ -334,6 +339,7 @@ class TestGetRoster:
         """Denies student."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
                 'user': ['profile_40000'],
             }, m)
@@ -389,6 +395,7 @@ class TestGradeDistributions:
         """Allows admin, returns no grades if not present."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_8876542', 'get_sections_8876542'],
                 'user': ['profile_10000'],
             }, m)
@@ -404,6 +411,7 @@ class TestGradeDistributions:
         """Allows admin, returns grades if present."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_1010101', 'get_sections_1010101'],
                 'user': ['profile_10000'],
             }, m)
@@ -427,6 +435,7 @@ class TestGradeDistributions:
         """Allows teacher."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': ['get_by_id_1010101', 'get_sections_1010101', 'get_enrollments_4567890_past'],
                 'user': ['profile_30000'],
             }, m)

@@ -131,10 +131,14 @@ def _set_session(response):
     if cookie_name in request.cookies:
         cookie_value = request.cookies[cookie_name]
         composite_key = json.loads(cookie_value.split('|')[0])
-        app.logger.debug(f'cookie: {composite_key}')
-        current_user_key = current_user.get_serialized_composite_key(canvas_site_id=current_user.canvas_site_id, uid=current_user.uid)
-        app.logger.debug(f'current_user: {current_user_key}')
-        if composite_key['uid'] == current_user.uid and composite_key['canvas_site_id'] == current_user.canvas_site_id:
+        current_user_key = current_user.get_serialized_composite_key(
+            acting_as_uid=current_user.acting_as_uid,
+            canvas_site_id=current_user.canvas_site_id,
+            uid=current_user.uid,
+        )
+        if composite_key['uid'] == current_user.uid \
+                and composite_key['canvas_site_id'] == current_user.canvas_site_id \
+                and composite_key['acting_as_uid'] == current_user.acting_as_uid:
             _set_cookie(response, cookie_name, cookie_value)
         elif current_user.is_authenticated:
             _set_cookie(response, cookie_name, current_user_key)
@@ -152,5 +156,10 @@ def _user_loader(user_id=None):
     if isinstance(composite_key, dict):
         canvas_site_id = composite_key.get('canvas_site_id', None)
         uid = composite_key.get('uid', None)
-        serialized_composite_key = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
+        acting_as_uid = composite_key.get('acting_as_uid', None)
+        serialized_composite_key = User.get_serialized_composite_key(
+            canvas_site_id=canvas_site_id,
+            uid=uid,
+            acting_as_uid=acting_as_uid,
+        )
     return User(serialized_composite_key)

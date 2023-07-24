@@ -22,7 +22,15 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+from ripley.externals import canvas
 from ripley.models.user_auth import UserAuth
+
+
+def can_administrate_canvas(uid):
+    admins = canvas.get_admins() or False
+    if admins:
+        return bool(next((admin for admin in admins if admin.user['login_id'] == uid), False))
+    return False
 
 
 def can_manage_mailing_list(canvas_user):

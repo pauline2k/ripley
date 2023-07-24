@@ -74,9 +74,14 @@ def update_user_session():
         params = request.get_json() or {}
         canvas_site_id = params.get('canvasSiteId')
         uid = current_user.uid
+        acting_as_uid = current_user.acting_as_uid
         logout_user()
         # Re-authenticate
-        user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
+        user_id = User.get_serialized_composite_key(
+            canvas_site_id=canvas_site_id,
+            uid=uid,
+            acting_as_uid=acting_as_uid,
+        )
         user = User(user_id)
         if user.is_active and (user.is_admin or len(user.canvas_site_user_roles)):
             # User must be either an admin or a member of the course site.
