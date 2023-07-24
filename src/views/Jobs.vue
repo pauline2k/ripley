@@ -100,6 +100,7 @@
                   <option
                     v-for="(item, index) in ['day_at', 'minutes', 'seconds']"
                     :key="index"
+                    :value="item"
                   >
                     {{ item }}
                   </option>
