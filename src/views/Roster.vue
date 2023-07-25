@@ -38,15 +38,22 @@
             />
           </v-col>
           <v-col sm="3">
-            <div v-if="sections">
-              <v-select
+            <div v-if="roster.sections">
+              <select
                 id="section-select"
-                v-model="section"
+                v-model="selectedSectionId"
                 aria-label="Search specific section (defaults to all sections)"
-                hide-details
-                :items="sections"
-                variant="outlined"
-              />
+                @change="onSelectSection"
+              >
+                <option :value="null">All Sections</option>
+                <option
+                  v-for="(section, index) in roster.sections"
+                  :key="index"
+                  :value="section.id"
+                >
+                  {{ section.name }}
+                </option>
+              </select>
             </div>
           </v-col>
           <v-col class="pt-3" cols="auto" sm="6">
@@ -135,8 +142,7 @@ export default {
     roster: undefined,
     screamInSpace: false,
     search: undefined,
-    section: '',
-    sections: undefined,
+    selectedSectionId: null,
     showTooltip: true,
     students: undefined,
     success: undefined
@@ -145,9 +151,6 @@ export default {
     search() {
       this.recalculateStudents()
       this.screamInSpace = this.idx(this.search) === 'in space no one can hear you scream'
-    },
-    section() {
-      return this.recalculateStudents()
     }
   },
   computed: {
@@ -171,18 +174,6 @@ export default {
         data => {
           this.roster = data
           this.students = this.roster.students
-          if (data.sections.length) {
-            this.sections = [{title: 'All sections', value: ''}]
-            this.$_.each(data.sections, section => {
-              this.sections.push({
-                ...section,
-                ...{
-                  title: section.name,
-                  value: section.id
-                }
-              })
-            })
-          }
           this.$_.each(this.students, s => s.idx = this.idx(`${s.firstName} ${s.lastName} ${s.studentId}`))
           // If student count is low then tooltip is not necessary.
           const threshold = 36
@@ -202,13 +193,16 @@ export default {
         this.$announcer.polite(`${this.roster.canvasSiteName} CSV downloaded`)
       })
     },
+    onSelectSection() {
+      this.recalculateStudents()
+    },
     recalculateStudents() {
       const normalizedPhrase = this.idx(this.search)
-      if (normalizedPhrase || this.section) {
+      if (normalizedPhrase || this.selectedSectionId) {
         this.students = this.$_.filter(this.roster.students, student => {
           let showStudent = !normalizedPhrase || student.idx.includes(normalizedPhrase)
-          if (this.section) {
-            showStudent = showStudent && this.$_.map(student.sections || [], 'id').includes(this.section)
+          if (this.selectedSectionId) {
+            showStudent = showStudent && this.$_.map(student.sections || [], 'id').includes(this.selectedSectionId)
           }
           return showStudent
         })

@@ -90,18 +90,27 @@
         <v-card-text>
           <v-container v-if="editJob">
             <v-row>
-              <v-col cols="12" sm="6">
-                <v-select
+              <v-col cols="12" sm="6" class="d-flex align-center">
+                <label for="job-schedule-select" class="pr-2">Type:</label>
+                <select
+                  id="job-schedule-select"
                   v-model="editJob.schedule.type"
-                  :items="['day_at', 'minutes', 'seconds']"
-                  label="Type"
-                  required
                   @change="editJob.schedule.value = ''"
-                ></v-select>
+                >
+                  <option
+                    v-for="(item, index) in ['day_at', 'minutes', 'seconds']"
+                    :key="index"
+                    :value="item"
+                  >
+                    {{ item }}
+                  </option>
+                </select>
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col cols="12" sm="6" class="d-flex align-center">
                 <v-text-field
                   v-model="editJob.schedule.value"
+                  density="compact"
+                  hide-details
                   required
                   :suffix="editJob.schedule.type === 'day_at' ? 'UTC' : ''"
                   :type="editJob.schedule.type === 'day_at' ? 'text' : 'number'"
