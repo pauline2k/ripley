@@ -31,9 +31,10 @@ from tests.util import register_canvas_uris
 admin_uid = '10000'
 no_canvas_account_uid = '10001'
 not_enrolled_uid = '20000'
+reader_uid = '60000'
+student_uid = '40000'
 ta_uid = '50000'
 teacher_uid = '30000'
-student_uid = '40000'
 
 
 class TestCanvasSiteEditSections:
@@ -47,6 +48,30 @@ class TestCanvasSiteEditSections:
             register_canvas_uris(app, {'course': ['get_by_id_8876542']}, m)
             canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+            _api_canvas_site_edit_sections(client, canvas_site_id, expected_status_code=401)
+
+    def test_reader(self, client, app, fake_auth):
+        """Denies Reader."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_by_id'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_7890123'],
+                'user': ['profile_60000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=reader_uid)
+            _api_canvas_site_edit_sections(client, canvas_site_id, expected_status_code=401)
+
+    def test_ta(self, client, app, fake_auth):
+        """Denies TA."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_by_id'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_6789012'],
+                'user': ['profile_50000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=ta_uid)
             _api_canvas_site_edit_sections(client, canvas_site_id, expected_status_code=401)
 
     def test_teacher(self, client, app, fake_auth):
@@ -112,6 +137,34 @@ class TestCanvasSiteProvisionSections:
             canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
             _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=401)
+
+    def test_reader(self, client, app, fake_auth):
+        """Allows Reader, read-only."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_7890123'],
+                'user': ['profile_60000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=reader_uid)
+            response = _api_canvas_course_provision_sections(client, canvas_site_id)
+            assert response['canvasSite']
+            assert response['canvasSite']['canEdit'] is False
+            assert response['canvasSite']['term'] == {
+                'id': '2232',
+                'name': 'Spring 2023',
+                'season': 'B',
+                'year': '2023',
+            }
+            assert len(response['canvasSite']['officialSections']) == 2
+            section = response['canvasSite']['officialSections'][0]
+            assert section['canvasName'] == 'Section A'
+            assert section['id'] == '32936'
+            assert section['name'] == 'LEC 001 (In Person)'
+            assert section['sisId'] == 'SEC:2023-B-32936'
+            assert section['termId'] == '2232'
+            assert len(response['teachingTerms']) == 1
 
     def test_ta(self, client, app, fake_auth):
         """Allows TA, read-only."""
@@ -276,6 +329,33 @@ class TestGetRoster:
             canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
             _api_get_roster(client, canvas_site_id, expected_status_code=401)
+
+    def test_reader(self, client, app, fake_auth):
+        """Denies Reader."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_7890123'],
+                'user': ['profile_60000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=reader_uid)
+            _api_get_roster(client, canvas_site_id, expected_status_code=401)
+
+    def test_ta(self, client, app, fake_auth):
+        """Allows TA."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_6789012'],
+                'user': ['profile_50000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=ta_uid)
+            response = _api_get_roster(client, canvas_site_id)
+
+            assert len(response['sections']) == 2
+            assert len(response['students']) == 4
 
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""

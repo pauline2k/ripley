@@ -64,34 +64,6 @@
         },
         "status_code": 200
     },
-    "search_users_1234567": {
-        "endpoint": "courses/1234567/search_users",
-        "data": [
-            {
-                "id": 4567890,
-                "email": "synthetic.ash@berkeley.edu",
-                "enrollments": [
-                    {
-                    "user_id": 4567890,
-                    "course_id": 1234567,
-                    "type": "TeacherEnrollment",
-                    "enrollment_state": "active",
-                    "role": "TeacherEnrollment",
-                    "last_activity_at": "2023-03-02T06:04:43Z",
-                    "sis_user_id": "300300000",
-                    "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
-                    }
-                ],
-                "login_id": "30000",
-                "integration_id": null,
-                "name": "Ash 🤖",
-                "short_name": "Ash 🤖",
-                "sortable_name": "🤖, Ash"
-            }
-        ],
-        "method": "GET",
-        "status_code": 200
-    },
     "get_external_tools_1234567": {
         "method": "GET",
         "endpoint": "courses/1234567/external_tools",
@@ -429,6 +401,36 @@
                     "sis_course_id": "CRS:ANTHRO-189-2023-B",
                     "sis_section_id": "2023-B-32936",
                     "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/6789012"
+                }
+            ]
+        },
+        "status_code": 200
+    },
+    "get_enrollments_7890123": {
+        "method": "GET",
+        "endpoint": "courses/8876542/users/7890123?include=enrollments",
+        "data": {
+            "id": 7890123,
+            "name": "Samuel Brett",
+            "short_name": "Samuel Brett",
+            "sortable_name": "Brett, Samuel",
+            "integration_id": null,
+            "login_id": "60000",
+            "sis_user_id": "30060000",
+            "enrollments": [
+                {
+                    "id": 103,
+                    "user_id": 7890123,
+                    "course_id": 8876542,
+                    "course_section_id": 10000,
+                    "type": "TaEnrollment",
+                    "enrollment_state": "active",
+                    "role": "Reader",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "30060000",
+                    "sis_course_id": "CRS:ANTHRO-189-2023-B",
+                    "sis_section_id": "2023-B-32936",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/7890123"
                 }
             ]
         },
@@ -1330,6 +1332,34 @@
             ],
             "email": "synthetic.ash@berkeley.edu"
         },
+        "status_code": 200
+    },
+    "search_users_1234567": {
+        "endpoint": "courses/1234567/search_users",
+        "data": [
+            {
+                "id": 4567890,
+                "email": "synthetic.ash@berkeley.edu",
+                "enrollments": [
+                    {
+                    "user_id": 4567890,
+                    "course_id": 1234567,
+                    "type": "TeacherEnrollment",
+                    "enrollment_state": "active",
+                    "role": "TeacherEnrollment",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "300300000",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
+                    }
+                ],
+                "login_id": "30000",
+                "integration_id": null,
+                "name": "Ash 🤖",
+                "short_name": "Ash 🤖",
+                "sortable_name": "🤖, Ash"
+            }
+        ],
+        "method": "GET",
         "status_code": 200
     }
 }
