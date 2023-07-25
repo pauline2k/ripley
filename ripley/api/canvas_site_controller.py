@@ -175,13 +175,13 @@ def canvas_egrade_export_status(canvas_site_id):
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/roster')
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA')
 def get_roster(canvas_site_id):
     return tolerant_jsonify(canvas_site_roster(canvas_site_id))
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/export_roster')
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA')
 def get_roster_csv(canvas_site_id):
     return csv_download_response(**canvas_site_roster_csv(canvas_site_id))
 
