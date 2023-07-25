@@ -152,14 +152,18 @@ def _user_loader(user_id=None):
     from ripley.models.user import User
 
     serialized_composite_key = None
-    composite_key = json.loads(user_id) if user_id else None
-    if isinstance(composite_key, dict):
-        canvas_site_id = composite_key.get('canvas_site_id', None)
-        uid = composite_key.get('uid', None)
-        acting_as_uid = composite_key.get('acting_as_uid', None)
-        serialized_composite_key = User.get_serialized_composite_key(
-            canvas_site_id=canvas_site_id,
-            uid=uid,
-            acting_as_uid=acting_as_uid,
-        )
+    if user_id:
+        try:
+            composite_key = json.loads(user_id)
+        except TypeError:
+            composite_key = None
+        if isinstance(composite_key, dict):
+            canvas_site_id = composite_key.get('canvas_site_id', None)
+            uid = composite_key.get('uid', None)
+            acting_as_uid = composite_key.get('acting_as_uid', None)
+            serialized_composite_key = User.get_serialized_composite_key(
+                canvas_site_id=canvas_site_id,
+                uid=uid,
+                acting_as_uid=acting_as_uid,
+            )
     return User(serialized_composite_key)
