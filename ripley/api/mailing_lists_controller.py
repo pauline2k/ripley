@@ -43,7 +43,7 @@ def mailing_lists():
         mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id) if course else None
         return tolerant_jsonify(mailing_list.to_api_json() if mailing_list else None)
     else:
-        raise ResourceNotFoundError(f'No bCourses site with ID "{current_user.canvas_site_id}" was found.')
+        raise ResourceNotFoundError(f'bCourses site {current_user.canvas_site_id} was not found.')
 
 
 @app.route('/api/mailing_list/welcome_email/activate')
