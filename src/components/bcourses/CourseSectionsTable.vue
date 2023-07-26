@@ -97,7 +97,6 @@
                 Unlink
               </v-btn>
             </div>
-
             <div v-if="mode === 'currentStaging' && !section.isCourseSection">
               <v-btn
                 class="canvas-button template-sections-table-button template-sections-table-button-undo-add canvas-no-decoration ml-1"
@@ -107,7 +106,6 @@
                 Undo Link
               </v-btn>
             </div>
-
             <!-- Available Staging Actions -->
             <div v-if="mode === 'availableStaging' && section.isCourseSection && section.stagedState === 'delete'">
               <v-btn
@@ -118,12 +116,10 @@
                 Undo Unlink
               </v-btn>
             </div>
-
             <div v-if="mode === 'availableStaging' && !section.isCourseSection && section.stagedState === 'add'">
               Linked <span class="sr-only">to pending list of new sections</span>
             </div>
-
-            <div v-if="mode === 'availableStaging' && !section.isCourseSection && section.stagedState === null">
+            <div v-if="mode === 'availableStaging' && !section.isCourseSection && !section.stagedState">
               <v-btn
                 class="canvas-button canvas-button-primary template-sections-table-button canvas-no-decoration ml-1"
                 :class="{'template-sections-table-button-undo-add': section.stagedState === 'add'}"
@@ -286,6 +282,7 @@ export default {
       this.displayableSections.forEach(s => {
         this.sectionDisplayClass[s.id] = this.rowClassLogic(this.mode, s)
       })
+      console.log(this.sectionDisplayClass)
     },
     unstage(section) {
       this.unstageAction(section)
@@ -336,13 +333,13 @@ td {
   width: 30px;
 }
 .template-sections-table-row-disabled td {
-  color: $color-grey-disabled;
+  color: $color-grey-disabled !important;
 }
 .template-sections-table-row-added td {
-  background-color: $color-yellow-row-highlighted;
+  background-color: $color-yellow-row-highlighted !important;
 }
 .template-sections-table-row-deleted td {
-  background-color: $color-red-row-highlighted;
+  background-color: $color-red-row-highlighted !important;
 }
 .template-sections-table-cell-section-action-option {
   height: 45px;

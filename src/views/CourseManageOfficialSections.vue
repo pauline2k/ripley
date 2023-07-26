@@ -150,7 +150,7 @@
                 </div>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
-                <div v-if="course.sections.length > 1" class="page-course-official-sections-form-select-all-option">
+                <div v-if="course.sections.length > 1" class="mx-2 mb-1">
                   <v-btn
                     v-if="!allSectionsAdded(course)"
                     id="page-course-official-sections-form-select-all-option-button"
@@ -161,7 +161,7 @@
                   >
                     Add All
                   </v-btn>
-                  <span v-if="allSectionsAdded(course)">All Added</span>
+                  <span v-if="allSectionsAdded(course)" class="d-inline-block px-4 py-2">All Added</span>
                 </div>
                 <v-row no-gutters>
                   <v-col md="12">
@@ -540,10 +540,6 @@ export default {
   }
   .page-course-official-sections-available-sections-header-label {
     font-size: 19px;
-  }
-  .page-course-official-sections-form-select-all-option {
-    font-size: 12px;
-    margin: 6px 0 4px 2px;
   }
   @media #{$small-only} {
     .page-course-official-sections-small-only-align-left {

@@ -107,12 +107,16 @@ def sort_course_sections(sections):
 def _course_sort_key(section):
     dept_name, catalog_prefix, catalog_root, catalog_suffix_1, catalog_suffix_2 = section['sort_key']
     return (
+        section['term_id'],
         dept_name,
         int(catalog_root),
         catalog_prefix,
         catalog_suffix_1,
         catalog_suffix_2,
+        section['section_number'],
+        section['section_id'],
         not section['is_primary'],
+        section['instruction_format'],
         section.get('is_co_instructor', False),
     )
 
