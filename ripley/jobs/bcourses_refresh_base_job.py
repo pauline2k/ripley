@@ -506,20 +506,23 @@ class BcoursesRefreshBaseJob(BaseJob):
                             for row in csv.DictReader(f):
                                 if row['status'] == 'deleted':
                                     deletion_count += 1
-                        if deletion_count > app.config['CANVAS_REFRESH_MAX_DELETED_ENROLLMENTS']:
-                            app.logger.error(
-                                f'Term {term_id} has {deletion_count} deleted enrollments, will not upload CSV. '
-                                'Adjust threshold and re-run job if desired.')
-                            continue
 
                         job_type = 'incremental' if self.job_flags.incremental else 'full'
-                        app.logger.info(f'Will post {enrollment_csv.count} enrollment updates to Canvas (term_id={term_id}).')
+
                         upload_dated_csv(
                             enrollment_csv.tempfile.name,
                             f"enrollments-{term_id.replace(':', '-')}-{job_type}-sis-import",
                             'canvas_sis_imports',
                             timestamp,
                         )
+
+                        if deletion_count > app.config['CANVAS_REFRESH_MAX_DELETED_ENROLLMENTS']:
+                            app.logger.error(
+                                f'Term {term_id} has {deletion_count} deleted enrollments, will not post CSV to Canvas. '
+                                'Adjust threshold and re-run job if desired.')
+                            continue
+
+                        app.logger.info(f'Will post {enrollment_csv.count} enrollment updates to Canvas (term_id={term_id}).')
                         _write_csv_to_zip(enrollment_csv)
                         data_to_upload = True
         finally:
