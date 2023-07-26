@@ -68,7 +68,7 @@ export default {
   },
   mounted() {
     this.init()
-    if (this.currentUser.canvasSiteId) {
+    if (this.currentUser.canvasSiteId && !this.currentUser.isAdmin) {
       this.proceed()
     } else {
       putFocusNextTick('page-header')
@@ -79,7 +79,7 @@ export default {
     proceed() {
       if (!this.isProcessing) {
         this.isProcessing = true
-        getMyMailingList().then(
+        getMyMailingList(true).then(
           data => {
             this.error = undefined
             if (data) {

@@ -1,13 +1,19 @@
 <template>
   <div v-if="!isLoading" class="canvas-application mx-10 my-5">
-    <h1 id="page-header" class="mt-0" tabindex="-1">Create Mailing List</h1>
+    <h1 id="page-header" class="my-3" tabindex="-1">Create Mailing List</h1>
     <v-alert
       v-if="!error && !isCreating && !success"
       density="compact"
       role="alert"
       type="info"
     >
-      No Mailing List has yet been created for this site.
+      <span v-if="$isInIframe">No Mailing List has been created for bCourses site.</span>
+      <span v-if="!$isInIframe">
+        No Mailing List has been created for bCourses site
+        <OutboundLink id="mailing-list-course-site-name" class="text-white" :href="canvasSite.url">
+          <span class="font-weight-bold">{{ canvasSite.name }}</span>
+        </OutboundLink>.
+      </span>
     </v-alert>
     <v-alert
       v-if="success"
@@ -29,119 +35,77 @@
     >
       {{ error }}
     </v-alert>
-    <div class="mt-4">
-      <v-card id="mailing-list-details" elevation="3">
-        <v-card-title>
-          <div class="pl-1 pt-2">
-            <h2>Canvas Course Site</h2>
-          </div>
-        </v-card-title>
+    <div class="mt-2">
+      <v-card id="mailing-list-details" elevation="1">
         <v-card-text>
-          <v-container>
-            <v-row no-gutters>
-              <v-col cols="2" align="center">
-                <div class="float-right font-weight-medium pr-3">
-                  Name:
-                </div>
-              </v-col>
-              <v-col>
-                <OutboundLink
-                  id="mailing-list-course-site-name"
-                  class="pr-2"
-                  :href="canvasSite.url"
-                >
-                  {{ canvasSite.name }}
-                </OutboundLink>
-              </v-col>
-            </v-row>
-            <v-row no-gutters>
-              <v-col cols="2">
-                <div class="float-right font-weight-medium pr-3">
-                  ID:
-                </div>
-              </v-col>
-              <v-col>
-                {{ canvasSite.canvasSiteId }}
-              </v-col>
-            </v-row>
-            <v-row no-gutters>
-              <v-col cols="2">
-                <div class="float-right font-weight-medium pr-3">
-                  Description:
-                </div>
-              </v-col>
-              <v-col>
-                {{ canvasSite.codeAndTerm }}
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card-text>
-      </v-card>
-      <div class="mt-8">
-        <h2>Create Mailing List</h2>
-        <v-container fluid>
-          <v-row no-gutters align="center">
-            <v-col cols="8">
-              <div class="d-flex pt-1 text-subtitle-1">
-                <div class="float-right mailing-list-name-input">
-                  <label for="mailing-list-name-input">Name:</label>
-                </div>
-                <div class="w-100">
-                  <div v-if="currentUser.isTeaching && !currentUser.isAdmin">
-                    {{ mailingListName }}
-                  </div>
-                  <div v-if="currentUser.isAdmin">
-                    <v-text-field
-                      id="mailing-list-name-input"
-                      v-model="mailingListName"
-                      aria-required="true"
-                      density="comfortable"
-                      hide-details
-                      maxlength="255"
-                      required
-                      variant="outlined"
-                      @keydown.enter="create"
-                    />
-                    <div v-if="hasInvalidCharacters" class="has-invalid-characters">
-                      <div class="d-flex text-red">
-                        <div class="pr-1 text-no-wrap">Name may contain neither spaces nor: </div>
-                        <div><pre>{{ $_.join([...$_.trim(invalidCharacters)], ' ') }}</pre></div>
+          bCourses Mailing Lists allow Teachers, TAs, Lead TAs and Readers to send email to everyone in a bCourses site
+          by giving the site its own email address. Messages sent to this address from the
+          <span class="font-weight-bold">official berkeley.edu email address</span> of a Teacher, TA, Lead TA or Reader
+          will be sent to the official email addresses of all site members. Students and people not in the site cannot
+          send messages through Mailing Lists.
+          <div class="mt-2">
+            <v-container class="py-2 pl-0" fluid>
+              <v-row no-gutters align="center">
+                <v-col cols="8">
+                  <div v-if="currentUser.isAdmin" class="d-flex pt-1 text-subtitle-1">
+                    <div class="float-right mailing-list-name-input">
+                      <label for="mailing-list-name-input">Name:</label>
+                    </div>
+                    <div class="w-100">
+                      <div>
+                        <v-text-field
+                          id="mailing-list-name-input"
+                          v-model="mailingListName"
+                          aria-required="true"
+                          density="comfortable"
+                          hide-details
+                          maxlength="255"
+                          required
+                          variant="outlined"
+                          @keydown.enter="create"
+                        />
+                        <div v-if="hasInvalidCharacters" class="has-invalid-characters">
+                          <div class="d-flex text-red">
+                            <div class="pr-1 text-no-wrap">Name may contain neither spaces nor: </div>
+                            <div><pre>{{ $_.join([...$_.trim(invalidCharacters)], ' ') }}</pre></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </v-col>
-            <v-col>
-              <div class="d-flex">
-                <div>
-                  <v-btn
-                    id="btn-cancel"
-                    class="mx-1"
-                    variant="text"
-                    @click="cancel"
-                  >
-                    Cancel
-                  </v-btn>
-                </div>
-                <div>
-                  <v-btn
-                    id="btn-create-mailing-list"
-                    color="primary"
-                    :disabled="isCreating || !$_.trim(mailingListName) || hasInvalidCharacters"
-                    @click="create"
-                  >
-                    <span v-if="!isCreating">Create mailing list</span>
-                    <span v-if="isCreating">
-                      <SpinnerWithinButton /> Creating...
-                    </span>
-                  </v-btn>
-                </div>
-              </div>
-            </v-col>
-          </v-row>
-        </v-container>
-      </div>
+                </v-col>
+                <v-col>
+                  <div class="d-flex float-right">
+                    <div v-if="currentUser.isAdmin">
+                      <v-btn
+                        id="btn-cancel"
+                        class="mx-1"
+                        variant="text"
+                        @click="cancel"
+                      >
+                        Cancel
+                      </v-btn>
+                    </div>
+                    <div>
+                      <v-btn
+                        id="btn-create-mailing-list"
+                        color="primary"
+                        :disabled="isCreating || !$_.trim(mailingListName) || hasInvalidCharacters"
+                        @click="create"
+                      >
+                        <span v-if="!isCreating">Create mailing list</span>
+                        <span v-if="isCreating">
+                          <SpinnerWithinButton /> Creating...
+                        </span>
+                      </v-btn>
+                    </div>
+                  </div>
+                </v-col>
+              </v-row>
+            </v-container>
+          </div>
+        </v-card-text>
+      </v-card>
     </div>
   </div>
 </template>
