@@ -32,36 +32,31 @@
             role="alert"
             :type="isWelcomeEmailActive ? 'success' : 'info'"
           >
-            <span v-if="isWelcomeEmailActive">Welcome email activated.</span>
+            <span v-if="isWelcomeEmailActive">Welcome email {{ isToggling ? 'is being' : '' }} activated.</span>
             <span v-if="!isWelcomeEmailActive">Sending welcome emails is paused until activation.</span>
           </v-alert>
-          <v-switch
-            v-model="isWelcomeEmailActive"
-            :label="isWelcomeEmailActive ? 'Active' : 'Inactive'"
-            color="success"
-            hide-details
-          />
-        </div>
-        <!--
-        TODO: Can we delete?
-        <div v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject">
-          <div>
-            <v-btn
-              id="welcome-email-activation-toggle"
-              @click="toggle"
-              @keyup.down="toggle"
+          <div class="w-25">
+            <v-switch
+              v-model="isWelcomeEmailActive"
+              color="success"
+              :disabled="isSaving || isToggling"
+              hide-details
+              @change="toggle"
             >
-              <div v-if="isTogglingEmailActivation" class="pl-2">
-                <SpinnerWithinButton />
-              </div>
-              <span v-if="!isTogglingEmailActivation" class="status-toggle-label">
-                <v-icon v-if="isWelcomeEmailActive" icon="mdi-toggle-on" class="toggle toggle-on" />
-                <v-icon v-if="!isWelcomeEmailActive" icon="mdi-toggle-off" class="toggle toggle-off" />
-              </span>
-            </v-btn>
+              <template #label>
+                <v-progress-circular
+                  v-if="isToggling"
+                  indeterminate
+                  size="24"
+                  class="ms-2"
+                />
+                <span v-if="!isToggling">
+                  {{ isWelcomeEmailActive ? 'Active' : 'Inactive' }}
+                </span>
+              </template>
+            </v-switch>
           </div>
         </div>
-        -->
         <div v-if="mailingList.welcomeEmailLastSent">
           <v-btn
             id="btn-download-sent-message-log"
@@ -77,46 +72,60 @@
           <label for="input-subject" class="font-weight-medium text-subtitle-1">
             Subject
           </label>
-          <div v-if="isEditingWelcomeEmail">
+          <div v-if="isEditing">
             <v-text-field
               id="input-subject"
               v-model="subject"
+              aria-required="true"
               density="compact"
               hide-details
+              maxlength="255"
+              :rules="[s => !!s || 'Required']"
               variant="outlined"
               @keydown.enter="saveWelcomeEmail"
             />
           </div>
-          <div v-if="!isEditingWelcomeEmail" id="page-site-mailing-list-subject">
+          <div v-if="!isEditing" id="page-site-mailing-list-subject">
             {{ mailingList.welcomeEmailSubject }}
           </div>
           <div class="mt-3">
             <label for="input-message" class="font-weight-medium text-subtitle-1">
               Message
             </label>
-            <div v-if="isEditingWelcomeEmail">
+            <div v-if="isEditing">
               <ckeditor
                 id="input-message"
                 v-model="body"
-                :config="editorConfig"
+                :config="{
+                  codeBlock: {
+                    indentSequence: '  '
+                  },
+                  initialData: '',
+                  link: {
+                    addTargetToExternalLinks: true,
+                    defaultProtocol: 'http://'
+                  },
+                  toolbar: ['bold', 'italic', 'bulletedList', 'numberedList', 'link']
+                }"
                 :editor="editor"
+                tag-name="textarea"
               />
             </div>
-            <div v-if="!isEditingWelcomeEmail">
+            <div v-if="!isEditing" class="pb-3 pt-1">
               <div id="page-site-mailing-list-body" v-html="mailingList.welcomeEmailBody"></div>
             </div>
           </div>
           <div class="mt-3">
-            <div v-if="isEditingWelcomeEmail">
+            <div v-if="isEditing">
               <v-btn
                 id="btn-save-welcome-email"
                 class="mr-2"
                 color="primary"
-                :disabled="!isWelcomeEmailValid"
+                :disabled="isSaving || isToggling || !isWelcomeEmailValid"
                 @click="saveWelcomeEmail"
               >
-                <span v-if="!isSavingWelcomeEmail">Save welcome email</span>
-                <span v-if="isSavingWelcomeEmail">
+                <span v-if="!isSaving">Save welcome email</span>
+                <span v-if="isSaving">
                   <SpinnerWithinButton /> Saving...
                 </span>
               </v-btn>
@@ -124,15 +133,17 @@
                 v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject"
                 id="btn-cancel-welcome-email-edit"
                 color="secondary"
+                :disabled="isSaving || isToggling"
                 @click="cancelEditMode"
               >
                 Cancel
               </v-btn>
             </div>
-            <div v-if="!isEditingWelcomeEmail">
+            <div v-if="!isEditing">
               <v-btn
                 id="btn-edit-welcome-email"
                 color="primary"
+                :disabled="isToggling"
                 @click="setEditMode"
               >
                 Edit welcome email
@@ -175,15 +186,11 @@ export default {
     },
     body: '',
     editor: ClassicEditor,
-    editorConfig: {
-      initialData: '',
-      toolbar: ['bold', 'italic', 'bulletedList', 'numberedList', 'link']
-    },
     errorMessages: [],
     isCreating: false,
-    isEditingWelcomeEmail: false,
-    isSavingWelcomeEmail: false,
-    isTogglingEmailActivation: false,
+    isEditing: false,
+    isSaving: false,
+    isToggling: false,
     isWelcomeEmailActive: false,
     mailingList: undefined,
     subject: ''
@@ -204,7 +211,7 @@ export default {
   },
   methods: {
     cancelEditMode() {
-      this.isEditingWelcomeEmail = false
+      this.isEditing = false
       this.body = this.mailingList.welcomeEmailBody || ''
       this.subject = this.mailingList.welcomeEmailSubject
       putFocusNextTick('send-welcome-email-header')
@@ -216,7 +223,7 @@ export default {
     saveWelcomeEmail() {
       if (this.isWelcomeEmailValid) {
         this.$announcer.polite('Saving welcome email')
-        this.isSavingWelcomeEmail = true
+        this.isSaving = true
         updateWelcomeEmail(false, this.body, this.subject).then(
           response => {
             this.updateDisplay(response)
@@ -224,20 +231,20 @@ export default {
           },
           this.$errorHandler
         ).then(() => {
-          this.isSavingWelcomeEmail = false
+          this.isSaving = false
         })
       }
     },
     setEditMode() {
-      this.isEditingWelcomeEmail = true
+      this.isEditing = true
       putFocusNextTick('input-subject')
     },
     toggle() {
-      this.isTogglingEmailActivation = true
-      const toggleEmailActivation = this.isWelcomeEmailActive ? deactivateWelcomeEmail : activateWelcomeEmail
-      toggleEmailActivation().then((data) => {
+      this.isToggling = true
+      const toggleEmailActivation = this.isWelcomeEmailActive ? activateWelcomeEmail : deactivateWelcomeEmail
+      toggleEmailActivation().then(data => {
         this.isWelcomeEmailActive = !!data.welcomeEmailActive
-        this.isTogglingEmailActivation = false
+        this.isToggling = false
         this.$announcer.polite(`${this.isWelcomeEmailActive ? 'Enabled' : 'Disabled' } welcome email`)
       })
     },
@@ -247,7 +254,7 @@ export default {
       this.body = this.mailingList.welcomeEmailBody || ''
       this.subject = this.mailingList.welcomeEmailSubject
       this.errorMessages = this.mailingList.errorMessages || []
-      this.isEditingWelcomeEmail = !this.body && !this.subject
+      this.isEditing = !this.body && !this.subject
       this.isCreating = false
     }
   }
@@ -255,6 +262,12 @@ export default {
 </script>
 
 <style>
+ol {
+  margin-left: 16px;
+}
+ul {
+  margin-left: 16px;
+}
 .ck.ck-editor__editable_inline {
   min-height: 150px;
   padding: 0 15px;

@@ -3,7 +3,7 @@ import utils from '@/api/api-utils'
 import {useContextStore} from '@/stores/context'
 
 export function activateWelcomeEmail() {
-  return utils.post('/api/mailing_list/welcome_email/activate', true)
+  return utils.get('/api/mailing_list/welcome_email/activate', true)
 }
 
 export function createMailingList(name: string, redirectOnError?: boolean) {
@@ -11,7 +11,7 @@ export function createMailingList(name: string, redirectOnError?: boolean) {
 }
 
 export function deactivateWelcomeEmail() {
-  return utils.post('/api/mailing_list/welcome_email/deactivate', {}, true)
+  return utils.get('/api/mailing_list/welcome_email/deactivate', true)
 }
 
 export function downloadWelcomeEmailCsv() {
