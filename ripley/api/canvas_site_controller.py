@@ -242,8 +242,9 @@ def _get_teaching_terms(section_ids, sections):
         teaching_sections = sections
     courses_by_term = {}
     for section_id, sections in groupby(teaching_sections, lambda s: s['section_id']):
+        sections = list(sections)
         section = next((s for s in sections if s.get('is_co_instructor', False) is False), None)
-        co_instructor_sections = [s for s in sections if s.get('is_co_instructor', False) is True]
+        co_instructor_sections = [s for s in sections if s.get('is_co_instructor', True) is True]
         course_id = section['course_id']
         term_id = section['term_id']
         if term_id not in courses_by_term:
