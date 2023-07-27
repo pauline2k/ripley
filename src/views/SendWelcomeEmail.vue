@@ -33,9 +33,9 @@
             :type="isWelcomeEmailActive ? 'success' : 'info'"
           >
             <span v-if="isWelcomeEmailActive">Welcome email {{ isToggling ? 'is being' : '' }} activated.</span>
-            <span v-if="!isWelcomeEmailActive">Sending welcome emails is paused until activation.</span>
+            <span v-if="!isWelcomeEmailActive">Sending welcome emails is paused.</span>
           </v-alert>
-          <div class="w-25">
+          <div class="ml-5 w-25">
             <v-switch
               v-model="isWelcomeEmailActive"
               color="success"
@@ -68,7 +68,7 @@
             Download sent message log (last updated {{ $moment(mailingList.welcomeEmailLastSent).format('MMM D, YYYY') }})
           </v-btn>
         </div>
-        <div class="mt-1">
+        <div class="container pa-5">
           <label for="input-subject" class="font-weight-medium text-subtitle-1">
             Subject
           </label>
@@ -77,6 +77,7 @@
               id="input-subject"
               v-model="subject"
               aria-required="true"
+              class="bg-white"
               density="compact"
               hide-details
               maxlength="255"
