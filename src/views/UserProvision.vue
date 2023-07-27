@@ -1,5 +1,5 @@
 <template>
-  <div class="canvas-application page-user-provision">
+  <div v-if="!isLoading" class="canvas-application page-user-provision">
     <v-container fluid>
       <v-row no-gutters>
         <h1 class="page-user-provision-heading">Add Users to bCourses</h1>
@@ -87,7 +87,6 @@ export default {
   data: () => ({
     error: null,
     importProcessing: false,
-    importUsers: () => {},
     invalidValues: [],
     listLength: null,
     rawUids: '',
@@ -98,6 +97,9 @@ export default {
     importButtonDisabled() {
       return this.importProcessing || !this.rawUids.length
     }
+  },
+  created() {
+    this.$ready()
   },
   methods: {
     onSubmit(evt) {

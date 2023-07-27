@@ -1,5 +1,5 @@
 <template>
-  <div class="canvas-application page-course-add-user">
+  <div v-if="!isLoading" class="canvas-application page-course-add-user">
     <MaintenanceNotice course-action-verb="user is added" />
 
     <h1 class="page-course-add-user-header">Find a Person to Add</h1>
@@ -11,7 +11,7 @@
 
     <div v-if="!showError">
       <v-row v-if="showAlerts" role="alert">
-        <v-col v-if="!isLoading" md="12">
+        <v-col md="12">
           <div v-if="noUserSelectedAlert" class="alert alert-error page-course-add-user-alert">
             Please select a user.
             <div class="alert-close-button-container">
@@ -166,14 +166,6 @@
           </div>
         </v-col>
       </v-row>
-
-      <v-progress-circular
-        v-if="isLoading"
-        class="mr-2"
-        color="primary"
-        indeterminate
-      />
-
       <v-row v-if="showUsersArea" no-gutters>
         <h2 id="user-search-results-header" class="sr-only" tabindex="-1">User Search Results</h2>
         <v-col v-if="userSearchResults.length > 0" md="12">
@@ -289,7 +281,6 @@ export default {
     courseSections: [],
     errorStatus: null,
     grantingRoles: [],
-    isLoading: null,
     noUserSelectedAlert: null,
     searchAlert: null,
     searchText: null,
@@ -310,6 +301,29 @@ export default {
     userSearchResultsCount: 0,
     userSearchResults: [],
   }),
+  created() {
+    getCanvasSiteUserRoles(this.currentUser.canvasSiteId).then(
+      response => {
+        if (this.isAuthorized(response)) {
+          this.grantingRoles = response.grantingRoles
+          this.selectedRole = response.grantingRoles[0]
+          getAddUserCourseSections(this.currentUser.canvasSiteId).then(
+            response => {
+              this.courseSections = response.courseSections
+              this.selectedSection = response.courseSections[0]
+              this.showSearchForm = true
+            },
+            this.showUnauthorized
+          )
+        } else {
+          this.showUnauthorized()
+        }
+      },
+      this.showUnauthorized
+    ).finally(() => {
+      this.$ready('Find Person to Add')
+    })
+  },
   methods: {
     isAuthorized(response) {
       return (
@@ -352,7 +366,7 @@ export default {
       } else {
         this.$announcer.polite('Loading user search results')
         this.showUsersArea = true
-        this.isLoading = true
+        this.loadingStart()
         searchUsers(this.currentUser.canvasSiteId, this.searchText, this.searchType).then(response => {
           this.userSearchResults = response.users
           if (response.users && response.users.length) {
@@ -367,33 +381,30 @@ export default {
             }
             this.showSearchAlert(noResultsAlert)
           }
-          this.isLoading = false
+          this.$ready()
           this.showAlerts = true
-          this.searchResultsFocus = true
         }, () => {
           this.showErrorStatus('User search failed.')
         })
       }
     },
     showErrorStatus(message) {
-      this.isLoading = false
       this.showError = true
       this.errorStatus = message
     },
     showSearchAlert(message) {
       this.showAlerts = true
       this.searchAlert = message
-      this.isLoading = false
     },
     showUnauthorized() {
       this.showErrorStatus('Authorization check failed.')
     },
     submitUser() {
+      this.loadingStart()
       iframeScrollToTop()
       this.showUsersArea = false
       this.showSearchForm = false
       this.$announcer.polite('Adding user')
-      this.isLoading = true
       this.showAlerts = true
       addUser(this.currentUser.canvasSiteId, this.selectedUser.ldapUid, this.selectedSection.id, this.selectedRole).then(response => {
         this.userAdded = {
@@ -404,37 +415,19 @@ export default {
         }
         this.additionSuccessMessage = true
         this.showSearchForm = true
-        this.isLoading = false
+        this.$ready()
         this.resetSearchState()
       }, () => {
         this.errorStatus = 'Request to add user failed'
         this.showSearchForm = true
         this.additionFailureMessage = true
-        this.isLoading = false
+        this.$ready()
         this.resetSearchState()
       })
     },
     updateSearchTextType() {
       this.searchTextType = (this.searchType === 'ldap_user_uid') ? 'number' : 'text'
     }
-  },
-  created() {
-    this.isLoading = true
-    getCanvasSiteUserRoles(this.currentUser.canvasSiteId).then(response => {
-      if (this.isAuthorized(response)) {
-        this.grantingRoles = response.grantingRoles
-        this.selectedRole = response.grantingRoles[0]
-        getAddUserCourseSections(this.currentUser.canvasSiteId).then(response => {
-          this.isLoading = false
-          this.courseSections = response.courseSections
-          this.selectedSection = response.courseSections[0]
-          this.showSearchForm = true
-          this.$ready()
-        }, this.showUnauthorized)
-      } else {
-        this.showUnauthorized()
-      }
-    }, this.showUnauthorized)
   }
 }
 </script>

@@ -156,7 +156,7 @@ export default {
       this.$router.push({path: '/mailing_list/select_course'})
     },
     create() {
-      this.error = this.success = null
+      this.error = null
       const name = this.$_.trim(this.mailingListName)
       if (name && !this.hasInvalidCharacters) {
         this.isCreating = true
