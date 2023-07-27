@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading" class="canvas-application pa-5">
-    <h1 id="page-header" tabindex="-1">Manage course site mailing list</h1>
+    <h1 id="page-header" tabindex="-1">Manage Mailing Lists</h1>
     <v-alert
       v-if="error"
       class="ma-2"
@@ -18,7 +18,7 @@
           id="page-site-mailing-list-site-id"
           v-model="canvasSiteId"
           aria-required="true"
-          :error="!!$_.trim(this.currentUser.canvasSiteId) && !isCanvasSiteIdValid"
+          :error="!!$_.trim(this.canvasSiteId) && !isCanvasSiteIdValid"
           hide-details
           maxlength="10"
           label="Canvas Course ID"
@@ -49,7 +49,7 @@
 import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
-import {getMyMailingList} from '@/api/mailing-list'
+import {getMailingList} from '@/api/mailing-list'
 import {getCanvasSite} from '@/api/canvas-site'
 import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 
@@ -58,41 +58,43 @@ export default {
   mixins: [Context, MailingList],
   components: {SpinnerWithinButton},
   data: () => ({
+    canvasSiteId: undefined,
     error: undefined,
     isProcessing: false
   }),
   computed: {
     isCanvasSiteIdValid() {
-      return isValidCanvasSiteId(this.currentUser.canvasSiteId)
+      return isValidCanvasSiteId(this.canvasSiteId)
     }
   },
   mounted() {
     this.init()
-    if (this.currentUser.canvasSiteId && !this.currentUser.isAdmin) {
-      this.proceed()
-    } else {
-      putFocusNextTick('page-header')
-      this.$ready()
-    }
+    putFocusNextTick('page-header')
+    this.$ready()
   },
   methods: {
     proceed() {
       if (!this.isProcessing) {
         this.isProcessing = true
-        getMyMailingList(true).then(
+        getCanvasSite(this.canvasSiteId).then(
           data => {
-            this.error = undefined
-            if (data) {
-              this.setMailingList(data)
-              this.$router.push('/mailing_list/update')
-              this.isProcessing = false
-            } else {
-              getCanvasSite(this.currentUser.canvasSiteId).then(data => {
-                this.setCanvasSite(data)
-                this.$router.push('/mailing_list/create')
+            this.setCanvasSite(data)
+            getMailingList(this.canvasSiteId).then(
+              data => {
+                this.error = undefined
+                if (data) {
+                  this.setMailingList(data)
+                  this.$router.push('/mailing_list/update')
+                } else {
+                  this.$router.push('/mailing_list/create')
+                }
                 this.isProcessing = false
-              })
-            }
+              },
+              error => {
+                this.error = error
+                this.isProcessing = false
+              }
+            )
           },
           error => {
             this.error = error

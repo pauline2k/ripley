@@ -24,12 +24,16 @@ export function getSuggestedMailingListName() {
   return utils.get('/api/mailing_list/suggested_name', true)
 }
 
+export function getMailingList(canvasSiteId: number, redirectOnError?: boolean) {
+  return utils.get(`/api/mailing_list/${canvasSiteId}`, redirectOnError)
+}
+
 export function getMyMailingList(redirectOnError?: boolean) {
   return utils.get('/api/mailing_list/my', redirectOnError)
 }
 
-export function populateMailingList(redirectOnError?: boolean) {
-  return utils.post('/api/mailing_list/populate', {}, redirectOnError)
+export function populateMailingList(mailingListId: number, redirectOnError?: boolean) {
+  return utils.post(`/api/mailing_list/${mailingListId}/populate`, {}, redirectOnError)
 }
 
 export function updateWelcomeEmail(active: boolean, body: string, subject: string) {
