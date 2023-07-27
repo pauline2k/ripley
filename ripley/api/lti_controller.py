@@ -204,12 +204,12 @@ def launch_grade_distribution():
 
 @app.route('/api/lti/mailing_list', methods=['GET', 'POST'])
 def launch_mailing_list():
-    return _launch_tool('mailing_list/select_course')
+    return _launch_tool('mailing_list/create')
 
 
 @app.route('/api/lti/mailing_lists', methods=['GET', 'POST'])
 def launch_mailing_lists():
-    return _launch_tool('mailing_lists')
+    return _launch_tool('mailing_list/select_course')
 
 
 @app.route('/api/lti/manage_official_sections', methods=['GET', 'POST'])
