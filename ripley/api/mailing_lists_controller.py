@@ -28,7 +28,7 @@ from datetime import datetime
 from flask import current_app as app, request
 from flask_login import current_user
 from ripley.api.errors import BadRequestError, ResourceNotFoundError
-from ripley.api.util import canvas_role_required, csv_download_response
+from ripley.api.util import admin_required, canvas_role_required, csv_download_response
 from ripley.externals import canvas
 from ripley.lib.http import tolerant_jsonify
 from ripley.models.mailing_list import MailingList
@@ -37,13 +37,14 @@ from ripley.models.mailing_list_members import MailingListMembers
 
 @app.route('/api/mailing_list/my')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def mailing_lists():
-    course = canvas.get_course(current_user.canvas_site_id)
-    if course:
-        mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id) if course else None
-        return tolerant_jsonify(mailing_list.to_api_json() if mailing_list else None)
-    else:
-        raise ResourceNotFoundError(f'bCourses site {current_user.canvas_site_id} was not found.')
+def my_mailing_list():
+    return _mailing_list(current_user.canvas_site_id)
+
+
+@app.route('/api/mailing_list/<canvas_site_id>')
+@admin_required
+def get_mailing_list(canvas_site_id):
+    return _mailing_list(canvas_site_id)
 
 
 @app.route('/api/mailing_list/welcome_email/activate')
@@ -148,15 +149,24 @@ def download_welcome_email_log():
         raise ResourceNotFoundError(f'No mailing list found for Canvas course {current_user.canvas_site_id}')
 
 
-@app.route('/api/mailing_list/populate', methods=['POST'])
+@app.route('/api/mailing_list/<mailing_list_id>/populate', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def populate_mailing_lists():
-    mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
+def populate_mailing_lists(mailing_list_id):
+    mailing_list = MailingList.find_by_id(mailing_list_id)
     if mailing_list:
-        mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
+        populated_mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
         return tolerant_jsonify({
-            'mailingList': mailing_list.to_api_json(),
+            'mailingList': populated_mailing_list.to_api_json(),
             'summary': update_summary,
         })
     else:
         raise ResourceNotFoundError(f'No mailing list found for Canvas course {current_user.canvas_site_id}')
+
+
+def _mailing_list(canvas_site_id):
+    course = canvas.get_course(canvas_site_id)
+    if course:
+        mailing_list = MailingList.find_by_canvas_site_id(canvas_site_id) if course else None
+        return tolerant_jsonify(mailing_list.to_api_json() if mailing_list else None)
+    else:
+        raise ResourceNotFoundError(f'bCourses site {canvas_site_id} was not found.')

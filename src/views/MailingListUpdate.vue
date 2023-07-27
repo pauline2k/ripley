@@ -137,6 +137,14 @@
       </v-card>
       <div class="d-flex justify-end mt-4">
         <v-btn
+          id="btn-cancel"
+          class="mr-2"
+          variant="outlined"
+          @click="cancel"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
           id="btn-populate-mailing-list"
           class="mr-2"
           color="primary"
@@ -146,13 +154,6 @@
           <span v-if="isUpdating">
             <SpinnerWithinButton /> Updating...
           </span>
-        </v-btn>
-        <v-btn
-          id="btn-cancel"
-          variant="outlined"
-          @click="sendWelcomeEmail"
-        >
-          Send Welcome Email
         </v-btn>
       </div>
     </div>
@@ -191,8 +192,8 @@ export default {
     }
   },
   methods: {
-    sendWelcomeEmail() {
-      this.$router.push({path: '/mailing_list/send_welcome_email'})
+    cancel() {
+      this.$router.push({path: '/mailing_list/select_course'})
     },
     pluralize,
     showUpdateSummary() {
@@ -228,14 +229,17 @@ export default {
       this.$announcer.polite('Updating')
       this.alerts = []
       this.isUpdating = true
-      populateMailingList().then(
+      populateMailingList(this.mailingList.id).then(
         data => {
           this.setMailingList(data.mailingList)
           this.setUpdateSummary(data.summary)
           this.showUpdateSummary()
         },
         error => {
-          this.setAlert(error, 'warning')
+          this.alerts = [{
+            message: error,
+            type: 'warning'
+          }]
         }
       ).then(() => {
         this.isUpdating = false

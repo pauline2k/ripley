@@ -224,24 +224,30 @@ class TestPopulateMailingList:
 
     def test_anonymous(self, client):
         """Denies anonymous user."""
-        _api_populate_mailing_list(client, expected_status_code=401)
+        _api_populate_mailing_list(client, 1, expected_status_code=401)
 
     def test_no_canvas_account(self, client, fake_auth):
         """Denies user with no Canvas account."""
         canvas_site_id = '1234567'
         fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
-        _api_populate_mailing_list(client, expected_status_code=401)
+        _api_populate_mailing_list(client, 1, expected_status_code=401)
 
-    def test_not_enrolled(self, client, app, fake_auth):
-        """Denies user with no course enrollment."""
+    def test_students_cannot_edit_mailing_list(self, client, app, fake_auth):
+        """Denies student access to mailing_list."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id_1234567'], 'user': ['profile_20000']}, m)
             canvas_site_id = '1234567'
-            fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
-            _api_populate_mailing_list(client, expected_status_code=401)
+            uid_of_student = 40000
+            register_canvas_uris(
+                app,
+                {'course': [f'get_by_id_{canvas_site_id}'], 'user': [f'profile_{uid_of_student}']},
+                m,
+            )
+            mailing_list = MailingList.create(canvas_site_id=canvas_site_id)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid_of_student)
+            _api_populate_mailing_list(client, mailing_list_id=mailing_list.id, expected_status_code=401)
 
-    def test_admin(self, client, app, fake_auth):
-        """Allows admin."""
+    def test_authorized(self, client, app, fake_auth):
+        """Allows admin to manage mailing list."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins'],
@@ -250,8 +256,8 @@ class TestPopulateMailingList:
             }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
-            _api_create_mailing_list(client)
-            api_json = _api_populate_mailing_list(client)
+            api_json = _api_create_mailing_list(client)
+            api_json = _api_populate_mailing_list(client, mailing_list_id=api_json['id'])
             assert api_json['mailingList']['canvasSite']['canvasSiteId'] == 1234567
             # TODO: verify populated mailing list
 
@@ -265,21 +271,22 @@ class TestPopulateMailingList:
             }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
-            _api_create_mailing_list(client)
-            api_json = _api_populate_mailing_list(client)
+            api_json = _api_create_mailing_list(client)
+            api_json = _api_populate_mailing_list(client, mailing_list_id=api_json['id'])
             assert api_json['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
             # TODO: verify populated mailing list
 
     def test_student(self, client, app, fake_auth):
         """Denies student."""
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {
-                'course': ['get_by_id_1234567', 'get_user_1234567_5678901'],
-                'user': ['profile_40000'],
-            }, m)
             canvas_site_id = '1234567'
+            register_canvas_uris(app, {
+                'course': [f'get_by_id_{canvas_site_id}', f'get_user_{canvas_site_id}_5678901'],
+                'user': [f'profile_{student_uid}'],
+            }, m)
+            mailing_list = MailingList.create(canvas_site_id=canvas_site_id)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
-            _api_populate_mailing_list(client, expected_status_code=401)
+            _api_populate_mailing_list(client, expected_status_code=401, mailing_list_id=mailing_list.id)
 
 
 def _api_activate_mailing_list(
@@ -314,8 +321,8 @@ def _api_my_mailing_list(client, expected_status_code=200):
     return response.json
 
 
-def _api_populate_mailing_list(client, expected_status_code=200):
-    response = client.post('/api/mailing_list/populate')
+def _api_populate_mailing_list(client, mailing_list_id, expected_status_code=200):
+    response = client.post(f'/api/mailing_list/{mailing_list_id}/populate')
     api_json = response.json
     assert response.status_code == expected_status_code, f"""
         HTTP status code {response.status_code} != {expected_status_code}

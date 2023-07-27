@@ -1,6 +1,8 @@
 <template>
   <div v-if="!isLoading" class="ma-5">
-    <h1 id="page-header" tabindex="-1">Mailing List</h1>
+    <h1 id="page-header" tabindex="-1">
+      Mailing List
+    </h1>
     <v-alert
       density="compact"
       role="alert"
@@ -10,22 +12,55 @@
       Messages can now be sent through this address.
     </v-alert>
     <div>
-      <div class="ml-3 mt-3">
+      <div class="ml-3 my-3">
         bCourses Mailing Lists allow Teachers, TAs, Lead TAs and Readers to send email to everyone in a bCourses site by
         giving the site its own email address. Messages sent to this address from the
         <strong>official berkeley.edu email address</strong>
         of a Teacher, TA, Lead TA or Reader will be sent to the official email addresses of all site
         members. Students and people not in the site cannot send messages through Mailing Lists.
       </div>
-      <h2 id="send-welcome-email-header" class="my-3" tabindex="-1">
+      <div v-if="mailingList.welcomeEmailLastSent" class="mb-3">
+        <h2 id="download-log-file-header" class="my-2" tabindex="-1">
+          Download Log of Sent Messages
+        </h2>
+        <div class="ml-3">
+          <div class="mb-2 my-1">
+            <v-btn
+              id="btn-download-sent-message-log"
+              color="primary"
+              :disabled="isDownloading || refreshing"
+              @click="downloadMessageLog"
+            >
+              <span class="mr-1">
+                <v-progress-circular
+                  v-if="isDownloading"
+                  class="mr-1"
+                  indeterminate
+                  size="18"
+                  width="3"
+                />
+                <v-icon v-if="!isDownloading" icon="mdi-file-download-outline" size="large" />
+              </span>
+              {{ isDownloading ? 'Downloading' : 'Download' }}
+            </v-btn>
+          </div>
+          <div>
+            <span class="font-weight-bold">NOTE:</span>
+            Welcome email last sent on {{ $moment(mailingList.welcomeEmailLastSent).format('MMM D, YYYY') }}
+          </div>
+        </div>
+      </div>
+      <h2 id="send-welcome-email-header" class="my-2" tabindex="-1">
         Send Welcome Email
       </h2>
       <div class="mb-3 ml-3">
-        The Welcome Email tool automatically sends a customizable message by email to all members of your course site,
-        even if the site has not yet been published. For more information, visit
-        <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900">
-          https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900
-        </OutboundLink>.
+        <div class="mb-3">
+          The Welcome Email tool automatically sends a customizable message by email to all members of your course site,
+          even if the site has not yet been published. For more information, visit
+          <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900">
+            https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900
+          </OutboundLink>.
+        </div>
         <div v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject" class="mt-2">
           <v-alert
             density="compact"
@@ -57,19 +92,8 @@
             </v-switch>
           </div>
         </div>
-        <div v-if="mailingList.welcomeEmailLastSent">
-          <v-btn
-            id="btn-download-sent-message-log"
-            type="button"
-            variant="text"
-            @click="downloadMessageLog"
-          >
-            <v-icon icon="mdi-file-download" />
-            Download sent message log (last updated {{ $moment(mailingList.welcomeEmailLastSent).format('MMM D, YYYY') }})
-          </v-btn>
-        </div>
-        <div class="container pa-5">
-          <label for="input-subject" class="font-weight-medium text-subtitle-1">
+        <div class="container pb-5 pt-3 px-5">
+          <label for="input-subject" class="font-weight-medium text-primary text-subtitle-1">
             Subject
           </label>
           <div v-if="isEditing">
@@ -90,7 +114,7 @@
             {{ mailingList.welcomeEmailSubject }}
           </div>
           <div class="mt-3">
-            <label for="input-message" class="font-weight-medium text-subtitle-1">
+            <label for="input-message" class="font-weight-medium text-primary text-subtitle-1">
               Message
             </label>
             <div v-if="isEditing">
@@ -161,6 +185,7 @@
 import CKEditor from '@ckeditor/ckeditor5-vue'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import Context from '@/mixins/Context'
+import MailingList from '@/mixins/MailingList'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {
@@ -179,7 +204,7 @@ export default {
     OutboundLink,
     SpinnerWithinButton
   },
-  mixins: [Context],
+  mixins: [Context, MailingList],
   data: () => ({
     alerts: {
       error: [],
@@ -189,11 +214,11 @@ export default {
     editor: ClassicEditor,
     errorMessages: [],
     isCreating: false,
+    isDownloading: false,
     isEditing: false,
     isSaving: false,
     isToggling: false,
     isWelcomeEmailActive: false,
-    mailingList: undefined,
     subject: ''
   }),
   computed: {
@@ -218,8 +243,12 @@ export default {
       putFocusNextTick('send-welcome-email-header')
     },
     downloadMessageLog() {
-      this.$announcer.polite('Downloading message log')
-      downloadWelcomeEmailCsv()
+      this.isDownloading = true
+      this.$announcer.polite('Downloading')
+      downloadWelcomeEmailCsv().then(() => {
+        this.isDownloading = false
+        this.$announcer.polite('Downloaded.')
+      })
     },
     saveWelcomeEmail() {
       if (this.isWelcomeEmailValid) {
@@ -250,7 +279,7 @@ export default {
       })
     },
     updateDisplay(data) {
-      this.mailingList = data
+      this.setMailingList(data)
       this.isWelcomeEmailActive = this.mailingList.welcomeEmailActive
       this.body = this.mailingList.welcomeEmailBody || ''
       this.subject = this.mailingList.welcomeEmailSubject

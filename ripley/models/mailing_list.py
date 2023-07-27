@@ -76,6 +76,10 @@ class MailingList(Base):
         return cls.query.filter_by(canvas_site_id=canvas_site_id).first()
 
     @classmethod
+    def find_by_id(cls, mailing_list_id):
+        return cls.query.filter_by(id=mailing_list_id).first()
+
+    @classmethod
     def get_suggested_name(cls, canvas_site_id):
         canvas_site = canvas.get_course(canvas_site_id)
         sis_term_id = canvas_site.term['sis_term_id']
@@ -185,7 +189,7 @@ class MailingList(Base):
             'populatedAt': to_isoformat(self.populated_at),
             'welcomeEmailActive': self.welcome_email_active,
             'welcomeEmailBody': self.welcome_email_body,
-            'welcomeEmailLastSent': welcome_email_last_sent,
+            'welcomeEmailLastSent': to_isoformat(welcome_email_last_sent),
             'welcomeEmailSubject': self.welcome_email_subject,
             'createdAt': to_isoformat(self.created_at),
             'updatedAt': to_isoformat(self.updated_at),
