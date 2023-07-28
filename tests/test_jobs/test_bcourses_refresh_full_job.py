@@ -51,7 +51,7 @@ class TestBcoursesRefreshFullJob:
             BcoursesRefreshFullJob(app)._run()
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-full-sis-import')
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_section_enrollments')
+    @mock.patch('ripley.lib.canvas_site_provisioning.get_section_enrollments')
     def test_previous_export_student_added(self, mock_section_enrollments, app, section_enrollments):
         with self.setup_term_enrollments_export(app) as s3:
             section_enrollments.append({
@@ -70,7 +70,7 @@ class TestBcoursesRefreshFullJob:
             assert len(spring_2023_enrollments_imported) == 2
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30060000,student,SEC:2023-B-32936,active,'
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_section_enrollments')
+    @mock.patch('ripley.lib.canvas_site_provisioning.get_section_enrollments')
     def test_student_removed(self, mock_section_enrollments, app, section_enrollments):
         with self.setup_term_enrollments_export(app) as s3:
             section_enrollments.pop()
@@ -81,8 +81,8 @@ class TestBcoursesRefreshFullJob:
             assert len(spring_2023_enrollments_imported) == 2
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30020000,student,SEC:2023-B-32936,deleted,'
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_section_enrollments')
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_section_instructors')
+    @mock.patch('ripley.lib.canvas_site_provisioning.get_section_enrollments')
+    @mock.patch('ripley.lib.canvas_site_provisioning.get_section_instructors')
     def test_student_becomes_ta(self, mock_section_instructors, mock_section_enrollments, app, section_enrollments, section_instructors):
         with self.setup_term_enrollments_export(app) as s3:
             section_enrollments.pop()

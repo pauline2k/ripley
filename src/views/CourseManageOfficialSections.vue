@@ -476,7 +476,7 @@ export default {
             this.$errorHandler((error, vm, info))
           }
         )
-      }, 2000)
+      }, 6000)
     },
     unstage(section) {
       if (section.stagedState === 'add') {

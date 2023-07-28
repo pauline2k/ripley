@@ -61,7 +61,7 @@ class TestRefreshBcoursesIncremental:
             BcoursesRefreshIncrementalJob(app)._run()
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import')
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_edo_enrollment_updates')
+    @mock.patch('ripley.lib.canvas_site_provisioning.get_edo_enrollment_updates')
     def test_previous_export_student_added(self, mock_edo_enrollment_updates, app, edo_enrollment_updates):
         with self.setup_term_enrollments_export(app) as s3:
             edo_enrollment_updates.append({
@@ -79,7 +79,7 @@ class TestRefreshBcoursesIncremental:
             assert len(spring_2023_enrollments_imported) == 2
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30060000,student,SEC:2023-B-32936,active,'
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_edo_enrollment_updates')
+    @mock.patch('ripley.lib.canvas_site_provisioning.get_edo_enrollment_updates')
     def test_multiple_incremental_jobs_do_not_duplicate(self, mock_edo_enrollment_updates, app, edo_enrollment_updates):
         with self.setup_incremental_refresh_job(app) as s3:
             mock_edo_enrollment_updates.return_value = edo_enrollment_updates
@@ -108,7 +108,7 @@ class TestRefreshBcoursesIncremental:
             assert len(latest_spring_2023_enrollments_imported) == 2
             assert latest_spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30060000,student,SEC:2023-B-32936,active,'
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_edo_enrollment_updates')
+    @mock.patch('ripley.lib.canvas_site_provisioning.get_edo_enrollment_updates')
     def test_previous_export_student_removed_no_change(self, mock_edo_enrollment_updates, app, edo_enrollment_updates):
         # The incremental refresh adds new enrollments and changes enrollment roles, but doesn't do a full enrollment query to
         # remove outdated enrollments from Canvas. Those are cleaned up only by the full refresh.
@@ -119,8 +119,8 @@ class TestRefreshBcoursesIncremental:
             BcoursesRefreshIncrementalJob(app)._run()
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
 
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_edo_enrollment_updates')
-    @mock.patch('ripley.jobs.bcourses_refresh_base_job.get_edo_instructor_updates')
+    @mock.patch('ripley.lib.canvas_site_provisioning.get_edo_enrollment_updates')
+    @mock.patch('ripley.lib.canvas_site_provisioning.get_edo_instructor_updates')
     def test_previous_export_student_becomes_ta(
         self, mock_edo_instructor_updates, mock_edo_enrollment_updates, app, edo_enrollment_updates, edo_instructor_updates,
     ):
