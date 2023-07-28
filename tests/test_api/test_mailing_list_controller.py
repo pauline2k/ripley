@@ -35,6 +35,73 @@ teacher_uid = '30000'
 student_uid = '40000'
 
 
+class TestGetMailingList:
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        _api_mailing_list(client, 1010101, expected_status_code=401)
+
+    def test_no_canvas_account(self, client, fake_auth):
+        """Denies user with no Canvas account."""
+        canvas_site_id = '1234567'
+        fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+        _api_mailing_list(client, canvas_site_id, expected_status_code=401)
+
+    def test_not_enrolled(self, client, app, fake_auth):
+        """Denies user with no course enrollment."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {'course': ['get_by_id_1234567'], 'user': ['profile_20000']}, m)
+            canvas_site_id = '1234567'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
+            _api_mailing_list(client, canvas_site_id, expected_status_code=401)
+
+    def test_admin(self, client, app, fake_auth):
+        """Allows admin."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = 1234567
+            register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}', f'search_users_{canvas_site_id}']}, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            _api_create_mailing_list(
+                canvas_site_id=canvas_site_id,
+                client=client,
+            )
+            api_json = _api_mailing_list(client, canvas_site_id)
+
+            assert api_json['canvasSite']['canvasSiteId'] == canvas_site_id
+            assert api_json['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
+            name_ = api_json['name']
+            assert name_ == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+
+    def test_teacher(self, client, app, fake_auth):
+        """Allows teacher."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': ['get_by_id_1234567', 'get_user_1234567_4567890', 'search_users_1234567'],
+                'user': ['profile_30000'],
+            }, m)
+            canvas_site_id = '1234567'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            _api_create_mailing_list(
+                canvas_site_id=canvas_site_id,
+                client=client,
+            )
+            # Verify
+            api_json = _api_mailing_list(client, canvas_site_id)
+            assert api_json['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+
+    def test_student(self, client, app, fake_auth):
+        """Denies student."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'course': ['get_by_id_1234567', 'get_user_1234567_5678901'],
+                'user': ['profile_40000'],
+            }, m)
+            canvas_site_id = '1234567'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
+            _api_mailing_list(client, canvas_site_id, expected_status_code=401)
+
+
 class TestGetMyMailingList:
 
     def test_anonymous(self, client):
@@ -346,6 +413,12 @@ def _api_create_mailing_list(
         data=json.dumps(params),
         content_type='application/json',
     )
+    assert response.status_code == expected_status_code
+    return response.json
+
+
+def _api_mailing_list(client, canvas_site_id, expected_status_code=200):
+    response = client.get(f'/api/mailing_list/{canvas_site_id}')
     assert response.status_code == expected_status_code
     return response.json
 

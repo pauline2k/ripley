@@ -174,7 +174,7 @@ export default {
     if (this.currentUser.isTeaching || this.currentUser.isAdmin) {
       getCanvasSite(this.canvasSiteId).then(data => {
         this.setCanvasSite(data)
-        getMailingList(this.canvasSiteId).then(data => {
+        getMailingList(this.canvasSiteId, true).then(data => {
           if (data) {
             this.goToNextPage()
           } else {
