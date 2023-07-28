@@ -7,13 +7,7 @@
       role="alert"
       type="info"
     >
-      <span v-if="$isInIframe">No Mailing List has been created for bCourses site.</span>
-      <span v-if="!$isInIframe">
-        No Mailing List has been created for bCourses site
-        <OutboundLink id="mailing-list-course-site-name" class="text-white" :href="canvasSite.url">
-          <span class="font-weight-bold">{{ canvasSite.name }}</span>
-        </OutboundLink>.
-      </span>
+      No Mailing List has been created for this site.
     </v-alert>
     <v-alert
       v-if="success"
@@ -38,13 +32,43 @@
     <div class="mt-2">
       <v-card id="mailing-list-details" elevation="1">
         <v-card-text>
-          bCourses Mailing Lists allow Teachers, TAs, Lead TAs and Readers to send email to everyone in a bCourses site
-          by giving the site its own email address. Messages sent to this address from the
-          <span class="font-weight-bold">official berkeley.edu email address</span> of a Teacher, TA, Lead TA or Reader
-          will be sent to the official email addresses of all site members. Students and people not in the site cannot
-          send messages through Mailing Lists.
-          <div class="mt-2">
-            <v-container class="py-2 pl-0" fluid>
+          <div v-if="!isAdminToolMode" class="mb-1">
+            bCourses Mailing Lists allow Teachers, TAs, Lead TAs and Readers to send email to everyone in a bCourses site
+            by giving the site its own email address. Messages sent to this address from the
+            <span class="font-weight-bold">official berkeley.edu email address</span> of a Teacher, TA, Lead TA or Reader
+            will be sent to the official email addresses of all site members. Students and people not in the site cannot
+            send messages through Mailing Lists.
+          </div>
+          <div>
+            <v-container class="mb-2 pb-1 pl-0 pt-2" fluid>
+              <v-row v-if="isAdminToolMode" no-gutters>
+                <v-col cols="auto" class="me-auto">
+                  <div v-if="canvasSite.url">
+                    <OutboundLink id="course-site-href" :href="canvasSite.url">
+                      <div class="d-flex">
+                        <div class="pr-2">
+                          <span class="sr-only">View course site </span>
+                          <h2>{{ canvasSite.name }}</h2>
+                        </div>
+                        <div class="pb-1">
+                          <v-icon icon="mdi-open-in-new" size="small" />
+                        </div>
+                      </div>
+                    </OutboundLink>
+                  </div>
+                  <div v-if="!canvasSite.url">
+                    <h2>{{ canvasSite.name }}</h2>
+                  </div>
+                </v-col>
+              </v-row>
+              <v-row v-if="isAdminToolMode" no-gutters>
+                <v-col>
+                  <div class="mb-4 w-auto">
+                    <div v-if="canvasSite.term" class="text-subtitle-1">{{ canvasSite.term.name }}</div>
+                    <div>Site ID: {{ canvasSite.canvasSiteId }}</div>
+                  </div>
+                </v-col>
+              </v-row>
               <v-row no-gutters align="center">
                 <v-col cols="8">
                   <div v-if="currentUser.isAdmin" class="d-flex pt-1 text-subtitle-1">
@@ -77,7 +101,7 @@
               </v-row>
               <v-row>
                 <v-col>
-                  <div class="d-flex float-right mt-2">
+                  <div class="d-flex float-right mt-1">
                     <div v-if="currentUser.isAdmin">
                       <v-btn
                         id="btn-cancel"
