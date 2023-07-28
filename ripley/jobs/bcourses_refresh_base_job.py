@@ -35,14 +35,14 @@ import zipfile
 
 from flask import current_app as app
 from ripley.externals import canvas
-from ripley.externals.data_loch import get_edo_enrollment_updates, get_edo_instructor_updates, \
-    get_section_enrollments, get_section_instructors, get_sections, get_sections_count, get_users
+from ripley.externals.data_loch import get_sections_count
 from ripley.externals.s3 import find_all_dated_csvs, find_last_dated_csv, find_last_dated_csvs, stream_object_text, upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_calnet_attributes_for_uids
-from ripley.lib.canvas_utils import api_formatted_course_role, csv_formatted_course_role, csv_row_for_campus_user, format_term_enrollments_export, \
-    parse_canvas_sis_section_id, sis_enrollment_status_to_canvas_course_role, uid_from_canvas_login_id, user_id_from_attributes
+from ripley.lib.canvas_site_provisioning import get_basic_attributes, initialize_recent_updates, process_course_enrollments
+from ripley.lib.canvas_utils import api_formatted_course_role, csv_row_for_campus_user, format_term_enrollments_export, \
+    parse_canvas_sis_section_id, uid_from_canvas_login_id, user_id_from_attributes
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from ripley.models.canvas_synchronization import CanvasSynchronization
@@ -78,10 +78,10 @@ class BcoursesRefreshBaseJob(BaseJob):
 
         if self.job_flags.incremental:
             uids_for_updates = set()
-            self.initialize_recent_updates(sis_term_ids, uids_for_updates)
-            users_by_uid = _get_calnet_users(uids_for_updates)
+            self.instructor_updates, self.enrollment_updates = initialize_recent_updates(sis_term_ids, uids_for_updates)
+            users_by_uid = get_basic_attributes(uids_for_updates)
         else:
-            users_by_uid = _get_calnet_users()
+            users_by_uid = get_basic_attributes()
 
         if self.job_flags.enrollments:
             self.initialize_enrollment_provisioning_reports(sis_term_ids, users_by_uid)
@@ -103,7 +103,7 @@ class BcoursesRefreshBaseJob(BaseJob):
                 self.process_enrollments(csv_set)
 
             if self.sis_user_id_changes:
-                app.logger.warn(f'About to add {len(self.sis_user_id_changes)} SIS user ID changes to CSV')
+                app.logger.warning(f'About to add {len(self.sis_user_id_changes)} SIS user ID changes to CSV')
                 for change in self.sis_user_id_changes.values():
                     csv_set.sis_ids.writerow(change)
 
@@ -205,32 +205,6 @@ class BcoursesRefreshBaseJob(BaseJob):
                 for row in csv.DictReader(stream_object_text(sis_id_import_csv)):
                     self.known_sis_id_updates[str(row['old_id'])] = str(row['new_id'])
 
-    def initialize_recent_updates(self, sis_term_ids, uids_for_updates):
-        def _collect_enrollment_updates(updates, status_column):
-            collector = {}
-            for term_id, term_rows in groupby(updates, key=itemgetter('term_id')):
-                canvas_term_id = BerkeleyTerm.from_sis_term_id(term_id).to_canvas_sis_term_id()
-                collector[canvas_term_id] = {}
-                for section_id, section_rows in groupby(term_rows, key=itemgetter('section_id')):
-                    collector[canvas_term_id][section_id] = []
-
-                    def _get_uid(row):
-                        if 'ldap_uid' in row:
-                            return row['ldap_uid']
-                        elif 'instructor_uid' in row:
-                            return row['instructor_uid']
-
-                    for uid, uid_rows in groupby(section_rows, key=_get_uid):
-                        if uid:
-                            uids_for_updates.add(uid)
-                            collector[canvas_term_id][section_id].append(list(uid_rows)[0])
-            return collector
-
-        instructor_results = get_edo_instructor_updates(CanvasSynchronization.get_last_instructor_sync())
-        self.instructor_updates = _collect_enrollment_updates(instructor_results, 'role_code')
-        enrollment_results = get_edo_enrollment_updates(CanvasSynchronization.get_last_enrollment_sync())
-        self.enrollment_updates = _collect_enrollment_updates(enrollment_results, 'sis_enrollment_status')
-
     @contextmanager
     def get_canvas_user_report(self, timestamp, users_by_uid):
         if self.job_flags.incremental:
@@ -281,7 +255,7 @@ class BcoursesRefreshBaseJob(BaseJob):
         campus_user = users_by_uid.get(uid, None)
         if campus_user:
             if is_inactive:
-                app.logger.warn(f'Reactivating account for LDAP UID {uid}.')
+                app.logger.warning(f'Reactivating account for LDAP UID {uid}.')
             new_row = csv_row_for_campus_user(campus_user)
         else:
             new_row = self.inactivate_user(uid, row, is_inactive, whitelisted_uids)
@@ -293,7 +267,7 @@ class BcoursesRefreshBaseJob(BaseJob):
             if str(row['user_id']) in self.known_sis_id_updates:
                 app.logger.debug(f"SIS ID change from {row['user_id']} to {new_row['user_id']} already processed, will not attempt to re-process.")
             else:
-                app.logger.warn(f"Will change SIS ID for user sis_login_id:{row['login_id']} from {row['user_id']} to {new_row['user_id']}")
+                app.logger.warning(f"Will change SIS ID for user sis_login_id:{row['login_id']} from {row['user_id']} to {new_row['user_id']}")
             self.sis_user_id_changes[f"sis_login_id:{row['login_id']}"] = {
                 'old_id': row['user_id'],
                 'new_id': new_row['user_id'],
@@ -309,7 +283,7 @@ class BcoursesRefreshBaseJob(BaseJob):
 
         # Force user reactivation if already inactive and in our whitelist.
         if uid in whitelisted_uids and is_inactive:
-            app.logger.warn(f'Reactivating account for unknown LDAP UID {uid}.')
+            app.logger.warning(f'Reactivating account for unknown LDAP UID {uid}.')
             new_row.update({
                 'login_id': uid,
                 'status': 'active',
@@ -317,7 +291,7 @@ class BcoursesRefreshBaseJob(BaseJob):
         # Otherwise, if an inactivation or email deletion job is running, proceed to mark the Canvas user account as inactive.
         elif self.job_flags.inactivate or self.job_flags.delete_email_addresses:
             if not is_inactive:
-                app.logger.warn(f'Inactivating account for LDAP UID {uid}.')
+                app.logger.warning(f'Inactivating account for LDAP UID {uid}.')
             new_row.update({
                 'login_id': uid,
                 'user_id': f'UID:{uid}',
@@ -367,111 +341,19 @@ class BcoursesRefreshBaseJob(BaseJob):
                                 if self.job_flags.incremental and section_id in ccns_with_updates:
                                     has_incremental_updates = True
                         if has_incremental_updates or not self.job_flags.incremental:
-                            self.process_course_enrollments(term_id, course_id, sis_section_ids, csv_set)
-
-    def process_course_enrollments(self, term_id, course_id, sis_section_ids, csv_set):
-        app.logger.debug(f'Refreshing course {course_id}')
-        existing_term_enrollments = self.enrollment_provisioning_reports.get(term_id, {})
-        primary_sections = _get_primary_sections(term_id, sis_section_ids)
-
-        for sis_section_id in sis_section_ids:
-            self.process_section_enrollments(term_id, course_id, sis_section_id, existing_term_enrollments, csv_set, primary_sections)
-
-    def process_section_enrollments(self, term_id, course_id, sis_section_id, existing_term_enrollments, csv_set, primary_sections):
-        app.logger.debug(f'Refreshing section: {sis_section_id}')
-
-        existing_section_enrollments = {}
-        section_id, berkeley_term = parse_canvas_sis_section_id(sis_section_id)
-
-        for ldap_uid, rows in groupby(
-            sorted(existing_term_enrollments.get(sis_section_id, []), key=itemgetter('sis_login_id')),
-            key=itemgetter('sis_login_id'),
-        ):
-            if (
-                not self.job_flags.incremental
-                or ldap_uid in [r['instructor_uid'] for r in self.instructor_updates.get(term_id, {}).get(section_id, [])]
-                or ldap_uid in [r['ldap_uid'] for r in self.enrollment_updates.get(term_id, {}).get(section_id, [])]
-            ):
-                existing_section_enrollments[ldap_uid] = list(rows)
-
-        self.process_student_enrollments(term_id, course_id, sis_section_id, csv_set, existing_section_enrollments)
-        self.process_instructor_enrollments(term_id, course_id, sis_section_id, primary_sections, csv_set, existing_section_enrollments)
-
-        # Remove existing enrollments not found in SIS
-        for ldap_uid, enrollment_rows in existing_section_enrollments.items():
-            self.process_missing_enrollments(term_id, course_id, sis_section_id, ldap_uid, csv_set, enrollment_rows)
-
-    def process_student_enrollments(self, term_id, course_id, sis_section_id, csv_set, existing_section_enrollments):
-        section_id, berkeley_term = parse_canvas_sis_section_id(sis_section_id)
-        if self.job_flags.incremental:
-            enrollment_rows = self.enrollment_updates.get(term_id, {}).get(section_id, [])
-        else:
-            enrollment_rows = get_section_enrollments(berkeley_term.to_sis_term_id(), [section_id], include_dropped=False)
-        app.logger.debug(f'{len(enrollment_rows)} student enrollments found for section {sis_section_id}')
-        for enrollment_row in enrollment_rows:
-            course_role = sis_enrollment_status_to_canvas_course_role(enrollment_row['sis_enrollment_status'])
-            if course_role and enrollment_row['ldap_uid']:
-                self.process_section_enrollment(
-                    term_id, course_id, sis_section_id, enrollment_row['ldap_uid'], course_role, csv_set, existing_section_enrollments)
-
-    def process_instructor_enrollments(self, term_id, course_id, sis_section_id, primary_sections, csv_set, existing_section_enrollments):
-        section_id, berkeley_term = parse_canvas_sis_section_id(sis_section_id)
-        if self.job_flags.incremental:
-            instructor_rows = self.instructor_updates.get(term_id, {}).get(section_id, [])
-        else:
-            instructor_rows = get_section_instructors(berkeley_term.to_sis_term_id(), [section_id])
-        app.logger.debug(f'{len(instructor_rows)} instructor enrollments found for section {sis_section_id}')
-        for instructor_row in instructor_rows:
-            course_role = _determine_instructor_role(sis_section_id, primary_sections, instructor_row['instructor_role_code'])
-            if course_role and instructor_row['instructor_uid']:
-                self.process_section_enrollment(
-                    term_id, course_id, sis_section_id, instructor_row['instructor_uid'], course_role, csv_set, existing_section_enrollments)
-
-    def process_section_enrollment(self, term_id, course_id, sis_section_id, ldap_uid, course_role, csv_set, existing_enrollments):
-        enrollment_csv = csv_set.enrollment_terms[term_id]
-        users_csv = csv_set.users
-        existing_user_enrollments = existing_enrollments.get(str(ldap_uid), None)
-        if existing_user_enrollments:
-            app.logger.debug(f'Found {len(existing_user_enrollments)} existing enrollments for UID {ldap_uid} in section {sis_section_id}')
-            # If the user already has the same role, remove the old enrollment from the cleanup list.
-            matching_enrollment = next((e for e in existing_user_enrollments if e['role'] == course_role), None)
-            if matching_enrollment:
-                app.logger.debug(f'Found matching enrollment for UID {ldap_uid}, section {sis_section_id}, role {course_role}')
-                existing_user_enrollments.remove(matching_enrollment)
-                # If the user's membership was due to an earlier SIS import, no further action is needed.
-                if matching_enrollment['sis_import_id']:
-                    return
-                # But if the user was manually added in this role, fall through and give Canvas a chance to convert the
-                # membership stickiness from manual to SIS import.
-        else:
-            self.add_user_if_new(ldap_uid, users_csv)
-
-        sis_user_id = self.known_users.get(ldap_uid, None) or _get_canvas_csv_row(ldap_uid).get('user_id', None)
-        if sis_user_id:
-            app.logger.info(f'Adding UID {ldap_uid} to section {sis_section_id} with role {course_role}')
-            enrollment_csv.writerow({
-                'course_id': course_id,
-                'user_id': sis_user_id,
-                'role': csv_formatted_course_role(course_role),
-                'section_id': sis_section_id,
-                'status': 'active',
-            })
-
-    def process_missing_enrollments(self, term_id, course_id, sis_section_id, ldap_uid, csv_set, enrollment_rows):
-        enrollment_csv = csv_set.enrollment_terms[term_id]
-        for enrollment in enrollment_rows:
-            # Only look at enrollments which are active and were due to an SIS import.
-            if enrollment['sis_import_id'] and enrollment['enrollment_state'] == 'active':
-                app.logger.info(f"""No campus record for Canvas enrollment (course {enrollment['course_id']},
-                    section {enrollment['canvas_section_id']}, user {ldap_uid}, role {enrollment['role']}""")
-                sis_user_id = self.sis_user_id_changes.get(f'sis_login_id:{ldap_uid}', {}).get('new_id', None) or enrollment['sis_user_id']
-                enrollment_csv.writerow({
-                    'course_id': course_id,
-                    'user_id': sis_user_id,
-                    'role': csv_formatted_course_role(enrollment['role']),
-                    'section_id': sis_section_id,
-                    'status': 'deleted',
-                })
+                            existing_term_enrollments = self.enrollment_provisioning_reports.get(term_id, {})
+                            process_course_enrollments(
+                                term_id,
+                                course_id,
+                                sis_section_ids,
+                                existing_term_enrollments,
+                                self.instructor_updates if hasattr(self, 'instructor_updates') else {},
+                                self.enrollment_updates if hasattr(self, 'enrollment_updates') else {},
+                                self.sis_user_id_changes,
+                                csv_set,
+                                self.known_users,
+                                self.job_flags.incremental,
+                            )
 
     def upload_results(self, csv_set, timestamp):  # noqa C901
         # The email deletion job runs an API loop and does not post a SIS import to Canvas.
@@ -537,16 +419,8 @@ class BcoursesRefreshBaseJob(BaseJob):
         finally:
             os.remove(z.filename)
 
-    def add_user_if_new(self, uid, users_csv):
-        if not self.known_users.get(str(uid), None):
-            csv_row = _get_canvas_csv_row(uid)
-            if csv_row:
-                self.known_users[str(uid)] = csv_row['user_id']
-                app.logger.debug(f"Adding new user (uid={uid}, sis id={csv_row['user_id']}")
-                users_csv.writerow(csv_row)
-
     def handle_email_deletions(self):
-        app.logger.warn(f'About to delete email addresses for {len(self.email_deletions)} inactive users: {self.email_deletions}')
+        app.logger.warning(f'About to delete email addresses for {len(self.email_deletions)} inactive users: {self.email_deletions}')
         for canvas_user_id in self.email_deletions:
             for channel in canvas.get_communication_channels(canvas_user_id):
                 if channel.type == 'email':
@@ -610,52 +484,3 @@ def _csv_data_changed(row, new_row):
         or (new_row['email'] and row['email'] != new_row['email'])
         or (row['full_name'] != f"{new_row['first_name'] or ''} {new_row['last_name'] or ''}")
         or (row['status'] != new_row['status']))
-
-
-def _determine_instructor_role(sis_section_id, primary_sections, role_code):
-    campus_section_id = parse_canvas_sis_section_id(sis_section_id)[0]
-    if primary_sections:
-        if next((s for s in primary_sections if str(s['section_id']) == str(campus_section_id)), None):
-            # Teacher permissions for the course site are generally determined by primary section assignment.
-            # Administrative Proxy assignments (instructor role "APRX"/"5") are treated as Lead TAs.
-            if role_code == 'APRX':
-                return 'Lead TA'
-            else:
-                return 'TeacherEnrollment'
-        else:
-            # Although SIS marks them as 'instructors', when someone is explicitly assigned to a secondary
-            # section, they are generally a GSI, and top-level bCourses Teacher access will be determined by assignment
-            # to a primary section.
-            return 'TaEnrollment'
-    else:
-        # However, if there are no primary sections in the course site, the site still needs at least one
-        # member with Teacher access.
-        return 'TeacherEnrollment'
-
-
-def _get_canvas_csv_row(uid):
-    user_results = _get_calnet_users([uid])
-    if len(user_results):
-        return csv_row_for_campus_user(next(iter(user_results.values())))
-    else:
-        return {}
-
-
-def _get_primary_sections(term_id, sis_section_ids):
-    campus_term_id = BerkeleyTerm.from_canvas_sis_term_id(term_id).to_sis_term_id()
-    campus_section_ids = [parse_canvas_sis_section_id(s)[0] for s in sis_section_ids]
-    loch_sections = get_sections(campus_term_id, campus_section_ids)
-    return [s for s in loch_sections if s['is_primary']]
-
-
-def _get_calnet_users(uids=None):
-    # First, call out the CalNet snapshot in the data loch.
-    users_by_uid = {r['ldap_uid']: r for r in get_users(uids)}
-    # If we've been given an specific set of UIDs to look for, then we can do a follow-up-call to LDAP for anyone the
-    # snapshot didn't capture.
-    if uids:
-        missing_uids = set(u for u in uids if u not in users_by_uid.keys())
-        if missing_uids:
-            ldap_users_by_uid = {u['ldap_uid']: u for u in get_calnet_attributes_for_uids(app, missing_uids)}
-            users_by_uid.update(ldap_users_by_uid)
-    return users_by_uid
