@@ -10,49 +10,27 @@
       <v-col>
         <v-card class="mx-auto" width="480">
           <div class="ma-5">
-            <h2 class="mb-0">Tools</h2>
-            <div v-if="!currentUser.canvasSiteId">
-              Certain tools are unavailable because the current user has a null <span class="font-italic">canvas_site_id</span>.
+            <div>
+              <h2 class="mb-0">Admin Tools</h2>
+              <StandaloneToolsList class="pt-0" :tools="adminTools" />
             </div>
-            <div v-if="!currentUser.isAdmin">
-              The current user is not an Admin. Expect authorization errors.
-            </div>
-            <v-list density="compact" :lines="false">
-              <template v-for="(tool, index) in tools" :key="index">
-                <v-list-item v-if="!tool.disabled">
-                  <template #prepend>
-                    <v-icon class="mr-4" :icon="tool.icon" />
-                  </template>
-                  <v-list-item-title>
-                    <router-link
-                      v-if="!tool.disabled"
-                      class="text-decoration-none"
-                      :to="tool.path"
-                    >
-                      {{ tool.title }}
-                    </router-link>
-                  </v-list-item-title>
-                </v-list-item>
-              </template>
-            </v-list>
-            <div v-if="currentUser.isAdmin">
-              <h2 class="mb-0 mt-5">Utilities</h2>
-              <v-list density="compact" :items="utilities" :lines="false">
-                <v-list-item
-                  v-for="(utility, index) in utilities"
-                  :key="index"
-                  color="primary"
+            <div class="mt-1">
+              <h2 class="mb-0">Embedded Tools</h2>
+              <div v-if="!currentUser.canvasSiteId" class="ml-3 my-1">
+                <v-alert
+                  density="compact"
+                  role="alert"
+                  type="info"
                 >
-                  <template #prepend>
-                    <v-icon class="mr-4" :icon="utility.icon" />
-                  </template>
-                  <v-list-item-title>
-                    <router-link class="text-decoration-none" :to="utility.path">
-                      {{ utility.title }}
-                    </router-link>
-                  </v-list-item-title>
-                </v-list-item>
-              </v-list>
+                  If you enter a Canvas site ID (see top of page) then the following links will become available.
+                </v-alert>
+              </div>
+              <StandaloneToolsList class="pt-0" :tools="embeddedTools" />
+            </div>
+
+            <div v-if="currentUser.isAdmin" class="mt-1">
+              <h2 class="mb-0">Utilities</h2>
+              <StandaloneToolsList class="pt-0" :tools="utilities" />
             </div>
           </div>
         </v-card>
@@ -67,12 +45,15 @@ import muthur from '@/assets/images/muthur.png'
 
 <script>
 import Context from '@/mixins/Context'
+import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
 
 export default {
   name: 'Welcome',
   mixins: [Context],
+  components: {StandaloneToolsList},
   data: () => ({
-    tools: [],
+    adminTools: [],
+    embeddedTools: [],
     utilities: [
       {icon: 'mdi-cog', title: 'Jobs', path: '/jobs'}
     ]
@@ -87,18 +68,19 @@ export default {
   methods: {
     loadTools() {
       const canvasSiteId = this.currentUser.canvasSiteId
-      const isAdmin = this.currentUser.isAdmin
-      this.tools = this.$_.sortBy([
+      this.adminTools = this.$_.sortBy([
         {disabled: false, icon: 'mdi-web', path: '/create_site', title: 'Create a Site'},
         {disabled: false, icon: 'mdi-account-plus-outline', path: '/provision_user', title: 'User Provision'},
-        {disabled: !isAdmin, icon: 'mdi-email-multiple-outline', path: '/mailing_list/select_course', title: 'Mailing Lists Manager'},
-        {disabled: !canvasSiteId, icon: 'mdi-email-multiple-outline', path: '/mailing_list/create', title: `Mailing List of Canvas Site ${canvasSiteId}`},
+        {disabled: false, icon: 'mdi-email-multiple-outline', path: '/mailing_list/select_course', title: 'Mailing Lists Manager'},
+      ], tool => tool.title)
+      this.embeddedTools = this.$_.sortBy([
+        {disabled: !canvasSiteId, icon: 'mdi-email-multiple-outline', path: '/mailing_list/create', title: 'Mailing List'},
         {disabled: !canvasSiteId, icon: 'mdi-export', path: '/grade_export', title: 'E-Grade Export'},
         {disabled: !canvasSiteId, icon: 'mdi-chart-bar-stacked', path: '/grade_distribution', title: 'Grade Distribution'},
         {disabled: !canvasSiteId, icon: 'mdi-account-school', path: '/add_user', title: 'Find a User to Add'},
         {disabled: !canvasSiteId, icon: 'mdi-google-classroom', path: '/manage_official_sections', title: 'Official Sections'},
         {disabled: !canvasSiteId, icon: 'mdi-account-multiple', path: '/roster', title: 'Roster Photos'}
-      ], tool => tool.title)
+      ])
     }
   }
 }

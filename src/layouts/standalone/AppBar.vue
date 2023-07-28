@@ -29,7 +29,7 @@
               :disabled="isUpdatingCanvasSiteId"
               :error="!!$_.trim(canvasSiteId) && !isCanvasSiteIdValid"
               hide-details
-              label="Canvas Course ID"
+              label="Canvas Site ID"
               maxlength="10"
               style="width: 200px"
               variant="outlined"

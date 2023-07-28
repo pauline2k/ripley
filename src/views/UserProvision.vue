@@ -80,10 +80,12 @@
 </template>
 
 <script>
+import Context from '@/mixins/Context'
 import {importUsers} from '@/api/canvas-utility'
 
 export default {
   name: 'UserProvision',
+  mixins: [Context],
   data: () => ({
     error: null,
     importProcessing: false,
