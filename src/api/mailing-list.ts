@@ -6,8 +6,8 @@ export function activateWelcomeEmail() {
   return utils.get('/api/mailing_list/welcome_email/activate', true)
 }
 
-export function createMailingList(name: string, redirectOnError?: boolean) {
-  return utils.post('/api/mailing_list/create', {name}, redirectOnError)
+export function createMailingList(canvasSiteId: number, name: string, redirectOnError?: boolean) {
+  return utils.post('/api/mailing_list/create', {canvasSiteId, name}, redirectOnError)
 }
 
 export function deactivateWelcomeEmail() {
@@ -20,8 +20,8 @@ export function downloadWelcomeEmailCsv() {
   return utils.downloadViaGet('/api/mailing_list/download/welcome_email_log', filename,true)
 }
 
-export function getSuggestedMailingListName() {
-  return utils.get('/api/mailing_list/suggested_name', true)
+export function getSuggestedMailingListName(canvasSiteId: number, redirectOnError?: boolean) {
+  return utils.get(`/api/mailing_list/suggested_name/${canvasSiteId}`, redirectOnError)
 }
 
 export function getMailingList(canvasSiteId: number, redirectOnError?: boolean) {

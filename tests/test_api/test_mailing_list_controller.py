@@ -59,7 +59,10 @@ class TestGetMyMailingList:
             canvas_site_id = 1234567
             register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}', f'search_users_{canvas_site_id}']}, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
-            _api_create_mailing_list(client)
+            _api_create_mailing_list(
+                canvas_site_id=canvas_site_id,
+                client=client,
+            )
             api_json = _api_my_mailing_list(client)
 
             assert api_json['canvasSite']['canvasSiteId'] == canvas_site_id
@@ -77,7 +80,10 @@ class TestGetMyMailingList:
             }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
-            _api_create_mailing_list(client)
+            _api_create_mailing_list(
+                canvas_site_id=canvas_site_id,
+                client=client,
+            )
             # Verify
             api_json = _api_my_mailing_list(client)
             assert api_json['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
@@ -98,13 +104,17 @@ class TestCreateMailingList:
 
     def test_anonymous(self, client):
         """Denies anonymous user."""
-        _api_create_mailing_list(client, expected_status_code=401)
+        _api_create_mailing_list(canvas_site_id=1010101, client=client, expected_status_code=401)
 
     def test_no_canvas_account(self, client, fake_auth):
         """Denies user with no Canvas account."""
         canvas_site_id = '1234567'
         fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
-        _api_create_mailing_list(client, expected_status_code=401)
+        _api_create_mailing_list(
+            canvas_site_id=canvas_site_id,
+            client=client,
+            expected_status_code=401,
+        )
 
     def test_not_enrolled(self, client, app, fake_auth):
         """Denies user with no course enrollment."""
@@ -112,7 +122,11 @@ class TestCreateMailingList:
             register_canvas_uris(app, {'course': ['get_by_id_1234567'], 'user': ['profile_20000']}, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
-            _api_create_mailing_list(client, expected_status_code=401)
+            _api_create_mailing_list(
+                canvas_site_id=canvas_site_id,
+                client=client,
+                expected_status_code=401,
+            )
 
     def test_authorized(self, client, app, fake_auth):
         """Allows admin."""
@@ -126,6 +140,7 @@ class TestCreateMailingList:
                 canvas_site_id = '1234567'
                 fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
                 api_json = _api_create_mailing_list(
+                    canvas_site_id=canvas_site_id,
                     client=client,
                     name=mailing_list_name,
                 )
@@ -138,10 +153,14 @@ class TestCreateMailingList:
                     assert api_json['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
                 # But you can't step into the same mailing list twice.
-                _api_create_mailing_list(client=client, expected_status_code=400)
-
+                _api_create_mailing_list(
+                    canvas_site_id=canvas_site_id,
+                    client=client,
+                    expected_status_code=400,
+                )
                 # Name conflicts also disallowed.
                 _api_create_mailing_list(
+                    canvas_site_id=canvas_site_id,
                     client=client,
                     name='astron-218-stellar-dynamics-and-galactic-stru-sp23',
                     expected_status_code=400,
@@ -157,7 +176,10 @@ class TestCreateMailingList:
             }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
-            api_json = _api_create_mailing_list(client)
+            api_json = _api_create_mailing_list(
+                canvas_site_id=canvas_site_id,
+                client=client,
+            )
             assert api_json['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
     def test_student(self, client, app, fake_auth):
@@ -169,7 +191,11 @@ class TestCreateMailingList:
             }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
-            _api_create_mailing_list(client, expected_status_code=401)
+            _api_create_mailing_list(
+                canvas_site_id=canvas_site_id,
+                client=client,
+                expected_status_code=401,
+            )
 
 
 class TestActivateMailingList:
@@ -256,7 +282,10 @@ class TestPopulateMailingList:
             }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
-            api_json = _api_create_mailing_list(client)
+            api_json = _api_create_mailing_list(
+                canvas_site_id=canvas_site_id,
+                client=client,
+            )
             api_json = _api_populate_mailing_list(client, mailing_list_id=api_json['id'])
             assert api_json['mailingList']['canvasSite']['canvasSiteId'] == 1234567
             # TODO: verify populated mailing list
@@ -271,7 +300,10 @@ class TestPopulateMailingList:
             }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
-            api_json = _api_create_mailing_list(client)
+            api_json = _api_create_mailing_list(
+                canvas_site_id=canvas_site_id,
+                client=client,
+            )
             api_json = _api_populate_mailing_list(client, mailing_list_id=api_json['id'])
             assert api_json['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
             # TODO: verify populated mailing list
@@ -301,11 +333,14 @@ def _api_activate_mailing_list(
 
 
 def _api_create_mailing_list(
+        canvas_site_id,
         client,
         expected_status_code=200,
         name=None,
 ):
-    params = {'name': name} if name else {}
+    params = {'canvasSiteId': canvas_site_id}
+    if name:
+        params['name'] = name
     response = client.post(
         '/api/mailing_list/create',
         data=json.dumps(params),

@@ -12,7 +12,7 @@
         :key="index"
         :disabled="!$_.size(alert.emailAddresses)"
       >
-        <v-expansion-panel-title :color="alert.type === 'errors' ? 'red' : 'success'">
+        <v-expansion-panel-title :color="alert.type === 'warning' ? 'error' : 'success'">
           <span v-if="$_.size(alert.emailAddresses)">
             {{ alert.message }}
             [<span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> users</span>]
@@ -252,7 +252,6 @@ export default {
 
 <style scoped lang="scss">
 .alert-message-without-email-addresses {
-  color: black !important;
   font-size: 16px;
   font-weight: 700;
 }

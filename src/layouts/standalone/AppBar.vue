@@ -103,10 +103,11 @@ export default {
   methods: {
     moment,
     updateCanvasSiteId() {
-      const isValid = Number.isInteger(this.canvasSiteId) || this.canvasSiteId.match(/^\d+$/)
+      const canvasSiteId = this.$_.trim(this.canvasSiteId) || null
+      const isValid = this.$_.isNil(canvasSiteId) || Number.isInteger(canvasSiteId) || canvasSiteId.match(/^\d+$/)
       if (isValid && this.currentUser.isAuthenticated) {
         this.isUpdatingCanvasSiteId = true
-        updateUserSession(this.canvasSiteId).then(
+        updateUserSession(canvasSiteId).then(
           data => {
             useContextStore().setCurrentUser(data)
             this.canvasSiteId = this.currentUser.canvasSiteId

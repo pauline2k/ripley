@@ -69,11 +69,12 @@ def welcome_email_activate():
 def create_mailing_lists():
     try:
         params = request.get_json()
+        canvas_site_id = params.get('canvasSiteId')
         list_name = params.get('name')
-        if list_name is None:
-            list_name = MailingList.get_suggested_name(current_user.canvas_site_id)
+        if canvas_site_id is None or list_name is None:
+            list_name = MailingList.get_suggested_name(canvas_site_id)
         mailing_list = MailingList.create(
-            canvas_site_id=current_user.canvas_site_id,
+            canvas_site_id=canvas_site_id,
             list_name=(list_name or '').strip() or None,
         )
         mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
@@ -119,10 +120,10 @@ def update_welcome_email():
         raise ResourceNotFoundError(f'bCourses site {current_user.canvas_site_id} has no mailing list.')
 
 
-@app.route('/api/mailing_list/suggested_name')
+@app.route('/api/mailing_list/suggested_name/<canvas_site_id>')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def get_suggested_mailing_list_name():
-    return tolerant_jsonify(MailingList.get_suggested_name(current_user.canvas_site_id))
+def get_suggested_mailing_list_name(canvas_site_id):
+    return tolerant_jsonify(MailingList.get_suggested_name(canvas_site_id))
 
 
 @app.route('/api/mailing_list/download/welcome_email_log')

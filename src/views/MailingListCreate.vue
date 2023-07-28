@@ -74,8 +74,10 @@
                     </div>
                   </div>
                 </v-col>
+              </v-row>
+              <v-row>
                 <v-col>
-                  <div class="d-flex float-right">
+                  <div class="d-flex float-right mt-2">
                     <div v-if="currentUser.isAdmin">
                       <v-btn
                         id="btn-cancel"
@@ -115,16 +117,18 @@ import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
-import {createMailingList, getMyMailingList, getSuggestedMailingListName} from '@/api/mailing-list'
+import {createMailingList, getMailingList, getSuggestedMailingListName} from '@/api/mailing-list'
 import {getCanvasSite} from '@/api/canvas-site'
-import {putFocusNextTick} from '@/utils'
+import {putFocusNextTick, toInt} from '@/utils'
 
 export default {
   name: 'MailingListCreate',
   components: {OutboundLink, SpinnerWithinButton},
   mixins: [Context, MailingList],
   data: () => ({
+    canvasSiteId: undefined,
     error: undefined,
+    isAdminToolMode: undefined,
     invalidCharacters: ' "(),:;<>@[\\]',
     isCreating: false,
     mailingListName: undefined,
@@ -138,14 +142,17 @@ export default {
   },
   mounted() {
     this.init()
+    this.canvasSiteId = toInt(this.$_.get(this.$route, 'params.canvasSiteId'))
+    this.isAdminToolMode = !!this.canvasSiteId
+    this.canvasSiteId = this.canvasSiteId || this.currentUser.canvasSiteId
     if (this.currentUser.isTeaching || this.currentUser.isAdmin) {
-      getCanvasSite(this.currentUser.canvasSiteId).then(data => {
+      getCanvasSite(this.canvasSiteId).then(data => {
         this.setCanvasSite(data)
-        getMyMailingList(false).then(data => {
+        getMailingList(this.canvasSiteId).then(data => {
           if (data) {
-            this.$router.push({path: '/mailing_list/send_welcome_email'})
+            this.goToNextPage()
           } else {
-            getSuggestedMailingListName().then(data => {
+            getSuggestedMailingListName(this.canvasSiteId).then(data => {
               this.mailingListName = data
               putFocusNextTick('page-header')
               this.$ready()
@@ -168,14 +175,18 @@ export default {
       if (name && !this.hasInvalidCharacters) {
         this.isCreating = true
         this.$announcer.polite('Creating list')
-        createMailingList(name).then(
+        createMailingList(this.canvasSiteId, name).then(
           data => {
             this.setMailingList(data)
-            this.$router.push('/mailing_list/send_welcome_email')
+            this.goToNextPage()
           },
           error => this.error = error
         ).then(() => this.isCreating = false)
       }
+    },
+    goToNextPage() {
+      const path = this.isAdminToolMode ? '/mailing_list/update' : '/mailing_list/send_welcome_email'
+      this.$router.push({path})
     }
   }
 }

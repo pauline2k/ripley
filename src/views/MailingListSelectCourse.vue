@@ -86,7 +86,7 @@ export default {
                   this.setMailingList(data)
                   this.$router.push('/mailing_list/update')
                 } else {
-                  this.$router.push('/mailing_list/create')
+                  this.$router.push(`/mailing_list/create/${this.canvasSiteId}`)
                 }
                 this.isProcessing = false
               },
