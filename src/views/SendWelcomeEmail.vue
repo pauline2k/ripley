@@ -93,7 +93,7 @@
           </div>
         </div>
         <div class="container pb-5 pt-3 px-5">
-          <label for="input-subject" class="font-weight-medium text-primary text-subtitle-1">
+          <label for="input-subject" class="text-subtitle-1">
             Subject
           </label>
           <div v-if="isEditing">
@@ -114,7 +114,7 @@
             {{ mailingList.welcomeEmailSubject }}
           </div>
           <div class="mt-3">
-            <label for="input-message" class="font-weight-medium text-primary text-subtitle-1">
+            <label for="input-message" class="text-subtitle-1">
               Message
             </label>
             <div v-if="isEditing">
