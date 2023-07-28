@@ -103,7 +103,7 @@
               <v-row>
                 <v-col>
                   <div class="d-flex float-right mt-1">
-                    <div v-if="currentUser.isAdmin">
+                    <div v-if="isAdminToolMode">
                       <v-btn
                         id="btn-cancel"
                         class="mx-1"

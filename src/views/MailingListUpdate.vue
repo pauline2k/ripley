@@ -134,7 +134,7 @@
               <v-col>
                 <div id="mailing-list-membership-last-updated">
                   <span v-if="mailingList.populatedAt">
-                    {{ $moment.unix(mailingList.populatedAt.epoch).format('MMM D, YYYY') }}
+                    {{ $moment(mailingList.populatedAt).format('MMM D, YYYY') }}
                   </span>
                   <span v-if="!$_.get(mailingList, 'populatedAt')">
                     Never.
