@@ -82,6 +82,7 @@
                           v-model="mailingListName"
                           aria-required="true"
                           density="comfortable"
+                          :disabled="isCreating"
                           hide-details
                           maxlength="255"
                           required
@@ -106,6 +107,7 @@
                       <v-btn
                         id="btn-cancel"
                         class="mx-1"
+                        :disabled="isCreating"
                         variant="text"
                         @click="cancel"
                       >
@@ -199,7 +201,7 @@ export default {
       if (name && !this.hasInvalidCharacters) {
         this.isCreating = true
         this.$announcer.polite('Creating list')
-        createMailingList(this.canvasSiteId, name).then(
+        createMailingList(this.canvasSiteId, name, !this.isAdminToolMode).then(
           data => {
             this.setMailingList(data)
             this.goToNextPage()

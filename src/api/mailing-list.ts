@@ -6,8 +6,13 @@ export function activateWelcomeEmail() {
   return utils.get('/api/mailing_list/welcome_email/activate', true)
 }
 
-export function createMailingList(canvasSiteId: number, name: string, redirectOnError?: boolean) {
-  return utils.post('/api/mailing_list/create', {canvasSiteId, name}, redirectOnError)
+export function createMailingList(
+  canvasSiteId: number,
+  name: string,
+  populate: boolean,
+  redirectOnError?: boolean
+) {
+  return utils.post('/api/mailing_list/create', {canvasSiteId, name, populate}, redirectOnError)
 }
 
 export function deactivateWelcomeEmail() {

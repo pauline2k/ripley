@@ -1,6 +1,16 @@
 <template>
   <div v-if="!isLoading" class="canvas-application page-site-mailing-list">
     <h1 id="page-header" tabindex="-1">Update Mailing List</h1>
+    <v-alert
+      v-if="!hasUpdatedSincePageLoad"
+      class="mb-2"
+      density="compact"
+      role="alert"
+      type="info"
+    >
+      The list "{{ mailingList.name }}@{{ mailingList.domain }}" has been created.
+      To add members, click the "Update Memberships" button below.
+    </v-alert>
     <v-expansion-panels
       v-if="alerts.length"
       id="mailing-list-update-alert"
@@ -50,11 +60,11 @@
         </v-expansion-panel-text>
       </v-expansion-panel>
     </v-expansion-panels>
-    <div class="mt-4">
-      <v-card id="mailing-list-details">
+    <div class="mt-2">
+      <v-card id="mailing-list-details" class="pl-3">
         <v-card-text>
           <h2>Canvas Course Site</h2>
-          <v-container>
+          <v-container class="py-3" fluid>
             <v-row no-gutters>
               <v-col cols="2">
                 <div class="float-right font-weight-medium pr-3">
@@ -71,7 +81,7 @@
                 </OutboundLink>
               </v-col>
             </v-row>
-            <v-row no-gutters>
+            <v-row class="pt-1" no-gutters>
               <v-col cols="2">
                 <div class="float-right font-weight-medium pr-3">
                   ID:
@@ -81,7 +91,7 @@
                 {{ canvasSite.canvasSiteId }}
               </v-col>
             </v-row>
-            <v-row no-gutters>
+            <v-row class="pt-1" no-gutters>
               <v-col cols="2">
                 <div class="float-right font-weight-medium pr-3">
                   Description:
@@ -93,8 +103,8 @@
             </v-row>
           </v-container>
 
-          <h2>Mailing List</h2>
-          <v-container>
+          <h2 class="mt-3">Mailing List</h2>
+          <v-container class="py-3" fluid>
             <v-row no-gutters>
               <v-col cols="2">
                 <div class="float-right font-weight-medium pr-3">
@@ -105,7 +115,7 @@
                 {{ mailingList.name }}@{{ mailingList.domain }}
               </v-col>
             </v-row>
-            <v-row no-gutters>
+            <v-row class="pt-1" no-gutters>
               <v-col cols="2">
                 <div class="float-right font-weight-medium pr-3">
                   Count:
@@ -115,7 +125,7 @@
                 <div id="mailing-list-member-count">{{ pluralize('member', mailingList.membersCount, {0: 'No'}) }}</div>
               </v-col>
             </v-row>
-            <v-row no-gutters>
+            <v-row class="pt-1" no-gutters>
               <v-col cols="2">
                 <div class="float-right font-weight-medium pr-3">
                   Last updated:
@@ -123,10 +133,10 @@
               </v-col>
               <v-col>
                 <div id="mailing-list-membership-last-updated">
-                  <span v-if="mailingList.timeLastPopulated">
-                    {{ $moment.unix(mailingList.timeLastPopulated.epoch).format('MMM D, YYYY') }}
+                  <span v-if="mailingList.populatedAt">
+                    {{ $moment.unix(mailingList.populatedAt.epoch).format('MMM D, YYYY') }}
                   </span>
-                  <span v-if="!$_.get(mailingList, 'timeLastPopulated')">
+                  <span v-if="!$_.get(mailingList, 'populatedAt')">
                     Never.
                   </span>
                 </div>
