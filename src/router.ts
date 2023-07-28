@@ -128,6 +128,13 @@ const routes:RouteRecordRaw[] = [
         }
       },
       {
+        component: MailingListCreate,
+        path: '/mailing_list/create/:canvasSiteId',
+        meta: {
+          title: 'Create Mailing List'
+        }
+      },
+      {
         component: MailingListUpdate,
         path: '/mailing_list/update',
         meta: {
