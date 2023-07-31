@@ -33,7 +33,7 @@ def send_system_error_email(message, subject=None):
         return content
     if subject is None:
         subject = f'{message[:50]}...' if len(message) > 50 else message
-    config_value = app.config['EMAIL_SYSTEM_ERRORS']
+    config_value = app.config['EMAIL_RIPLEY_OPERATIONS']
     email_addresses = config_value if isinstance(config_value, list) else [config_value]
     for email_address in email_addresses:
         BConnected().send(

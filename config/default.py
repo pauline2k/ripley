@@ -68,9 +68,8 @@ DEV_AUTH_PASSWORD = 'another secret'
 EMAIL_RIPLEY_SUPPORT = 'bcourseshelp@berkeley.edu'
 EMAIL_IF_PING_HAS_ERROR = True
 EMAIL_REDIRECT_WHEN_TESTING = ['__EMAIL_REDIRECT_WHEN_TESTING__at_berkeley.edu']
-EMAIL_RIPLEY_OPERATIONS = '__EMAIL_RIPLEY_OPERATIONS__at_@berkeley.edu'
-EMAIL_RIPLEY_OPERATIONS_LABEL = 'Ellen Ripley, Warrant Officer'
-EMAIL_SYSTEM_ERRORS = ['__EMAIL_SYSTEM_ERRORS__at_berkeley.edu']
+EMAIL_RIPLEY_OPERATIONS = ['__EMAIL_RIPLEY_OPERATIONS__at_@berkeley.edu']
+EMAIL_RIPLEY_OPERATIONS_LABEL = 'Ellen Ripley, Warrant Officer of bCourses'
 EMAIL_TEST_MODE = True
 
 # Directory to search for mock fixtures, if running in "test" or "demo" mode.
