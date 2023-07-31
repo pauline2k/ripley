@@ -100,8 +100,8 @@ export default {
       }
     },
     reportError(message, putFocus='basic-auth-uid') {
-      this.error = this.$_.get(message, 'message')
-      this.$announcer.polite(this.error)
+      this.error = typeof message === 'string' ? message : this.$_.get(message, 'message')
+      this.$announcer.polite(this.error || 'Uh oh, an error occurred.')
       putFocusNextTick(putFocus)
     }
   }
