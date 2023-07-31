@@ -23,32 +23,63 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+import traceback
+
 from canvasapi.exceptions import CanvasException
 from flask import current_app as app
 import psycopg2
 from ripley import db
 from ripley.externals import data_loch
+from ripley.externals.b_connected import BConnected
 from ripley.externals.canvas import ping_canvas
 from ripley.externals.rds import log_db_error
 from ripley.externals.redis import redis_status
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.http import tolerant_jsonify
+from ripley.merged.emailer import send_system_error_email
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import text
 
 
 @app.route('/api/ping')
 def ping():
-    return tolerant_jsonify(
-        {
-            'app': True,
-            'calnet': _ping_calnet(),
-            'canvas': _ping_canvas(),
-            'data_loch': _data_loch_status(),
-            'db': _db_status(),
-            'rq': _redis_queue_status(),
-        },
-    )
+    b_connected_ping = None
+    calnet_ping = None
+    canvas_ping = None
+    data_loch_ping = None
+    db_ping = None
+    _redis_queue_ping = None
+    try:
+        b_connected_ping = BConnected().ping()
+        calnet_ping = _ping_calnet()
+        canvas_ping = _ping_canvas()
+        data_loch_ping = _data_loch_status()
+        db_ping = _db_status()
+        _redis_queue_ping = _redis_queue_status()
+    except Exception as e:
+        subject = str(e)
+        subject = f'{subject[:100]}...' if len(subject) > 100 else subject
+        message = f'Error during /api/ping: {subject}'
+        app.logger.error(message)
+        app.logger.exception(e)
+        if app.config['EMAIL_IF_PING_HAS_ERROR']:
+            send_system_error_email(
+                message=f'{message}\n\n<pre>{traceback.format_exc()}</pre>',
+                subject=message,
+            )
+
+    finally:
+        return tolerant_jsonify(
+            {
+                'app': True,
+                'b_connected': b_connected_ping,
+                'calnet': calnet_ping,
+                'canvas': canvas_ping,
+                'data_loch': data_loch_ping,
+                'db': db_ping,
+                'rq': _redis_queue_ping,
+            },
+        )
 
 
 def _data_loch_status():

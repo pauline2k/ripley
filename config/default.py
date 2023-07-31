@@ -33,6 +33,12 @@ AWS_S3_REGION = 'us-west-2'
 # Base directory for the application (one level up from this config file).
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
+# bConnected On-Premise (bCOP) SMTP server
+BCOP_SMTP_PASSWORD = None
+BCOP_SMTP_PORT = 587
+BCOP_SMTP_SERVER = 'bcop.berkeley.edu'
+BCOP_SMTP_USERNAME = None
+
 CAS_SERVER = 'https://auth-test.berkeley.edu/cas/'
 
 CANVAS_ACCESS_TOKEN = 'a token'
@@ -60,6 +66,12 @@ DEV_AUTH_ENABLED = False
 DEV_AUTH_PASSWORD = 'another secret'
 
 EMAIL_RIPLEY_SUPPORT = 'bcourseshelp@berkeley.edu'
+EMAIL_IF_PING_HAS_ERROR = True
+EMAIL_REDIRECT_WHEN_TESTING = ['__EMAIL_REDIRECT_WHEN_TESTING__at_berkeley.edu']
+EMAIL_RIPLEY_OPERATIONS = '__EMAIL_RIPLEY_OPERATIONS__at_@berkeley.edu'
+EMAIL_RIPLEY_OPERATIONS_LABEL = 'Ellen Ripley, Warrant Officer'
+EMAIL_SYSTEM_ERRORS = ['__EMAIL_SYSTEM_ERRORS__at_berkeley.edu']
+EMAIL_TEST_MODE = True
 
 # Directory to search for mock fixtures, if running in "test" or "demo" mode.
 FIXTURES_PATH = None
