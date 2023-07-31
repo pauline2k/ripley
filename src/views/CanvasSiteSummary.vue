@@ -21,7 +21,7 @@
       <div class="mt-3">
         <h3>Users</h3>
         <v-alert
-          v-if="!this.config.isVueAppDebugMode && !this.currentUser.isAdmin"
+          v-if="!config.isVueAppDebugMode && !currentUser.isAdmin"
           class="ma-2"
           :closable="true"
           density="compact"

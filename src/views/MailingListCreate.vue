@@ -171,24 +171,20 @@ export default {
     this.canvasSiteId = toInt(this.$_.get(this.$route, 'params.canvasSiteId'))
     this.isAdminToolMode = !!this.canvasSiteId
     this.canvasSiteId = this.canvasSiteId || this.currentUser.canvasSiteId
-    if (this.currentUser.isTeaching || this.currentUser.isAdmin) {
-      getCanvasSite(this.canvasSiteId).then(data => {
-        this.setCanvasSite(data)
-        getMailingList(this.canvasSiteId, true).then(data => {
-          if (data) {
-            this.goToNextPage()
-          } else {
-            getSuggestedMailingListName(this.canvasSiteId).then(data => {
-              this.mailingListName = data
-              putFocusNextTick('page-header')
-              this.$ready()
-            })
-          }
-        })
+    getCanvasSite(this.canvasSiteId).then(data => {
+      this.setCanvasSite(data)
+      getMailingList(this.canvasSiteId, true).then(data => {
+        if (data) {
+          this.goToNextPage()
+        } else {
+          getSuggestedMailingListName(this.canvasSiteId).then(data => {
+            this.mailingListName = data
+            putFocusNextTick('page-header')
+            this.$ready()
+          })
+        }
       })
-    } else {
-      this.$router.push({path: '/404'})
-    }
+    })
   },
   methods: {
     cancel() {
