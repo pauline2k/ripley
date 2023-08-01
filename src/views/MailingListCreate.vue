@@ -84,15 +84,16 @@
                           density="comfortable"
                           :disabled="isCreating"
                           hide-details
-                          maxlength="255"
+                          maxlength="50"
                           required
                           variant="outlined"
                           @keydown.enter="create"
                         />
                         <div v-if="hasInvalidCharacters" class="has-invalid-characters">
                           <div class="d-flex text-red">
-                            <div class="pr-1 text-no-wrap">Name may contain neither spaces nor: </div>
-                            <div><pre>{{ $_.join([...$_.trim(invalidCharacters)], ' ') }}</pre></div>
+                            <div class="pr-1 text-no-wrap">
+                              Only lowercase alphanumeric, underscore and hyphen characters allowed.
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -155,15 +156,16 @@ export default {
     canvasSiteId: undefined,
     error: undefined,
     isAdminToolMode: undefined,
-    invalidCharacters: ' "(),:;<>@[\\]',
     isCreating: false,
     mailingListName: undefined,
-    success: undefined
+    success: undefined,
+    validNameRegex: /[a-z0-9_-]/g
   }),
   computed: {
     hasInvalidCharacters() {
       const name = this.$_.trim(this.mailingListName)
-      return !!this.$_.intersection([...name], [...this.invalidCharacters]).length
+      const isValid = name.length && name.match(this.validNameRegex).length === name.length && name[0].match(/[a-z]/)
+      return !isValid
     }
   },
   mounted() {
