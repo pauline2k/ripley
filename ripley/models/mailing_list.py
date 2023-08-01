@@ -87,7 +87,8 @@ class MailingList(Base):
         if term:
             name = unidecode(canvas_site.name.strip().lower())
             name = '-'.join([word for word in re.split('[^a-z0-9]+', name) if word])[0:45]
-            name += '-' + term.to_abbreviation() if term else '-list'
+            name = name if name[-1] == '-' else f'{name}-'
+            name += term.to_abbreviation() if term else 'list'
             return name
         else:
             return None
