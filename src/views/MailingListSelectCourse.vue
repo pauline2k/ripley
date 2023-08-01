@@ -4,7 +4,6 @@
     <v-alert
       v-if="error"
       class="ma-2"
-      :closable="true"
       density="compact"
       role="alert"
       type="warning"
@@ -50,7 +49,6 @@ import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {getMailingList} from '@/api/mailing-list'
-import {getCanvasSite} from '@/api/canvas-site'
 import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 
 export default {
@@ -76,25 +74,15 @@ export default {
     proceed() {
       if (!this.isProcessing) {
         this.isProcessing = true
-        getCanvasSite(this.canvasSiteId).then(
+        getMailingList(this.canvasSiteId).then(
           data => {
-            this.setCanvasSite(data)
-            getMailingList(this.canvasSiteId).then(
-              data => {
-                this.error = undefined
-                if (data) {
-                  this.setMailingList(data)
-                  this.$router.push('/mailing_list/update')
-                } else {
-                  this.$router.push(`/mailing_list/create/${this.canvasSiteId}`)
-                }
-                this.isProcessing = false
-              },
-              error => {
-                this.error = error
-                this.isProcessing = false
-              }
-            )
+            this.error = undefined
+            if (data) {
+              this.setMailingList(data)
+              this.$router.push('/mailing_list/update')
+            } else {
+              this.$router.push(`/mailing_list/create/${this.canvasSiteId}`)
+            }
           },
           error => {
             this.error = error

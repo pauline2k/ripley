@@ -22,7 +22,6 @@
     <v-alert
       v-if="error"
       class="ma-2"
-      :closable="true"
       density="compact"
       role="alert"
       type="warning"
@@ -101,7 +100,7 @@
                   </div>
                 </v-col>
               </v-row>
-              <v-row>
+              <v-row v-if="currentUser.isTeaching || currentUser.isAdmin">
                 <v-col>
                   <div class="d-flex float-right mt-1">
                     <div v-if="isAdminToolMode">
@@ -173,20 +172,28 @@ export default {
     this.canvasSiteId = toInt(this.$_.get(this.$route, 'params.canvasSiteId'))
     this.isAdminToolMode = !!this.canvasSiteId
     this.canvasSiteId = this.canvasSiteId || this.currentUser.canvasSiteId
-    getCanvasSite(this.canvasSiteId).then(data => {
-      this.setCanvasSite(data)
-      getMailingList(this.canvasSiteId, true).then(data => {
+    getMailingList(this.canvasSiteId).then(
+      data => {
+        this.setMailingList(data)
         if (data) {
           this.goToNextPage()
         } else {
-          getSuggestedMailingListName(this.canvasSiteId).then(data => {
-            this.mailingListName = data
-            putFocusNextTick('page-header')
-            this.$ready()
+          this.getCanvasSite().then(data => {
+            this.setCanvasSite(data)
+            getSuggestedMailingListName(this.canvasSiteId).then(data => {
+              this.mailingListName = data
+              putFocusNextTick('page-header')
+              this.$ready()
+            })
           })
         }
-      })
-    })
+      },
+      error => {
+        this.error = error
+        putFocusNextTick('page-header')
+        this.$ready()
+      }
+    )
   },
   methods: {
     cancel() {
@@ -207,6 +214,15 @@ export default {
           error => this.error = error
         ).then(() => this.isCreating = false)
       }
+    },
+    getCanvasSite() {
+      return new Promise(resolve => {
+        if (this.canvasSite) {
+          resolve(this.canvasSite)
+        } else {
+          getCanvasSite(this.canvasSiteId).then(resolve)
+        }
+      })
     },
     goToNextPage() {
       const path = this.isAdminToolMode ? '/mailing_list/update' : '/mailing_list/send_welcome_email'
