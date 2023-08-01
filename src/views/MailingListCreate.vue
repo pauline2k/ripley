@@ -89,8 +89,8 @@
                           variant="outlined"
                           @keydown.enter="create"
                         />
-                        <div v-if="hasInvalidCharacters" class="has-invalid-characters">
-                          <div class="d-flex text-red">
+                        <div class="has-invalid-characters">
+                          <div v-if="hasInvalidCharacters" class="d-flex text-red">
                             <div class="pr-1 text-no-wrap">
                               Only lowercase alphanumeric, underscore and hyphen characters allowed.
                             </div>
@@ -218,7 +218,7 @@ export default {
 
 <style scoped lang="scss">
 .has-invalid-characters {
-  min-height: 24px;
+  min-height: 28px;
 }
 .mailing-list-name-input {
   padding: 10px 8px 0 0;

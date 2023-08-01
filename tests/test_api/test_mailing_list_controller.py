@@ -167,6 +167,23 @@ class TestGetMyMailingList:
             _api_my_mailing_list(client, expected_status_code=401)
 
 
+class TestSuggestedMailingListName:
+
+    @classmethod
+    def _api_suggested_mailing_list_name(cls, client, canvas_site_id, expected_status_code=200):
+        response = client.get(f'/api/mailing_list/suggested_name/{canvas_site_id}')
+        assert response.status_code == expected_status_code
+        return response.json
+
+    def test_suggested_mailing_list_name(self, app, client, fake_auth):
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}']}, m)
+            suggested_name = self._api_suggested_mailing_list_name(canvas_site_id=canvas_site_id, client=client)
+            assert suggested_name == 'voix-ambigue-d-un-coeur-qui-au-zephyr-prefere-sp23'
+
+
 class TestCreateMailingList:
 
     def test_anonymous(self, client):
