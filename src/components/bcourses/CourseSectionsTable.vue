@@ -282,7 +282,6 @@ export default {
       this.displayableSections.forEach(s => {
         this.sectionDisplayClass[s.id] = this.rowClassLogic(this.mode, s)
       })
-      console.log(this.sectionDisplayClass)
     },
     unstage(section) {
       this.unstageAction(section)
