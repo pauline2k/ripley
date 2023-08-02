@@ -306,26 +306,26 @@ class BcoursesRefreshBaseJob(BaseJob):
         return new_row
 
     def process_enrollments(self, csv_set):
-        for term_id in csv_set.enrollment_terms.keys():
+        for sis_term_id in csv_set.enrollment_terms.keys():
             if (
                 self.job_flags.incremental
-                and term_id not in self.enrollment_updates and term_id not in self.instructor_updates
+                and sis_term_id not in self.enrollment_updates and sis_term_id not in self.instructor_updates
             ):
                 continue
 
-            sis_term_id = BerkeleyTerm.from_canvas_sis_term_id(term_id).to_sis_term_id()
-            if not get_sections_count(sis_term_id):
+            term_id = BerkeleyTerm.from_canvas_sis_term_id(sis_term_id).to_sis_term_id()
+            if not get_sections_count(term_id):
                 app.logger.error(f'No section data found in loch for term {term_id}, will not process enrollments.')
                 continue
 
             canvas_sections_file = tempfile.NamedTemporaryFile()
-            sections_report = canvas.get_csv_report('sections', download_path=canvas_sections_file.name, term_id=term_id)
+            sections_report = canvas.get_csv_report('sections', download_path=canvas_sections_file.name, term_id=sis_term_id)
             if not sections_report:
                 continue
 
             if self.job_flags.incremental:
-                instructor_update_ccns = self.instructor_updates.get(term_id, {}).keys()
-                enrollment_update_ccns = self.enrollment_updates.get(term_id, {}).keys()
+                instructor_update_ccns = self.instructor_updates.get(sis_term_id, {}).keys()
+                enrollment_update_ccns = self.enrollment_updates.get(sis_term_id, {}).keys()
                 ccns_with_updates = set(instructor_update_ccns).union(enrollment_update_ccns)
 
             with open(canvas_sections_file.name, 'r') as f:
@@ -336,14 +336,14 @@ class BcoursesRefreshBaseJob(BaseJob):
                         for r in csv_rows:
                             canvas_sis_section_id = r.get('section_id', None)
                             section_id, berkeley_term = parse_canvas_sis_section_id(canvas_sis_section_id)
-                            if berkeley_term and berkeley_term.to_canvas_sis_term_id() == term_id:
+                            if berkeley_term and berkeley_term.to_canvas_sis_term_id() == sis_term_id:
                                 sis_section_ids.add(canvas_sis_section_id)
                                 if self.job_flags.incremental and section_id in ccns_with_updates:
                                     has_incremental_updates = True
                         if has_incremental_updates or not self.job_flags.incremental:
-                            existing_term_enrollments = self.enrollment_provisioning_reports.get(term_id, {})
+                            existing_term_enrollments = self.enrollment_provisioning_reports.get(sis_term_id, {})
                             process_course_enrollments(
-                                term_id,
+                                sis_term_id,
                                 course_id,
                                 sis_section_ids,
                                 existing_term_enrollments,
@@ -368,20 +368,20 @@ class BcoursesRefreshBaseJob(BaseJob):
             z.write(csv.tempfile.name, os.path.basename(csv.tempfile.name))
 
         try:
-            if csv_set.sis_ids.count:
+            if 'sis_ids' in csv_set._fields and csv_set.sis_ids.count:
                 app.logger.info(f'Will post {csv_set.sis_ids.count} SIS ID changes to Canvas.')
                 upload_dated_csv(csv_set.sis_ids.tempfile.name, 'sis-id-sis-import', 'canvas_sis_imports', timestamp)
                 _write_csv_to_zip(csv_set.sis_ids)
                 data_to_upload = True
 
-            if csv_set.users.count:
+            if 'users' in csv_set._fields and csv_set.users.count:
                 app.logger.info(f'Will post {csv_set.users.count} user updates to Canvas.')
                 upload_dated_csv(csv_set.users.tempfile.name, 'user-sis-import', 'canvas_sis_imports', timestamp)
                 _write_csv_to_zip(csv_set.users)
                 data_to_upload = True
 
             if self.job_flags.enrollments:
-                for term_id, enrollment_csv in csv_set.enrollment_terms.items():
+                for sis_term_id, enrollment_csv in csv_set.enrollment_terms.items():
                     if enrollment_csv.count:
                         with open(enrollment_csv.tempfile.name, 'r') as f:
                             deletion_count = 0
@@ -393,18 +393,18 @@ class BcoursesRefreshBaseJob(BaseJob):
 
                         upload_dated_csv(
                             enrollment_csv.tempfile.name,
-                            f"enrollments-{term_id.replace(':', '-')}-{job_type}-sis-import",
+                            f"enrollments-{sis_term_id.replace(':', '-')}-{job_type}-sis-import",
                             'canvas_sis_imports',
                             timestamp,
                         )
 
                         if deletion_count > app.config['CANVAS_REFRESH_MAX_DELETED_ENROLLMENTS']:
                             app.logger.error(
-                                f'Term {term_id} has {deletion_count} deleted enrollments, will not post CSV to Canvas. '
+                                f'Term {sis_term_id} has {deletion_count} deleted enrollments, will not post CSV to Canvas. '
                                 'Adjust threshold and re-run job if desired.')
                             continue
 
-                        app.logger.info(f'Will post {enrollment_csv.count} enrollment updates to Canvas (term_id={term_id}).')
+                        app.logger.info(f'Will post {enrollment_csv.count} enrollment updates to Canvas (term_id={sis_term_id}).')
                         _write_csv_to_zip(enrollment_csv)
                         data_to_upload = True
         finally:

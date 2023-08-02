@@ -85,8 +85,8 @@ def initialize_recent_updates(sis_term_ids, uids_for_updates):
 
 
 def process_course_enrollments(
-    term_id,
-    course_id,
+    sis_term_id,
+    sis_course_id,
     sis_section_ids,
     existing_term_enrollments,
     instructor_updates,
@@ -96,20 +96,20 @@ def process_course_enrollments(
     known_users,
     is_incremental,
 ):
-    app.logger.debug(f'Refreshing course {course_id}')
-    primary_sections = _get_primary_sections(term_id, sis_section_ids)
+    app.logger.debug(f'Refreshing course {sis_course_id}')
+    primary_sections = _get_primary_sections(sis_term_id, sis_section_ids)
 
     for sis_section_id in sis_section_ids:
         section_id, berkeley_term = parse_canvas_sis_section_id(sis_section_id)
-        section_instructor_updates = instructor_updates.get(term_id, {}).get(section_id, [])
-        section_enrollment_updates = enrollment_updates.get(term_id, {}).get(section_id, [])
-        process_section_enrollments(term_id, course_id, sis_section_id, existing_term_enrollments, section_instructor_updates,
+        section_instructor_updates = instructor_updates.get(sis_term_id, {}).get(section_id, [])
+        section_enrollment_updates = enrollment_updates.get(sis_term_id, {}).get(section_id, [])
+        process_section_enrollments(sis_term_id, sis_course_id, sis_section_id, existing_term_enrollments, section_instructor_updates,
                                     section_enrollment_updates, sis_user_id_changes, csv_set, primary_sections, known_users, is_incremental)
 
 
 def process_section_enrollments(
-    term_id,
-    course_id,
+    sis_term_id,
+    sis_course_id,
     sis_section_id,
     existing_term_enrollments,
     section_instructor_updates,
@@ -133,18 +133,18 @@ def process_section_enrollments(
             or ldap_uid in [r['ldap_uid'] for r in section_enrollment_updates]
         ):
             existing_section_enrollments[ldap_uid] = list(rows)
-    process_student_enrollments(term_id, course_id, sis_section_id, section_enrollment_updates, csv_set, existing_section_enrollments,
+    process_student_enrollments(sis_term_id, sis_course_id, sis_section_id, section_enrollment_updates, csv_set, existing_section_enrollments,
                                 known_users, is_incremental)
-    process_instructor_enrollments(term_id, course_id, sis_section_id, primary_sections, section_instructor_updates, csv_set,
+    process_instructor_enrollments(sis_term_id, sis_course_id, sis_section_id, primary_sections, section_instructor_updates, csv_set,
                                    existing_section_enrollments, known_users, is_incremental)
     # Remove existing enrollments not found in SIS
     for ldap_uid, enrollment_rows in existing_section_enrollments.items():
-        process_missing_enrollments(term_id, course_id, sis_section_id, ldap_uid, sis_user_id_changes, csv_set, enrollment_rows)
+        process_missing_enrollments(sis_term_id, sis_course_id, sis_section_id, ldap_uid, sis_user_id_changes, csv_set, enrollment_rows)
 
 
 def process_student_enrollments(
-    term_id,
-    course_id,
+    sis_term_id,
+    sis_course_id,
     sis_section_id,
     section_enrollment_updates,
     csv_set,
@@ -161,13 +161,13 @@ def process_student_enrollments(
     for enrollment_row in enrollment_rows:
         course_role = sis_enrollment_status_to_canvas_course_role(enrollment_row['sis_enrollment_status'])
         if course_role and enrollment_row['ldap_uid']:
-            process_section_enrollment(term_id, course_id, sis_section_id, enrollment_row['ldap_uid'], course_role, csv_set,
+            process_section_enrollment(sis_term_id, sis_course_id, sis_section_id, enrollment_row['ldap_uid'], course_role, csv_set,
                                        existing_section_enrollments, known_users)
 
 
 def process_instructor_enrollments(
-    term_id,
-    course_id,
+    sis_term_id,
+    sis_course_id,
     sis_section_id,
     primary_sections,
     section_instructor_updates,
@@ -185,13 +185,12 @@ def process_instructor_enrollments(
     for instructor_row in instructor_rows:
         course_role = _determine_instructor_role(sis_section_id, primary_sections, instructor_row['instructor_role_code'])
         if course_role and instructor_row['instructor_uid']:
-            process_section_enrollment(term_id, course_id, sis_section_id, instructor_row['instructor_uid'], course_role, csv_set,
+            process_section_enrollment(sis_term_id, sis_course_id, sis_section_id, instructor_row['instructor_uid'], course_role, csv_set,
                                        existing_section_enrollments, known_users)
 
 
-def process_section_enrollment(term_id, course_id, sis_section_id, ldap_uid, course_role, csv_set, existing_enrollments, known_users):
-    enrollment_csv = csv_set.enrollment_terms[term_id]
-    users_csv = csv_set.users
+def process_section_enrollment(sis_term_id, sis_course_id, sis_section_id, ldap_uid, course_role, csv_set, existing_enrollments, known_users):
+    enrollment_csv = csv_set.enrollment_terms[sis_term_id]
     existing_user_enrollments = existing_enrollments.get(str(ldap_uid), None)
     if existing_user_enrollments:
         app.logger.debug(f'Found {len(existing_user_enrollments)} existing enrollments for UID {ldap_uid} in section {sis_section_id}')
@@ -205,14 +204,14 @@ def process_section_enrollment(term_id, course_id, sis_section_id, ldap_uid, cou
                 return
             # But if the user was manually added in this role, fall through and give Canvas a chance to convert the
             # membership stickiness from manual to SIS import.
-    else:
-        _add_user_if_new(ldap_uid, known_users, users_csv)
+    elif 'users' in csv_set._fields:
+        _add_user_if_new(ldap_uid, known_users, csv_set.users)
 
     sis_user_id = known_users.get(str(ldap_uid), None) or get_canvas_csv_row(ldap_uid).get('user_id', None)
     if sis_user_id:
         app.logger.info(f'Adding UID {ldap_uid} to section {sis_section_id} with role {course_role}')
         enrollment_csv.writerow({
-            'course_id': course_id,
+            'course_id': sis_course_id,
             'user_id': sis_user_id,
             'role': csv_formatted_course_role(course_role),
             'section_id': sis_section_id,
@@ -220,8 +219,8 @@ def process_section_enrollment(term_id, course_id, sis_section_id, ldap_uid, cou
         })
 
 
-def process_missing_enrollments(term_id, course_id, sis_section_id, ldap_uid, sis_user_id_changes, csv_set, enrollment_rows):
-    enrollment_csv = csv_set.enrollment_terms[term_id]
+def process_missing_enrollments(sis_term_id, sis_course_id, sis_section_id, ldap_uid, sis_user_id_changes, csv_set, enrollment_rows):
+    enrollment_csv = csv_set.enrollment_terms[sis_term_id]
     for enrollment in enrollment_rows:
         # Only look at enrollments which are active and were due to an SIS import.
         if enrollment['sis_import_id'] and enrollment['enrollment_state'] == 'active':
@@ -229,7 +228,7 @@ def process_missing_enrollments(term_id, course_id, sis_section_id, ldap_uid, si
                 section {enrollment['canvas_section_id']}, user {ldap_uid}, role {enrollment['role']}""")
             sis_user_id = sis_user_id_changes.get(f'sis_login_id:{ldap_uid}', {}).get('new_id', None) or enrollment['sis_user_id']
             enrollment_csv.writerow({
-                'course_id': course_id,
+                'course_id': sis_course_id,
                 'user_id': sis_user_id,
                 'role': csv_formatted_course_role(enrollment['role']),
                 'section_id': sis_section_id,
@@ -267,8 +266,11 @@ def _determine_instructor_role(sis_section_id, primary_sections, role_code):
         return 'TeacherEnrollment'
 
 
-def _get_primary_sections(term_id, sis_section_ids):
-    campus_term_id = BerkeleyTerm.from_canvas_sis_term_id(term_id).to_sis_term_id()
+def _get_primary_sections(sis_term_id, sis_section_ids):
+    campus_term = BerkeleyTerm.from_canvas_sis_term_id(sis_term_id)
+    if not campus_term:
+        app.logger.error(f'Unknown Canvas term {sis_term_id}')
+        return []
     campus_section_ids = [parse_canvas_sis_section_id(s)[0] for s in sis_section_ids]
-    loch_sections = get_sections(campus_term_id, campus_section_ids)
+    loch_sections = get_sections(campus_term.to_sis_term_id(), campus_section_ids)
     return [s for s in loch_sections if s['is_primary']]
