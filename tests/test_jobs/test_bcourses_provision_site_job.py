@@ -43,9 +43,9 @@ class TestBcoursesProvisionSiteJob:
     def test_no_changes(self, app):
         params = {
             'canvas_site_id': 8876542,
-            'section_ids_to_remove': [],
+            'deleted_section_ids': [],
+            'updated_sis_section_ids': ['SEC:2023-B-32936'],
             'sis_course_id': 'CRS:ANTHRO-189-2023-B',
-            'sis_section_ids': ['SEC:2023-B-32936'],
             'sis_term_id': 'TERM:2023-B',
         }
         with setup_bcourses_provision_job(app) as (s3, m):
@@ -57,10 +57,10 @@ class TestBcoursesProvisionSiteJob:
     def test_no_enrollments(self, app):
         params = {
             'canvas_site_id': 1234567,
-            'section_ids_to_remove': [],
+            'deleted_section_ids': [],
             'sis_course_id': 'CRS:ASTRON-218-2023-B',
-            'sis_section_ids': ['SEC:2023-B-98765'],
             'sis_term_id': 'TERM:2023-B',
+            'updated_sis_section_ids': ['SEC:2023-B-98765'],
         }
         with setup_bcourses_provision_job(app) as (s3, m):
             BcoursesProvisionSiteJob(app)._run(params)
@@ -70,9 +70,9 @@ class TestBcoursesProvisionSiteJob:
     def test_added_section(self, mock_section_enrollments, app, section_enrollments):
         params = {
             'canvas_site_id': 1234567,
-            'section_ids_to_remove': [],
+            'deleted_section_ids': [],
+            'updated_sis_section_ids': ['SEC:2023-B-87654'],
             'sis_course_id': 'CRS:ASTRON-218-2023-B',
-            'sis_section_ids': ['SEC:2023-B-87654'],
             'sis_term_id': 'TERM:2023-B',
         }
         section_enrollments.append({
@@ -97,9 +97,9 @@ class TestBcoursesProvisionSiteJob:
     def test_removed_section(self, mock_section_enrollments, app, section_enrollments):
         params = {
             'canvas_site_id': 8876542,
-            'section_ids_to_remove': ['32936'],
+            'deleted_section_ids': ['32936'],
+            'updated_sis_section_ids': ['SEC:2023-B-32937'],
             'sis_course_id': 'CRS:ANTHRO-189-2023-B',
-            'sis_section_ids': ['SEC:2023-B-32937'],
             'sis_term_id': 'TERM:2023-B',
         }
 

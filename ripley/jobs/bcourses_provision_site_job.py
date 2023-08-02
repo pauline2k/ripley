@@ -62,12 +62,12 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
         timestamp = this_sync.strftime('%F_%H-%M-%S')
 
         canvas_site_id = params.get('canvas_site_id', None)
+        deleted_section_ids = params.get('deleted_section_ids', [])
         sis_term_id = params.get('sis_term_id', None)
         sis_course_id = params.get('sis_course_id', None)
-        sis_section_ids = params.get('sis_section_ids', [])
-        section_ids_to_remove = params.get('section_ids_to_remove', [])
-        if not (canvas_site_id and sis_term_id and sis_course_id and sis_section_ids):
-            required_params = ['canvas_site_id', 'sis_term_id', 'sis_course_id', 'sis_section_ids']
+        updated_sis_section_ids = params.get('updated_sis_section_ids', [])
+        if not (canvas_site_id and sis_term_id and sis_course_id):
+            required_params = ['canvas_site_id', 'sis_term_id', 'sis_course_id']
             missing_params = [key for key in required_params if params.get(key, None) is None]
             raise BackgroundJobError(f'bCourses site provisioning job failed (Missing required params {str(missing_params)}).')
 
@@ -75,7 +75,7 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
             process_course_enrollments(
                 sis_term_id,
                 sis_course_id,
-                sis_section_ids,
+                updated_sis_section_ids,
                 existing_term_enrollments={},
                 instructor_updates={},
                 enrollment_updates={},
@@ -84,7 +84,7 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
                 known_users={},
                 is_incremental=self.job_flags.incremental,
             )
-            self._remove_section_enrollments(sis_term_id, canvas_site_id, sis_course_id, section_ids_to_remove, csv_set)
+            self._remove_section_enrollments(sis_term_id, canvas_site_id, sis_course_id, deleted_section_ids, csv_set)
             for _csv in csv_set.all:
                 _csv.filehandle.close()
 
@@ -94,12 +94,12 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
         CanvasSynchronization.update(enrollments=this_sync, instructors=this_sync)
         app.logger.info(f'bCourses site provisioning job (mode={self.__class__.__name__}) complete.')
 
-    def _remove_section_enrollments(self, sis_term_id, canvas_site_id, sis_course_id, section_ids_to_remove, csv_set):
+    def _remove_section_enrollments(self, sis_term_id, canvas_site_id, sis_course_id, deleted_section_ids, csv_set):
         enrollment_csv = csv_set.enrollment_terms[sis_term_id]
         canvas_sections = canvas.get_course_sections(canvas_site_id)
         for section in canvas_sections:
             section_id, berkeley_term = parse_canvas_sis_section_id(section.sis_section_id)
-            if section_id and str(section_id) in section_ids_to_remove:
+            if section_id and str(section_id) in deleted_section_ids:
                 section_enrollments = section.get_enrollments()
                 for enrollment in section_enrollments:
                     enrollment_csv.writerow({

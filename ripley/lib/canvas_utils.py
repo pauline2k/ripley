@@ -121,12 +121,12 @@ def uid_from_canvas_login_id(login_id):
     return result
 
 
-def update_canvas_sections(course, section_ids, section_ids_to_remove):
+def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
     canvas_sis_term_id = course.term['sis_term_id']
     term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
-    sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=section_ids)
+    sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=all_section_ids)
     if not (sis_sections and len(sis_sections)):
-        raise ResourceNotFoundError(f'No sections found with IDs {", ".join(section_ids)}')
+        raise ResourceNotFoundError(f'No sections found with IDs {", ".join(all_section_ids)}')
 
     def _section(section):
         return {
@@ -148,8 +148,10 @@ def update_canvas_sections(course, section_ids, section_ids_to_remove):
         job = get_current_job()
         if job:
             job.meta['sis_import_id'] = sis_import.id
-            job.save_meta()
-        return _update_enrollments_in_background(term.to_sis_term_id(), course, sections, section_ids_to_remove, sis_import)
+        bg_job = _update_enrollments_in_background(canvas_sis_term_id, course, sections, section_ids_to_remove, sis_import)
+        if bg_job:
+            job.meta['enrollment_update_job_id'] = bg_job.id
+        job.save_meta()
 
 
 def user_id_from_attributes(attributes):
@@ -177,15 +179,15 @@ def _canvas_site_term_json(canvas_site):
     return api_json
 
 
-def _update_enrollments_in_background(term_id, course, sections, section_ids_to_remove, sis_import):
+def _update_enrollments_in_background(sis_term_id, course, all_sections, deleted_section_ids, sis_import):
     from ripley.jobs.bcourses_provision_site_job import BcoursesProvisionSiteJob
 
     params = {
-        'term_id': term_id,
         'canvas_site_id': course.id,
-        'section_ids_to_remove': section_ids_to_remove,
+        'deleted_section_ids': deleted_section_ids,
         'sis_course_id': course.sis_course_id,
-        'sis_section_ids': [s['section_id'] for s in sections],
+        'sis_term_id': sis_term_id,
+        'updated_sis_section_ids': [s['section_id'] for s in all_sections if s['status'] == 'active'],
     }
     app.logger.info(f'SIS import (id={sis_import.id}) {sis_import.workflow_state}; starting job BcoursesProvisionSiteJob \
                     (sis_course_id={course.sis_course_id}).')

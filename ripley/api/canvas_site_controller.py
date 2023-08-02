@@ -38,6 +38,7 @@ from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, get_grade_distribution_with_enrollments
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
+from ripley.models.job_history import JobHistory
 
 
 @app.route('/api/canvas_site/provision')
@@ -74,18 +75,19 @@ def edit_sections(canvas_site_id):
     if not course:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
     params = request.get_json()
-    sections_to_add = params.get('sectionIdsToAdd', [])
-    sections_to_remove = params.get('sectionIdsToRemove', [])
-    sections_to_update = params.get('sectionIdsToUpdate', [])
-    section_ids = sections_to_add + sections_to_update
-    if not len(section_ids):
+    section_ids_to_add = params.get('sectionIdsToAdd', [])
+    section_ids_to_remove = params.get('sectionIdsToRemove', [])
+    section_ids_to_update = params.get('sectionIdsToUpdate', [])
+    all_section_ids = section_ids_to_add + section_ids_to_remove + section_ids_to_update
+    if not len(all_section_ids):
         raise BadRequestError('Required parameters are missing.')
-    job = enqueue(func=update_canvas_sections, args=(course, section_ids, sections_to_remove))
+    job = enqueue(func=update_canvas_sections, args=(course, all_section_ids, section_ids_to_remove))
     if not job:
         raise InternalServerError('Updates cannot be completed at this time.')
     return tolerant_jsonify(
         {
             'jobId': job.id,
+            'jobStatus': 'sendingRequest',
         },
     )
 
@@ -147,7 +149,14 @@ def get_provision_status():
     job = get_job(job_id)
     job_status = job.get_status(refresh=True)
     job_data = job.get_meta(refresh=True)
-
+    if 'enrollment_update_job_id' in job_data:
+        enrollment_update_job = JobHistory.get_by_id(job_data['enrollment_update_job_id'])
+        if enrollment_update_job.failed:
+            job_status = 'failed'
+        elif enrollment_update_job.finished_at:
+            job_status = 'finished'
+        else:
+            job_status = 'started'
     if 'sis_import_id' in job_data:
         sis_import = canvas.get_sis_import(job_data['sis_import_id'])
         if not sis_import:
