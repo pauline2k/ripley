@@ -160,13 +160,16 @@ class User(UserMixin):
                 'canvasUserTitle': user_profile.get('title'),
                 'isCanvasAdmin': can_administrate_canvas(uid),
             }
+            is_student = False
             is_teaching = False
             canvas_site_user = canvas.get_course_user(self.__canvas_site_id, canvas_user_id)
             if canvas_site_user and canvas_site_user.enrollments:
-                roles = [e['role'] for e in canvas_site_user.enrollments]
+                roles = list({e['role'] for e in canvas_site_user.enrollments})
                 canvas_user_data['canvasSiteUserRoles'] = roles
                 roles_that_teach = ['TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader']
                 is_teaching = bool(next((role for role in roles if role in roles_that_teach), None))
+                is_student = not is_teaching and 'StudentEnrollment' in roles
+            canvas_user_data['isStudent'] = is_student
             canvas_user_data['isTeaching'] = is_teaching
         return canvas_user_data
 
@@ -178,6 +181,7 @@ class User(UserMixin):
         is_admin = False
         is_faculty = False
         is_staff = False
+        is_student = False
         is_teaching = False
         name = None
         # Deduce user metadata.
@@ -195,8 +199,9 @@ class User(UserMixin):
                     affiliations = set(calnet_profile.get('affiliations', []) or [])
                     is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
                     is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
+                    is_student = bool(canvas_user_data and canvas_user_data['isStudent'])
                     is_teaching = bool(canvas_user_data and canvas_user_data['isTeaching'])
-        return {
+        api_json = {
             **{
                 'canvasActingAsUid': self.__acting_as_uid,
                 'canvasSiteId': self.__canvas_site_id,
@@ -207,6 +212,7 @@ class User(UserMixin):
                 'isAuthenticated': is_active,
                 'isFaculty': is_faculty,
                 'isStaff': is_staff,
+                'isStudent': is_student,
                 'isTeaching': is_teaching,
                 'name': name,
                 'uid': uid,
@@ -214,3 +220,4 @@ class User(UserMixin):
             **(calnet_profile or {}),
             **(canvas_user_data or {}),
         }
+        return dict(sorted(api_json.items()))

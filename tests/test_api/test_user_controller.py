@@ -38,6 +38,12 @@ class TestUserProfile:
     """User profile API."""
 
     @classmethod
+    def _api_my_profile(cls, client, expected_status_code=200):
+        response = client.get('/api/user/profile')
+        assert response.status_code == expected_status_code
+        return response.json
+
+    @classmethod
     def _api_user_profile(cls, client, uid, expected_status_code=200):
         response = client.post(
             '/api/user/profile',
@@ -68,10 +74,25 @@ class TestUserProfile:
             api_json = self._api_user_profile(client, uid=student_uid)
             assert api_json['isTeaching'] is False
 
+    def test_authorized_student(self, app, client, fake_auth):
+        """Identifies student role in context of Canvas site."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = 8876542
+            uid = student_uid
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_user_{canvas_site_id}_5678901'],
+                'user': [f'profile_{uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+            api_json = self._api_user_profile(client, uid=uid)
+            assert api_json['isStudent'] is True
+
     def test_authorized_admin(self, client, fake_auth):
         fake_auth.login(canvas_site_id=None, uid=admin_uid)
         api_json = self._api_user_profile(client, uid=student_uid)
         assert api_json['uid'] == student_uid
+        assert api_json['isStudent'] is False
         assert api_json['isTeaching'] is False
 
     def test_masquerading_cookies(self, app, client, fake_auth):
@@ -91,6 +112,7 @@ class TestUserProfile:
             response = client.get('/api/user/my_profile')
             api_json = response.json
             assert api_json['uid'] == teacher_uid
+            assert api_json['isStudent'] is False
             assert api_json['isTeaching'] is True
             # Cookies!
             cookies = response.headers.getlist('Set-Cookie')
@@ -111,6 +133,7 @@ class TestUserProfile:
             response = client.get('/api/user/my_profile')
             api_json = response.json
             assert api_json['uid'] == student_uid
+            assert api_json['isStudent'] is True
             assert api_json['isTeaching'] is False
             # More cookies!
             cookies = response.headers.getlist('Set-Cookie')
