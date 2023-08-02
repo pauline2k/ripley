@@ -77,7 +77,7 @@ def edit_sections(canvas_site_id):
     sections_to_add = params.get('sectionIdsToAdd', [])
     sections_to_remove = params.get('sectionIdsToRemove', [])
     sections_to_update = params.get('sectionIdsToUpdate', [])
-    section_ids = sections_to_add + sections_to_remove + sections_to_update
+    section_ids = sections_to_add + sections_to_update
     if not len(section_ids):
         raise BadRequestError('Required parameters are missing.')
     job = enqueue(func=update_canvas_sections, args=(course, section_ids, sections_to_remove))
@@ -86,7 +86,6 @@ def edit_sections(canvas_site_id):
     return tolerant_jsonify(
         {
             'jobId': job.id,
-            'jobStatus': job.get_status(),
         },
     )
 

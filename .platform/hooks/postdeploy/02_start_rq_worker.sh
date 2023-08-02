@@ -55,7 +55,7 @@ attempt=0
 until [ -z "$(sudo ps | grep rq:worker:xenomorph)" ];
 do
   (( attempt++ ))
-  if (( count <= 3 ))
+  if (( attempt <= 3 ))
   then
     echo "Stopping existing worker (attempt ${attempt} of 3)."; echo
     sudo ${PYTHONPATH}/python -c "from xenomorph import stop_workers; stop_workers('${redis_url}')" >> "${log_location}" 2>&1

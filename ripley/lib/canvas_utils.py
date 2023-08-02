@@ -31,7 +31,13 @@ from ripley.externals import canvas, data_loch
 from ripley.lib.berkeley_course import course_section_name
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.sis_import_csv import SisImportCsv
+from ripley.models.job_history import JobHistory
 from rq.job import get_current_job
+
+
+def get_canvas_sis_section_id(sis_section):
+    berkeley_term = BerkeleyTerm.from_sis_term_id(sis_section['term_id'])
+    return f"SEC:{berkeley_term.year}-{berkeley_term.season}-{sis_section['section_id']}"
 
 
 def parse_canvas_sis_section_id(sis_section_id):
@@ -115,20 +121,19 @@ def uid_from_canvas_login_id(login_id):
     return result
 
 
-def update_canvas_sections(course, section_ids, sections_to_remove):
+def update_canvas_sections(course, section_ids, section_ids_to_remove):
     canvas_sis_term_id = course.term['sis_term_id']
     term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
     sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=section_ids)
     if not (sis_sections and len(sis_sections)):
         raise ResourceNotFoundError(f'No sections found with IDs {", ".join(section_ids)}')
-    canvas_course_id = course.sis_course_id
 
     def _section(section):
         return {
-            'section_id': section['section_id'],
-            'course_id': canvas_course_id,
+            'section_id': get_canvas_sis_section_id(section),
+            'course_id': course.sis_course_id,
             'name': course_section_name(section),
-            'status': 'deleted' if section['section_id'] in sections_to_remove else 'active',
+            'status': 'deleted' if section['section_id'] in section_ids_to_remove else 'active',
             'start_date': None,
             'end_date': None,
         }
@@ -144,7 +149,7 @@ def update_canvas_sections(course, section_ids, sections_to_remove):
         if job:
             job.meta['sis_import_id'] = sis_import.id
             job.save_meta()
-        return sis_import
+        return _update_enrollments_in_background(term.to_sis_term_id(), course, sections, section_ids_to_remove, sis_import)
 
 
 def user_id_from_attributes(attributes):
@@ -170,3 +175,19 @@ def _canvas_site_term_json(canvas_site):
                 'name': term.to_english(),
             }
     return api_json
+
+
+def _update_enrollments_in_background(term_id, course, sections, section_ids_to_remove, sis_import):
+    from ripley.jobs.bcourses_provision_site_job import BcoursesProvisionSiteJob
+
+    params = {
+        'term_id': term_id,
+        'canvas_site_id': course.id,
+        'section_ids_to_remove': section_ids_to_remove,
+        'sis_course_id': course.sis_course_id,
+        'sis_section_ids': [s['section_id'] for s in sections],
+    }
+    app.logger.info(f'SIS import (id={sis_import.id}) {sis_import.workflow_state}; starting job BcoursesProvisionSiteJob \
+                    (sis_course_id={course.sis_course_id}).')
+    BcoursesProvisionSiteJob(app.app_context).run_async(force_run=True, params=params)
+    return JobHistory.get_running_job(job_key=BcoursesProvisionSiteJob.key())

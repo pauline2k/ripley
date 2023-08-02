@@ -22,6 +22,7 @@
                 "root_account_id": 1,
                 "sis_import_id": "10000000",
                 "sis_section_id": "SEC:2023-B-32936",
+                "sis_user_id": "30040000",
                 "type": "TaEnrollment",
                 "updated_at": "2023-01-31T00:09:55Z",
                 "user_id": 5678901,

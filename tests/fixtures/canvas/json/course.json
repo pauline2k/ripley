@@ -206,17 +206,36 @@
         "status_code": 200
     },
     "get_sections_1010101": {
+      "method": "GET",
+      "endpoint": "courses/1010101/sections",
+      "data": [
+        {
+          "id": 500,
+          "name": "Section A",
+          "sis_section_id": "SEC:2022-D-99999",
+          "integration_id": null,
+          "sis_import_id": 47,
+          "course_id": 1010101,
+          "sis_course_id": "CRS:ANTHRO-189-2023-B",
+          "start_at": "2012-06-01T00:00:00-06:00",
+          "end_at": null,
+          "restrict_enrollments_to_section_dates": null,
+          "nonxlist_course_id": null
+        }
+      ]
+    },
+    "get_sections_1234567": {
         "method": "GET",
-        "endpoint": "courses/1010101/sections",
+        "endpoint": "courses/1234567/sections",
         "data": [
           {
-            "id": 500,
+            "id": 501,
             "name": "Section A",
-            "sis_section_id": "SEC:2022-D-99999",
+            "sis_section_id": "SEC:2023-B-98765",
             "integration_id": null,
             "sis_import_id": 47,
-            "course_id": 1010101,
-            "sis_course_id": "CRS:ANTHRO-189-2023-B",
+            "course_id": 1234567,
+            "sis_course_id": "CRS:ASTRON-218-2023-B",
             "start_at": "2012-06-01T00:00:00-06:00",
             "end_at": null,
             "restrict_enrollments_to_section_dates": null,

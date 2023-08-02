@@ -185,14 +185,16 @@
         <h2 id="updating-sections-header" class="page-course-official-sections-existing-sections-header-label">
           Updating Official Sections in Course Site
         </h2>
-        <div v-if="jobStatus === 'sendingRequest'" class="pending-request-step">
-          Sending request...
-        </div>
-        <div v-if="$_.includes(['queued', 'initializing', 'created'], jobStatus)" class="pending-request-step">
-          Request sent. Awaiting processing...
-        </div>
-        <div v-if="$_.includes(['started', 'importing'], jobStatus)" class="pending-request-step">
-          Request received. Updating sections...
+        <div class="pending-request-step">
+          <div v-if="jobStatus === 'sendingRequest'">
+            Sending request...
+          </div>
+          <div v-if="$_.includes(['queued', 'initializing', 'created'], jobStatus)">
+            Request sent. Awaiting processing...
+          </div>
+          <div v-if="$_.includes(['started', 'importing'], jobStatus)">
+            Request received. Updating sections...
+          </div>
         </div>
         <v-progress-linear
           class="mx-4"
@@ -498,6 +500,7 @@ export default {
 
 <style scoped lang="scss">
 .pending-request-step {
+  height: 24px;
   margin: 20px 0;
   text-align: center;
 }

@@ -87,7 +87,8 @@ def stop_workers(redis_url):
         workers = Worker.all(redis_conn)
         # Any remaining workers, kill 'em.
         for w in workers:
-            os.kill(w.pid, signal.SIGINT)
+            if w.pid:
+                os.kill(w.pid, signal.SIGINT)
 
 
 def work_horse_killed_handler(job, pid, stat, rusage):
