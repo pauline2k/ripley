@@ -132,7 +132,7 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
         return {
             'section_id': get_canvas_sis_section_id(section),
             'course_id': course.sis_course_id,
-            'name': course_section_name(section),
+            'name': f"{section['course_name']} {course_section_name(section)}",
             'status': 'deleted' if section['section_id'] in section_ids_to_remove else 'active',
             'start_date': None,
             'end_date': None,
