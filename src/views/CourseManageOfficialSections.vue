@@ -195,6 +195,9 @@
           <div v-if="$_.includes(['started', 'importing'], jobStatus)">
             Request received. Updating sections...
           </div>
+          <div v-if="'finished' === jobStatus">
+            Finishing up...
+          </div>
         </div>
         <v-progress-linear
           class="mx-4"
@@ -375,7 +378,7 @@ export default {
       this.adminSemesters = feed.admin_semesters
       this.isCourseCreator = this.usersClassCount > 0
       this.feedFetched = true
-      this.currentWorkflowStep = 'preview'
+      this.changeWorkflowStep('preview')
     },
     rowClassLogic(listMode, section) {
       return {
@@ -414,7 +417,7 @@ export default {
           }
         ).catch(
           () => {
-            this.currentWorkflowStep = 'preview'
+            this.changeWorkflowStep('preview')
             this.jobStatus = 'error'
             this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
             clearInterval(this.exportTimer)
@@ -456,7 +459,7 @@ export default {
         courseProvisionJobStatus(this.backgroundJobId).then(
           response => {
             this.jobStatus = response.jobStatus
-            if (!this.jobStatus || !this.$_.includes(['started', 'queued', 'initializing', 'created', 'importing'], this.jobStatus)) {
+            if (!(this.$_.includes(['started', 'queued', 'initializing', 'created', 'importing'], this.jobStatus))) {
               clearInterval(this.exportTimer)
               if (this.$_.includes(['imported', 'finished'], this.jobStatus) && response.workflowState === 'imported') {
                 this.jobStatusMessage = 'The sections in this course site have been updated successfully.'
@@ -471,14 +474,14 @@ export default {
           }
         ).catch(
           (error, vm, info) => {
-            this.currentWorkflowStep = 'preview'
+            this.changeWorkflowStep('preview')
             this.jobStatus = 'error'
             this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
             clearInterval(this.exportTimer)
             this.$errorHandler((error, vm, info))
           }
         )
-      }, 6000)
+      }, 4000)
     },
     unstage(section) {
       if (section.stagedState === 'add') {

@@ -54,12 +54,16 @@ class JobHistory(db.Model):
                 """
 
     @classmethod
-    def is_job_running(cls, job_key):
-        return cls.get_running_job(job_key) is not None
+    def get_by_id(cls, id_):
+        return cls.query.filter_by(id=id_).first()
 
     @classmethod
     def get_running_job(cls, job_key):
-        return cls.query.filter_by(job_key=job_key, finished_at=None).first()
+        return cls.query.filter_by(job_key=job_key, finished_at=None).order_by(desc(cls.started_at)).first()
+
+    @classmethod
+    def is_job_running(cls, job_key):
+        return cls.get_running_job(job_key) is not None
 
     @classmethod
     def job_started(cls, job_key):
