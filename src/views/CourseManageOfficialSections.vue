@@ -4,9 +4,7 @@
       <div v-if="currentWorkflowStep === 'staging'">
         <MaintenanceNotice course-action-verb="site is updated" />
       </div>
-
       <h1 id="page-header" class="page-course-official-sections-header1">Official Sections</h1>
-
       <div v-if="currentWorkflowStep === 'preview'">
         <v-alert
           id="page-course-official-sections-job-status-notice"
@@ -25,18 +23,17 @@
             <li v-for="(msg, index) in jobStatusDetails" :key="index">{{ msg }}</li>
           </ul>
         </v-alert>
-
         <h2 id="sr-context-header" class="sr-only">Viewing Sections</h2>
-
         <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-white-border">
-          <div class="d-flex justify-space-between pb-1">
-            <h3 id="course-site-sections-header" class="my-4 pb-4">
+          <div class="d-flex align-start justify-space-between pb-2">
+            <h3 id="course-site-sections-header">
               Sections in this Course Site
             </h3>
             <div class="d-flex align-end">
               <v-btn
                 v-if="canvasSite.canEdit"
-                class="canvas-button canvas-button-primary canvas-no-decoration page-course-official-sections-button"
+                id="official-sections-edit-btn"
+                class="canvas-button canvas-button-primary canvas-no-decoration text-no-wrap"
                 @click="changeWorkflowStep('staging')"
               >
                 Edit Sections
@@ -55,17 +52,16 @@
           </v-row>
         </div>
       </div>
-
       <div v-if="currentWorkflowStep === 'staging'">
         <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-grey-border">
           <h2 id="sr-context-header" class="sr-only">Managing Sections</h2>
-
-          <div class="page-course-official-sections-current-sections-header">
-            <h3 id="course-site-sections" class="page-course-official-sections-existing-sections-header-label">
+          <div class="d-flex align-start flex-wrap justify-space-between pb-2">
+            <h3 id="course-site-sections" class="text-no-wrap me-auto">
               Sections in this Course Site
             </h3>
             <div class="text-right">
               <v-btn
+                id="official-sections-cancel-btn"
                 class="canvas-button mx-1"
                 aria-label="Cancel section modifications for this course site"
                 @click="cancel"
@@ -73,7 +69,8 @@
                 Cancel
               </v-btn>
               <v-btn
-                class="canvas-button canvas-button-primary"
+                id="official-sections-save-btn"
+                class="canvas-button canvas-button-primary text-no-wrap"
                 :disabled="totalStagedCount === 0"
                 aria-label="Apply pending modifications to this course site"
                 @click="saveChanges"
@@ -136,18 +133,18 @@
               style="border-radius: 3px !important"
               :value="course.slug"
             >
-              <v-expansion-panel-title
-                class="d-flex flex-row-reverse height-unset pa-0"
-                collapse-icon="mdi-menu-down"
-                expand-icon="mdi-menu-right"
-              >
-                <div class="d-flex flex-wrap flex-grow-1">
-                  <h4 id="available-course-header" class="sections-course-title d-flex align-center">
-                    {{ course.courseCode }}<span v-if="course.title"> : {{ course.title }}</span>
-                  </h4>
-                  <span v-if="course.sections && (course.sections.length === 1)" class="sections-course-subtitle text-no-wrap">&nbsp;(1 section)</span>
-                  <span v-if="course.sections && (course.sections.length !== 1)" class="sections-course-subtitle text-no-wrap">&nbsp;({{ course.sections.length }} sections)</span>
-                </div>
+              <v-expansion-panel-title class="d-flex align-start justify-start height-unset pa-0">
+                <template #actions="{ expanded }">
+                  <v-icon class="mt-1 order-0" :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
+                </template>
+                <h4 id="available-course-header" class="d-flex flex-nowrap order-1 sections-course-title">
+                  <div class="text-no-wrap">{{ course.courseCode }}<span v-if="course.title">&nbsp;:&nbsp;</span></div>
+                  <div>
+                    {{ course.title }}&nbsp;
+                    <span v-if="course.sections && (course.sections.length === 1)" class="sections-course-subtitle text-no-wrap">(1 section)</span>
+                    <span v-if="course.sections && (course.sections.length !== 1)" class="sections-course-subtitle text-no-wrap">({{ course.sections.length }} sections)</span>
+                  </div>
+                </h4>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
                 <div v-if="course.sections.length > 1" class="mx-2 mb-1">
@@ -180,9 +177,8 @@
           </v-expansion-panels>
         </div>
       </div>
-
       <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
-        <h2 id="updating-sections-header" class="page-course-official-sections-existing-sections-header-label">
+        <h2 id="updating-sections-header" class="text-no-wrap">
           Updating Official Sections in Course Site
         </h2>
         <div class="pending-request-step">
@@ -199,15 +195,15 @@
             Finishing up...
           </div>
         </div>
-        <v-progress-linear
-          class="mx-4"
-          color="primary"
-          height="10"
-          indeterminate
-        />
+        <div class="px-5">
+          <v-progress-linear
+            color="primary"
+            height="10"
+            indeterminate
+          />
+        </div>
       </div>
     </div>
-
     <div v-if="displayError" class="alert-container" role="alert">
       <i class="fa fa-warning canvas-notice-icon"></i>
       <div class="notice-text-container">
@@ -520,9 +516,6 @@ export default {
     line-height: 30px;
     margin: 15px 0 16px;
   }
-  .page-course-official-sections-button {
-    white-space: nowrap;
-  }
   .page-course-official-sections-courses-container {
     margin: 0;
   }
@@ -539,11 +532,11 @@ export default {
   .page-course-official-sections-current-sections-white-border {
     border: $color-white solid 1px;
   }
+  .page-course-official-sections-sections-area {
+    min-width: 500px;
+  }
   .page-course-official-sections-sections-area.page-course-official-sections-current-sections-grey-border {
     padding: 15px;
-  }
-  .page-course-official-sections-sections-area + .page-course-official-sections-sections-area {
-    margin-top: 25px;
   }
   .page-course-official-sections-available-sections-header-label {
     font-size: 19px;
@@ -553,8 +546,7 @@ export default {
       text-align: left;
     }
   }
-  h3.sections-course-title {
-    display: inline !important;
+  h4.sections-course-title {
     font-size: 15px !important;
     font-weight: 500 !important;
     line-height: 20px;
@@ -574,6 +566,9 @@ export default {
   }
   .v-expansion-panel-text__wrapper {
     padding: 6px 4px 0px 4px;
+  }
+  .v-expansion-panel-title__icon {
+    margin-inline-start: unset;
   }
   .v-expansion-panel__shadow {
     display: none !important;
