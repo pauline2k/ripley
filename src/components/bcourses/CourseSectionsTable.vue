@@ -302,29 +302,19 @@ td {
   border-spacing: 0;
   margin: 0;
   width: 100%;
-  // disable alternating row color
-  tr:nth-of-type(even) {
-    background: inherit;
-  }
-  tbody tr:last-child td {
-    border-bottom: $color-item-group-item-border solid 1px;
-    vertical-align: top;
-  }
-  tbody:last-child tr:last-child td {
-    border-bottom: 0;
-    vertical-align: top;
-  }
   tbody tr td {
+    border-top: solid 1px $color-container-grey-border;
     color: $color-body-black;
     font-size: 14px;
-    font-weight: 300;
+    font-weight: 400;
     padding-left: 14px;
+    vertical-align: top;
   }
   thead tr th {
     color: $color-body-black;
     font-size: 13px;
-    font-weight: 400;
-    padding-left: 14px;
+    font-weight: 500;
+    padding: 6px 10px 6px 14px;
     text-align: start;
   }
 }
