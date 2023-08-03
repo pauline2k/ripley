@@ -49,13 +49,13 @@
           </v-col>
         </v-row>
         <v-row v-for="(user, index) in canvasSite.users" :key="user.id" :class="{'bg-blue-grey-lighten-5': !(index % 2)}">
-          <v-col cols="2">
+          <v-col :class="{'font-weight-bold': user.uid === currentUser.uid}" cols="2">
             <a
               :href="user.url"
               target="_blank"
               title="Open Canvas course user profile in new tab"
             >
-              {{ user.sortableName }}
+              {{ user.sortableName }}<span v-if="user.uid === currentUser.uid"> (you)</span>
             </a>
           </v-col>
           <v-col class="text-no-wrap" cols="2">
@@ -69,19 +69,20 @@
               {{ describeEnrollment(enrollment) }}
             </div>
           </v-col>
-          <v-col cols="2">
-            <v-btn
-              v-if="canBecomeAnotherUser() && isNumeric(user.uid)"
-              :id="`become-${user.uid}`"
-              variant="text"
-              @click="devAuth(user.uid)"
-            >
-              <v-icon class="mr-2" icon="mdi-arrow-right-circle-outline" />
-              Log in<span class="sr-only"> as {{ user.name }}</span>
-            </v-btn>
-            <div v-if="canBecomeAnotherUser() && user.uid && user.uid.includes('inactive')" class="text-red">
-              <v-icon class="mr-2" icon="mdi-exclamation-circle" />
-              <span class="sr-only"> as {{ user.name }} is </span>Inactive
+          <v-col class="become-user-column" cols="2">
+            <div v-if="canBecomeAnotherUser() && isNumeric(user.uid) && user.uid !== currentUser.uid">
+              <v-btn
+                :id="`become-${user.uid}`"
+                variant="text"
+                @click="devAuth(user.uid)"
+              >
+                <v-icon class="mr-2" icon="mdi-arrow-right-circle-outline" />
+                Log in<span class="sr-only"> as {{ user.name }}</span>
+              </v-btn>
+              <div v-if="user.uid.includes('inactive')" class="text-red">
+                <v-icon class="mr-2" icon="mdi-exclamation-circle" />
+                <span class="sr-only"> as {{ user.name }} is </span>Inactive
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -133,6 +134,7 @@ export default {
       return `${role} in ${e.sis_section_id}`
     },
     devAuth(uid) {
+      this.loadingStart()
       becomeUser(this.currentUser.canvasSiteId, uid).then(() => window.location.href = '/')
     },
     isNumeric(s) {
@@ -141,3 +143,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.become-user-column {
+  min-height: 60px;
+}
+</style>

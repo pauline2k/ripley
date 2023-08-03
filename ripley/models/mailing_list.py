@@ -163,13 +163,13 @@ class MailingList(Base):
     def update_population_metadata(
             cls,
             mailing_list_id,
-            members_count,
             populate_add_errors,
             populate_remove_errors,
             populated_at,
     ):
         mailing_list = cls.query.filter_by(id=mailing_list_id).first()
         if mailing_list:
+            members_count = len(MailingListMembers.get_mailing_list_members(mailing_list_id=mailing_list.id))
             mailing_list.members_count = members_count
             mailing_list.populate_add_errors = populate_add_errors
             mailing_list.populate_remove_errors = populate_remove_errors
@@ -180,13 +180,14 @@ class MailingList(Base):
 
     def to_api_json(self):
         canvas_site = canvas.get_course(self.canvas_site_id)
-        with_welcomed_at = list(filter(lambda m: m.welcomed_at, self.mailing_list_members or []))
+        mailing_list_members = list(filter(lambda m: not m.deleted_at, self.mailing_list_members or []))
+        with_welcomed_at = list(filter(lambda m: m.welcomed_at, mailing_list_members))
         welcome_email_last_sent = max([m.welcomed_at for m in with_welcomed_at]) if with_welcomed_at else None
         return {
             'canvasSite': canvas_site_to_api_json(canvas_site),
             'domain': app.config['MAILGUN_DOMAIN'],
             'id': self.id,
-            'membersCount': len(self.mailing_list_members),
+            'membersCount': len(mailing_list_members),
             'name': self.list_name,
             'populatedAt': to_isoformat(self.populated_at),
             'welcomeEmailActive': self.welcome_email_active,
@@ -312,7 +313,7 @@ class MailingList(Base):
                             key = 'successes' if success else 'errors'
                             summary['add'][key].append(preferred_email)
                     else:
-                        app.logger.warn(f"No email address found for UID {user['uid']}")
+                        app.logger.warning(f"No email address found for UID {user['uid']}")
 
         # Email addresses NOT accounted for above must now be removed from the db.
         summary['remove']['total'] = len(email_addresses_of_active_mailing_list_members)
@@ -324,15 +325,12 @@ class MailingList(Base):
             key = 'successes' if mailing_list_member else 'errors'
             summary['remove'][key].append(email_address)
 
-        members = MailingListMembers.get_mailing_list_members(mailing_list_id=mailing_list.id)
-        cls.update_population_metadata(
+        mailing_list = cls.update_population_metadata(
             mailing_list_id=mailing_list.id,
-            members_count=len(members),
             populate_add_errors=len(summary['add']['errors']),
             populate_remove_errors=len(summary['remove']['errors']),
             populated_at=utc_now(),
         )
-        mailing_list = cls.query.filter_by(id=mailing_list.id).first()
         app.logger.info('\n' + f'Mailing list {mailing_list.list_name} update: {summary}' + '\n')
         return mailing_list, summary
 

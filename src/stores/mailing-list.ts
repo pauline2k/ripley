@@ -8,7 +8,7 @@ export const useMailingListStore = defineStore('mailingList', {
   }),
   actions: {
     init() {
-      this.canvasSite = this.mailingList = undefined
+      this.canvasSite = this.mailingList = this.updateSummary = undefined
     },
     setCanvasSite(canvasSite: any) {
       const a = []

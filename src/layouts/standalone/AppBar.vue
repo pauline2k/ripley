@@ -26,7 +26,7 @@
               v-model="canvasSiteId"
               :append-inner-icon="isUpdatingCanvasSiteId ? 'mdi-progress-check' : 'mdi-arrow-right-circle-outline'"
               density="compact"
-              :disabled="isUpdatingCanvasSiteId"
+              :disabled="isUpdatingCanvasSiteId || isLoading"
               :error="!!$_.trim(canvasSiteId) && !isCanvasSiteIdValid"
               hide-details
               label="Canvas Site ID"
