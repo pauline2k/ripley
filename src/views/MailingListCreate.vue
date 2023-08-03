@@ -2,7 +2,7 @@
   <div v-if="!isLoading" class="canvas-application mx-10 my-5">
     <h1 id="page-header" class="my-3" tabindex="-1">Create Mailing List</h1>
     <v-alert
-      v-if="!error && !isCreating && !success"
+      v-if="!error && !success"
       density="compact"
       role="alert"
       type="info"
@@ -40,7 +40,7 @@
           </div>
           <div>
             <v-container class="mb-2 pb-1 pl-0 pt-2" fluid>
-              <v-row v-if="isAdminToolMode" no-gutters>
+              <v-row v-if="isAdminToolMode">
                 <v-col cols="auto" class="me-auto">
                   <div v-if="canvasSite.url">
                     <OutboundLink id="course-site-href" :href="canvasSite.url">
@@ -60,7 +60,7 @@
                   </div>
                 </v-col>
               </v-row>
-              <v-row v-if="isAdminToolMode" no-gutters>
+              <v-row v-if="isAdminToolMode">
                 <v-col>
                   <div class="mb-4 w-auto">
                     <div v-if="canvasSite.term" class="text-subtitle-1">{{ canvasSite.term.name }}</div>
@@ -68,9 +68,9 @@
                   </div>
                 </v-col>
               </v-row>
-              <v-row no-gutters align="center">
-                <v-col cols="8">
-                  <div v-if="currentUser.isAdmin" class="d-flex pt-1 text-subtitle-1">
+              <v-row align="center">
+                <v-col class="pb-0" cols="8">
+                  <div class="d-flex pt-1 text-subtitle-1">
                     <div class="float-right mailing-list-name-input">
                       <label for="mailing-list-name-input">Name:</label>
                     </div>
@@ -100,9 +100,9 @@
                   </div>
                 </v-col>
               </v-row>
-              <v-row v-if="currentUser.isTeaching || currentUser.isAdmin">
+              <v-row v-if="currentUser.isTeaching || currentUser.isAdmin" no-gutters>
                 <v-col>
-                  <div class="d-flex float-right mt-1">
+                  <div class="d-flex float-right">
                     <div v-if="isAdminToolMode">
                       <v-btn
                         id="btn-cancel"
@@ -201,13 +201,13 @@ export default {
       this.$router.push({path: '/mailing_list/select_course'})
     },
     create() {
-      this.error = null
       const name = this.$_.trim(this.mailingListName)
       if (name && !this.hasInvalidCharacters) {
         this.isCreating = true
         this.$announcer.polite('Creating list')
         createMailingList(this.canvasSiteId, name, !this.isAdminToolMode).then(
           data => {
+            this.error = null
             this.setMailingList(data)
             this.goToNextPage()
           },

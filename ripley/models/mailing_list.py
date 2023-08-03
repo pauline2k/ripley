@@ -42,9 +42,9 @@ class MailingList(Base):
     __tablename__ = 'canvas_site_mailing_lists'
 
     id = db.Column(db.Integer, nullable=False, primary_key=True)  # noqa: A003
-    canvas_site_id = db.Column(db.Integer, nullable=False)
+    canvas_site_id = db.Column(db.Integer, nullable=False, unique=True)
     canvas_site_name = db.Column(db.String(255))
-    list_name = db.Column(db.String(255))
+    list_name = db.Column(db.String(255), unique=True)
     members_count = db.Column(db.Integer)
     populate_add_errors = db.Column(db.Integer)
     populated_at = db.Column(db.DateTime)
@@ -106,11 +106,12 @@ class MailingList(Base):
             raise ValueError(f'List with id {canvas_site_id} already exists')
         mailing_list = cls(canvas_site_id=canvas_site_id)
 
-        mailing_list.list_name = list_name or cls.get_suggested_name(canvas_site_id)
-        name_conflict = cls.query.filter_by(list_name=mailing_list.list_name).first()
+        list_name = list_name or cls.get_suggested_name(canvas_site_id)
+        name_conflict = cls.query.filter_by(list_name=list_name).first()
         if name_conflict:
-            raise ValueError(f'List with name {mailing_list.list_name} already exists')
+            raise ValueError(f'The name {list_name} is used by another Canvas site and is not available.')
 
+        mailing_list.list_name = list_name
         mailing_list.welcome_email_body = welcome_email_body
         mailing_list.welcome_email_subject = welcome_email_subject
         db.session.add(mailing_list)

@@ -34,13 +34,13 @@
       <v-container fluid>
         <v-row>
           <v-col cols="2">
-            Canvas User ID
+            Name
           </v-col>
           <v-col cols="2">
             UID
           </v-col>
           <v-col cols="2">
-            Name
+            Canvas User ID
           </v-col>
           <v-col cols="4">
             Enrollments
@@ -48,13 +48,7 @@
           <v-col cols="2">
           </v-col>
         </v-row>
-        <v-row v-for="user in canvasSite.users" :key="user.id">
-          <v-col class="text-no-wrap" cols="2">
-            {{ user.id }}
-          </v-col>
-          <v-col class="text-no-wrap" cols="2">
-            {{ user.uid }}
-          </v-col>
+        <v-row v-for="(user, index) in canvasSite.users" :key="user.id" :class="{'bg-blue-grey-lighten-5': !(index % 2)}">
           <v-col cols="2">
             <a
               :href="user.url"
@@ -64,12 +58,16 @@
               {{ user.sortableName }}
             </a>
           </v-col>
+          <v-col class="text-no-wrap" cols="2">
+            {{ user.uid }}
+          </v-col>
+          <v-col class="text-no-wrap" cols="2">
+            {{ user.id }}
+          </v-col>
           <v-col cols="4">
-            <ul>
-              <li v-for="enrollment in user.enrollments" :key="enrollment.id">
-                {{ describeEnrollment(enrollment) }}
-              </li>
-            </ul>
+            <div v-for="enrollment in user.enrollments" :key="enrollment.id">
+              {{ describeEnrollment(enrollment) }}
+            </div>
           </v-col>
           <v-col cols="2">
             <v-btn
