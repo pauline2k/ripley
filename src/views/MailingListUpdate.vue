@@ -149,6 +149,7 @@
         <v-btn
           id="btn-cancel"
           class="mr-2"
+          :disabled="isUpdating"
           variant="outlined"
           @click="cancel"
         >
@@ -158,6 +159,7 @@
           id="btn-populate-mailing-list"
           class="mr-2"
           color="primary"
+          :disabled="isUpdating"
           @click="update"
         >
           <span v-if="!isUpdating">Update Memberships{{ hasUpdatedSincePageLoad ? ' Again' : '' }}</span>
@@ -237,7 +239,6 @@ export default {
     },
     update() {
       this.$announcer.polite('Updating')
-      this.alerts = []
       this.isUpdating = true
       populateMailingList(this.mailingList.id).then(
         data => {

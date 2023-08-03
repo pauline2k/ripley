@@ -1,5 +1,5 @@
 <template>
-  <v-menu>
+  <v-menu :disabled="isLoading">
     <template #activator="{ props }">
       <v-btn
         v-bind="props"
