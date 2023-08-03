@@ -53,9 +53,9 @@ def get_canvas_site(canvas_site_id):
         api_json = canvas_site_to_api_json(course)
         include_users = to_bool_or_none(request.args.get('includeUsers', False))
         if include_users:
-            api_json['users'] = []
+            users = []
             for user in course.get_users(include=('email', 'enrollments')):
-                api_json['users'].append({
+                users.append({
                     'id': user.id,
                     'enrollments': user.enrollments,
                     'name': user.name,
@@ -63,6 +63,7 @@ def get_canvas_site(canvas_site_id):
                     'uid': user.login_id if hasattr(user, 'login_id') else None,
                     'url': f"{app.config['CANVAS_API_URL']}/courses/{canvas_site_id}/users/{user.id}",
                 })
+            api_json['users'] = sorted(users, key=lambda u: u['sortableName'])
         return tolerant_jsonify(api_json)
     else:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
