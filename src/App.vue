@@ -15,19 +15,19 @@
     <v-main class="v-main-when-print">
       <PageLoadProgress v-if="isLoading" />
       <router-view v-if="applicationState.status === 200" />
-      <NotFound v-if="applicationState.status !== 200" />
+      <Error v-if="applicationState.status !== 200" />
     </v-main>
   </v-app>
 </template>
 
 <script>
 import Context from '@/mixins/Context'
-import NotFound from '@/views/NotFound'
+import Error from '@/views/Error'
 import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
 
 export default {
   name: 'App',
-  components: {NotFound, PageLoadProgress},
+  components: {Error, PageLoadProgress},
   mixins: [Context],
   methods: {
     skipTo: anchor => console.log(`TODO: VueScrollTo.scrollTo(${anchor}, 400)`)

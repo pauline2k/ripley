@@ -33,7 +33,7 @@ axios.get(`${apiBaseUrl}/api/user/my_profile`).then(data => {
       isVueAppDebugMode: _.trim(import.meta.env.VITE_APP_DEBUG).toLowerCase() === 'true'
     })
     app.use(router).config.errorHandler = function (error, vm, info) {
-      const message = _.get(error, 'message') || info || 'Uh oh, there was a problem.'
+      const message = _.get(error, 'message') || info
       const stacktrace = _.get(error, 'stack', null)
       console.log(`\n${message}\n${stacktrace}\n`)
       useContextStore().setApplicationState(500, message, stacktrace)
