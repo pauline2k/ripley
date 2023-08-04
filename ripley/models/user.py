@@ -162,7 +162,7 @@ class User(UserMixin):
             }
             is_student = False
             is_teaching = False
-            canvas_site_user = canvas.get_course_user(self.__canvas_site_id, canvas_user_id)
+            canvas_site_user = canvas.get_course_user(self.__canvas_site_id, canvas_user_id) if course else None
             if canvas_site_user and canvas_site_user.enrollments:
                 roles = list({e['role'] for e in canvas_site_user.enrollments})
                 canvas_user_data['canvasSiteUserRoles'] = roles
@@ -195,7 +195,10 @@ class User(UserMixin):
                     is_admin = user_auth.is_superuser if user_auth and user_auth.active else False
                     canvas_user_data = self._load_canvas_user_data(uid) or {}
                     canvas_site_user_roles = canvas_user_data.get('canvasSiteUserRoles') if canvas_user_data else None
-                    is_active = bool(is_admin or canvas_site_user_roles)
+                    is_active = bool(
+                        is_admin
+                        or (canvas_user_data.get('canvasSiteId') and canvas_site_user_roles)
+                        or canvas_user_data.get('canvasUserId'))
                     affiliations = set(calnet_profile.get('affiliations', []) or [])
                     is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
                     is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
