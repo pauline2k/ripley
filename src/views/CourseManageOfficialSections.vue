@@ -55,11 +55,11 @@
       <div v-if="currentWorkflowStep === 'staging'">
         <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-grey-border">
           <h2 id="sr-context-header" class="sr-only">Managing Sections</h2>
-          <div class="d-flex align-start flex-wrap justify-space-between pb-2">
-            <h3 id="course-site-sections" class="text-no-wrap me-auto">
+          <div class="d-flex align-center flex-wrap justify-space-between">
+            <h3 id="course-site-sections" class="text-no-wrap mb-2">
               Sections in this Course Site
             </h3>
-            <div class="text-right">
+            <div class="mb-2 ml-auto">
               <v-btn
                 id="official-sections-cancel-btn"
                 class="canvas-button mx-1"
@@ -491,7 +491,9 @@ export default {
       section.stagedState = null
     },
     unstageAll() {
-      this.existingCourseSections = this.canvasSite.officialSections
+      return this.$_.each(this.allSections, section => {
+        this.$_.unset(section, 'stagedState')
+      })
     }
   }
 }
@@ -533,7 +535,7 @@ export default {
     border: $color-white solid 1px;
   }
   .page-course-official-sections-sections-area {
-    min-width: 500px;
+    min-width: 420px;
   }
   .page-course-official-sections-sections-area.page-course-official-sections-current-sections-grey-border {
     padding: 15px;
