@@ -95,15 +95,17 @@
           <v-row v-if="totalStagedCount > 12" class="row">
             <v-col md="12" class="text-right">
               <v-btn
-                class="canvas-button canvas-no-decoration"
+                id="official-sections-secondary-cancel-btn"
+                class="canvas-button mx-1"
                 aria-label="Cancel section modifications for this course site"
-                @click="changeWorkflowStep('preview')"
+                @click="cancel"
               >
                 Cancel
               </v-btn>
               <v-btn
+                id="official-sections-secondary-save-btn"
                 :disabled="totalStagedCount === 0"
-                class="canvas-button canvas-button-primary canvas-no-decoration"
+                class="canvas-button canvas-button-primary text-no-wrap"
                 aria-label="Apply pending modifications to this course site"
                 @click="saveChanges"
               >
@@ -126,9 +128,9 @@
             multiple
           >
             <v-expansion-panel
-              v-for="course in courseSemesterClasses"
+              v-for="(course, index) in courseSemesterClasses"
               :id="`sections-course-${course.slug}`"
-              :key="course.courseCode"
+              :key="index"
               class="container px-1 mt-4"
               style="border-radius: 3px !important"
               :value="course.slug"
@@ -150,10 +152,10 @@
                 <div v-if="course.sections.length > 1" class="mx-2 mb-1">
                   <v-btn
                     v-if="!allSectionsAdded(course)"
-                    id="page-course-official-sections-form-select-all-option-button"
+                    :id="`course-${index}-add-all-sections-btn`"
                     aria-label="Add all sections for this course to the list of sections to be added"
                     color="primary"
-                    variant="link"
+                    variant="plain"
                     @click="addAllSections(course)"
                   >
                     Add All
