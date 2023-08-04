@@ -363,19 +363,11 @@ td {
 }
 .template-sections-table-cell-course-code {
   min-width: 115px;
-  width: 15%
+  width: 10%
 }
 .template-sections-table-cell-section-id {
   min-width: 70px;
   width: 10%
-}
-.template-sections-table-cell-section-timestamps {
-  min-width: 155px;
-  width: 15%
-}
-.template-sections-table-cell-section-locations {
-  min-width: 150px;
-  width: 15%
 }
 .template-sections-table-cell-section-instructors {
   min-width: 183px;
@@ -383,6 +375,14 @@ td {
 }
 .template-sections-table-cell-section-label {
   min-width: 115px;
+  width: 15%
+}
+.template-sections-table-cell-section-locations {
+  min-width: 150px;
+  width: 15%
+}
+.template-sections-table-cell-section-timestamps {
+  min-width: 155px;
   width: 15%
 }
 .template-sections-table-sited-icon {
