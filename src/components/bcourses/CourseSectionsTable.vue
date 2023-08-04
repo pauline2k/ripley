@@ -20,7 +20,7 @@
           <th v-if="mode === 'createCourseForm'" class="template-sections-table-cell-checkbox">Action</th>
           <th class="template-sections-table-cell-course-code">Course Code</th>
           <th class="template-sections-table-cell-section-label">Section Label</th>
-          <th class="template-sections-table-cell-section-id">Course Control Number</th>
+          <th class="template-sections-table-cell-section-id">Class Number</th>
           <th class="template-sections-table-cell-section-timestamps d-none d-sm-none d-md-table-cell">Schedule</th>
           <th class="template-sections-table-cell-section-locations d-none d-sm-none d-md-table-cell">Location</th>
           <th class="template-sections-table-cell-section-instructors d-none d-sm-none d-lg-table-cell">Instructors</th>
@@ -362,8 +362,8 @@ td {
   }
 }
 .template-sections-table-cell-course-code {
-  min-width: 115px;
-  width: 10%
+  min-width: 100px;
+  width: 5%
 }
 .template-sections-table-cell-section-id {
   min-width: 70px;
