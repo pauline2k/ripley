@@ -27,9 +27,8 @@ import csv
 from functools import wraps
 from urllib.parse import urljoin, urlparse
 
-from flask import abort, current_app as app, redirect, request, Response
+from flask import abort, current_app as app, request, Response
 from flask_login import current_user, login_user, logout_user
-from ripley.lib.http import tolerant_jsonify
 from werkzeug.wrappers import ResponseStream
 
 
@@ -78,7 +77,7 @@ def csv_download_response(rows, filename, fieldnames=None):
     return response
 
 
-def start_login_session(user, redirect_path=None):
+def start_login_session(user):
     app.logger.info(f"""Starting login session for {user.uid}""")
     if (current_user.is_authenticated and (
             current_user.uid != user.uid or current_user.canvas_site_id != user.canvas_site_id)):
@@ -86,12 +85,7 @@ def start_login_session(user, redirect_path=None):
             (UID {current_user.uid} canvas_site_id {current_user.canvas_site_id}). Terminating existing session.""")
         logout_user()
     authenticated = login_user(user, force=True, remember=True) and current_user.is_authenticated
-    if not _is_safe_url(request.args.get('next')):
-        return abort(400)
-    if authenticated:
-        return redirect(redirect_path) if redirect_path else tolerant_jsonify(current_user.to_api_json())
-    else:
-        return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)
+    return authenticated if _is_safe_url(request.args.get('next')) else abort(400)
 
 
 def _is_safe_url(target):

@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 import urllib
 
-from flask import Response
+from flask import redirect, Response
 import simplejson as json
 
 
@@ -34,6 +34,12 @@ def add_param_to_url(url, param):
     parsed_query = urllib.parse.parse_qsl(parsed_url.query)
     parsed_query.append(param)
     return urllib.parse.urlunparse(parsed_url._replace(query=urllib.parse.urlencode(parsed_query)))
+
+
+def redirect_unauthorized(user):
+    name = (user.name or f'UID {user.uid}') if user else 'user'
+    redirect_path = add_param_to_url('/error', ('error', f'Sorry, {name} is not authorized to use this tool.'))
+    return redirect(redirect_path)
 
 
 def tolerant_jsonify(obj, status=200, **kwargs):

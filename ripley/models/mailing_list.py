@@ -109,7 +109,7 @@ class MailingList(Base):
         list_name = list_name or cls.get_suggested_name(canvas_site_id)
         name_conflict = cls.query.filter_by(list_name=list_name).first()
         if name_conflict:
-            raise ValueError(f'The name {list_name} is used by another Canvas site and is not available.')
+            raise ValueError(f'The name {list_name} is used by another bCourses site and is not available.')
 
         mailing_list.list_name = list_name
         mailing_list.welcome_email_body = welcome_email_body

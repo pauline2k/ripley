@@ -8,12 +8,12 @@ import CourseGradeExport from '@/views/CourseGradeExport.vue'
 import CourseManageOfficialSections from '@/views/CourseManageOfficialSections.vue'
 import CreateCourseSite from '@/views/CreateCourseSite.vue'
 import CreateProjectSite from '@/views/CreateProjectSite.vue'
+import Error from '@/views/Error.vue'
 import Jobs from '@/views/Jobs.vue'
 import Login from '@/views/Login.vue'
 import MailingListCreate from '@/views/MailingListCreate.vue'
 import MailingListSelectCourse from '@/views/MailingListSelectCourse.vue'
 import MailingListUpdate from '@/views/MailingListUpdate.vue'
-import NotFound from '@/views/NotFound.vue'
 import Profile from '@/views/Profile.vue'
 import Roster from '@/views/Roster.vue'
 import SendWelcomeEmail from '@/views/SendWelcomeEmail.vue'
@@ -164,20 +164,31 @@ const routes:RouteRecordRaw[] = [
   },
   {
     beforeEnter: auth.requiresAdmin,
+    component: BaseStandalone,
+    path: '/',
     children: [
       {
         path: '/jobs',
         component: Jobs,
         meta: {title: 'MU-TH-UR 6000'}
       }
-    ],
-    component: BaseStandalone,
-    path: '/',
+    ]
   },
   {
-    beforeEnter: () => useContextStore().setApplicationState(404),
-    component: NotFound,
-    path: '/:pathMatch(.*)'
+    component: BaseView,
+    path: '/',
+    children: [
+      {
+        beforeEnter: () => useContextStore().setApplicationState(500),
+        component: Error,
+        path: '/error'
+      },
+      {
+        beforeEnter: () => useContextStore().setApplicationState(404),
+        component: Error,
+        path: '/:pathMatch(.*)'
+      }
+    ]
   }
 ]
 

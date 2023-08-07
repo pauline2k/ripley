@@ -13,17 +13,16 @@
           :max-width="applicationState.stacktrace ? 640 : 480"
         >
           <v-card-title class="ml-2 mt-3">
-            {{ isError ? 'Error' : applicationState.message || 'Page Not Found' }}
+            <h2>{{ header }}</h2>
           </v-card-title>
-          <v-card-text v-if="isError || !applicationState.message">
+          <v-card-text>
             <div
-              v-if="isError"
               id="error-message"
               aria-live="polite"
               class="ml-2"
               role="alert"
             >
-              {{ applicationState.message || 'Uh oh, there was a problem.' }}
+              {{ applicationState.message }}
               <div v-if="applicationState.stacktrace" class="py-3">
                 <pre>{{ applicationState.stacktrace }}</pre>
               </div>
@@ -46,17 +45,23 @@ import derelictOnAlienPlanet from '@/assets/images/derelict-on-alien-planet.jpg'
 import AppBar from '@/layouts/standalone/AppBar.vue'
 import Context from '@/mixins/Context'
 import ContactUsPrompt from '@/components/utils/ContactUsPrompt'
+import {useContextStore} from '@/stores/context'
 
 export default {
-  name: 'NotFound',
+  name: 'Error',
   mixins: [Context],
   components: {AppBar, ContactUsPrompt},
   data: () => ({
-    isError: false
+    header: undefined
   }),
   mounted() {
-    this.isError = ![200, 404].includes(this.applicationState.status)
-    this.$ready(this.isError ? 'Error' : 'Page Not Found')
+    let url = new URL(window.location.href)
+    const error = url.searchParams.get('error')
+    const show404 = !error && [200, 404].includes(this.applicationState.status)
+    const message = error || this.applicationState.message
+    useContextStore().setApplicationState(show404 ? 404 : 500, message)
+    this.header = show404 ? 'Page Not Found' : (message ? 'Error' : 'Uh oh, there was a problem.')
+    this.$ready(this.header)
   }
 }
 </script>

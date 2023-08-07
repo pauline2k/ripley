@@ -30,7 +30,7 @@ from flask import current_app as app, flash, redirect, request, url_for
 from flask_login import current_user, login_required, logout_user
 from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import start_login_session
-from ripley.lib.http import add_param_to_url, tolerant_jsonify
+from ripley.lib.http import redirect_unauthorized, tolerant_jsonify
 from ripley.models.user import User
 
 
@@ -83,13 +83,12 @@ def update_user_session():
             acting_as_uid=acting_as_uid,
         )
         user = User(user_id)
-        if user.is_active and (user.is_admin or len(user.canvas_site_user_roles)):
+        if start_login_session(user) and (user.is_admin or len(user.canvas_site_user_roles)):
             # User must be either an admin or a member of the course site.
-            start_login_session(user)
             return tolerant_jsonify(user.to_api_json())
         else:
             logout_user()
-            return tolerant_jsonify(f'Sorry, {uid} is not authorized to use this tool.', 403)
+            return redirect_unauthorized(user)
     else:
         raise ResourceNotFoundError('Unknown path')
 
@@ -114,13 +113,11 @@ def cas_login():
     app.logger.info(f'Logged into CAS as user {uid}')
     user_id = User.get_serialized_composite_key(canvas_site_id=None, uid=uid)
     user = User(user_id)
-    if user.is_active:
+    if start_login_session(user):
         flash('Logged in successfully.')
-        redirect_path = target_url or '/'
-        return start_login_session(user, redirect_path=redirect_path)
+        return redirect(target_url or '/')
     else:
-        redirect_path = add_param_to_url('/', ('error', f'Sorry, {user.name} is not authorized to use this tool.'))
-        return redirect(redirect_path)
+        return redirect_unauthorized(user)
 
 
 def _cas_client(target_url=None):
@@ -141,9 +138,10 @@ def _dev_auth_login(canvas_site_id, password, uid):
     if not user.is_active:
         msg = f'Sorry, {uid} is not authorized to use this tool.'
         return tolerant_jsonify({'message': msg}, 403)
-    response = start_login_session(user)
-    app.logger.debug(f'Successful dev-auth login for UID {user.uid}.')
-    return response
+    if start_login_session(user):
+        return tolerant_jsonify(current_user.to_api_json())
+    else:
+        return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)
 
 
 def _get_custom_param(lti_data, key):

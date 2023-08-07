@@ -23,14 +23,14 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from flask import current_app as app
+from flask import current_app as app, redirect
 from pylti1p3.contrib.flask import (FlaskCacheDataStorage, FlaskMessageLaunch, FlaskOIDCLogin, FlaskRequest)
 from pylti1p3.exception import LtiException
 from pylti1p3.tool_config import ToolConfJsonFile
 from ripley import cache
 from ripley.api.errors import BadRequestError, InternalServerError
 from ripley.api.util import start_login_session
-from ripley.lib.http import tolerant_jsonify
+from ripley.lib.http import redirect_unauthorized, tolerant_jsonify
 from ripley.models.user import User
 
 
@@ -254,8 +254,11 @@ def _launch_tool(target_uri):
             acting_as_uid=canvas_masquerading_user_id,
         )
         user = User(user_id)
-        app.logger.info(f"""Logged in during LTI launch as {masquerade}UID {uid}, Canvas ID {canvas_user_id}{course_context}""")
-        return start_login_session(user, redirect_path=f'/{target_uri}')
+        if start_login_session(user):
+            app.logger.info(f'Logged in during LTI launch as {masquerade}UID {uid}, Canvas ID {canvas_user_id}{course_context}')
+            return redirect(f'/{target_uri}')
+        else:
+            return redirect_unauthorized(user)
     except Exception as e:
         app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
         raise InternalServerError({'message': str(e)})
