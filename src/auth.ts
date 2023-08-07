@@ -16,7 +16,7 @@ export default {
     if (currentUser.isAdmin) {
       next()
     } else if (currentUser.isAuthenticated) {
-      useContextStore().setApplicationState(404)
+      useContextStore().setApplicationState(401, 'Unauthorized')
       next()
     } else {
       goToLogin(to, next)
