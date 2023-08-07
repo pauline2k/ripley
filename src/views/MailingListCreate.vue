@@ -40,7 +40,7 @@
           </div>
           <div>
             <v-container class="mb-2 pb-1 pl-0 pt-2" fluid>
-              <v-row v-if="isAdminToolMode">
+              <v-row v-if="isAdminToolMode" no-gutters>
                 <v-col cols="auto" class="me-auto">
                   <div v-if="canvasSite.url">
                     <OutboundLink id="course-site-href" :href="canvasSite.url">
@@ -60,7 +60,7 @@
                   </div>
                 </v-col>
               </v-row>
-              <v-row v-if="isAdminToolMode">
+              <v-row v-if="isAdminToolMode" no-gutters>
                 <v-col>
                   <div class="mb-4 w-auto">
                     <div v-if="canvasSite.term" class="text-subtitle-1">{{ canvasSite.term.name }}</div>
@@ -68,7 +68,7 @@
                   </div>
                 </v-col>
               </v-row>
-              <v-row align="center">
+              <v-row align="center" no-gutters>
                 <v-col class="pb-0" cols="8">
                   <div class="d-flex pt-1 text-subtitle-1">
                     <div class="float-right mailing-list-name-input">

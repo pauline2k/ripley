@@ -104,7 +104,7 @@ export default {
   }),
   created() {
     const canvasSiteId = this.$_.get(this.$route, 'params.id')
-    getCanvasSite(canvasSiteId, true).then(data => {
+    getCanvasSite(canvasSiteId, true, true).then(data => {
       this.canvasSite = data
       this.canvasSite.users = this.$_.sortBy(this.canvasSite.users, user => `${this.isNumeric(user.uid) ? '' : '_'} ${user.sortableName} ${user.uid}`)
       this.$ready()

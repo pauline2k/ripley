@@ -34,22 +34,18 @@ from ripley.models.user_auth import UserAuth
 
 class User(UserMixin):
 
-    # We will lazy-load canvas_user site data.
-    __canvas_site_id = None
-
     def __init__(self, serialized_composite_key=None):
         composite_key = json.loads(serialized_composite_key) if serialized_composite_key else {}
-        uid = composite_key.get('uid', None)
+        self.uid = composite_key.get('uid', None)
+        if self.uid is not None:
+            try:
+                self.uid = str(int(self.uid))
+            except ValueError:
+                self.uid = None
         canvas_site_id = str(composite_key.get('canvas_site_id', None)).strip()
         self.__canvas_site_id = int(canvas_site_id) if canvas_site_id and canvas_site_id.isnumeric() else None
-        acting_as_uid = composite_key.get('acting_as_uid', None)
-        self.__acting_as_uid = acting_as_uid
-        if uid:
-            try:
-                uid = str(int(uid))
-            except ValueError:
-                pass
-        self.user = self._load_user(uid=uid)
+        self.__acting_as_uid = composite_key.get('acting_as_uid', None)
+        self.user = self._load_user()
 
     def __repr__(self):
         return f"""<User
@@ -85,10 +81,6 @@ class User(UserMixin):
             uid=self.uid,
             acting_as_uid=self.acting_as_uid,
         )
-
-    @property
-    def uid(self):
-        return self.user['uid']
 
     @property
     def email_address(self):
@@ -136,11 +128,11 @@ class User(UserMixin):
             'acting_as_uid': acting_as_uid,
         })
 
-    def _load_canvas_user_data(self, uid):
+    def _load_canvas_user_data(self):
         canvas_user_data = None
-        user_profile = canvas.get_sis_user_profile(uid) if uid else None
+        user_profile = canvas.get_sis_user_profile(self.uid) if self.uid else None
         if user_profile:
-            course = canvas.get_course(course_id=self.__canvas_site_id) if uid and self.__canvas_site_id else None
+            course = canvas.get_course(course_id=self.__canvas_site_id) if self.uid and self.__canvas_site_id else None
             canvas_user_id = user_profile.get('id')
             canvas_user_data = {
                 'canvasSiteId': self.__canvas_site_id,
@@ -158,7 +150,7 @@ class User(UserMixin):
                 'canvasUserSisUserId': user_profile.get('sis_user_id'),
                 'canvasUserSortableName': user_profile.get('sortable_name'),
                 'canvasUserTitle': user_profile.get('title'),
-                'isCanvasAdmin': can_administrate_canvas(uid),
+                'isCanvasAdmin': can_administrate_canvas(self.uid),
             }
             is_student = False
             is_teaching = False
@@ -173,7 +165,7 @@ class User(UserMixin):
             canvas_user_data['isTeaching'] = is_teaching
         return canvas_user_data
 
-    def _load_user(self, uid=None):
+    def _load_user(self):
         calnet_profile = None
         canvas_user_data = None
         email_address = None
@@ -185,15 +177,15 @@ class User(UserMixin):
         is_teaching = False
         name = None
         # Deduce user metadata.
-        if uid:
-            calnet_profile = get_calnet_user_for_uid(app, uid)
-            user_auth = UserAuth.find_by_uid(uid)
+        if self.uid:
+            calnet_profile = get_calnet_user_for_uid(app, self.uid)
+            user_auth = UserAuth.find_by_uid(self.uid)
             if calnet_profile:
-                name = calnet_profile.get('name') or f'UID {uid}'
+                name = calnet_profile.get('name') or f'UID {self.uid}'
                 email_address = calnet_profile.get('email') or None
                 if not calnet_profile.get('isExpiredPerLdap', True):
                     is_admin = user_auth.is_superuser if user_auth and user_auth.active else False
-                    canvas_user_data = self._load_canvas_user_data(uid) or {}
+                    canvas_user_data = self._load_canvas_user_data() or {}
                     canvas_site_user_roles = canvas_user_data.get('canvasSiteUserRoles') if canvas_user_data else None
                     is_active = bool(
                         is_admin
@@ -218,7 +210,7 @@ class User(UserMixin):
                 'isStudent': is_student,
                 'isTeaching': is_teaching,
                 'name': name,
-                'uid': uid,
+                'uid': self.uid,
             },
             **(calnet_profile or {}),
             **(canvas_user_data or {}),

@@ -125,7 +125,7 @@ def get_grade_distribution(canvas_site_id):
 def get_official_sections(canvas_site_id):
     can_edit = bool(next((role for role in current_user.canvas_site_user_roles if role in ['TeacherEnrollment', 'Lead TA']), None))
     course = canvas.get_course(canvas_site_id)
-    if not (course):
+    if not course:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
     canvas_sis_term_id = course.term['sis_term_id']
     term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
