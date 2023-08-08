@@ -28,7 +28,7 @@
     >
       {{ error }}
     </v-alert>
-    <div v-if="!currentUser.isStudent" class="mt-2">
+    <div v-if="!error && !currentUser.isStudent" class="mt-2">
       <v-card id="mailing-list-details" elevation="1">
         <v-card-text>
           <div v-if="!isAdminToolMode" class="mb-1">
