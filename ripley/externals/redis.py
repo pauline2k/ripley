@@ -85,7 +85,7 @@ def get_job(job_id):
 def get_redis_conn(app):
     global redis_conn
     if redis_conn is None:
-        if app.config['TESTING']:
+        if app.config['REDIS_USE_FAKE_CLIENT']:
             redis_conn = FakeStrictRedis()
         elif app.config['REDIS_PASSWORD']:
             redis_conn = redis.from_url(f"rediss://default:{app.config['REDIS_PASSWORD']}@{app.config['REDIS_HOST']}:{app.config['REDIS_PORT']}")
