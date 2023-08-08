@@ -21,6 +21,17 @@ nvm use
 npm install
 ```
 
+### Configuration
+
+If you plan to use any resources outside localhost, put your configurations in a separately encrypted area:
+
+```
+mkdir /Volumes/XYZ/ripley_config
+export RIPLEY_LOCAL_CONFIGS=/Volumes/XYZ/ripley_config
+```
+
+## Database
+
 ### Create Postgres user and databases
 
 ![Photo of computer room of the movie Alien.](src/assets/images/muthur.png)
@@ -36,20 +47,35 @@ export FLASK_APP=application.py
 flask initdb
 ```
 
-### Create local configurations
+## Redis
 
-If you plan to use any resources outside localhost, put your configurations in a separately encrypted area:
+### Local Redis Server installation (optional)
+
+#### Install and start Redis server
 
 ```
-mkdir /Volumes/XYZ/ripley_config
-export RIPLEY_LOCAL_CONFIGS=/Volumes/XYZ/ripley_config
+brew install redis
+
+# Start server
+redis-server
 ```
 
-### Listen on the queue for jobs
+#### Configure Ripley to talk to local Redis
+
+```
+REDIS_HOST = '127.0.0.1'
+REDIS_PORT = 6379
+REDIS_USE_FAKE_CLIENT = False
+```
+
+## Jobs
+
+Listen on the queue for jobs, with Redis.
+
 
 ![Close-up image of the Xenomorph from the movie Alien.](src/assets/images/xenomorph.png)
 
-On Mac OS 10.13 and later, disable the fork() crash behavior (see https://github.com/rq/rq/issues/1418):
+On macOS 10.13 and later, disable the fork() crash behavior (see https://github.com/rq/rq/issues/1418):
 
 ```
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES

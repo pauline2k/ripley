@@ -1,25 +1,25 @@
 import _ from 'lodash'
 import auth from '@/auth'
-import BaseStandalone from '@/layouts/standalone/BaseStandalone.vue'
-import CanvasSiteSummary from '@/views/CanvasSiteSummary.vue'
-import CourseAddUser from '@/views/CourseAddUser.vue'
-import CourseGradeDistribution from '@/views/CourseGradeDistribution.vue'
-import CourseGradeExport from '@/views/CourseGradeExport.vue'
-import CourseManageOfficialSections from '@/views/CourseManageOfficialSections.vue'
-import CreateCourseSite from '@/views/CreateCourseSite.vue'
-import CreateProjectSite from '@/views/CreateProjectSite.vue'
-import Error from '@/views/Error.vue'
-import Jobs from '@/views/Jobs.vue'
-import Login from '@/views/Login.vue'
-import MailingListCreate from '@/views/MailingListCreate.vue'
-import MailingListSelectCourse from '@/views/MailingListSelectCourse.vue'
-import MailingListUpdate from '@/views/MailingListUpdate.vue'
-import Profile from '@/views/Profile.vue'
-import Roster from '@/views/Roster.vue'
-import SendWelcomeEmail from '@/views/SendWelcomeEmail.vue'
-import SiteCreation from '@/views/SiteCreation.vue'
-import UserProvision from '@/views/UserProvision.vue'
-import Welcome from '@/views/Welcome.vue'
+const BaseStandalone = () => import('./layouts/standalone/BaseStandalone.vue')
+const CanvasSiteSummary = () => import('./views/CanvasSiteSummary.vue')
+const CourseAddUser = () => import('./views/CourseAddUser.vue')
+const CourseGradeDistribution = () => import('./views/CourseGradeDistribution.vue')
+const CourseGradeExport = () => import('./views/CourseGradeExport.vue')
+const CourseManageOfficialSections = () => import('./views/CourseManageOfficialSections.vue')
+const CreateCourseSite = () => import('./views/CreateCourseSite.vue')
+const CreateProjectSite = () => import('./views/CreateProjectSite.vue')
+const Error = () => import('./views/Error.vue')
+const Jobs = () => import('./views/Jobs.vue')
+const Login = () => import('./views/Login.vue')
+const MailingListCreate = () => import('./views/MailingListCreate.vue')
+const MailingListSelectCourse = () => import('./views/MailingListSelectCourse.vue')
+const MailingListUpdate = () => import('./views/MailingListUpdate.vue')
+const Profile = () => import('./views/Profile.vue')
+const Roster = () => import('./views/Roster.vue')
+const SendWelcomeEmail = () => import('./views/SendWelcomeEmail.vue')
+const SiteCreation = () => import('./views/SiteCreation.vue')
+const UserProvision = () => import('./views/UserProvision.vue')
+const Welcome = () => import('@/views/Welcome.vue')
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 import {useContextStore} from '@/stores/context'
 
@@ -193,7 +193,7 @@ const routes:RouteRecordRaw[] = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 })
 
