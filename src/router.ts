@@ -150,14 +150,9 @@ const routes:RouteRecordRaw[] = [
   },
   {
     beforeEnter: auth.requiresAdmin,
-    component: BaseStandalone,
+    component: BaseView,
     path: '/',
     children: [
-      {
-        path: '/jobs',
-        component: Jobs,
-        meta: {title: 'MU-TH-UR 6000'}
-      },
       {
         component: MailingListSelectCourse,
         path: '/mailing_list/select_course',
@@ -171,6 +166,18 @@ const routes:RouteRecordRaw[] = [
         meta: {
           title: 'bCourses User Provision'
         }
+      }
+    ]
+  },
+  {
+    beforeEnter: auth.requiresAdmin,
+    component: BaseStandalone,
+    path: '/',
+    children: [
+      {
+        path: '/jobs',
+        component: Jobs,
+        meta: {title: 'MU-TH-UR 6000'}
       }
     ]
   },
@@ -197,12 +204,9 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach(() => {
+router.afterEach((to: any) => {
   useContextStore().loadingStart()
   useContextStore().resetApplicationState()
-})
-
-router.afterEach((to: any) => {
   const title = _.get(to, 'meta.title') || _.capitalize(to.name) || 'Welcome'
   document.title = `${title} | UC Berkeley`
 })

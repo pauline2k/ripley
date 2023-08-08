@@ -4,15 +4,15 @@ import {nextTick} from 'vue'
 import {putFocusNextTick} from '@/utils'
 import {defineStore} from 'pinia'
 
-const DEFAULT_APPLICATION_STATE = {
+const $_getDefaultApplicationState = () => ({
   message: undefined,
   stacktrace: undefined,
   status: 200
-}
+})
 
 export const useContextStore = defineStore('context', {
   state: () => ({
-    applicationState: DEFAULT_APPLICATION_STATE,
+    applicationState: $_getDefaultApplicationState(),
     config: undefined,
     currentUser: {
       canvasSiteId: undefined,
@@ -52,7 +52,7 @@ export const useContextStore = defineStore('context', {
       this.isLoading = true
     },
     resetApplicationState() {
-      this.applicationState = DEFAULT_APPLICATION_STATE
+      this.applicationState = $_getDefaultApplicationState()
     },
     setConfig(config: any) {
       this.config = config

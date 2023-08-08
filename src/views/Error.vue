@@ -1,6 +1,7 @@
 <template>
   <AppBar  v-if="!$isInIframe" />
   <v-container
+    v-if="!isLoading"
     class="background-splash"
     fill-height
     fluid
@@ -15,7 +16,7 @@
           <v-card-title class="ml-2 mt-3">
             <h2>{{ header }}</h2>
           </v-card-title>
-          <v-card-text>
+          <v-card-text v-if="applicationState.message">
             <div
               id="error-message"
               aria-live="polite"
@@ -58,9 +59,11 @@ export default {
     let url = new URL(window.location.href)
     const error = url.searchParams.get('error')
     const show404 = !error && [200, 404].includes(this.applicationState.status)
-    const message = error || this.applicationState.message
-    useContextStore().setApplicationState(show404 ? 404 : 500, message)
-    this.header = show404 ? 'Page Not Found' : (message ? 'Error' : 'Uh oh, there was a problem.')
+    useContextStore().setApplicationState(
+      this.applicationState.status,
+      error || this.applicationState.message
+    )
+    this.header = show404 ? 'Page Not Found' : 'Uh oh, there was a problem.'
     this.$ready(this.header)
   }
 }
