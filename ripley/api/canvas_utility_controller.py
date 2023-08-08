@@ -22,8 +22,10 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
-from flask import current_app as app
+from flask import current_app as app, request
+from flask_login import current_user, login_required
 from ripley.lib.http import tolerant_jsonify
+from ripley.models.user import User
 
 
 @app.route('/api/canvas/external_tools')
@@ -32,11 +34,12 @@ def get_external_tools():
 
 
 @app.route('/api/canvas/authorizations')
+@login_required
 def get_authorizations():
     return tolerant_jsonify({
         'authorizations': {
-            'canCreateCourseSite': True,
-            'canCreateProjectSite': True,
+            'canCreateCourseSite': current_user.can_create_canvas_course_site(),
+            'canCreateProjectSite': current_user.can_create_canvas_project_site(),
         },
     })
 
@@ -44,4 +47,10 @@ def get_authorizations():
 @app.route('/api/canvas/can_user_create_site')
 def can_user_create_site():
     # Used by canvas-customization.js
-    return tolerant_jsonify([])
+    can_create = False
+    canvas_user_id = request.args.get('canvas_user_id')
+    if canvas_user_id:
+        user = User.from_canvas_user_id(canvas_user_id)
+        if user:
+            can_create = user.can_create_canvas_project_site() or user.can_create_canvas_course_site()
+    return tolerant_jsonify({'canCreateSite': can_create})

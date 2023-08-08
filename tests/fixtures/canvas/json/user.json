@@ -153,5 +153,125 @@
             "locale": null
         },
         "status_code": 200
+    },
+    "properties_2345678": {
+        "method": "GET",
+        "endpoint": "users/2345678",
+        "data": {
+            "id": 2345678,
+            "name": "Ellen Ripley",
+            "short_name": "Ellen Ripley",
+            "sortable_name": "Ripley, Ellen",
+            "sis_user_id": "30010000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": "Warrant Officer",
+            "bio": null,
+            "primary_email": "ellen.ripley@berkeley.edu",
+            "login_id": "10000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
+    },
+    "properties_3456789": {
+        "method": "GET",
+        "endpoint": "users/3456789",
+        "data": {
+            "id": 3456789,
+            "name": "Joan Lambert",
+            "short_name": "Joan Lambert",
+            "sortable_name": "Lambert, Joan",
+            "sis_user_id": "30020000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": "Navigator",
+            "bio": null,
+            "primary_email": "joan.lambert@berkeley.edu",
+            "login_id": "20000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
+    },
+    "properties_4567890": {
+        "method": "GET",
+        "endpoint": "users/4567890",
+        "data": {
+            "id": 4567890,
+            "name": "Ash 🤖",
+            "short_name": "Ash 🤖",
+            "sortable_name": "🤖, Ash",
+            "sis_user_id": "30030000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": "Hyperdyne Systems-series synthetic",
+            "bio": null,
+            "primary_email": "synthetic.ash@berkeley.edu",
+            "login_id": "30000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
+    },
+    "properties_5678901": {
+        "method": "GET",
+        "endpoint": "users/5678901",
+        "data": {
+            "id": 5678901,
+            "name": "XO Kane",
+            "short_name": "XO Kane",
+            "sortable_name": "Kane, XO",
+            "sis_user_id": "30040000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": "Executive Officer",
+            "bio": null,
+            "primary_email": "xo.kane@berkeley.edu",
+            "login_id": "40000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
+    },
+    "properties_6789012": {
+        "method": "GET",
+        "endpoint": "users/6789012",
+        "data": {
+            "id": 6789012,
+            "name": "Denis Parker",
+            "short_name": "Denis Parker",
+            "sortable_name": "Parker, Denis",
+            "sis_user_id": "30050000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": "Chief Engineer",
+            "bio": null,
+            "primary_email": "dennis.monroe.parker@berkeley.edu",
+            "login_id": "50000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
+    },
+    "properties_7890123": {
+        "method": "GET",
+        "endpoint": "users/7890123",
+        "data": {
+            "id": 7890123,
+            "name": "Samuel Brett",
+            "short_name": "Samuel Brett",
+            "sortable_name": "Brett, Samuel",
+            "sis_user_id": "30060000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": "Engineer",
+            "bio": null,
+            "primary_email": "samuel.brett@berkeley.edu",
+            "login_id": "60000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
     }
 }
