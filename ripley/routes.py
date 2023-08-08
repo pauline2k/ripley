@@ -27,7 +27,7 @@ import json
 import traceback
 
 from flask import jsonify, make_response, redirect, request, session
-from flask_login import current_user, LoginManager
+from flask_login import current_user, LoginManager, user_logged_out
 from werkzeug.exceptions import HTTPException
 
 
@@ -54,6 +54,10 @@ def register_routes(app):
     import ripley.api.error_handlers
 
     index_html = open(app.config['INDEX_HTML']).read()
+
+    @user_logged_out.connect_via(app)
+    def _user_logged_out(sender, user):
+        user.logout()
 
     @app.login_manager.unauthorized_handler
     def unauthorized_handler():
