@@ -27,7 +27,9 @@ import json
 from flask import current_app as app
 from flask_login import UserMixin
 from ripley.externals import canvas
+from ripley.externals.data_loch import has_instructor_history
 from ripley.externals.redis import cache_dict_object, fetch_cached_dict_object, remove_cached_dict_object
+from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.canvas_authorization import can_administrate_canvas
 from ripley.models.user_auth import UserAuth
@@ -35,7 +37,7 @@ from ripley.models.user_auth import UserAuth
 
 class User(UserMixin):
 
-    def __init__(self, serialized_composite_key=None):
+    def __init__(self, serialized_composite_key=None, canvas_user_profile=None):
         composite_key = json.loads(serialized_composite_key) if serialized_composite_key else {}
         self.uid = composite_key.get('uid', None)
         if self.uid is not None:
@@ -46,7 +48,7 @@ class User(UserMixin):
         canvas_site_id = str(composite_key.get('canvas_site_id', None)).strip()
         self.__canvas_site_id = int(canvas_site_id) if canvas_site_id and canvas_site_id.isnumeric() else None
         self.__acting_as_uid = composite_key.get('acting_as_uid', None)
-        self.user = self._load_user()
+        self.user = self._load_user(canvas_user_profile)
 
     def __repr__(self):
         return f"""<User
@@ -108,6 +110,14 @@ class User(UserMixin):
         return self.user['isCanvasAdmin']
 
     @property
+    def is_faculty(self):
+        return self.user['isFaculty']
+
+    @property
+    def is_staff(self):
+        return self.user['isStaff']
+
+    @property
     def is_teaching(self):
         return self.user['isTeaching']
 
@@ -120,8 +130,28 @@ class User(UserMixin):
     def name(self):
         return self.user['name']
 
+    @classmethod
+    def from_canvas_user_id(cls, canvas_user_id):
+        canvas_user = canvas.get_user(canvas_user_id)
+        if not canvas_user:
+            return None
+        return cls(
+            serialized_composite_key=json.dumps({'uid': canvas_user.login_id}),
+            canvas_user_profile=canvas_user.__dict__,
+        )
+
     def to_api_json(self):
         return self.user
+
+    def can_create_canvas_course_site(self):
+        return self.is_admin or self.is_canvas_admin or self.is_current_campus_instructor()
+
+    def can_create_canvas_project_site(self):
+        return self.is_admin or self.is_canvas_admin or self.is_faculty or self.is_staff
+
+    def is_current_campus_instructor(self):
+        current_term_ids = [t.to_sis_term_id() for t in BerkeleyTerm.get_current_terms().values()]
+        return has_instructor_history(self.uid, current_term_ids)
 
     @classmethod
     def get_serialized_composite_key(cls, canvas_site_id, uid, acting_as_uid=None):
@@ -131,11 +161,12 @@ class User(UserMixin):
             'acting_as_uid': acting_as_uid,
         })
 
-    def _load_canvas_user_data(self):
+    def _load_canvas_user_data(self, user_profile=None):
         cache_key = self._get_cache_key()
         canvas_user_data = fetch_cached_dict_object(cache_key)
         if not canvas_user_data:
-            user_profile = canvas.get_sis_user_profile(self.uid) if self.uid else None
+            if not user_profile:
+                user_profile = canvas.get_sis_user_profile(self.uid) if self.uid else None
             if user_profile:
                 course = canvas.get_course(course_id=self.__canvas_site_id) if self.uid and self.__canvas_site_id else None
                 canvas_user_id = user_profile.get('id')
@@ -171,7 +202,7 @@ class User(UserMixin):
                 cache_dict_object(cache_key, canvas_user_data, 120)
         return canvas_user_data
 
-    def _load_user(self):
+    def _load_user(self, canvas_user_profile=None):
         calnet_profile = None
         canvas_user_data = None
         email_address = None
@@ -191,7 +222,7 @@ class User(UserMixin):
                 email_address = calnet_profile.get('email') or None
                 if not calnet_profile.get('isExpiredPerLdap', True):
                     is_admin = user_auth.is_superuser if user_auth and user_auth.active else False
-                    canvas_user_data = self._load_canvas_user_data() or {}
+                    canvas_user_data = self._load_canvas_user_data(user_profile=canvas_user_profile) or {}
                     canvas_site_user_roles = canvas_user_data.get('canvasSiteUserRoles') if canvas_user_data else None
                     is_active = bool(
                         is_admin
