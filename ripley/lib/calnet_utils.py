@@ -26,6 +26,7 @@ import json
 from os import path
 
 from ripley.externals import calnet
+from ripley.externals.redis import cache_dict_object, fetch_cached_dict_object
 
 
 def get_calnet_attributes_for_uids(app, uids):
@@ -45,8 +46,14 @@ def get_calnet_attributes_for_uids(app, uids):
 
 
 def get_calnet_user_for_uid(app, uid):
-    users = _get_calnet_users(app, [uid])
-    return users[uid] if users else None
+    cache_key = f'calnet_user_for_uid_{uid}'
+    calnet_user = fetch_cached_dict_object(cache_key)
+    if not calnet_user:
+        users = _get_calnet_users(app, [uid])
+        calnet_user = users[uid] if users else None
+        if calnet_user:
+            cache_dict_object(cache_key, calnet_user, 120)
+    return calnet_user
 
 
 def _get_calnet_users(app, uids, search_base=None):
