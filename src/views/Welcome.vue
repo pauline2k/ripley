@@ -75,7 +75,7 @@ export default {
       ], tool => tool.title)
       this.embeddedTools = this.$_.sortBy([
         {disabled: !canvasSiteId, icon: 'mdi-email-multiple-outline', path: '/mailing_list/create', title: 'Mailing List'},
-        {disabled: !canvasSiteId, icon: 'mdi-export', path: '/grade_export', title: 'E-Grade Export'},
+        {disabled: !canvasSiteId, icon: 'mdi-export', path: '/export_grade', title: 'E-Grade Export'},
         {disabled: !canvasSiteId, icon: 'mdi-chart-bar-stacked', path: '/grade_distribution', title: 'Grade Distribution'},
         {disabled: !canvasSiteId, icon: 'mdi-account-school', path: '/add_user', title: 'Find a User to Add'},
         {disabled: !canvasSiteId, icon: 'mdi-google-classroom', path: '/manage_official_sections', title: 'Official Sections'},

@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import auth from '@/auth'
+const BaseLTI = () => import('./layouts/lti/BaseLTI.vue')
 const BaseStandalone = () => import('./layouts/standalone/BaseStandalone.vue')
 const CanvasSiteSummary = () => import('./views/CanvasSiteSummary.vue')
 const CourseAddUser = () => import('./views/CourseAddUser.vue')
@@ -182,7 +183,7 @@ const routes:RouteRecordRaw[] = [
     ]
   },
   {
-    component: BaseView,
+    component: BaseLTI,
     path: '/',
     children: [
       {

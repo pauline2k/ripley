@@ -35,7 +35,7 @@ from canvasapi.section import Section
 from canvasapi.sis_import import SisImport
 from canvasapi.user import User
 from flask import current_app as app
-from ripley.externals.redis import cache_dict_object, fetch_cached_dict_object
+from ripley.externals.redis import fetch_cached_dict_object
 
 # By default, we allow up to an hour for Canvas to rouse itself.
 BACKGROUND_STATUS_CHECK_INTERVAL = 20
@@ -91,8 +91,9 @@ def get_course(course_id, api_call=True):
         if not course:
             try:
                 course = c.get_course(course_id, include=['term'])
-                if course:
-                    cache_dict_object(cache_key, course, 120)
+                # TODO: Fix caching of non-dict object
+                # if course:
+                #     cache_dict_object(cache_key, course, 120)
             except Exception as e:
                 app.logger.error(f'Failed to retrieve Canvas course (id={course_id})')
                 app.logger.exception(e)

@@ -5,7 +5,7 @@
         <div class="me-auto">
           <BuildSummary />
         </div>
-        <div v-if="currentUser.isAuthenticated" class="align-center d-flex pr-5">
+        <div v-if="config.isVueAppDebugMode && currentUser.isAuthenticated" class="align-center d-flex pr-5">
           <div v-if="canvasSiteId" class="pr-2">
             <a
               :href="`${config.canvasApiUrl}/courses/${canvasSiteId}`"
