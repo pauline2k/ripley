@@ -1,5 +1,11 @@
 <template>
-  <div class="canvas-application page-course-grade-export">
+  <div v-if="!isLoading" class="canvas-application page-course-grade-export">
+    <div>
+      appState: {{ appState }}
+    </div>
+    <div>
+      error: {{ error }}
+    </div>
     <v-progress-circular
       v-if="appState === 'initializing'"
       class="mr-2"
@@ -318,6 +324,26 @@ export default {
     selectedType: null,
     showRetryOption: null
   }),
+  beforeUnmount() {
+    clearInterval(this.exportTimer)
+  },
+  created() {
+    this.appState = 'initializing'
+    getCanvasSiteUserRoles(this.currentUser.canvasSiteId).then(
+      response => {
+        this.canvasRootUrl = response.canvasRootUrl
+        this.currentUser.canvasSiteId = response.courseId
+        if (this.$_.includes(response.roles, 'Teacher') || this.$_.includes(response.roles, 'globalAdmin') ) {
+          this.loadExportOptions()
+        } else {
+          this.appState = 'error'
+          this.errorStatus = 'You must be a teacher in this bCourses course to export to E-Grades CSV.'
+        }
+        this.$ready()
+      },
+      this.$errorHandler
+    )
+  },
   methods: {
     downloadGrades() {
       const pnpCutoff = this.enablePnpConversion === 'false' ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
@@ -434,25 +460,6 @@ export default {
       this.appState = 'selection'
       putFocusNextTick('page-course-grade-export-header')
     }
-  },
-  beforeUnmount() {
-    clearInterval(this.exportTimer)
-  },
-  created() {
-    this.appState = 'initializing'
-    getCanvasSiteUserRoles(this.currentUser.canvasSiteId).then(
-      response => {
-        this.canvasRootUrl = response.canvasRootUrl
-        this.currentUser.canvasSiteId = response.courseId
-        if (this.$_.includes(response.roles, 'Teacher') || this.$_.includes(response.roles, 'globalAdmin') ) {
-          this.loadExportOptions()
-        } else {
-          this.appState = 'error'
-          this.errorStatus = 'You must be a teacher in this bCourses course to export to E-Grades CSV.'
-        }
-      },
-      this.$errorHandler
-    )
   }
 }
 </script>
