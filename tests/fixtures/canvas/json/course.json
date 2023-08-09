@@ -65,6 +65,28 @@
         },
         "status_code": 200
     },
+    "get_by_id_775390": {
+        "method": "GET",
+        "endpoint": "courses/775390",
+        "data": {
+            "id": 8876542,
+            "course_code": "CHEM 1A-LEC-001",
+            "name": "General Chemistry",
+            "description": "",
+            "sis_course_id": "CRS:CHEM-1A",
+            "account_id": 1,
+            "root_account_id": 1,
+            "enrollment_term_id": 1,
+            "grading_standard_id": 1,
+            "term": {
+                "name": "Default term",
+                "sis_term_id": null
+            },
+            "time_zone": "America/Los_Angeles",
+            "workflow_state": "available"
+        },
+        "status_code": 200
+    },
     "get_external_tools_1234567": {
         "method": "GET",
         "endpoint": "courses/1234567/external_tools",
