@@ -172,15 +172,33 @@ def get_provision_status():
     })
 
 
-@app.route('/api/canvas_site/<canvas_site_id>/egrade_export/options')
-def canvas_egrade_export(canvas_site_id):
-    return tolerant_jsonify([])
+@app.route('/api/canvas_site/egrade_export/options')
+@canvas_role_required('TeacherEnrollment')
+def egrade_export_options():
+    course_settings = canvas.get_course_settings(current_user.canvas_site_id)
+    official_sections, section_ids, sections = _get_official_sections(current_user.canvas_site_id)
+    return tolerant_jsonify({
+        'gradingStandardEnabled': course_settings['grading_standard_enabled'],
+        'officialSections': [s for s in official_sections if s['id']],
+        'sectionTerms': [] if not len(section_ids) else _get_teaching_terms(section_ids, sections),
+    })
+
+
+@app.route('/api/canvas_site/<canvas_site_id>/egrade_export/prepare')
+def prepare_egrade_export(canvas_site_id):
+    return tolerant_jsonify({
+        'jobId': 1,
+        'jobRequestStatus': 'Success',
+    })
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/egrade_export/status')
 def canvas_egrade_export_status(canvas_site_id):
     # TODO: ?jobId=${jobId}
-    return tolerant_jsonify([])
+    return tolerant_jsonify({
+        'jobStatus': 'Processing',
+        'percentComplete': 50,
+    })
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/roster')

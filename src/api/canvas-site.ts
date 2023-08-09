@@ -21,8 +21,8 @@ export function downloadGradeCsv(
   return utils.downloadViaGet(`/api/canvas_site/${canvasSiteId}/egrade_export/download?${queryParams}`, filename, true)
 }
 
-export function getExportOptions(canvasSiteId: number) {
-  return utils.get(`/api/canvas_site/${canvasSiteId}/egrade_export/options`, true)
+export function getExportOptions(redirectOnError?: boolean) {
+  return utils.get('/api/canvas_site/egrade_export/options', redirectOnError)
 }
 
 export function getExportJobStatus(canvasSiteId: number, jobId: string) {
