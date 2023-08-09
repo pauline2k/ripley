@@ -83,15 +83,18 @@ class MailingList(Base):
     def get_suggested_name(cls, canvas_site_id):
         canvas_site = canvas.get_course(canvas_site_id)
         sis_term_id = canvas_site.term['sis_term_id']
+
+        def scrub(s):
+            return '-'.join([word for word in re.split('[^a-z0-9]+', unidecode(s.strip().lower())) if word])[0:45]
+        name = scrub(canvas_site.name)
+        name = name if name[-1] == '-' else f'{name}-'
         term = BerkeleyTerm.from_canvas_sis_term_id(sis_term_id) if sis_term_id else None
         if term:
-            name = unidecode(canvas_site.name.strip().lower())
-            name = '-'.join([word for word in re.split('[^a-z0-9]+', name) if word])[0:45]
-            name = name if name[-1] == '-' else f'{name}-'
-            name += term.to_abbreviation() if term else 'list'
-            return name
+            name += term.to_abbreviation()
         else:
-            return None
+            term_name = canvas_site.term['name']
+            name += scrub(term_name) if term_name else 'list'
+        return name
 
     @classmethod
     def create(

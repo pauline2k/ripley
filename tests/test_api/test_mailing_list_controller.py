@@ -183,6 +183,14 @@ class TestSuggestedMailingListName:
             suggested_name = self._api_suggested_mailing_list_name(canvas_site_id=canvas_site_id, client=client)
             assert suggested_name == 'voix-ambigue-d-un-coeur-qui-au-zephyr-prefere-sp23'
 
+    def test_suggested_name_when_default_term(self, app, client, fake_auth):
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '775390'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}']}, m)
+            suggested_name = self._api_suggested_mailing_list_name(canvas_site_id=canvas_site_id, client=client)
+            assert suggested_name == 'general-chemistry-default-term'
+
 
 class TestCreateMailingList:
 
