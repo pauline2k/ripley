@@ -146,6 +146,19 @@ def get_instructing_sections(uid, term_ids):
     return safe_execute_rds(sql, **params)
 
 
+def has_instructor_history(uid, term_ids):
+    params = {
+        'instructor_uid': uid,
+        'term_ids': term_ids,
+    }
+    sql = """SELECT count(cs_course_id) AS count
+        FROM sis_data.edo_sections
+        WHERE instructor_uid = %(instructor_uid)s
+        AND sis_term_id = ANY(%(term_ids)s)"""
+    result = safe_execute_rds(sql, **params)
+    return bool(result[0] and result[0]['count'] > 0)
+
+
 def get_edo_instructor_updates(since_timestamp):
     params = {
         'since_timestamp': since_timestamp.strftime('%Y-%m-%d %H:%M:%S'),

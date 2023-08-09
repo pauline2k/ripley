@@ -97,10 +97,14 @@ def register_canvas_uris(app, requirements, requests_mocker):
             raise TypeError(f'{objects} is not a list.')
 
         for obj_name in objects:
-            obj = data.get(obj_name)
-            if obj is None:
-                raise ValueError(f'{obj_name.__repr__()} does not exist in {fixture}.json')
-            _register_object(app, requests_mocker, obj_name, obj)
+            if obj_name == '*':
+                for obj_key, obj in data.items():
+                    _register_object(app, requests_mocker, obj_key, obj)
+            else:
+                obj = data.get(obj_name)
+                if obj is None:
+                    raise ValueError(f'{obj_name.__repr__()} does not exist in {fixture}.json')
+                _register_object(app, requests_mocker, obj_name, obj)
 
 
 @contextmanager
