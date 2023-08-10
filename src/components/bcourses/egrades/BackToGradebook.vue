@@ -1,9 +1,17 @@
 <template>
-  <div class="pr-1">
-    <v-icon icon="mdi-chevron-left" />
-  </div>
-  <div>
-    <a class="template-back-link" :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">Back to Gradebook</a>
+  <div class="d-flex">
+    <div v-if="!omitIcon" class="pr-1">
+      <v-icon icon="mdi-chevron-left" />
+    </div>
+    <div>
+      <a
+        class="template-back-link"
+        :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`"
+        target="_top"
+      >
+        Back to Gradebook
+      </a>
+    </div>
   </div>
 </template>
 

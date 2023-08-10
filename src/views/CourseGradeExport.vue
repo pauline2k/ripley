@@ -99,8 +99,8 @@
           <div class="text-right">
             <v-btn
               id="cancel-button"
-              class="mr-1"
-              variant="text"
+              class="mr-2"
+              variant="outlined"
               @click="goToGradebook"
             >
               Cancel<span class="sr-only"> and return to Gradebook</span>
@@ -143,7 +143,12 @@
       </v-row>
       <v-row v-if="officialSections.length > 1" no-gutters>
         <v-col md="5">
-          <select id="course-sections" v-model="selectedSection" class="form-input-select w-100">
+          <select
+            id="course-sections"
+            v-model="selectedSection"
+            class="form-input-select w-100"
+          >
+            <option :value="null">Choose...</option>
             <option v-for="section in officialSections" :key="section.canvasName" :value="section">
               {{ section.canvasName }}
             </option>
@@ -164,9 +169,10 @@
                 type="radio"
                 name="enablePnpCoversion"
                 value="true"
-                @change="selectedPnpCutoffGrade = ''"
+                @change="selectedPnpCutoffGrade = null"
               />
-              Automatically convert letter grades in the E-Grades export to the student-selected grading option. Please select the lowest passing letter grade.
+              Automatically convert letter grades in the E-Grades export to the student-selected grading option.
+              Please select the lowest passing letter grade.
             </label>
           </p>
         </v-col>
@@ -180,8 +186,12 @@
               class="form-input-select grade-export-select-pnp-cutoff"
               :disabled="enablePnpConversion !== 'true'"
             >
-              <option value="">Select a grade</option>
-              <option v-for="grade in letterGrades" :key="grade" :value="grade">
+              <option :value="null">Select a grade</option>
+              <option
+                v-for="grade in ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']"
+                :key="grade"
+                :value="grade"
+              >
                 {{ grade.replace('-', '&minus;').replace('+', '&plus;') }}
               </option>
             </select>
@@ -201,7 +211,9 @@
                 value="false"
                 @change="selectedPnpCutoffGrade = ''"
               />
-              Do not automatically convert any letter grades to P/NP. I have applied a P/NP grading scheme to all grades in this course, or will manually adjust the grades in the E-Grades Export CSV to reflect the student-selected grading option.
+              Do not automatically convert any letter grades to P/NP. I have applied a P/NP grading scheme to
+              all grades in this course, or will manually adjust the grades in the E-Grades Export CSV to
+              reflect the student-selected grading option.
             </label>
           </p>
         </v-col>
@@ -316,11 +328,10 @@ export default {
     enablePnpConversion: null,
     exportTimer: null,
     jobStatus: null,
-    letterGrades: ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F'],
     noGradingStandardEnabled: false,
     officialSections: [],
     percentCompleteRounded: null,
-    selectedPnpCutoffGrade: '',
+    selectedPnpCutoffGrade: null,
     selectedSection: null,
     selectedType: null,
     showRetryOption: null
@@ -352,7 +363,7 @@ export default {
       )
     },
     goToGradebook() {
-      const gradebookUrl = `${this.canvasRootUrl}/courses/${this.currentUser.canvasSiteId}/grades`
+      const gradebookUrl = `${this.config.canvasApiUrl}/courses/${this.currentUser.canvasSiteId}/grades`
       if (this.$isInIframe) {
         iframeParentLocation(gradebookUrl)
       } else {
@@ -361,7 +372,7 @@ export default {
     },
     initializePnpCutoffGrades() {
       this.enablePnpConversion = 'true'
-      this.selectedPnpCutoffGrade = ''
+      this.selectedPnpCutoffGrade = null
     },
     loadExportOptions() {
       return getExportOptions(false).then(
@@ -390,7 +401,7 @@ export default {
         this.contactSupport = true
       } else {
         this.officialSections = officialSections
-        this.selectedSection = officialSections[0]
+        this.selectedSection = null
       }
     },
     loadSectionTerms(sectionTerms) {
@@ -409,7 +420,6 @@ export default {
     preloadGrades(type) {
       this.selectedType = type
       this.appState = 'loading'
-      this.appfocus = true
       this.jobStatus = 'New'
       iframeScrollToTop()
       prepareGradesCacheJob(this.currentUser.canvasSiteId).then(
