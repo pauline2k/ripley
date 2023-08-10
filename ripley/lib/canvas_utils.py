@@ -24,6 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 import re
+import time
 
 from flask import current_app as app
 from ripley.api.errors import InternalServerError, ResourceNotFoundError
@@ -100,6 +101,10 @@ def csv_row_for_campus_user(user):
 
 def format_term_enrollments_export(term_id):
     return f"{term_id.replace(':', '-')}-term-enrollments-export"
+
+
+def prepare_egrade_export(term_id):
+    time.sleep(30)
 
 
 def sis_enrollment_status_to_canvas_course_role(sis_enrollment_status):

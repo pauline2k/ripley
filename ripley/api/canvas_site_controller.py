@@ -33,7 +33,8 @@ from ripley.externals import canvas, data_loch
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_course import course_to_api_json, section_to_api_json, sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, update_canvas_sections
+from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, prepare_egrade_export, \
+    update_canvas_sections
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, get_grade_distribution_with_enrollments
@@ -184,12 +185,20 @@ def egrade_export_options():
     })
 
 
-@app.route('/api/canvas_site/<canvas_site_id>/egrade_export/prepare')
-def prepare_egrade_export(canvas_site_id):
-    return tolerant_jsonify({
-        'jobId': 1,
-        'jobRequestStatus': 'Success',
-    })
+@app.route('/api/canvas_site/<canvas_site_id>/egrade_export/prepare', methods=['POST'])
+def egrade_export_prepare(canvas_site_id):
+    course = canvas.get_course(canvas_site_id)
+    if not course:
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
+    job = enqueue(func=prepare_egrade_export, args=(course))
+    if not job:
+        raise InternalServerError('Updates cannot be completed at this time.')
+    return tolerant_jsonify(
+        {
+            'jobId': job.id,
+            'jobRequestStatus': 'Success',
+        },
+    )
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/egrade_export/status')
