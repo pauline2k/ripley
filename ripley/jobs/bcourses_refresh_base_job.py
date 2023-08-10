@@ -292,13 +292,13 @@ class BcoursesRefreshBaseJob(BaseJob):
         elif self.job_flags.inactivate or self.job_flags.delete_email_addresses:
             if not is_inactive:
                 app.logger.warning(f'Inactivating account for LDAP UID {uid}.')
-            new_row.update({
-                'login_id': uid,
-                'user_id': f'UID:{uid}',
-                'email': None,
-                'status': 'suspended',
-            })
-            is_inactive = True
+                new_row.update({
+                    'login_id': uid,
+                    'user_id': f'UID:{uid}',
+                    'email': None,
+                    'status': 'suspended',
+                })
+                is_inactive = True
 
         if user_row['email'] and is_inactive and self.job_flags.delete_email_addresses:
             self.email_deletions.append(user_row['canvas_user_id'])
