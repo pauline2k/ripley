@@ -24,7 +24,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 import re
-import time
 
 from flask import current_app as app
 from ripley.api.errors import InternalServerError, ResourceNotFoundError
@@ -103,8 +102,31 @@ def format_term_enrollments_export(term_id):
     return f"{term_id.replace(':', '-')}-term-enrollments-export"
 
 
-def prepare_egrade_export(term_id):
-    time.sleep(30)
+def prepare_egrade_export(course):
+    app.logger.warning(f'E-Grades job started for course {course.id}')
+    official_grades = []
+    for user in course.get_users(enrollment_type='student', include='enrollments'):
+        grades = _extract_grades(user['enrollments'])
+        official_grades.append({
+            'current_grade': grades['current_grade'],
+            'final_grade': grades['final_grade'],
+            'name': user.sortable_name,
+            'override_grade': grades['override_grade'],
+            'uid': user.login_id if hasattr(user, 'login_id') else None,
+        })
+    return official_grades
+
+
+def _extract_grades(enrollments):
+    keys = ['current_score', 'current_grade', 'final_score', 'final_grade override_score', 'override_grade']
+    grade_hash = dict.fromkeys(keys, None)
+    enrollments = filter(lambda e: e.type == 'StudentEnrollment' and hasattr(e, 'grades'), enrollments)
+    if enrollments:
+        api_grades = enrollments[0].grades
+        for key in keys:
+            if key in api_grades:
+                grade_hash[key] = api_grades[key]
+    return grade_hash
 
 
 def sis_enrollment_status_to_canvas_course_role(sis_enrollment_status):
