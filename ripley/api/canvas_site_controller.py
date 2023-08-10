@@ -143,6 +143,7 @@ def get_official_sections(canvas_site_id):
 
 
 @app.route('/api/canvas_site/provision/status')
+@canvas_role_required('TeacherEnrollment')
 def get_provision_status():
     job_id = request.args.get('jobId', None)
     if not job_id:
@@ -190,7 +191,7 @@ def egrade_export_prepare(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if not course:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
-    job = enqueue(func=prepare_egrade_export, args=canvas_site_id)
+    job = enqueue(func=prepare_egrade_export, args=[canvas_site_id])
     if not job:
         raise InternalServerError('Updates cannot be completed at this time.')
     return tolerant_jsonify(
@@ -201,12 +202,63 @@ def egrade_export_prepare(canvas_site_id):
     )
 
 
-@app.route('/api/canvas_site/<canvas_site_id>/egrade_export/status')
-def canvas_egrade_export_status(canvas_site_id):
-    # TODO: ?jobId=${jobId}
+@app.route('/api/canvas_site/egrade_export/download')
+def egrade_export_download():
+    params = request.args
+    grade_type = params.get('gradeType', None)
+    pnp_cutoff = params.get('pnpCutoff', None)
+    section_id = params.get('sectionId', None)
+    term_id = params.get('termId', None)
+
+    if None in [grade_type, pnp_cutoff, section_id, term_id]:
+        raise BadRequestError('Required parameter(s) are missing')
+    if grade_type not in ['current', 'final']:
+        raise BadRequestError(f'Invalid gradeType value: {grade_type}')
+    letter_grades = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
+    if pnp_cutoff not in letter_grades and pnp_cutoff != 'ignore':
+        raise BadRequestError(f'Invalid pnpCutoff value: {pnp_cutoff}')
+
+    # TODO: Translate legacy Ruby code
+    # # Campus Solutions expects Windows-style line endings.
+    # csv_string = CSV.generate(row_sep: "\r\n") do |csv|
+    #   csv << ['ID', 'Name', 'Grade', 'Grading Basis', 'Comments']
+    #   official_student_grades(term_cd, term_yr, ccn).each do |student|
+    #     grade = convert_to_basis(student["#{type}_grade".to_sym].to_s, student[:override_grade], student[:grading_basis], pnp_cutoff)
+    #     basis = student[:grading_basis] || ''
+    #     comment = case student[:grading_basis]
+    #       when 'CPN', 'DPN', 'EPN', 'PNP' then 'P/NP grade'
+    #       when 'ESU', 'SUS' then 'S/U grade'
+    #       when 'CNC' then 'C/NC grade'
+    #       else ''
+    #     end
+    #     csv << [student[:student_id], student[:name], grade, basis, comment]
+    #   end
+    # end
+    # # Prepend a space so that Excel does not tragically misinterpret the opening 'ID' column as a SYLK header.
+    # csv_string.prepend ' '
+
+    # term_season = {
+    #   'B' => 'Spring',
+    #   'C' => 'Summer',
+    #   'D' => 'Fall'
+    # }[params['term_cd']]
+    # respond_to do |format|
+    #   format.csv {
+    #     render csv: official_student_grades.to_s,
+    #     filename: "egrades-#{params['type']}-#{params['ccn']}-#{term_season}-#{params['term_yr']}-#{canvas_course_id}"
+    #   }
+    # end
+    return csv_download_response([])
+
+
+@app.route('/api/canvas_site/egrade_export/status', methods=['POST'])
+def canvas_egrade_export_status():
+    job_id = request.get_json().get('jobId', None)
+    job = get_job(job_id)
+    job_status = job.get_status(refresh=True)
     return tolerant_jsonify({
-        'jobStatus': 'Processing',
-        'percentComplete': 50,
+        'jobStatus': job_status,
+        'percentComplete': 0.5,  # TODO: Can we deduce 'percentComplete' value?
     })
 
 
