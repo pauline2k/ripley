@@ -190,7 +190,7 @@ def egrade_export_prepare(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if not course:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
-    job = enqueue(func=prepare_egrade_export, args=(course))
+    job = enqueue(func=prepare_egrade_export, args=canvas_site_id)
     if not job:
         raise InternalServerError('Updates cannot be completed at this time.')
     return tolerant_jsonify(

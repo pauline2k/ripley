@@ -28,6 +28,7 @@ from fakeredis import FakeStrictRedis
 from flask import current_app as app
 import redis
 from ripley import skip_when_pytest
+from ripley.api.errors import InternalServerError
 from rq import Connection, Queue, Worker
 from rq.job import Job, Retry
 
@@ -37,10 +38,13 @@ redis_conn = None
 
 @skip_when_pytest()
 def cache_dict_object(cache_key, dict_object, expire_seconds=None):
-    get_redis_conn(app)
-    redis_conn.set(cache_key, json.dumps(dict_object))
-    if expire_seconds:
-        redis_conn.expire(cache_key, time=expire_seconds)
+    if type(dict_object) is dict:
+        get_redis_conn(app)
+        redis_conn.set(cache_key, json.dumps(dict_object))
+        if expire_seconds:
+            redis_conn.expire(cache_key, time=expire_seconds)
+    else:
+        raise InternalServerError(f'Invalid object type: {type(dict_object)}')
 
 
 @skip_when_pytest()
