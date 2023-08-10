@@ -4,25 +4,36 @@
       appState: {{ appState }}
     </div>
     <div v-if="appState === 'error'">
+      <v-alert
+        v-if="error"
+        class="ma-2"
+        density="compact"
+        prominent
+        role="alert"
+        type="warning"
+      >
+        <div class="pt-1">
+          {{ error }}
+        </div>
+        <div v-if="showRetryOption" class="pt-2">
+          <v-btn id="retry-selection-btn" color="primary" @click="retrySelection">
+            Retry
+          </v-btn>
+        </div>
+        <div v-if="contactSupport" class="py-2">
+          If this is not expected, please contact
+          <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink>
+          for further assistance.
+        </div>
+      </v-alert>
       <div v-if="error" role="alert">
-        <p>
-          <v-icon icon="mdi-exclamation-triangle" class="text-warning" /> {{ error }}
-        </p>
-        <p v-if="showRetryOption"><a @click="retrySelection">Retry</a></p>
-        <p v-if="contactSupport">If this is not expected, please contact <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink> for further assistance.</p>
       </div>
     </div>
-
     <v-container v-if="appState === 'preselection'">
       <v-row no-gutters>
         <v-col md="12">
           <div class="align-center d-flex">
-            <div class="pr-1">
-              <v-icon icon="mdi-chevron-left" />
-            </div>
-            <div>
-              <a class="template-back-link" :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">Back to Gradebook</a>
-            </div>
+            <BackToGradebook />
           </div>
         </v-col>
       </v-row>
@@ -110,8 +121,7 @@
     <v-container v-if="appState === 'selection'">
       <v-row no-gutters aria-hidden="true">
         <v-col md="12">
-          <v-icon icon="mdi-angle-left" class="mr-2" />
-          <a class="template-back-link" :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">Back to Gradebook</a>
+          <BackToGradebook />
         </v-col>
       </v-row>
       <v-row no-gutters>
@@ -126,7 +136,7 @@
         </v-col>
       </v-row>
       <v-row class="sr-only">
-        <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">Back to Gradebook</a>
+        <BackToGradebook />
       </v-row>
       <v-row v-if="officialSections.length > 1" no-gutters>
         <h2 class="grade-export-download-header">Select section</h2>
@@ -134,8 +144,8 @@
       <v-row v-if="officialSections.length > 1" no-gutters>
         <v-col md="5">
           <select id="course-sections" v-model="selectedSection" class="form-input-select w-100">
-            <option v-for="section in officialSections" :key="section.display_name" :value="section">
-              {{ section.display_name }}
+            <option v-for="section in officialSections" :key="section.canvasName" :value="section">
+              {{ section.canvasName }}
             </option>
           </select>
         </v-col>
@@ -208,15 +218,14 @@
             Current grades download ignores unsubmitted assignments when calculating grades.
             Use this download when you want to excuse unsubmitted assignments.
           </p>
-          <button
+          <v-btn
             id="download-current-grades-button"
-            type="button"
             :disabled="enablePnpConversion !== 'false' && !selectedPnpCutoffGrade"
-            class="canvas-button canvas-button-primary"
+            color="primary"
             @click="preloadGrades('current')"
           >
             Download Current Grades
-          </button>
+          </v-btn>
         </v-col>
       </v-row>
       <v-row no-gutters>
@@ -228,15 +237,14 @@
             Final grades download counts unsubmitted assignments as zeroes when calculating grades.
             Use this download when you want to include all unsubmitted assignments as part of the grade.
           </p>
-          <button
+          <v-btn
             id="download-final-grades-button"
-            type="button"
+            color="primary"
             :disabled="enablePnpConversion !== 'false' && !selectedPnpCutoffGrade"
-            class="canvas-button canvas-button-primary"
             @click="preloadGrades('final')"
           >
             Download Final Grades
-          </button>
+          </v-btn>
         </v-col>
       </v-row>
       <v-row no-gutters>
@@ -251,7 +259,7 @@
       </v-row>
       <v-row no-gutters>
         <v-col v-if="currentUser.canvasSiteId" md="12" class="grade-export-grade-link">
-          <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">Back to Gradebook</a>
+          <BackToGradebook />
         </v-col>
       </v-row>
     </v-container>
@@ -288,6 +296,7 @@
 </template>
 
 <script>
+import BackToGradebook from '@/components/bcourses/egrades/BackToGradebook.vue'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import ProgressBar from '@/components/bcourses/shared/ProgressBar'
@@ -296,7 +305,7 @@ import {iframeParentLocation, iframeScrollToTop, putFocusNextTick} from '@/utils
 
 export default {
   name: 'CourseGradeExport',
-  components: {OutboundLink, ProgressBar},
+  components: {BackToGradebook, OutboundLink, ProgressBar},
   mixins: [Context],
   data: () => ({
     appState: null,
