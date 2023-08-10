@@ -143,6 +143,7 @@
       </v-row>
       <v-row v-if="officialSections.length > 1" no-gutters>
         <v-col md="5">
+          {{ selectedSection }}
           <select
             id="course-sections"
             v-model="selectedSection"
@@ -232,7 +233,7 @@
           </p>
           <v-btn
             id="download-current-grades-button"
-            :disabled="enablePnpConversion !== 'false' && !selectedPnpCutoffGrade"
+            :disabled="!selectedSection || (enablePnpConversion !== 'false' && !selectedPnpCutoffGrade)"
             color="primary"
             @click="preloadGrades('current')"
           >
@@ -354,11 +355,9 @@ export default {
     downloadGrades() {
       const pnpCutoff = this.enablePnpConversion === 'false' ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
       downloadGradeCsv(
-        this.currentUser.canvasSiteId,
-        this.selectedSection.sectionId,
-        this.selectedSection.term_cd,
-        this.selectedSection.term_yr,
         this.selectedType,
+        this.selectedSection.id,
+        this.selectedSection.termId,
         pnpCutoff
       )
     },

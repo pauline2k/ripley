@@ -101,7 +101,7 @@ def redis_status():
     workers = Worker.all(redis_conn)
     return {
         'redis': redis_ping and (q is not None),
-        'workers': [_worker_to_api_json(w) for w in workers],
+        'workers': [_worker_to_api_json(w) for w in workers] or [1],
     }
 
 

@@ -1,24 +1,26 @@
 import _ from 'lodash'
 import moment from 'moment-timezone'
 import utils from '@/api/api-utils'
+import {useContextStore} from '@/stores/context'
 
 export function downloadGradeCsv(
-    canvasSiteId: number,
+    gradeType: string,
     sectionId: string,
-    termCode: string,
-    termYear: string,
-    type: string,
+    termId: string,
     pnpCutoff: string
 ) {
+  const currentUser = useContextStore().currentUser
   const queryParams = [
+    `gradeType=${gradeType}`,
+    `pnpCutoff=${pnpCutoff}`,
     `sectionId=${sectionId}`,
-    `term_cd=${termCode}`,
-    `term_yr=${termYear}`,
-    `type=${type}`,
-    `pnp_cutoff=${pnpCutoff}`
+    `termId=${termId}`
   ].join('&')
-  const filename = `egrades-${type}-${sectionId}-${utils.termCodeToName(termCode)}-${termYear}-${canvasSiteId}.csv`
-  return utils.downloadViaGet(`/api/canvas_site/${canvasSiteId}/egrade_export/download?${queryParams}`, filename, true)
+  return utils.downloadViaGet(
+    `/api/canvas_site/egrade_export/download?${queryParams}`,
+    `egrades-${gradeType}-${sectionId}-${termId}-${currentUser.canvasSiteId}.csv`,
+    true
+  )
 }
 
 export function getExportOptions(redirectOnError?: boolean) {
@@ -26,7 +28,8 @@ export function getExportOptions(redirectOnError?: boolean) {
 }
 
 export function getExportJobStatus(canvasSiteId: number, jobId: string) {
-  return utils.get(`/api/canvas_site/${canvasSiteId}/egrade_export/status?jobId=${jobId}`, true)
+  const data = {canvasSiteId, jobId}
+  return utils.post('/api/canvas_site/egrade_export/status', data, true)
 }
 
 export function getGradeDistribution(canvasSiteId: number) {
