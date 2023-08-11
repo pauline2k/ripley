@@ -321,8 +321,8 @@ def _get_teaching_terms(section_ids, sections):
             terms.append(term)
 
     teaching_sections = []
-    if (current_user.is_teaching or current_user.acting_as_uid):
-        instructor_uid = current_user.acting_as_uid or current_user.uid
+    if (current_user.is_teaching or current_user.canvas_masquerading_user_id):
+        instructor_uid = current_user.uid
         teaching_sections = sort_course_sections(
             data_loch.get_instructing_sections(instructor_uid, [t.to_sis_term_id() for t in terms]) or [],
         )
