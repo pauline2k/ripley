@@ -251,7 +251,7 @@ def _launch_tool(target_uri):
         user_id = User.get_serialized_composite_key(
             canvas_site_id=canvas_site_id,
             uid=uid,
-            acting_as_uid=canvas_masquerading_user_id,
+            canvas_masquerading_user_id=canvas_masquerading_user_id,
         )
         user = User(user_id)
         if start_login_session(user):

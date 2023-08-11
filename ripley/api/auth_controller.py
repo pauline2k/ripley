@@ -74,13 +74,13 @@ def update_user_session():
         params = request.get_json() or {}
         canvas_site_id = params.get('canvasSiteId')
         uid = current_user.uid
-        acting_as_uid = current_user.acting_as_uid
+        canvas_masquerading_user_id = current_user.canvas_masquerading_user_id
         logout_user()
         # Re-authenticate
         user_id = User.get_serialized_composite_key(
             canvas_site_id=canvas_site_id,
             uid=uid,
-            acting_as_uid=acting_as_uid,
+            canvas_masquerading_user_id=canvas_masquerading_user_id,
         )
         user = User(user_id)
         if start_login_session(user) and (user.is_admin or len(user.canvas_site_user_roles)):

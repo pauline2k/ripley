@@ -47,12 +47,12 @@ class User(UserMixin):
                 self.uid = None
         canvas_site_id = str(composite_key.get('canvas_site_id', None)).strip()
         self.__canvas_site_id = int(canvas_site_id) if canvas_site_id and canvas_site_id.isnumeric() else None
-        self.__acting_as_uid = composite_key.get('acting_as_uid', None)
+        self.__canvas_masquerading_user_id = composite_key.get('canvas_masquerading_user_id', None)
         self.user = self._load_user(canvas_user_profile)
 
     def __repr__(self):
         return f"""<User
-                    acting_as_uid={self.__acting_as_uid},
+                    canvas_masquerading_user_id={self.__canvas_masquerading_user_id},
                     canvas_site_id={self.user['canvasSiteId']},
                     email_address={self.email_address},
                     is_active={self.is_active},
@@ -63,8 +63,8 @@ class User(UserMixin):
                 """
 
     @property
-    def acting_as_uid(self):
-        return self.__acting_as_uid
+    def canvas_masquerading_user_id(self):
+        return self.__canvas_masquerading_user_id
 
     @property
     def canvas_site_id(self):
@@ -82,7 +82,7 @@ class User(UserMixin):
         return self.get_serialized_composite_key(
             canvas_site_id=self.canvas_site_id,
             uid=self.uid,
-            acting_as_uid=self.acting_as_uid,
+            canvas_masquerading_user_id=self.canvas_masquerading_user_id,
         )
 
     @property
@@ -154,11 +154,11 @@ class User(UserMixin):
         return has_instructor_history(self.uid, current_term_ids)
 
     @classmethod
-    def get_serialized_composite_key(cls, canvas_site_id, uid, acting_as_uid=None):
+    def get_serialized_composite_key(cls, canvas_site_id, uid, canvas_masquerading_user_id=None):
         return json.dumps({
             'canvas_site_id': canvas_site_id,
             'uid': uid,
-            'acting_as_uid': acting_as_uid,
+            'canvas_masquerading_user_id': canvas_masquerading_user_id,
         })
 
     def _load_canvas_user_data(self, user_profile=None):
@@ -235,7 +235,7 @@ class User(UserMixin):
                     is_teaching = bool(canvas_user_data and canvas_user_data['isTeaching'])
         api_json = {
             **{
-                'canvasActingAsUid': self.__acting_as_uid,
+                'canvasMasqueradingUserId': self.__canvas_masquerading_user_id,
                 'canvasSiteId': self.__canvas_site_id,
                 'emailAddress': email_address,
                 'isActive': is_active,
