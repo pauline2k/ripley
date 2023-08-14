@@ -28,9 +28,11 @@ import re
 from flask import current_app as app
 from ripley.api.errors import InternalServerError, ResourceNotFoundError
 from ripley.externals import canvas, data_loch
+from ripley.externals.s3 import upload_dated_csv
 from ripley.lib.berkeley_course import course_section_name
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.sis_import_csv import SisImportCsv
+from ripley.lib.util import utc_now
 from ripley.models.job_history import JobHistory
 from rq.job import get_current_job
 
@@ -168,6 +170,14 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
     with SisImportCsv.create(fieldnames=['section_id', 'course_id', 'name', 'status', 'start_date', 'end_date']) as sections_csv:
         sections_csv.writerows(sections)
         sections_csv.filehandle.close()
+
+        upload_dated_csv(
+            sections_csv.tempfile.name,
+            f"course-provision-{canvas_sis_term_id.replace(':', '-')}-{course.sis_course_id.replace(':', '-')}-sections-sis-import",
+            'canvas_sis_imports',
+            utc_now().strftime('%F_%H-%M-%S'),
+        )
+
         app.logger.debug(f'Posting course sections SIS import (canvas_site_id={course.id}).')
         sis_import = canvas.post_sis_import(attachment=sections_csv.tempfile.name)
         if not sis_import:
