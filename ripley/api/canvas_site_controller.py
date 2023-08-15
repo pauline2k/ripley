@@ -231,10 +231,10 @@ def egrade_export_download():
             comment = 'C/NC grade'
         rows.append({
             'ID': row['sid'],
-            'Name': row['name'],
+            'Name': f"{row['last_name']}, {row['first_name']}",
             'Grade': row['grade'],
             'Grading Basis': grading_basis,
-            'Comments': comment or '',
+            'Comments': comment or None,
         })
     term = BerkeleyTerm.from_sis_term_id(term_id)
     return csv_download_response(
