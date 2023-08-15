@@ -231,7 +231,7 @@ def get_basic_profile_and_grades_per_enrollments(term_id, section_ids):
     }
     sql = """
         SELECT
-            DISTINCT enr1.grade, enr2.ldap_uid, sec.sis_course_name, enr1.grading_basis, u.sid, u.first_name || ' ' || u.last_name AS name
+            DISTINCT enr2.grade, enr2.ldap_uid, sec.sis_course_name, enr1.grading_basis, u.sid, u.first_name, u.last_name
         FROM sis_data.edo_enrollments enr1
         JOIN sis_data.edo_enrollments enr2
             ON enr1.ldap_uid = enr2.ldap_uid
