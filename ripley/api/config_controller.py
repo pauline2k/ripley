@@ -27,6 +27,7 @@ import json
 
 from flask import current_app as app
 from ripley import __version__ as version
+from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import get_eb_environment
 
@@ -48,6 +49,7 @@ def app_config():
     api_json = {
         **dict((_to_api_key(key), app.config[key]) for key in PUBLIC_CONFIGS),
         **_get_app_version(),
+        **_get_current_terms(),
         **{
             'ebEnvironment': get_eb_environment(),
             'maxValidCanvasSiteId': 2147483647,
@@ -74,3 +76,10 @@ def _get_app_version():
     v = {'version': version}
     v.update(build_stats or {'build': None})
     return v
+
+
+def _get_current_terms():
+    api_json = {'terms': {}}
+    for key, value in BerkeleyTerm.get_current_terms().items():
+        api_json['terms'][key] = value.to_api_json()
+    return api_json
