@@ -222,7 +222,7 @@
               <v-btn
                 id="download-final-grades-button"
                 color="primary"
-                :disabled="enablePnpConversion !== 'false' && !selectedPnpCutoffGrade"
+                :disabled="!selectedSection || (enablePnpConversion !== 'false' && !selectedPnpCutoffGrade)"
                 @click="preloadGrades('final')"
               >
                 Download Final Grades

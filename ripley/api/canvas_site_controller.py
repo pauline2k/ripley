@@ -23,19 +23,15 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from itertools import groupby
-
 from flask import current_app as app, redirect, request
 from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
-from ripley.externals import canvas, data_loch
-from ripley.externals.data_loch import get_basic_profile_and_grades_per_enrollments
+from ripley.externals import canvas
 from ripley.externals.redis import enqueue, get_job
-from ripley.lib.berkeley_course import course_to_api_json, section_to_api_json, sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, prepare_egrade_export, \
-    update_canvas_sections
+from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, get_official_sections, \
+    get_teaching_terms, update_canvas_sections
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, get_grade_distribution_with_enrollments
@@ -124,15 +120,15 @@ def get_grade_distribution(canvas_site_id):
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections')
 @canvas_role_required('DesignerEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
-def get_official_sections(canvas_site_id):
+def get_official_course_sections(canvas_site_id):
     can_edit = bool(next((role for role in current_user.canvas_site_user_roles if role in ['TeacherEnrollment', 'Lead TA']), None))
     course = canvas.get_course(canvas_site_id)
     if not course:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
     canvas_sis_term_id = course.term['sis_term_id']
     term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
-    official_sections, section_ids, sections = _get_official_sections(canvas_site_id)
-    teaching_terms = [] if not len(section_ids) else _get_teaching_terms(section_ids, sections)
+    official_sections, section_ids, sections = get_official_sections(canvas_site_id)
+    teaching_terms = [] if not len(section_ids) else get_teaching_terms(current_user, section_ids, sections)
     return tolerant_jsonify({
         'canvasSite': {
             'canEdit': can_edit,
@@ -175,86 +171,6 @@ def get_provision_status():
     })
 
 
-@app.route('/api/canvas_site/egrade_export/options')
-@canvas_role_required('TeacherEnrollment')
-def egrade_export_options():
-    course_settings = canvas.get_course_settings(current_user.canvas_site_id)
-    official_sections, section_ids, sections = _get_official_sections(current_user.canvas_site_id)
-    return tolerant_jsonify({
-        'gradingStandardEnabled': course_settings['grading_standard_enabled'],
-        'officialSections': [s for s in official_sections if s['id']],
-        'sectionTerms': [] if not len(section_ids) else _get_teaching_terms(section_ids, sections),
-    })
-
-
-@app.route('/api/canvas_site/<canvas_site_id>/egrade_export/prepare', methods=['POST'])
-def egrade_export_prepare(canvas_site_id):
-    course = canvas.get_course(canvas_site_id)
-    if not course:
-        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
-    job = enqueue(func=prepare_egrade_export, args=[canvas_site_id])
-    if not job:
-        raise InternalServerError('Updates cannot be completed at this time.')
-    return tolerant_jsonify(
-        {
-            'jobId': job.id,
-            'jobRequestStatus': 'Success',
-        },
-    )
-
-
-@app.route('/api/canvas_site/egrade_export/download')
-def egrade_export_download():
-    params = request.args
-    grade_type = params.get('gradeType', None)
-    pnp_cutoff = params.get('pnpCutoff', None)
-    section_id = params.get('sectionId', None)
-    term_id = params.get('termId', None)
-
-    if None in [grade_type, pnp_cutoff, section_id, term_id]:
-        raise BadRequestError('Required parameter(s) are missing')
-    if grade_type not in ['current', 'final']:
-        raise BadRequestError(f'Invalid gradeType value: {grade_type}')
-    letter_grades = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
-    if pnp_cutoff not in letter_grades and pnp_cutoff != 'ignore':
-        raise BadRequestError(f'Invalid pnpCutoff value: {pnp_cutoff}')
-
-    rows = []
-    for row in get_basic_profile_and_grades_per_enrollments(term_id=term_id, section_ids=[section_id]):
-        grading_basis = (row['grading_basis'] or '').upper()
-        comment = None
-        if grading_basis in ['CPN', 'DPN', 'EPN', 'PNP']:
-            comment = 'P/NP grade'
-        elif grading_basis in ['ESU', 'SUS']:
-            comment = 'S/U grade'
-        elif grading_basis == 'CNC':
-            comment = 'C/NC grade'
-        rows.append({
-            'ID': row['sid'],
-            'Name': f"{row['last_name']}, {row['first_name']}",
-            'Grade': row['grade'],
-            'Grading Basis': grading_basis,
-            'Comments': comment or None,
-        })
-    term = BerkeleyTerm.from_sis_term_id(term_id)
-    return csv_download_response(
-        rows=rows,
-        filename=f'egrades-{grade_type}-{section_id}-#{term.season}-{term.year}-{current_user.canvas_site_id}.csv',
-        fieldnames=['ID', 'Name', 'Grade', 'Grading Basis', 'Comments'],
-    )
-
-
-@app.route('/api/canvas_site/egrade_export/status', methods=['POST'])
-def canvas_egrade_export_status():
-    job_id = request.get_json().get('jobId', None)
-    job = get_job(job_id)
-    job_status = job.get_status(refresh=True)
-    return tolerant_jsonify({
-        'jobStatus': job_status,
-        'percentComplete': 0.5,  # TODO: Can we deduce 'percentComplete' value?
-    })
-
-
 @app.route('/api/canvas_site/<canvas_site_id>/roster')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA')
 def get_roster(canvas_site_id):
@@ -277,74 +193,3 @@ def redirect_to_canvas_profile(canvas_site_id, uid):
         return redirect(f'{base_url}/courses/{canvas_site_id}/users/{user.id}')
     else:
         raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
-
-
-def _get_official_sections(canvas_site_id):
-    canvas_sections = canvas.get_course_sections(canvas_site_id)
-    canvas_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
-    canvas_sections_by_id = {cs['id']: cs for cs in canvas_sections if cs['id']}
-    section_ids = list(canvas_sections_by_id.keys())
-    term_id = canvas_sections[0]['termId']
-    sis_sections = sort_course_sections(
-        data_loch.get_sections(term_id, section_ids) or [],
-    )
-    if len(sis_sections) != len(section_ids):
-        app.logger.warn(f'Canvas site ID {canvas_site_id} has {len(section_ids)} sections, but SIS has {len(sis_sections)} sections.')
-
-    def _section(section_id, rows):
-        canvas_section = canvas_sections_by_id[section_id]
-        return {
-            **canvas_section,
-            **section_to_api_json(rows[0], rows[1:]),
-        }
-    official_sections = []
-    for section_id, rows in groupby(sis_sections, lambda s: s['section_id']):
-        official_sections.append(_section(section_id, list(rows)))
-    return official_sections, section_ids, sis_sections
-
-
-def _get_teaching_terms(section_ids, sections):
-    berkeley_terms = BerkeleyTerm.get_current_terms()
-    canvas_terms = [term.sis_term_id for term in canvas.get_terms() if term.sis_term_id]
-    terms = []
-    for key, term in berkeley_terms.items():
-        if term.to_canvas_sis_term_id() not in canvas_terms:
-            continue
-        if key != 'future' or term.season == 'D':
-            terms.append(term)
-
-    teaching_sections = []
-    if (current_user.is_teaching or current_user.canvas_masquerading_user_id):
-        instructor_uid = current_user.uid
-        teaching_sections = sort_course_sections(
-            data_loch.get_instructing_sections(instructor_uid, [t.to_sis_term_id() for t in terms]) or [],
-        )
-    if not len(teaching_sections):
-        teaching_sections = sections
-    courses_by_term = {}
-    for section_id, sections in groupby(teaching_sections, lambda s: s['section_id']):
-        sections = list(sections)
-        section = next((s for s in sections if s.get('is_co_instructor', False) is False), None)
-        co_instructor_sections = [s for s in sections if s.get('is_co_instructor', True) is True]
-        course_id = section['course_id']
-        term_id = section['term_id']
-        if term_id not in courses_by_term:
-            courses_by_term[term_id] = {}
-        if course_id not in courses_by_term[term_id]:
-            term = BerkeleyTerm.from_sis_term_id(term_id)
-            courses_by_term[term_id][course_id] = course_to_api_json(term, section)
-        courses_by_term[term_id][course_id]['sections'].append({
-            **section_to_api_json(section, co_instructor_sections),
-            'isCourseSection': section_id in section_ids,
-        })
-
-    def _term_courses(term_id, courses_by_id):
-        term = BerkeleyTerm.from_sis_term_id(term_id)
-        return {
-            'classes': list(courses_by_id.values()),
-            'name': term.to_english(),
-            'slug': term.to_slug(),
-            'termId': term_id,
-            'termYear': term.year,
-        }
-    return [_term_courses(term_id, courses_by_id) for term_id, courses_by_id in courses_by_term.items()]
