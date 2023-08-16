@@ -33,7 +33,7 @@ from ripley.models.mailing_list import MailingList
 
 class MailingListRefreshJob(BaseJob):
 
-    def _run(self):
+    def _run(self, params={}):
         update_count = 0
         current_term_abbreviations = [t.to_abbreviation() for t in BerkeleyTerm.get_current_terms().values()]
 

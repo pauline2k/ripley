@@ -31,7 +31,7 @@ from ripley.jobs.errors import BackgroundJobError
 
 class ReconfigureCanvasTestServersJob(BaseJob):
 
-    def _run(self):
+    def _run(self, params={}):
         test_servers = app.config['CANVAS_TEST_SERVERS']
         for server in test_servers:
             account = canvas.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False, api_url=server)
