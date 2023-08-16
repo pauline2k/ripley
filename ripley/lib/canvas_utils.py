@@ -136,7 +136,7 @@ def get_official_sections(canvas_site_id):
     return official_sections, section_ids, sis_sections
 
 
-def get_teaching_terms(current_user, section_ids, sections):
+def get_teaching_terms(current_user, section_ids=None, sections=None, uid=None):
     berkeley_terms = BerkeleyTerm.get_current_terms()
     canvas_terms = [term.sis_term_id for term in canvas.get_terms() if term.sis_term_id]
     terms = []
@@ -146,14 +146,20 @@ def get_teaching_terms(current_user, section_ids, sections):
         if key != 'future' or term.season == 'D':
             terms.append(term)
 
-    teaching_sections = []
-    if (current_user.is_teaching or current_user.canvas_masquerading_user_id):
+    instructor_uid = None
+    if uid:
+        instructor_uid = uid
+    elif (current_user.is_teaching or current_user.canvas_masquerading_user_id):
         instructor_uid = current_user.uid
+
+    teaching_sections = []
+    if instructor_uid:
         teaching_sections = sort_course_sections(
             data_loch.get_instructing_sections(instructor_uid, [t.to_sis_term_id() for t in terms]) or [],
         )
-    if not len(teaching_sections):
+    if not len(teaching_sections) and sections:
         teaching_sections = sections
+
     courses_by_term = {}
     for section_id, sections in groupby(teaching_sections, lambda s: s['section_id']):
         sections = list(sections)
@@ -166,10 +172,10 @@ def get_teaching_terms(current_user, section_ids, sections):
         if course_id not in courses_by_term[term_id]:
             term = BerkeleyTerm.from_sis_term_id(term_id)
             courses_by_term[term_id][course_id] = course_to_api_json(term, section)
-        courses_by_term[term_id][course_id]['sections'].append({
-            **section_to_api_json(section, co_instructor_sections),
-            'isCourseSection': section_id in section_ids,
-        })
+        section_feed = section_to_api_json(section, co_instructor_sections)
+        if section_ids:
+            section_feed['isCourseSection'] = section_id in section_ids
+        courses_by_term[term_id][course_id]['sections'].append(section_feed)
 
     def _term_courses(term_id, courses_by_id):
         term = BerkeleyTerm.from_sis_term_id(term_id)

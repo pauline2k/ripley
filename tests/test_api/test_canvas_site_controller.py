@@ -117,6 +117,58 @@ def _api_canvas_site_edit_sections(client, canvas_site_id, params=None, expected
     return response.json
 
 
+class TestCanvasSiteProvision:
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        _api_canvas_course_provision(client, expected_status_code=401)
+
+    def test_teacher(self, client, app, fake_auth):
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'user': ['profile_30000'],
+            }, m)
+            fake_auth.login(canvas_site_id=None, uid=teacher_uid)
+            feed = _api_canvas_course_provision(client)
+            assert feed['teachingTerms'][0]['name'] == 'Spring 2023'
+            assert feed['teachingTerms'][0]['classes'][0]['courseCode'] == 'ANTHRO 189'
+
+    def test_admin_acting_as_teacher(self, client, app, fake_auth):
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'user': ['profile_30000', f'profile_{admin_uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=None, uid=admin_uid)
+            feed = _api_canvas_course_provision(client, params={'adminActingAs': teacher_uid, 'adminTermSlug': 'spring-2023'})
+            assert feed['teachingTerms'][0]['name'] == 'Spring 2023'
+            assert feed['teachingTerms'][0]['classes'][0]['courseCode'] == 'ANTHRO 189'
+
+    def test_admin_requesting_ccns(self, client, app, fake_auth):
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'user': ['profile_30000', f'profile_{admin_uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=None, uid=admin_uid)
+            feed = _api_canvas_course_provision(client, params={'adminByCcns': '32936', 'adminTermSlug': 'spring-2023'})
+            assert feed['teachingTerms'][0]['name'] == 'Spring 2023'
+            assert feed['teachingTerms'][0]['classes'][0]['courseCode'] == 'ANTHRO 189'
+
+
+def _api_canvas_course_provision(client, params=None, expected_status_code=200):
+    path = '/api/canvas_site/provision'
+    if params:
+        path += f'?{"&".join([k + "=" + v for k, v in params.items()])}'
+    response = client.get(path)
+    assert response.status_code == expected_status_code
+    return response.json
+
+
 class TestCanvasSiteProvisionSections:
     def test_anonymous(self, client):
         """Denies anonymous user."""
