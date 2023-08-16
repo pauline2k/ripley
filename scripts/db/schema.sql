@@ -76,6 +76,7 @@ CREATE TABLE canvas_site_mailing_lists (
     populate_remove_errors INTEGER,
     populated_at TIMESTAMP WITH TIME ZONE,
     state CHARACTER VARYING(255),
+    term_id INTEGER,
     type CHARACTER VARYING(255),
     welcome_email_active BOOLEAN DEFAULT FALSE NOT NULL,
     welcome_email_body TEXT,

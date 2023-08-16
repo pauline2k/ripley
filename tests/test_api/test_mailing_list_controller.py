@@ -25,6 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import json
 
 import requests_mock
+from ripley.externals import canvas
 from ripley.models.mailing_list import MailingList
 from tests.util import register_canvas_uris
 
@@ -319,8 +320,9 @@ class TestActivateMailingList:
                 'user': ['profile_30000'],
             }, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            canvas_site = canvas.get_course(canvas_site_id)
             mailing_list = MailingList.create(
-                canvas_site_id=canvas_site_id,
+                canvas_site=canvas_site,
                 list_name='Wonder Twin powers activate!',
                 welcome_email_body='Body',
                 welcome_email_subject='Subject',
@@ -360,7 +362,8 @@ class TestPopulateMailingList:
                 {'course': [f'get_by_id_{canvas_site_id}'], 'user': [f'profile_{uid_of_student}']},
                 m,
             )
-            mailing_list = MailingList.create(canvas_site_id=canvas_site_id)
+            canvas_site = canvas.get_course(canvas_site_id)
+            mailing_list = MailingList.create(canvas_site)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=uid_of_student)
             _api_populate_mailing_list(client, mailing_list_id=mailing_list.id, expected_status_code=401)
 
@@ -408,7 +411,8 @@ class TestPopulateMailingList:
                 'course': [f'get_by_id_{canvas_site_id}', f'get_user_{canvas_site_id}_5678901'],
                 'user': [f'profile_{student_uid}'],
             }, m)
-            mailing_list = MailingList.create(canvas_site_id=canvas_site_id)
+            canvas_site = canvas.get_course(canvas_site_id)
+            mailing_list = MailingList.create(canvas_site)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
             _api_populate_mailing_list(client, expected_status_code=401, mailing_list_id=mailing_list.id)
 

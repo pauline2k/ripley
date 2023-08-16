@@ -74,12 +74,10 @@ def create_mailing_lists():
         canvas_site_id = params.get('canvasSiteId')
         list_name = params.get('name')
         populate = params.get('populate') or False
-        if canvas_site_id is None or list_name is None:
-            list_name = MailingList.get_suggested_name(canvas_site_id)
-        mailing_list = MailingList.create(
-            canvas_site_id=canvas_site_id,
-            list_name=(list_name or '').strip() or None,
-        )
+        canvas_site = canvas.get_course(canvas_site_id) if canvas_site_id else None
+        if not canvas_site:
+            raise ResourceNotFoundError(f'Canvas site {canvas_site_id} not found')
+        mailing_list = MailingList.create(canvas_site=canvas_site, list_name=list_name)
         if populate:
             mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
         return tolerant_jsonify(mailing_list.to_api_json())
@@ -127,7 +125,11 @@ def update_welcome_email():
 @app.route('/api/mailing_list/suggested_name/<canvas_site_id>')
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
 def get_suggested_mailing_list_name(canvas_site_id):
-    return tolerant_jsonify(MailingList.get_suggested_name(canvas_site_id))
+    canvas_site = canvas.get_course(canvas_site_id)
+    if canvas_site:
+        return tolerant_jsonify(MailingList.get_suggested_name(canvas_site))
+    else:
+        raise ResourceNotFoundError(f'Canvas site {canvas_site_id} not found')
 
 
 @app.route('/api/mailing_list/download/welcome_email_log')

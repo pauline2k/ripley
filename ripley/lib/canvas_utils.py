@@ -102,6 +102,12 @@ def csv_row_for_campus_user(user):
     }
 
 
+def extract_berkeley_term_id(canvas_site):
+    sis_term_id = canvas_site.term['sis_term_id']
+    term = BerkeleyTerm.from_canvas_sis_term_id(sis_term_id) if sis_term_id else None
+    return term.to_sis_term_id() if term else None
+
+
 def format_term_enrollments_export(term_id):
     return f"{term_id.replace(':', '-')}-term-enrollments-export"
 

@@ -24,6 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 import requests_mock
+from ripley.externals import canvas
 from ripley.jobs.mailing_list_refresh_job import MailingListRefreshJob
 from ripley.models.mailing_list import MailingList
 from ripley.models.mailing_list_members import MailingListMembers
@@ -35,7 +36,8 @@ class TestMailingListRefreshJob:
     def test_job_run(self, app):
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {'course': ['get_by_id_1234567', 'search_users_1234567']}, m)
-            mailing_list = MailingList.create('1234567')
+            canvas_site = canvas.get_course('1234567')
+            mailing_list = MailingList.create(canvas_site)
             assert mailing_list.populated_at is None
             assert len(MailingListMembers.query.filter_by(mailing_list_id=mailing_list.id).all()) == 0
 

@@ -30,7 +30,7 @@ from ripley import db, std_commit
 from ripley.externals import canvas, data_loch
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_authorization import has_instructing_role, is_project_maintainer, is_project_owner
-from ripley.lib.canvas_utils import canvas_site_to_api_json
+from ripley.lib.canvas_utils import canvas_site_to_api_json, extract_berkeley_term_id
 from ripley.lib.mailing_list_utils import send_welcome_emails
 from ripley.lib.util import to_isoformat, utc_now
 from ripley.models.base import Base
@@ -49,6 +49,7 @@ class MailingList(Base):
     populate_add_errors = db.Column(db.Integer)
     populated_at = db.Column(db.DateTime)
     populate_remove_errors = db.Column(db.Integer)
+    term_id = db.Column(db.Integer)
     welcome_email_active = db.Column(db.Boolean, nullable=False)
     welcome_email_body = db.Column(db.Text)
     welcome_email_subject = db.Column(db.Text)
@@ -80,14 +81,12 @@ class MailingList(Base):
         return cls.query.filter_by(id=mailing_list_id).first()
 
     @classmethod
-    def get_suggested_name(cls, canvas_site_id):
-        canvas_site = canvas.get_course(canvas_site_id)
-        sis_term_id = canvas_site.term['sis_term_id']
-
+    def get_suggested_name(cls, canvas_site):
         def scrub(s):
             return '-'.join([word for word in re.split('[^a-z0-9]+', unidecode(s.strip().lower())) if word])[0:45]
         name = scrub(canvas_site.name)
         name = name if name[-1] == '-' else f'{name}-'
+        sis_term_id = canvas_site.term['sis_term_id']
         term = BerkeleyTerm.from_canvas_sis_term_id(sis_term_id) if sis_term_id else None
         if term:
             name += term.to_abbreviation()
@@ -99,22 +98,24 @@ class MailingList(Base):
     @classmethod
     def create(
             cls,
-            canvas_site_id,
+            canvas_site,
             list_name=None,
             welcome_email_body=None,
             welcome_email_subject=None,
     ):
+        canvas_site_id = canvas_site.id
+        list_name = (list_name or MailingList.get_suggested_name(canvas_site)).strip()
         mailing_list = cls.query.filter_by(canvas_site_id=canvas_site_id).first()
         if mailing_list:
             raise ValueError(f'List with id {canvas_site_id} already exists')
         mailing_list = cls(canvas_site_id=canvas_site_id)
+        term_id = extract_berkeley_term_id(canvas_site)
 
-        list_name = list_name or cls.get_suggested_name(canvas_site_id)
-        name_conflict = cls.query.filter_by(list_name=list_name).first()
-        if name_conflict:
+        if cls.query.filter_by(list_name=list_name).first():
             raise ValueError(f'The name {list_name} is used by another bCourses site and is not available.')
 
         mailing_list.list_name = list_name
+        mailing_list.term_id = int(term_id)
         mailing_list.welcome_email_body = welcome_email_body
         mailing_list.welcome_email_subject = welcome_email_subject
         db.session.add(mailing_list)
@@ -193,6 +194,7 @@ class MailingList(Base):
             'membersCount': len(mailing_list_members),
             'name': self.list_name,
             'populatedAt': to_isoformat(self.populated_at),
+            'termId': self.term_id,
             'welcomeEmailActive': self.welcome_email_active,
             'welcomeEmailBody': self.welcome_email_body,
             'welcomeEmailLastSent': to_isoformat(welcome_email_last_sent),
