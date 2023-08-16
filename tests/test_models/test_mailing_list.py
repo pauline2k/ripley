@@ -25,6 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 import pytest
 import requests_mock
+from ripley.externals import canvas
 from ripley.models.mailing_list import MailingList
 from tests.util import register_canvas_uris
 
@@ -34,9 +35,9 @@ class TestMailingList:
     def test_initialize(self, app):
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {'course': ['get_by_id_1234567']}, m)
-            mailing_list = MailingList.create('1234567')
+            canvas_site = canvas.get_course('1234567')
+            mailing_list = MailingList.create(canvas_site)
             feed = mailing_list.to_api_json()
-
             assert feed['canvasSite']['canvasSiteId'] == 1234567
             assert feed['canvasSite']['sisCourseId'] == 'CRS:ASTRON-218-2023-B'
             assert feed['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
@@ -45,6 +46,7 @@ class TestMailingList:
             assert feed['canvasSite']['term'] == {'term_yr': '2023', 'term_cd': 'B', 'name': 'Spring 2023'}
 
             assert feed['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
+            assert feed['termId'] == 2232
             assert feed['welcomeEmailActive'] is False
             assert feed['welcomeEmailBody'] is None
             assert feed['welcomeEmailSubject'] is None
@@ -52,12 +54,12 @@ class TestMailingList:
     def test_create(self, app):
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {'course': ['get_by_id_1234567']}, m)
-
-            mailing_list = MailingList.create('1234567')
+            canvas_site = canvas.get_course('1234567')
+            mailing_list = MailingList.create(canvas_site)
             feed = mailing_list.to_api_json()
 
             assert feed['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
             assert feed['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
             with pytest.raises(ValueError, match='List with id 1234567 already exists'):
-                mailing_list = MailingList.create('1234567')
+                mailing_list = MailingList.create(canvas_site)
