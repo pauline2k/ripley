@@ -99,6 +99,15 @@ class BerkeleyTerm:
             season = chr(ord(self.season) + 1)
         return type(self)(year, season)
 
+    def previous_term(self):
+        if self.season == 'B':
+            year = str(int(self.year) - 1)
+            season = 'D'
+        else:
+            year = self.year
+            season = chr(ord(self.season) - 1)
+        return type(self)(year, season)
+
     def to_abbreviation(self):
         season_map = {
             'A': 'wi',

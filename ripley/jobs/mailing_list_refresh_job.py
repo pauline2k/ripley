@@ -23,8 +23,6 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-import re
-
 from flask import current_app as app
 from ripley.jobs.base_job import BaseJob
 from ripley.lib.berkeley_term import BerkeleyTerm
@@ -34,17 +32,21 @@ from ripley.models.mailing_list import MailingList
 class MailingListRefreshJob(BaseJob):
 
     def _run(self, params={}):
-        update_count = 0
-        current_term_abbreviations = [t.to_abbreviation() for t in BerkeleyTerm.get_current_terms().values()]
+        updated = []
+        berkeley_terms = BerkeleyTerm.get_current_terms()
+        current_term = berkeley_terms['current']
+        current_term_id = int(current_term.to_sis_term_id())
+        previous_term_id = int(current_term.previous_term().to_sis_term_id())
 
         for mailing_list in MailingList.query.all():
-            m = re.match('(?:sp|su|fa)\\d\\d\\Z/', mailing_list.list_name)
-            if m and m.group(0) not in current_term_abbreviations:
-                continue
-            MailingList.populate(mailing_list)
-            update_count += 1
+            term_id = mailing_list.term_id
+            if not term_id or term_id == previous_term_id or term_id >= current_term_id:
+                MailingList.populate(mailing_list)
+                updated.append(mailing_list)
 
-        app.logger.info(f'Updated membership for {update_count} mailing lists, job complete.')
+        app.logger.info(f'Updated membership for {len(updated)} mailing lists, job complete.')
+        # Return list of canvas_site_ids for sake of unit test(s).
+        return [m.canvas_site_id for m in updated]
 
     @classmethod
     def description(cls):

@@ -35,12 +35,14 @@ class TestMailingListRefreshJob:
 
     def test_job_run(self, app):
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {'course': ['get_by_id_1234567', 'search_users_1234567']}, m)
-            canvas_site = canvas.get_course('1234567')
-            mailing_list = MailingList.create(canvas_site)
-            assert mailing_list.populated_at is None
-            assert len(MailingListMembers.query.filter_by(mailing_list_id=mailing_list.id).all()) == 0
+            for canvas_site_id in ['1010101', '1234567', '775390']:
+                register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}', f'search_users_{canvas_site_id}']}, m)
+                canvas_site = canvas.get_course(canvas_site_id)
+                mailing_list = MailingList.create(canvas_site)
+                assert mailing_list.populated_at is None
+                assert len(MailingListMembers.query.filter_by(mailing_list_id=mailing_list.id).all()) == 0
 
-            MailingListRefreshJob(app)._run()
+            impacted_canvas_site_ids = MailingListRefreshJob(app)._run()
+            assert impacted_canvas_site_ids == [1234567, 775390]
             assert mailing_list.populated_at is not None
             assert len(MailingListMembers.query.filter_by(mailing_list_id=mailing_list.id).all()) == 1

@@ -115,7 +115,7 @@ class MailingList(Base):
             raise ValueError(f'The name {list_name} is used by another bCourses site and is not available.')
 
         mailing_list.list_name = list_name
-        mailing_list.term_id = int(term_id)
+        mailing_list.term_id = int(term_id) if term_id and term_id.isnumeric() else None
         mailing_list.welcome_email_body = welcome_email_body
         mailing_list.welcome_email_subject = welcome_email_subject
         db.session.add(mailing_list)
