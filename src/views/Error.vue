@@ -55,10 +55,11 @@ export default {
   data: () => ({
     header: undefined
   }),
-  mounted() {
+  created() {
     let url = new URL(window.location.href)
     const error = url.searchParams.get('error')
-    const show404 = !error && [200, 404].includes(this.applicationState.status)
+    const isError = !!error || this.$route.path.includes('error')
+    const show404 = !isError && [200, 404].includes(this.applicationState.status)
     useContextStore().setApplicationState(
       this.applicationState.status,
       error || this.applicationState.message

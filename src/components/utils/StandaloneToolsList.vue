@@ -3,7 +3,7 @@
     <template v-for="(tool, index) in tools" :key="index">
       <v-list-item>
         <template #prepend>
-          <v-icon class="mr-4" :icon="tool.icon" />
+          <v-icon :icon="tool.icon" />
         </template>
         <v-list-item-title>
           <span v-if="tool.disabled" class="font-weight-light">

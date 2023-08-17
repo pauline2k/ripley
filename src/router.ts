@@ -187,12 +187,10 @@ const routes:RouteRecordRaw[] = [
     path: '/',
     children: [
       {
-        beforeEnter: () => useContextStore().setApplicationState(500),
         component: Error,
         path: '/error'
       },
       {
-        beforeEnter: () => useContextStore().setApplicationState(404),
         component: Error,
         path: '/:pathMatch(.*)'
       }

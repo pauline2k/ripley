@@ -16,8 +16,9 @@ export default {
     if (currentUser.isAdmin) {
       next()
     } else if (currentUser.isAuthenticated) {
-      useContextStore().setApplicationState(401, 'Unauthorized')
-      next()
+      const message = 'Unauthorized'
+      useContextStore().setApplicationState(401)
+      next(`/error?error=${message}`)
     } else {
       goToLogin(to, next)
     }

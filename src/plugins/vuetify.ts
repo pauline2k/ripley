@@ -6,7 +6,7 @@ import {VAlert} from 'vuetify/components/VAlert'
 import {VAppBar, VAppBarTitle} from 'vuetify/components/VAppBar'
 import {VApp} from 'vuetify/components/VApp'
 import {VBtn} from 'vuetify/components/VBtn'
-import {VCard, VCardActions, VCardText, VCardTitle} from 'vuetify/components/VCard'
+import {VCard, VCardActions, VCardSubtitle, VCardText, VCardTitle} from 'vuetify/components/VCard'
 import {VCheckbox} from 'vuetify/components/VCheckbox'
 import {VCol, VContainer, VSpacer, VRow} from 'vuetify/components/VGrid'
 import {VDataTable, VDataTableVirtual} from 'vuetify/labs/VDataTable'
@@ -36,6 +36,7 @@ export default createVuetify({
     VBtn,
     VCard,
     VCardActions,
+    VCardSubtitle,
     VCardText,
     VCardTitle,
     VCheckbox,
