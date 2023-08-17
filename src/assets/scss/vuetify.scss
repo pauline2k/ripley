@@ -1,5 +1,6 @@
-@forward 'vuetify/styles' with (
+@use 'vuetify' with (
   $color-pack: true,
+  $utilities: true,
   $grid-breakpoints: (
     'xs': 0,
     'sm': 576px,

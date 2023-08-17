@@ -9,11 +9,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `
-          @use "@/assets/styles/colors.scss" as *;
-          @use "@/assets/styles/ripley-global.scss" as *;
-          @use "@/assets/styles/variables.scss" as *;
-        `
+        additionalData: '@import "@/assets/scss/global.scss";'
       }
     }
   },
@@ -23,8 +19,7 @@ export default defineConfig({
       template: {transformAssetUrls}
     }),
     vuetify({
-      autoImport: true,
-      styles: {configFile: 'src/main.scss'}
+      autoImport: false
     })
   ],
   resolve: {
