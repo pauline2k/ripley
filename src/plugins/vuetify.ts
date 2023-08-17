@@ -11,14 +11,17 @@ import {VCheckbox} from 'vuetify/components/VCheckbox'
 import {VCol, VContainer, VSpacer, VRow} from 'vuetify/components/VGrid'
 import {VDataTable, VDataTableVirtual} from 'vuetify/labs/VDataTable'
 import {VDialog} from 'vuetify/components/VDialog'
+import {VExpansionPanel, VExpansionPanels, VExpansionPanelText, VExpansionPanelTitle} from 'vuetify/components/VExpansionPanel'
 import {VIcon} from 'vuetify/components/VIcon'
 import {VImg} from 'vuetify/components/VImg'
-import {VList, VListItem, VListItemAction, VListItemTitle} from 'vuetify/components/VList'
+import {VList, VListItem, VListItemAction, VListItemSubtitle, VListItemTitle} from 'vuetify/components/VList'
 import {VMain} from 'vuetify/components/VMain'
 import {VMenu} from 'vuetify/components/VMenu'
 import {VProgressCircular} from 'vuetify/components/VProgressCircular'
+import {VProgressLinear} from 'vuetify/components/VProgressLinear'
 import {VSnackbar} from 'vuetify/components/VSnackbar'
 import {VSwitch} from 'vuetify/components/VSwitch'
+import {VTooltip} from 'vuetify/components/VTooltip'
 import {VTextField} from 'vuetify/components/VTextField'
 
 // @ts-ignore
@@ -41,20 +44,27 @@ export default createVuetify({
     VDataTable,
     VDataTableVirtual,
     VDialog,
+    VExpansionPanel,
+    VExpansionPanels,
+    VExpansionPanelText,
+    VExpansionPanelTitle,
     VIcon,
     VImg,
     VList,
     VListItem,
     VListItemAction,
+    VListItemSubtitle,
     VListItemTitle,
     VMain,
     VMenu,
     VProgressCircular,
+    VProgressLinear,
     VRow,
     VSnackbar,
     VSpacer,
     VSwitch,
-    VTextField
+    VTextField,
+    VTooltip
   },
   display: {
     thresholds: {
