@@ -8,8 +8,6 @@ import {registerPlugins} from '@/plugins'
 import {useContextStore} from '@/stores/context'
 import router from '@/router'
 
-import './main.scss'
-
 const app = createApp(App)
 
 registerPlugins(app)

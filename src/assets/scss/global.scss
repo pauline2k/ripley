@@ -1,0 +1,122 @@
+@forward "variables";
+
+body {
+  background-color: #f6f6f6 !important;
+  color: #474747 !important;
+  cursor: auto;
+  font-family: Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1.5;
+  margin: 0;
+  overflow-x: hidden;
+  padding: 0;
+  position: relative;
+}
+
+html {
+  overflow-y: unset !important;
+}
+
+html, body {
+  font-size: 14px;
+  height: 100%;
+}
+
+.height-unset {
+  height: unset !important;
+  min-height: unset !important;
+}
+
+* {
+  text-transform: none !important;
+}
+
+.alert-container {
+  margin: 10px 0;
+}
+
+.alert-error-icon {
+  float: left;
+  font-size: 38px;
+  line-height: 45px;
+  margin-right: 5px;
+}
+.alert-close-button-container {
+  display: inline-block;
+  float: right;
+
+  .close-button {
+    background-color: transparent;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    &, &:hover, &:focus, &:active, &:visited {
+      color: inherit;
+      font-family: FontAwesome;
+      font-size: 20px;
+      text-decoration: none;
+    }
+  }
+}
+
+.background-splash {
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+.canvas-notice-icon {
+  font-size: 20px;
+  line-height: 20px;
+  margin-right: 5px;
+}
+
+.canvas-page-form {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.ellipsis {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.font-size-16 {
+  font-size: 16px;
+}
+
+.notice-text-container {
+  line-height: 18px;
+  margin-left: 52px;
+}
+
+.sr-only {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+@media print {
+  html,
+  body {
+    height: fit-content;
+    *.display-none-when-print {
+      display: none;
+    }
+    *.avoid-break-inside-when-print {
+      page-break-inside: avoid;
+    }
+    *.v-main-when-print {
+      padding: 0;
+    }
+  }
+}

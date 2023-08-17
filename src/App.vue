@@ -36,9 +36,6 @@ export default {
 </script>
 
 <style lang="scss">
-* {
-  text-transform: none !important;
-}
 .alert {
   background-color: $color-alert-background;
   border: 0;
@@ -62,39 +59,7 @@ export default {
   background-color: $color-alert-error-background;
   color: $color-alert-error-foreground;
 }
-.alert-container {
-  margin: 10px 0;
-}
-.alert-error-icon {
-  float: left;
-  font-size: 38px;
-  line-height: 45px;
-  margin-right: 5px;
-}
-.alert-close-button-container {
-  display: inline-block;
-  float: right;
 
-  .close-button {
-    background-color: transparent;
-    border: 0;
-    margin: 0;
-    padding: 0;
-    &, &:hover, &:focus, &:active, &:visited {
-      color: inherit;
-      font-family: FontAwesome;
-      font-size: 20px;
-      text-decoration: none;
-    }
-  }
-}
-.background-splash {
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
-  min-height: 100vh;
-}
 .bg-white {
   background: $color-white;
 }
@@ -141,38 +106,17 @@ export default {
     }
   }
 }
-.canvas-notice-icon {
-  font-size: 20px;
-  line-height: 20px;
-  margin-right: 5px;
-}
-.canvas-page-form {
-  background: transparent;
-  border: 0;
-  padding: 0;
-}
 .container {
   background: $color-container-grey-background !important;
   border: 1px solid $color-container-grey-border !important;
   border-radius: 3px !important;
   padding: 9px !important;
 }
-.ellipsis {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.font-size-16 {
-  font-size: 16px;
-}
+
 .icon-gold {
   color: $color-dark-tangerine;
 }
-.notice-text-container {
-  line-height: 18px;
-  margin-left: 52px;
-}
+
 .notice-text-header {
   color: $color-off-black;
   font-size: 16px;
@@ -180,14 +124,7 @@ export default {
   line-height: 20px;
   margin: 4px 0;
 }
-.sr-only {
-  position: absolute;
-  left: -10000px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-}
+
 a {
   color: $primary-color;
   text-decoration: none;
@@ -198,6 +135,7 @@ a {
     text-decoration: underline;
   }
 }
+
 h1 {
   color: $color-off-black;
   font-family: $body-font-family;
@@ -206,24 +144,28 @@ h1 {
   line-height: 30px;
   margin: 15px 0 16px;
 }
+
 h2 {
   color: $color-off-black;
   font-family: $body-font-family;
   font-size: 20px;
   font-weight: normal;
 }
+
 h3 {
   color: $color-off-black;
   font-family: $body-font-family;
   font-size: 18px;
   font-weight: normal;
 }
+
 h3.sections-course-title {
   display: inline !important;
   font-size: 15px !important;
   font-weight: 500 !important;
   line-height: 20px;
 }
+
 select {
   appearance: auto !important;
   background: field !important;
