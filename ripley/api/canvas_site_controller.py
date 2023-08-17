@@ -27,8 +27,9 @@ from flask import current_app as app, redirect, request
 from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
-from ripley.externals import canvas
+from ripley.externals import canvas, data_loch
 from ripley.externals.redis import enqueue, get_job
+from ripley.lib.berkeley_course import sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, get_official_sections, \
     get_teaching_terms, update_canvas_sections
@@ -41,7 +42,20 @@ from ripley.models.job_history import JobHistory
 
 @app.route('/api/canvas_site/provision')
 def canvas_site_provision():
-    return tolerant_jsonify([])
+    if not current_user.is_authenticated or not current_user.can_create_canvas_course_site():
+        app.logger.warning(f'Unauthorized request to {request.path}')
+        return app.login_manager.unauthorized()
+
+    admin_acting_as = request.args.get('adminActingAs')
+    admin_by_ccns = request.args.getlist('adminByCcns')
+    admin_term_slug = request.args.get('adminTermSlug')
+
+    is_admin = (current_user.is_admin or current_user.is_canvas_admin)
+    if is_admin and admin_by_ccns and admin_term_slug:
+        feed = _course_provision_feed_by_ccns(admin_by_ccns, admin_term_slug)
+    else:
+        feed = _course_provision_feed(is_admin, admin_acting_as)
+    return tolerant_jsonify(feed)
 
 
 @app.route('/api/canvas_site/<canvas_site_id>')
@@ -128,7 +142,7 @@ def get_official_course_sections(canvas_site_id):
     canvas_sis_term_id = course.term['sis_term_id']
     term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
     official_sections, section_ids, sections = get_official_sections(canvas_site_id)
-    teaching_terms = [] if not len(section_ids) else get_teaching_terms(current_user, section_ids, sections)
+    teaching_terms = [] if not len(section_ids) else get_teaching_terms(current_user, section_ids=section_ids, sections=sections)
     return tolerant_jsonify({
         'canvasSite': {
             'canEdit': can_edit,
@@ -193,3 +207,36 @@ def redirect_to_canvas_profile(canvas_site_id, uid):
         return redirect(f'{base_url}/courses/{canvas_site_id}/users/{user.id}')
     else:
         raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
+
+
+def _course_provision_feed(is_admin, admin_acting_as):
+    uid = (is_admin and admin_acting_as) or current_user.uid
+    return {
+        'isAdmin': is_admin,
+        'adminActingAs': admin_acting_as,
+        'teachingTerms': get_teaching_terms(current_user, uid=uid),
+        'adminTerms': _get_admin_terms(),
+    }
+
+
+def _course_provision_feed_by_ccns(admin_by_ccns, admin_term_slug):
+    term_id = BerkeleyTerm.from_slug(admin_term_slug).to_sis_term_id()
+    sections = sort_course_sections(
+        data_loch.get_sections(term_id, admin_by_ccns) or [],
+    )
+    return {
+        'isAdmin': True,
+        'adminTerms': _get_admin_terms(),
+        'teachingTerms': get_teaching_terms(current_user, section_ids=admin_by_ccns, sections=sections),
+    }
+
+
+def _get_admin_terms():
+    def _term_feed(term):
+        return {
+            'code': term.season,
+            'name': term.to_english(),
+            'slug': term.to_slug(),
+            'year': term.year,
+        }
+    return [_term_feed(t) for t in BerkeleyTerm.get_current_terms().values()]

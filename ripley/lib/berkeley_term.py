@@ -79,6 +79,18 @@ class BerkeleyTerm:
             return cls(year=year, season=season)
 
     @classmethod
+    def from_slug(cls, slug=None):
+        if slug:
+            match = re.match(r'\A(spring|summer|fall)-(\d{4})\Z', slug)
+            if match:
+                season_codes = {
+                    'spring': 'B',
+                    'summer': 'C',
+                    'fall': 'D',
+                }
+                return cls(match.group(2), season_codes[match.group(1)])
+
+    @classmethod
     def from_term_name(cls, term_name=None):
         if term_name:
             match = re.match(r'\A(Spring|Summer|Fall) (\d{4})\Z', term_name)

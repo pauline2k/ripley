@@ -27,8 +27,7 @@ from flask import current_app as app, request
 from flask_login import current_user
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
-from ripley.externals import canvas
-from ripley.externals.data_loch import get_basic_profile_and_grades_per_enrollments
+from ripley.externals import canvas, data_loch
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import get_official_sections, get_teaching_terms, prepare_egrade_export
@@ -44,7 +43,7 @@ def egrade_export_options():
     return tolerant_jsonify({
         'gradingStandardEnabled': course_settings['grading_standard_enabled'],
         'officialSections': [s for s in official_sections if s['id']],
-        'sectionTerms': [] if not len(section_ids) else get_teaching_terms(current_user, section_ids, sections),
+        'sectionTerms': [] if not len(section_ids) else get_teaching_terms(current_user, section_ids=section_ids, sections=sections),
     })
 
 
@@ -80,7 +79,7 @@ def egrade_export_download():
         raise BadRequestError(f'Invalid pnpCutoff value: {pnp_cutoff}')
 
     rows = []
-    for row in get_basic_profile_and_grades_per_enrollments(term_id=term_id, section_ids=[section_id]):
+    for row in data_loch.get_basic_profile_and_grades_per_enrollments(term_id=term_id, section_ids=[section_id]):
         grading_basis = (row['grading_basis'] or '').upper()
         comment = None
         if grading_basis in ['CPN', 'DPN', 'EPN', 'PNP']:
