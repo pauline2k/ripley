@@ -86,11 +86,11 @@ def get_course(course_id, api_call=True):
         return Course(c._Canvas__requester, {'id': course_id})
     else:
         try:
-            course = c.get_course(course_id, include=['term'])
+            return c.get_course(course_id, include=['term'])
         except Exception as e:
             app.logger.error(f'Failed to retrieve Canvas course (id={course_id})')
             app.logger.exception(e)
-    return course
+            return None
 
 
 def get_course_sections(course_id):

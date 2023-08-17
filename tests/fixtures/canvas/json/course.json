@@ -12,8 +12,8 @@
             "enrollment_term_id": 1,
             "grading_standard_id": 1,
             "term": {
-                "name": "Fall 2022",
-                "sis_term_id": "TERM:2022-D"
+                "name": "Fall 2020",
+                "sis_term_id": "TERM:2020-D"
             },
             "time_zone": "America/Los_Angeles",
             "workflow_state": "available"
@@ -69,7 +69,7 @@
         "method": "GET",
         "endpoint": "courses/775390",
         "data": {
-            "id": 8876542,
+            "id": 775390,
             "course_code": "CHEM 1A-LEC-001",
             "name": "General Chemistry",
             "description": "",
@@ -1416,6 +1416,34 @@
         },
         "status_code": 200
     },
+    "search_users_1010101": {
+        "endpoint": "courses/1010101/search_users",
+        "data": [
+            {
+                "id": 4567890,
+                "email": "synthetic.ash@berkeley.edu",
+                "enrollments": [
+                    {
+                      "user_id": 4567890,
+                      "course_id": 1010101,
+                      "type": "TeacherEnrollment",
+                      "enrollment_state": "active",
+                      "role": "TeacherEnrollment",
+                      "last_activity_at": "2023-03-02T06:04:43Z",
+                      "sis_user_id": "300300000",
+                      "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
+                    }
+                ],
+                "login_id": "30000",
+                "integration_id": null,
+                "name": "Ash 🤖",
+                "short_name": "Ash 🤖",
+                "sortable_name": "🤖, Ash"
+            }
+        ],
+        "method": "GET",
+        "status_code": 200
+    },
     "search_users_1234567": {
         "endpoint": "courses/1234567/search_users",
         "data": [
@@ -1432,6 +1460,34 @@
                     "last_activity_at": "2023-03-02T06:04:43Z",
                     "sis_user_id": "300300000",
                     "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
+                    }
+                ],
+                "login_id": "30000",
+                "integration_id": null,
+                "name": "Ash 🤖",
+                "short_name": "Ash 🤖",
+                "sortable_name": "🤖, Ash"
+            }
+        ],
+        "method": "GET",
+        "status_code": 200
+    },
+    "search_users_775390": {
+        "endpoint": "courses/775390/search_users",
+        "data": [
+            {
+                "id": 4567890,
+                "email": "synthetic.ash@berkeley.edu",
+                "enrollments": [
+                    {
+                    "user_id": 4567890,
+                    "course_id": 775390,
+                    "type": "TeacherEnrollment",
+                    "enrollment_state": "active",
+                    "role": "TeacherEnrollment",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "300300000",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/775390/users/4567890"
                     }
                 ],
                 "login_id": "30000",
