@@ -32,7 +32,7 @@ from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_course import sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, get_official_sections, \
-    get_teaching_terms, update_canvas_sections
+    get_teaching_terms, provision_course_site, update_canvas_sections
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, get_grade_distribution_with_enrollments
@@ -79,6 +79,36 @@ def get_canvas_site(canvas_site_id):
         return tolerant_jsonify(api_json)
     else:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
+
+
+@app.route('/api/canvas_site/provision/create', methods=['POST'])
+def create_course_site():
+    if not current_user.is_authenticated or not current_user.can_create_canvas_course_site():
+        app.logger.warning(f'Unauthorized request to {request.path}')
+        return app.login_manager.unauthorized()
+
+    params = request.get_json()
+    admin_acting_as = params.get('adminActingAs')
+    admin_by_ccns = params.get('adminByCcns')
+    site_name = params.get('siteName')
+    site_abbreviation = params.get('siteAbbreviation')
+    term_slug = params.get('termSlug')
+    section_ids = params.get('ccns')
+
+    is_admin = (current_user.is_admin or current_user.is_canvas_admin)
+    uid = (is_admin and admin_acting_as) or current_user.uid
+
+    if not len(section_ids):
+        raise BadRequestError('Required parameters are missing.')
+    job = enqueue(func=provision_course_site, args=(uid, site_name, site_abbreviation, term_slug, section_ids, bool(admin_by_ccns)))
+    if not job:
+        raise InternalServerError('Updates cannot be completed at this time.')
+    return tolerant_jsonify(
+        {
+            'jobId': job.id,
+            'jobStatus': 'sendingRequest',
+        },
+    )
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections', methods=['POST'])
