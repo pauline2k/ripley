@@ -80,17 +80,18 @@ def get_communication_channels(canvas_user_id):
         app.logger.exception(e)
 
 
-def get_course(course_id, api_call=True):
+def get_course(course_id, api_call=True, use_sis_id=False):
     c = _get_canvas()
     if api_call is False:
         return Course(c._Canvas__requester, {'id': course_id})
     else:
+        course = None
         try:
-            return c.get_course(course_id, include=['term'])
+            course = c.get_course(course_id, include=['term'], use_sis_id=use_sis_id)
         except Exception as e:
             app.logger.error(f'Failed to retrieve Canvas course (id={course_id})')
             app.logger.exception(e)
-            return None
+        return course
 
 
 def get_course_sections(course_id):

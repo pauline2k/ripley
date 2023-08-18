@@ -27,7 +27,7 @@ from itertools import groupby
 import re
 
 from flask import current_app as app
-from ripley.api.errors import InternalServerError, ResourceNotFoundError
+from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.externals import canvas, data_loch
 from ripley.externals.s3 import upload_dated_csv
 from ripley.lib.berkeley_course import course_section_name, course_to_api_json, section_to_api_json, \
@@ -37,6 +37,11 @@ from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from ripley.models.job_history import JobHistory
 from rq.job import get_current_job
+
+
+def get_canvas_course_id(course_slug, term):
+    # TODO add random hash as needed to ensure uniqueness
+    return f'CRS:{course_slug.upper()}-{term.year}-{term.season}'
 
 
 def get_canvas_sis_section_id(sis_section):
@@ -136,9 +141,12 @@ def get_official_sections(canvas_site_id):
     return official_sections, section_ids, sis_sections
 
 
-def get_teaching_terms(current_user, section_ids=None, sections=None, uid=None):
+def get_teaching_terms(current_user=None, section_ids=None, sections=None, term_id=None, uid=None):
     berkeley_terms = BerkeleyTerm.get_current_terms()
-    canvas_terms = [term.sis_term_id for term in canvas.get_terms() if term.sis_term_id]
+    if term_id:
+        canvas_terms = [term_id]
+    else:
+        canvas_terms = [term.sis_term_id for term in canvas.get_terms() if term.sis_term_id]
     terms = []
     for key, term in berkeley_terms.items():
         if term.to_canvas_sis_term_id() not in canvas_terms:
@@ -149,7 +157,7 @@ def get_teaching_terms(current_user, section_ids=None, sections=None, uid=None):
     instructor_uid = None
     if uid:
         instructor_uid = uid
-    elif (current_user.is_teaching or current_user.canvas_masquerading_user_id):
+    elif current_user and (current_user.is_teaching or current_user.canvas_masquerading_user_id):
         instructor_uid = current_user.uid
 
     teaching_sections = []
@@ -160,6 +168,21 @@ def get_teaching_terms(current_user, section_ids=None, sections=None, uid=None):
     if not len(teaching_sections) and sections:
         teaching_sections = sections
 
+    courses_by_term = _build_courses_by_term(teaching_sections, term_id, section_ids)
+
+    def _term_courses(term_id, courses_by_id):
+        term = BerkeleyTerm.from_sis_term_id(term_id)
+        return {
+            'classes': list(courses_by_id.values()),
+            'name': term.to_english(),
+            'slug': term.to_slug(),
+            'termId': term_id,
+            'termYear': term.year,
+        }
+    return [_term_courses(term_id, courses_by_id) for term_id, courses_by_id in courses_by_term.items()]
+
+
+def _build_courses_by_term(teaching_sections, term_id, section_ids):
     courses_by_term = {}
     for section_id, sections in groupby(teaching_sections, lambda s: s['section_id']):
         sections = list(sections)
@@ -176,17 +199,7 @@ def get_teaching_terms(current_user, section_ids=None, sections=None, uid=None):
         if section_ids:
             section_feed['isCourseSection'] = section_id in section_ids
         courses_by_term[term_id][course_id]['sections'].append(section_feed)
-
-    def _term_courses(term_id, courses_by_id):
-        term = BerkeleyTerm.from_sis_term_id(term_id)
-        return {
-            'classes': list(courses_by_id.values()),
-            'name': term.to_english(),
-            'slug': term.to_slug(),
-            'termId': term_id,
-            'termYear': term.year,
-        }
-    return [_term_courses(term_id, courses_by_id) for term_id, courses_by_id in courses_by_term.items()]
+    return courses_by_term
 
 
 def prepare_egrade_export(course):
@@ -202,6 +215,117 @@ def prepare_egrade_export(course):
             'uid': user.login_id if hasattr(user, 'login_id') else None,
         })
     return official_grades
+
+
+def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_ids, is_admin_by_ccns):
+    term = BerkeleyTerm.from_slug(term_slug)
+
+    terms_feed = []
+    # Admins can specify semester and CCNs directly, without access checks.
+    if is_admin_by_ccns:
+        sections = sort_course_sections(
+            data_loch.get_sections(term.to_sis_term_id(), section_ids) or [],
+        )
+        terms_feed = get_teaching_terms(sections=sections)
+    # Otherwise, the user must have instructor access (direct or inherited via section nesting) to all sections.
+    else:
+        terms_feed = get_teaching_terms(section_ids=section_ids, term_id=term.to_sis_term_id(), uid=uid)
+
+    courses_list = terms_feed[0]['classes'] if terms_feed else []
+    if not courses_list:
+        raise BadRequestError('No candidate courses found.')
+
+    course_slug = courses_list[0]['course_name'].replace(' ', '-').lower()
+
+    # TODO identify department subaccount
+    subaccount = 'Plant Skills for Life'
+
+    # TODO get Canvas role id for teacher and lead ta
+    teacher_role_id = 999
+
+    sis_term_id = term.to_canvas_sis_term_id()
+    sis_course_id = get_canvas_course_id(course_slug, term)
+    course_site_definition = {
+        'course_id': sis_course_id,
+        'short_name': site_abbreviation,
+        'long_name': site_name,
+        'account_id': subaccount,
+        'term_id': sis_term_id,
+        'status': 'active',
+    }
+
+    with SisImportCsv.create(fieldnames=['course_id', 'short_name', 'long_name', 'account_id', 'term_id', 'status']) as course_csv:
+        course_csv.writerows([course_site_definition])
+        course_csv.filehandle.close()
+
+        upload_dated_csv(
+            course_csv.tempfile.name,
+            f"course-provision-{sis_course_id.replace(':', '-')}-course-sis-import",
+            'canvas_sis_imports',
+            utc_now().strftime('%F_%H-%M-%S'),
+        )
+
+        app.logger.debug(f'Posting course SIS import (sis_course_id={sis_course_id}).')
+        sis_import = canvas.post_sis_import(attachment=course_csv.tempfile.name)
+        if not sis_import:
+            raise InternalServerError(f'Course sections SIS import failed (sis_course_id={sis_course_id}).')
+
+    course = canvas.get_course(sis_course_id, use_sis_id=True)
+    if not course:
+        raise InternalServerError(f'Canvas course lookup failed (sis_course_id={sis_course_id}).')
+
+    # TODO Adjust settings (hide conferences and grade distributions, set default view)
+
+    # Section definitions
+    section_feeds = []
+    section_roles = {}
+    for s in sections:
+        sis_section_id = get_canvas_sis_section_id(s)
+        section_feeds.append({
+            'section_id': sis_section_id,
+            'course_id': course.sis_course_id,
+            'name': f"{s['course_name']} {course_section_name(s)}",
+            'status': 'active',
+            'start_date': None,
+            'end_date': None,
+        })
+        # TODO in case of admin_by_ccns, determine instructor role and add
+        section_roles[sis_section_id] = None
+
+    with SisImportCsv.create(fieldnames=['section_id', 'course_id', 'name', 'status', 'start_date', 'end_date']) as sections_csv:
+        sections_csv.writerows(section_feeds)
+        sections_csv.filehandle.close()
+
+        upload_dated_csv(
+            sections_csv.tempfile.name,
+            f"course-provision-{course.sis_course_id.replace(':', '-')}-sections-sis-import",
+            'canvas_sis_imports',
+            utc_now().strftime('%F_%H-%M-%S'),
+        )
+
+        app.logger.debug(f'Posting course sections SIS import (canvas_site_id={course.id}).')
+        sis_import = canvas.post_sis_import(attachment=sections_csv.tempfile.name)
+        if not sis_import:
+            raise InternalServerError(f'Course sections SIS import failed (canvas_site_id={course.id}).')
+
+    # Add instructor to section
+    if not is_admin_by_ccns:
+        instructor_role_id = section_roles[section_feeds[0]['section_id']] or teacher_role_id
+        sis_user_profile = canvas.get_sis_user_profile(uid)
+        if not sis_user_profile:
+            # TODO add user via SIS import
+            # CanvasCsv::UserProvision.new.import_users [uid]
+            sis_user_profile = canvas.get_sis_user_profile(uid)
+        canvas.add_user_to_section(section_id=sections[0]['id'], user_profile_id=sis_user_profile.id, role_id=instructor_role_id)
+
+    # Background enrollment update
+    job = get_current_job()
+    if job:
+        job.meta['sis_import_id'] = sis_import.id
+    bg_job = _update_enrollments_in_background(sis_term_id, course, sections, [], sis_import)
+    if bg_job:
+        job.meta['enrollment_update_job_id'] = bg_job.id
+    job.save_meta()
 
 
 def sis_enrollment_status_to_canvas_course_role(sis_enrollment_status):
