@@ -39,7 +39,6 @@ from ripley.externals.data_loch import get_sections_count
 from ripley.externals.s3 import find_all_dated_csvs, find_last_dated_csv, find_last_dated_csvs, stream_object_text, upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.calnet_utils import get_calnet_attributes_for_uids
 from ripley.lib.canvas_site_provisioning import get_basic_attributes, initialize_recent_updates, process_course_enrollments
 from ripley.lib.canvas_utils import api_formatted_course_role, csv_row_for_campus_user, format_term_enrollments_export, \
     parse_canvas_sis_section_id, uid_from_canvas_login_id, user_id_from_attributes
@@ -229,8 +228,7 @@ class BcoursesRefreshBaseJob(BaseJob):
                         missing_uids.add(uid)
 
             if missing_uids:
-                ldap_users_by_uid = {u['ldap_uid']: u for u in get_calnet_attributes_for_uids(app, missing_uids)}
-                users_by_uid.update(ldap_users_by_uid)
+                users_by_uid.update(get_basic_attributes(missing_uids))
 
             # Having looped once through the report for UIDs, we restart the loop for actual processing.
             with open(canvas_users_file.name, 'r') as f:

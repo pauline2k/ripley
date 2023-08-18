@@ -85,16 +85,10 @@ def get_all_active_users():
 # Query to retrieve user data for maintenance within bCourses, more broadly scoped to
 # include inactive users.
 def get_users(uids=None):
-    uids_sql_fragment = "ldap_uid IN ('" + "', '".join(uids) + "') AND" if uids else ''
+    uids_sql_fragment = "WHERE ldap_uid IN ('" + "', '".join(uids) + "')" if uids else ''
     sql = f"""
         SELECT * FROM sis_data.{_basic_attributes_table()}
-        WHERE {uids_sql_fragment} (
-            person_type != 'A' OR
-            affiliations LIKE '%STUDENT-TYPE-REGISTERED%' OR
-            affiliations LIKE '%STUDENT-TYPE-NOT REGISTERED%' OR
-            affiliations LIKE '%EMPLOYEE-TYPE%' OR
-            affiliations LIKE '%GUEST-TYPE%'
-        )
+        {uids_sql_fragment}
     """
     return safe_execute_rds(sql)
 
