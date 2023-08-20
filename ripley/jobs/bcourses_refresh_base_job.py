@@ -224,7 +224,7 @@ class BcoursesRefreshBaseJob(BaseJob):
                 for row in csv.DictReader(f):
                     account_data = uid_from_canvas_login_id(row['login_id'])
                     uid = account_data['uid']
-                    if uid not in users_by_uid:
+                    if uid and uid not in users_by_uid:
                         missing_uids.add(uid)
 
             if missing_uids:
