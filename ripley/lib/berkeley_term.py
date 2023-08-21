@@ -53,7 +53,7 @@ class BerkeleyTerm:
             'current': cls.from_term_name(current_term_name),
             'next': cls.from_term_name(current_term_name).next_term(),
         }
-        if future_term_name != terms['next'].to_english():
+        if future_term_name not in [terms['current'].to_english(), terms['next'].to_english()]:
             terms['future'] = cls.from_term_name(future_term_name)
 
         return terms
