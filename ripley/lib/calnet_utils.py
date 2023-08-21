@@ -27,6 +27,7 @@ from os import path
 
 from ripley.externals import calnet
 from ripley.externals.redis import cache_dict_object, fetch_cached_dict_object
+from ripley.lib.util import safe_str
 
 
 def get_calnet_attributes_for_uids(app, uids):
@@ -35,8 +36,8 @@ def get_calnet_attributes_for_uids(app, uids):
     # Update dictionary format to be interchangeable with loch basic_attributes query results.
     def _transform_user(user):
         return {
-            'ldap_uid': user['uid'],
-            'sid': user['sid'] or user['csid'],
+            'ldap_uid': safe_str(user['uid']),
+            'sid': safe_str(user['sid'] or user['csid']),
             'first_name': user['firstName'],
             'last_name': user['lastName'],
             'email_address': user['email'],
@@ -68,7 +69,7 @@ def _get_calnet_users(app, uids, search_base=None):
                 users_by_uid[uid] = {'uid': uid}
     else:
         calnet_client = calnet.client(app)
-        calnet_results = calnet_client.search_uids(uids, search_base)
+        calnet_results = calnet_client.search_uids(uids, search_base, use_fallback_mail=True)
         for uid in uids:
             calnet_result = next((r for r in calnet_results if str(r['uid']) == str(uid)), None)
             if calnet_result:
