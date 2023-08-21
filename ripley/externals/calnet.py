@@ -79,7 +79,10 @@ class Client:
         from flask import current_app as app
         all_out = []
         for i in range(0, len(uids), BATCH_QUERY_MAXIMUM):
-            app.logger.debug(f'Executing LDAP UID search ({i} to {i + BATCH_QUERY_MAXIMUM} of {len(uids)})')
+            if len(uids) == 1:
+                app.logger.debug(f'Executing LDAP search (UID {uids[0]})')
+            else:
+                app.logger.debug(f'Executing LDAP UID search ({i+1} to {min(len(uids), i+BATCH_QUERY_MAXIMUM)} of {len(uids)})')
             uids_batch = uids[i:i + BATCH_QUERY_MAXIMUM]
             try:
                 _filter = _ldap_search_filter({'uid': uids_batch}, search_base)
