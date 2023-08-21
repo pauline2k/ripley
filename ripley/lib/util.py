@@ -37,6 +37,10 @@ def localize_datetime(dt):
     return dt.astimezone(pytz.timezone(app.config['TIMEZONE']))
 
 
+def safe_str(value):
+    return str(value) if value else None
+
+
 def to_bool_or_none(arg):
     """
     With the idea of "no decision is a decision" in mind, this util has three possible outcomes: True, False and None.

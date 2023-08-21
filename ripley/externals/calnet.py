@@ -75,7 +75,7 @@ class Client:
         )
         return self._search(search_filter, use_fallback_mail=True)
 
-    def search_uids(self, uids, search_base=None):
+    def search_uids(self, uids, search_base=None, use_fallback_mail=False):
         from flask import current_app as app
         all_out = []
         for i in range(0, len(uids), BATCH_QUERY_MAXIMUM):
@@ -83,7 +83,7 @@ class Client:
             uids_batch = uids[i:i + BATCH_QUERY_MAXIMUM]
             try:
                 _filter = _ldap_search_filter({'uid': uids_batch}, search_base)
-                all_out += self._search(_filter, search_base)
+                all_out += self._search(_filter, search_base, use_fallback_mail=use_fallback_mail)
             except Exception as e:
                 app.logger.error('LDAP UID search query failed')
                 app.logger.exception(e)
