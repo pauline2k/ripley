@@ -278,7 +278,7 @@ import BackToGradebook from '@/components/bcourses/egrades/BackToGradebook.vue'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import ProgressBar from '@/components/bcourses/shared/ProgressBar'
-import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/canvas-site'
+import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/egrades-export'
 import {iframeParentLocation, iframeScrollToTop, putFocusNextTick} from '@/utils'
 
 export default {
@@ -405,7 +405,7 @@ export default {
       this.debug(`preloadGrades:
         selectedType: ${type}
       `)
-      prepareGradesCacheJob(this.currentUser.canvasSiteId).then(
+      prepareGradesCacheJob().then(
         data => {
           this.debug(`post-prepareGradesCacheJob:
             data: ${data}
@@ -437,7 +437,7 @@ export default {
         backgroundJobId: ${this.backgroundJobId}
       `)
       this.exportTimer = setInterval(() => {
-        getExportJobStatus(this.currentUser.canvasSiteId, this.backgroundJobId).then(
+        getExportJobStatus(this.backgroundJobId).then(
           data => {
             this.debug(`post-getExportJobStatus:
               data: ${data}

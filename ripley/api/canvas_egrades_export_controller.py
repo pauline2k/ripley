@@ -30,14 +30,14 @@ from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas, data_loch
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import get_official_sections, get_teaching_terms, prepare_egrade_export
+from ripley.lib.canvas_utils import get_official_sections, get_teaching_terms, prepare_egrades_export
 from ripley.lib.egrade_utils import convert_per_grading_basis, LETTER_GRADES
 from ripley.lib.http import tolerant_jsonify
 
 
-@app.route('/api/canvas_site/egrade_export/options')
+@app.route('/api/canvas_site/egrades_export/options')
 @canvas_role_required('TeacherEnrollment')
-def egrade_export_options():
+def egrades_export_options():
     course_settings = canvas.get_course_settings(current_user.canvas_site_id)
     official_sections, section_ids, sections = get_official_sections(current_user.canvas_site_id)
     return tolerant_jsonify({
@@ -47,12 +47,14 @@ def egrade_export_options():
     })
 
 
-@app.route('/api/canvas_site/<canvas_site_id>/egrade_export/prepare', methods=['POST'])
-def egrade_export_prepare(canvas_site_id):
+@app.route('/api/canvas_site/egrades_export/prepare', methods=['POST'])
+@canvas_role_required('TeacherEnrollment')
+def egrades_export_prepare():
+    canvas_site_id = current_user.canvas_site_id
     course = canvas.get_course(canvas_site_id)
     if not course:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
-    job = enqueue(func=prepare_egrade_export, args=[canvas_site_id])
+    job = enqueue(func=prepare_egrades_export, args=[canvas_site_id])
     if not job:
         raise InternalServerError('Updates cannot be completed at this time.')
     return tolerant_jsonify(
@@ -63,8 +65,9 @@ def egrade_export_prepare(canvas_site_id):
     )
 
 
-@app.route('/api/canvas_site/egrade_export/download')
-def egrade_export_download():
+@app.route('/api/canvas_site/egrades_export/download')
+@canvas_role_required('TeacherEnrollment')
+def egrades_download():
     params = request.args
     grade_type = params.get('gradeType', None)
     pnp_cutoff = params.get('pnpCutoff', None)
@@ -105,8 +108,9 @@ def egrade_export_download():
     )
 
 
-@app.route('/api/canvas_site/egrade_export/status', methods=['POST'])
-def canvas_egrade_export_status():
+@app.route('/api/canvas_site/egrades_export/status', methods=['POST'])
+@canvas_role_required('TeacherEnrollment')
+def canvas_egrades_export_status():
     job_id = request.get_json().get('jobId', None)
     job = get_job(job_id)
     job_status = job.get_status(refresh=True)
