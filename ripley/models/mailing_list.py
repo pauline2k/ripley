@@ -92,7 +92,7 @@ class MailingList(Base):
             name += term.to_abbreviation()
         else:
             term_name = canvas_site.term['name']
-            name += scrub(term_name) if term_name else 'list'
+            name += scrub(term_name) if term_name and 'default' not in term_name.lower() else 'list'
         return name
 
     @classmethod

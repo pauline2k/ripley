@@ -190,7 +190,7 @@ class TestSuggestedMailingListName:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}']}, m)
             suggested_name = self._api_suggested_mailing_list_name(canvas_site_id=canvas_site_id, client=client)
-            assert suggested_name == 'general-chemistry-default-term'
+            assert suggested_name == 'general-chemistry-list'
 
 
 class TestCreateMailingList:
