@@ -122,6 +122,13 @@ const routes:RouteRecordRaw[] = [
         }
       },
       {
+        component: MailingListSelectCourse,
+        path: '/mailing_list/select_course',
+        meta: {
+          title: 'Select Course Site'
+        }
+      },
+      {
         component: MailingListCreate,
         path: '/mailing_list/create/:canvasSiteId',
         meta: {
@@ -143,29 +150,18 @@ const routes:RouteRecordRaw[] = [
         }
       },
       {
-        component: Welcome,
-        name: 'Welcome',
-        path: '/welcome'
-      }
-    ]
-  },
-  {
-    beforeEnter: auth.requiresAdmin,
-    component: BaseView,
-    path: '/',
-    children: [
-      {
-        component: MailingListSelectCourse,
-        path: '/mailing_list/select_course',
-        meta: {
-          title: 'Select Course Site'
-        }
-      },
-      {
         component: UserProvision,
         path: '/provision_user',
         meta: {
           title: 'bCourses User Provision'
+        }
+      },
+      {
+        component: Welcome,
+        name: 'Welcome',
+        path: '/welcome',
+        meta: {
+          isHome: true
         }
       }
     ]

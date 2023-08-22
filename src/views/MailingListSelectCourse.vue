@@ -10,7 +10,7 @@
     >
       {{ error }}
     </v-alert>
-    <div class="align-center d-flex flex-wrap pa-3">
+    <div v-if="currentUser.isAdmin" class="align-center d-flex flex-wrap pa-3">
       <div class="pr-3">
         <label for="page-site-mailing-list-site-id" class="sr-only">Course Site ID</label>
         <v-text-field
@@ -66,8 +66,12 @@ export default {
     }
   },
   mounted() {
-    this.init()
-    putFocusNextTick('page-header')
+    if (this.currentUser.isAdmin) {
+      this.init()
+      putFocusNextTick('page-header')
+    } else {
+      this.error = 'Unauthorized'
+    }
     this.$ready()
   },
   methods: {

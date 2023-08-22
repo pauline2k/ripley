@@ -1,7 +1,15 @@
 <template>
   <div class="align-center d-flex">
     <div class="pr-2">
-      <router-link id="link-to-home" class="text-decoration-none" to="/">
+      <span v-if="$route.meta.isHome">
+        <v-icon color="primary" icon="mdi-alien" size="large" />
+      </span>
+      <router-link
+        v-if="!$route.meta.isHome"
+        id="link-to-home"
+        class="text-decoration-none"
+        to="/"
+      >
         <span class="sr-only">Home</span>
         <v-icon color="primary" icon="mdi-alien" size="large" />
       </router-link>

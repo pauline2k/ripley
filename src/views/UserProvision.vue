@@ -1,81 +1,82 @@
 <template>
   <div v-if="!isLoading" class="canvas-application page-user-provision">
-    <v-container fluid>
-      <v-row no-gutters>
-        <h1 class="page-user-provision-heading">Add Users to bCourses</h1>
-      </v-row>
-      <form name="userImportForm" @submit="onSubmit">
+    <h1 class="page-user-provision-heading">Add Users to bCourses</h1>
+    <form v-if="currentUser.isAdmin" name="userImportForm" @submit="onSubmit">
+      <v-container fluid>
         <v-row no-gutters>
+          <v-col cols="2">
+            <label for="page-user-provision-uid-list" class="form-label">
+              <span aria-hidden="true">UID</span>
+              <span class="sr-only">U I D</span>
+              List
+            </label>
+          </v-col>
           <v-col cols="10">
-            <v-container fluid>
-              <v-row no-gutters>
-                <v-col cols="2">
-                  <label for="page-user-provision-uid-list" class="form-label">
-                    <span aria-hidden="true">UID</span>
-                    <span class="sr-only">U I D</span>
-                    List
-                  </label>
-                </v-col>
-                <v-col cols="10">
-                  <textarea
-                    id="page-user-provision-uid-list"
-                    v-model="rawUids"
-                    class="page-user-provision-uid-list-input"
-                    rows="4"
-                    name="uids"
-                    placeholder="Paste your list of UIDs here organized one UID per a line, or separated by spaces or commas."
-                  >
-                  </textarea>
-                  <small v-if="validationErrors.required" role="alert" aria-live="polite">
-                    You must provide at least one
-                    <span aria-hidden="true">UID</span>
-                    <span class="sr-only">U I D</span>
-                    .
-                  </small>
-                  <small v-if="validationErrors.isNotNumeric" role="alert" aria-live="polite">
-                    The following items in your list are not numeric: {{ invalidValues.join(', ') }}
-                  </small>
-                  <small v-if="validationErrors.isExceedingLimit" role="alert" aria-live="polite">
-                    Maximum IDs: 200. {{ listLength }} IDs found in list.
-                  </small>
-                </v-col>
-              </v-row>
-              <v-row no-gutters>
-                <v-col cols="2"></v-col>
-                <v-col cols="2">
-                  <button
-                    type="submit"
-                    class="canvas-button canvas-button-primary d-block"
-                    :disabled="importButtonDisabled"
-                  >
-                    Import Users
-                  </button>
-                </v-col>
-                <v-col cols="8">
-                  <div role="alert" aria-live="polite">
-                    <div v-if="importProcessing">
-                      <span class="sr-only">Processing import</span>
-                      <v-progress-circular
-                        color="primary"
-                        indeterminate
-                      />
-                    </div>
-                    <div v-if="status === 'error'" class="page-user-provision-feedback">
-                      <v-icon icon="mdi-exclamation-circle" class="icon-red mr-2" />
-                      <strong>Error : {{ error }}</strong>
-                    </div>
-                    <div v-if="status === 'success'" class="page-user-provision-feedback">
-                      <v-icon icon="mdi-check-circle" class="icon-green mr-2" />
-                      Success : The users specified were imported into bCourses.
-                    </div>
-                  </div>
-                </v-col>
-              </v-row>
-            </v-container>
+            <textarea
+              id="page-user-provision-uid-list"
+              v-model="rawUids"
+              class="page-user-provision-uid-list-input"
+              rows="4"
+              name="uids"
+              placeholder="Paste your list of UIDs here organized one UID per a line, or separated by spaces or commas."
+            >
+            </textarea>
+            <small v-if="validationErrors.required" role="alert" aria-live="polite">
+              You must provide at least one
+              <span aria-hidden="true">UID</span>
+              <span class="sr-only">U I D</span>
+              .
+            </small>
+            <small v-if="validationErrors.isNotNumeric" role="alert" aria-live="polite">
+              The following items in your list are not numeric: {{ invalidValues.join(', ') }}
+            </small>
+            <small v-if="validationErrors.isExceedingLimit" role="alert" aria-live="polite">
+              Maximum IDs: 200. {{ listLength }} IDs found in list.
+            </small>
           </v-col>
         </v-row>
-      </form>
-    </v-container>
+        <v-row no-gutters>
+          <v-col cols="2"></v-col>
+          <v-col cols="2">
+            <button
+              type="submit"
+              class="canvas-button canvas-button-primary d-block"
+              :disabled="importButtonDisabled"
+            >
+              Import Users
+            </button>
+          </v-col>
+          <v-col cols="8">
+            <div role="alert" aria-live="polite">
+              <div v-if="importProcessing">
+                <span class="sr-only">Processing import</span>
+                <v-progress-circular
+                  color="primary"
+                  indeterminate
+                />
+              </div>
+              <div v-if="status === 'error'" class="page-user-provision-feedback">
+                <v-icon icon="mdi-exclamation-circle" class="icon-red mr-2" />
+                <strong>Error : {{ error }}</strong>
+              </div>
+              <div v-if="status === 'success'" class="page-user-provision-feedback">
+                <v-icon icon="mdi-check-circle" class="icon-green mr-2" />
+                Success : The users specified were imported into bCourses.
+              </div>
+            </div>
+          </v-col>
+        </v-row>
+      </v-container>
+    </form>
+    <v-alert
+      v-if="!currentUser.isAdmin"
+      class="ma-2"
+      density="compact"
+      role="alert"
+      type="warning"
+    >
+      Unauthorized
+    </v-alert>
   </div>
 </template>
 

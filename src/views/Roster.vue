@@ -109,19 +109,6 @@
           </v-col>
         </v-row>
       </v-container>
-      <v-snackbar
-        v-model="screamInSpace"
-        class="mb-3"
-        close-on-content-click
-        timeout="5000"
-        variant="elevated"
-      >
-        <v-img
-          alt="In space, no one can hear you scream."
-          src="@/assets/images/in-space-no-one-can-hear-you-scream.jpg"
-          width="40vw"
-        />
-      </v-snackbar>
     </div>
   </div>
 </template>
@@ -140,7 +127,6 @@ export default {
     error: undefined,
     printButtonTooltip: 'You can print when student images have loaded.',
     roster: undefined,
-    screamInSpace: false,
     search: undefined,
     selectedSectionId: null,
     showTooltip: true,
@@ -150,7 +136,6 @@ export default {
   watch: {
     search() {
       this.recalculateStudents()
-      this.screamInSpace = this.idx(this.search) === 'in space no one can hear you scream'
     }
   },
   computed: {
