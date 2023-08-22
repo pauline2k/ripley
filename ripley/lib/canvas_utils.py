@@ -202,7 +202,7 @@ def _build_courses_by_term(teaching_sections, term_id, section_ids):
     return courses_by_term
 
 
-def prepare_egrade_export(course):
+def prepare_egrades_export(course):
     app.logger.warning(f'E-Grades job started for course {course.id}')
     official_grades = []
     for user in course.get_users(enrollment_type='student', include='enrollments'):
