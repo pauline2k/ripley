@@ -12,7 +12,7 @@
           <div class="ma-5">
             <div>
               <h2 class="mb-0">Admin Tools</h2>
-              <StandaloneToolsList class="pt-0" :tools="adminTools" />
+              <StandaloneToolsList :tools="adminTools" />
             </div>
             <div class="mt-1">
               <h2 class="mb-0">Embedded Tools</h2>
@@ -25,12 +25,12 @@
                   If you enter a Canvas site ID (see top of page) then the following links will become available.
                 </v-alert>
               </div>
-              <StandaloneToolsList class="pt-0" :tools="embeddedTools" />
+              <StandaloneToolsList :tools="embeddedTools" />
             </div>
 
             <div v-if="currentUser.isAdmin" class="mt-1">
               <h2 class="mb-0">Utilities</h2>
-              <StandaloneToolsList class="pt-0" :tools="utilities" />
+              <StandaloneToolsList :tools="utilities" />
             </div>
           </div>
         </v-card>
