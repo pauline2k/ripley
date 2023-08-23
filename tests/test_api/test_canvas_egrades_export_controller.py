@@ -215,7 +215,9 @@ class TestEgradesExportDownload:
                     f'get_sections_{canvas_site_id}',
                     f'get_settings_{canvas_site_id}',
                     'get_enrollments_4567890',
+
                 ],
+                'section': ['get_enrollments_10000'],
                 'user': [f'profile_{teacher_uid}'],
             }, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
