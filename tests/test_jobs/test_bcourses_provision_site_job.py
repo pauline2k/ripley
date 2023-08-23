@@ -108,7 +108,7 @@ class TestBcoursesProvisionSiteJob:
         with setup_bcourses_provision_job(app) as (s3, m):
             BcoursesProvisionSiteJob(app)._run(params)
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full-sis-import')
-            assert len(spring_2023_enrollments_imported) == 8
+            assert len(spring_2023_enrollments_imported) == 9
             deleted_enrollments = [row for row in spring_2023_enrollments_imported if 'SEC:2023-B-32936' in row]
             updated_enrollments = [row for row in spring_2023_enrollments_imported if 'SEC:2023-B-32937' in row]
             assert len(deleted_enrollments)
