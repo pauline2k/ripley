@@ -248,14 +248,14 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     sis_course_id = get_canvas_course_id(course_slug, term)
 
     with SisImportCsv.create(fieldnames=['course_id', 'short_name', 'long_name', 'account_id', 'term_id', 'status']) as course_csv:
-        course_csv.writerows([{
+        course_csv.writerow({
             'course_id': sis_course_id,
             'short_name': site_abbreviation,
             'long_name': site_name,
             'account_id': account.sis_account_id,
             'term_id': sis_term_id,
             'status': 'active',
-        }])
+        })
         course_csv.filehandle.close()
 
         upload_dated_csv(
@@ -311,17 +311,16 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         if not sis_import:
             raise InternalServerError(f'Course sections SIS import failed (canvas_site_id={course.id}).')
 
-    # Add instructor to section
     if not is_admin_by_ccns:
-        instructor_role_id = section_roles[section_feeds[0]['section_id']] or (teacher_role and teacher_role.id)
-        sis_user_profile = canvas.get_sis_user_profile(uid)
-        if not sis_user_profile:
-            # TODO add user via SIS import
-            # CanvasCsv::UserProvision.new.import_users [uid]
-            sis_user_profile = canvas.get_sis_user_profile(uid)
-
-        user_section = explicit_sections_for_instructor[0] if explicit_sections_for_instructor else sections[0]
-        canvas.add_user_to_section(section_id=user_section['id'], user_profile_id=sis_user_profile.id, role_id=instructor_role_id)
+        _add_instructor_to_site(
+            uid,
+            course,
+            section_roles,
+            teacher_role,
+            explicit_sections_for_instructor,
+            sections,
+            section_feeds,
+        )
 
     # Background enrollment update
     job = get_current_job()
@@ -361,6 +360,34 @@ def _prepare_section_definition(
                 section_roles[sis_section_id] = lead_ta_role and lead_ta_role.id
             else:
                 section_roles[sis_section_id] = teacher_role and teacher_role.id
+
+
+def _add_instructor_to_site(
+    uid,
+    course,
+    section_roles,
+    teacher_role,
+    explicit_sections_for_instructor,
+    sections,
+    section_feeds,
+):
+    instructor_role_id = section_roles[section_feeds[0]['section_id']] or (teacher_role and teacher_role.id)
+    sis_user_profile = canvas.get_sis_user_profile(uid)
+    if not sis_user_profile:
+        user_result = data_loch.get_users(uids=[uid])
+        if user_result:
+            with SisImportCsv.create(['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) as users_csv:
+                users_csv.writerow(csv_row_for_campus_user(user_result[0]))
+                users_csv.filehandle.close()
+                sis_import = canvas.post_sis_import(attachment=users_csv.tempfile.name)
+                if not sis_import:
+                    raise InternalServerError(f'Course sections SIS import failed (canvas_site_id={course.id}).')
+        sis_user_profile = canvas.get_sis_user_profile(uid)
+        if not sis_user_profile:
+            raise InternalServerError(f'Failed to create instructor account (uids={uid}).')
+
+    user_section = explicit_sections_for_instructor[0] if explicit_sections_for_instructor else sections[0]
+    canvas.add_user_to_section(section_id=user_section['id'], user_profile_id=sis_user_profile.id, role_id=instructor_role_id)
 
 
 def sis_enrollment_status_to_canvas_course_role(sis_enrollment_status):
@@ -468,12 +495,12 @@ def _subaccount_for_department(dept_name):
         return subaccount
     else:
         with SisImportCsv.create(fieldnames=['account_id', 'parent_account_id', 'name', 'status']) as accounts_csv:
-            accounts_csv.writerows([{
+            accounts_csv.writerow({
                 'account_id': subaccount_id,
                 'parent_account_id': 'ACCT:OFFICIAL_COURSES',
                 'name': dept_name,
                 'status': 'active',
-            }])
+            })
             accounts_csv.filehandle.close()
             sis_import = canvas.post_sis_import(attachment=accounts_csv.tempfile.name)
             if not sis_import:
