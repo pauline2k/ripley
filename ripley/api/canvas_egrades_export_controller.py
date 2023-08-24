@@ -27,11 +27,11 @@ from flask import current_app as app, request
 from flask_login import current_user
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, csv_download_response
-from ripley.externals import canvas, data_loch
+from ripley.externals import canvas
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import get_official_sections, get_teaching_terms, prepare_egrades_export
-from ripley.lib.egrade_utils import convert_per_grading_basis, LETTER_GRADES
+from ripley.lib.egrade_utils import convert_per_grading_basis, get_canvas_course_student_grades, LETTER_GRADES
 from ripley.lib.http import tolerant_jsonify
 
 
@@ -83,7 +83,7 @@ def egrades_download():
 
     canvas_site_id = current_user.canvas_site_id
     rows = []
-    for row in data_loch.get_basic_profile_and_grades_per_enrollments(term_id=term_id, section_ids=[section_id]):
+    for row in get_canvas_course_student_grades(canvas_site_id=canvas_site_id, section_id=section_id, term_id=term_id):
         grading_basis = (row['grading_basis'] or '').upper()
         comment = None
         if grading_basis in ['CPN', 'DPN', 'EPN', 'PNP']:
@@ -96,8 +96,8 @@ def egrades_download():
         override_grade = None
         rows.append({
             'ID': row['sid'],
-            'Name': f"{row['last_name']}, {row['first_name']}",
-            'Grade': convert_per_grading_basis(row['grade'], override_grade, grading_basis, pnp_cutoff),
+            'Name': row['name'],
+            'Grade': convert_per_grading_basis(row['grades'][f'{grade_type}_grade'], override_grade, grading_basis, pnp_cutoff),
             'Grading Basis': grading_basis,
             'Comments': comment or None,
         })

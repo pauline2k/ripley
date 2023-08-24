@@ -62,6 +62,7 @@ export default {
   },
   methods: {
     logOut() {
+      this.loadingStart()
       logOut().then(data => window.location.href = data.casLogoutUrl)
     },
   }
