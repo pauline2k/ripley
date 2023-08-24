@@ -81,6 +81,7 @@ def egrades_download():
     if pnp_cutoff not in LETTER_GRADES and pnp_cutoff != 'ignore':
         raise BadRequestError(f'Invalid pnpCutoff value: {pnp_cutoff}')
 
+    canvas_site_id = current_user.canvas_site_id
     rows = []
     for row in data_loch.get_basic_profile_and_grades_per_enrollments(term_id=term_id, section_ids=[section_id]):
         grading_basis = (row['grading_basis'] or '').upper()
@@ -103,7 +104,7 @@ def egrades_download():
     term = BerkeleyTerm.from_sis_term_id(term_id)
     return csv_download_response(
         rows=rows,
-        filename=f'egrades-{grade_type}-{section_id}-#{term.season}-{term.year}-{current_user.canvas_site_id}.csv',
+        filename=f'egrades-{grade_type}-{section_id}-{term.season}-{term.year}-{canvas_site_id}.csv',
         fieldnames=['ID', 'Name', 'Grade', 'Grading Basis', 'Comments'],
     )
 

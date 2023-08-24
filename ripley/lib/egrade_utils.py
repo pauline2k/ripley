@@ -23,7 +23,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from ripley.externals import canvas
+from ripley.externals import canvas, data_loch
 from ripley.lib.canvas_utils import parse_canvas_sis_section_id
 
 GRADING_BASIS_CODES = ['CPN', 'DPN', 'EPN', 'ESU', 'PNP', 'SUS']
@@ -41,27 +41,33 @@ def convert_per_grading_basis(grade, override_grade, grading_basis, pnp_cutoff):
     return effective_grade
 
 
-def get_canvas_course_student_grades(canvas_site_id, section_id):
+def get_canvas_course_student_grades(canvas_site_id, section_id, term_id):
+    enrollments = data_loch.get_basic_profile_and_grades_per_enrollments(term_id=term_id, section_ids=[section_id])
+    loch_enrollments_by_uid = {e['ldap_uid']: e for e in enrollments}
     students = []
     for canvas_section in canvas.get_course_sections(canvas_site_id):
         next_section_id, berkeley_term = parse_canvas_sis_section_id(canvas_section.sis_section_id)
         if section_id == next_section_id:
-            for enrollment in canvas.get_section(section_id, api_call=False).get_enrollments():
+            for enrollment in canvas.get_section(canvas_section.id, api_call=False).get_enrollments():
                 required_fields = [hasattr(enrollment, key) for key in ['enrollment_state', 'grades', 'role', 'user']]
                 if all(required_fields) and enrollment.role == 'StudentEnrollment':
                     is_active = str(enrollment.enrollment_state).lower() == 'active'
                     uid = enrollment.user.get('login_id')
-                    if uid and is_active and 'current_grade' in enrollment.grades:
-                        students.append({
-                            'grades': {
-                                'current_grade': enrollment.grades.get('current_grade'),
-                                'current_score': enrollment.grades.get('current_score'),
-                                'final_grade': enrollment.grades.get('final_grade'),
-                                'final_score': enrollment.grades.get('final_score'),
-                                'override_grade': enrollment.grades.get('override_grade'),
-                                'override_score': enrollment.grades.get('override_score'),
-                            },
-                            'name': enrollment.user.get('sortable_name') or enrollment.user.get('name'),
-                            'uid': uid,
-                        })
+                    loch_enrollment = loch_enrollments_by_uid.get(uid)
+                    if loch_enrollment:
+                        if uid and is_active and 'current_grade' in enrollment.grades:
+                            students.append({
+                                'grades': {
+                                    'current_grade': enrollment.grades.get('current_grade'),
+                                    'current_score': enrollment.grades.get('current_score'),
+                                    'final_grade': enrollment.grades.get('final_grade'),
+                                    'final_score': enrollment.grades.get('final_score'),
+                                    'override_grade': enrollment.grades.get('override_grade'),
+                                    'override_score': enrollment.grades.get('override_score'),
+                                },
+                                'grading_basis': enrollment['grading_basis'],
+                                'name': enrollment.user.get('sortable_name') or enrollment.user.get('name'),
+                                'sid': enrollment['sid'],
+                                'uid': uid,
+                            })
     return students
