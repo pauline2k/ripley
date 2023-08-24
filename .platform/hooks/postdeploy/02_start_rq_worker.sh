@@ -52,7 +52,7 @@ fi
 echo "Connecting to ${redis_host}:${redis_port} from ${RIPLEY_ENV} environment."; echo
 
 attempt=0
-until [ -z "$(sudo ps | grep rq:worker:xenomorph)" ];
+until [ -z "$(sudo ps | grep rq:worker:xenomorph | grep -v grep)" ];
 do
   (( attempt++ ))
   if (( attempt <= 3 ))
