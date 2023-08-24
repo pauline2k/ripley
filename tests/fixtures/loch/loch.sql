@@ -190,6 +190,7 @@ CREATE TABLE sis_data.edo_sections (
     sis_term_id VARCHAR,
     sis_section_id VARCHAR,
     is_primary BOOLEAN,
+    dept_name VARCHAR,
     sis_course_name VARCHAR,
     sis_course_title VARCHAR,
     sis_instruction_format VARCHAR,
@@ -211,20 +212,20 @@ CREATE TABLE sis_data.edo_sections (
 );
 
 INSERT INTO sis_data.edo_sections
-(sis_term_id, sis_section_id, is_primary, sis_course_name, sis_course_title, sis_instruction_format, sis_section_num, allowed_units, cs_course_id, session_code, instruction_mode, primary_associated_section_id, instructor_uid, instructor_name, instructor_role_code, meeting_location, meeting_days, meeting_start_time, meeting_end_time, meeting_start_date, meeting_end_date)
+(sis_term_id, sis_section_id, is_primary, dept_name, sis_course_name, sis_course_title, sis_instruction_format, sis_section_num, allowed_units, cs_course_id, session_code, instruction_mode, primary_associated_section_id, instructor_uid, instructor_name, instructor_role_code, meeting_location, meeting_days, meeting_start_time, meeting_end_time, meeting_start_date, meeting_end_date)
 VALUES
-('2232', '32936', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '001', NULL, '876543', 1, 'P', NULL, '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
-('2232', '32937', TRUE, 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '002', NULL, '876543', 1, 'P', NULL, '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
-('2225', '10000', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '001', NULL, '100726', 1, 'P', NULL, '13579', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
-('2228', '17275', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '001', NULL, '100726', 1, 'P', NULL, '13579', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
-('2228', '17277', TRUE, 'ANTHRO 197', 'Fieldwork', 'FLD', '002', NULL, '100726', 1, 'P', NULL, '200122', 'Mufty Blauswater', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
-('2225', '20000', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '001', NULL, '1234567', 1, 'P', NULL, '30000', 'Ash', 'PI', 'Sevastopol Station', 'SAMOWE', '09:00', '11:00', '2023-02-17', '2023-02-17'),
-('2232', '12345', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '001', NULL, '1234567', 1, 'P', NULL, '30000', 'Ash', 'PI', 'Sevastopol Station', 'SAMOWE', '09:00', '11:00', '2023-02-17', '2023-02-17'),
-('2232', '12347', FALSE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'DIS', '101', NULL, '1234567', 1, 'P', NULL, '200122', 'Mufty Blauswater', 'PI', 'Sevastopol Station', 'TU', '14:00', '15:00', '2023-01-17', '2023-05-17'),
-('2232', '12346', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '002', NULL, '1234567', 1, 'P', NULL, '30000', 'Ash', 'PI', 'Acheron LV 426', 'TUTH', '09:00', '13:30', '2023-01-17', '2023-05-05'),
-('2232', '12346', TRUE, 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '002', NULL, '1234567', 1, 'P', NULL, '13579', 'Fitzi Ritz', 'PI', 'Acheron LV 426', 'TUTH', '09:00', '13:30', '2023-01-17', '2023-05-05'),
-('2228', '32290', TRUE, 'ASTRON C228', 'Extragalactic Astronomy and Cosmology', 'LEC', '001', NULL, '124009', 1, 'P', NULL, '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
-('2228', '32291', TRUE, 'ASTRON C228', 'Extragalactic Astronomy and Cosmology', 'LEC', '002', NULL, '124009', 1, 'P', NULL, '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL);
+('2232', '32936', TRUE, 'ANTHRO', 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '001', NULL, '876543', 1, 'P', NULL, '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2232', '32937', TRUE, 'ANTHRO', 'ANTHRO 189', 'Our Dogs, Ourselves: Encounters between the Human and the Non-Human', 'LEC', '002', NULL, '876543', 1, 'P', NULL, '30000', 'Ash 🤖', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2225', '10000', TRUE, 'ANTHRO', 'ANTHRO 197', 'Fieldwork', 'FLD', '001', NULL, '100726', 1, 'P', NULL, '13579', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2228', '17275', TRUE, 'ANTHRO', 'ANTHRO 197', 'Fieldwork', 'FLD', '001', NULL, '100726', 1, 'P', NULL, '13579', 'Fitzi Ritz', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2228', '17277', TRUE, 'ANTHRO', 'ANTHRO 197', 'Fieldwork', 'FLD', '002', NULL, '100726', 1, 'P', NULL, '200122', 'Mufty Blauswater', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2225', '20000', TRUE, 'ASTRON', 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '001', NULL, '1234567', 1, 'P', NULL, '30000', 'Ash', 'PI', 'Sevastopol Station', 'SAMOWE', '09:00', '11:00', '2023-02-17', '2023-02-17'),
+('2232', '12345', TRUE, 'ASTRON', 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '001', NULL, '1234567', 1, 'P', NULL, '30000', 'Ash', 'PI', 'Sevastopol Station', 'SAMOWE', '09:00', '11:00', '2023-02-17', '2023-02-17'),
+('2232', '12347', FALSE, 'ASTRON', 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'DIS', '101', NULL, '1234567', 1, 'P', NULL, '200122', 'Mufty Blauswater', 'PI', 'Sevastopol Station', 'TU', '14:00', '15:00', '2023-01-17', '2023-05-17'),
+('2232', '12346', TRUE, 'ASTRON', 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '002', NULL, '1234567', 1, 'P', NULL, '30000', 'Ash', 'PI', 'Acheron LV 426', 'TUTH', '09:00', '13:30', '2023-01-17', '2023-05-05'),
+('2232', '12346', TRUE, 'ASTRON', 'ASTRON 218', 'Stellar Dynamics and Galactic Structure', 'LEC', '002', NULL, '1234567', 1, 'P', NULL, '13579', 'Fitzi Ritz', 'PI', 'Acheron LV 426', 'TUTH', '09:00', '13:30', '2023-01-17', '2023-05-05'),
+('2228', '32290', TRUE, 'ASTRON', 'ASTRON C228', 'Extragalactic Astronomy and Cosmology', 'LEC', '001', NULL, '124009', 1, 'P', NULL, '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
+('2228', '32291', TRUE, 'ASTRON', 'ASTRON C228', 'Extragalactic Astronomy and Cosmology', 'LEC', '002', NULL, '124009', 1, 'P', NULL, '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- ('2232', '32936', '20000', 'E', NULL, 'GRD'),
 -- ('2232', '32936', '40000', 'E', NULL, 'GRD'),

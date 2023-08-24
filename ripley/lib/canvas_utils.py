@@ -40,7 +40,7 @@ from rq.job import get_current_job
 
 def get_canvas_course_id(course_slug, term):
     # TODO add random hash as needed to ensure uniqueness
-    return f'CRS:{course_slug.upper()}-{term.year}-{term.season}'
+    return f'CRS:{course_slug.upper()}'
 
 
 def get_canvas_sis_section_id(sis_section):
@@ -234,27 +234,27 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     if not courses_list:
         raise BadRequestError('No candidate courses found.')
 
-    course_slug = courses_list[0]['course_name'].replace(' ', '-').lower()
+    course_slug = courses_list[0]['slug']
 
-    # TODO identify department subaccount
-    subaccount = 'Plant Skills for Life'
-
-    # TODO get Canvas role id for teacher and lead ta
-    teacher_role_id = 999
+    # Identify department subaccount
+    dept_name = courses_list[0]['deptName']
+    account = _subaccount_for_department(dept_name)
+    defined_roles = list(account.get_roles())
+    teacher_role = next((r for r in defined_roles if r.label == 'Teacher'), None)
+    lead_ta_role = next((r for r in defined_roles if r.label == 'Lead TA'), None)
 
     sis_term_id = term.to_canvas_sis_term_id()
     sis_course_id = get_canvas_course_id(course_slug, term)
-    course_site_definition = {
-        'course_id': sis_course_id,
-        'short_name': site_abbreviation,
-        'long_name': site_name,
-        'account_id': subaccount,
-        'term_id': sis_term_id,
-        'status': 'active',
-    }
 
     with SisImportCsv.create(fieldnames=['course_id', 'short_name', 'long_name', 'account_id', 'term_id', 'status']) as course_csv:
-        course_csv.writerows([course_site_definition])
+        course_csv.writerows([{
+            'course_id': sis_course_id,
+            'short_name': site_abbreviation,
+            'long_name': site_name,
+            'account_id': account.sis_account_id,
+            'term_id': sis_term_id,
+            'status': 'active',
+        }])
         course_csv.filehandle.close()
 
         upload_dated_csv(
@@ -278,18 +278,21 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     # Section definitions
     section_feeds = []
     section_roles = {}
-    for s in sections:
-        sis_section_id = get_canvas_sis_section_id(s)
-        section_feeds.append({
-            'section_id': sis_section_id,
-            'course_id': course.sis_course_id,
-            'name': f"{s['course_name']} {course_section_name(s)}",
-            'status': 'active',
-            'start_date': None,
-            'end_date': None,
-        })
-        # TODO in case of admin_by_ccns, determine instructor role and add
-        section_roles[sis_section_id] = None
+    explicit_sections_for_instructor = []
+
+    for c in courses_list:
+        for s in c['sections']:
+            _prepare_section_definition(
+                s,
+                course,
+                uid,
+                lead_ta_role,
+                teacher_role,
+                is_admin_by_ccns,
+                section_feeds,
+                section_roles,
+                explicit_sections_for_instructor,
+            )
 
     with SisImportCsv.create(fieldnames=['section_id', 'course_id', 'name', 'status', 'start_date', 'end_date']) as sections_csv:
         sections_csv.writerows(section_feeds)
@@ -309,13 +312,15 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
 
     # Add instructor to section
     if not is_admin_by_ccns:
-        instructor_role_id = section_roles[section_feeds[0]['section_id']] or teacher_role_id
+        instructor_role_id = section_roles[section_feeds[0]['section_id']] or (teacher_role and teacher_role.id)
         sis_user_profile = canvas.get_sis_user_profile(uid)
         if not sis_user_profile:
             # TODO add user via SIS import
             # CanvasCsv::UserProvision.new.import_users [uid]
             sis_user_profile = canvas.get_sis_user_profile(uid)
-        canvas.add_user_to_section(section_id=sections[0]['id'], user_profile_id=sis_user_profile.id, role_id=instructor_role_id)
+
+        user_section = explicit_sections_for_instructor[0] if explicit_sections_for_instructor else sections[0]
+        canvas.add_user_to_section(section_id=user_section['id'], user_profile_id=sis_user_profile.id, role_id=instructor_role_id)
 
     # Background enrollment update
     job = get_current_job()
@@ -323,6 +328,36 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         job.meta['sis_import_id'] = sis_import.id
         job.save_meta()
     _update_enrollments_in_background(sis_term_id, course, sections, [], sis_import)
+
+
+def _prepare_section_definition(
+    section,
+    course,
+    uid,
+    lead_ta_role,
+    teacher_role,
+    is_admin_by_ccns,
+    section_feeds,
+    section_roles,
+    explicit_sections_for_instructor,
+):
+    sis_section_id = get_canvas_sis_section_id(section)
+    section_feeds.append({
+        'section_id': sis_section_id,
+        'course_id': course.sis_course_id,
+        'name': f"{section['course_name']} {course_section_name(section)}",
+        'status': 'active',
+        'start_date': None,
+        'end_date': None,
+    })
+    if not is_admin_by_ccns:
+        instructing_assignment = next((i for i in section['instructors'] if i['uid'] == uid), None)
+        if instructing_assignment:
+            explicit_sections_for_instructor.append(section)
+            if instructing_assignment['role'] == 'APRX':
+                section_roles[sis_section_id] = lead_ta_role and lead_ta_role.id
+            else:
+                section_roles[sis_section_id] = teacher_role and teacher_role.id
 
 
 def sis_enrollment_status_to_canvas_course_role(sis_enrollment_status):
@@ -418,6 +453,32 @@ def _extract_grades(enrollments):
             if key in api_grades:
                 grade_hash[key] = api_grades[key]
     return grade_hash
+
+
+def _subaccount_for_department(dept_name):
+    dept_name = dept_name.replace('/', '_')
+    subaccount_id = f'ACCT:{dept_name}'
+    subaccount = canvas.get_account(subaccount_id, use_sis_id=True)
+    if subaccount:
+        return subaccount
+    else:
+        with SisImportCsv.create(fieldnames=['account_id', 'parent_account_id', 'name', 'status']) as accounts_csv:
+            accounts_csv.writerows([{
+                'account_id': subaccount_id,
+                'parent_account_id': 'ACCT:OFFICIAL_COURSES',
+                'name': dept_name,
+                'status': 'active',
+            }])
+            accounts_csv.filehandle.close()
+            sis_import = canvas.post_sis_import(attachment=accounts_csv.tempfile.name)
+            if not sis_import:
+                raise InternalServerError(f'Subccount SIS import failed (account_id={subaccount_id}).')
+
+        subaccount = canvas.get_account(subaccount_id, use_sis_id=True)
+        if subaccount:
+            return subaccount
+        else:
+            raise InternalServerError(f'Could not find bCourses account for department {dept_name}')
 
 
 def _update_enrollments_in_background(sis_term_id, course, all_sections, deleted_section_ids, sis_import):

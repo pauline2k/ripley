@@ -299,6 +299,7 @@ class TestCanvasSiteProvisionSections:
             assert sections[0]['instructors'] == [
                 {
                     'name': 'Ash',
+                    'role': 'PI',
                     'uid': '30000',
                 },
             ]
@@ -319,10 +320,12 @@ class TestCanvasSiteProvisionSections:
             assert sections[1]['instructors'] == [
                 {
                     'name': 'Ash',
+                    'role': 'PI',
                     'uid': '30000',
                 },
                 {
                     'name': 'Fitzi Ritz',
+                    'role': 'PI',
                     'uid': '13579',
                 },
             ]
@@ -342,6 +345,7 @@ class TestCanvasSiteProvisionSections:
             assert sections[2]['instructors'] == [
                 {
                     'name': 'Mufty Blauswater',
+                    'role': 'PI',
                     'uid': '200122',
                 },
             ]
