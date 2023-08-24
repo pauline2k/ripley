@@ -35,6 +35,7 @@ COURSE_NAME_REGEX = r'([A-Z]+)\s([A-Z]?)(\d+)([A-Z]?)([A-Z]?)'
 SECTION_COLUMNS = f"""
     ss.sis_term_id AS term_id,
     ss.cs_course_id AS course_id,
+    ss.dept_name,
     ss.sis_course_name AS course_name,
     ss.sis_course_title AS course_title,
     ss.sis_section_id AS section_id,
@@ -51,6 +52,7 @@ SECTION_COLUMNS = f"""
     ss.meeting_end_date,
     ss.instructor_uid,
     ss.instructor_name,
+    ss.instructor_role_code,
     regexp_matches(ss.sis_course_name, '{COURSE_NAME_REGEX}') AS sort_key"""
 
 connection_pool = None

@@ -30,6 +30,7 @@ from time import strftime, strptime
 def course_to_api_json(berkeley_term, section):
     return {
         'courseCode': section['course_name'],
+        'deptName': section['dept_name'],
         'sections': [],
         'slug': '-'.join([
             section['course_name'].replace(' ', '-').lower(),
@@ -62,6 +63,7 @@ def section_to_api_json(section, co_instructor_sections=None):
     def _instructor(section):
         return {
             'name': section['instructor_name'],
+            'role': section['instructor_role_code'],
             'uid': section['instructor_uid'],
         }
     schedules = {

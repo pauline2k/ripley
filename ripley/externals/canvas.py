@@ -46,14 +46,14 @@ def ping_canvas():
     return get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID']) is not None
 
 
-def get_account(account_id, api_call=True, api_url=None):
+def get_account(account_id, api_call=True, api_url=None, use_sis_id=False):
     c = _get_canvas(api_url)
     if api_call is False:
         return Account(c._Canvas__requester, {'id': account_id})
     else:
         account = None
         try:
-            account = c.get_account(account_id)
+            account = c.get_account(account_id, use_sis_id=use_sis_id)
         except Exception as e:
             app.logger.error(f'Failed to retrieve Canvas account (id={account_id})')
             app.logger.exception(e)
