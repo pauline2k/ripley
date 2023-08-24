@@ -75,20 +75,22 @@ def stop_workers(redis_url):
         app = create_app()
     redis_conn = redis.from_url(redis_url)
     with Connection(redis_conn):
-        wait_seconds = 10
-        workers = Worker.all(redis_conn)
-        app.logger.info(f'{Worker.count(redis_conn)} existing worker(s) need to be shut down.')
-        for w in workers:
-            _request_stop(redis_conn, w)
+        worker_count = Worker.count(redis_conn)
+        if worker_count > 0:
+            app.logger.info(f'{worker_count} existing worker(s) need to be shut down.')
+            wait_seconds = 10
+            workers = Worker.all(redis_conn)
+            for w in workers:
+                _request_stop(redis_conn, w)
 
-        # Wait for worker to gracefully shut down.
-        time.sleep(wait_seconds)
+            # Wait for worker to gracefully shut down.
+            time.sleep(wait_seconds)
 
-        workers = Worker.all(redis_conn)
-        # Any remaining workers, kill 'em.
-        for w in workers:
-            if w.pid:
-                os.kill(w.pid, signal.SIGINT)
+            workers = Worker.all(redis_conn)
+            # Any remaining workers, kill 'em.
+            for w in workers:
+                if w.pid:
+                    os.kill(w.pid, signal.SIGINT)
 
 
 def work_horse_killed_handler(job, pid, stat, rusage):

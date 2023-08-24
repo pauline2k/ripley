@@ -37,7 +37,6 @@ from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, get_grade_distribution_with_enrollments
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
-from ripley.models.job_history import JobHistory
 
 
 @app.route('/api/canvas_site/provision')
@@ -193,14 +192,6 @@ def get_provision_status():
     job = get_job(job_id)
     job_status = job.get_status(refresh=True)
     job_data = job.get_meta(refresh=True)
-    if 'enrollment_update_job_id' in job_data:
-        enrollment_update_job = JobHistory.get_by_id(job_data['enrollment_update_job_id'])
-        if enrollment_update_job.failed:
-            job_status = 'failed'
-        elif enrollment_update_job.finished_at:
-            job_status = 'finished'
-        else:
-            job_status = 'started'
     if 'sis_import_id' in job_data:
         sis_import = canvas.get_sis_import(job_data['sis_import_id'])
         if not sis_import:
