@@ -207,24 +207,25 @@ class TestEgradesExportDownload:
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
         with requests_mock.Mocker() as m:
-            canvas_site_id = '8876542'
+            canvas_site_id = 1010101
+            section_id = 99999
+            term_id = 2228
             register_canvas_uris(app, {
-                'account': ['get_admins', 'get_terms'],
+                'account': ['get_admins'],
                 'course': [
                     f'get_by_id_{canvas_site_id}',
                     f'get_sections_{canvas_site_id}',
                     f'get_settings_{canvas_site_id}',
                     'get_enrollments_4567890',
-
                 ],
-                'section': ['get_enrollments_10000'],
-                'user': [f'profile_{teacher_uid}'],
+                'section': ['get_enrollments_500'],
+                'user': ['profile_10000'],
             }, m)
-            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = self._api_egrades_download(
                 client,
-                section_id=32936,
-                term_id=2232,
+                section_id=section_id,
+                term_id=term_id,
             )
             assert 'csv' in response.content_type
             csv = str(response.data)
