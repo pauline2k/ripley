@@ -165,8 +165,8 @@ class User(UserMixin):
         cache_key = self._get_cache_key()
         canvas_user_data = fetch_cached_dict_object(cache_key)
         if not canvas_user_data:
-            if not user_profile:
-                user_profile = canvas.get_sis_user_profile(self.uid) if self.uid else None
+            if not user_profile and self.uid:
+                user_profile = canvas.get_sis_user_profile(self.uid) or canvas.get_sis_user_profile(f'inactive-{self.uid}')
             if user_profile:
                 course = canvas.get_course(course_id=self.__canvas_site_id) if self.uid and self.__canvas_site_id else None
                 canvas_user_id = user_profile.get('id')
