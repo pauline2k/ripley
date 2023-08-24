@@ -187,10 +187,10 @@
           <div v-if="jobStatus === 'sendingRequest'">
             Sending request...
           </div>
-          <div v-if="$_.includes(['queued', 'initializing', 'created'], jobStatus)">
+          <div v-if="'queued' === jobStatus">
             Request sent. Awaiting processing...
           </div>
-          <div v-if="$_.includes(['started', 'importing'], jobStatus)">
+          <div v-if="'started' === jobStatus">
             Request received. Updating sections...
           </div>
           <div v-if="'finished' === jobStatus">
@@ -457,9 +457,9 @@ export default {
         courseProvisionJobStatus(this.backgroundJobId).then(
           response => {
             this.jobStatus = response.jobStatus
-            if (!(this.$_.includes(['started', 'queued', 'initializing', 'created', 'importing'], this.jobStatus))) {
+            if (!(this.$_.includes(['started', 'queued'], this.jobStatus))) {
               clearInterval(this.exportTimer)
-              if (this.$_.includes(['imported', 'finished'], this.jobStatus) && response.workflowState === 'imported') {
+              if (this.jobStatus === 'finished' && response.workflowState === 'imported') {
                 this.jobStatusMessage = 'The sections in this course site have been updated successfully.'
               } else {
                 this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'

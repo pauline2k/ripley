@@ -89,7 +89,6 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
                 _csv.filehandle.close()
 
             self.upload_results(csv_set, timestamp)
-            app.logger.info('Job complete.')
 
         CanvasSynchronization.update(enrollments=this_sync, instructors=this_sync)
         app.logger.info(f'bCourses site provisioning job (mode={self.__class__.__name__}) complete.')

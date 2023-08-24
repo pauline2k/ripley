@@ -41,17 +41,21 @@ class BaseJob:
     def __init__(self, app_context):
         self.app_context = app_context
 
-    def run_async(self, force_run=False, params={}):
+    def run_async(self, force_run=False, concurrent=False, params={}):
         if os.environ.get('RIPLEY_ENV') in ['test', 'testext']:
             app.logger.info('Test run in progress; will not muddy the waters by actually kicking off a background thread.')
-            self.run(force_run=force_run, params=params)
+            self.run(force_run=force_run, concurrent=concurrent, params=params)
         else:
             app.logger.info('About to start background thread.')
-            kwargs = {'force_run': force_run, 'params': params}
+            kwargs = {
+                'force_run': force_run,
+                'concurrent': concurrent,
+                'params': params,
+            }
             thread = Thread(target=self.run, kwargs=kwargs, daemon=True)
             thread.start()
 
-    def run(self, force_run=False, params=None):
+    def run(self, force_run=False, concurrent=False, params=None):
         with self.app_context():
             job = Job.get_job_by_key(self.key())
             if job:
@@ -71,7 +75,7 @@ class BaseJob:
                         if hours_running >= app.config['JOB_TIMEOUT_HOURS']:
                             app.logger.warn(f'Older instance of job {self.key()} has timed out.')
                             JobHistory.job_finished(id_=running_job.id, failed=True)
-                        else:
+                        elif not concurrent:
                             app.logger.warn(f'Skipping job {self.key()} because an older instance is still running')
                             return
 

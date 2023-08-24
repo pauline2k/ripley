@@ -35,7 +35,6 @@ from ripley.lib.berkeley_course import course_section_name, course_to_api_json, 
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
-from ripley.models.job_history import JobHistory
 from rq.job import get_current_job
 
 
@@ -322,10 +321,8 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     job = get_current_job()
     if job:
         job.meta['sis_import_id'] = sis_import.id
-    bg_job = _update_enrollments_in_background(sis_term_id, course, sections, [], sis_import)
-    if bg_job:
-        job.meta['enrollment_update_job_id'] = bg_job.id
-    job.save_meta()
+        job.save_meta()
+    _update_enrollments_in_background(sis_term_id, course, sections, [], sis_import)
 
 
 def sis_enrollment_status_to_canvas_course_role(sis_enrollment_status):
@@ -382,10 +379,8 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
         job = get_current_job()
         if job:
             job.meta['sis_import_id'] = sis_import.id
-        bg_job = _update_enrollments_in_background(canvas_sis_term_id, course, sections, section_ids_to_remove, sis_import)
-        if bg_job:
-            job.meta['enrollment_update_job_id'] = bg_job.id
-        job.save_meta()
+            job.save_meta()
+        _update_enrollments_in_background(canvas_sis_term_id, course, sections, section_ids_to_remove, sis_import)
 
 
 def user_id_from_attributes(attributes):
@@ -437,5 +432,4 @@ def _update_enrollments_in_background(sis_term_id, course, all_sections, deleted
     }
     app.logger.info(f'SIS import (id={sis_import.id}) {sis_import.workflow_state}; starting job BcoursesProvisionSiteJob \
                     (sis_course_id={course.sis_course_id}).')
-    BcoursesProvisionSiteJob(app.app_context).run_async(force_run=True, params=params)
-    return JobHistory.get_running_job(job_key=BcoursesProvisionSiteJob.key())
+    BcoursesProvisionSiteJob(app.app_context).run(force_run=True, concurrent=True, params=params)
