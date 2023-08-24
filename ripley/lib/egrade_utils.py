@@ -48,26 +48,28 @@ def get_canvas_course_student_grades(canvas_site_id, section_id, term_id):
     for canvas_section in canvas.get_course_sections(canvas_site_id):
         next_section_id, berkeley_term = parse_canvas_sis_section_id(canvas_section.sis_section_id)
         if section_id == next_section_id:
-            for enrollment in canvas.get_section(canvas_section.id, api_call=False).get_enrollments():
-                required_fields = [hasattr(enrollment, key) for key in ['enrollment_state', 'grades', 'role', 'user']]
-                if all(required_fields) and enrollment.role == 'StudentEnrollment':
-                    is_active = str(enrollment.enrollment_state).lower() == 'active'
-                    uid = enrollment.user.get('login_id')
+            for canvas_enrollment in canvas.get_section(canvas_section.id, api_call=False).get_enrollments():
+                required_fields = [hasattr(canvas_enrollment, key) for key in ['enrollment_state', 'grades', 'role', 'user']]
+                if all(required_fields) and canvas_enrollment.role == 'StudentEnrollment':
+                    is_active = str(canvas_enrollment.enrollment_state).lower() == 'active'
+                    student = canvas_enrollment.user
+                    uid = student.get('login_id')
                     loch_enrollment = loch_enrollments_by_uid.get(uid)
                     if loch_enrollment:
-                        if uid and is_active and 'current_grade' in enrollment.grades:
+                        grades = canvas_enrollment.grades
+                        if is_active and 'current_grade' in grades:
                             students.append({
                                 'grades': {
-                                    'current_grade': enrollment.grades.get('current_grade'),
-                                    'current_score': enrollment.grades.get('current_score'),
-                                    'final_grade': enrollment.grades.get('final_grade'),
-                                    'final_score': enrollment.grades.get('final_score'),
-                                    'override_grade': enrollment.grades.get('override_grade'),
-                                    'override_score': enrollment.grades.get('override_score'),
+                                    'current_grade': grades.get('current_grade'),
+                                    'current_score': grades.get('current_score'),
+                                    'final_grade': grades.get('final_grade'),
+                                    'final_score': grades.get('final_score'),
+                                    'override_grade': grades.get('override_grade'),
+                                    'override_score': grades.get('override_score'),
                                 },
-                                'grading_basis': enrollment['grading_basis'],
-                                'name': enrollment.user.get('sortable_name') or enrollment.user.get('name'),
-                                'sid': enrollment['sid'],
+                                'grading_basis': loch_enrollment['grading_basis'],
+                                'name': student.get('sortable_name') or student.get('name'),
+                                'sid': loch_enrollment['sid'],
                                 'uid': uid,
                             })
     return students

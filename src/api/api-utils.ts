@@ -34,6 +34,10 @@ export default {
     )
   },
   downloadViaGet(path: string, filename: string, redirectOnError?: boolean) {
+    // Filename prefix is intended for developer workstation only. Set its value in the ".env.development.local" file.
+    // The prefix in filename will distinguish local downloads, useful when comparing results with other environments.
+    const prefix = import.meta.env.VITE_APP_DOWNLOAD_FILENAME_PREFIX
+    filename = `${prefix}${filename}`
     return axios(
       `${import.meta.env.VITE_APP_API_BASE_URL}${path}`,
       {responseType: 'blob'}
