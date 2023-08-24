@@ -61,12 +61,12 @@ def start_worker(redis_url, name='xenomorph'):
             name=name,
             work_horse_killed_handler=work_horse_killed_handler,
         )
+        app.logger.info('Initialized xenomorph.')
         w.work(
             logging_level=app.config['LOGGING_LEVEL'],
             date_format='%Y-%m-%d %H:%M:%S,%f',
             log_format=app.config['LOGGING_FORMAT'],
         )
-        app.logger.info('Initialized xenomorph.')
 
 
 def stop_workers(redis_url):
@@ -76,21 +76,21 @@ def stop_workers(redis_url):
     redis_conn = redis.from_url(redis_url)
     with Connection(redis_conn):
         worker_count = Worker.count(redis_conn)
-        if worker_count > 0:
-            app.logger.info(f'{worker_count} existing worker(s) need to be shut down.')
-            wait_seconds = 10
-            workers = Worker.all(redis_conn)
-            for w in workers:
-                _request_stop(redis_conn, w)
+        app.logger.info(f'{worker_count} existing worker(s) need to be shut down.')
+        wait_seconds = 10
+        workers = Worker.all(redis_conn)
+        for w in workers:
+            _request_stop(redis_conn, w)
 
-            # Wait for worker to gracefully shut down.
-            time.sleep(wait_seconds)
+        # Wait for worker to gracefully shut down.
+        time.sleep(wait_seconds)
 
-            workers = Worker.all(redis_conn)
-            # Any remaining workers, kill 'em.
-            for w in workers:
-                if w.pid:
-                    os.kill(w.pid, signal.SIGINT)
+        workers = Worker.all(redis_conn)
+        # Any remaining workers, kill 'em.
+        for w in workers:
+            if w.pid:
+                app.logger.info(f'Existing worker (PID {w.pid}) did not stop when asked.')
+                os.kill(w.pid, signal.SIGINT)
 
 
 def work_horse_killed_handler(job, pid, stat, rusage):
