@@ -23,18 +23,14 @@
           for further assistance.
         </div>
       </v-alert>
-      <div v-if="error" role="alert">
-      </div>
     </div>
     <v-container v-if="appState === 'preselection'">
       <v-row no-gutters>
         <v-col>
-          <div class="align-center d-flex">
-            <BackToGradebook />
-          </div>
-          <h1 class="grade-export-header">Before exporting your E-Grades:</h1>
-          <h2 class="grade-export-sub-header">1. Select a grading scheme:</h2>
-          <div class="pb-4 pt-2">
+          <BackToGradebook />
+          <h1 class="grade-export-header mb-3 mt-2">Before exporting your E-Grades:</h1>
+          <h2 class="grade-export-sub-header">1. Select a grading scheme</h2>
+          <div class="pb-4 pl-5 pt-2">
             <span v-if="!noGradingStandardEnabled">
               You have already set a grading scheme. You can view your grading scheme or select an alternate grading scheme in
               <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`" target="_top">Course Settings</a>.
@@ -44,12 +40,12 @@
               <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`" target="_top">Course Settings</a>
               and return once completed.
             </span>
-            <div class="pt-2">
+            <div class="pt-1">
               For detailed instructions, see: "<OutboundLink href="https://community.canvaslms.com/docs/DOC-26521-how-do-i-enable-a-grading-scheme-for-a-course">How do I enable a grading scheme for a course?</OutboundLink>"
             </div>
           </div>
           <h2 class="grade-export-sub-header">2. Post all assignment grades:</h2>
-          <div class="pb-8 pt-2">
+          <div class="pb-8 pl-5 pt-2">
             <div>
               All assignment grades must be posted (published/unmuted) to ensure that your E-Grades export matches what you see in the gradebook. To confirm that all grades have been posted, review all columns in
               <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">your gradebook</a>
@@ -110,7 +106,7 @@
           <BackToGradebook />
           <h1
             id="grade-export-header"
-            class="grade-export-header"
+            class="grade-export-header mb-3 mt-2"
             tabindex="-1"
           >
             Export E-Grades
@@ -123,25 +119,26 @@
       <v-row v-if="officialSections.length > 1" no-gutters>
         <v-col md="5">
           <h2 class="pb-2">Select section</h2>
-          <select
-            id="course-sections"
-            v-model="selectedSection"
-            class="w-100"
-          >
-            <option :value="null">Choose...</option>
-            <option v-for="section in officialSections" :key="section.canvasName" :value="section">
-              {{ section.canvasName }}
-            </option>
-          </select>
+          <div class="pl-3">
+            <select
+              id="course-sections"
+              v-model="selectedSection"
+            >
+              <option :value="null">Choose...</option>
+              <option v-for="section in officialSections" :key="section.canvasName" :value="section">
+                {{ section.canvasName }}
+              </option>
+            </select>
+          </div>
         </v-col>
       </v-row>
       <v-row no-gutters>
         <v-col>
           <div class="py-4">
             <h2>Configure P/NP grade options</h2>
-            <div class="pt-2">
-              <div>
-                <label for="input-enable-pnp-conversion-true">
+            <div class="pl-2 pt-2">
+              <div class="d-flex">
+                <div>
                   <input
                     id="input-enable-pnp-conversion-true"
                     v-model="enablePnpConversion"
@@ -151,11 +148,13 @@
                     value="true"
                     @change="selectedPnpCutoffGrade = null"
                   />
+                </div>
+                <label for="input-enable-pnp-conversion-true">
                   Automatically convert letter grades in the E-Grades export to the student-selected grading option.
                   Please select the lowest passing letter grade.
                 </label>
               </div>
-              <div class="pb-4 pt-1">
+              <div class="pb-4 pl-4 pt-1">
                 <select
                   id="select-pnp-grade-cutoff"
                   v-model="selectedPnpCutoffGrade"
@@ -173,21 +172,25 @@
                 </select>
               </div>
             </div>
-            <div>
-              <label for="input-enable-pnp-conversion-true">
-                <input
-                  id="input-enable-pnp-conversion-false"
-                  v-model="enablePnpConversion"
-                  class="mr-2"
-                  type="radio"
-                  name="enablePnpConversion"
-                  value="false"
-                  @change="selectedPnpCutoffGrade = ''"
-                />
-                Do not automatically convert any letter grades to P/NP. I have applied a P/NP grading scheme to
-                all grades in this course, or will manually adjust the grades in the E-Grades Export CSV to
-                reflect the student-selected grading option.
-              </label>
+            <div class="pl-2 pt-1">
+              <div class="d-flex">
+                <div>
+                  <input
+                    id="input-enable-pnp-conversion-false"
+                    v-model="enablePnpConversion"
+                    class="mr-2"
+                    type="radio"
+                    name="enablePnpConversion"
+                    value="false"
+                    @change="selectedPnpCutoffGrade = ''"
+                  />
+                </div>
+                <label for="input-enable-pnp-conversion-false">
+                  Do not automatically convert any letter grades to P/NP. I have applied a P/NP grading scheme to
+                  all grades in this course, or will manually adjust the grades in the E-Grades Export CSV to
+                  reflect the student-selected grading option.
+                </label>
+              </div>
             </div>
           </div>
         </v-col>
@@ -195,9 +198,9 @@
       <v-row no-gutters>
         <v-col>
           <h2>What would you like to download?</h2>
-          <div class="pt-2">
+          <div class="pl-2 pt-1">
             <h3>Current Grades</h3>
-            <div class="pt-2">
+            <div>
               Current grades download ignores unsubmitted assignments when calculating grades.
               Use this download when you want to excuse unsubmitted assignments.
             </div>
@@ -212,7 +215,7 @@
               </v-btn>
             </div>
           </div>
-          <div class="pt-2">
+          <div class="pl-2 pt-2">
             <h3>Final Grades</h3>
             <div>
               Final grades download counts unsubmitted assignments as zeroes when calculating grades.
@@ -229,7 +232,7 @@
               </v-btn>
             </div>
           </div>
-          <div class="pb-6 pt-2">
+          <div class="pb-4 pl-2 pt-3">
             For more information, see
             <OutboundLink href="https://berkeley.service-now.com/kb?id=kb_article_view&sysparm_article=KB0010659&sys_kb_id=8b7818e11b1837ccbc27feeccd4bcbbe">From bCourses to E-Grades</OutboundLink>
           </div>
@@ -246,7 +249,7 @@
       <v-container v-if="appState === 'loading'">
         <v-row no-gutters>
           <v-col>
-            <h1 class="grade-export-header">Preparing E-Grades for Download</h1>
+            <h1 class="grade-export-header mb-3 mt-2">Preparing E-Grades for Download</h1>
           </v-col>
         </v-row>
         <div v-if="!jobStatus" class="grade-export-notice-pending-request">
