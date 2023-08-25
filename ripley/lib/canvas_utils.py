@@ -25,6 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from itertools import groupby
 import re
+import secrets
 
 from flask import current_app as app
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
@@ -39,9 +40,20 @@ from ripley.models.job_history import JobHistory
 from rq.job import get_current_job
 
 
-def get_canvas_course_id(course_slug, term):
-    # TODO add random hash as needed to ensure uniqueness
-    return f'CRS:{course_slug.upper()}'
+def get_canvas_course_id(course_slug):
+    base_course_id = f'CRS:{course_slug.upper()}'
+    course_id = base_course_id
+    attempts = 0
+    existing_site = None
+    while attempts < 10:
+        existing_site = canvas.get_course(course_id, use_sis_id=True)
+        if not existing_site:
+            break
+        attempts += 1
+        course_id = base_course_id + secrets.token_hex(4).upper()
+    if existing_site:
+        raise InternalServerError(f'Could not generate unique ID for Canvas site {course_slug}')
+    return course_id
 
 
 def get_canvas_sis_section_id(sis_section):
