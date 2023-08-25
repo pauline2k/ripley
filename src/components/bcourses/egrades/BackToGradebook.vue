@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex">
+  <div class="align-center d-flex">
     <div class="pr-1">
       <v-icon icon="mdi-chevron-left" />
     </div>
