@@ -14,6 +14,6 @@ export function canUserCreateSite() {
   return utils.get('/api/canvas/can_user_create_site', true)
 }
 
-export function importUsers(userIds: string[]) {
-  return utils.post('/api/canvas/user_provision/user_import', {userIds}, true)
+export function importUsers(uids: string[]) {
+  return utils.post('/api/canvas/import_users', {uids}, true)
 }

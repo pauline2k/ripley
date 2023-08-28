@@ -57,6 +57,24 @@ def get_calnet_user_for_uid(app, uid):
     return calnet_user
 
 
+def roles_from_affiliations(affiliations):
+    return {
+        'advisor': False,
+        'concurrentEnrollmentStudent': False,
+        'expiredAccount': False,
+        'exStudent': any(item for item in affiliations if item in ['SIS-EXTENDED', 'FORMER-STUDENT', 'AFFILIATE-TYPE-ADVCON-ALUMNUS']),
+        'faculty': 'EMPLOYEE-TYPE-ACADEMIC' in affiliations,
+        'graduate': False,
+        'guest': 'GUEST-TYPE-SPONSORED' in affiliations,
+        'law': False,
+        'registered': 'STUDENT-TYPE-REGISTERED' in affiliations,
+        'releasedAdmit': False,
+        'staff': 'EMPLOYEE-TYPE-STAFF' in affiliations,
+        'student': any(item for item in affiliations if item in ['STUDENT-TYPE-REGISTERED', 'STUDENT-TYPE-NOT-REGISTERED']),
+        'undergrad': False,
+    }
+
+
 def _get_calnet_users(app, uids, search_base=None):
     users_by_uid = {}
     if app.config['RIPLEY_ENV'] == 'test':

@@ -81,10 +81,10 @@ def register_routes(app):
     def handle_exception(e):
         subject = str(e)
         if isinstance(e, HTTPException):
-            app.logger.warn(f"""\n\n{type(e).__name__} {subject}\n{traceback.format_exc()}\n""")
+            app.logger.warning(f"""\n\n{type(e).__name__} {subject}\n{traceback.format_exc()}\n""")
         else:
             message = f'{e}\n\n<pre>{traceback.format_exc()}</pre>'
-            app.logger.warn(message)
+            app.logger.warning(message)
             # # TODO? Notify Ripley Ops teams
             # send_system_error_email(
             #     message=message,
