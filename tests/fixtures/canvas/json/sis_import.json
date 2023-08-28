@@ -12,5 +12,19 @@
             "account_id": 1
         },
         "status_code": 200
+    },
+    "post_csv": {
+        "method": "POST",
+        "endpoint": "accounts/1/sis_imports.json?import_type=instructure_csv&extension=csv",
+        "data": {
+            "id": 2,
+            "progress": 100,
+            "workflow_state": "imported",
+            "data": {
+                "import_type": "instructure_csv"
+            },
+            "account_id": 1
+        },
+        "status_code": 200
     }
 }

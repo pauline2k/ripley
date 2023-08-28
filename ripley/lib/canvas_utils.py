@@ -338,7 +338,7 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     if job:
         job.meta['sis_import_id'] = sis_import.id
         job.save_meta()
-    _update_enrollments_in_background(sis_term_id, course, sections, [], sis_import)
+    _update_section_enrollments(sis_term_id, course, sections, [], sis_import)
 
 
 def _prepare_section_definition(
@@ -454,7 +454,7 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
         if job:
             job.meta['sis_import_id'] = sis_import.id
             job.save_meta()
-        _update_enrollments_in_background(canvas_sis_term_id, course, sections, section_ids_to_remove, sis_import)
+        _update_section_enrollments(canvas_sis_term_id, course, sections, section_ids_to_remove, sis_import)
 
 
 def user_id_from_attributes(attributes):
@@ -520,7 +520,7 @@ def _subaccount_for_department(dept_name):
             raise InternalServerError(f'Could not find bCourses account for department {dept_name}')
 
 
-def _update_enrollments_in_background(sis_term_id, course, all_sections, deleted_section_ids, sis_import):
+def _update_section_enrollments(sis_term_id, course, all_sections, deleted_section_ids, sis_import):
     from ripley.jobs.bcourses_provision_site_job import BcoursesProvisionSiteJob
 
     params = {

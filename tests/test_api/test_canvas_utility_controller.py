@@ -23,8 +23,15 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+import json
+
 import requests_mock
 from tests.util import register_canvas_uris
+
+
+admin_uid = '10000'
+no_canvas_account_uid = '10001'
+teacher_uid = '30000'
 
 
 class TestSiteCreationAuthorization:
@@ -79,3 +86,64 @@ def _api_authorizations(app, client, fake_auth, uid, expected_status_code=200):
         response = client.get('api/canvas/authorizations')
         assert response.status_code == expected_status_code
         return response.json
+
+
+class TestImportUsers:
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        _api_import_users(client, expected_status_code=401)
+
+    def test_no_canvas_account(self, client, fake_auth):
+        """Denies user with no Canvas account."""
+        canvas_site_id = '8876542'
+        fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+        _api_import_users(client, expected_status_code=401)
+
+    def test_teacher(self, client, fake_auth):
+        """Denies teacher."""
+        canvas_site_id = '8876542'
+        fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+        _api_import_users(client, expected_status_code=401)
+
+    def test_admin(self, app, client, fake_auth):
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_by_id'],
+                'course': ['get_by_id_8876542'],
+                'user': ['profile_10000'],
+                'sis_import': ['get_by_id', 'post_csv'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            response = _api_import_users(client, uids='50000,70000')
+            assert response['status'] == 'success'
+            assert response['uids'] == ['50000', '70000']
+
+    def test_invalid_param(self, app, client, fake_auth):
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {'account': ['get_admins'], 'course': ['get_by_id_8876542']}, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            _api_import_users(client, uids='', expected_status_code=400)
+            _api_import_users(client, uids='abc', expected_status_code=400)
+            _api_import_users(client, uids=None, expected_status_code=400)
+            _api_import_users(
+                client,
+                uids="<b onmouseover=alert('hacked!')>click me!</b>",
+                expected_status_code=400,
+            )
+            _api_import_users(
+                client,
+                uids='<SCRIPT type="text/javascript">var adr = \'../evil.php?cakemonster=\' + escape(document.cookie);</SCRIPT>',
+                expected_status_code=400,
+            )
+
+
+def _api_import_users(client, uids='123,345', expected_status_code=200):
+    response = client.post(
+        'api/canvas/import_users',
+        data=json.dumps({'uids': uids}),
+        content_type='application/json',
+    )
+    assert response.status_code == expected_status_code
+    return response.json
