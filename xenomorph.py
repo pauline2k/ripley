@@ -55,6 +55,8 @@ def start_worker(redis_url, name='xenomorph'):
     redis_conn = redis.from_url(redis_url)
     with Connection(redis_conn), app.app_context():
         q = Queue()
+        # Shut down existing worker, if running.
+        send_shutdown_command(redis_conn, name)
         w = Worker(
             queues=[q],
             connection=redis_conn,
