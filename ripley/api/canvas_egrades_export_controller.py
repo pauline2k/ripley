@@ -54,9 +54,13 @@ def egrades_export_prepare():
     course = canvas.get_course(canvas_site_id)
     if not course:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
-    job = enqueue(func=prepare_egrades_export, args=[canvas_site_id])
-    if not job:
-        raise InternalServerError('Updates cannot be completed at this time.')
+    try:
+        job = enqueue(args=[canvas_site_id], func=prepare_egrades_export)
+        if not job:
+            raise InternalServerError('Updates cannot be completed at this time.')
+    except Exception as e:
+        app.logger.error(f'Failed to enqueue egrades_export job where canvas_site_id = {canvas_site_id}')
+        raise e
     return tolerant_jsonify(
         {
             'jobId': job.id,

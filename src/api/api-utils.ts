@@ -45,16 +45,5 @@ export default {
       (response: any) => fileDownload(response.data, filename),
       error => $_errorHandler(error, redirectOnError)
     )
-  },
-  termCodeToName(termCode: string) {
-    return _.get(
-      {
-        'A': 'Winter',
-        'B': 'Spring',
-        'C': 'Summer',
-        'D': 'Fall'
-      },
-      termCode
-    )
   }
 }
