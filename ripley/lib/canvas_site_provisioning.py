@@ -105,9 +105,14 @@ def process_course_enrollments(
     csv_set,
     known_users,
     is_incremental,
+    primary_sections=None,
 ):
     app.logger.debug(f'Refreshing course {sis_course_id}')
-    primary_sections = _get_primary_sections(sis_term_id, sis_section_ids)
+
+    # If this method is being called by a course provision job, we may get a list of existing primary sections distinct
+    # from those provided in sis_section_ids. Otherwise, determine primary sections from sis_section_ids.
+    if not primary_sections:
+        primary_sections = _get_primary_sections(sis_term_id, sis_section_ids)
 
     for sis_section_id in sis_section_ids:
         section_id, berkeley_term = parse_canvas_sis_section_id(sis_section_id)

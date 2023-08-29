@@ -450,11 +450,17 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
         sis_import = canvas.post_sis_import(attachment=sections_csv.tempfile.name)
         if not sis_import:
             raise InternalServerError(f'Course sections SIS import failed (canvas_site_id={course.id}).')
+
+        # We need the complete list of site sections, including those we're not updating, in order to pass on a
+        # complete list of primary sections in the course.
+        all_site_official_sections, all_site_section_ids, all_site_sis_sections = get_official_sections(course.id)
+        primary_sections = [s for s in all_site_sis_sections if s['is_primary']]
+
         job = get_current_job()
         if job:
             job.meta['sis_import_id'] = sis_import.id
             job.save_meta()
-        _update_section_enrollments(canvas_sis_term_id, course, sections, section_ids_to_remove, sis_import)
+        _update_section_enrollments(canvas_sis_term_id, course, sections, section_ids_to_remove, sis_import, primary_sections)
 
 
 def user_id_from_attributes(attributes):
@@ -520,12 +526,13 @@ def _subaccount_for_department(dept_name):
             raise InternalServerError(f'Could not find bCourses account for department {dept_name}')
 
 
-def _update_section_enrollments(sis_term_id, course, all_sections, deleted_section_ids, sis_import):
+def _update_section_enrollments(sis_term_id, course, all_sections, deleted_section_ids, sis_import, primary_sections=None):
     from ripley.jobs.bcourses_provision_site_job import BcoursesProvisionSiteJob
 
     params = {
         'canvas_site_id': course.id,
         'deleted_section_ids': deleted_section_ids,
+        'primary_sections': primary_sections,
         'sis_course_id': course.sis_course_id,
         'sis_term_id': sis_term_id,
         'updated_sis_section_ids': [s['section_id'] for s in all_sections if s['status'] == 'active'],
