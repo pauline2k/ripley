@@ -60,7 +60,7 @@ def _initialize_queue(app):
     global q
     redis_conn = get_redis_conn(app)
     with Connection(redis_conn):
-        q = Queue(is_async=(not app.config['TESTING']), default_timeout=600)
+        q = Queue(is_async=app.config['REDIS_QUEUE_IS_ASYNC'], default_timeout=600)
 
 
 def _register_jobs(app):

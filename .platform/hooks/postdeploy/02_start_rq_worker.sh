@@ -49,7 +49,7 @@ else
   redis_url="redis://${redis_host}:${redis_port}"
 fi
 
-echo "Connecting to ${redis_host}:${redis_port} from ${RIPLEY_ENV} environment."; echo
+echo "Connecting to Redis at '${redis_url}' from ${RIPLEY_ENV} environment."; echo
 
 attempt=0
 until [ -z "$(sudo ps | grep rq:worker:xenomorph | grep -v grep)" ];
@@ -58,7 +58,7 @@ do
   if (( attempt <= 3 ))
   then
     echo "Stopping existing worker (attempt ${attempt} of 3)."; echo
-    sudo ${PYTHONPATH}/python -c "from xenomorph import stop_workers; stop_workers('${redis_url}')" >> "${log_location}" 2>&1
+    sudo "${PYTHONPATH}/python" -c "from xenomorph import stop_workers; stop_workers('${redis_url}')" >> "${log_location}" 2>&1
     sleep 1
   else
     break
@@ -66,7 +66,7 @@ do
 done
 
 echo "Starting worker..."; echo
-sudo ${PYTHONPATH}/python -c "import os; from xenomorph import start_worker; os.environ['RIPLEY_ENV'] = '${RIPLEY_ENV}'; os.environ['RIPLEY_LOCAL_CONFIGS'] = '${RIPLEY_LOCAL_CONFIGS}'; start_worker('${redis_url}')" >> "${log_location}" 2>&1 &
+sudo "${PYTHONPATH}/python" -c "import os; from xenomorph import start_worker; os.environ['RIPLEY_ENV'] = '${RIPLEY_ENV}'; os.environ['RIPLEY_LOCAL_CONFIGS'] = '${RIPLEY_LOCAL_CONFIGS}'; start_worker('${redis_url}')" >> "${log_location}" 2>&1 &
 sleep 1
 
 cat <<'ascii_end'
@@ -110,5 +110,11 @@ cat <<'ascii_end'
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ascii_end
 
+if [ "$(command -v "${PYTHONPATH}/rq")" ]; then
+  RQ_EXECUTABLE_HOME="${PYTHONPATH}"
+else
+  RQ_EXECUTABLE_HOME="$(which rq | sed "s/\/rq//")"
+fi
+
 echo; echo "Worker status:"
-echo $(${PYTHONPATH}/rq info -W -u ${redis_url})
+"${RQ_EXECUTABLE_HOME}/rq" info -W -u "${redis_url}"

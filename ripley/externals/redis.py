@@ -64,10 +64,11 @@ def enqueue(func, args):
     from ripley.factory import q
     get_redis_conn(app)
     status = redis_status()
-    queue_ready = len(status['workers']) or not q.is_async
-    if not (status['redis'] and queue_ready):
-        app.logger.exception(f'Job queue unavailable! Status: {status}')
+    if not status['redis']:
+        app.logger.exception(f'Redis queue is unavailable. Status: {status}')
         return False
+    if not len(status['workers']) and q.is_async:
+        raise InternalServerError('No Redis workers found.')
     with Connection(redis_conn):
         job = q.enqueue(
             f=func,

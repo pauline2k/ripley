@@ -44,6 +44,7 @@ LOGGING_LOCATION = 'STDOUT'
 LTI_CONFIG_PATH = f'{BASE_DIR}/tests/config/test-lti-config.json'
 
 REDIS_USE_FAKE_CLIENT = True
+REDIS_QUEUE_IS_ASYNC = False
 
 SQLALCHEMY_DATABASE_URI = 'postgresql://ripley:ripley@localhost:5432/nostromo_test'
 
