@@ -63,6 +63,7 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
 
         canvas_site_id = params.get('canvas_site_id', None)
         deleted_section_ids = params.get('deleted_section_ids', [])
+        primary_sections = params.get('primary_sections', None)
         sis_term_id = params.get('sis_term_id', None)
         sis_course_id = params.get('sis_course_id', None)
         updated_sis_section_ids = params.get('updated_sis_section_ids', [])
@@ -83,6 +84,7 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
                 csv_set=csv_set,
                 known_users={},
                 is_incremental=self.job_flags.incremental,
+                primary_sections=primary_sections,
             )
             self._remove_section_enrollments(sis_term_id, canvas_site_id, sis_course_id, deleted_section_ids, csv_set)
             for _csv in csv_set.all:
