@@ -228,9 +228,6 @@ VALUES
 ('2228', '32290', TRUE, 'ASTRON', 'ASTRON C228', 'Extragalactic Astronomy and Cosmology', 'LEC', '001', NULL, '124009', 1, 'P', NULL, '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL),
 ('2228', '32291', TRUE, 'ASTRON', 'ASTRON C228', 'Extragalactic Astronomy and Cosmology', 'LEC', '002', NULL, '124009', 1, 'P', NULL, '30000', 'Ash', 'PI', NULL, NULL, NULL, NULL, NULL, NULL);
 
--- ('2232', '32936', '20000', 'E', NULL, 'GRD'),
--- ('2232', '32936', '40000', 'E', NULL, 'GRD'),
-
 DROP SCHEMA IF EXISTS student cascade;
 
 CREATE SCHEMA student;

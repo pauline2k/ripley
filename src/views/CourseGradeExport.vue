@@ -1,5 +1,6 @@
 <template>
-  <div v-if="!isLoading" class="canvas-application grade-export">
+  <div v-if="!isLoading" class="canvas-application">
+    <v-alert>appState = {{ appState }}</v-alert>
     <div v-if="appState === 'error'">
       <v-alert
         v-if="error"
@@ -33,11 +34,11 @@
           <div class="pb-4 pl-5 pt-2">
             <span v-if="!noGradingStandardEnabled">
               You have already set a grading scheme. You can view your grading scheme or select an alternate grading scheme in
-              <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`" target="_top">Course Settings</a>.
+              <OutboundLink :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`">Course Settings</OutboundLink>
             </span>
             <span v-if="noGradingStandardEnabled">
               Set a grading scheme in
-              <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`" target="_top">Course Settings</a>
+              <OutboundLink :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`">Course Settings</OutboundLink>
               and return once completed.
             </span>
             <div class="pt-1">
@@ -123,6 +124,7 @@
             <select
               id="course-sections"
               v-model="selectedSection"
+              class="w-50"
             >
               <option :value="null">Choose...</option>
               <option v-for="section in officialSections" :key="section.canvasName" :value="section">
@@ -215,7 +217,7 @@
               </v-btn>
             </div>
           </div>
-          <div class="pl-2 pt-2">
+          <div class="pl-2 pt-1">
             <h3>Final Grades</h3>
             <div>
               Final grades download counts unsubmitted assignments as zeroes when calculating grades.
@@ -415,6 +417,7 @@ export default {
           `)
           if (data.jobRequestStatus === 'Success') {
             this.backgroundJobId = data.jobId
+            this.debug(`startExportJob >> backgroundJobId = ${this.backgroundJobId}`)
             this.startExportJob()
           } else {
             this.appState = 'error'
@@ -429,6 +432,7 @@ export default {
       )
     },
     retrySelection() {
+
       this.appState = 'selection'
       this.contactSupport = false
       this.error = null
@@ -447,7 +451,7 @@ export default {
             `)
             this.jobStatus = data.jobStatus
             this.percentCompleteRounded = Math.round(data.percentComplete * 100)
-            if (this.jobStatus !== 'New' && this.jobStatus !== 'Processing') {
+            if (!['New', 'Processing', 'queued'].includes(this.jobStatus)) {
               this.percentCompleteRounded = null
               clearInterval(this.exportTimer)
               this.$announcer.polite('Downloading export. Export form options presented for an additional download.')
@@ -471,50 +475,29 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.grade-export {
-  p {
-    font-size: 14px;
-    font-weight: 300;
-    margin-bottom: 10px;
-  }
-  .grade-export-button-link {
-    font-weight: 300;
-  }
-  .grade-export-header {
-    font-size: 23px;
-    font-weight: 400;
-    padding: 12px 0 0;
-  }
-  .grade-export-sub-header {
-    font-size: 20px;
-    font-weight: 400;
-  }
-  .grade-export-download-button-container {
-    border: $color-off-black 1px solid;
-    margin: 10px;
-  }
-  .grade-export-image-inline {
-    height: 15px;
-    margin-bottom: -3px;
-  }
-  .grade-export-section {
-    margin: 10px 0;
-  }
-  .grade-export-form-label {
-    display: inline-block;
-    margin: 8px 0;
-  }
-  .grade-export-notice-pending-request {
-    margin: 15px auto;
-  }
-  .grade-export-refresh-button {
-    font-size: 11px;
-    padding: 1px 5px;
-    text-decoration: none;
-  }
-  .grade-export-select-pnp-cutoff {
-    padding-right: 25px;
-    width: fit-content;
-  }
+.grade-export-header {
+  font-size: 23px;
+  font-weight: 400;
+  padding: 12px 0 0;
+}
+.grade-export-sub-header {
+  font-size: 20px;
+  font-weight: 400;
+}
+.grade-export-image-inline {
+  height: 15px;
+  margin-bottom: -3px;
+}
+.grade-export-notice-pending-request {
+  margin: 15px auto;
+}
+.grade-export-refresh-button {
+  font-size: 11px;
+  padding: 1px 5px;
+  text-decoration: none;
+}
+.grade-export-select-pnp-cutoff {
+  padding-right: 25px;
+  width: fit-content;
 }
 </style>
