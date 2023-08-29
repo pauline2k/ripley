@@ -59,7 +59,6 @@ export default {
   background-color: $color-alert-error-background;
   color: $color-alert-error-foreground;
 }
-
 .bg-white {
   background: $color-white;
 }
@@ -88,22 +87,53 @@ export default {
   }
 }
 .canvas-form {
-  label {
-    padding: 9px 0;
+  background: $color-white-smoke !important;
+  border: 1px solid $color-whisper !important;
+  padding: 10px 5px !important;
+  .validation-messages {
+    color: $color-harley-davidson-orange;
+    font-size: 13px;
+    font-weight: 400;
+    min-height: 20px;
+    margin: 0 12px 4px;
   }
-  input[type="text"] {
-    border: 1px solid $color-grey;
-    border-radius: 3px;
-    color: $color-off-black;
-    display: inline-block;
-    font-family: $body-font-family;
+  input[type="number"],
+  input[type="password"],
+  input[type="text"],
+  textarea {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    background: $color-white;
+    border: 1px solid $color-very-light-grey;
+    border-radius: 0;
+    box-shadow: inset 0 1px 2px $color-whisper;
     font-size: 14px;
-    line-height: 20px;
-    margin-bottom: 10px;
-    padding: 8px;
+    font-weight: normal;
+    margin: 0 0 4px;
+    padding: 8px 12px;
+    width: 100%;
     &[disabled] {
       color: $color-grey;
     }
+    &.error{
+      border: 1px solid $color-harley-davidson-orange !important;
+      color: $color-harley-davidson-orange !important;
+      font-weight: 500;
+    }
+  }
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    margin-right: 10px;
+    margin-top: 8px;
+    text-align: right;
+  }
+  textarea {
+    resize: vertical;
+  }
+  ::placeholder {
+    color: $color-nobel;
   }
 }
 .container {
@@ -112,11 +142,15 @@ export default {
   border-radius: 3px !important;
   padding: 9px !important;
 }
-
 .icon-gold {
   color: $color-dark-tangerine;
 }
-
+.icon-green {
+  color: $color-salem;
+}
+.icon-red {
+  color: $color-harley-davidson-orange;
+}
 .notice-text-header {
   color: $color-off-black;
   font-size: 16px;
@@ -124,7 +158,6 @@ export default {
   line-height: 20px;
   margin: 4px 0;
 }
-
 a {
   color: $primary-color;
   text-decoration: none;
@@ -135,7 +168,6 @@ a {
     text-decoration: underline;
   }
 }
-
 h1 {
   color: $color-off-black;
   font-family: $body-font-family;
@@ -144,28 +176,24 @@ h1 {
   line-height: 30px;
   margin: 15px 0 16px;
 }
-
 h2 {
   color: $color-off-black;
   font-family: $body-font-family;
   font-size: 20px;
   font-weight: normal;
 }
-
 h3 {
   color: $color-off-black;
   font-family: $body-font-family;
   font-size: 18px;
   font-weight: normal;
 }
-
 h3.sections-course-title {
   display: inline !important;
   font-size: 15px !important;
   font-weight: 500 !important;
   line-height: 20px;
 }
-
 select {
   appearance: auto !important;
   background: field !important;
