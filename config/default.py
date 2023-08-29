@@ -126,6 +126,7 @@ REMEMBER_COOKIE_SECURE = True
 REDIS_HOST = ''
 REDIS_PASSWORD = ''
 REDIS_PORT = '6379'
+REDIS_QUEUE_IS_ASYNC = False
 REDIS_USE_FAKE_CLIENT = False
 
 # Used to encrypt session cookie.
