@@ -47,7 +47,7 @@ def get_basic_attributes(uids=None):
     # First, call out the CalNet snapshot in the data loch.
     users_by_uid = {}
     remaining_uids = set(u for u in uids if u) if uids else None
-    for r in get_users(remaining_uids):
+    for r in get_users(remaining_uids) if remaining_uids else []:
         if remaining_uids:
             remaining_uids.discard(r['ldap_uid'])
         if (

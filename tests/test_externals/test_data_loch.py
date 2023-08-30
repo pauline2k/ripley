@@ -75,3 +75,19 @@ class TestDataLoch:
         assert term[0]['term_name'] == 'Fall 2022'
         assert term[0]['term_begins'] == date(2022, 8, 17)
         assert term[0]['term_ends'] == date(2022, 12, 16)
+
+    def test_find_people_by_email(self):
+        results = data_loch.find_people_by_email('T@berk')
+        assert len(results) == 2
+        assert results[0]['ldap_uid'] == '60000'
+        assert results[1]['ldap_uid'] == '20000'
+
+    def test_find_people_by_name(self):
+        results = data_loch.find_people_by_name('RIPLEY, E')
+        assert len(results) == 1
+        assert results[0]['ldap_uid'] == '10000'
+
+    def test_find_person_by_uid(self):
+        results = data_loch.find_person_by_uid('30000')
+        assert len(results) == 1
+        assert results[0]['ldap_uid'] == '30000'
