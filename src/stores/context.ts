@@ -48,7 +48,10 @@ export const useContextStore = defineStore('context', {
       }
     },
     loadingStart(label?: string) {
-      console.log(`TODO: Screen-reader announce "${label}"`)
+      if (label) {
+        // TODO: use '@vue-a11y/announcer'
+        console.log(`TODO: Screen-reader announce "${label}"`)
+      }
       this.isLoading = true
     },
     resetApplicationState() {

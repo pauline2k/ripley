@@ -7,29 +7,18 @@
       <div>
         <div id="page-create-course-select-semesters" class="buttonset">
           <h2 class="page-create-course-site-header page-create-course-site-header2">Term</h2>
-          <span v-for="(semester, index) in teachingTerms" :key="index">
-            <input
-              :id="`semester${index}`"
-              type="radio"
-              name="semester"
-              class="sr-only"
-              :aria-selected="currentSemester === semester.slug"
+          <span v-for="(term, index) in teachingTerms" :key="index">
+            <v-btn
+              :id="`term${index}`"
+              name="term"
+              :aria-selected="currentSemester === term.slug"
+              :color="currentSemester === term.slug ? 'primary' : ''"
               role="tab"
-              @click="switchSemester(semester)"
-            />
-            <label
-              :for="`semester${index}`"
-              class="buttonset-button"
-              role="button"
-              aria-disabled="false"
-              :class="{
-                'buttonset-button-active': currentSemester === semester.slug,
-                'buttonset-corner-left': !index,
-                'buttonset-corner-right': (index === $_.size(teachingTerms) - 1)
-              }"
+              @click="switchSemester(term)"
+              @keyup.enter="switchSemester(term)"
             >
-              {{ semester.name }}
-            </label>
+              {{ term.name }}
+            </v-btn>
           </span>
         </div>
       </div>

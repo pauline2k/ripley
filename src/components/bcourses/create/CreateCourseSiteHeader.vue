@@ -50,44 +50,33 @@
         <h3 id="load-sections-by-id" class="sr-only">Load Sections by ID</h3>
         <form id="load-sections-by-id-form" class="canvas-page-form" @submit.prevent="submit">
           <div v-if="$_.size(adminTerms)">
-            <div class="buttonset">
-              <span v-for="(term, index) in adminTerms" :key="index">
-                <input
-                  :id="`term${index}`"
-                  type="radio"
-                  name="adminTerm"
-                  class="sr-only"
-                  :aria-selected="currentAdminTerm === term.slug"
-                  role="tab"
-                  @click="switchAdminTerm(term)"
-                  @keyup.enter="switchAdminTerm(term)"
-                />
-                <label
-                  :for="`semester${index}`"
-                  class="buttonset-button"
-                  role="button"
-                  aria-disabled="false"
-                  :class="{
-                    'buttonset-button-active': currentAdminTerm === semester.slug,
-                    'buttonset-corner-left': index === 0,
-                    'buttonset-corner-right': index === ($_.size(adminTerm) - 1)
-                  }"
-                >
-                  {{ term.name }}
-                </label>
-              </span>
-            </div>
+            <span v-for="(term, index) in adminTerms" :key="index">
+              <v-btn
+                :id="`term${index}`"
+                name="adminTerm"
+                :aria-selected="currentAdminTerm === term.slug"
+                :color="currentAdminTerm === term.slug ? 'primary' : ''"
+                role="tab"
+                @click="switchAdminTerm(term)"
+                @keyup.enter="switchAdminTerm(term)"
+              >
+                {{ term.name }}
+              </v-btn>
+            </span>
             <label
               for="page-create-course-site-section-id-list"
               class="sr-only"
             >
               Provide Section ID List Separated by Commas or Spaces
             </label>
-            <textarea
-              id="page-create-course-site-section-id-list"
-              v-model="sectionIds"
-              placeholder="Paste your list of Section IDs here, separated by commas or spaces"
-            />
+            <div>
+              <textarea
+                id="page-create-course-site-section-id-list"
+                v-model="sectionIds"
+                class="page-create-course-site-section-id-input"
+                placeholder="Paste your list of Section IDs here, separated by commas or spaces"
+              ></textarea>
+            </div>
             <v-btn
               id="sections-by-ids-button"
               class="canvas-button canvas-button-primary"
@@ -233,6 +222,15 @@ export default {
   font-weight: normal;
   line-height: 40px;
   margin: 5px 0;
+}
+.page-create-course-site-section-id-input {
+  border: solid 1px;
+  border-radius: 3px;
+  font-family: Lato,Helvetica Neue,Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  padding: 5px;
+  width: 100%;
 }
 .has-error {
   color: $color-alert-error-foreground;
