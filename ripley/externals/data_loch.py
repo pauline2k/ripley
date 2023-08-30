@@ -331,6 +331,47 @@ def get_undergraduate_term(term_id):
     return safe_execute_rds(sql)
 
 
+def find_people_by_email(search_string):
+    params = {
+        'email': f'%{search_string.strip().lower()}%',
+    }
+    sql = f"""SELECT DISTINCT ldap_uid, sid, first_name, TRIM(last_name) AS last_name, email_address, affiliations, person_type
+            FROM sis_data.{_basic_attributes_table()}
+            WHERE LOWER(email_address) LIKE %(email)s
+            AND (affiliations LIKE '%%-TYPE-%%') AND person_type NOT IN ('A', 'Z')
+            ORDER BY TRIM(last_name)
+        """
+    return safe_execute_rds(sql, **params)
+
+
+def find_people_by_name(search_string):
+    names = [name.strip().lower() for name in search_string.split(',')]
+    names_string = ','.join(names)
+    params = {
+        'name': f'{names_string}%',
+    }
+    sql = f"""SELECT DISTINCT ldap_uid, sid, first_name, TRIM(last_name) AS last_name, email_address, affiliations, person_type
+            FROM sis_data.{_basic_attributes_table()}
+            WHERE LOWER(CONCAT(CONCAT(TRIM(last_name), ','), TRIM(first_name))) LIKE %(name)s
+            AND (affiliations LIKE '%%-TYPE-%%') AND person_type NOT IN ('A', 'Z')
+            ORDER BY TRIM(last_name)
+        """
+    return safe_execute_rds(sql, **params)
+
+
+def find_person_by_uid(uid):
+    params = {
+        'uid': uid,
+    }
+    sql = f"""SELECT DISTINCT ldap_uid, sid, first_name, TRIM(last_name) AS last_name, email_address, affiliations, person_type
+            FROM sis_data.{_basic_attributes_table()}
+            WHERE ldap_uid = %(uid)s
+            AND (affiliations LIKE '%%-TYPE-%%') AND person_type NOT IN ('A', 'Z')
+            ORDER BY TRIM(last_name)
+        """
+    return safe_execute_rds(sql, **params)
+
+
 def _safe_execute(sql, cursor, **kwargs):
     try:
         ts = datetime.now().timestamp()
