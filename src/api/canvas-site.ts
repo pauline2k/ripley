@@ -66,10 +66,10 @@ export function getSections(
 ) {
   let feedUrl = '/api/canvas_site/provision'
   if (isAdmin) {
-    if (adminMode === 'act_as' && adminActingAs) {
-      feedUrl = '/api/canvas_site/provision_as/' + adminActingAs
-    } else if ((adminMode !== 'act_as') && adminBySectionIds) {
-      feedUrl = `/api/canvas_site/provision?admin_term_slug=${currentSemester}`
+    if (adminMode === 'actAs' && adminActingAs) {
+      feedUrl = `/api/canvas_site/provision?adminActingAs=${adminActingAs}`
+    } else if ((adminMode !== 'actAs') && adminBySectionIds) {
+      feedUrl = `/api/canvas_site/provision?adminTermSlug=${currentSemester}`
       _.each(adminBySectionIds, sectionId => feedUrl += `&adminBySectionIds[]=${sectionId}`)
     }
   }

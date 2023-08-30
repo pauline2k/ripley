@@ -1,13 +1,13 @@
 <template>
   <div>
-    <div v-if="!$_.size(teachingSemesters)" role="alert">
+    <div v-if="!$_.size(teachingTerms)" role="alert">
       <p>You are currently not listed as the instructor of record for any courses, so you cannot create a course site in bCourses.</p>
     </div>
-    <div v-if="$_.size(teachingSemesters)">
+    <div v-if="$_.size(teachingTerms)">
       <div>
         <div id="page-create-course-select-semesters" class="buttonset">
           <h2 class="page-create-course-site-header page-create-course-site-header2">Term</h2>
-          <span v-for="(semester, index) in teachingSemesters" :key="index">
+          <span v-for="(semester, index) in teachingTerms" :key="index">
             <input
               :id="`semester${index}`"
               type="radio"
@@ -25,7 +25,7 @@
               :class="{
                 'buttonset-button-active': currentSemester === semester.slug,
                 'buttonset-corner-left': !index,
-                'buttonset-corner-right': (index === $_.size(teachingSemesters) - 1)
+                'buttonset-corner-right': (index === $_.size(teachingTerms) - 1)
               }"
             >
               {{ semester.name }}
@@ -89,7 +89,7 @@
                   <span class="sr-only">Toggle course sections list</span>
                 </div>
                 <div class="btn-course-title-text pr-2 pt-1">
-                  <h3 class="sections-course-title">{{ course.course_code }}<span v-if="course.title">: {{ course.title }}</span></h3>
+                  <h3 class="sections-course-title">{{ course.courseCode }}<span v-if="course.title">: {{ course.title }}</span></h3>
                 </div>
                 <div v-if="$_.size(course.sections)" class="btn-course-title-text pt-1">
                   ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
@@ -161,7 +161,7 @@ export default {
       required: true,
       type: Function
     },
-    teachingSemesters: {
+    teachingTerms: {
       required: true,
       type: Array
     },

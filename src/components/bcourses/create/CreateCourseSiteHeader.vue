@@ -17,17 +17,19 @@
           class="canvas-page-form page-create-course-site-act-as-form"
           @submit.prevent="submit"
         >
-          <v-row no-gutters>
-            <v-col cols="auto">
+          <v-row>
+            <v-col cols="2">
               <label for="instructor-uid" class="sr-only">Instructor UID</label>
               <v-text-field
                 id="instructor-uid"
                 v-model="uid"
+                density="compact"
                 placeholder="Instructor UID"
                 role="search"
+                variant="outlined"
               ></v-text-field>
             </v-col>
-            <v-col cols="auto">
+            <v-col>
               <div>
                 <v-btn
                   id="sections-by-uid-button"
@@ -47,18 +49,18 @@
       <div v-if="adminMode === 'bySectionId'">
         <h3 id="load-sections-by-id" class="sr-only">Load Sections by ID</h3>
         <form id="load-sections-by-id-form" class="canvas-page-form" @submit.prevent="submit">
-          <div v-if="$_.size(adminSemesters)">
+          <div v-if="$_.size(adminTerms)">
             <div class="buttonset">
-              <span v-for="(semester, index) in adminSemesters" :key="index">
+              <span v-for="(term, index) in adminTerms" :key="index">
                 <input
-                  :id="`semester${index}`"
+                  :id="`term${index}`"
                   type="radio"
-                  name="adminSemester"
+                  name="adminTerm"
                   class="sr-only"
-                  :aria-selected="currentAdminSemester === semester.slug"
+                  :aria-selected="currentAdminTerm === term.slug"
                   role="tab"
-                  @click="switchAdminSemester(semester)"
-                  @keyup.enter="switchAdminSemester(semester)"
+                  @click="switchAdminTerm(term)"
+                  @keyup.enter="switchAdminTerm(term)"
                 />
                 <label
                   :for="`semester${index}`"
@@ -66,12 +68,12 @@
                   role="button"
                   aria-disabled="false"
                   :class="{
-                    'buttonset-button-active': currentAdminSemester === semester.slug,
+                    'buttonset-button-active': currentAdminTerm === semester.slug,
                     'buttonset-corner-left': index === 0,
-                    'buttonset-corner-right': index === ($_.size(adminSemesters) - 1)
+                    'buttonset-corner-right': index === ($_.size(adminTerm) - 1)
                   }"
                 >
-                  {{ semester.name }}
+                  {{ term.name }}
                 </label>
               </span>
             </div>
@@ -130,12 +132,12 @@ export default {
       required: true,
       type: String
     },
-    adminSemesters: {
+    adminTerms: {
       default: undefined,
       required: false,
       type: Array
     },
-    currentAdminSemester: {
+    currentAdminTerm: {
       required: true,
       type: String
     },
@@ -159,7 +161,7 @@ export default {
       required: true,
       type: Boolean
     },
-    switchAdminSemester: {
+    switchAdminTerm: {
       required: true,
       type: Function
     }

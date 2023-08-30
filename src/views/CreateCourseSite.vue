@@ -14,14 +14,14 @@
           <CreateCourseSiteHeader
             v-if="isAdmin && currentWorkflowStep !== 'monitoringJob'"
             :admin-mode="adminMode"
-            :admin-semesters="adminSemesters"
-            :current-admin-semester="currentAdminSemester"
+            :admin-terms="adminTerms"
+            :current-admin-term="currentAdminTerm"
             :fetch-feed="fetchFeed"
             :set-admin-acting-as="setAdminActingAs"
             :set-admin-by-section-ids="setAdminBySectionIds"
             :set-admin-mode="setAdminMode"
             :show-maintenance-notice="showMaintenanceNotice"
-            :switch-admin-semester="switchAdminSemester"
+            :switch-admin-term="switchAdminTerm"
           />
         </div>
       </div>
@@ -40,7 +40,7 @@
             :selected-sections-list="selectedSectionsList"
             :show-confirmation="showConfirmation"
             :switch-semester="switchSemester"
-            :teaching-semesters="teachingSemesters"
+            :teaching-terms="teachingTerms"
             :update-selected="updateSelected"
           />
         </div>
@@ -102,12 +102,12 @@ export default {
     adminActingAs: undefined,
     adminBySectionIds: undefined,
     adminMode: 'actAs',
-    adminSemesters: undefined,
+    adminTerms: [],
     canvasSite: undefined,
     canvasSiteId: undefined,
     course: undefined,
-    coursesList: undefined,
-    currentAdminSemester: undefined,
+    coursesList: [],
+    currentAdminTerm: undefined,
     currentSemester: undefined,
     currentSemesterName: undefined,
     currentWorkflowStep: undefined,
@@ -125,7 +125,7 @@ export default {
     selectedSectionsList: undefined,
     semester: undefined,
     showMaintenanceNotice: true,
-    teachingSemesters: undefined,
+    teachingTerms: [],
     timeoutPromise: undefined
   }),
   created() {
@@ -159,11 +159,11 @@ export default {
 
       const onSuccess = data => {
         this.updateMetadata(data)
-        this.usersClassCount = this.classCount(data.teachingSemesters)
-        this.teachingSemesters = data.teachingSemesters
+        this.usersClassCount = this.classCount(data.teachingTerms)
+        this.teachingTerms = data.teachingTerms
         this.canvasSite = data.canvas_site
         const canvasSiteId = this.canvasSite ? this.canvasSite.canvasSiteId : ''
-        this.fillCourseSites(data.teachingSemesters, canvasSiteId)
+        this.fillCourseSites(data.teachingTerms, canvasSiteId)
         this.$announcer.polite('Course section loaded successfully')
         if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
           this.$_.each(this.coursesList, course => {
@@ -186,7 +186,7 @@ export default {
         return this.$errorHandler(data)
       }
 
-      const semester = (this.adminMode === 'bySectionId' ? this.currentAdminSemester : this.currentSemester)
+      const semester = (this.adminMode === 'bySectionId' ? this.currentAdminTerm : this.currentSemester)
 
       getSections(
         this.adminActingAs,
@@ -268,8 +268,8 @@ export default {
     loadCourseLists() {
       this.courseSemester = false
       // identify semester matching current course site
-      this.$_.each(this.teachingSemesters, semester => {
-        if ((semester.termYear === this.canvasSite.term.term_yr) && (semester.termCode === this.canvasSite.term.term_cd)) {
+      this.$_.each(this.teachingTerms, term => {
+        if ((term.termYear === this.canvasSite.term.term_yr) && (term.termCode === this.canvasSite.term.term_cd)) {
           this.courseSemester = semester
           return false
         }
@@ -361,7 +361,7 @@ export default {
         courseCreate(
           this.isAdmin && this.adminMode === 'actAs' ? this.adminActingAs : null,
           this.isAdmin && this.adminMode === 'bySectionId' ? this.adminBySectionIds : null,
-          this.isAdmin && this.adminMode === 'bySectionId' ? this.currentAdminSemester : null,
+          this.isAdmin && this.adminMode === 'bySectionId' ? this.currentAdminTerm : null,
           sectionIds,
           siteAbbreviation,
           siteName,
@@ -369,8 +369,8 @@ export default {
         ).then(onSuccess, onError)
       }
     },
-    switchAdminSemester(semester) {
-      this.currentAdminSemester = semester.slug
+    switchAdminTerm(semester) {
+      this.currentAdminTerm = semester.slug
       this.selectedSectionsList = []
       this.updateSelected()
       this.$announcer.polite(`Switched to ${semester.name} for Section ID input`)
@@ -384,17 +384,17 @@ export default {
       this.updateSelected()
     },
     updateMetadata(data) {
-      this.isAdmin = data.is_admin
-      this.teachingSemesters = data.teachingSemesters
-      if (this.$_.size(this.teachingSemesters) > 0) {
-        this.switchSemester(this.teachingSemesters[0])
+      this.isAdmin = data.isAdmin
+      this.teachingTerms = data.teachingTerms
+      if (this.$_.size(this.teachingTerms) > 0) {
+        this.switchSemester(this.teachingTerms[0])
       }
-      this.fillCourseSites(this.teachingSemesters)
+      this.fillCourseSites(this.teachingTerms)
       if (this.isAdmin) {
-        this.adminActingAs = data.admin_acting_as
-        this.adminSemesters = data.admin_semesters
-        if (this.$_.size(this.adminSemesters) > 0 && !this.currentAdminSemester) {
-          this.switchAdminSemester(this.adminSemesters[0])
+        this.adminActingAs = data.adminActingAs
+        this.adminTerms = data.adminTerms
+        if (this.$_.size(this.adminTerms) > 0 && !this.currentAdminTerm) {
+          this.switchAdminTerm(this.adminTerms[0])
         }
       } else {
         this.currentWorkflowStep = 'selecting'
