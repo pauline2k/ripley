@@ -232,7 +232,7 @@ export default {
   mixins: [Context],
   data: () => ({
     adminActingAs: null,
-    adminSemesters: null,
+    adminTerms: null,
     availableSectionsPanel: [],
     canvasSite: {},
     courseSemesterClasses: [],
@@ -372,8 +372,8 @@ export default {
         this.loadCourseLists(feed.teachingTerms)
       }
       this.isAdmin = feed.is_admin
-      this.adminActingAs = feed.admin_acting_as
-      this.adminSemesters = feed.admin_semesters
+      this.adminActingAs = feed.adminActingAs
+      this.adminTerms = feed.adminTerms
       this.isCourseCreator = this.usersClassCount > 0
       this.feedFetched = true
       this.changeWorkflowStep('preview')
