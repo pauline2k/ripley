@@ -161,6 +161,41 @@ class User(UserMixin):
             'canvas_masquerading_user_id': canvas_masquerading_user_id,
         })
 
+    @classmethod
+    def load_canvas_user_data(cls, canvas_site_id, canvas_user_profile, uid):
+        canvas_user_id = canvas_user_profile.get('id')
+        course = canvas.get_course(course_id=canvas_site_id) if uid and canvas_site_id else None
+        canvas_user_data = {
+            'canvasSiteId': canvas_site_id,
+            'canvasSiteCourseCode': course.course_code if course else None,
+            'canvasSiteEnrollmentTermId': course.enrollment_term_id if course else None,
+            'canvasSiteName': course.name if course else None,
+            'canvasSiteSisCourseId': course.sis_course_id if course else None,
+            'canvasSiteUserRoles': [],
+            'canvasUserId': canvas_user_id,
+            'canvasUserAvatarUrl': canvas_user_profile.get('avatar_url'),
+            'canvasUserLoginId': canvas_user_profile.get('login_id'),
+            'canvasUserName': canvas_user_profile.get('name'),
+            'canvasUserPrimaryEmail': canvas_user_profile.get('primary_email'),
+            'canvasUserShortName': canvas_user_profile.get('short_name'),
+            'canvasUserSisUserId': canvas_user_profile.get('sis_user_id'),
+            'canvasUserSortableName': canvas_user_profile.get('sortable_name'),
+            'canvasUserTitle': canvas_user_profile.get('title'),
+            'isCanvasAdmin': can_administrate_canvas(uid),
+        }
+        is_student = False
+        is_teaching = False
+        canvas_site_user = canvas.get_course_user(canvas_site_id, canvas_user_id) if course else None
+        if canvas_site_user and canvas_site_user.enrollments:
+            roles = list({e['role'] for e in canvas_site_user.enrollments})
+            canvas_user_data['canvasSiteUserRoles'] = roles
+            roles_that_teach = ['TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader']
+            is_teaching = bool(next((role for role in roles if role in roles_that_teach), None))
+            is_student = not is_teaching and 'StudentEnrollment' in roles
+        canvas_user_data['isStudent'] = is_student
+        canvas_user_data['isTeaching'] = is_teaching
+        return canvas_user_data
+
     def _load_canvas_user_data(self, user_profile=None):
         cache_key = self._get_cache_key()
         canvas_user_data = fetch_cached_dict_object(cache_key)
@@ -168,37 +203,11 @@ class User(UserMixin):
             if not user_profile and self.uid:
                 user_profile = canvas.get_sis_user_profile(self.uid) or canvas.get_sis_user_profile(f'inactive-{self.uid}')
             if user_profile:
-                course = canvas.get_course(course_id=self.__canvas_site_id) if self.uid and self.__canvas_site_id else None
-                canvas_user_id = user_profile.get('id')
-                canvas_user_data = {
-                    'canvasSiteId': self.__canvas_site_id,
-                    'canvasSiteCourseCode': course.course_code if course else None,
-                    'canvasSiteEnrollmentTermId': course.enrollment_term_id if course else None,
-                    'canvasSiteName': course.name if course else None,
-                    'canvasSiteSisCourseId': course.sis_course_id if course else None,
-                    'canvasSiteUserRoles': [],
-                    'canvasUserId': canvas_user_id,
-                    'canvasUserAvatarUrl': user_profile.get('avatar_url'),
-                    'canvasUserLoginId': user_profile.get('login_id'),
-                    'canvasUserName': user_profile.get('name'),
-                    'canvasUserPrimaryEmail': user_profile.get('primary_email'),
-                    'canvasUserShortName': user_profile.get('short_name'),
-                    'canvasUserSisUserId': user_profile.get('sis_user_id'),
-                    'canvasUserSortableName': user_profile.get('sortable_name'),
-                    'canvasUserTitle': user_profile.get('title'),
-                    'isCanvasAdmin': can_administrate_canvas(self.uid),
-                }
-                is_student = False
-                is_teaching = False
-                canvas_site_user = canvas.get_course_user(self.__canvas_site_id, canvas_user_id) if course else None
-                if canvas_site_user and canvas_site_user.enrollments:
-                    roles = list({e['role'] for e in canvas_site_user.enrollments})
-                    canvas_user_data['canvasSiteUserRoles'] = roles
-                    roles_that_teach = ['TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader']
-                    is_teaching = bool(next((role for role in roles if role in roles_that_teach), None))
-                    is_student = not is_teaching and 'StudentEnrollment' in roles
-                canvas_user_data['isStudent'] = is_student
-                canvas_user_data['isTeaching'] = is_teaching
+                canvas_user_data = self.load_canvas_user_data(
+                    canvas_site_id=self.__canvas_site_id,
+                    canvas_user_profile=user_profile,
+                    uid=self.uid,
+                )
                 cache_dict_object(cache_key, canvas_user_data, 120)
         return canvas_user_data
 

@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import json
 
 import requests_mock
-from tests.util import register_canvas_uris
+from tests.util import override_config, register_canvas_uris
 
 admin_uid = '10000'
 no_canvas_account_uid = '10001'
@@ -238,6 +238,72 @@ class TestEgradesExportDownload:
             assert 'csv' in response.content_type
             csv = str(response.data)
             assert 'ID,Name,Grade,Grading Basis,Comments' in csv
+
+
+class TestOfficialCanvasCourse:
+
+    @classmethod
+    def _api_is_official_canvas_course(cls, canvas_site_id, client, expected_status_code=200):
+        response = client.get(f'/api/canvas_site/egrades_export/{canvas_site_id}/is_official_course')
+        assert response.status_code == expected_status_code
+        return response.json
+
+    def test_unauthorized(self, client, fake_auth):
+        """Denies unauthorized users."""
+        users = {
+            'anonymous': None,
+            'no_canvas_account': no_canvas_account_uid,
+            'not_enrolled': not_enrolled_uid,
+            'reader': reader_uid,
+            'student': student_uid,
+            'teaching_assistant': ta_uid,
+        }
+        for user_type, uid in users.items():
+            canvas_site_id = '8876542'
+            if uid:
+                fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+            self._api_is_official_canvas_course(
+                canvas_site_id=canvas_site_id,
+                client=client,
+                expected_status_code=401,
+            )
+
+    def test_authorized(self, client, app, fake_auth):
+        """Allows teacher."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [
+                    f'get_by_id_{canvas_site_id}',
+                    f'get_sections_{canvas_site_id}',
+                    'get_enrollments_4567890',
+                ],
+                'user': [f'profile_{teacher_uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            api_json = self._api_is_official_canvas_course(canvas_site_id=canvas_site_id, client=client)
+            # Verify
+            assert api_json['isOfficialCourse'] is True
+
+    def test_is_not_official_course(self, app, client, fake_auth):
+        """The course is not official based on term."""
+        with override_config(app, 'CANVAS_OLDEST_OFFICIAL_TERM', '2242'):
+            with requests_mock.Mocker() as m:
+                canvas_site_id = '8876542'
+                register_canvas_uris(app, {
+                    'account': ['get_admins'],
+                    'course': [
+                        f'get_by_id_{canvas_site_id}',
+                        f'get_sections_{canvas_site_id}',
+                        'get_enrollments_4567890',
+                    ],
+                    'user': [f'profile_{teacher_uid}'],
+                }, m)
+                fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+                api_json = self._api_is_official_canvas_course(canvas_site_id=canvas_site_id, client=client)
+                # Verify
+                assert api_json['isOfficialCourse'] is False
 
 
 def _api_egrades_export_prepare(
