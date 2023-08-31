@@ -7,7 +7,7 @@
       </strong>
       <ul id="page-create-course-site-section-list" class="page-create-course-site-section-list">
         <li v-for="section in selectedSectionsList" :key="section.sectionId">
-          {{ section.courseTitle }} - {{ section.courseCode }} {{ section.section_label }} ({{ section.sectionId }})
+          {{ section.courseTitle }} - {{ section.courseCode }} ({{ section.id }})
         </li>
       </ul>
     </div>
@@ -87,7 +87,7 @@
 
 <script>
 import Context from '@/mixins/Context'
-import {iframeScrollToTop, putFocusNextTick} from '@/utils'
+import {iframeScrollToTop, pluralize, putFocusNextTick} from '@/utils'
 import {trim} from 'lodash'
 
 export default {
@@ -118,11 +118,12 @@ export default {
   created() {
     const section = this.selectedSectionsList[0]
     this.siteName = `${section.courseTitle} (${this.currentSemesterName})`
-    this.siteAbbreviation = `${section.courseCode}-${section.instruction_format}-${section.section_number}`
+    this.siteAbbreviation = `${section.courseCode}-${section.instructionFormat}-${section.sectionNumber}`
     iframeScrollToTop()
     putFocusNextTick('confirm-course-site-details-header')
   },
   methods: {
+    pluralize,
     create() {
       this.startCourseSiteJob(this.siteName, this.siteAbbreviation)
     },

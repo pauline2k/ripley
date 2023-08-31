@@ -46,7 +46,7 @@ def canvas_site_provision():
         return app.login_manager.unauthorized()
 
     admin_acting_as = request.args.get('adminActingAs')
-    admin_by_ccns = request.args.getlist('adminByCcns')
+    admin_by_ccns = request.args.getlist('adminBySectionIds[]')
     admin_term_slug = request.args.get('adminTermSlug')
 
     is_admin = (current_user.is_admin or current_user.is_canvas_admin)
@@ -88,16 +88,16 @@ def create_course_site():
 
     params = request.get_json()
     admin_acting_as = params.get('adminActingAs')
-    admin_by_ccns = params.get('adminByCcns')
+    admin_by_ccns = params.get('adminBySectionIds')
     site_name = params.get('siteName')
     site_abbreviation = params.get('siteAbbreviation')
     term_slug = params.get('termSlug')
-    section_ids = params.get('ccns')
+    section_ids = params.get('sectionIds')
 
     is_admin = (current_user.is_admin or current_user.is_canvas_admin)
     uid = (is_admin and admin_acting_as) or current_user.uid
 
-    if not len(section_ids):
+    if not section_ids or not len(section_ids):
         raise BadRequestError('Required parameters are missing.')
     job = enqueue(func=provision_course_site, args=(uid, site_name, site_abbreviation, term_slug, section_ids, bool(admin_by_ccns)))
     if not job:
