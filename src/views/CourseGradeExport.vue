@@ -342,9 +342,9 @@ export default {
       `)
       downloadGradeCsv(
         this.selectedType,
+        this.backgroundJobId,
         this.selectedSection.id,
-        this.selectedSection.termId,
-        pnpCutoff
+        this.selectedSection.termId
       )
     },
     goToGradebook() {
@@ -410,7 +410,13 @@ export default {
       this.debug(`preloadGrades:
         selectedType: ${type}
       `)
-      prepareGradesCacheJob().then(
+      const pnpCutoff = this.enablePnpConversion === 'false' ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
+      prepareGradesCacheJob(
+        this.selectedType,
+        pnpCutoff,
+        this.selectedSection.id,
+        this.selectedSection.termId
+      ).then(
         data => {
           this.debug(`post-prepareGradesCacheJob:
             data: ${data}

@@ -104,12 +104,6 @@ class TestEgradeExportOptions:
 class TestEgradesExportPrepare:
 
     @classmethod
-    def _api_egrades_export_prepare(cls, client, expected_status_code=200, failed_assertion_message=None):
-        response = client.post('/api/canvas_site/egrades_export/prepare')
-        assert response.status_code == expected_status_code, failed_assertion_message
-        return response.json
-
-    @classmethod
     def _api_egrades_export_status(cls, client, job_id, expected_status_code=200):
         response = client.post(
             '/api/canvas_site/egrades_export/status',
@@ -133,10 +127,14 @@ class TestEgradesExportPrepare:
         for user_type, uid in users.items():
             if uid:
                 fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
-            self._api_egrades_export_prepare(
+            _api_egrades_export_prepare(
                 client=client,
                 expected_status_code=401,
                 failed_assertion_message=f'Unexpected response status for {user_type} user',
+                grade_type='final',
+                pnp_cutoff='ignore',
+                section_id=32936,
+                term_id=2232,
             )
 
     def test_teacher(self, client, app, fake_auth):
@@ -154,7 +152,13 @@ class TestEgradesExportPrepare:
                 'user': [f'profile_{teacher_uid}'],
             }, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
-            api_json = self._api_egrades_export_prepare(client)
+            api_json = _api_egrades_export_prepare(
+                client,
+                grade_type='final',
+                pnp_cutoff='ignore',
+                section_id=32936,
+                term_id=2232,
+            )
             # Verify
             job_id = api_json['jobId']
             assert job_id
@@ -171,14 +175,12 @@ class TestEgradesExportDownload:
     def _api_egrades_download(
             cls,
             client,
-            section_id,
-            term_id,
+            job_id,
             expected_status_code=200,
             failed_assertion_message=None,
     ):
         path = '/api/canvas_site/egrades_export/download'
-        query_string = f'gradeType=final&pnpCutoff=B&sectionId={section_id}&termId={term_id}'
-        response = client.get(f'{path}?{query_string}')
+        response = client.get(f'{path}?jobId={job_id}')
 
         assert response.status_code == expected_status_code, failed_assertion_message
         return response
@@ -200,34 +202,62 @@ class TestEgradesExportDownload:
                 client,
                 expected_status_code=401,
                 failed_assertion_message=f'Unexpected response status for {user_type} user',
-                section_id=32936,
-                term_id=2232,
+                job_id=2,
             )
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
         with requests_mock.Mocker() as m:
-            canvas_site_id = 1010101
-            section_id = 99999
-            term_id = 2228
-            register_canvas_uris(app, {
-                'account': ['get_admins'],
-                'course': [
-                    f'get_by_id_{canvas_site_id}',
-                    f'get_sections_{canvas_site_id}',
-                    f'get_settings_{canvas_site_id}',
-                    'get_enrollments_4567890',
-                ],
-                'section': ['get_enrollments_500'],
-                'user': ['profile_10000'],
-            }, m)
-            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
-            response = self._api_egrades_download(
+            canvas_site_id = '8876542'
+            section_id = '32936'
+            canvas_section_id = '10000'
+            term_id = '2228'
+            uid = admin_uid
+            register_canvas_uris(
+                app,
+                {
+                    'account': ['get_admins'],
+                    'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}'],
+                    'section': [f'get_enrollments_{canvas_section_id}'],
+                    'user': [f'profile_{uid}'],
+                },
+                m,
+            )
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+            api_json = _api_egrades_export_prepare(
                 client,
+                grade_type='final',
+                pnp_cutoff='ignore',
                 section_id=section_id,
                 term_id=term_id,
             )
+            # Verify
+            job_id = api_json['jobId']
+            assert job_id
+            response = self._api_egrades_download(client, job_id=job_id)
             assert 'csv' in response.content_type
             csv = str(response.data)
-            # Verify
             assert 'ID,Name,Grade,Grading Basis,Comments' in csv
+
+
+def _api_egrades_export_prepare(
+        client,
+        grade_type,
+        pnp_cutoff,
+        section_id,
+        term_id,
+        expected_status_code=200,
+        failed_assertion_message=None,
+):
+    response = client.post(
+        '/api/canvas_site/egrades_export/prepare',
+        data=json.dumps({
+            'gradeType': grade_type,
+            'pnpCutoff': pnp_cutoff,
+            'sectionId': section_id,
+            'termId': term_id,
+        }),
+        content_type='application/json',
+    )
+    assert response.status_code == expected_status_code, failed_assertion_message
+    return response.json
