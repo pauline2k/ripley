@@ -35,9 +35,9 @@ export function courseCreate(
   termSlug: string
 ) {
   return utils.post('/api/canvas_site/provision/create', {
-    adminActingAs: adminActingAs,
-    adminBySectionIds: adminBySectionIds,
-    adminTermSlug: adminTermSlug,
+    adminActingAs,
+    adminBySectionIds,
+    adminTermSlug,
     sectionIds,
     siteAbbreviation,
     siteName,
