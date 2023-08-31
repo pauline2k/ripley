@@ -25,13 +25,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from flask import current_app as app, request
 from flask_login import current_user
-from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
+from ripley.api.errors import BadRequestError, InternalServerError
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import get_official_sections, get_teaching_terms, prepare_egrades_export
-from ripley.lib.egrade_utils import convert_per_grading_basis, get_canvas_course_student_grades, LETTER_GRADES
+from ripley.lib.egrade_utils import LETTER_GRADES
 from ripley.lib.http import tolerant_jsonify
 
 
@@ -50,16 +50,27 @@ def egrades_export_options():
 @app.route('/api/canvas_site/egrades_export/prepare', methods=['POST'])
 @canvas_role_required('TeacherEnrollment')
 def egrades_export_prepare():
-    canvas_site_id = current_user.canvas_site_id
-    course = canvas.get_course(canvas_site_id)
-    if not course:
-        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
+    params = request.get_json()
+    grade_type = params.get('gradeType', None)
+    pnp_cutoff = params.get('pnpCutoff', None)
+    section_id = params.get('sectionId', None)
+    term_id = params.get('termId', None)
+
+    if None in [grade_type, pnp_cutoff, section_id, term_id]:
+        raise BadRequestError('Required parameter(s) are missing')
+    if grade_type not in ['current', 'final']:
+        raise BadRequestError(f'Invalid gradeType value: {grade_type}')
+    if pnp_cutoff not in LETTER_GRADES and pnp_cutoff != 'ignore':
+        raise BadRequestError(f'Invalid pnpCutoff value: {pnp_cutoff}')
     try:
-        job = enqueue(args=[canvas_site_id], func=prepare_egrades_export)
+        job = enqueue(
+            args=[current_user.canvas_site_id, grade_type, pnp_cutoff, section_id, term_id],
+            func=prepare_egrades_export,
+        )
         if not job:
             raise InternalServerError('Updates cannot be completed at this time.')
     except Exception as e:
-        app.logger.error(f'Failed to enqueue egrades_export job where canvas_site_id = {canvas_site_id}')
+        app.logger.error(f'Failed to enqueue egrades_export job where canvas_site_id = {current_user.canvas_site_id}')
         raise e
     return tolerant_jsonify(
         {
@@ -73,44 +84,23 @@ def egrades_export_prepare():
 @canvas_role_required('TeacherEnrollment')
 def egrades_download():
     params = request.args
-    grade_type = params.get('gradeType', None)
-    pnp_cutoff = params.get('pnpCutoff', None)
-    section_id = params.get('sectionId', None)
-    term_id = params.get('termId', None)
-
-    if None in [grade_type, pnp_cutoff, section_id, term_id]:
-        raise BadRequestError('Required parameter(s) are missing')
-    if grade_type not in ['current', 'final']:
-        raise BadRequestError(f'Invalid gradeType value: {grade_type}')
-    if pnp_cutoff not in LETTER_GRADES and pnp_cutoff != 'ignore':
-        raise BadRequestError(f'Invalid pnpCutoff value: {pnp_cutoff}')
-
-    canvas_site_id = current_user.canvas_site_id
-    rows = []
-    for row in get_canvas_course_student_grades(canvas_site_id=canvas_site_id, section_id=section_id, term_id=term_id):
-        grading_basis = (row['grading_basis'] or '').upper()
-        comment = None
-        if grading_basis in ['CPN', 'DPN', 'EPN', 'PNP']:
-            comment = 'P/NP grade'
-        elif grading_basis in ['ESU', 'SUS']:
-            comment = 'S/U grade'
-        elif grading_basis == 'CNC':
-            comment = 'C/NC grade'
-        # TODO: Pull grades (including 'override_grade') from https://canvas.instructure.com/doc/api/enrollments.html
-        override_grade = None
-        rows.append({
-            'ID': row['sid'],
-            'Name': row['name'],
-            'Grade': convert_per_grading_basis(row['grades'][f'{grade_type}_grade'], override_grade, grading_basis, pnp_cutoff),
-            'Grading Basis': grading_basis,
-            'Comments': comment or None,
-        })
-    term = BerkeleyTerm.from_sis_term_id(term_id)
-    return csv_download_response(
-        rows=rows,
-        filename=f'egrades-{grade_type}-{section_id}-{term.season}-{term.year}-{canvas_site_id}.csv',
-        fieldnames=['ID', 'Name', 'Grade', 'Grading Basis', 'Comments'],
-    )
+    job_id = params.get('jobId', None)
+    job = get_job(job_id)
+    job_status = job.get_status(refresh=True)
+    if job_status == 'finished':
+        job_result = job.result
+        grade_type = job_result['grade_type']
+        rows = job_result['rows']
+        section_id = job_result['section_id']
+        term_id = job_result['term_id']
+        term = BerkeleyTerm.from_sis_term_id(term_id)
+        return csv_download_response(
+            rows=rows,
+            filename=f'egrades-{grade_type}-{section_id}-{term.season}-{term.year}-{current_user.canvas_site_id}.csv',
+            fieldnames=['ID', 'Name', 'Grade', 'Grading Basis', 'Comments'],
+        )
+    else:
+        raise BadRequestError(f'Sorry, job {job_id} has not finished or failed. (Job status: {job_status})')
 
 
 @app.route('/api/canvas_site/egrades_export/status', methods=['POST'])

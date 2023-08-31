@@ -30,10 +30,12 @@ import secrets
 from flask import current_app as app
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.externals import canvas, data_loch
+from ripley.externals.canvas import get_course_sections
 from ripley.externals.s3 import upload_dated_csv
 from ripley.lib.berkeley_course import course_section_name, course_to_api_json, section_to_api_json, \
     sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
+from ripley.lib.egrade_utils import convert_per_grading_basis, get_canvas_course_student_grades
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from rq.job import get_current_job
@@ -213,19 +215,62 @@ def _build_courses_by_term(teaching_sections, term_id, section_ids):
     return courses_by_term
 
 
-def prepare_egrades_export(course):
-    app.logger.warning(f'E-Grades job started for course {course.id}')
+def prepare_egrades_export(canvas_site_id, grade_type, pnp_cutoff, section_id, term_id):
+    app.logger.warning(f'E-Grades job started for course {canvas_site_id}')
     official_grades = []
-    for user in course.get_users(enrollment_type='student', include='enrollments'):
-        grades = _extract_grades(user['enrollments'])
-        official_grades.append({
-            'current_grade': grades['current_grade'],
-            'final_grade': grades['final_grade'],
-            'name': user.sortable_name,
-            'override_grade': grades['override_grade'],
-            'uid': user.login_id if hasattr(user, 'login_id') else None,
+    canvas_section_id = None
+    for canvas_course_section in get_course_sections(canvas_site_id):
+        berkeley_section_id, berkeley_term = parse_canvas_sis_section_id(canvas_course_section.sis_section_id)
+        if berkeley_section_id == section_id:
+            canvas_section_id = canvas_course_section.id
+            break
+    if canvas_section_id:
+        enrollments = canvas.get_section(canvas_section_id, api_call=False).get_enrollments()
+        for enrollment in enrollments:
+            grades = _extract_grades([enrollment])
+            student = enrollment.user
+            uid = student['login_id'] if 'login_id' in student else None
+            official_grade = {
+                'current_grade': grades['current_grade'],
+                'final_grade': grades['final_grade'],
+                'name': student['sortable_name'],
+                'override_grade': grades['override_grade'],
+                'uid': uid,
+            }
+            official_grades.append(official_grade)
+    else:
+        raise BadRequestError(f'Section {section_id} not found in context of Canvas course site {canvas_site_id}.')
+
+    rows = []
+    for row in get_canvas_course_student_grades(canvas_site_id=canvas_site_id, section_id=section_id, term_id=term_id):
+        grading_basis = (row['grading_basis'] or '').upper()
+        comment = None
+        if grading_basis in ['CPN', 'DPN', 'EPN', 'PNP']:
+            comment = 'P/NP grade'
+        elif grading_basis in ['ESU', 'SUS']:
+            comment = 'S/U grade'
+        elif grading_basis == 'CNC':
+            comment = 'C/NC grade'
+        override_grade = row.get('grades', {}).get('override_grade')
+        grade = convert_per_grading_basis(
+            row['grades'][f'{grade_type}_grade'],
+            override_grade,
+            grading_basis,
+            pnp_cutoff,
+        )
+        rows.append({
+            'ID': row['sid'],
+            'Name': row['name'],
+            'Grade': grade,
+            'Grading Basis': grading_basis,
+            'Comments': comment or None,
         })
-    return official_grades
+    return {
+        'grade_type': grade_type,
+        'rows': rows,
+        'section_id': section_id,
+        'term_id': term_id,
+    }
 
 
 def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_ids, is_admin_by_ccns):
@@ -489,9 +534,9 @@ def _canvas_site_term_json(canvas_site):
 
 
 def _extract_grades(enrollments):
-    keys = ['current_score', 'current_grade', 'final_score', 'final_grade override_score', 'override_grade']
+    keys = ['current_score', 'current_grade', 'final_score', 'final_grade', 'override_score', 'override_grade']
     grade_hash = dict.fromkeys(keys, None)
-    enrollments = filter(lambda e: e.type == 'StudentEnrollment' and hasattr(e, 'grades'), enrollments)
+    enrollments = list(filter(lambda e: hasattr(e, 'grades'), enrollments))
     if enrollments:
         api_grades = enrollments[0].grades
         for key in keys:
