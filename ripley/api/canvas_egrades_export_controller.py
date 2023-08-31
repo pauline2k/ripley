@@ -24,13 +24,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from flask import current_app as app, request
-from flask_login import current_user
+from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError
 from ripley.api.util import canvas_role_required, csv_download_response
 from ripley.externals import canvas
+from ripley.externals.canvas import get_course_sections
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import get_official_sections, get_teaching_terms, prepare_egrades_export
+from ripley.lib.canvas_utils import get_official_sections, get_teaching_terms, parse_canvas_sis_section_id, \
+    prepare_egrades_export
 from ripley.lib.egrade_utils import LETTER_GRADES
 from ripley.lib.http import tolerant_jsonify
 
@@ -78,6 +80,33 @@ def egrades_export_prepare():
             'jobRequestStatus': 'Success',
         },
     )
+
+
+@app.route('/api/canvas_site/egrades_export/<canvas_site_id>/is_official_course')
+@login_required
+def is_official_canvas_course(canvas_site_id):
+    is_authorized = False
+    if current_user.is_authenticated and current_user.is_admin:
+        is_authorized = True
+    elif current_user.is_authenticated and current_user.canvas_user_id:
+        canvas_site_id = str(current_user.canvas_site_id)
+        if canvas_site_id:
+            roles = current_user.canvas_site_user_roles
+            is_authorized = bool(next((role for role in roles if role == 'TeacherEnrollment'), False))
+
+    if is_authorized:
+        is_official_course = False
+        oldest_official_term = app.config['CANVAS_OLDEST_OFFICIAL_TERM']
+        for canvas_section in get_course_sections(canvas_site_id):
+            section_id, berkeley_term = parse_canvas_sis_section_id(canvas_section.sis_section_id)
+            if berkeley_term:
+                sis_term_id = berkeley_term.to_sis_term_id()
+                if sis_term_id >= str(oldest_official_term):
+                    is_official_course = True
+                    break
+        return tolerant_jsonify({'isOfficialCourse': is_official_course})
+    else:
+        return app.login_manager.unauthorized()
 
 
 @app.route('/api/canvas_site/egrades_export/download')
