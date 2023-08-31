@@ -116,6 +116,7 @@
 <script>
 import Context from '@/mixins/Context'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
+import {each, filter, map, size, trim} from 'lodash'
 import {exportRoster, getRoster} from '@/api/canvas-site'
 import {printPage} from '@/utils'
 
@@ -140,7 +141,7 @@ export default {
   },
   computed: {
     disablePrintButton() {
-      return !this.$_.size(this.students) || !!this.students.find(s => !s.hasRosterPhotoLoaded)
+      return !size(this.students) || !!this.students.find(s => !s.hasRosterPhotoLoaded)
     },
     showPrintButtonTooltip: {
       get() {
@@ -159,7 +160,7 @@ export default {
         data => {
           this.roster = data
           this.students = this.roster.students
-          this.$_.each(this.students, s => s.idx = this.idx(`${s.firstName} ${s.lastName} ${s.studentId}`))
+          each(this.students, s => s.idx = this.idx(`${s.firstName} ${s.lastName} ${s.studentId}`))
           // If student count is low then tooltip is not necessary.
           const threshold = 36
           this.showPrintButtonTooltip = (this.students.length >= threshold) && this.disablePrintButton
@@ -184,10 +185,10 @@ export default {
     recalculateStudents() {
       const normalizedPhrase = this.idx(this.search)
       if (normalizedPhrase || this.selectedSectionId) {
-        this.students = this.$_.filter(this.roster.students, student => {
+        this.students = filter(this.roster.students, student => {
           let showStudent = !normalizedPhrase || student.idx.includes(normalizedPhrase)
           if (this.selectedSectionId) {
-            showStudent = showStudent && this.$_.map(student.sections || [], 'id').includes(this.selectedSectionId)
+            showStudent = showStudent && map(student.sections || [], 'id').includes(this.selectedSectionId)
           }
           return showStudent
         })
@@ -197,7 +198,7 @@ export default {
       }
     },
     idx(value) {
-      return value && this.$_.trim(value).replace(/[^\w\s]/gi, '').toLowerCase()
+      return value && trim(value).replace(/[^\w\s]/gi, '').toLowerCase()
     },
     printRoster() {
       printPage(`${this.idx(this.currentUser.canvasSiteName).replace(/\s/g, '-')}_roster`)

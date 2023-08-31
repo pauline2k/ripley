@@ -85,7 +85,7 @@
     <v-dialog v-model="editJobDialog" max-width="400px" persistent>
       <v-card>
         <v-card-title>
-          <span class="headline">{{ $_.get(editJob, 'name') }} Schedule</span>
+          <span class="headline">{{ get(editJob, 'name') }} Schedule</span>
         </v-card-title>
         <v-card-text>
           <v-container v-if="editJob">
@@ -140,6 +140,7 @@
 import Context from '@/mixins/Context'
 import DisableJobToggle from '@/components/job/DisableJobToggle'
 import JobHistory from '@/components/job/JobHistory'
+import {cloneDeep, find, get} from 'lodash'
 import {getJobHistory, getJobSchedule, setJobDisabled, startJob, updateJobSchedule} from '@/api/job'
 
 export default {
@@ -179,8 +180,9 @@ export default {
     clearTimeout(this.refresher)
   },
   methods: {
+    get,
     isRunning(jobKey) {
-      return !!this.$_.find(this.jobHistory, h => h.jobKey === jobKey && !h.finishedAt)
+      return !!find(this.jobHistory, h => h.jobKey === jobKey && !h.finishedAt)
     },
     refresh(quietly) {
       this.refreshing = true
@@ -200,7 +202,7 @@ export default {
         startedAt: this.$moment()
       })
       startJob(job.key, {isDryRun: this.isDryRun}).then(() => {})
-      const jobName = this.$_.find(this.jobSchedule.jobs, ['key', job.key]).name
+      const jobName = find(this.jobSchedule.jobs, ['key', job.key]).name
       console.log(`TODO: this.snackbarOpen(${jobName} job started)`)
     },
     scheduleEditCancel() {
@@ -209,7 +211,7 @@ export default {
       this.$announcer.polite('Cancelled')
     },
     scheduleEditOpen(job) {
-      this.editJob = this.$_.cloneDeep(job)
+      this.editJob = cloneDeep(job)
       this.editJobDialog = true
       this.$announcer.polite(`Opened dialog to edit job ${job.name}`)
     },
@@ -219,7 +221,7 @@ export default {
         this.editJob.schedule.type,
         this.editJob.schedule.value
       ).then(() => {
-        const match = this.$_.find(this.jobSchedule.jobs, ['id', this.editJob.id])
+        const match = find(this.jobSchedule.jobs, ['id', this.editJob.id])
         match.schedule = this.editJob.schedule
         this.editJob = undefined
         this.editJobDialog = false

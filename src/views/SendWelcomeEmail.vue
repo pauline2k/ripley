@@ -196,6 +196,7 @@ import {
   updateWelcomeEmail
 } from '@/api/mailing-list'
 import {putFocusNextTick} from '@/utils'
+import {trim} from 'lodash'
 
 export default {
   name: 'SendWelcomeEmail',
@@ -223,7 +224,7 @@ export default {
   }),
   computed: {
     isWelcomeEmailValid() {
-      return !!this.$_.trim(this.subject) && !!this.$_.trim(this.body)
+      return !!trim(this.subject) && !!trim(this.body)
     }
   },
   created() {

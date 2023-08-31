@@ -18,7 +18,7 @@
       <span class="font-weight-bold text-body-1">
         Ripley v{{ config.version }}
       </span>
-      <span v-if="$_.get(config, 'build.gitCommit')" class="text-body-1">
+      <span v-if="get(config, 'build.gitCommit')" class="text-body-1">
         &mdash; Github: <a
           :href="`https://github.com/ets-berkeley-edu/ripley/commit/${config.build.gitCommit}`"
           target="_blank"
@@ -32,12 +32,16 @@
 
 <script>
 import Context from '@/mixins/Context'
+import {get} from 'lodash'
 
 export default {
   name: 'BuildSummary',
   mixins: [Context],
   data: () => ({
     summary: undefined
-  })
+  }),
+  methods: {
+    get
+  }
 }
 </script>

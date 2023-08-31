@@ -1,3 +1,4 @@
+import viteCompression from 'vite-plugin-compression'
 import vue from '@vitejs/plugin-vue'
 import vuetify, {transformAssetUrls} from 'vite-plugin-vuetify'
 import {defineConfig} from 'vite'
@@ -15,6 +16,7 @@ export default defineConfig({
   },
   define: {'process.env': {}},
   plugins: [
+    viteCompression(),
     vue({
       template: {transformAssetUrls}
     }),

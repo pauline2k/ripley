@@ -85,6 +85,7 @@ import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import MonitoringJob from '@/components/bcourses/create/MonitoringJob'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
+import {each, get, includes, map, size} from 'lodash'
 import {iframeParentLocation} from '@/utils'
 
 export default {
@@ -137,8 +138,8 @@ export default {
   methods: {
     classCount(semesters) {
       let count = 0
-      if (this.$_.size(semesters) > 0) {
-        this.$_.each(semesters, semester => {
+      if (size(semesters) > 0) {
+        each(semesters, semester => {
           count += semester.classes.length
         })
       }
@@ -166,9 +167,9 @@ export default {
         this.fillCourseSites(data.teachingTerms, canvasSiteId)
         this.$announcer.polite('Course section loaded successfully')
         if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
-          this.$_.each(this.coursesList, course => {
-            this.$_.each(course.sections, section => {
-              section.selected = this.$_.includes(this.adminBySectionIds, section.sectionId)
+          each(this.coursesList, course => {
+            each(course.sections, section => {
+              section.selected = includes(this.adminBySectionIds, section.sectionId)
             })
           })
           this.updateSelected()
@@ -197,16 +198,16 @@ export default {
       ).then(onSuccess, onError)
     },
     fillCourseSites(semestersFeed, canvasSiteId=null) {
-      this.$_.each(semestersFeed, semester => {
-        this.$_.each(semester.classes, course => {
+      each(semestersFeed, semester => {
+        each(semester.classes, course => {
           course.allSelected = false
           course.selectToggleText = 'All'
           let hasSites = false
           let sectionIdToSites = {}
-          this.$_.each(course.class_sites, site => {
+          each(course.class_sites, site => {
             if (site.emitter === 'bCourses') {
               if (site.id !== canvasSiteId) {
-                this.$_.each(site.sections, siteSection => {
+                each(site.sections, siteSection => {
                   hasSites = true
                   if (!sectionIdToSites[siteSection.sectionId]) {
                     sectionIdToSites[siteSection.sectionId] = []
@@ -218,7 +219,7 @@ export default {
           })
           if (hasSites) {
             course.hasSites = hasSites
-            this.$_.each(course.sections, section => {
+            each(course.sections, section => {
               let sectionId = section.sectionId
               if (sectionIdToSites[sectionId]) {
                 section.sites = sectionIdToSites[sectionId]
@@ -241,7 +242,7 @@ export default {
           this.jobStatusLoader()
         } else {
           clearTimeout(this.timeoutPromise)
-          const courseSiteUrl = this.$_.get(data.courseSite, 'url')
+          const courseSiteUrl = get(data.courseSite, 'url')
           if (this.jobStatus === 'Completed' && courseSiteUrl) {
             this.$announcer.polite('Done. Loading new course site now.')
             if (this.$isInIframe) {
@@ -268,7 +269,7 @@ export default {
     loadCourseLists() {
       this.courseSemester = false
       // identify semester matching current course site
-      this.$_.each(this.teachingTerms, term => {
+      each(this.teachingTerms, term => {
         if ((term.termYear === this.canvasSite.term.term_yr) && (term.termCode === this.canvasSite.term.term_cd)) {
           this.courseSemester = semester
           return false
@@ -283,12 +284,12 @@ export default {
         this.existingCourseSections = []
         this.allSections = []
         const existingSectionIds = []
-        this.$_.each(this.courseSemester.classes, classItem => {
-          this.$_.each(classItem.sections, section => {
+        each(this.courseSemester.classes, classItem => {
+          each(classItem.sections, section => {
             section.parentClass = classItem
             this.allSections.push(section)
             section.stagedState = null
-            this.$_.each(this.canvasSite.officialSections, officialSection => {
+            each(this.canvasSite.officialSections, officialSection => {
               if (officialSection.sectionId === section.sectionId && existingSectionIds.indexOf(section.sectionId) === -1) {
                 existingSectionIds.push(section.sectionId)
                 this.existingCourseSections.push(section)
@@ -305,8 +306,8 @@ export default {
     },
     selectedSections(coursesList) {
       const selected = []
-      this.$_.each(coursesList, course => {
-        this.$_.each(course.sections, section => {
+      each(coursesList, course => {
+        each(course.sections, section => {
           if (section.selected) {
             section.courseTitle = course.title
             section.courseCatalog = course.course_catalog
@@ -342,7 +343,7 @@ export default {
       this.$announcer.polite('Creating course site. Please wait.')
       this.showMaintenanceNotice = false
       this.updateSelected()
-      const sectionIds = this.$_.map(this.selectedSectionsList, 'sectionId')
+      const sectionIds = map(this.selectedSectionsList, 'sectionId')
       if (sectionIds.length > 0) {
         const onSuccess = data => {
           this.jobId = data.job_id
@@ -386,14 +387,14 @@ export default {
     updateMetadata(data) {
       this.isAdmin = data.isAdmin
       this.teachingTerms = data.teachingTerms
-      if (this.$_.size(this.teachingTerms) > 0) {
+      if (size(this.teachingTerms) > 0) {
         this.switchSemester(this.teachingTerms[0])
       }
       this.fillCourseSites(this.teachingTerms)
       if (this.isAdmin) {
         this.adminActingAs = data.adminActingAs
         this.adminTerms = data.adminTerms
-        if (this.$_.size(this.adminTerms) > 0 && !this.currentAdminTerm) {
+        if (size(this.adminTerms) > 0 && !this.currentAdminTerm) {
           this.switchAdminTerm(this.adminTerms[0])
         }
       } else {

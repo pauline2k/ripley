@@ -33,7 +33,7 @@
                 name="siteName"
                 :required="true"
               />
-              <div v-if="!$_.trim(siteName)" class="alert notice-error">
+              <div v-if="!trim(siteName)" class="alert notice-error">
                 <v-icon icon="mdi-exclamation-circle" class="left icon-red canvas-notice-icon" />
                 Please fill out a site name.
               </div>
@@ -50,7 +50,7 @@
                 class="w-100"
                 :required="true"
               />
-              <div v-if="!$_.trim(siteAbbreviation)" class="alert notice-error">
+              <div v-if="!trim(siteAbbreviation)" class="alert notice-error">
                 <v-icon icon="mdi-exclamation-circle" class="left icon-red canvas-notice-icon" />
                 Please fill out a site abbreviation.
               </div>
@@ -65,7 +65,7 @@
               aria-controls="page-create-course-site-steps-container"
               aria-label="Create Course Site"
               class="canvas-button canvas-button-primary"
-              :disabled="!$_.trim(siteName) || !$_.trim(siteAbbreviation)"
+              :disabled="!trim(siteName) || !trim(siteAbbreviation)"
             >
               Create Course Site
             </v-btn>
@@ -88,6 +88,7 @@
 <script>
 import Context from '@/mixins/Context'
 import {iframeScrollToTop, putFocusNextTick} from '@/utils'
+import {trim} from 'lodash'
 
 export default {
   name: 'ConfirmationStep',
@@ -124,7 +125,8 @@ export default {
   methods: {
     create() {
       this.startCourseSiteJob(this.siteName, this.siteAbbreviation)
-    }
+    },
+    trim
   }
 }
 </script>

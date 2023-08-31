@@ -270,6 +270,7 @@ import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {addUser, getAddUserCourseSections, getCanvasSiteUserRoles, searchUsers} from '@/api/canvas-user'
 import {iframeScrollToTop, putFocusNextTick} from '@/utils'
+import {includes, trim} from 'lodash'
 
 export default {
   name: 'CourseAddUser',
@@ -327,9 +328,9 @@ export default {
   methods: {
     isAuthorized(response) {
       return (
-        this.$_.includes(response.roleTypes, 'TeacherEnrollment') ||
-        this.$_.includes(response.roleTypes, 'TaEnrollment') ||
-        this.$_.includes(response.roles, 'globalAdmin')
+        includes(response.roleTypes, 'TeacherEnrollment') ||
+        includes(response.roleTypes, 'TaEnrollment') ||
+        includes(response.roles, 'globalAdmin')
       )
     },
     resetForm() {
@@ -359,7 +360,7 @@ export default {
     searchUsers() {
       this.resetSearchState()
       this.resetImportState()
-      if (!this.$_.trim(this.searchText)) {
+      if (!trim(this.searchText)) {
         this.showSearchAlert('You did not enter any search terms.')
       } else if (this.searchType === 'ldap_user_id' && !isFinite(this.searchText)) {
         this.showSearchAlert('UID search terms must be numeric.')

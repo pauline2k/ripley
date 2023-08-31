@@ -23,7 +23,7 @@
         <div class="d-flex justify-end mt-4">
           <button
             id="create-project-site-button"
-            :disabled="isCreating || !$_.trim(name)"
+            :disabled="isCreating || !trim(name)"
             aria-controls="page-reader-alert"
             class="canvas-button canvas-button-primary"
             type="submit"
@@ -62,6 +62,7 @@ import CanvasErrors from '@/components/bcourses/CanvasErrors'
 import Context from '@/mixins/Context'
 import {createProjectSite} from '@/api/canvas-site'
 import {iframeParentLocation} from '@/utils'
+import {trim} from 'lodash'
 
 export default {
   name: 'CreateProjectSite',
@@ -95,7 +96,8 @@ export default {
           this.isCreating = false
         }
       })
-    }
+    },
+    trim
   }
 }
 </script>

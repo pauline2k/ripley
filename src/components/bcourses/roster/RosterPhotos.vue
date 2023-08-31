@@ -48,7 +48,7 @@
           :id="`student-majors-${student.studentId}`"
           class="page-roster-student-majors print-hide"
         >
-          {{ $_.truncate(student.majors.join(', '), {length: 50}) }}
+          {{ truncate(student.majors.join(', '), {length: 50}) }}
         </div>
       </v-card-text>
     </v-card>
@@ -59,6 +59,7 @@
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import RosterPhoto from '@/components/bcourses/roster/RosterPhoto'
+import {truncate} from 'lodash'
 
 export default {
   name: 'RosterPhotos',
@@ -72,7 +73,10 @@ export default {
   },
   data: () => ({
     context: 'canvas'
-  })
+  }),
+  methods: {
+    truncate
+  }
 }
 </script>
 

@@ -17,7 +17,7 @@
           id="page-site-mailing-list-site-id"
           v-model="canvasSiteId"
           aria-required="true"
-          :error="!!$_.trim(this.canvasSiteId) && !isCanvasSiteIdValid"
+          :error="!!trim(this.canvasSiteId) && !isCanvasSiteIdValid"
           hide-details
           maxlength="10"
           label="Canvas Course ID"
@@ -50,6 +50,7 @@ import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {getMailingList} from '@/api/mailing-list'
 import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
+import {trim} from 'lodash'
 
 export default {
   name: 'MailingListSelectCourse',
@@ -94,7 +95,8 @@ export default {
           }
         )
       }
-    }
+    },
+    trim
   }
 }
 </script>

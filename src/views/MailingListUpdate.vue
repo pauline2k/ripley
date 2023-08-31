@@ -20,19 +20,19 @@
       <v-expansion-panel
         v-for="(alert, index) in alerts"
         :key="index"
-        :disabled="!$_.size(alert.emailAddresses)"
+        :disabled="!size(alert.emailAddresses)"
       >
         <v-expansion-panel-title :color="alert.type === 'warning' ? 'error' : 'success'">
-          <span v-if="$_.size(alert.emailAddresses)">
+          <span v-if="size(alert.emailAddresses)">
             {{ alert.message }}
             [<span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> users</span>]
           </span>
-          <span v-if="!$_.size(alert.emailAddresses)" class="alert-message-without-email-addresses">
+          <span v-if="!size(alert.emailAddresses)" class="alert-message-without-email-addresses">
             {{ alert.message }}
           </span>
           <template #actions>
             <v-icon
-              v-if="$_.size(alert.emailAddresses)"
+              v-if="size(alert.emailAddresses)"
               color="white"
               :icon="alert.type === 'errors' ? 'mdi-alert-circle' : 'mdi-check'"
             />
@@ -136,7 +136,7 @@
                   <span v-if="mailingList.populatedAt">
                     {{ $moment(mailingList.populatedAt).format('MMM D, YYYY') }}
                   </span>
-                  <span v-if="!$_.get(mailingList, 'populatedAt')">
+                  <span v-if="!get(mailingList, 'populatedAt')">
                     Never.
                   </span>
                 </div>
@@ -177,6 +177,7 @@ import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
+import {each, get, size} from 'lodash'
 import {populateMailingList} from '@/api/mailing-list'
 import {pluralize, putFocusNextTick} from '@/utils'
 
@@ -207,25 +208,26 @@ export default {
     cancel() {
       this.$router.push({path: '/mailing_list/select_course'})
     },
+    get,
     pluralize,
     showUpdateSummary() {
       const actions = ['add', 'remove', 'restore', 'update']
       const count = key => {
         let count = 0
-        this.$_.each(actions, action => count += this.updateSummary[action][key].length)
+        each(actions, action => count += this.updateSummary[action][key].length)
         return count
       }
       const errorCount = count('errors')
       const successCount = count('successes')
       if (errorCount || successCount) {
         this.alerts = []
-        this.$_.each(['errors', 'successes'], type => {
-          this.$_.each(actions, action => {
+        each(['errors', 'successes'], type => {
+          each(actions, action => {
             const summary = this.updateSummary[action]
             const emailAddresses = summary[type]
             if (emailAddresses.length) {
               const prefix = type === 'errors' ? `failed to ${action}` : (action === 'add' ? 'added ' : `${action}d `)
-              const message = this.$_.capitalize(prefix + pluralize('user', emailAddresses.length) + '.')
+              const message = capitalize(prefix + pluralize('user', emailAddresses.length) + '.')
               this.alerts.push({action, emailAddresses, message, summary, type})
             }
           })
@@ -237,6 +239,7 @@ export default {
         }]
       }
     },
+    size,
     update() {
       this.$announcer.polite('Updating')
       this.isUpdating = true

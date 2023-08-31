@@ -1,6 +1,6 @@
-import _ from 'lodash'
 import moment from 'moment-timezone'
 import utils from '@/api/api-utils'
+import {each} from 'lodash'
 
 export function getGradeDistribution(canvasSiteId: number) {
   return utils.get(`/api/canvas_site/${canvasSiteId}/grade_distribution`, true)
@@ -70,7 +70,7 @@ export function getSections(
       feedUrl = `/api/canvas_site/provision?adminActingAs=${adminActingAs}`
     } else if ((adminMode !== 'actAs') && adminBySectionIds) {
       feedUrl = `/api/canvas_site/provision?adminTermSlug=${currentSemester}`
-      _.each(adminBySectionIds, sectionId => feedUrl += `&adminBySectionIds[]=${sectionId}`)
+      each(adminBySectionIds, sectionId => feedUrl += `&adminBySectionIds[]=${sectionId}`)
     }
   }
   return utils.get(feedUrl)

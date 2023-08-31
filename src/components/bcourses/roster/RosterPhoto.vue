@@ -30,6 +30,7 @@ import photoUnavailable from '@/assets/images/photo_unavailable.svg'
 
 <script>
 import Context from '@/mixins/Context'
+import {trim} from 'lodash'
 
 export default {
   name: 'RosterPhoto',
@@ -49,7 +50,7 @@ export default {
     photoUrl: undefined
   }),
   created() {
-    const photoUrl = this.$_.trim(this.student.photoUrl || '')
+    const photoUrl = trim(this.student.photoUrl || '')
     if (photoUrl) {
       this.photoUrl = photoUrl.startsWith('http') ? photoUrl : `${this.config.apiBaseUrl}${photoUrl}`
     } else {

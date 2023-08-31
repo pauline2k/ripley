@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import auth from '@/auth'
 const BaseLTI = () => import('./layouts/lti/BaseLTI.vue')
 const BaseStandalone = () => import('./layouts/standalone/BaseStandalone.vue')
@@ -21,6 +20,7 @@ const SendWelcomeEmail = () => import('./views/SendWelcomeEmail.vue')
 const SiteCreation = () => import('./views/SiteCreation.vue')
 const UserProvision = () => import('./views/UserProvision.vue')
 const Welcome = () => import('@/views/Welcome.vue')
+import {capitalize, get} from 'lodash'
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 import {useContextStore} from '@/stores/context'
 
@@ -202,7 +202,7 @@ const router = createRouter({
 router.afterEach((to: any) => {
   useContextStore().loadingStart()
   useContextStore().resetApplicationState()
-  const title = _.get(to, 'meta.title') || _.capitalize(to.name) || 'Welcome'
+  const title = get(to, 'meta.title') || capitalize(to.name) || 'Welcome'
   document.title = `${title} | UC Berkeley`
 })
 

@@ -2,14 +2,14 @@
   <div class="canvas-application pa-5">
     <div v-if="!isLoading">
       <h1 id="page-header" tabindex="-1">Grade Distribution</h1>
-      <div v-if="$_.get(gradeDistribution, 'demographics')" class="container mb-4">
+      <div v-if="get(gradeDistribution, 'demographics')" class="container mb-4">
         <DemographicsChart
           :change-series-color="changeSeriesColor"
           :chart-defaults="chartDefaults"
           :grade-distribution="gradeDistribution.demographics"
         />
       </div>
-      <div v-if="$_.get(gradeDistribution, 'enrollments')" class="container mb-4">
+      <div v-if="get(gradeDistribution, 'enrollments')" class="container mb-4">
         <PriorEnrollmentChart
           :change-series-color="changeSeriesColor"
           :chart-defaults="chartDefaults"
@@ -21,10 +21,11 @@
 </template>
 
 <script>
-import DemographicsChart from '@/components/bcourses/analytics/DemographicsChart'
 import Context from '@/mixins/Context'
-import {getGradeDistribution} from '@/api/canvas-site'
+import DemographicsChart from '@/components/bcourses/analytics/DemographicsChart'
 import PriorEnrollmentChart from '@/components/bcourses/analytics/PriorEnrollmentChart'
+import {each, get} from 'lodash'
+import {getGradeDistribution} from '@/api/canvas-site'
 
 export default {
   name: 'CourseGradeDistribution',
@@ -117,12 +118,12 @@ export default {
   methods: {
     changeSeriesColor(chartSettings) {
       const defaultSeries = chartSettings.series[0]
-      const primarySeries = this.$_.get(chartSettings.series, 1)
-      const secondarySeries = this.$_.get(chartSettings.series, 2)
+      const primarySeries = get(chartSettings.series, 1)
+      const secondarySeries = get(chartSettings.series, 2)
       const defaultSeriesColor = (primarySeries && !secondarySeries) ? this.colors.primary : this.colors.default
       defaultSeries.color = defaultSeriesColor
       chartSettings.colors[0] = defaultSeriesColor
-      this.$_.each(defaultSeries.data, item => {
+      each(defaultSeries.data, item => {
         item.color = defaultSeriesColor
         item.dataLabels = this.getDataLabel(item.y, defaultSeriesColor)
         item.dataLabels.enabled = !primarySeries
@@ -130,17 +131,18 @@ export default {
       if (primarySeries) {
         const primarySeriesColor = secondarySeries ? this.colors.primary : this.colors.secondary
         primarySeries.color = primarySeriesColor
-        this.$_.each(this.$_.get(primarySeries, 'data', []), item => {
+        each(get(primarySeries, 'data', []), item => {
           item.color = primarySeriesColor
         })
       }
       if (secondarySeries) {
         secondarySeries.color = this.colors.secondary
-        this.$_.each(this.$_.get(secondarySeries, 'data', []), item => {
+        each(get(secondarySeries, 'data', []), item => {
           item.color = this.colors.secondary
         })
       }
     },
+    get,
     getDataLabel(yVal, color) {
       const displayAboveColumn = yVal < 2
       return {
@@ -154,7 +156,7 @@ export default {
       this.chartDefaults.colors = [this.colors.default, this.colors.secondary]
       this.chartDefaults.series[0].name = 'Fall 2023'
       this.chartDefaults.series[0].color = this.colors.default
-      this.$_.each(this.gradeDistribution.demographics, item => {
+      each(this.gradeDistribution.demographics, item => {
         this.chartDefaults.series[0].data.push({
           color: this.colors.default,
           custom: {count: item.count},

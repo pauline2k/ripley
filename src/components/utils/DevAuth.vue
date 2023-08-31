@@ -54,6 +54,7 @@
 <script>
 import Context from '@/mixins/Context'
 import {devAuthLogIn} from '@/api/auth'
+import {get, trim} from 'lodash'
 import {useContextStore} from '@/stores/context'
 import {putFocusNextTick} from '@/utils'
 
@@ -69,14 +70,14 @@ export default {
   }),
   computed: {
     disableSubmit() {
-      return !this.$_.trim(this.password) || !this.$_.trim(this.uid)
+      return !trim(this.password) || !trim(this.uid)
     }
   },
   methods: {
     devAuth() {
-      const canvasSiteId = this.$_.trim(this.canvasSiteId)
-      const password = this.$_.trim(this.password)
-      const uid = this.$_.trim(this.uid)
+      const canvasSiteId = trim(this.canvasSiteId)
+      const password = trim(this.password)
+      const uid = trim(this.uid)
       if (uid && password) {
         devAuthLogIn(canvasSiteId, uid, password).then(
           data => {
@@ -85,7 +86,7 @@ export default {
               this.$announcer.polite('You are logged in.')
               this.$router.push({path: '/welcome'})
             } else {
-              const message = this.$_.get(data, 'error') || this.$_.get(data, 'message') || 'Authentication failed'
+              const message = get(data, 'error') || get(data, 'message') || 'Authentication failed'
               this.reportError(message)
             }
           },
@@ -100,7 +101,7 @@ export default {
       }
     },
     reportError(message, putFocus='basic-auth-uid') {
-      this.error = typeof message === 'string' ? message : this.$_.get(message, 'message')
+      this.error = typeof message === 'string' ? message : get(message, 'message')
       this.$announcer.polite(this.error || 'Uh oh, an error occurred.')
       putFocusNextTick(putFocus)
     }

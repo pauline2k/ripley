@@ -1,10 +1,10 @@
-import _ from 'lodash'
 import utils from '@/api/api-utils'
+import {startsWith} from 'lodash'
 import {useContextStore} from '@/stores/context'
 
 const getTermName = (termId: string) => {
   const seasonCodes: any = {'0': 'Winter', '2': 'Spring', '5': 'Summer', '8': 'Fall'}
-  const year = `${_.startsWith(termId, '1') ? 19 : 20}${termId.substring(1, 3)}`
+  const year = `${startsWith(termId, '1') ? 19 : 20}${termId.substring(1, 3)}`
   return `${seasonCodes[termId.substring(3, 4)]} ${year}`
 }
 

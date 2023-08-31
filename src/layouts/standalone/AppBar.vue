@@ -27,7 +27,7 @@
               :append-inner-icon="isUpdatingCanvasSiteId ? 'mdi-progress-check' : 'mdi-arrow-right-circle-outline'"
               density="compact"
               :disabled="isUpdatingCanvasSiteId || isLoading"
-              :error="!!$_.trim(canvasSiteId) && !isCanvasSiteIdValid"
+              :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
               hide-details
               label="Canvas Site ID"
               maxlength="10"
@@ -64,6 +64,7 @@ import Context from '@/mixins/Context'
 import moment from 'moment'
 import {updateUserSession} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
+import {isNil, trim} from 'lodash'
 import {isValidCanvasSiteId} from '@/utils'
 
 export default {
@@ -102,9 +103,10 @@ export default {
   },
   methods: {
     moment,
+    trim,
     updateCanvasSiteId() {
-      const canvasSiteId = this.$_.trim(this.canvasSiteId) || null
-      const isValid = this.$_.isNil(canvasSiteId) || Number.isInteger(canvasSiteId) || canvasSiteId.match(/^\d+$/)
+      const canvasSiteId = trim(this.canvasSiteId) || null
+      const isValid = isNil(canvasSiteId) || Number.isInteger(canvasSiteId) || canvasSiteId.match(/^\d+$/)
       if (isValid && this.currentUser.isAuthenticated) {
         this.isUpdatingCanvasSiteId = true
         updateUserSession(canvasSiteId).then(

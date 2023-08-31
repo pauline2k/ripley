@@ -49,7 +49,7 @@
       <div v-if="adminMode === 'bySectionId'">
         <h3 id="load-sections-by-id" class="sr-only">Load Sections by ID</h3>
         <form id="load-sections-by-id-form" class="canvas-page-form" @submit.prevent="submit">
-          <div v-if="$_.size(adminTerms)">
+          <div v-if="size(adminTerms)">
             <span v-for="(term, index) in adminTerms" :key="index">
               <v-btn
                 :id="`term${index}`"
@@ -81,7 +81,7 @@
               id="sections-by-ids-button"
               class="canvas-button canvas-button-primary"
               aria-controls="page-create-course-site-steps-container"
-              :disabled="!$_.trim(sectionIds)"
+              :disabled="!trim(sectionIds)"
               type="submit"
             >
               Review matching Section IDs
@@ -103,6 +103,7 @@
 
 <script>
 import Context from '@/mixins/Context'
+import {partition, size, trim} from 'lodash'
 import {putFocusNextTick} from '@/utils'
 
 export default {
@@ -171,11 +172,12 @@ export default {
         putFocusNextTick(mode === 'bySectionId' ? 'load-sections-by-id' : 'instructor-uid')
       }
     },
+    size,
     submit() {
       if (this.adminMode === 'bySectionId') {
-        const trimmed = this.$_.trim(this.sectionIds)
-        const split = this.$_.split(trimmed, /[,\r\n\t ]+/)
-        const notNumeric = this.$_.partition(split, sectionId => /^\d+$/.test(this.$_.trim(sectionId)))[1]
+        const trimmed = trim(this.sectionIds)
+        const split = split(trimmed, /[,\r\n\t ]+/)
+        const notNumeric = partition(split, sectionId => /^\d+$/.test(trim(sectionId)))[1]
         if (notNumeric.length) {
           this.error = 'Section IDs must be numeric.'
           putFocusNextTick('page-create-course-site-section-id-list')
@@ -184,7 +186,7 @@ export default {
           this.fetchFeed()
         }
       } else {
-        const trimmed = this.$_.trim(this.uid)
+        const trimmed = trim(this.uid)
         if (/^\d+$/.test(trimmed)) {
           this.setAdminActingAs(trimmed)
           this.fetchFeed()
@@ -193,7 +195,8 @@ export default {
           putFocusNextTick('instructor-uid')
         }
       }
-    }
+    },
+    trim
   }
 }
 </script>
