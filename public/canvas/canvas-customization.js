@@ -291,22 +291,15 @@ addMentalHealthResourcesResponsiveLink();
     if (window.ENV && window.ENV.GRADEBOOK_OPTIONS && window.ENV.GRADEBOOK_OPTIONS.context_id) {
       // Verify that the current course contains official course sections
       const courseId = window.ENV.GRADEBOOK_OPTIONS.context_id;
-      // TODO: Change to Ripley's API path
       apiRequest(`/api/canvas_site/egrades_export/${courseId}/is_official_course`, function(officialCourseResponse) {
         if (officialCourseResponse.isOfficialCourse) {
           // Get the id of the E-Grades LTI tool
           getExternalToolId('officialCourseTools', 'Download E-Grades', function(gradesExportLtiId) {
             if (gradesExportLtiId) {
-              const linkUrl = '/courses/' + courseId + '/external_tools/' + gradesExportLtiId;
-
+              const linkUrl = `/courses/${courseId}/external_tools/${gradesExportLtiId}`;
               // Add the 'E-Grades' export option
               waitUntilAvailable('#gradebook-toolbar .gradebook-menus', false, function($gradebookToolbarMenu) {
-                var eGradesButton = [
-                  '<a class="ui-button" href="' + linkUrl + '">',
-                  '  E-Grades',
-                  '</a>'
-                ].join('');
-                $gradebookToolbarMenu.append(eGradesButton);
+                $gradebookToolbarMenu.append(`<a id="e-grades-button" class="ui-button" href="${linkUrl}">E-Grades</a>`);
               });
             }
           });
