@@ -24,6 +24,7 @@
 <script>
 import Context from '@/mixins/Context'
 import {Chart} from 'highcharts-vue'
+import {cloneDeep, each, get, keys} from 'lodash'
 
 export default {
   name: 'PriorEnrollmentChart',
@@ -51,8 +52,8 @@ export default {
     selectedCourse: null
   }),
   created() {
-    this.chartSettings = this.$_.cloneDeep(this.chartDefaults)
-    this.courses = this.$_.keys(this.gradeDistribution)
+    this.chartSettings = cloneDeep(this.chartDefaults)
+    this.courses = keys(this.gradeDistribution)
   },
   methods: {
     onSelectCourse() {
@@ -65,24 +66,24 @@ export default {
           data: [],
           name: `Have taken ${this.selectedCourse}`
         }
-        this.$_.each(this.gradeDistribution[this.selectedCourse], item => {
+        each(this.gradeDistribution[this.selectedCourse], item => {
           gradesWithoutPriorEnroll.data.push({
             custom: {
-              count: this.$_.get(item, 'noPriorEnrollCount', 0)
+              count: get(item, 'noPriorEnrollCount', 0)
             },
             dataLabels: {
               enabled: false
             },
-            y: this.$_.get(item, 'noPriorEnrollPercentage', 0)
+            y: get(item, 'noPriorEnrollPercentage', 0)
           })
           gradesWithPriorEnroll.data.push({
             custom: {
-              count: this.$_.get(item, 'priorEnrollCount', 0)
+              count: get(item, 'priorEnrollCount', 0)
             },
             dataLabels: {
               enabled: false
             },
-            y: this.$_.get(item, 'priorEnrollPercentage', 0)
+            y: get(item, 'priorEnrollPercentage', 0)
           })
         })
         this.chartSettings.series[0].type = 'spline'

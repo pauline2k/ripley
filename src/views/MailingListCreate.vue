@@ -118,7 +118,7 @@
                       <v-btn
                         id="btn-create-mailing-list"
                         color="primary"
-                        :disabled="isCreating || !$_.trim(mailingListName) || hasInvalidCharacters"
+                        :disabled="isCreating || !trim(mailingListName) || hasInvalidCharacters"
                         @click="create"
                       >
                         <span v-if="!isCreating">Create mailing list</span>
@@ -144,6 +144,7 @@ import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {createMailingList, getMailingList, getSuggestedMailingListName} from '@/api/mailing-list'
+import {get, trim} from 'lodash'
 import {getCanvasSite} from '@/api/canvas-site'
 import {putFocusNextTick, toInt} from '@/utils'
 
@@ -162,14 +163,14 @@ export default {
   }),
   computed: {
     hasInvalidCharacters() {
-      const name = this.$_.trim(this.mailingListName)
+      const name = trim(this.mailingListName)
       const isValid = name.length && name.match(this.validNameRegex).length === name.length && name[0].match(/[a-z]/)
       return !isValid
     }
   },
   mounted() {
     this.init()
-    this.canvasSiteId = toInt(this.$_.get(this.$route, 'params.canvasSiteId'))
+    this.canvasSiteId = toInt(get(this.$route, 'params.canvasSiteId'))
     this.isAdminToolMode = !!this.canvasSiteId
     this.canvasSiteId = this.canvasSiteId || this.currentUser.canvasSiteId
     getMailingList(this.canvasSiteId).then(
@@ -201,7 +202,7 @@ export default {
       this.$router.push({path: '/mailing_list/select_course'})
     },
     create() {
-      const name = this.$_.trim(this.mailingListName)
+      const name = trim(this.mailingListName)
       if (name && !this.hasInvalidCharacters) {
         this.isCreating = true
         this.$announcer.polite('Creating list')
@@ -227,7 +228,8 @@ export default {
     goToNextPage() {
       const path = this.isAdminToolMode ? '/mailing_list/update' : '/mailing_list/send_welcome_email'
       this.$router.push({path})
-    }
+    },
+    trim
   }
 }
 </script>

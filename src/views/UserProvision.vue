@@ -20,7 +20,7 @@
           <textarea
             id="page-user-provision-uid-list"
             v-model="rawUids"
-            :class="{'error': !$_.isEmpty(validationErrors)}"
+            :class="{'error': !isEmpty(validationErrors)}"
             rows="4"
             name="uids"
             placeholder="Paste your list of UIDs here organized one UID per a line, or separated by spaces or commas."
@@ -96,6 +96,7 @@
 <script>
 import Context from '@/mixins/Context'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
+import {each, isEmpty, size} from 'lodash'
 import {importUsers} from '@/api/canvas-utility'
 
 export default {
@@ -113,7 +114,7 @@ export default {
   }),
   computed: {
     importButtonDisabled() {
-      return this.importProcessing || this.$_.isEmpty(this.rawUids)
+      return this.importProcessing || isEmpty(this.rawUids)
     }
   },
   created() {
@@ -125,6 +126,7 @@ export default {
     }
   },
   methods: {
+    isEmpty,
     onSubmit() {
       this.error = null
       this.status = null
@@ -148,17 +150,17 @@ export default {
       if (!uids) {
         this.validationErrors.required = true
       }
-      this.listLength = this.$_.size(uids)
+      this.listLength = size(uids)
       if (this.listLength > 200) {
         this.validationErrors.isExceedingLimit = true
       }
-      this.$_.each(uids, uid => {
+      each(uids, uid => {
         if (isNaN(Number(uid))) {
           this.invalidValues.push(uid)
           this.validationErrors.isNotNumeric = true
         }
       })
-      if (this.$_.isEmpty(this.validationErrors)) {
+      if (isEmpty(this.validationErrors)) {
         return uids.join()
       }
     }

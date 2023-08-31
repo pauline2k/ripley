@@ -1,12 +1,12 @@
-import _ from 'lodash'
 import App from './App.vue'
 import axios from 'axios'
 import moment from 'moment'
+import router from '@/router'
 import {createApp} from 'vue'
+import {get, trim} from 'lodash'
 import {initializeAxios} from './utils'
 import {registerPlugins} from '@/plugins'
 import {useContextStore} from '@/stores/context'
-import router from '@/router'
 
 const app = createApp(App)
 
@@ -14,7 +14,6 @@ registerPlugins(app)
 initializeAxios(app, axios)
 
 // Globals
-app.config.globalProperties.$_ = _
 app.config.globalProperties.$isInIframe = !!window.parent.frames.length
 app.config.globalProperties.$moment = moment
 app.config.globalProperties.$ready = (label?: string, focusTarget?: string) => useContextStore().loadingComplete(label, focusTarget)
@@ -28,11 +27,11 @@ axios.get(`${apiBaseUrl}/api/user/my_profile`).then(data => {
     useContextStore().setConfig({
       ...data,
       apiBaseUrl,
-      isVueAppDebugMode: _.trim(import.meta.env.VITE_APP_DEBUG).toLowerCase() === 'true'
+      isVueAppDebugMode: trim(import.meta.env.VITE_APP_DEBUG).toLowerCase() === 'true'
     })
     app.use(router).config.errorHandler = function (error, vm, info) {
-      const message = _.get(error, 'message') || info
-      const stacktrace = _.get(error, 'stack', null)
+      const message = get(error, 'message') || info
+      const stacktrace = get(error, 'stack', null)
       console.log(`\n${message}\n${stacktrace}\n`)
       useContextStore().setApplicationState(500, message, stacktrace)
     }

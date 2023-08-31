@@ -18,7 +18,7 @@
           variant="tonal"
         >
           <div class="font-size-16">{{ jobStatusMessage }}</div>
-          <div v-if="$_.size(jobStatusDetails)" class="font-weight-bold py-2">Messages:</div>
+          <div v-if="size(jobStatusDetails)" class="font-weight-bold py-2">Messages:</div>
           <ul class="px-4" aria-label="error messages">
             <li v-for="(msg, index) in jobStatusDetails" :key="index">{{ msg }}</li>
           </ul>
@@ -220,8 +220,8 @@
 import Context from '@/mixins/Context'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
-
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
+import {each, filter, find, flatMap, includes, keys, last, map, set, size, toString, union, unset} from 'lodash'
 
 export default {
   name: 'CourseManageOfficialSections',
@@ -261,13 +261,13 @@ export default {
   },
   computed: {
     allSections() {
-      return this.$_.flatMap(this.courseSemesterClasses, classItem => {
+      return flatMap(this.courseSemesterClasses, classItem => {
         return classItem.sections
       })
     },
     totalStagedCount() {
-      return this.$_.size(this.$_.filter(this.allSections, section => {
-        return (section.isCourseSection && this.$_.includes(this.$_.keys(section), 'stagedState')) || (!section.isCourseSection && section.stagedState === 'add')
+      return size(filter(this.allSections, section => {
+        return (section.isCourseSection && includes(keys(section), 'stagedState')) || (!section.isCourseSection && section.stagedState === 'add')
       }))
     }
   },
@@ -284,7 +284,7 @@ export default {
       this.eventHub.emit('sections-table-updated')
     },
     allSectionsAdded(course) {
-      return !this.$_.find(course.sections, section => {
+      return !find(course.sections, section => {
         return (!section.isCourseSection && section.stagedState !== 'add') || (section.isCourseSection && section.stagedState === 'delete')
       })
     },
@@ -340,8 +340,8 @@ export default {
       return valid ? sections : false
     },
     loadCourseLists(teachingTerms) {
-      const courseSemester = this.$_.find(teachingTerms, semester => {
-        return (this.$_.toString(semester.termId) === this.$_.toString(this.canvasSite.term.id))
+      const courseSemester = find(teachingTerms, semester => {
+        return (toString(semester.termId) === toString(this.canvasSite.term.id))
       })
       if (courseSemester) {
         this.availableSectionsPanel = []
@@ -357,7 +357,7 @@ export default {
             this.canvasSite.officialSections.forEach(officialSection => {
               if (officialSection.id === teachingSection.id) {
                 if (officialSection.canvasName !== `${teachingSection.courseCode} ${teachingSection.name}`) {
-                  this.$_.set(teachingSection, 'nameDiscrepancy', true)
+                  set(teachingSection, 'nameDiscrepancy', true)
                 }
               }
             })
@@ -426,9 +426,10 @@ export default {
     sectionString(section) {
       return section.courseCode + ' ' + section.name
     },
+    size,
     stageAdd(section) {
       if (!section.isCourseSection) {
-        this.$_.set(section, 'stagedState', 'add')
+        set(section, 'stagedState', 'add')
         this.$announcer.polite('Included in the list of sections to be added')
       } else {
         this.displayError = 'Unable to add ' + this.sectionString(section) + ', as it already exists within the course site.'
@@ -436,8 +437,8 @@ export default {
     },
     stageDelete(section) {
       if (section.isCourseSection) {
-        this.availableSectionsPanel = this.$_.union(this.availableSectionsPanel, [section.courseSlug])
-        this.$_.set(section, 'stagedState', 'delete')
+        this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
+        set(section, 'stagedState', 'delete')
         this.$announcer.polite('Included in the list of sections to be deleted')
       } else {
         this.displayError = 'Unable to delete Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
@@ -445,8 +446,8 @@ export default {
     },
     stageUpdate(section) {
       if (section.isCourseSection) {
-        this.availableSectionsPanel = this.$_.union(this.availableSectionsPanel, [section.courseSlug])
-        this.$_.set(section, 'stagedState', 'update')
+        this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
+        set(section, 'stagedState', 'update')
         this.$announcer.polite('Included in the list of sections to be updated')
       } else {
         this.displayError = 'Unable to update Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
@@ -457,14 +458,14 @@ export default {
         courseProvisionJobStatus(this.backgroundJobId).then(
           response => {
             this.jobStatus = response.jobStatus
-            if (!(this.$_.includes(['started', 'queued'], this.jobStatus))) {
+            if (!(includes(['started', 'queued'], this.jobStatus))) {
               clearInterval(this.exportTimer)
               if (this.jobStatus === 'finished' && response.workflowState === 'imported') {
                 this.jobStatusMessage = 'The sections in this course site have been updated successfully.'
               } else {
                 this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
-                if (response.workflowState === 'imported_with_messages' && this.$_.size(response.messages)) {
-                  this.jobStatusDetails = this.$_.map(response.messages, message => this.$_.last(message))
+                if (response.workflowState === 'imported_with_messages' && size(response.messages)) {
+                  this.jobStatusDetails = map(response.messages, message => last(message))
                 }
               }
               this.fetchFeed()
@@ -483,7 +484,7 @@ export default {
     },
     unstage(section) {
       if (section.stagedState === 'add') {
-        this.availableSectionsPanel = this.$_.union(this.availableSectionsPanel, [section.courseSlug])
+        this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
         this.$announcer.polite('Removed section from the list of sections to be added')
       } else if (section.stagedState === 'delete') {
         this.$announcer.polite('Removed section from the list of sections to be deleted')
@@ -493,8 +494,8 @@ export default {
       section.stagedState = null
     },
     unstageAll() {
-      return this.$_.each(this.allSections, section => {
-        this.$_.unset(section, 'stagedState')
+      return each(this.allSections, section => {
+        unset(section, 'stagedState')
       })
     }
   }

@@ -10,7 +10,7 @@
     >
       <option :value="null">Select Demographic</option>
       <template v-for="(group, key) in demographicOptions">
-        <template v-if="$_.size(group.options) === 1">
+        <template v-if="size(group.options) === 1">
           <option
             :id="`grade-distribution-demographics-option-${key}-0`"
             :key="`${key}-0`"
@@ -41,6 +41,7 @@
 <script>
 import Context from '@/mixins/Context'
 import {Chart} from 'highcharts-vue'
+import {cloneDeep, each, get, includes, keys, size, union} from 'lodash'
 
 export default {
   name: 'DemographicsChart',
@@ -93,22 +94,22 @@ export default {
     selectedDemographic: null
   }),
   created() {
-    this.chartSettings = this.$_.cloneDeep(this.chartDefaults)
+    this.chartSettings = cloneDeep(this.chartDefaults)
     this.collectDemographicOptions()
   },
   methods: {
     collectDemographicOptions() {
       const translate = (category, values) => {
-        if (this.$_.includes(['transferStatus', 'underrepresentedMinorityStatus'], category)) {
+        if (includes(['transferStatus', 'underrepresentedMinorityStatus'], category)) {
           return ['true']
         }
         return values
       }
-      this.$_.each(this.gradeDistribution, item => {
-        this.$_.each(item, (values, category) => {
+      each(this.gradeDistribution, item => {
+        each(item, (values, category) => {
           if (category in this.demographicOptions) {
             let options = this.demographicOptions[category]['options']
-            options = this.$_.union(options, translate(category, this.$_.keys(values)))
+            options = union(options, translate(category, keys(values)))
             this.demographicOptions[category]['options'] = options
           }
         })
@@ -116,20 +117,20 @@ export default {
     },
     onSelectDemographic() {
       if (this.selectedDemographic) {
-        const group = this.$_.get(this.selectedDemographic, 'group')
-        const option = this.$_.get(this.selectedDemographic, 'option')
+        const group = get(this.selectedDemographic, 'group')
+        const option = get(this.selectedDemographic, 'option')
         const optionLabel = option === 'true' ? '' : `&mdash; ${option}`
         const secondarySeries = {
           data: [],
           name: `${this.demographicOptions[group].label} ${optionLabel}`
         }
-        this.$_.each(this.gradeDistribution, item => {
+        each(this.gradeDistribution, item => {
           secondarySeries.data.push({
-            custom: {count: this.$_.get(item[group][option], 'count', 0)},
+            custom: {count: get(item[group][option], 'count', 0)},
             dataLabels: {
               enabled: false
             },
-            y: this.$_.get(item[group][option], 'percentage', 0)
+            y: get(item[group][option], 'percentage', 0)
           })
         })
         this.chartSettings.series[1] = secondarySeries
@@ -137,7 +138,8 @@ export default {
         this.chartSettings.series.pop()
       }
       this.changeSeriesColor(this.chartSettings)
-    }
+    },
+    size
   }
 }
 </script>

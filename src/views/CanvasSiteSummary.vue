@@ -94,6 +94,7 @@
 <script>
 import Context from '@/mixins/Context'
 import {becomeUser} from '@/api/auth'
+import {get, sortBy} from 'lodash'
 import {getCanvasSite} from '@/api/canvas-site'
 
 export default {
@@ -103,10 +104,10 @@ export default {
     canvasSite: undefined
   }),
   created() {
-    const canvasSiteId = this.$_.get(this.$route, 'params.id')
+    const canvasSiteId = get(this.$route, 'params.id')
     getCanvasSite(canvasSiteId, true, true).then(data => {
       this.canvasSite = data
-      this.canvasSite.users = this.$_.sortBy(this.canvasSite.users, user => `${this.isNumeric(user.uid) ? '' : '_'} ${user.sortableName} ${user.uid}`)
+      this.canvasSite.users = sortBy(this.canvasSite.users, user => `${this.isNumeric(user.uid) ? '' : '_'} ${user.sortableName} ${user.uid}`)
       this.$ready()
     })
   },

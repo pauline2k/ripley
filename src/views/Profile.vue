@@ -5,6 +5,7 @@
 </template>
 
 <script>
+import {get} from 'lodash'
 import {getUserProfile} from '@/api/user'
 
 export default {
@@ -13,7 +14,7 @@ export default {
     profile: undefined
   }),
   created() {
-    const uid = this.$_.get(this.$route, 'params.uid')
+    const uid = get(this.$route, 'params.uid')
     getUserProfile(uid).then(data => {
       this.profile = data
       this.$ready()

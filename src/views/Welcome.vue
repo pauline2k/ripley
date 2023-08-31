@@ -46,6 +46,7 @@ import muthur from '@/assets/images/muthur.png'
 <script>
 import Context from '@/mixins/Context'
 import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
+import {sortBy} from 'lodash'
 
 export default {
   name: 'Welcome',
@@ -68,12 +69,12 @@ export default {
   methods: {
     loadTools() {
       const canvasSiteId = this.currentUser.canvasSiteId
-      this.adminTools = this.$_.sortBy([
+      this.adminTools = sortBy([
         {disabled: false, icon: 'mdi-web', path: '/create_site', title: 'Create a Site'},
         {disabled: false, icon: 'mdi-account-plus-outline', path: '/provision_user', title: 'User Provision'},
         {disabled: false, icon: 'mdi-email-multiple-outline', path: '/mailing_list/select_course', title: 'Mailing Lists Manager'},
       ], tool => tool.title)
-      this.embeddedTools = this.$_.sortBy([
+      this.embeddedTools = sortBy([
         {disabled: !canvasSiteId, icon: 'mdi-email-multiple-outline', path: '/mailing_list/create', title: 'Mailing List'},
         {disabled: !canvasSiteId, icon: 'mdi-export', path: '/export_grade', title: 'E-Grade Export'},
         {disabled: !canvasSiteId, icon: 'mdi-chart-bar-stacked', path: '/grade_distribution', title: 'Grade Distribution'},

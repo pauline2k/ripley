@@ -1,9 +1,9 @@
 <template>
   <div class="page-create-course-site-select-sections">
-    <div v-if="!$_.size(teachingTerms)" role="alert">
+    <div v-if="!size(teachingTerms)" role="alert">
       <p>You are currently not listed as the instructor of record for any courses, so you cannot create a course site in bCourses.</p>
     </div>
-    <div v-if="$_.size(teachingTerms)">
+    <div v-if="size(teachingTerms)">
       <div>
         <div id="page-create-course-select-semesters" class="buttonset">
           <h2 class="page-create-course-site-header page-create-course-site-header2">Term</h2>
@@ -81,7 +81,7 @@
                 <h3 class="d-flex flex-nowrap order-1 sections-course-title">
                   {{ course.courseCode }}
                   <span v-if="course.title">: {{ course.title }}</span>
-                  <span v-if="$_.size(course.sections)" class="btn-course-title-text pt-1">
+                  <span v-if="size(course.sections)" class="btn-course-title-text pt-1">
                     ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
                   </span>
                 </h3>
@@ -132,6 +132,7 @@
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {pluralize} from '@/utils'
+import {size} from 'lodash'
 
 export default {
   name: 'SelectSectionsStep',
@@ -173,11 +174,12 @@ export default {
     }
   }),
   methods: {
-    pluralize,
     cancel() {
       const path = this.$isInIframe ? '/lti/create_site' : '/create_site'
       this.$router.push({path})
     },
+    pluralize,
+    size,
     toggleShowHide: course => course.visible = !course.visible
   }
 }

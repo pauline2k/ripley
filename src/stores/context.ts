@@ -1,8 +1,8 @@
-import _ from 'lodash'
 import mitt from 'mitt'
-import {nextTick} from 'vue'
-import {putFocusNextTick} from '@/utils'
 import {defineStore} from 'pinia'
+import {nextTick} from 'vue'
+import {noop} from 'lodash'
+import {putFocusNextTick} from '@/utils'
 
 const $_getDefaultApplicationState = () => ({
   message: undefined,
@@ -44,7 +44,7 @@ export const useContextStore = defineStore('context', {
         nextTick(() => {
           let counter = 0
           const job: any = setInterval(() => (callable() || ++counter > 3) && clearInterval(job), 500)
-        }).then(_.noop)
+        }).then(noop)
       }
     },
     loadingStart(label?: string) {

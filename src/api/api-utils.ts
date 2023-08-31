@@ -1,10 +1,10 @@
-import _ from 'lodash'
 import axios from 'axios'
 import fileDownload from 'js-file-download'
+import {get} from 'lodash'
 import {useContextStore} from '@/stores/context'
 
 const $_errorHandler = (error: any, redirectOnError?: boolean) => {
-  const status = _.get(error, 'response.status')
+  const status = get(error, 'response.status')
   const message = $_getErrorMessage(error, status)
   console.log(`\n${error}\n${message}\n`)
   if (redirectOnError) {
@@ -15,7 +15,7 @@ const $_errorHandler = (error: any, redirectOnError?: boolean) => {
 
 const $_getErrorMessage = (error: any, status: number) => {
   return useContextStore().currentUser.isAuthenticated && (!status || status >= 400)
-    ? _.get(error, 'response.data.error') || _.get(error, 'response.data.message') || _.get(error, 'message')
+    ? get(error, 'response.data.error') || get(error, 'response.data.message') || get(error, 'message')
     : 'Unauthorized request'
 }
 

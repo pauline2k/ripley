@@ -179,6 +179,7 @@
 <script>
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
+import {each, filter, includes, map} from 'lodash'
 
 export default {
   name: 'CourseSectionsTable',
@@ -241,8 +242,8 @@ export default {
         this.allSelected = false
         this.indeterminate = true
       }
-      this.$_.each(this.sections, section => {
-        section.selected = this.$_.includes(this.selected, section.id)
+      each(this.sections, section => {
+        section.selected = includes(this.selected, section.id)
       })
       this.updateSelected()
     }
@@ -255,7 +256,7 @@ export default {
     sectionDisplayClass: {}
   }),
   created() {
-    this.selected = this.$_.map(this.$_.filter(this.sections, 'selected'), 'id')
+    this.selected = map(filter(this.sections, 'selected'), 'id')
     this.updateSectionDisplay()
     this.eventHub.on('sections-table-updated', this.updateSectionDisplay)
   },
@@ -281,10 +282,10 @@ export default {
       this.eventHub.emit('sections-table-updated')
     },
     toggleAll(checked) {
-      this.selected = checked ? this.$_.map(this.sections, 'id').slice() : []
+      this.selected = checked ? map(this.sections, 'id').slice() : []
     },
     updateSectionDisplay() {
-      this.displayableSections = this.$_.filter(this.sections, s => this.rowDisplayLogic(this.mode, s))
+      this.displayableSections = filter(this.sections, s => this.rowDisplayLogic(this.mode, s))
       this.displayableSections.forEach(s => {
         this.sectionDisplayClass[s.id] = this.rowClassLogic(this.mode, s)
       })

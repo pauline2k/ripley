@@ -1,4 +1,4 @@
-import _ from 'lodash'
+import {capitalize, concat, get, head, includes, initial, join, last, noop, trim} from 'lodash'
 import {nextTick} from 'vue'
 import {useContextStore} from '@/stores/context'
 
@@ -6,7 +6,7 @@ export const isInIframe = !!window.parent.frames.length
 
 export function decamelize(str: string, separator=' ') {
   const parsed = str.replace(/([a-z\d])([A-Z])/g, '$1' + separator + '$2')
-  return _.capitalize(parsed.replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2'))
+  return capitalize(parsed.replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2'))
 }
 
 export function iframeParentLocation(location: string) {
@@ -51,8 +51,8 @@ export function initializeAxios(app: any, axios: any) {
   axios.interceptors.response.use(
     (response: any) => response.headers['content-type'] === 'application/json' ? response.data : response,
     (error: any) => {
-      const errorStatus = _.get(error, 'response.status')
-      if (_.includes([401, 403], errorStatus)) {
+      const errorStatus = get(error, 'response.status')
+      if (includes([401, 403], errorStatus)) {
         // Refresh user in case his/her session expired.
         return axios.get(`${apiBaseUrl}/api/user/my_profile`).then((data: any) => {
           const currentUser = data
@@ -69,17 +69,17 @@ export function initializeAxios(app: any, axios: any) {
 }
 
 export function isValidCanvasSiteId(canvasSiteId: string) {
-  canvasSiteId = _.trim(canvasSiteId)
-  const maxValidCanvasSiteId = _.get(useContextStore(), 'config.maxValidCanvasSiteId') || 10
+  canvasSiteId = trim(canvasSiteId)
+  const maxValidCanvasSiteId = get(useContextStore(), 'config.maxValidCanvasSiteId') || 10
   return !!canvasSiteId && canvasSiteId.match(/^\d+$/) && parseInt(canvasSiteId, 10) <= maxValidCanvasSiteId
 }
 
 export function oxfordJoin(arr: any[]) {
   switch(arr.length) {
   case 0: return ''
-  case 1: return _.head(arr)
-  case 2: return `${_.head(arr)} and ${_.last(arr)}`
-  default: return _.join(_.concat(_.initial(arr), ` and ${_.last(arr)}`), ', ')
+  case 1: return head(arr)
+  case 2: return `${head(arr)} and ${last(arr)}`
+  default: return join(concat(initial(arr), ` and ${last(arr)}`), ', ')
   }
 }
 
@@ -105,7 +105,7 @@ export function putFocusNextTick(id: string, cssSelector?: string) {
   nextTick(() => {
     let counter = 0
     const job:any = setInterval(() => (callable() || ++counter > 3) && clearInterval(job), 500)
-  }).then(_.noop)
+  }).then(noop)
 }
 
 export function toInt(value: any, defaultValue: any = null) {

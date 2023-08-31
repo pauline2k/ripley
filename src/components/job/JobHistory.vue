@@ -15,7 +15,7 @@
       </div>
       <v-spacer />
       <v-text-field
-        v-if="$_.size(jobHistory)"
+        v-if="size(jobHistory)"
         v-model="search"
         append-inner-icon="mdi-magnify"
         hide-details
@@ -63,6 +63,7 @@
 
 <script>
 import Context from '@/mixins/Context'
+import {size} from 'lodash'
 
 export default {
   name: 'JobHistory',
@@ -86,6 +87,9 @@ export default {
       {title: 'Finished', key: 'finishedAt'}
     ],
     search: undefined
-  })
+  }),
+  methods: {
+    size
+  }
 }
 </script>
