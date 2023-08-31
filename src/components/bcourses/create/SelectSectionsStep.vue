@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="page-create-course-site-select-sections">
     <div v-if="!$_.size(teachingTerms)" role="alert">
       <p>You are currently not listed as the instructor of record for any courses, so you cannot create a course site in bCourses.</p>
     </div>
@@ -65,40 +65,47 @@
       </div>
       <div>
         <form class="canvas-page-form" @submit="showConfirmation">
-          <ul class="page-create-course-site-section-margin">
-            <li v-for="course in coursesList" :key="course.course_id" class="container sections-course-container-bottom-margin">
-              <v-btn
-                :aria-expanded="`${course.visible}`"
-                class="d-flex p-0"
-                variant="link"
-                @click="toggleShowHide(course)"
-              >
-                <div class="toggle-show-hide">
-                  <v-icon :icon="course.visible ? 'mdi-caret-down' : 'mdi-caret-right'" />
-                  <span class="sr-only">Toggle course sections list</span>
-                </div>
-                <div class="btn-course-title-text pr-2 pt-1">
-                  <h3 class="sections-course-title">{{ course.courseCode }}<span v-if="course.title">: {{ course.title }}</span></h3>
-                </div>
-                <div v-if="$_.size(course.sections)" class="btn-course-title-text pt-1">
-                  ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
-                </div>
-              </v-btn>
-              <v-collapse :id="course.course_id" v-model="course.visible">
-                <CourseSectionsTable
-                  mode="createCourseForm"
-                  :sections="course.sections"
-                  :update-selected="updateSelected"
-                />
-              </v-collapse>
-            </li>
-          </ul>
+          <v-expansion-panels v-if="coursesList.length > 0" class="pb-4" multiple>
+            <v-expansion-panel
+              v-for="course in coursesList"
+              :id="`sections-course-${course.slug}`"
+              :key="course.course_id"
+              class="container px-1 mt-4"
+              style="border-radius: 3px !important"
+              :value="course.slug"
+            >
+              <v-expansion-panel-title class="d-flex align-start justify-start height-unset pa-0">
+                <template #actions="{ expanded }">
+                  <v-icon class="mt-1 order-0" :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
+                </template>
+                <h3 class="d-flex flex-nowrap order-1 sections-course-title">
+                  {{ course.courseCode }}
+                  <span v-if="course.title">: {{ course.title }}</span>
+                  <span v-if="$_.size(course.sections)" class="btn-course-title-text pt-1">
+                    ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
+                  </span>
+                </h3>
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <v-row no-gutters>
+                  <v-col md="12">
+                    <CourseSectionsTable
+                      :key="course.slug"
+                      mode="createCourseForm"
+                      :sections="course.sections"
+                      :update-selected="updateSelected"
+                    />
+                  </v-col>
+                </v-row>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
           <div class="d-flex justify-end">
             <v-btn
               id="page-create-course-site-cancel"
               aria-label="Cancel and return to Site Creation Overview"
               class="canvas-button"
-              variant="link"
+              variant="text"
               @click="cancel"
             >
               Cancel
@@ -216,5 +223,25 @@ export default {
 .toggle-show-hide {
   line-height: 1.8;
   width: 20px;
+}
+</style>
+
+<style lang="scss">
+.page-create-course-site-select-sections {
+  .v-expansion-panel-title__overlay {
+    background-color: transparent !important;
+  }
+  .v-expansion-panel-text__wrapper {
+    padding: 6px 4px 0px 4px;
+  }
+  .v-expansion-panel-title__icon {
+    margin-inline-start: unset;
+  }
+  .v-expansion-panel__shadow {
+    display: none !important;
+  }
+  .v-expansion-panel::after {
+    border: none !important;
+  }
 }
 </style>

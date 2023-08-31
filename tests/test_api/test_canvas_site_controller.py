@@ -155,7 +155,7 @@ class TestCanvasSiteProvision:
                 'user': ['profile_30000', f'profile_{admin_uid}'],
             }, m)
             fake_auth.login(canvas_site_id=None, uid=admin_uid)
-            feed = _api_canvas_course_provision(client, params={'adminByCcns': '32936', 'adminTermSlug': 'spring-2023'})
+            feed = _api_canvas_course_provision(client, params={'adminBySectionIds[]': '32936', 'adminTermSlug': 'spring-2023'})
             assert feed['teachingTerms'][0]['name'] == 'Spring 2023'
             assert feed['teachingTerms'][0]['classes'][0]['courseCode'] == 'ANTHRO 189'
 

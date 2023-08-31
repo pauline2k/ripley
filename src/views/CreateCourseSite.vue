@@ -342,7 +342,7 @@ export default {
       this.$announcer.polite('Creating course site. Please wait.')
       this.showMaintenanceNotice = false
       this.updateSelected()
-      const sectionIds = this.$_.map(this.selectedSectionsList, 'sectionId')
+      const sectionIds = this.$_.map(this.selectedSectionsList, 'id')
       if (sectionIds.length > 0) {
         const onSuccess = data => {
           this.jobId = data.job_id
