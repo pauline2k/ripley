@@ -35,8 +35,7 @@ from ripley.jobs.base_job import BaseJob
 from ripley.models.job import Job
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from tests.util import override_config
-
+from tests.util import execute_loch_fixture_sql, override_config
 
 os.environ['RIPLEY_ENV'] = 'test'  # noqa
 
@@ -141,14 +140,9 @@ def fake_auth(app, db, client):
 @pytest.fixture(scope='session', autouse=True)
 def fake_loch(app):
     """Mimic data loch schemas and tables in a local Postgres database."""
-    from sqlalchemy import create_engine
-    from sqlalchemy.sql import text
     fixture_path = f"{app.config['BASE_DIR']}/tests/fixtures"
     with open(f'{fixture_path}/loch/loch.sql', 'r') as ddlfile:
-        ddltext = ddlfile.read()
-    data_loch_db = create_engine(app.config['DATA_LOCH_RDS_URI'])
-    with data_loch_db.connect():
-        data_loch_db.execute(text(ddltext))
+        execute_loch_fixture_sql(app, ddlfile.read())
 
 
 @pytest.fixture(scope='session', autouse=True)
