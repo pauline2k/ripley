@@ -180,11 +180,10 @@ export default {
         this.$ready()
       }
 
-      const onError = data => {
+      const onError = () => {
         this.$announcer.polite('Course section loading failed')
         this.displayError = 'failure'
         this.$ready()
-        return this.$errorHandler(data)
       }
 
       const semester = (this.adminMode === 'bySectionId' ? this.currentAdminTerm : this.currentSemester)
@@ -346,18 +345,17 @@ export default {
       const sectionIds = map(this.selectedSectionsList, 'id')
       if (sectionIds.length > 0) {
         const onSuccess = data => {
-          this.jobId = data.job_id
+          this.jobId = data.jobId
           this.currentWorkflowStep = 'monitoringJob'
           this.$announcer.polite('Started course site creation.')
           this.completedFocus = true
           this.jobStatusLoader()
         }
-        const onError = error => {
+        const onError = () => {
           this.percentComplete = 0
           this.currentWorkflowStep = null
           this.jobStatus = 'Error'
           this.displayError = 'Failed to create course provisioning job.'
-          return this.$errorHandler(error)
         }
         courseCreate(
           this.isAdmin && this.adminMode === 'actAs' ? this.adminActingAs : null,

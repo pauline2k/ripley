@@ -357,7 +357,7 @@ class TestCanvasSiteProvisionSections:
                 },
             ]
             assert sections[2]['sectionNumber'] == '101'
-            assert course['slug'] == 'astron-218-B-2023'
+            assert course['slug'] == 'astron-218-2023-B'
 
 
 class TestGetRoster:

@@ -157,7 +157,7 @@ class BerkeleyTerm:
             '6W2': 'D',
             '3W': 'E',
         }
-        ids = [self.season, self.year]
+        ids = [self.year, self.season]
         if session_code and session_code in summer_sessions:
             ids.append(summer_sessions[session_code])
         return '-'.join(ids)
