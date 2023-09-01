@@ -107,21 +107,27 @@ class TestGetMailingList:
 
 class TestGetMyMailingList:
 
+    @classmethod
+    def _api_my_mailing_list(cls, client, expected_status_code=200):
+        response = client.get('/api/mailing_list/my')
+        assert response.status_code == expected_status_code
+        return response.json
+
     def test_anonymous(self, client):
         """Denies anonymous user."""
-        _api_my_mailing_list(client, expected_status_code=401)
+        self._api_my_mailing_list(client, expected_status_code=401)
 
     def test_no_canvas_account(self, client, fake_auth):
         """Denies user with no Canvas account."""
         fake_auth.login(canvas_site_id='1234567', uid=no_canvas_account_uid)
-        _api_my_mailing_list(client, expected_status_code=401)
+        self._api_my_mailing_list(client, expected_status_code=401)
 
     def test_not_enrolled(self, client, app, fake_auth):
         """Denies user with no course enrollment."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {'course': ['get_by_id_1234567'], 'user': ['profile_20000']}, m)
             fake_auth.login(canvas_site_id='1234567', uid=not_enrolled_uid)
-            _api_my_mailing_list(client, expected_status_code=401)
+            self._api_my_mailing_list(client, expected_status_code=401)
 
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
@@ -133,8 +139,8 @@ class TestGetMyMailingList:
                 canvas_site_id=canvas_site_id,
                 client=client,
             )
-            api_json = _api_my_mailing_list(client)
-
+            api_json = self._api_my_mailing_list(client)
+            # Verify
             assert api_json['canvasSite']['canvasSiteId'] == canvas_site_id
             assert api_json['canvasSite']['name'] == 'ASTRON 218: Stellar Dynamics and Galactic Structure'
             name_ = api_json['name']
@@ -155,7 +161,7 @@ class TestGetMyMailingList:
                 client=client,
             )
             # Verify
-            api_json = _api_my_mailing_list(client)
+            api_json = self._api_my_mailing_list(client)
             assert api_json['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
 
     def test_student(self, client, app, fake_auth):
@@ -167,7 +173,7 @@ class TestGetMyMailingList:
             }, m)
             canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
-            _api_my_mailing_list(client, expected_status_code=401)
+            self._api_my_mailing_list(client, expected_status_code=401)
 
 
 class TestSuggestedMailingListName:
@@ -395,42 +401,32 @@ class TestPopulateMailingList:
             )
             mailing_list_id = api_json['id']
             api_json = self._api_populate_mailing_list(client, mailing_list_id=mailing_list_id)
-
             # Verify
-            expected_email_address = 'synthetic.ash@berkeley.edu'
+            original_email_address = 'synthetic.ash@berkeley.edu'
             assert api_json['mailingList']['canvasSite']['canvasSiteId'] == canvas_site_id
             added = api_json['summary']['add']
             assert added['total'] == 1
-            assert added['successes'][0] == expected_email_address
+            assert added['successes'][0] == original_email_address
             for key in ['remove', 'restore', 'update', 'welcomeEmails']:
                 assert api_json['summary'][key]['total'] == 0
 
-            def _update_email_address_in_loch(email_address):
-                execute_loch_fixture_sql(
-                    app,
-                    sql=f"""
-                        UPDATE sis_data.basic_attributes
-                        SET email_address = '{email_address}'
-                        WHERE ldap_uid = '30000'
-                    """,
-                )
-            # Alter email address
+            # Alter email address, re-populate mailing list, and verify.
             interim_email_address = 'polystyrene.ash@berkeley.edu'
-            _update_email_address_in_loch(interim_email_address)
-            # Re-populate mailing list
+            _update_email_address_in_loch(app, interim_email_address)
             api_json = self._api_populate_mailing_list(client, mailing_list_id=mailing_list_id)
-            assert api_json
-            # TODO: Make it work! We expect an update to existing record.
-            the_feature_works_as_expected = False
-            if the_feature_works_as_expected:
-                updated = api_json['summary']['update']
-                assert updated['total'] == 1
-                assert updated['successes'][0] == interim_email_address
-                for key in ['add', 'remove', 'restore', 'welcomeEmails']:
-                    assert api_json['summary'][key]['total'] == 0
-
-            # Reset email address. We are done.
-            _update_email_address_in_loch(expected_email_address)
+            removed = api_json['summary']['remove']
+            assert removed['total'] == 1
+            assert removed['successes'][0] == original_email_address
+            added = api_json['summary']['add']
+            assert added['total'] == 1
+            assert added['successes'][0] == interim_email_address
+            for key in ['restore', 'update', 'welcomeEmails']:
+                assert api_json['summary'][key]['total'] == 0
+            # Restore original email address and verify.
+            _update_email_address_in_loch(app, original_email_address)
+            api_json = self._api_populate_mailing_list(client, mailing_list_id=mailing_list_id)
+            assert api_json['summary']['restore']['successes'][0] == original_email_address
+            assert api_json['summary']['remove']['successes'][0] == interim_email_address
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -584,7 +580,12 @@ def _api_mailing_list(client, canvas_site_id, expected_status_code=200):
     return response.json
 
 
-def _api_my_mailing_list(client, expected_status_code=200):
-    response = client.get('/api/mailing_list/my')
-    assert response.status_code == expected_status_code
-    return response.json
+def _update_email_address_in_loch(app, email_address):
+    execute_loch_fixture_sql(
+        app,
+        sql=f"""
+            UPDATE sis_data.basic_attributes
+            SET email_address = '{email_address}'
+            WHERE ldap_uid = '30000'
+        """,
+    )
