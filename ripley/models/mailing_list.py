@@ -352,9 +352,6 @@ def _get_preferred_email(canvas_user_email, loch_user_email):
     preferred_email = None
     if preferred_email_source == 'DATA_LOCH':
         preferred_email = loch_user_email or canvas_user_email
-    # elif preferred_email_source == 'CALNET':
-    #     TODO: Do we need to support this option?
-    #     preferred_email = ???
     elif preferred_email_source == 'CANVAS':
         preferred_email = canvas_user_email or loch_user_email
     return preferred_email.lower() if preferred_email else None
