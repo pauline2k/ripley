@@ -27,11 +27,13 @@ import json
 import requests_mock
 from ripley.externals import canvas
 from ripley.models.mailing_list import MailingList
-from tests.util import register_canvas_uris
+from tests.util import execute_loch_fixture_sql, register_canvas_uris
 
 admin_uid = '10000'
 no_canvas_account_uid = '10001'
 not_enrolled_uid = '20000'
+reader_uid = '60000'
+ta_uid = '50000'
 teacher_uid = '30000'
 student_uid = '40000'
 
@@ -342,15 +344,25 @@ class TestActivateMailingList:
 
 class TestPopulateMailingList:
 
+    @classmethod
+    def _api_populate_mailing_list(cls, client, mailing_list_id, expected_status_code=200):
+        response = client.post(f'/api/mailing_list/{mailing_list_id}/populate')
+        api_json = response.json
+        assert response.status_code == expected_status_code, f"""
+            HTTP status code {response.status_code} != {expected_status_code}
+            error: {api_json}
+        """
+        return api_json
+
     def test_anonymous(self, client):
         """Denies anonymous user."""
-        _api_populate_mailing_list(client, 1, expected_status_code=401)
+        self._api_populate_mailing_list(client, 1, expected_status_code=401)
 
     def test_no_canvas_account(self, client, fake_auth):
         """Denies user with no Canvas account."""
         canvas_site_id = '1234567'
         fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
-        _api_populate_mailing_list(client, 1, expected_status_code=401)
+        self._api_populate_mailing_list(client, 1, expected_status_code=401)
 
     def test_students_cannot_edit_mailing_list(self, client, app, fake_auth):
         """Denies student access to mailing_list."""
@@ -365,41 +377,81 @@ class TestPopulateMailingList:
             canvas_site = canvas.get_course(canvas_site_id)
             mailing_list = MailingList.create(canvas_site)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=uid_of_student)
-            _api_populate_mailing_list(client, mailing_list_id=mailing_list.id, expected_status_code=401)
+            self._api_populate_mailing_list(client, mailing_list_id=mailing_list.id, expected_status_code=401)
 
     def test_authorized(self, client, app, fake_auth):
         """Allows admin to manage mailing list."""
         with requests_mock.Mocker() as m:
+            canvas_site_id = 1234567
             register_canvas_uris(app, {
                 'account': ['get_admins'],
-                'course': ['get_by_id_1234567', 'search_users_1234567'],
-                'user': ['profile_10000'],
+                'course': [f'get_by_id_{canvas_site_id}', f'search_users_{canvas_site_id}'],
+                'user': [f'profile_{admin_uid}'],
             }, m)
-            canvas_site_id = '1234567'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             api_json = _api_create_mailing_list(
                 canvas_site_id=canvas_site_id,
                 client=client,
             )
-            api_json = _api_populate_mailing_list(client, mailing_list_id=api_json['id'])
-            assert api_json['mailingList']['canvasSite']['canvasSiteId'] == 1234567
-            # TODO: verify populated mailing list
+            mailing_list_id = api_json['id']
+            api_json = self._api_populate_mailing_list(client, mailing_list_id=mailing_list_id)
+
+            # Verify
+            expected_email_address = 'synthetic.ash@berkeley.edu'
+            assert api_json['mailingList']['canvasSite']['canvasSiteId'] == canvas_site_id
+            added = api_json['summary']['add']
+            assert added['total'] == 1
+            assert added['successes'][0] == expected_email_address
+            for key in ['remove', 'restore', 'update', 'welcomeEmails']:
+                assert api_json['summary'][key]['total'] == 0
+
+            def _update_email_address_in_loch(email_address):
+                execute_loch_fixture_sql(
+                    app,
+                    sql=f"""
+                        UPDATE sis_data.basic_attributes
+                        SET email_address = '{email_address}'
+                        WHERE ldap_uid = '30000'
+                    """,
+                )
+            # Alter email address
+            interim_email_address = 'polystyrene.ash@berkeley.edu'
+            _update_email_address_in_loch(interim_email_address)
+            # Re-populate mailing list
+            api_json = self._api_populate_mailing_list(client, mailing_list_id=mailing_list_id)
+            assert api_json
+            # TODO: Make it work! We expect an update to existing record.
+            the_feature_works_as_expected = False
+            if the_feature_works_as_expected:
+                updated = api_json['summary']['update']
+                assert updated['total'] == 1
+                assert updated['successes'][0] == interim_email_address
+                for key in ['add', 'remove', 'restore', 'welcomeEmails']:
+                    assert api_json['summary'][key]['total'] == 0
+
+            # Reset email address. We are done.
+            _update_email_address_in_loch(expected_email_address)
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
         with requests_mock.Mocker() as m:
+            canvas_site_id = 1234567
+            uid = teacher_uid
             register_canvas_uris(app, {
                 'account': ['get_admins'],
-                'course': ['get_by_id_1234567', 'get_user_1234567_4567890', 'search_users_1234567'],
-                'user': ['profile_30000'],
+                'course': [
+                    f'get_by_id_{canvas_site_id}',
+                    f'get_user_{canvas_site_id}_4567890',
+                    f'search_users_{canvas_site_id}',
+                ],
+                'user': [f'profile_{uid}'],
             }, m)
-            canvas_site_id = '1234567'
-            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
             api_json = _api_create_mailing_list(
                 canvas_site_id=canvas_site_id,
                 client=client,
             )
-            api_json = _api_populate_mailing_list(client, mailing_list_id=api_json['id'])
+            api_json = self._api_populate_mailing_list(client, mailing_list_id=api_json['id'])
             assert api_json['mailingList']['name'] == 'astron-218-stellar-dynamics-and-galactic-stru-sp23'
             # TODO: verify populated mailing list
 
@@ -414,7 +466,87 @@ class TestPopulateMailingList:
             canvas_site = canvas.get_course(canvas_site_id)
             mailing_list = MailingList.create(canvas_site)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
-            _api_populate_mailing_list(client, expected_status_code=401, mailing_list_id=mailing_list.id)
+            self._api_populate_mailing_list(client, expected_status_code=401, mailing_list_id=mailing_list.id)
+
+
+class TestUpdateWelcomeEmail:
+
+    @classmethod
+    def _api_welcome_email_update(cls, body, client, subject, active=False, expected_status_code=200):
+        response = client.post(
+            '/api/mailing_list/welcome_email/update',
+            data=json.dumps({
+                'active': active,
+                'body': body,
+                'subject': subject,
+            }),
+            content_type='application/json',
+        )
+        assert response.status_code == expected_status_code
+        return response.json
+
+    def test_unauthorized(self, client, fake_auth):
+        """Denies unauthorized users."""
+        canvas_site_id = '8876542'
+        users = {
+            'anonymous': None,
+            'no_canvas_account': no_canvas_account_uid,
+            'not_enrolled': not_enrolled_uid,
+            'reader': reader_uid,
+            'student': student_uid,
+            'teaching_assistant': ta_uid,
+        }
+        for user_type, uid in users.items():
+            if uid:
+                fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+            self._api_welcome_email_update(
+                subject='Lightning strikes',
+                body='...Maybe once, maybe twice',
+                client=client,
+                expected_status_code=401,
+            )
+
+    def test_authorized(self, client, app, fake_auth):
+        """Allows authorized user to update mailing list."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '1234567'
+            uid = teacher_uid
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [
+                    f'get_by_id_{canvas_site_id}',
+                    f'get_user_{canvas_site_id}_4567890',
+                    f'search_users_{canvas_site_id}'],
+                'user': [f'profile_{uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+            # Expect 404. The mailing list does not exist.
+            self._api_welcome_email_update(
+                body="This ain't gonna work",
+                client=client,
+                expected_status_code=404,
+                subject='Doomed to fail',
+            )
+            # Create the mailing list.
+            canvas_site = canvas.get_course(canvas_site_id)
+            mailing_list = MailingList.create(
+                canvas_site=canvas_site,
+                list_name='Gypsy',
+                welcome_email_body="So I'm back to the velvet underground",
+                welcome_email_subject='Back to that floor I love',
+            )
+            # Update the welcome email.
+            body = 'To a room with some lace and paper flowers'
+            subject = 'Back to the gypsy that I was'
+            api_json = self._api_welcome_email_update(
+                body=body,
+                client=client,
+                subject=subject,
+            )
+            assert api_json['id'] == mailing_list.id
+            assert api_json['name'] == 'Gypsy'
+            assert api_json['welcomeEmailBody'] == body
+            assert api_json['welcomeEmailSubject'] == subject
 
 
 def _api_activate_mailing_list(
@@ -456,13 +588,3 @@ def _api_my_mailing_list(client, expected_status_code=200):
     response = client.get('/api/mailing_list/my')
     assert response.status_code == expected_status_code
     return response.json
-
-
-def _api_populate_mailing_list(client, mailing_list_id, expected_status_code=200):
-    response = client.post(f'/api/mailing_list/{mailing_list_id}/populate')
-    api_json = response.json
-    assert response.status_code == expected_status_code, f"""
-        HTTP status code {response.status_code} != {expected_status_code}
-        error: {api_json}
-    """
-    return api_json

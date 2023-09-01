@@ -66,6 +66,14 @@ def count_s3_csvs(app, s3, key):
     return count
 
 
+def execute_loch_fixture_sql(app, sql):
+    from sqlalchemy import create_engine
+    from sqlalchemy.sql import text
+    data_loch_db = create_engine(app.config['DATA_LOCH_RDS_URI'])
+    with data_loch_db.connect():
+        data_loch_db.execute(text(sql))
+
+
 def read_s3_csv(app, s3, key, get_latest=False):
     objects = s3.Bucket(app.config['AWS_S3_BUCKET']).objects.all()
     if get_latest:

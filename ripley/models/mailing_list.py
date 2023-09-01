@@ -131,12 +131,13 @@ class MailingList(Base):
 
     @classmethod
     def populate(cls, mailing_list):
-        course = canvas.get_course(course_id=mailing_list.canvas_site_id)
-        canvas_site_users = list(course.get_users(include=('email', 'enrollments')))
+        canvas_site_id = mailing_list.canvas_site_id
         mailing_list_members = MailingListMembers.get_mailing_list_members(
             include_deleted=True,
             mailing_list_id=mailing_list.id,
         )
+        course = canvas.get_course(course_id=canvas_site_id, api_call=False)
+        canvas_site_users = list(course.get_users(include=('email', 'enrollments')))
         mailing_list, update_summary = cls._update_memberships(
             canvas_site_users=canvas_site_users,
             mailing_list=mailing_list,

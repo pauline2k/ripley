@@ -105,7 +105,7 @@ def update_welcome_email():
     mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
     if mailing_list:
         params = request.get_json()
-        active = None if params.get('active') is None else params.get('active')
+        active = bool(params.get('active', False))
         body = params.get('body').strip() if params.get('body') else None
         subject = params.get('subject').strip() if params.get('subject') else None
         if None in [body, active, subject]:
@@ -113,7 +113,7 @@ def update_welcome_email():
 
         mailing_list = MailingList.update(
             mailing_list_id=mailing_list.id,
-            welcome_email_active=bool(active),
+            welcome_email_active=active,
             welcome_email_body=body,
             welcome_email_subject=subject,
         )
