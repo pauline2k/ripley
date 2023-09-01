@@ -49,15 +49,27 @@ def get_canvas_course_id(course_slug):
         if not existing_site:
             break
         attempts += 1
-        course_id = base_course_id + secrets.token_hex(4).upper()
+        course_id = base_course_id + '-' + secrets.token_hex(4).upper()
     if existing_site:
         raise InternalServerError(f'Could not generate unique ID for Canvas site {course_slug}')
     return course_id
 
 
-def get_canvas_sis_section_id(sis_section):
-    berkeley_term = BerkeleyTerm.from_sis_term_id(sis_section['term_id'])
-    return f"SEC:{berkeley_term.year}-{berkeley_term.season}-{sis_section['section_id']}"
+def get_canvas_sis_section_id(term_id, sis_section_id):
+    berkeley_term = BerkeleyTerm.from_sis_term_id(term_id)
+    base_section_id = f'SEC:{berkeley_term.year}-{berkeley_term.season}-{sis_section_id}'
+    section_id = base_section_id
+    attempts = 0
+    existing_section = None
+    while attempts < 10:
+        existing_section = canvas.get_section(section_id, use_sis_id=True)
+        if not existing_section:
+            break
+        attempts += 1
+        section_id = base_section_id + '-' + secrets.token_hex(4).upper()
+    if existing_section:
+        raise InternalServerError(f'Could not generate unique ID for Canvas section {term_id}-{sis_section_id}')
+    return section_id
 
 
 def parse_canvas_sis_section_id(sis_section_id):
@@ -240,7 +252,7 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         terms_feed = get_teaching_terms(sections=sections)
     # Otherwise, the user must have instructor access (direct or inherited via section nesting) to all sections.
     else:
-        terms_feed = get_teaching_terms(section_ids=section_ids, term_id=term.to_sis_term_id(), uid=uid)
+        terms_feed = get_teaching_terms(section_ids=section_ids, term_id=term.to_canvas_sis_term_id(), uid=uid)
 
     courses_list = terms_feed[0]['classes'] if terms_feed else []
     if not courses_list:
@@ -256,7 +268,7 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     lead_ta_role = next((r for r in defined_roles if r.label == 'Lead TA'), None)
 
     sis_term_id = term.to_canvas_sis_term_id()
-    sis_course_id = get_canvas_course_id(course_slug, term)
+    sis_course_id = get_canvas_course_id(course_slug)
 
     with SisImportCsv.create(fieldnames=['course_id', 'short_name', 'long_name', 'account_id', 'term_id', 'status']) as course_csv:
         course_csv.writerow({
@@ -291,13 +303,16 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     section_feeds = []
     section_roles = {}
     explicit_sections_for_instructor = []
+    all_sections = []
 
     for c in courses_list:
         for s in c['sections']:
+            all_sections.append(s)
             _prepare_section_definition(
                 s,
                 course,
                 uid,
+                term.to_sis_term_id(),
                 lead_ta_role,
                 teacher_role,
                 is_admin_by_ccns,
@@ -326,10 +341,11 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         _add_instructor_to_site(
             uid,
             course,
+            term.to_sis_term_id(),
             section_roles,
             teacher_role,
             explicit_sections_for_instructor,
-            sections,
+            all_sections,
             section_feeds,
         )
 
@@ -338,13 +354,14 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     if job:
         job.meta['sis_import_id'] = sis_import.id
         job.save_meta()
-    _update_section_enrollments(sis_term_id, course, sections, [], sis_import)
+    _update_section_enrollments(sis_term_id, course, section_feeds, [], sis_import)
 
 
 def _prepare_section_definition(
     section,
     course,
     uid,
+    sis_term_id,
     lead_ta_role,
     teacher_role,
     is_admin_by_ccns,
@@ -352,11 +369,11 @@ def _prepare_section_definition(
     section_roles,
     explicit_sections_for_instructor,
 ):
-    sis_section_id = get_canvas_sis_section_id(section)
+    sis_section_id = get_canvas_sis_section_id(sis_term_id, section['id'])
     section_feeds.append({
         'section_id': sis_section_id,
         'course_id': course.sis_course_id,
-        'name': f"{section['course_name']} {course_section_name(section)}",
+        'name': f"{section['courseCode']} {section['name']}",
         'status': 'active',
         'start_date': None,
         'end_date': None,
@@ -374,10 +391,11 @@ def _prepare_section_definition(
 def _add_instructor_to_site(
     uid,
     course,
+    sis_term_id,
     section_roles,
     teacher_role,
     explicit_sections_for_instructor,
-    sections,
+    all_sections,
     section_feeds,
 ):
     instructor_role_id = section_roles[section_feeds[0]['section_id']] or (teacher_role and teacher_role.id)
@@ -395,8 +413,15 @@ def _add_instructor_to_site(
         if not sis_user_profile:
             raise InternalServerError(f'Failed to create instructor account (uids={uid}).')
 
-    user_section = explicit_sections_for_instructor[0] if explicit_sections_for_instructor else sections[0]
-    canvas.add_user_to_section(section_id=user_section['id'], user_profile_id=sis_user_profile.id, role_id=instructor_role_id)
+    user_section = explicit_sections_for_instructor[0] if explicit_sections_for_instructor else all_sections[0]
+    sis_section_id = get_canvas_sis_section_id(sis_term_id, user_section['id'])
+    canvas_section = canvas.get_section(section_id=f'sis_section_id:{sis_section_id}', api_call=False, use_sis_id=True)
+    canvas_section.enroll_user(
+        sis_user_profile['id'],
+        role_id=instructor_role_id,
+        enrollment_state='active',
+        notify=False,
+    )
 
 
 def sis_enrollment_status_to_canvas_course_role(sis_enrollment_status):
@@ -427,7 +452,7 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
 
     def _section(section):
         return {
-            'section_id': get_canvas_sis_section_id(section),
+            'section_id': get_canvas_sis_section_id(section['term_id'], section['section_id']),
             'course_id': course.sis_course_id,
             'name': f"{section['course_name']} {course_section_name(section)}",
             'status': 'deleted' if section['section_id'] in section_ids_to_remove else 'active',

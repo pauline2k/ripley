@@ -175,14 +175,14 @@ def get_external_tools(obj_type, obj_id=None):
     return tools
 
 
-def get_section(section_id, api_call=True):
+def get_section(section_id, api_call=True, use_sis_id=False):
     c = _get_canvas()
     if api_call is False:
         return Section(c._Canvas__requester, {'id': section_id})
     else:
         section = None
         try:
-            section = c.get_section(section_id, include=['term'])
+            section = c.get_section(section_id, include=['term'], use_sis_id=False)
         except Exception as e:
             app.logger.error(f'Failed to retrieve Canvas section (id={section_id})')
             app.logger.exception(e)
