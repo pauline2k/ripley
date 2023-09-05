@@ -31,8 +31,7 @@ from ripley.externals import canvas
 from ripley.externals.canvas import get_course_sections
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import get_official_sections, get_teaching_terms, parse_canvas_sis_section_id, \
-    prepare_egrades_export
+from ripley.lib.canvas_utils import get_official_sections, parse_canvas_sis_section_id, prepare_egrades_export
 from ripley.lib.egrade_utils import LETTER_GRADES
 from ripley.lib.http import tolerant_jsonify
 
@@ -45,7 +44,7 @@ def egrades_export_options():
     return tolerant_jsonify({
         'gradingStandardEnabled': course_settings['grading_standard_enabled'],
         'officialSections': [s for s in official_sections if s['id']],
-        'sectionTerms': [] if not len(section_ids) else get_teaching_terms(current_user, section_ids=section_ids, sections=sections),
+        'sectionTerms': list(set([section['term_id'] for section in sections])),
     })
 
 
