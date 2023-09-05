@@ -232,8 +232,7 @@ export default {
       data => {
         this.updateDisplay(data)
         this.$ready('Mailing List', 'page-header')
-      },
-      this.$errorHandler
+      }
     )
   },
   methods: {
@@ -259,8 +258,7 @@ export default {
           response => {
             this.updateDisplay(response)
             putFocusNextTick('send-welcome-email-header')
-          },
-          this.$errorHandler
+          }
         ).then(() => {
           this.isSaving = false
         })
