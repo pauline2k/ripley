@@ -24,6 +24,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 import os
 
+AWS_APP_ROLE_ARN = 'arn:aws:iam::123456789012:role/test-role'
+
 # Base directory for the application (one level up from this config file).
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 

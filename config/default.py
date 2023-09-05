@@ -26,6 +26,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import logging
 import os
 
+# Ripley-specific AWS credentials.
+AWS_APP_ROLE_ARN = 'aws:arn::<account>:role/<app_ripley_role>'
 AWS_PROFILE = None
 AWS_S3_BUCKET = 'some-bucket'
 AWS_S3_REGION = 'us-west-2'
@@ -60,6 +62,7 @@ DATA_LOCH_BASIC_ATTRIBUTES_TABLE = 'edo_basic_attributes'
 DATA_LOCH_RDS_URI = 'postgresql://nessie:secret@secret-rds-url.com:5432/db'
 DATA_LOCH_MAX_CONNECTIONS = 50
 
+DATA_LOCH_S3_ENCRYPTION = 'AES256'
 DATA_LOCH_S3_PHOTO_BUCKET = 'photo-bucket'
 DATA_LOCH_S3_PHOTO_PATH = 'photos'
 
