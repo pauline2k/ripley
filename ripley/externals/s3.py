@@ -151,11 +151,27 @@ def upload_dated_csv(local_name, remote_name, folder, timestamp):
 
 
 def _get_s3_client():
-    return _get_session().client('s3')
+    return _get_session().client('s3', region_name=app.config['AWS_S3_REGION'])
 
 
 def _get_session():
-    return boto3.Session(profile_name=app.config['AWS_PROFILE'])
+    credentials = _get_sts_credentials()
+    return boto3.Session(
+        aws_access_key_id=credentials['AccessKeyId'],
+        aws_secret_access_key=credentials['SecretAccessKey'],
+        aws_session_token=credentials['SessionToken'],
+    )
+
+
+def _get_sts_credentials():
+    sts_client = boto3.client('sts')
+    role_arn = app.config['AWS_APP_ROLE_ARN']
+    assumed_role_object = sts_client.assume_role(
+        RoleArn=role_arn,
+        RoleSessionName='AssumeAppRoleSession',
+        DurationSeconds=900,
+    )
+    return assumed_role_object['Credentials']
 
 
 def _generate_signed_url(client, bucket, key, expiration):
