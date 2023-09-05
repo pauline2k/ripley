@@ -254,13 +254,12 @@ export default {
           }
         }
       }
-      const onError = data => {
+      const onError = () => {
         this.$announcer.polite('Course section loading failed')
         this.displayError = 'failure'
         this.percentComplete = 0
         this.jobStatus = 'Error'
         this.displayError = 'Failed to create course provisioning job.'
-        return this.$errorHandler(data)
       }
       const handler = () => courseProvisionJobStatus(this.jobId).then(onSuccess, onError)
       this.timeoutPromise = setTimeout(handler, 2000)

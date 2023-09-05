@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from flask import current_app as app, redirect, request
 from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
-from ripley.api.util import canvas_role_required, csv_download_response
+from ripley.api.util import canvas_role_required, canvas_site_creation_required, csv_download_response
 from ripley.externals import canvas, data_loch
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_course import sort_course_sections
@@ -183,7 +183,7 @@ def get_official_course_sections(canvas_site_id):
 
 
 @app.route('/api/canvas_site/provision/status')
-@canvas_role_required('TeacherEnrollment')
+@canvas_site_creation_required
 def get_provision_status():
     job_id = request.args.get('jobId', None)
     if not job_id:
