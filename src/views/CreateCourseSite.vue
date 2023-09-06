@@ -228,42 +228,6 @@ export default {
         })
       })
     },
-    jobStatusLoader() {
-      const onSuccess = data => {
-        this.jobId = data.jobId
-        this.jobStatus = data.jobStatus
-        this.completedSteps = data.completedSteps
-        if (this.jobStatus === 'Processing' || this.jobStatus === 'New') {
-          if (this.percentComplete !== data.percentComplete) {
-            this.percentComplete = data.percentComplete
-            this.$announcer.polite(`${Math.round(this.percentComplete * 100)} percent done in creating new course site.`)
-          }
-          this.jobStatusLoader()
-        } else {
-          clearTimeout(this.timeoutPromise)
-          const courseSiteUrl = get(data.courseSite, 'url')
-          if (this.jobStatus === 'Completed' && courseSiteUrl) {
-            this.$announcer.polite('Done. Loading new course site now.')
-            if (this.$isInIframe) {
-              iframeParentLocation(courseSiteUrl)
-            } else {
-              window.location.href = courseSiteUrl
-            }
-          } else {
-            this.displayError = 'Failed to create course site.'
-          }
-        }
-      }
-      const onError = () => {
-        this.$announcer.polite('Course section loading failed')
-        this.displayError = 'failure'
-        this.percentComplete = 0
-        this.jobStatus = 'Error'
-        this.displayError = 'Failed to create course provisioning job.'
-      }
-      const handler = () => courseProvisionJobStatus(this.jobId).then(onSuccess, onError)
-      this.timeoutPromise = setTimeout(handler, 2000)
-    },
     loadCourseLists() {
       this.courseSemester = false
       // identify semester matching current course site
@@ -349,6 +313,8 @@ export default {
           this.$announcer.polite('Started course site creation.')
           this.completedFocus = true
           this.jobStatusLoader()
+          this.jobStatus = response.jobStatus
+          this.trackBackgroundJob()
         }
         const onError = () => {
           this.percentComplete = 0
@@ -380,6 +346,42 @@ export default {
       this.currentSemesterName = semester.name
       this.$announcer.polite(`Course sections for ${semester.name} loaded`)
       this.updateSelected()
+    },
+    trackBackgroundJob() {
+      this.exportTimer = setInterval(() => {
+        courseProvisionJobStatus(this.backgroundJobId).then(
+          response => {
+            this.jobStatus = response.jobStatus
+            if (!(includes(['started', 'queued'], this.jobStatus))) {
+              clearInterval(this.exportTimer)
+              if (this.jobStatus === 'finished') {
+                const courseSiteUrl = get(data.courseSite, 'url')
+                if (courseSiteUrl) {
+                  this.$announcer.polite('Done. Loading new course site now.')
+                  if (this.$isInIframe) {
+                    iframeParentLocation(courseSiteUrl)
+                  } else {
+                    window.location.href = courseSiteUrl
+                  }
+                }
+              } else {
+                this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
+                if (response.workflowState === 'imported_with_messages' && size(response.messages)) {
+                  this.jobStatusDetails = map(response.messages, message => last(message))
+                }
+              }
+              this.fetchFeed()
+            }
+          }
+        ).catch(
+          () => {
+            this.currentWorkflowStep = null
+            this.jobStatus = 'error'
+            this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
+            clearInterval(this.exportTimer)
+          }
+        )
+      }, 4000)
     },
     updateMetadata(data) {
       this.isAdmin = data.isAdmin
