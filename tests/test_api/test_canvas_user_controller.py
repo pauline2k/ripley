@@ -88,8 +88,8 @@ class TestSearchUsers:
                 {'searchText': '60000', 'searchType': 'uid'},
             ]:
                 results = _api_search_users(client, params=params)
-                assert len(results) == 1
-                assert results[0]['uid'] == '60000'
+                assert len(results['users']) == 1
+                assert results['users'][0]['uid'] == '60000'
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -107,8 +107,8 @@ class TestSearchUsers:
                 {'searchText': '30000', 'searchType': 'uid'},
             ]:
                 results = _api_search_users(client, params=params)
-                assert len(results) == 1
-                assert results[0]['uid'] == '30000'
+                assert len(results['users']) == 1
+                assert results['users'][0]['uid'] == '30000'
 
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
@@ -126,8 +126,8 @@ class TestSearchUsers:
                 {'searchText': '20000', 'searchType': 'uid'},
             ]:
                 results = _api_search_users(client, params=params)
-                assert len(results) == 1
-                assert results[0]['uid'] == '20000'
+                assert len(results['users']) == 1
+                assert results['users'][0]['uid'] == '20000'
 
     def test_invalid_params(self, client, app, fake_auth):
         """Returns an error if searchText is blank or searchType is invalid."""
