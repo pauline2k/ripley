@@ -175,6 +175,18 @@ def get_external_tools(obj_type, obj_id=None):
     return tools
 
 
+def get_roles():
+    canvas = _get_canvas()
+    account = canvas.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'])
+    roles = None
+    try:
+        roles = account.get_roles()
+    except Exception as e:
+        app.logger.error('Failed to retrieve Canvas roles')
+        app.logger.exception(e)
+    return roles
+
+
 def get_section(section_id, api_call=True, use_sis_id=False):
     c = _get_canvas()
     if api_call is False:

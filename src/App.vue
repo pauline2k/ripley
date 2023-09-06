@@ -105,7 +105,7 @@ export default {
     -webkit-appearance: none;
     background: $color-white;
     border: 1px solid $color-very-light-grey;
-    border-radius: 0;
+    border-radius: 3px !important;
     box-shadow: inset 0 1px 2px $color-whisper;
     font-size: 14px;
     font-weight: normal;
@@ -123,11 +123,28 @@ export default {
   }
   label {
     display: block;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 400;
     margin-right: 10px;
     margin-top: 8px;
     text-align: right;
+  }
+  select {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    background: $color-white;
+    border: 1px solid $color-very-light-grey;
+    border-radius: 0;
+    font-family: $body-font-family;
+    font-size: 14px;
+    font-weight: 500;
+    height: 38px;
+    margin: 0 0 4px;
+    padding: 8px 14px 8px 9px;
+    width: 100%;
+    &[disabled] {
+      color: $color-grey;
+    }
   }
   textarea {
     resize: vertical;
@@ -141,6 +158,9 @@ export default {
   border: 1px solid $color-container-grey-border !important;
   border-radius: 3px !important;
   padding: 9px !important;
+}
+.icon-blue {
+  color: $color-help-link-blue;
 }
 .icon-gold {
   color: $color-dark-tangerine;
@@ -167,6 +187,10 @@ a {
   &:hover, &:focus {
     text-decoration: underline;
   }
+}
+body, .v-application {
+  color: $color-body-black !important;
+  font-family: $body-font-family !important;
 }
 h1 {
   color: $color-off-black;

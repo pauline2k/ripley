@@ -1,14 +1,11 @@
 <template>
   <div v-if="!isLoading" class="canvas-application page-course-add-user">
     <MaintenanceNotice course-action-verb="user is added" />
-
-    <h1 class="page-course-add-user-header">Find a Person to Add</h1>
-
+    <h1 id="page-header" class="page-course-add-user-header">Find a Person to Add</h1>
     <div v-if="showError">
       <v-icon icon="mdi-exclamation-triangle" class="icon-red canvas-notice-icon" />
       {{ errorStatus }}
     </div>
-
     <div v-if="!showError">
       <v-row v-if="showAlerts" role="alert">
         <v-col md="12">
@@ -25,7 +22,6 @@
               </button>
             </div>
           </div>
-
           <div v-if="searchAlert" class="alert alert-error page-course-add-user-alert">
             {{ searchAlert }}
             {{ searchTypeNotice }}
@@ -41,17 +37,14 @@
               </button>
             </div>
           </div>
-
           <div v-if="userSearchResultsCount > userSearchResults.length" class="alert alert-info page-course-add-user-alert">
             Your search returned {{ userSearchResultsCount }} results, but only the first
             {{ userSearchResults.length }} are shown.
             Please refine your search to limit the number of results.
           </div>
-
           <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="sr-only">
             {{ userSearchResultsCount }} user search results loaded.
           </div>
-
           <div v-if="additionSuccessMessage" id="success-message" class="alert alert-success page-course-add-user-alert">
             {{ userAdded.fullName }} was added to the
             &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course as a {{ userAdded.role }}.
@@ -62,7 +55,6 @@
               </button>
             </div>
           </div>
-
           <div v-if="additionFailureMessage" class="alert alert-error page-course-add-user-alert">
             <v-icon icon="mdi-exclamation-triangle" class="icon-red canvas-notice-icon" />
             {{ errorStatus }}
@@ -75,95 +67,100 @@
           </div>
         </v-col>
       </v-row>
-
       <v-row v-if="showSearchForm" no-gutters>
-        <v-col md="6">
-          <form class="canvas-page-form" @submit.prevent="searchUsers">
+        <v-col>
+          <form class="canvas-form px-sm-16" @submit.prevent="searchUsers">
             <v-row class="horizontal-form" no-gutters>
-              <v-col md="4">
-                <label for="search-text" class="sr-only">Search users</label>
+              <v-col cols="12" md="4" class="my-1">
+                <label for="search-text" class="sr-only">Find a person to add</label>
                 <input
                   id="search-text"
                   v-model="searchText"
-                  class="form-input-text"
+                  class="d-flex align-center mb-0"
                   :type="searchTextType"
                   placeholder="Find a person to add"
                 >
               </v-col>
-              <v-col md="6">
+              <v-col cols="12" md="6" class="my-1">
                 <v-row no-gutters>
-                  <v-col class="d-none d-sm-none d-md-block" md="2">
-                    <label for="search-type" class="label label-horizontal form-entities">By:</label>
+                  <v-col class="d-none d-sm-none d-md-flex justify-end align-center" md="2">
+                    <label for="search-type" class="mt-0"><span class="sr-only">Search </span>By:</label>
                   </v-col>
-                  <v-col md="10">
+                  <v-col md="10" class="pr-md-8">
                     <select
                       id="search-type"
                       v-model="searchType"
-                      class="form-input-select"
+                      class="d-flex align-center mb-0"
                       @change="updateSearchTextType"
                     >
                       <option value="name">Last Name, First Name</option>
                       <option value="email">Email</option>
-                      <option value="ldap_user_id" aria-label="CalNet U I D">CalNet UID</option>
+                      <option value="uid" aria-label="CalNet U I D">CalNet UID</option>
                     </select>
                   </v-col>
                 </v-row>
               </v-col>
-              <v-col md="2" class="column-align-center">
-                <button
-                  id="submit-search"
+              <v-col cols="12" md="2" class="column-align-center my-1">
+                <v-btn
+                  id="add-user-submit-search-btn"
                   type="submit"
                   :disabled="!searchText"
-                  class="canvas-button canvas-button-primary full-wide"
+                  class="canvas-button canvas-button-primary w-100"
                   aria-label="Perform User Search"
                 >
                   Go
-                </button>
+                </v-btn>
               </v-col>
             </v-row>
           </form>
         </v-col>
       </v-row>
-
-      <v-row v-if="showSearchForm" class="page-help-notice" no-gutters>
+      <v-row v-if="showSearchForm" no-gutters>
         <v-col md="12">
-          <v-icon icon="mdi-question-circle" class="page-help-notice-icon left mr-2" />
-          <div class="page-help-notice-left-margin">
-            <button
-              class="button-link"
+          <div class="shrink icon-blue">
+            <v-btn
+              id="add-user-help-btn"
               aria-controls="page-help-notice"
               aria-haspopup="true"
               :aria-expanded="`${toggle.displayHelp}`"
+              class="font-weight-regular text-no-wrap my-2"
+              prepend-icon="mdi-help-circle"
+              variant="text"
               @click="toggle.displayHelp = !toggle.displayHelp"
             >
               Need help finding someone?
-            </button>
-            <div aria-live="polite">
-              <div v-if="toggle.displayHelp" id="page-help-notice" class="page-help-notice-content user-search-notice">
-                <!-- Note: This help text content is also maintained in the public/canvas/canvas-customization.js script -->
-                <dl class="user-search-notice-description-list">
-                  <dt class="user-search-notice-description-term">UC Berkeley Faculty, Staff and Students</dt>
-                  <dd class="user-search-notice-description">
-                    UC Berkeley faculty, staff and students <em>(regular and concurrent enrollment)</em> can be found in the
-                    <OutboundLink href="http://directory.berkeley.edu/">CalNet Directory</OutboundLink>
-                    and be added to your site using their CalNet UID or official email address.
-                  </dd>
-                  <dt class="user-search-notice-description-term">Guests</dt>
-                  <dd class="user-search-notice-description">
-                    Peers from other institutions or guests from the community must be sponsored with a
-                    <OutboundLink href="https://idc.berkeley.edu/guests/">CalNet Guest Account</OutboundLink>.
-                    Do NOT request a CalNet Guest Account for concurrent enrollment students.
-                  </dd>
-                  <dt class="user-search-notice-description-term">More Information</dt>
-                  <dd class="user-search-notice-description">
-                    Go to this
-                    <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010842">bCourses help page</OutboundLink>
-                    for more information about adding people to bCourses sites.
-                  </dd>
-                </dl>
-              </div>
-            </div>
+            </v-btn>
           </div>
+          <v-expand-transition>
+            <v-card
+              v-show="toggle.displayHelp"
+              id="page-help-notice"
+              class="user-search-notice rounded-0 mx-8"
+              elevation="0"
+            >
+              <!-- Note: This help text content is also maintained in the public/canvas/canvas-customization.js script -->
+              <dl class="user-search-notice-description-list">
+                <dt class="user-search-notice-description-term">UC Berkeley Faculty, Staff and Students</dt>
+                <dd class="user-search-notice-description">
+                  UC Berkeley faculty, staff and students <em>(regular and concurrent enrollment)</em> can be found in the
+                  <OutboundLink href="http://directory.berkeley.edu/">CalNet Directory</OutboundLink>
+                  and be added to your site using their CalNet UID or official email address.
+                </dd>
+                <dt class="user-search-notice-description-term">Guests</dt>
+                <dd class="user-search-notice-description">
+                  Peers from other institutions or guests from the community must be sponsored with a
+                  <OutboundLink href="https://idc.berkeley.edu/guests/">CalNet Guest Account.</OutboundLink>
+                  Do NOT request a CalNet Guest Account for concurrent enrollment students.
+                </dd>
+                <dt class="user-search-notice-description-term">More Information</dt>
+                <dd class="user-search-notice-description">
+                  Go to this
+                  <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010842">bCourses help page</OutboundLink>
+                  for more information about adding people to bCourses sites.
+                </dd>
+              </dl>
+            </v-card>
+          </v-expand-transition>
         </v-col>
       </v-row>
       <v-row v-if="showUsersArea" no-gutters>
@@ -268,7 +265,7 @@
 import Context from '@/mixins/Context'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
-import {addUser, getAddUserCourseSections, getCanvasSiteUserRoles, searchUsers} from '@/api/canvas-user'
+import {addUser, getAddUserOptions, searchUsers} from '@/api/canvas-user'
 import {iframeScrollToTop, putFocusNextTick} from '@/utils'
 import {includes, trim} from 'lodash'
 
@@ -303,27 +300,37 @@ export default {
     userSearchResults: [],
   }),
   created() {
-    getCanvasSiteUserRoles(this.currentUser.canvasSiteId).then(
+    getAddUserOptions(this.currentUser.canvasSiteId).then(
       response => {
-        if (this.isAuthorized(response)) {
-          this.grantingRoles = response.grantingRoles
-          this.selectedRole = response.grantingRoles[0]
-          getAddUserCourseSections(this.currentUser.canvasSiteId).then(
-            response => {
-              this.courseSections = response.courseSections
-              this.selectedSection = response.courseSections[0]
-              this.showSearchForm = true
-            },
-            this.showUnauthorized
-          )
-        } else {
-          this.showUnauthorized()
-        }
-      },
-      this.showUnauthorized
+        this.grantingRoles = response.grantingRoles
+        this.selectedRole = response.grantingRoles[0]
+      }
     ).finally(() => {
+      this.showSearchForm = true
       this.$ready('Find Person to Add')
     })
+    // TODO:
+    // getCanvasSiteUserRoles(this.currentUser.canvasSiteId).then(
+    //   response => {
+    //     if (this.isAuthorized(response)) {
+    //       this.grantingRoles = response.grantingRoles
+    //       this.selectedRole = response.grantingRoles[0]
+    //       getAddUserCourseSections(this.currentUser.canvasSiteId).then(
+    //         response => {
+    //           this.courseSections = response.courseSections
+    //           this.selectedSection = response.courseSections[0]
+    //           this.showSearchForm = true
+    //         },
+    //         this.showUnauthorized
+    //       )
+    //     } else {
+    //       this.showUnauthorized()
+    //     }
+    //   },
+    //   this.showUnauthorized
+    // ).finally(() => {
+    //   this.$ready('Find Person to Add')
+    // })
   },
   methods: {
     isAuthorized(response) {
@@ -362,13 +369,13 @@ export default {
       this.resetImportState()
       if (!trim(this.searchText)) {
         this.showSearchAlert('You did not enter any search terms.')
-      } else if (this.searchType === 'ldap_user_id' && !isFinite(this.searchText)) {
+      } else if (this.searchType === 'uid' && !isFinite(this.searchText)) {
         this.showSearchAlert('UID search terms must be numeric.')
       } else {
         this.$announcer.polite('Loading user search results')
         this.showUsersArea = true
         this.loadingStart()
-        searchUsers(this.currentUser.canvasSiteId, this.searchText, this.searchType).then(response => {
+        searchUsers(this.searchText, this.searchType).then(response => {
           this.userSearchResults = response.users
           if (response.users && response.users.length) {
             this.userSearchResultsCount = response.users[0].resultCount
@@ -377,7 +384,7 @@ export default {
           } else {
             this.userSearchResultsCount = 0
             let noResultsAlert = 'Your search did not match any users with a CalNet ID.'
-            if (this.searchType === 'ldap_user_id') {
+            if (this.searchType === 'uid') {
               noResultsAlert += ' CalNet UIDs must be an exact match.'
             }
             this.showSearchAlert(noResultsAlert)
@@ -437,11 +444,9 @@ export default {
 .page-course-add-user {
   background: $color-white;
   padding: 10px;
-
   .page-course-add-user-alert {
     margin-bottom: 20px;
   }
-
   .page-course-add-user-header {
     color: $color-off-black;
     font-family: $body-font-family;
@@ -450,62 +455,9 @@ export default {
     line-height: 40px;
     margin: 8px 0;
   }
-
-  button {
-    &, &:hover, &:active, &:focus {
-      font-family: $body-font-family;
-      font-size: 14px;
-      font-weight: 300;
-    }
-  }
-
-  p {
-    font-size: 14px;
-    line-height: 16px;
-    margin: 0 0 10px;
-  }
-
-  select {
-    width: 100%;
-  }
-
-  .canvas-page-form {
-    form input[type="text"] {
-      font-family: $body-font-family;
-      font-size: 14px;
-      margin: 2px 10px 0 0;
-      padding: 8px 12px;
-    }
-
-    .form-input-select {
-      margin-bottom: 8px;
-    }
-  }
-
-  .horizontal-form {
-    .label {
-      white-space: nowrap;
-    }
-
-    .label-horizontal {
-      margin-top: 9px;
-    }
-
-    .form-entity {
-      border: 1px solid $color-very-light-grey;
-      font-family: Arial;
-      font-size: 12px;
-      height: 25px;
-      margin: 3px 0;
-      padding: 5px;
-    }
-  }
-
-  .fa-black {
-    color: $color-off-black !important;
-  }
-
   .user-search-notice {
+    border: 1px solid #d0d0d0;
+    padding: 15px;
     .user-search-notice-description-list {
       margin-bottom: 0;
     }
@@ -517,21 +469,8 @@ export default {
       margin-left: 15px;
     }
   }
-
   .column-align-center {
     text-align: center;
-  }
-
-  @media #{$small-only} {
-    .full-wide {
-      width: 100%;
-    }
-
-    .horizontal-form {
-      .columns {
-        margin-bottom: 0;
-      }
-    }
   }
 }
 </style>
