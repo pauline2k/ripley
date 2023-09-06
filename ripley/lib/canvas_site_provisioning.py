@@ -31,7 +31,7 @@ from ripley.externals.data_loch import get_edo_enrollment_updates, get_edo_instr
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_calnet_attributes_for_uids
 from ripley.lib.canvas_utils import csv_formatted_course_role, csv_row_for_campus_user, parse_canvas_sis_section_id, \
-    sis_enrollment_status_to_canvas_course_role
+    sis_enrollment_status_to_canvas_course_role, user_id_from_attributes
 from ripley.models.canvas_synchronization import CanvasSynchronization
 
 
@@ -173,6 +173,12 @@ def process_student_enrollments(
     else:
         enrollment_rows = get_section_enrollments(berkeley_term.to_sis_term_id(), [section_id], include_dropped=False)
     app.logger.debug(f'{len(enrollment_rows)} student enrollments found for section {sis_section_id}')
+
+    # Course provising jobs won't pass in a prepopulated array of known users, so construct a dictionary if needed.
+    if not known_users:
+        campus_users_by_uid = get_basic_attributes([r['ldap_uid'] for r in enrollment_rows])
+        known_users = {uid: user_id_from_attributes(campus_user) for uid, campus_user in campus_users_by_uid.items()}
+
     for enrollment_row in enrollment_rows:
         course_role = sis_enrollment_status_to_canvas_course_role(enrollment_row['sis_enrollment_status'])
         if course_role and enrollment_row['ldap_uid']:

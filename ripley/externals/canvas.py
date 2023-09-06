@@ -182,7 +182,7 @@ def get_section(section_id, api_call=True, use_sis_id=False):
     else:
         section = None
         try:
-            section = c.get_section(section_id, include=['term'], use_sis_id=False)
+            section = c.get_section(section_id, include=['term'], use_sis_id=use_sis_id)
         except Exception as e:
             app.logger.error(f'Failed to retrieve Canvas section (id={section_id})')
             app.logger.exception(e)

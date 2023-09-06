@@ -187,9 +187,9 @@ def get_teaching_terms(current_user=None, section_ids=None, sections=None, term_
 
     teaching_sections = []
     if instructor_uid:
-        teaching_sections = sort_course_sections(
-            data_loch.get_instructing_sections(instructor_uid, [t.to_sis_term_id() for t in terms]) or [],
-        )
+        teaching_sections = data_loch.get_instructing_sections(instructor_uid, [t.to_sis_term_id() for t in terms]) or []
+        teaching_sections = sort_course_sections(teaching_sections)
+
     if not len(teaching_sections) and sections:
         teaching_sections = sections
 
@@ -352,19 +352,20 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
 
     for c in courses_list:
         for s in c['sections']:
-            all_sections.append(s)
-            _prepare_section_definition(
-                s,
-                course,
-                uid,
-                term.to_sis_term_id(),
-                lead_ta_role,
-                teacher_role,
-                is_admin_by_ccns,
-                section_feeds,
-                section_roles,
-                explicit_sections_for_instructor,
-            )
+            if s['section_id'] in section_ids:
+                all_sections.append(s)
+                _prepare_section_definition(
+                    s,
+                    course,
+                    uid,
+                    term.to_sis_term_id(),
+                    lead_ta_role,
+                    teacher_role,
+                    is_admin_by_ccns,
+                    section_feeds,
+                    section_roles,
+                    explicit_sections_for_instructor,
+                )
 
     with SisImportCsv.create(fieldnames=['section_id', 'course_id', 'name', 'status', 'start_date', 'end_date']) as sections_csv:
         sections_csv.writerows(section_feeds)
@@ -390,7 +391,6 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
             section_roles,
             teacher_role,
             explicit_sections_for_instructor,
-            all_sections,
             section_feeds,
         )
 
@@ -415,18 +415,19 @@ def _prepare_section_definition(
     explicit_sections_for_instructor,
 ):
     sis_section_id = get_canvas_sis_section_id(sis_term_id, section['id'])
-    section_feeds.append({
+    section_feed = {
         'section_id': sis_section_id,
         'course_id': course.sis_course_id,
         'name': f"{section['courseCode']} {section['name']}",
         'status': 'active',
         'start_date': None,
         'end_date': None,
-    })
+    }
+    section_feeds.append(section_feed)
     if not is_admin_by_ccns:
         instructing_assignment = next((i for i in section['instructors'] if i['uid'] == uid), None)
         if instructing_assignment:
-            explicit_sections_for_instructor.append(section)
+            explicit_sections_for_instructor.append(section_feed)
             if instructing_assignment['role'] == 'APRX':
                 section_roles[sis_section_id] = lead_ta_role and lead_ta_role.id
             else:
@@ -440,7 +441,6 @@ def _add_instructor_to_site(
     section_roles,
     teacher_role,
     explicit_sections_for_instructor,
-    all_sections,
     section_feeds,
 ):
     instructor_role_id = section_roles[section_feeds[0]['section_id']] or (teacher_role and teacher_role.id)
@@ -458,8 +458,8 @@ def _add_instructor_to_site(
         if not sis_user_profile:
             raise InternalServerError(f'Failed to create instructor account (uids={uid}).')
 
-    user_section = explicit_sections_for_instructor[0] if explicit_sections_for_instructor else all_sections[0]
-    sis_section_id = get_canvas_sis_section_id(sis_term_id, user_section['id'])
+    user_section_feed = explicit_sections_for_instructor[0] if explicit_sections_for_instructor else section_feeds[0]
+    sis_section_id = user_section_feed['section_id']
     canvas_section = canvas.get_section(section_id=f'sis_section_id:{sis_section_id}', api_call=False, use_sis_id=True)
     canvas_section.enroll_user(
         sis_user_profile['id'],
