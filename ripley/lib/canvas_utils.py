@@ -385,7 +385,7 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
 
     for c in courses_list:
         for s in c['sections']:
-            if s['section_id'] in section_ids:
+            if s['id'] in section_ids:
                 all_sections.append(s)
                 _prepare_section_definition(
                     s,
