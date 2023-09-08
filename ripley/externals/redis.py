@@ -89,10 +89,14 @@ def get_redis_conn(app):
         if app.config['REDIS_USE_FAKE_CLIENT']:
             redis_conn = FakeStrictRedis()
         elif app.config['REDIS_PASSWORD']:
-            redis_conn = redis.from_url(f"rediss://default:{app.config['REDIS_PASSWORD']}@{app.config['REDIS_HOST']}:{app.config['REDIS_PORT']}")
+            redis_conn = redis.from_url(get_url(app))
         else:
             redis_conn = redis.from_url('redis://localhost:6379')
     return redis_conn
+
+
+def get_url(app):
+    return f"rediss://default:{app.config['REDIS_PASSWORD']}@{app.config['REDIS_HOST']}:{app.config['REDIS_PORT']}"
 
 
 def redis_status():

@@ -49,9 +49,9 @@ def create_app():
     return app
 
 
-def start_worker(redis_url, name='xenomorph'):
+def start_worker(redis_url, name='xenomorph', app_arg=None):
     global app
-    app = create_app()
+    app = app_arg or create_app()
     redis_conn = redis.from_url(redis_url)
     with Connection(redis_conn), app.app_context():
         q = Queue()
@@ -71,10 +71,10 @@ def start_worker(redis_url, name='xenomorph'):
         )
 
 
-def stop_workers(redis_url):
+def stop_workers(redis_url, app_arg=None):
     global app
     if not app:
-        app = create_app()
+        app = app_arg or create_app()
     redis_conn = redis.from_url(redis_url)
     with Connection(redis_conn):
         worker_count = Worker.count(redis_conn)
@@ -93,6 +93,9 @@ def stop_workers(redis_url):
             if w.pid:
                 app.logger.info(f'Existing worker (PID {w.pid}) did not stop when asked.')
                 os.kill(w.pid, signal.SIGINT)
+            else:
+                # A worker without a PID is incapable of doing any work and needs to be taken off the payroll.
+                w.teardown()
 
 
 def work_horse_killed_handler(job, pid, stat, rusage):
