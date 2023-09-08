@@ -27,7 +27,7 @@ import os
 import threading
 import time
 
-from ripley.externals import rds
+from ripley.externals import rds, redis
 from ripley.jobs.base_job import BaseJob
 from ripley.jobs.bcourses_refresh_base_job import BcoursesRefreshBaseJob
 from ripley.jobs.errors import BackgroundJobError
@@ -68,9 +68,23 @@ class BackgroundJobManager:
                 cls.active = True
                 while self.monitor.is_running():
                     schedule.run_pending()
+                    # While the xenomorph workers are distinct from the background jobs in this class, this continuously
+                    # running thread is a good place to check up on them.
+                    cls._check_xenomorphs()
                     time.sleep(interval)
                 schedule.clear()
                 cls.active = False
+
+            @staticmethod
+            def _check_xenomorphs():
+                redis_status = redis.redis_status()
+                live_worker = next((w for w in redis_status.get('workers', []) if w['pid']), None)
+                if not live_worker:
+                    from xenomorph import start_worker, stop_workers
+                    redis_url = redis.get_url(app)
+                    stop_workers(redis_url, app_arg=app)
+                    thread = threading.Thread(target=start_worker, args=[redis_url], kwargs={'app_arg': app}, daemon=True)
+                    thread.start()
 
         interval = app.config['JOBS_SECONDS_BETWEEN_PENDING_CHECK']
         all_jobs = Job.get_all()
