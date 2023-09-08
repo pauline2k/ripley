@@ -304,6 +304,9 @@ export default {
       response => {
         this.grantingRoles = response.grantingRoles
         this.selectedRole = response.grantingRoles[0]
+        this.courseSections = response.courseSections
+        this.selectedSection = response.courseSections[0]
+        this.showSearchForm = true
       }
     ).finally(() => {
       this.showSearchForm = true

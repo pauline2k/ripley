@@ -180,7 +180,7 @@ def get_roles():
     account = canvas.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'])
     roles = None
     try:
-        roles = account.get_roles()
+        roles = account.get_roles(show_inherited=True)
     except Exception as e:
         app.logger.error('Failed to retrieve Canvas roles')
         app.logger.exception(e)

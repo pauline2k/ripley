@@ -944,6 +944,428 @@
         "endpoint": "accounts/1",
         "status_code": 404
     },
+    "get_roles": {
+        "method": "GET",
+        "endpoint": "accounts/1/roles",
+        "data": [
+            {
+                "id": 568,
+                "role": "Support Admin",
+                "label": "Support Admin",
+                "last_updated_at": "2023-09-02T18:11:38Z",
+                "base_role_type": "AccountMembership",
+                "workflow_state": "active",
+                "created_at": "2012-12-22T06:20:25-08:00",
+                "permissions": {},
+                "is_account_role": "true",
+                "account": {
+                    "id": 90242,
+                    "name": "UC Berkeley",
+                    "workflow_state": "active"
+                }
+            },
+            {
+                "id": 1366,
+                "role": "Developer Admin",
+                "label": "Developer Admin",
+                "last_updated_at": "2023-07-21T18:56:45Z",
+                "base_role_type": "AccountMembership",
+                "workflow_state": "active",
+                "created_at": "2013-05-03T14:33:31-07:00",
+                "permissions": {},
+                "is_account_role": "true",
+                "account": {
+                    "id": 90242,
+                    "name": "UC Berkeley",
+                    "workflow_state": "active"
+                }
+            },
+            {
+                "id": 6307,
+                "role": "Reader",
+                "label": "Reader",
+                "last_updated_at": "2021-07-16T03:12:48Z",
+                "base_role_type": "TaEnrollment",
+                "workflow_state": "active",
+                "created_at": "2020-09-09T17:04:57-07:00",
+                "permissions": {},
+                "is_account_role": "false"
+            },
+            {
+                "id": 1820,
+                "role": "Lead TA",
+                "label": "Lead TA",
+                "last_updated_at": "2021-07-16T03:12:48Z",
+                "base_role_type": "TaEnrollment",
+                "workflow_state": "active",
+                "created_at": "2020-09-09T17:04:57-07:00",
+                "permissions": {
+                    "add_designer_to_course": {
+                        "enabled": false,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_designer_enrollments"
+                    },
+                    "add_observer_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_observer_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_student_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_student_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_ta_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": true,
+                        "prior_default": false,
+                        "group": "manage_course_ta_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_teacher_to_course": {
+                        "enabled": false,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_teacher_enrollments"
+                    },
+                    "manage_students": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    }
+                },
+                "is_account_role": "false"
+            },
+            {
+                "id": 1822,
+                "role": "AccountAdmin",
+                "label": "Account Admin",
+                "last_updated_at": "2021-07-16T03:12:48Z",
+                "base_role_type": "AccountMembership",
+                "workflow_state": "built_in",
+                "created_at": "2020-09-09T17:04:57-07:00",
+                "permissions": {},
+                "is_account_role": "true"
+            },
+            {
+                "id": 6310,
+                "role": "TeacherEnrollment",
+                "label": "Teacher",
+                "last_updated_at": "2023-04-27T16:54:23Z",
+                "base_role_type": "TeacherEnrollment",
+                "workflow_state": "built_in",
+                "created_at": "2020-09-09T17:04:57-07:00",
+                "permissions": {
+                    "add_designer_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_designer_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_observer_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_observer_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_student_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_student_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_ta_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_ta_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_teacher_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_teacher_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "manage_students": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    }
+                },
+                "is_account_role": "false"
+            },
+            {
+                "id": 6313,
+                "role": "ObserverEnrollment",
+                "label": "Observer",
+                "last_updated_at": "2022-04-28T00:21:14Z",
+                "base_role_type": "ObserverEnrollment",
+                "workflow_state": "built_in",
+                "created_at": "2020-09-09T17:04:57-07:00",
+                "permissions": {
+                    "add_designer_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_designer_enrollments"
+                    },
+                    "add_observer_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_observer_enrollments"
+                    },
+                    "add_student_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_student_enrollments"
+                    },
+                    "add_ta_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_ta_enrollments"
+                    },
+                    "add_teacher_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_teacher_enrollments"
+                    },
+                    "manage_students": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false
+                    }
+                },
+                "is_account_role": "false"
+            },
+            {
+                "id": 6309,
+                "role": "StudentEnrollment",
+                "label": "Student",
+                "last_updated_at": "2022-10-20T17:20:56Z",
+                "base_role_type": "StudentEnrollment",
+                "workflow_state": "built_in",
+                "created_at": "2020-09-09T17:04:57-07:00",
+                "permissions": {
+                    "add_designer_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_designer_enrollments"
+                    },
+                    "add_observer_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_observer_enrollments"
+                    },
+                    "add_student_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_student_enrollments"
+                    },
+                    "add_ta_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_ta_enrollments"
+                    },
+                    "add_teacher_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_teacher_enrollments"
+                    },
+                    "manage_students": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false
+                    }
+                },
+                "is_account_role": "false"
+            },
+            {
+                "id": 6311,
+                "role": "TaEnrollment",
+                "label": "TA",
+                "last_updated_at": "2023-05-15T23:21:05Z",
+                "base_role_type": "TaEnrollment",
+                "workflow_state": "built_in",
+                "created_at": "2020-09-09T17:04:57-07:00",
+                "permissions": {
+                    "add_designer_to_course": {
+                        "enabled": false,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_designer_enrollments"
+                    },
+                    "add_observer_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_observer_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_student_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_student_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_ta_to_course": {
+                        "enabled": false,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_ta_enrollments"
+                    },
+                    "add_teacher_to_course": {
+                        "enabled": false,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_teacher_enrollments"
+                    },
+                    "manage_students": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    }
+                },
+                "is_account_role": "false"
+            },
+            {
+                "id": 6312,
+                "role": "DesignerEnrollment",
+                "label": "Designer",
+                "last_updated_at": "2022-12-07T21:10:07Z",
+                "base_role_type": "DesignerEnrollment",
+                "workflow_state": "built_in",
+                "created_at": "2020-09-09T17:04:57-07:00",
+                "permissions": {
+                    "add_designer_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": true,
+                        "prior_default": false,
+                        "group": "manage_course_designer_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_observer_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": true,
+                        "prior_default": true,
+                        "group": "manage_course_observer_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_student_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "group": "manage_course_student_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_ta_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": true,
+                        "prior_default": false,
+                        "group": "manage_course_ta_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "add_teacher_to_course": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": true,
+                        "prior_default": false,
+                        "group": "manage_course_teacher_enrollments",
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    },
+                    "manage_students": {
+                        "enabled": true,
+                        "locked": false,
+                        "readonly": false,
+                        "explicit": false,
+                        "applies_to_self": true,
+                        "applies_to_descendants": true
+                    }
+                },
+                "is_account_role": "false"
+            }
+        ],
+        "status_code": 200
+    },
     "get_sis_import": {
         "method": "GET",
         "endpoint": "accounts/1/sis_imports/2",
