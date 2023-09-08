@@ -28,6 +28,7 @@ import re
 import secrets
 
 from flask import current_app as app
+from flask_login import current_user
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.externals import canvas, data_loch
 from ripley.externals.canvas import get_course_sections
@@ -72,6 +73,38 @@ def get_canvas_sis_section_id(term_id, sis_section_id):
     if existing_section:
         raise InternalServerError(f'Could not generate unique ID for Canvas section {term_id}-{sis_section_id}')
     return section_id
+
+
+def get_grantable_roles():
+    permission_to_grantable_role_types = {
+        'add_designer_to_course': {'DesignerEnrollment'},
+        'add_observer_to_course': {'ObserverEnrollment'},
+        'add_student_to_course': {'StudentEnrollment'},
+        'add_ta_to_course': {'TaEnrollment'},
+        'add_teacher_to_course': {'TeacherEnrollment'},
+        'manage_students': {'StudentEnrollment', 'ObserverEnrollment'},
+        'manage_admin_users': {'DesignerEnrollment', 'TaEnrollment', 'TeacherEnrollment'},
+    }
+
+    def _has_permission(role, permission):
+        return role.permissions.get(permission, {}).get('enabled', False)
+
+    all_roles = {r.role: r for r in canvas.get_roles()}
+    grantable_roles = []
+
+    if current_user.is_admin:
+        grantable_roles = [role for role in all_roles.values() if role.base_role_type.endswith('Enrollment')]
+    else:
+        grantable_role_types = set()
+        for user_role in current_user.canvas_site_user_roles:
+            role = all_roles[user_role]
+            for permission, role_types in permission_to_grantable_role_types.items():
+                if _has_permission(role, permission):
+                    grantable_role_types.update(role_types)
+        grantable_roles = [role for role in all_roles.values() if role.base_role_type in grantable_role_types]
+
+    roles = [role.label for role in sorted(grantable_roles, key=_canvas_role_sort_key)]
+    return [role for i, role in enumerate(roles) if role not in roles[:i]]
 
 
 def parse_canvas_sis_section_id(sis_section_id):
@@ -542,6 +575,15 @@ def user_id_from_attributes(attributes):
         return attributes['sid']
     else:
         return f"UID:{attributes['ldap_uid']}"
+
+
+def _canvas_role_sort_key(role):
+    # The default Canvas UX orders roles by base role type, then built-ins first, then role ID.
+    role_type_order = ['StudentEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'DesignerEnrollment', 'ObserverEnrollment']
+    type_key = role_type_order.index(role.base_role_type)
+    # Custom roles have a "workflow_state" of "active" rather than "built_in".
+    workflow_key = 0 if role.workflow_state == 'built_in' else 1
+    return f'{type_key}_{workflow_key}_{role.id}'
 
 
 def _canvas_site_term_json(canvas_site):

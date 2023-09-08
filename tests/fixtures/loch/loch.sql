@@ -22,7 +22,8 @@ VALUES
 ('30000', '30030000', 'Ash', '🤖', 'synthetic.ash@berkeley.edu', 'STUDENT-TYPE-NOT REGISTERED', 'S'),
 ('40000', '30040000', 'XO', 'Kane', 'xo.kane@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
 ('50000', '30050000', 'Dennis', 'Parker', 'dennis.parker@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
-('60000', '30060000', 'Samuel', 'Brett', 'sam.brett@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S');
+('60000', '30060000', 'Samuel', 'Brett', 'sam.brett@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
+('80000', '30080000', 'Jonesie', 'the Cat', 'jonesie@berkeley.edu', 'EMPLOYEE-TYPE-STAFF', 'S');
 
 CREATE TABLE sis_data.edo_enrollment_updates
 (
