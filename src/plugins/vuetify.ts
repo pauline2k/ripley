@@ -11,6 +11,7 @@ import {VCheckbox} from 'vuetify/components/VCheckbox'
 import {VCol, VContainer, VSpacer, VRow} from 'vuetify/components/VGrid'
 import {VDataTable, VDataTableVirtual} from 'vuetify/labs/VDataTable'
 import {VDialog} from 'vuetify/components/VDialog'
+import {VDivider} from 'vuetify/components/VDivider'
 import {VExpandTransition} from 'vuetify/components/transitions'
 import {VExpansionPanel, VExpansionPanels, VExpansionPanelText, VExpansionPanelTitle} from 'vuetify/components/VExpansionPanel'
 import {VIcon} from 'vuetify/components/VIcon'
@@ -46,6 +47,7 @@ export default createVuetify({
     VDataTable,
     VDataTableVirtual,
     VDialog,
+    VDivider,
     VExpandTransition,
     VExpansionPanel,
     VExpansionPanels,
