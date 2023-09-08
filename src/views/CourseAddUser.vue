@@ -167,7 +167,7 @@
         <h2 id="user-search-results-header" class="sr-only" tabindex="-1">User Search Results</h2>
         <v-col v-if="userSearchResults.length > 0" md="12">
           <form class="canvas-page-form">
-            <fieldset class="form-fieldset">
+            <fieldset class="mb-4">
               <legend class="sr-only">Select the user you wish to add to the course site:</legend>
               <table class="table table-striped">
                 <thead>
@@ -179,8 +179,12 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(user, index) in userSearchResults" :id="`user-search-result-row-${index}`" :key="user.ldapUid">
-                    <td :id="`user-search-result-row-select-${index}`">
+                  <tr
+                    v-for="(user, index) in userSearchResults"
+                    :id="`user-search-result-row-${index}`"
+                    :key="user.uid"
+                  >
+                    <td :id="`user-search-result-row-select-${index}`" class="px-3 py-4">
                       <input
                         :id="`user-search-result-input-${index}`"
                         v-model="selectedUser"
@@ -190,15 +194,15 @@
                         :aria-labelled-by="`user-search-result-row-name-${index} user-search-result-row-ldap-uid-${index}`"
                       >
                     </td>
-                    <td :id="`user-search-result-row-name-${index}`">
+                    <td :id="`user-search-result-row-name-${index}`" class="px-3 py-4">
                       <label :for="`user-search-result-${index}-input`" class="form-input-label-no-align">
                         {{ user.firstName }} {{ user.lastName }}
                       </label>
                     </td>
-                    <td :id="`user-search-result-row-ldap-uid-${index}`">
-                      {{ user.ldapUid }}
+                    <td :id="`user-search-result-row-ldap-uid-${index}`" class="px-3 py-4">
+                      {{ user.uid }}
                     </td>
-                    <td :id="`user-search-result-row-email-${index}`">
+                    <td :id="`user-search-result-row-email-${index}`" class="px-3 py-4">
                       {{ user.emailAddress }}
                     </td>
                   </tr>
@@ -206,25 +210,25 @@
               </table>
             </fieldset>
             <v-row no-gutters>
-              <v-col md="7">
-                <v-row no-gutters>
-                  <v-col sm="3">
+              <v-col>
+                <v-row no-gutters class="mb-2">
+                  <v-col sm="2" offset="2" class="d-flex align-center justify-end pr-3">
                     <label for="user-role"><strong><span class="required-field-indicator">*</span> Role</strong>:</label>
                   </v-col>
-                  <v-col sm="9">
-                    <select id="user-role" v-model="selectedRole" class="form-input-select">
+                  <v-col sm="8">
+                    <select id="user-role" v-model="selectedRole">
                       <option v-for="role in grantingRoles" :key="role" :value="role">
                         {{ role }}
                       </option>
                     </select>
                   </v-col>
                 </v-row>
-                <v-row no-gutters>
-                  <v-col sm="3">
+                <v-row no-gutters class="mb-2">
+                  <v-col sm="2" offset="2" class="d-flex align-center justify-end pr-3">
                     <label for="course-section"><strong><span class="required-field-indicator">*</span> Section</strong>:</label>
                   </v-col>
-                  <v-col sm="9">
-                    <select id="course-section" v-model="selectedSection" class="form-input-select">
+                  <v-col sm="8">
+                    <select id="course-section" v-model="selectedSection">
                       <option v-for="section in courseSections" :key="section.name" :value="section">
                         {{ section.name }}
                       </option>
@@ -238,7 +242,7 @@
                 <div class="d-flex justify-end">
                   <v-btn
                     id="add-user-btn"
-                    class="canvas-button canvas-button-primary"
+                    class="canvas-button canvas-button-primary mx-1"
                     :disabled="!selectedUser"
                     @click="submitUser"
                   >
@@ -246,7 +250,7 @@
                   </v-btn>
                   <v-btn
                     id="start-over-btn"
-                    class="canvas-button start-over-button"
+                    class="canvas-button mx-1"
                     @click="resetForm"
                   >
                     Start Over
@@ -417,7 +421,7 @@ export default {
       this.showSearchForm = false
       this.$announcer.polite('Adding user')
       this.showAlerts = true
-      addUser(this.currentUser.canvasSiteId, this.selectedUser.ldapUid, this.selectedSection.id, this.selectedRole).then(response => {
+      addUser(this.currentUser.canvasSiteId, this.selectedUser.uid, this.selectedSection.id, this.selectedRole).then(response => {
         this.userAdded = {
           ...response.userAdded,
           fullName: this.selectedUser.firstName + ' ' + this.selectedUser.lastName,

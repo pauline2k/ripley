@@ -14,7 +14,7 @@
         </div>
       </v-checkbox>
     </div>
-    <table id="template-sections-table" class="template-sections-table bg-white">
+    <table id="template-sections-table" class="bg-white">
       <thead>
         <tr>
           <th v-if="mode === 'createCourseForm'" class="template-sections-table-cell-checkbox">Action</th>
@@ -301,29 +301,6 @@ export default {
 <style scoped lang="scss">
 td {
   padding: 10px;
-}
-.template-sections-table {
-  border: 1px solid $color-container-grey-border;
-  border-collapse: separate;
-  border-radius: 3px;
-  border-spacing: 0;
-  margin: 0;
-  width: 100%;
-  tbody tr td {
-    border-top: solid 1px $color-container-grey-border;
-    color: $color-body-black;
-    font-size: 14px;
-    font-weight: 400;
-    padding-left: 14px;
-    vertical-align: top;
-  }
-  thead tr th {
-    color: $color-body-black;
-    font-size: 13px;
-    font-weight: 500;
-    padding: 6px 10px 6px 14px;
-    text-align: start;
-  }
 }
 .template-sections-table-cell-checkbox {
   width: 30px;

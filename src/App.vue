@@ -90,6 +90,8 @@ export default {
   background: $color-white-smoke !important;
   border: 1px solid $color-whisper !important;
   padding: 10px 5px !important;
+}
+form {
   .validation-messages {
     color: $color-harley-davidson-orange;
     font-size: 13px;
@@ -121,7 +123,7 @@ export default {
       font-weight: 500;
     }
   }
-  label {
+  .form-label {
     display: block;
     font-size: 13px;
     font-weight: 400;
@@ -178,6 +180,9 @@ export default {
   line-height: 20px;
   margin: 4px 0;
 }
+.required-field-indicator {
+  color: $color-harley-davidson-orange;
+}
 a {
   color: $primary-color;
   text-decoration: none;
@@ -227,4 +232,42 @@ select {
   line-height: 20px !important;
   padding: 4px;
 }
+table {
+  border: 1px solid $color-container-grey-border;
+  border-collapse: separate;
+  border-radius: 3px;
+  border-spacing: 0;
+  margin: 0;
+  width: 100%;
+  tbody tr td {
+    border-top: solid 1px $color-container-grey-border;
+    color: $color-body-black;
+    font-size: 14px;
+    font-weight: 400;
+    padding-left: 14px;
+    vertical-align: top;
+  }
+  thead tr th {
+    background-color: transparent;
+    color: $color-body-black;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 10px 6px 14px;
+    text-align: start;
+  }
+  td {
+    border-bottom-color: $color-table-cell-border-grey;
+  }
+  &.table-striped {
+    tbody {
+      tr:nth-child(odd) {
+        background-color: $color-table-cell-bg-grey;
+      }
+      tr:nth-of-type(even) {
+        background-color: $color-white;
+      }
+    }
+  }
+}
+
 </style>

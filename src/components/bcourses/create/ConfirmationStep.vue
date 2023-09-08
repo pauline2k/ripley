@@ -21,7 +21,7 @@
         <v-container fluid>
           <v-row>
             <v-col class="pr-1" md="3">
-              <label for="siteName" class="right">
+              <label for="siteName" class="form-label">
                 Site Name:
               </label>
             </v-col>
@@ -41,7 +41,7 @@
           </v-row>
           <v-row>
             <v-col class="pr-1" md="3">
-              <label for="siteAbbreviation" class="right">Site Abbreviation:</label>
+              <label for="siteAbbreviation" class="form-label">Site Abbreviation:</label>
             </v-col>
             <v-col class="pl-0" md="6">
               <v-text-field
