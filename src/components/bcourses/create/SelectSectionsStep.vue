@@ -104,7 +104,6 @@
             <v-btn
               id="page-create-course-site-cancel"
               aria-label="Cancel and return to Site Creation Overview"
-              class="canvas-button"
               variant="text"
               @click="cancel"
             >
@@ -112,11 +111,10 @@
             </v-btn>
             <v-btn
               id="page-create-course-site-continue"
-              class="canvas-button canvas-button-primary"
-              type="button"
-              :disabled="!selectedSectionsList.length"
               aria-controls="page-create-course-site-steps-container"
               aria-label="Continue to next step"
+              color="primary"
+              :disabled="!selectedSectionsList.length"
               @click="showConfirmation"
             >
               Next

@@ -4,7 +4,8 @@
     <v-btn
       id="toggle-admin-mode-button"
       aria-controls="page-create-course-site-admin-section-loader-form"
-      class="canvas-button canvas-button-small page-create-course-site-admin-mode-switch pb-2 ptl-3 pr-2 pt-2"
+      class="page-create-course-site-admin-mode-switch pb-2 ptl-3 pr-2 pt-2"
+      color="primary"
       @click="setMode(adminMode === 'actAs' ? 'bySectionId' : 'actAs')"
     >
       Switch to {{ adminMode === 'actAs' ? 'Section ID input' : 'acting as instructor' }}
@@ -33,11 +34,10 @@
               <div>
                 <v-btn
                   id="sections-by-uid-button"
-                  type="submit"
-                  class="canvas-button canvas-button-primary"
-                  :disabled="!uid"
-                  aria-label="Load official sections for instructor"
                   aria-controls="page-create-course-site-steps-container"
+                  aria-label="Load official sections for instructor"
+                  color="primary"
+                  :disabled="!uid"
                 >
                   As instructor
                 </v-btn>
@@ -79,10 +79,9 @@
             </div>
             <v-btn
               id="sections-by-ids-button"
-              class="canvas-button canvas-button-primary"
               aria-controls="page-create-course-site-steps-container"
+              color="primary"
               :disabled="!trim(sectionIds)"
-              type="submit"
             >
               Review matching Section IDs
             </v-btn>

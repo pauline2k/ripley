@@ -105,7 +105,7 @@
                   id="add-user-submit-search-btn"
                   type="submit"
                   :disabled="!searchText"
-                  class="canvas-button canvas-button-primary w-100"
+                  class="w-100"
                   aria-label="Perform User Search"
                 >
                   Go
@@ -242,7 +242,7 @@
                 <div class="d-flex justify-end">
                   <v-btn
                     id="add-user-btn"
-                    class="canvas-button canvas-button-primary mx-1"
+                    class="mx-1"
                     :disabled="!selectedUser"
                     @click="submitUser"
                   >
@@ -250,7 +250,8 @@
                   </v-btn>
                   <v-btn
                     id="start-over-btn"
-                    class="canvas-button mx-1"
+                    class="mx-1"
+                    color="primary"
                     @click="resetForm"
                   >
                     Start Over

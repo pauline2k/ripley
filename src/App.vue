@@ -62,17 +62,6 @@ export default {
 .bg-white {
   background: $color-white;
 }
-.canvas-button {
-  background: $color-button-background !important;
-  border: 1px solid $color-button-border !important;
-  box-shadow: none !important;
-  font-family: $body-font-family;
-  font-size: 14px !important;
-  line-height: 20px;
-  overflow: hidden;
-  transition: background-color .2s ease-in-out 0s;
-}
-.canvas-button-primary,
 .canvas-application .page-roster .roster-search .button-blue {
   background: $color-button-primary-background !important;
   color: $color-button-primary-color !important;
