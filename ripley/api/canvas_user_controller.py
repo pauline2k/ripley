@@ -25,11 +25,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from flask import current_app as app, request
 from flask_login import login_required
-from ripley.api.errors import BadRequestError, ResourceNotFoundError
+from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required
 from ripley.externals import canvas
 from ripley.externals.data_loch import find_people_by_email, find_people_by_name, find_person_by_uid
-from ripley.lib.canvas_utils import get_grantable_roles
+from ripley.lib.canvas_utils import add_user_to_course_section, get_grantable_roles
 from ripley.lib.http import tolerant_jsonify
 
 
@@ -47,14 +47,30 @@ def get_add_user_options(canvas_site_id):
     })
 
 
-@app.route('/api/canvas_user/<canvas_site_id>/roles')
-def canvas_site_user_roles(canvas_site_id):
-    return tolerant_jsonify([])
-
-
-@app.route('/api/canvas_user/<canvas_site_id>/course_sections')
+@app.route('/api/canvas_user/<canvas_site_id>/users', methods=['POST'])
+@login_required
+@canvas_role_required('TaEnrollment', 'TeacherEnrollment', 'Lead TA')
 def canvas_site_add_user(canvas_site_id):
-    return tolerant_jsonify([])
+    course = canvas.get_course(canvas_site_id)
+    if not course:
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
+    params = request.get_json()
+    course_section_id = params.get('sectionId')
+    role = params.get('role')
+    uid = params.get('uid')
+    all_roles = {r.label: r for r in canvas.get_roles()}
+    role_id = getattr(all_roles[role], 'id', None)
+    if not role_id:
+        raise BadRequestError(f'Unknown role: {role}.')
+    enrollment = add_user_to_course_section(uid, role_id, course_section_id)
+    if enrollment:
+        return tolerant_jsonify({
+            'role': role,
+            'sectionId': str(enrollment.course_section_id),
+            'uid': uid,
+        })
+    else:
+        raise InternalServerError('Encountered a problem while trying to add a user.')
 
 
 @app.route('/api/canvas_user/search')
@@ -79,12 +95,14 @@ def search_users():
 
 def _campus_user_to_api_json(user):
     return {
-        'uid': user['ldap_uid'],
+        'affiliations': user['affiliations'],
+        'emailAddress': user['email_address'],
         'firstName': user['first_name'],
         'lastName': user['last_name'],
-        'emailAddress': user['email_address'],
-        'affiliations': user['affiliations'],
+        'resultCount': user['result_count'],
+        'rowNumber': user['row_number'],
         'type': user['person_type'],
+        'uid': user['ldap_uid'],
     }
 
 

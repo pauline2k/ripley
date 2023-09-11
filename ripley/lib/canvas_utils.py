@@ -36,10 +36,31 @@ from ripley.externals.s3 import upload_dated_csv
 from ripley.lib.berkeley_course import course_section_name, course_to_api_json, section_to_api_json, \
     sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
+from ripley.lib.calnet_utils import get_basic_attributes, roles_from_affiliations
 from ripley.lib.egrade_utils import convert_per_grading_basis, get_canvas_course_student_grades
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from rq.job import get_current_job
+
+
+def add_user_to_course_section(uid, role_id, course_section_id):
+    canvas_user = canvas.get_sis_user_profile(uid)
+    if not canvas_user:
+        import_users([uid])
+        canvas_user = canvas.get_sis_user_profile(uid)
+    if not canvas_user:
+        app.logger.warning(f'Unable to find or create Canvas user for UID={uid}')
+        return None
+    canvas_section = canvas.get_section(section_id=course_section_id, api_call=False, use_sis_id=True)
+    if not canvas_section:
+        app.logger.warning(f'No Canvas section found with course_section_id={course_section_id})')
+        return None
+    return canvas_section.enroll_user(
+        canvas_user['id'],
+        role_id=role_id,
+        enrollment_state='active',
+        notify=False,
+    )
 
 
 def create_canvas_project_site(name):
@@ -289,6 +310,32 @@ def get_teaching_terms(current_user=None, section_ids=None, sections=None, term_
             'termYear': term.year,
         }
     return [_term_courses(term_id, courses_by_id) for term_id, courses_by_id in courses_by_term.items()]
+
+
+def import_users(uids):
+    users = []
+    batch_size = 1000
+    for batch in [uids[i:i + batch_size] for i in range(0, len(uids), batch_size)]:
+        rows = get_basic_attributes(batch)
+        for uid, row in rows.items():
+            person_type = getattr(row, 'person_type', None)
+            if person_type == 'Z':
+                continue
+            user = {
+                'affiliations': row['affiliations'],
+                'email_address': row['email_address'],
+                'first_name': row['first_name'],
+                'last_name': row['last_name'],
+                'ldap_uid': uid,
+                'roles': roles_from_affiliations(row['affiliations']),
+                'sid': row['sid'],
+            }
+            if person_type != 'A' or any(item for item in ['student', 'staff', 'faculty', 'guest'] if user['roles'][item]):
+                users.append(csv_row_for_campus_user(user))
+    with SisImportCsv.create(['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) as users_csv:
+        users_csv.writerows(users)
+        users_csv.filehandle.close()
+        return canvas.post_sis_import(attachment=users_csv.tempfile.name)
 
 
 def _build_courses_by_term(teaching_sections, term_id, section_ids):

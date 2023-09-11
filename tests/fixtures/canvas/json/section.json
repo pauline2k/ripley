@@ -86,7 +86,7 @@
                     "current_grade": "B",
                     "final_grade": "A"
                 },
-                "id": 19986606,
+                "id": 19986608,
                 "last_activity_at": "2023-02-01T21:29:50Z",
                 "limit_privileges_to_course_section": false,
                 "role": "TaEnrollment",
@@ -118,7 +118,7 @@
                     "current_grade": "B+",
                     "final_grade": "A"
                 },
-                "id": 19986606,
+                "id": 19986608,
                 "last_activity_at": "2023-02-01T21:29:50Z",
                 "limit_privileges_to_course_section": false,
                 "role": "StudentEnrollment",
@@ -139,6 +139,43 @@
                 }
             }
         ],
+        "status_code": 200
+    },
+    "post_enrollments_10000": {
+        "method": "POST",
+        "endpoint": "sections/10000/enrollments",
+        "data": {
+            "associated_user_id": null,
+            "course_id": 8876542,
+            "course_section_id": 10000,
+            "created_at": "2013-08-22T21:27:20Z",
+            "enrollment_state": "active",
+            "grades": {
+                "current_score": null,
+                "final_score": 0.0,
+                "current_grade": null,
+                "final_grade": "F"
+            },
+            "id": 19986606,
+            "last_activity_at": "2023-02-01T21:29:50Z",
+            "limit_privileges_to_course_section": false,
+            "role": "StudentEnrollment",
+            "root_account_id": 1,
+            "sis_import_id": "10000001",
+            "sis_section_id": "SEC:2023-B-32936",
+            "sis_user_id": "30010000",
+            "type": "StudentEnrollment",
+            "updated_at": "2023-01-31T00:09:55Z",
+            "user_id": 2345678,
+            "user": {
+                "id": 2345678,
+                "name": "Ellen Ripley",
+                "short_name": "Ellen Ripley",
+                "sortable_name": "Ripley, Ellen",
+                "sis_user_id": "30010000",
+                "login_id": "10000"
+            }
+        },
         "status_code": 200
     }
 }

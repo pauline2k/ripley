@@ -25,9 +25,34 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import json
 from os import path
 
+from flask import current_app as app
 from ripley.externals import calnet
+from ripley.externals.data_loch import get_users
 from ripley.externals.redis import cache_dict_object, fetch_cached_dict_object
 from ripley.lib.util import safe_str
+
+
+def get_basic_attributes(uids=None):
+    # First, call out the CalNet snapshot in the data loch.
+    users_by_uid = {}
+    remaining_uids = set(u for u in uids if u) if uids else None
+    for r in get_users(remaining_uids) if remaining_uids else []:
+        if remaining_uids:
+            remaining_uids.discard(r['ldap_uid'])
+        if (
+            r['person_type'] != 'A'
+            or 'STUDENT-TYPE-REGISTERED' in r['affiliations']
+            or 'STUDENT-TYPE-NOT REGISTERED' in r['affiliations']
+            or 'EMPLOYEE-TYPE' in r['affiliations']
+            or 'GUEST-TYPE' in r['affiliations']
+        ):
+            users_by_uid[r['ldap_uid']] = r
+    # If we've been given a specific set of UIDs to look for, then we can do a follow-up-call to LDAP for anyone the
+    # snapshot didn't capture.
+    if remaining_uids:
+        ldap_users_by_uid = {u['ldap_uid']: u for u in get_calnet_attributes_for_uids(app, remaining_uids)}
+        users_by_uid.update(ldap_users_by_uid)
+    return users_by_uid
 
 
 def get_calnet_attributes_for_uids(app, uids):

@@ -84,9 +84,9 @@
               <v-col cols="12" md="6" class="my-1">
                 <v-row no-gutters>
                   <v-col class="d-none d-sm-none d-md-flex justify-end align-center" md="2">
-                    <label for="search-type" class="mt-0"><span class="sr-only">Search </span>By:</label>
+                    <label for="search-type" class="mt-0 pr-3"><span class="sr-only">Search </span>By:</label>
                   </v-col>
-                  <v-col md="10" class="pr-md-8">
+                  <v-col md="10" class="pr-md-4">
                     <select
                       id="search-type"
                       v-model="searchType"
@@ -103,6 +103,7 @@
               <v-col cols="12" md="2" class="column-align-center my-1">
                 <v-btn
                   id="add-user-submit-search-btn"
+                  color="primary"
                   type="submit"
                   :disabled="!searchText"
                   class="w-100"
@@ -243,6 +244,7 @@
                   <v-btn
                     id="add-user-btn"
                     class="mx-1"
+                    color="primary"
                     :disabled="!selectedUser"
                     @click="submitUser"
                   >
@@ -251,7 +253,6 @@
                   <v-btn
                     id="start-over-btn"
                     class="mx-1"
-                    color="primary"
                     @click="resetForm"
                   >
                     Start Over

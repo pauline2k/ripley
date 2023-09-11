@@ -335,11 +335,13 @@ def find_people_by_email(search_string):
     params = {
         'email': f'%{search_string.strip().lower()}%',
     }
-    sql = f"""SELECT DISTINCT ldap_uid, sid, first_name, TRIM(last_name) AS last_name, email_address, affiliations, person_type
+    sql = f"""SELECT ldap_uid, sid, first_name, TRIM(last_name) AS last_name, email_address, affiliations,
+                person_type, row_number() OVER(ORDER BY 1) row_number, COUNT(*) OVER() result_count
             FROM sis_data.{_basic_attributes_table()}
             WHERE LOWER(email_address) LIKE %(email)s
             AND (affiliations LIKE '%%-TYPE-%%') AND person_type NOT IN ('A', 'Z')
             ORDER BY TRIM(last_name)
+            LIMIT 20
         """
     return safe_execute_rds(sql, **params)
 
@@ -350,11 +352,13 @@ def find_people_by_name(search_string):
     params = {
         'name': f'{names_string}%',
     }
-    sql = f"""SELECT DISTINCT ldap_uid, sid, first_name, TRIM(last_name) AS last_name, email_address, affiliations, person_type
+    sql = f"""SELECT ldap_uid, sid, first_name, TRIM(last_name) AS last_name, email_address, affiliations,
+                person_type, row_number() OVER(ORDER BY 1) row_number, COUNT(*) OVER() result_count
             FROM sis_data.{_basic_attributes_table()}
             WHERE LOWER(CONCAT(CONCAT(TRIM(last_name), ','), TRIM(first_name))) LIKE %(name)s
             AND (affiliations LIKE '%%-TYPE-%%') AND person_type NOT IN ('A', 'Z')
             ORDER BY TRIM(last_name)
+            LIMIT 20
         """
     return safe_execute_rds(sql, **params)
 
@@ -363,11 +367,11 @@ def find_person_by_uid(uid):
     params = {
         'uid': uid,
     }
-    sql = f"""SELECT DISTINCT ldap_uid, sid, first_name, TRIM(last_name) AS last_name, email_address, affiliations, person_type
+    sql = f"""SELECT DISTINCT ldap_uid, sid, first_name, TRIM(last_name) AS last_name, email_address, affiliations,
+            person_type, 1 AS row_number, 1 AS result_count
             FROM sis_data.{_basic_attributes_table()}
             WHERE ldap_uid = %(uid)s
             AND (affiliations LIKE '%%-TYPE-%%') AND person_type NOT IN ('A', 'Z')
-            ORDER BY TRIM(last_name)
         """
     return safe_execute_rds(sql, **params)
 
