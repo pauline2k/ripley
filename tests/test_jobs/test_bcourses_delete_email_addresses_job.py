@@ -43,8 +43,8 @@ class TestBcoursesDeleteEmailAddressesJob:
             BcoursesDeleteEmailAddressesJob(app)._run()
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
 
-    @mock.patch('ripley.lib.canvas_site_provisioning.get_calnet_attributes_for_uids')
-    @mock.patch('ripley.lib.canvas_site_provisioning.get_users')
+    @mock.patch('ripley.lib.calnet_utils.get_calnet_attributes_for_uids')
+    @mock.patch('ripley.lib.calnet_utils.get_users')
     def test_vanishing_user(self, mock_loch_users, mock_calnet_users, app, loch_campus_users):
         with setup_bcourses_refresh_job(app) as (s3, m):
             ash = next(u for u in loch_campus_users if u['ldap_uid'] == '30000')

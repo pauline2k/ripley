@@ -27,35 +27,12 @@ from operator import itemgetter
 
 from flask import current_app as app
 from ripley.externals.data_loch import get_edo_enrollment_updates, get_edo_instructor_updates, get_section_enrollments, \
-    get_section_instructors, get_sections, get_users
+    get_section_instructors, get_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.calnet_utils import get_calnet_attributes_for_uids
+from ripley.lib.calnet_utils import get_basic_attributes
 from ripley.lib.canvas_utils import csv_formatted_course_role, csv_row_for_campus_user, parse_canvas_sis_section_id, \
     sis_enrollment_status_to_canvas_course_role, user_id_from_attributes
 from ripley.models.canvas_synchronization import CanvasSynchronization
-
-
-def get_basic_attributes(uids=None):
-    # First, call out the CalNet snapshot in the data loch.
-    users_by_uid = {}
-    remaining_uids = set(u for u in uids if u) if uids else None
-    for r in get_users(remaining_uids) if remaining_uids else []:
-        if remaining_uids:
-            remaining_uids.discard(r['ldap_uid'])
-        if (
-            r['person_type'] != 'A'
-            or 'STUDENT-TYPE-REGISTERED' in r['affiliations']
-            or 'STUDENT-TYPE-NOT REGISTERED' in r['affiliations']
-            or 'EMPLOYEE-TYPE' in r['affiliations']
-            or 'GUEST-TYPE' in r['affiliations']
-        ):
-            users_by_uid[r['ldap_uid']] = r
-    # If we've been given a specific set of UIDs to look for, then we can do a follow-up-call to LDAP for anyone the
-    # snapshot didn't capture.
-    if remaining_uids:
-        ldap_users_by_uid = {u['ldap_uid']: u for u in get_calnet_attributes_for_uids(app, remaining_uids)}
-        users_by_uid.update(ldap_users_by_uid)
-    return users_by_uid
 
 
 def initialize_recent_updates(sis_term_ids, uids_for_updates):

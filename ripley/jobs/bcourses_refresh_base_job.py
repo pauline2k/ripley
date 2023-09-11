@@ -39,7 +39,8 @@ from ripley.externals.data_loch import get_sections_count
 from ripley.externals.s3 import find_all_dated_csvs, find_last_dated_csv, find_last_dated_csvs, stream_object_text, upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_site_provisioning import get_basic_attributes, initialize_recent_updates, process_course_enrollments
+from ripley.lib.calnet_utils import get_basic_attributes
+from ripley.lib.canvas_site_provisioning import initialize_recent_updates, process_course_enrollments
 from ripley.lib.canvas_utils import api_formatted_course_role, csv_row_for_campus_user, format_term_enrollments_export, \
     parse_canvas_sis_section_id, uid_from_canvas_login_id, user_id_from_attributes
 from ripley.lib.sis_import_csv import SisImportCsv
