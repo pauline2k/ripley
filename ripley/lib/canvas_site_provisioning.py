@@ -35,14 +35,6 @@ from ripley.lib.canvas_utils import csv_formatted_course_role, csv_row_for_campu
 from ripley.models.canvas_synchronization import CanvasSynchronization
 
 
-def get_canvas_csv_row(uid):
-    user_results = get_basic_attributes([uid])
-    if len(user_results):
-        return csv_row_for_campus_user(next(iter(user_results.values())))
-    else:
-        return {}
-
-
 def get_basic_attributes(uids=None):
     # First, call out the CalNet snapshot in the data loch.
     users_by_uid = {}
@@ -118,11 +110,30 @@ def process_course_enrollments(
         section_id, berkeley_term = parse_canvas_sis_section_id(sis_section_id)
         section_instructor_updates = instructor_updates.get(sis_term_id, {}).get(section_id, [])
         section_enrollment_updates = enrollment_updates.get(sis_term_id, {}).get(section_id, [])
-        process_section_enrollments(sis_term_id, sis_course_id, sis_section_id, existing_term_enrollments, section_instructor_updates,
-                                    section_enrollment_updates, sis_user_id_changes, csv_set, primary_sections, known_users, is_incremental)
+        _process_section_enrollments(
+            sis_term_id,
+            sis_course_id,
+            sis_section_id,
+            existing_term_enrollments,
+            section_instructor_updates,
+            section_enrollment_updates,
+            sis_user_id_changes,
+            csv_set,
+            primary_sections,
+            known_users,
+            is_incremental,
+        )
 
 
-def process_section_enrollments(
+def _get_canvas_csv_row(uid):
+    user_results = get_basic_attributes([uid])
+    if len(user_results):
+        return csv_row_for_campus_user(next(iter(user_results.values())))
+    else:
+        return {}
+
+
+def _process_section_enrollments(
     sis_term_id,
     sis_course_id,
     sis_section_id,
@@ -148,16 +159,41 @@ def process_section_enrollments(
             or ldap_uid in [r['ldap_uid'] for r in section_enrollment_updates]
         ):
             existing_section_enrollments[ldap_uid] = list(rows)
-    process_student_enrollments(sis_term_id, sis_course_id, sis_section_id, section_enrollment_updates, csv_set, existing_section_enrollments,
-                                known_users, is_incremental)
-    process_instructor_enrollments(sis_term_id, sis_course_id, sis_section_id, primary_sections, section_instructor_updates, csv_set,
-                                   existing_section_enrollments, known_users, is_incremental)
+    _process_student_enrollments(
+        sis_term_id,
+        sis_course_id,
+        sis_section_id,
+        section_enrollment_updates,
+        csv_set,
+        existing_section_enrollments,
+        known_users,
+        is_incremental,
+    )
+    _process_instructor_enrollments(
+        sis_term_id,
+        sis_course_id,
+        sis_section_id,
+        primary_sections,
+        section_instructor_updates,
+        csv_set,
+        existing_section_enrollments,
+        known_users,
+        is_incremental,
+    )
     # Remove existing enrollments not found in SIS
     for ldap_uid, enrollment_rows in existing_section_enrollments.items():
-        process_missing_enrollments(sis_term_id, sis_course_id, sis_section_id, ldap_uid, sis_user_id_changes, csv_set, enrollment_rows)
+        _process_missing_enrollments(
+            sis_term_id,
+            sis_course_id,
+            sis_section_id,
+            ldap_uid,
+            sis_user_id_changes,
+            csv_set,
+            enrollment_rows,
+        )
 
 
-def process_student_enrollments(
+def _process_student_enrollments(
     sis_term_id,
     sis_course_id,
     sis_section_id,
@@ -182,11 +218,19 @@ def process_student_enrollments(
     for enrollment_row in enrollment_rows:
         course_role = sis_enrollment_status_to_canvas_course_role(enrollment_row['sis_enrollment_status'])
         if course_role and enrollment_row['ldap_uid']:
-            process_section_enrollment(sis_term_id, sis_course_id, sis_section_id, enrollment_row['ldap_uid'], course_role, csv_set,
-                                       existing_section_enrollments, known_users)
+            _process_section_enrollment(
+                sis_term_id,
+                sis_course_id,
+                sis_section_id,
+                enrollment_row['ldap_uid'],
+                course_role,
+                csv_set,
+                existing_section_enrollments,
+                known_users,
+            )
 
 
-def process_instructor_enrollments(
+def _process_instructor_enrollments(
     sis_term_id,
     sis_course_id,
     sis_section_id,
@@ -206,11 +250,19 @@ def process_instructor_enrollments(
     for instructor_row in instructor_rows:
         course_role = _determine_instructor_role(sis_section_id, primary_sections, instructor_row['instructor_role_code'])
         if course_role and instructor_row['instructor_uid']:
-            process_section_enrollment(sis_term_id, sis_course_id, sis_section_id, instructor_row['instructor_uid'], course_role, csv_set,
-                                       existing_section_enrollments, known_users)
+            _process_section_enrollment(
+                sis_term_id,
+                sis_course_id,
+                sis_section_id,
+                instructor_row['instructor_uid'],
+                course_role,
+                csv_set,
+                existing_section_enrollments,
+                known_users,
+            )
 
 
-def process_section_enrollment(sis_term_id, sis_course_id, sis_section_id, ldap_uid, course_role, csv_set, existing_enrollments, known_users):
+def _process_section_enrollment(sis_term_id, sis_course_id, sis_section_id, ldap_uid, course_role, csv_set, existing_enrollments, known_users):
     enrollment_csv = csv_set.enrollment_terms[sis_term_id]
     existing_user_enrollments = existing_enrollments.get(str(ldap_uid), None)
     if existing_user_enrollments:
@@ -228,7 +280,7 @@ def process_section_enrollment(sis_term_id, sis_course_id, sis_section_id, ldap_
     elif 'users' in csv_set._fields:
         _add_user_if_new(ldap_uid, known_users, csv_set.users)
 
-    sis_user_id = known_users.get(str(ldap_uid), None) or get_canvas_csv_row(ldap_uid).get('user_id', None)
+    sis_user_id = known_users.get(str(ldap_uid), None) or _get_canvas_csv_row(ldap_uid).get('user_id', None)
     if sis_user_id:
         app.logger.info(f'Adding UID {ldap_uid} to section {sis_section_id} with role {course_role}')
         enrollment_csv.writerow({
@@ -240,7 +292,7 @@ def process_section_enrollment(sis_term_id, sis_course_id, sis_section_id, ldap_
         })
 
 
-def process_missing_enrollments(sis_term_id, sis_course_id, sis_section_id, ldap_uid, sis_user_id_changes, csv_set, enrollment_rows):
+def _process_missing_enrollments(sis_term_id, sis_course_id, sis_section_id, ldap_uid, sis_user_id_changes, csv_set, enrollment_rows):
     enrollment_csv = csv_set.enrollment_terms[sis_term_id]
     for enrollment in enrollment_rows:
         # Only look at enrollments which are active and were due to an SIS import.
@@ -259,7 +311,7 @@ def process_missing_enrollments(sis_term_id, sis_course_id, sis_section_id, ldap
 
 def _add_user_if_new(uid, known_users, users_csv):
     if not known_users.get(str(uid), None):
-        csv_row = get_canvas_csv_row(uid)
+        csv_row = _get_canvas_csv_row(uid)
         if csv_row:
             known_users[str(uid)] = csv_row['user_id']
             app.logger.debug(f"Adding new user (uid={uid}, sis id={csv_row['user_id']}")

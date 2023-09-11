@@ -19,7 +19,7 @@
             required
             placeholder="Enter a name for your site"
             variant="outlined"
-            @keydown.enter="createProjectSite"
+            @keydown.enter="create"
           />
         </div>
       </div>
@@ -43,6 +43,7 @@
           class="mr-2"
           color="primary"
           :disabled="isCreating || !trim(name)"
+          @click="create"
         >
           <span v-if="!isCreating">Create a Project Site</span>
           <span v-if="isCreating">
@@ -82,7 +83,7 @@ export default {
     cancel() {
       this.$router.push({path: '/create_site'})
     },
-    createProjectSite() {
+    create() {
       this.isCreating = true
       this.$announcer.polite('Creating new project site...')
       createProjectSite(this.name).then(data => {
