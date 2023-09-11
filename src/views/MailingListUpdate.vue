@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="canvas-application page-site-mailing-list">
+  <div v-if="!isLoading" class="page-site-mailing-list">
     <h1 id="page-header" tabindex="-1">Update Mailing List</h1>
     <v-alert
       v-if="!hasUpdatedSincePageLoad"

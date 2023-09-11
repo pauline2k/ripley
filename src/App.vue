@@ -62,24 +62,6 @@ export default {
 .bg-white {
   background: $color-white;
 }
-.canvas-application .page-roster .roster-search .button-blue {
-  background: $color-button-primary-background !important;
-  color: $color-button-primary-color !important;
-  &:hover, &:active, &:focus {
-    background: $color-button-primary-hover-background !important;
-    border-color: $color-button-primary-border !important;
-    box-shadow: none !important;
-    color: $color-button-primary-color !important;
-  }
-  &[disabled] {
-    color: $color-button-primary-color !important;
-  }
-}
-.canvas-form {
-  background: $color-white-smoke !important;
-  border: 1px solid $color-whisper !important;
-  padding: 10px 5px !important;
-}
 form {
   .validation-messages {
     color: $color-harley-davidson-orange;
@@ -169,9 +151,6 @@ form {
   line-height: 20px;
   margin: 4px 0;
 }
-.required-field-indicator {
-  color: $color-harley-davidson-orange;
-}
 a {
   color: $primary-color;
   text-decoration: none;
@@ -258,5 +237,4 @@ table {
     }
   }
 }
-
 </style>

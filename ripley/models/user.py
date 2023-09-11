@@ -63,6 +63,14 @@ class User(UserMixin):
                 """
 
     @property
+    def can_create_canvas_course_site(self):
+        return self.is_admin or self.is_canvas_admin or self.is_current_campus_instructor()
+
+    @property
+    def can_create_canvas_project_site(self):
+        return self.is_admin or self.is_canvas_admin or self.is_faculty or self.is_staff
+
+    @property
     def canvas_masquerading_user_id(self):
         return self.__canvas_masquerading_user_id
 
@@ -142,12 +150,6 @@ class User(UserMixin):
 
     def to_api_json(self):
         return self.user
-
-    def can_create_canvas_course_site(self):
-        return self.is_admin or self.is_canvas_admin or self.is_current_campus_instructor()
-
-    def can_create_canvas_project_site(self):
-        return self.is_admin or self.is_canvas_admin or self.is_faculty or self.is_staff
 
     def is_current_campus_instructor(self):
         current_term_ids = [t.to_sis_term_id() for t in BerkeleyTerm.get_current_terms().values()]

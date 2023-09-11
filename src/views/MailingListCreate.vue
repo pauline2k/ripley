@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="canvas-application mx-10 my-5">
+  <div v-if="!isLoading" class="mx-10 my-5">
     <h1 id="page-header" class="my-3" tabindex="-1">Create Mailing List</h1>
     <v-alert
       v-if="!error && !success"

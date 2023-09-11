@@ -1,10 +1,10 @@
 <template>
-  <div v-if="!isLoading" class="canvas-application page-user-provision">
+  <div v-if="!isLoading" class="page-user-provision">
     <h1 id="page-header" class="page-user-provision-heading">Add Users to bCourses</h1>
     <form
       v-if="currentUser.isAdmin"
       id="user-import-form"
-      class="canvas-form pr-16"
+      class="pr-16"
       name="userImportForm"
       @submit.prevent="onSubmit"
     >

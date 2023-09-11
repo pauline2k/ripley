@@ -1,5 +1,5 @@
 <template>
-  <div class="canvas-application page-create-course-site pl-5 pr-5 pt-3 pb-3">
+  <div class="page-create-course-site pl-5 pr-5 pt-3 pb-3">
     <div v-if="!isLoading && !displayError" class="accessibility-no-outline">
       <div class="d-flex flex-column pt-3">
         <div>
@@ -70,7 +70,7 @@
         </div>
       </div>
     </div>
-    <div v-if="displayError" class="alert-container pt-5">
+    <div v-if="displayError" class="pt-5">
       <CanvasErrors :message="displayError" />
     </div>
   </div>
