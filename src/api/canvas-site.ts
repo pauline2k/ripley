@@ -46,7 +46,7 @@ export function courseCreate(
 }
 
 export function createProjectSite(name: string) {
-  return utils.post('/api/canvas_site/project_provision/create',{name})
+  return utils.post('/api/canvas_site/project_site/create',{name})
 }
 
 export function courseProvisionJobStatus(jobId: number) {

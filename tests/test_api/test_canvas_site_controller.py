@@ -360,6 +360,25 @@ class TestCanvasSiteProvisionSections:
             assert course['slug'] == 'astron-218-2023-B'
 
 
+class TestCreateProjectSite:
+
+    @classmethod
+    def _api_create_project_site(cls, client, name, expected_status_code=200):
+        response = client.post(
+            '/api/canvas_site/project_site/create',
+            data=json.dumps({'name': name}),
+            content_type='application/json',
+        )
+        assert response.status_code == expected_status_code
+        return response.json
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        self._api_create_project_site(client, 'Sorry Charlie', expected_status_code=401)
+
+    # TODO: More test coverage, please.
+
+
 class TestGetRoster:
 
     def test_anonymous(self, client):

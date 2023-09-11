@@ -31,11 +31,12 @@ from ripley.externals import canvas, data_loch
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_course import sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, get_official_sections, \
-    get_teaching_terms, provision_course_site, update_canvas_sections
+from ripley.lib.canvas_utils import canvas_section_to_api_json, canvas_site_to_api_json, create_canvas_project_site, \
+    get_official_sections, get_teaching_terms, provision_course_site, update_canvas_sections
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
-from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, get_grade_distribution_with_enrollments
+from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, \
+    get_grade_distribution_with_enrollments
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
 
@@ -83,8 +84,11 @@ def get_canvas_site(canvas_site_id):
 @app.route('/api/canvas_site/project_site/create', methods=['POST'])
 def create_project_site():
     if current_user.is_authenticated and current_user.can_create_canvas_project_site:
-        # TODO: Create a project site!
-        return tolerant_jsonify({})
+        params = request.get_json()
+        name = (params.get('name', None) or '').strip()
+        if not name or len(name) > 255:
+            raise BadRequestError(f"'Invalid project site name: '{name}'")
+        return tolerant_jsonify(create_canvas_project_site(name))
     else:
         app.logger.warning(f'Unauthorized request to {request.path}')
         return app.login_manager.unauthorized()

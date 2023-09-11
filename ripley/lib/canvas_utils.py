@@ -42,6 +42,57 @@ from ripley.lib.util import utc_now
 from rq.job import get_current_job
 
 
+def create_canvas_project_site(name):
+    account_id = app.config['CANVAS_BERKELEY_ACCOUNT_ID']
+    term_id = app.config['CANVAS_PROJECTS_TERM_ID']
+    project_site = canvas.get_account(account_id, api_call=False).create_course(
+        course_code=name,
+        name=name,
+        sis_course_id=f'PROJ:{secrets.token_hex(8).upper()}',
+        term_id=term_id,
+    )
+    # TODO: Ripley wants the logic below.
+    #
+    #    site_id = course_details['id']
+    #    response = Canvas::CourseCopyImport.new(canvas_course_id: site_id).import_course_template(template_id)
+    #    if (import_status = response[:body]) && import_status['workflow_state'] != 'completed'
+    #      progress_id = import_status['progress_url'].split('/').last
+    #      import_start_time = Time.now.to_i
+    #    end
+    #
+    #    tabs_worker = Canvas::ExternalTools.new(canvas_course_id: site_id)
+    #    if (conferences_tab = tabs_worker.course_site_tab_list.find { |t| t['label'].start_with?('BigBlueButton') })
+    #      # Tab modification API calls seem to stick better if we give them a moment's breather after site creation.
+    #      sleep 5
+    #      tabs_worker.hide_course_site_tab(conferences_tab)
+    #    end
+    #
+    #    enrollment = CanvasLti::CourseAddUser.new(user_id: @uid, canvas_course_id: site_id).add_user_to_course(@uid, 'Owner')
+    #
+    #    if progress_id
+    #      import_state = 'new'
+    #      15.times do
+    #        response = Canvas::Progress.new(progress_id: progress_id).get_progress
+    #        import_state = response[:body] && response[:body]['workflow_state']
+    #        break if !import_state || import_state == 'completed'
+    #        sleep 1
+    #      end
+    #      elapsed_time = Time.now.to_i - import_start_time
+    #      if import_state == 'completed'
+    #        logger.warn("Project site #{site_id} template import completed after #{elapsed_time} seconds")
+    #      else
+    #        logger.warn("Project site #{site_id} template import not completed after #{elapsed_time} seconds")
+    #      end
+    #    end
+    #
+    #    return {
+    #      projectSiteId: site_id,
+    #      projectSiteUrl: "#{Settings.canvas_proxy.url_root}/courses/#{site_id}",
+    #      enrollment_id: enrollment['id']
+    #    }
+    return project_site
+
+
 def get_canvas_course_id(course_slug):
     base_course_id = f'CRS:{course_slug.upper()}'
     course_id = base_course_id
