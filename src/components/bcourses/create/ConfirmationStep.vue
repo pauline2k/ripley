@@ -61,10 +61,9 @@
           <div>
             <v-btn
               id="create-course-site-button"
-              type="submit"
               aria-controls="page-create-course-site-steps-container"
               aria-label="Create Course Site"
-              class="canvas-button canvas-button-primary"
+              color="primary"
               :disabled="!trim(siteName) || !trim(siteAbbreviation)"
             >
               Create Course Site
@@ -73,7 +72,6 @@
           <div class="pr-2">
             <v-btn
               id="go-back-button"
-              class="canvas-button"
               @click="goBack"
             >
               Go Back

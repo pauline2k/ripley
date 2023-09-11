@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="canvas-application mx-10 my-5">
+  <div v-if="!isLoading" class="mx-10 my-5">
     <h1>Create a Site</h1>
     <v-container class="ml-4" fluid>
       <v-row class="ml-8" no-gutters>

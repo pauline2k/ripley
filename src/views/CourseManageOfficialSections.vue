@@ -33,7 +33,8 @@
               <v-btn
                 v-if="canvasSite.canEdit"
                 id="official-sections-edit-btn"
-                class="canvas-button canvas-button-primary canvas-no-decoration text-no-wrap"
+                class="canvas-no-decoration text-no-wrap"
+                color="primary"
                 @click="changeWorkflowStep('staging')"
               >
                 Edit Sections
@@ -62,7 +63,7 @@
             <div class="mb-2 ml-auto">
               <v-btn
                 id="official-sections-cancel-btn"
-                class="canvas-button mx-1"
+                class="mx-1"
                 aria-label="Cancel section modifications for this course site"
                 @click="cancel"
               >
@@ -70,9 +71,10 @@
               </v-btn>
               <v-btn
                 id="official-sections-save-btn"
-                class="canvas-button canvas-button-primary text-no-wrap"
-                :disabled="totalStagedCount === 0"
                 aria-label="Apply pending modifications to this course site"
+                class="text-no-wrap"
+                color="primary"
+                :disabled="totalStagedCount === 0"
                 @click="saveChanges"
               >
                 Save Changes
@@ -96,17 +98,18 @@
             <v-col md="12" class="text-right">
               <v-btn
                 id="official-sections-secondary-cancel-btn"
-                class="canvas-button mx-1"
                 aria-label="Cancel section modifications for this course site"
+                class="mx-1"
                 @click="cancel"
               >
                 Cancel
               </v-btn>
               <v-btn
                 id="official-sections-secondary-save-btn"
-                :disabled="totalStagedCount === 0"
-                class="canvas-button canvas-button-primary text-no-wrap"
                 aria-label="Apply pending modifications to this course site"
+                :disabled="totalStagedCount === 0"
+                class="text-no-wrap"
+                color="primary"
                 @click="saveChanges"
               >
                 Save Changes

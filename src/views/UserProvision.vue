@@ -53,8 +53,8 @@
           <div class="d-flex flex-wrap">
             <v-btn
               id="user-provision-import-btn"
-              type="submit"
-              class="canvas-button canvas-button-primary text-no-wrap mr-4 my-2"
+              class="text-no-wrap mr-4 my-2"
+              color="primary"
               :disabled="importButtonDisabled"
             >
               <span v-if="!importProcessing">Import Users</span>
