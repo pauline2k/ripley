@@ -46,8 +46,8 @@ def get_external_tools():
 def get_authorizations():
     return tolerant_jsonify({
         'authorizations': {
-            'canCreateCourseSite': current_user.can_create_canvas_course_site(),
-            'canCreateProjectSite': current_user.can_create_canvas_project_site(),
+            'canCreateCourseSite': current_user.can_create_canvas_course_site,
+            'canCreateProjectSite': current_user.can_create_canvas_project_site,
         },
     })
 
@@ -60,7 +60,7 @@ def can_user_create_site():
     if canvas_user_id:
         user = User.from_canvas_user_id(canvas_user_id)
         if user:
-            can_create = user.can_create_canvas_project_site() or user.can_create_canvas_course_site()
+            can_create = user.can_create_canvas_project_site or user.can_create_canvas_course_site
     return tolerant_jsonify({'canCreateSite': can_create})
 
 

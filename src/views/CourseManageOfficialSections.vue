@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="canvas-application page-course-official-sections">
+  <div v-if="!isLoading" class="page-course-official-sections">
     <div v-if="feedFetched && !displayError">
       <div v-if="currentWorkflowStep === 'staging'">
         <MaintenanceNotice course-action-verb="site is updated" />
@@ -209,9 +209,9 @@
         </div>
       </div>
     </div>
-    <div v-if="displayError" class="alert-container" role="alert">
+    <div v-if="displayError" role="alert">
       <i class="fa fa-warning canvas-notice-icon"></i>
-      <div class="notice-text-container">
+      <div>
         <h1 id="notice-text-header" class="notice-text-header">Error</h1>
         <p>{{ displayError }}</p>
       </div>

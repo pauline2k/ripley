@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="canvas-application pa-5">
+  <div v-if="!isLoading" class="pa-5">
     <h1 id="page-header" tabindex="-1">Manage Mailing Lists</h1>
     <v-alert
       v-if="error"

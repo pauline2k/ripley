@@ -1,56 +1,60 @@
 <template>
-  <div class="canvas-application">
-    <div v-if="!isLoading && !error">
-      <h1>Create a Project Site</h1>
-      <form class="bg-transparent border-0 canvas-form" @submit.prevent="createProjectSite">
-        <v-container>
-          <v-row>
-            <v-col class="float-right" sm="3">
-              <label for="page-create-project-site-name">Project Site Name</label>
-            </v-col>
-            <v-col class="pl-0 pt-2" sm="9">
-              <v-text-field
-                id="page-create-project-site-name"
-                v-model="name"
-                class="w-50"
-                :disabled="isCreating"
-                placeholder="Enter a name for your site"
-              />
-            </v-col>
-          </v-row>
-        </v-container>
-        <div class="d-flex justify-end mt-4">
-          <v-btn
-            id="create-project-site-button"
-            aria-controls="page-reader-alert"
-            class="mr-2"
-            color="primary"
-            :disabled="isCreating || !trim(name)"
-          >
-            <span v-if="!isCreating">Create a Project Site</span>
-            <span v-if="isCreating">
-              <v-progress-circular
-                class="mr-2"
-                color="primary"
-                indeterminate
-              />
-              Creating...
-            </span>
-          </v-btn>
-          <v-btn
-            id="cancel-and-return-to-site-creation"
-            type="button"
-            aria-label="Cancel and return to Site Creation Overview"
-            variant="link"
-            @click="cancel"
-          >
-            Cancel
-          </v-btn>
+  <div class="mx-10 my-5">
+    <h1>Create a Project Site</h1>
+    <div v-if="!isLoading">
+      <CanvasErrors v-if="error" :message="error" />
+      <div class="align-center d-flex justify-center pb-8 pt-4">
+        <div class="pr-3">
+          <label for="page-create-project-site-name" class="font-weight-medium text-subtitle-1">Project Site Name</label>
         </div>
-      </form>
-    </div>
-    <div v-if="error" class="alert-container">
-      <CanvasErrors :message="error" />
+        <div class="w-50">
+          <v-text-field
+            id="page-create-project-site-name"
+            v-model="name"
+            class="w-100"
+            density="comfortable"
+            :disabled="isCreating"
+            hide-details
+            maxlength="50"
+            required
+            placeholder="Enter a name for your site"
+            variant="outlined"
+            @keydown.enter="createProjectSite"
+          />
+        </div>
+      </div>
+      <div class="pb-8 pr-2">
+        <v-divider />
+      </div>
+      <div class="d-flex justify-end">
+        <v-btn
+          id="cancel-and-return-to-site-creation"
+          aria-label="Cancel and return to Site Creation Overview"
+          class="mx-1"
+          type="button"
+          variant="text"
+          @click="cancel"
+        >
+          Cancel
+        </v-btn>
+        <v-btn
+          id="create-project-site-button"
+          aria-controls="page-reader-alert"
+          class="mr-2"
+          color="primary"
+          :disabled="isCreating || !trim(name)"
+        >
+          <span v-if="!isCreating">Create a Project Site</span>
+          <span v-if="isCreating">
+            <v-progress-circular
+              class="mr-2"
+              color="primary"
+              indeterminate
+            />
+            Creating...
+          </span>
+        </v-btn>
+      </div>
     </div>
   </div>
 </template>
@@ -76,8 +80,7 @@ export default {
   },
   methods: {
     cancel() {
-      const path = this.$isInIframe ? '/lti/create_site' : '/create_site'
-      this.$router.push({path})
+      this.$router.push({path: '/create_site'})
     },
     createProjectSite() {
       this.isCreating = true

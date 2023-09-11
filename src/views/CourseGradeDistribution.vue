@@ -1,5 +1,5 @@
 <template>
-  <div class="canvas-application pa-5">
+  <div class="pa-5">
     <div v-if="!isLoading">
       <h1 id="page-header" tabindex="-1">Grade Distribution</h1>
       <div v-if="get(gradeDistribution, 'demographics')" class="container mb-4">

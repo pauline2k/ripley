@@ -41,7 +41,7 @@ from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
 @app.route('/api/canvas_site/provision')
 def canvas_site_provision():
-    if not current_user.is_authenticated or not current_user.can_create_canvas_course_site():
+    if not current_user.is_authenticated or not current_user.can_create_canvas_course_site:
         app.logger.warning(f'Unauthorized request to {request.path}')
         return app.login_manager.unauthorized()
 
@@ -80,9 +80,19 @@ def get_canvas_site(canvas_site_id):
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
 
 
+@app.route('/api/canvas_site/project_site/create', methods=['POST'])
+def create_project_site():
+    if current_user.is_authenticated and current_user.can_create_canvas_project_site:
+        # TODO: Create a project site!
+        return tolerant_jsonify({})
+    else:
+        app.logger.warning(f'Unauthorized request to {request.path}')
+        return app.login_manager.unauthorized()
+
+
 @app.route('/api/canvas_site/provision/create', methods=['POST'])
 def create_course_site():
-    if not current_user.is_authenticated or not current_user.can_create_canvas_course_site():
+    if not current_user.is_authenticated or not current_user.can_create_canvas_course_site:
         app.logger.warning(f'Unauthorized request to {request.path}')
         return app.login_manager.unauthorized()
 

@@ -67,7 +67,7 @@ def canvas_role_required(*roles):
 def canvas_site_creation_required(func):
     @wraps(func)
     def _canvas_site_creation_required(*args, **kw):
-        if current_user and (current_user.can_create_canvas_project_site() or current_user.can_create_canvas_course_site()):
+        if current_user and (current_user.can_create_canvas_project_site or current_user.can_create_canvas_course_site):
             return func(*args, **kw)
         else:
             app.logger.warning(f'Unauthorized request to {request.path}')

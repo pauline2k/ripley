@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="canvas-application">
+  <div v-if="!isLoading">
     <div v-if="appState === 'error'">
       <v-alert
         v-if="error"

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="canvas-application page-course-add-user">
+  <div v-if="!isLoading" class="page-course-add-user">
     <MaintenanceNotice course-action-verb="user is added" />
     <h1 id="page-header" class="page-course-add-user-header">Find a Person to Add</h1>
     <div v-if="showError">
@@ -69,7 +69,7 @@
       </v-row>
       <v-row v-if="showSearchForm" no-gutters>
         <v-col>
-          <form class="canvas-form px-sm-16" @submit.prevent="searchUsers">
+          <form class="px-sm-16" @submit.prevent="searchUsers">
             <v-row class="horizontal-form" no-gutters>
               <v-col cols="12" md="4" class="my-1">
                 <label for="search-text" class="sr-only">Find a person to add</label>
@@ -480,5 +480,8 @@ export default {
   .column-align-center {
     text-align: center;
   }
+}
+.required-field-indicator {
+  color: $color-harley-davidson-orange;
 }
 </style>
