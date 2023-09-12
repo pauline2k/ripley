@@ -43,7 +43,7 @@ from ripley.lib.util import utc_now
 from rq.job import get_current_job
 
 
-def add_user_to_course_section(uid, role_id, course_section_id):
+def add_user_to_course_section(uid, role, course_section_id):
     canvas_user = canvas.get_sis_user_profile(uid)
     if not canvas_user:
         import_users([uid])
@@ -57,9 +57,13 @@ def add_user_to_course_section(uid, role_id, course_section_id):
         return None
     return canvas_section.enroll_user(
         canvas_user['id'],
-        role_id=role_id,
-        enrollment_state='active',
-        notify=False,
+        **{
+            'enrollment[type]': role.base_role_type,
+            'enrollment[role_id]': role.id,
+            'enrollment[enrollment_state]': 'active',
+            'enrollment[course_section_id]': course_section_id,
+            'enrollment[notify]': False,
+        },
     )
 
 

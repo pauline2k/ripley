@@ -56,16 +56,17 @@ def canvas_site_add_user(canvas_site_id):
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
     params = request.get_json()
     course_section_id = params.get('sectionId')
-    role = params.get('role')
+    role_label = params.get('role')
     uid = params.get('uid')
-    all_roles = {r.label: r for r in canvas.get_roles()}
-    role_id = getattr(all_roles[role], 'id', None)
-    if not role_id:
-        raise BadRequestError(f'Unknown role: {role}.')
-    enrollment = add_user_to_course_section(uid, role_id, course_section_id)
+    all_roles = canvas.get_roles()
+    role = next((r for r in all_roles if r.label == role_label), None)
+    if not role:
+        raise BadRequestError(f'Unknown role: {role_label}.')
+    enrollment = add_user_to_course_section(uid, role, course_section_id)
     if enrollment:
+        role_given = next((r for r in all_roles if r.id == enrollment.role_id), None)
         return tolerant_jsonify({
-            'role': role,
+            'role': getattr(role_given, 'label', role_label),
             'sectionId': str(enrollment.course_section_id),
             'uid': uid,
         })

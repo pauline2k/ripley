@@ -1,23 +1,35 @@
 <template>
   <div v-if="!isLoading" class="page-course-add-user">
     <MaintenanceNotice course-action-verb="user is added" />
-    <h1 id="page-header" class="page-course-add-user-header">Find a Person to Add</h1>
-    <div v-if="showError">
-      <v-icon icon="mdi-exclamation-triangle" class="icon-red canvas-notice-icon" />
-      {{ errorStatus }}
-    </div>
-    <div v-if="!showError">
+    <h1 id="page-header">Find a Person to Add</h1>
+    <div>
       <v-row v-if="showAlerts" role="alert">
         <v-col md="12">
+          <div v-if="errorStatus" class="alert alert-error page-course-add-user-alert">
+            <div class="d-flex align-center">
+              <v-icon icon="mdi-alert" class="canvas-notice-icon" />
+              {{ errorStatus }}
+            </div>
+            <div class="alert-close-button-container d-flex ml-4">
+              <button
+                id="hide-search-error-button"
+                class="align-self-center"
+                @click="errorStatus = ''"
+              >
+                <v-icon icon="mdi-close-circle" />
+                <span class="sr-only">Hide Alert</span>
+              </button>
+            </div>
+          </div>
           <div v-if="noUserSelectedAlert" class="alert alert-error page-course-add-user-alert">
             Please select a user.
-            <div class="alert-close-button-container">
+            <div class="alert-close-button-container d-flex ml-4">
               <button
                 id="hide-select-user-alert-button"
-                class="close-button"
+                class="align-self-center"
                 @click="noUserSelectedAlert = ''"
               >
-                <v-icon icon="mdi-times-circle" />
+                <v-icon icon="mdi-close-circle" />
                 <span class="sr-only">Hide Alert</span>
               </button>
             </div>
@@ -26,13 +38,13 @@
             {{ searchAlert }}
             {{ searchTypeNotice }}
             Please try again.
-            <div class="alert-close-button-container">
+            <div class="alert-close-button-container d-flex ml-4">
               <button
                 id="hide-search-alert-button"
-                class="close-button"
+                class="align-self-center"
                 @click="searchAlert = null"
               >
-                <v-icon icon="mdi-times-circle" />
+                <v-icon icon="mdi-close-circle" />
                 <span class="sr-only">Hide Alert</span>
               </button>
             </div>
@@ -45,22 +57,20 @@
           <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="sr-only">
             {{ userSearchResultsCount }} user search results loaded.
           </div>
-          <div v-if="additionSuccessMessage" id="success-message" class="alert alert-success page-course-add-user-alert">
+          <div
+            v-if="additionSuccessMessage"
+            id="success-message"
+            class="alert alert-success page-course-add-user-alert"
+          >
             {{ userAdded.fullName }} was added to the
             &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course as a {{ userAdded.role }}.
-            <div class="alert-close-button-container">
-              <button class="close-button" @click="additionSuccessMessage = ''">
-                <v-icon icon="mdi-times-circle" />
-                <span class="sr-only">Hide Alert</span>
-              </button>
-            </div>
-          </div>
-          <div v-if="additionFailureMessage" class="alert alert-error page-course-add-user-alert">
-            <v-icon icon="mdi-exclamation-triangle" class="icon-red canvas-notice-icon" />
-            {{ errorStatus }}
-            <div class="alert-close-button-container">
-              <button class="close-button" @click="additionFailureMessage = ''">
-                <v-icon icon="mdi-times-circle" />
+            <div class="alert-close-button-container d-flex ml-4">
+              <button
+                id="hide-search-success-button"
+                class="align-self-center"
+                @click="additionSuccessMessage = false"
+              >
+                <v-icon icon="mdi-close-circle" />
                 <span class="sr-only">Hide Alert</span>
               </button>
             </div>
@@ -69,9 +79,9 @@
       </v-row>
       <v-row v-if="showSearchForm" no-gutters>
         <v-col>
-          <form class="px-sm-16" @submit.prevent="searchUsers">
+          <form @submit.prevent="searchUsers">
             <v-row class="horizontal-form" no-gutters>
-              <v-col cols="12" md="4" class="my-1">
+              <v-col cols="12" sm="4" class="my-1">
                 <label for="search-text" class="sr-only">Find a person to add</label>
                 <input
                   id="search-text"
@@ -81,12 +91,12 @@
                   placeholder="Find a person to add"
                 >
               </v-col>
-              <v-col cols="12" md="6" class="my-1">
+              <v-col cols="12" sm="6" class="my-1">
                 <v-row no-gutters>
-                  <v-col class="d-none d-sm-none d-md-flex justify-end align-center" md="2">
+                  <v-col class="d-none d-sm-flex justify-end align-center" sm="2">
                     <label for="search-type" class="mt-0 pr-3"><span class="sr-only">Search </span>By:</label>
                   </v-col>
-                  <v-col md="10" class="pr-md-4">
+                  <v-col sm="10" class="pr-sm-4">
                     <select
                       id="search-type"
                       v-model="searchType"
@@ -100,7 +110,7 @@
                   </v-col>
                 </v-row>
               </v-col>
-              <v-col cols="12" md="2" class="column-align-center my-1">
+              <v-col cols="12" sm="2" class="column-align-center my-1">
                 <v-btn
                   id="add-user-submit-search-btn"
                   color="primary"
@@ -136,7 +146,7 @@
             <v-card
               v-show="toggle.displayHelp"
               id="page-help-notice"
-              class="user-search-notice rounded-0 mx-8"
+              class="user-search-notice rounded-0 mx-8 mb-4"
               elevation="0"
             >
               <!-- Note: This help text content is also maintained in the public/canvas/canvas-customization.js script -->
@@ -213,10 +223,15 @@
             <v-row no-gutters>
               <v-col>
                 <v-row no-gutters class="mb-2">
-                  <v-col sm="2" offset="2" class="d-flex align-center justify-end pr-3">
+                  <v-col
+                    cols="2"
+                    offset-sm="2"
+                    offset-md="4"
+                    class="d-flex align-center justify-end pr-3"
+                  >
                     <label for="user-role"><strong><span class="required-field-indicator">*</span> Role</strong>:</label>
                   </v-col>
-                  <v-col sm="8">
+                  <v-col cols="10" sm="8" md="6">
                     <select id="user-role" v-model="selectedRole">
                       <option v-for="role in grantingRoles" :key="role" :value="role">
                         {{ role }}
@@ -225,10 +240,15 @@
                   </v-col>
                 </v-row>
                 <v-row no-gutters class="mb-2">
-                  <v-col sm="2" offset="2" class="d-flex align-center justify-end pr-3">
+                  <v-col
+                    cols="2"
+                    offset-sm="2"
+                    offset-md="4"
+                    class="d-flex align-center justify-end pr-3"
+                  >
                     <label for="course-section"><strong><span class="required-field-indicator">*</span> Section</strong>:</label>
                   </v-col>
-                  <v-col sm="8">
+                  <v-col cols="10" sm="8" md="6">
                     <select id="course-section" v-model="selectedSection">
                       <option v-for="section in courseSections" :key="section.name" :value="section">
                         {{ section.name }}
@@ -253,7 +273,7 @@
                   <v-btn
                     id="start-over-btn"
                     class="mx-1"
-                    @click="resetForm"
+                    @click="startOver"
                   >
                     Start Over
                   </v-btn>
@@ -273,15 +293,14 @@ import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {addUser, getAddUserOptions, searchUsers} from '@/api/canvas-user'
 import {iframeScrollToTop, putFocusNextTick} from '@/utils'
-import {includes, trim} from 'lodash'
+import {find, get, trim} from 'lodash'
 
 export default {
   name: 'CourseAddUser',
   components: {MaintenanceNotice, OutboundLink},
   mixins: [Context],
   data: () => ({
-    additionFailureMessage: null,
-    additionSuccessMessage: null,
+    additionSuccessMessage: false,
     courseSections: [],
     errorStatus: null,
     grantingRoles: [],
@@ -295,7 +314,6 @@ export default {
     selectedSection: null,
     selectedUser: null,
     showAlerts: null,
-    showError: null,
     showSearchForm: null,
     showUsersArea: null,
     toggle: {
@@ -313,59 +331,30 @@ export default {
         this.courseSections = response.courseSections
         this.selectedSection = response.courseSections[0]
         this.showSearchForm = true
-      }
+      },
+      this.showUnauthorized
+    ).catch(this.showUnauthorized
     ).finally(() => {
-      this.showSearchForm = true
       this.$ready('Find Person to Add')
     })
-    // TODO:
-    // getCanvasSiteUserRoles(this.currentUser.canvasSiteId).then(
-    //   response => {
-    //     if (this.isAuthorized(response)) {
-    //       this.grantingRoles = response.grantingRoles
-    //       this.selectedRole = response.grantingRoles[0]
-    //       getAddUserCourseSections(this.currentUser.canvasSiteId).then(
-    //         response => {
-    //           this.courseSections = response.courseSections
-    //           this.selectedSection = response.courseSections[0]
-    //           this.showSearchForm = true
-    //         },
-    //         this.showUnauthorized
-    //       )
-    //     } else {
-    //       this.showUnauthorized()
-    //     }
-    //   },
-    //   this.showUnauthorized
-    // ).finally(() => {
-    //   this.$ready('Find Person to Add')
-    // })
   },
   methods: {
-    isAuthorized(response) {
-      return (
-        includes(response.roleTypes, 'TeacherEnrollment') ||
-        includes(response.roleTypes, 'TaEnrollment') ||
-        includes(response.roles, 'globalAdmin')
-      )
-    },
     resetForm() {
       this.searchTextType = 'text'
       this.searchText = ''
       this.searchType = 'name'
       this.searchTypeNotice = ''
-      this.showAlerts = false
-      this.resetSearchState()
-      this.resetImportState()
+      this.selectedRole = this.grantingRoles[0]
+      this.selectedSection = this.courseSections[0]
       putFocusNextTick('search-text')
     },
     resetImportState() {
       this.userAdded = false
       this.showAlerts = false
       this.additionSuccessMessage = false
-      this.additionFailureMessage = false
     },
     resetSearchState() {
+      this.errorStatus = null
       this.noUserSelectedAlert = false
       this.searchAlert = null
       this.selectedUser = null
@@ -398,15 +387,17 @@ export default {
             }
             this.showSearchAlert(noResultsAlert)
           }
-          this.$ready()
           this.showAlerts = true
         }, () => {
           this.showErrorStatus('User search failed.')
+          this.showSearchForm = true
+        }).finally(() => {
+          this.$ready()
         })
       }
     },
     showErrorStatus(message) {
-      this.showError = true
+      this.showAlerts = true
       this.errorStatus = message
     },
     showSearchAlert(message) {
@@ -415,6 +406,12 @@ export default {
     },
     showUnauthorized() {
       this.showErrorStatus('Authorization check failed.')
+    },
+    startOver() {
+      this.showAlerts = false
+      this.resetForm()
+      this.resetSearchState()
+      this.resetImportState()
     },
     submitUser() {
       this.loadingStart()
@@ -427,23 +424,25 @@ export default {
         this.userAdded = {
           ...response.userAdded,
           fullName: this.selectedUser.firstName + ' ' + this.selectedUser.lastName,
-          role: this.selectedRole,
-          sectionName: this.selectedSection.name
+          role: response.role,
+          sectionName: get(find(this.courseSections, {'id': response.sectionId}), 'name', this.selectedSection.name)
         }
-        this.additionSuccessMessage = true
-        this.showSearchForm = true
-        this.$ready()
         this.resetSearchState()
+        this.resetForm()
+        this.additionSuccessMessage = true
       }, () => {
         this.errorStatus = 'Request to add user failed'
+        this.showUsersArea = true
+      }).catch(() => {
+        this.errorStatus = 'Request to add user failed'
+        this.showUsersArea = true
+      }).finally(() => {
         this.showSearchForm = true
-        this.additionFailureMessage = true
         this.$ready()
-        this.resetSearchState()
       })
     },
     updateSearchTextType() {
-      this.searchTextType = (this.searchType === 'ldap_user_uid') ? 'number' : 'text'
+      this.searchTextType = (this.searchType === 'uid') ? 'number' : 'text'
     }
   }
 }
@@ -454,15 +453,10 @@ export default {
   background: $color-white;
   padding: 10px;
   .page-course-add-user-alert {
+    display: flex;
+    font-weight: 500;
+    justify-content: space-between;
     margin-bottom: 20px;
-  }
-  .page-course-add-user-header {
-    color: $color-off-black;
-    font-family: $body-font-family;
-    font-size: 23px;
-    font-weight: 400;
-    line-height: 40px;
-    margin: 8px 0;
   }
   .user-search-notice {
     border: 1px solid #d0d0d0;
