@@ -64,6 +64,7 @@
               aria-controls="page-create-course-site-steps-container"
               aria-label="Create Course Site"
               color="primary"
+              type="submit"
               :disabled="!trim(siteName) || !trim(siteAbbreviation)"
             >
               Create Course Site

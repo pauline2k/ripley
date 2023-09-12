@@ -42,6 +42,7 @@
           aria-controls="page-reader-alert"
           class="mr-2"
           color="primary"
+          type="submit"
           :disabled="isCreating || !trim(name)"
           @click="create"
         >
