@@ -55,6 +55,7 @@
               id="user-provision-import-btn"
               class="text-no-wrap mr-4 my-2"
               color="primary"
+              type="submit"
               :disabled="importButtonDisabled"
             >
               <span v-if="!importProcessing">Import Users</span>

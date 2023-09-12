@@ -37,6 +37,7 @@
                   aria-controls="page-create-course-site-steps-container"
                   aria-label="Load official sections for instructor"
                   color="primary"
+                  type="submit"
                   :disabled="!uid"
                 >
                   As instructor
@@ -81,6 +82,7 @@
               id="sections-by-ids-button"
               aria-controls="page-create-course-site-steps-container"
               color="primary"
+              type="submit"
               :disabled="!trim(sectionIds)"
             >
               Review matching Section IDs
