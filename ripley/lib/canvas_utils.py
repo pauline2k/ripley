@@ -528,7 +528,8 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     # Background enrollment update
     job = get_current_job()
     if job:
-        job.meta['sis_import_id'] = sis_import.id
+        job = get_current_job()
+        job.meta['courseSiteUrl'] = f"{app.config['CANVAS_API_URL']}/courses/{course.id}"
         job.save_meta()
     _update_section_enrollments(sis_term_id, course, section_feeds, [], sis_import)
 
