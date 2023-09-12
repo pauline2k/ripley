@@ -33,6 +33,7 @@ from canvasapi.account import Account
 from canvasapi.course import Course
 from canvasapi.section import Section
 from canvasapi.sis_import import SisImport
+from canvasapi.tab import Tab
 from canvasapi.user import User
 from flask import current_app as app
 
@@ -175,6 +176,15 @@ def get_external_tools(obj_type, obj_id=None):
     return tools
 
 
+def get_progress(progress_id):
+    canvas = _get_canvas()
+    try:
+        return canvas.get_progress(progress_id)
+    except Exception as e:
+        app.logger.error(f'Failed to retrieve Progress (progress_id={progress_id})')
+        app.logger.exception(e)
+
+
 def get_roles():
     canvas = _get_canvas()
     account = canvas.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'])
@@ -301,6 +311,17 @@ def post_sis_import(attachment, extension='csv'):
 
     except Exception as e:
         app.logger.exception(e)
+
+
+def set_tab_hidden(tab_id, hidden):
+    tab = None
+    c = _get_canvas()
+    try:
+        tab = Tab(c._Canvas__requester, {'id': tab_id}).update(hidden=hidden)
+    except Exception as e:
+        app.logger.error(f'Failed to update Canvas course site tab (id={tab_id})')
+        app.logger.exception(e)
+    return tab
 
 
 def _get_canvas(api_url=None):
