@@ -320,7 +320,7 @@ export default {
       const sectionIds = map(this.selectedSectionsList, 'id')
       if (sectionIds.length > 0) {
         const onSuccess = data => {
-          this.backgroundJobId = data.backgroundJobId
+          this.backgroundJobId = data.jobId
           this.jobStatus = data.jobStatus
           this.$announcer.polite('Started course site creation.')
           this.completedFocus = true
