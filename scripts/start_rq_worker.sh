@@ -66,8 +66,6 @@ do
 done
 
 echo "Starting worker..."; echo
-sudo "${PYTHONPATH}/python" -c "import os; from xenomorph import start_worker; os.environ['RIPLEY_ENV'] = '${RIPLEY_ENV}'; os.environ['RIPLEY_LOCAL_CONFIGS'] = '${RIPLEY_LOCAL_CONFIGS}'; start_worker('${redis_url}')" >> "${log_location}" 2>&1 &
-sleep 1
 
 cat <<'ascii_end'
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -109,6 +107,9 @@ cat <<'ascii_end'
 @@                                                                 @@
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ascii_end
+
+sudo "${PYTHONPATH}/python" -c "import os; from xenomorph import start_worker; os.environ['RIPLEY_ENV'] = '${RIPLEY_ENV}'; os.environ['RIPLEY_LOCAL_CONFIGS'] = '${RIPLEY_LOCAL_CONFIGS}'; start_worker('${redis_url}')" >> "${log_location}" 2>&1
+sleep 1
 
 if [ "$(command -v "${PYTHONPATH}/rq")" ]; then
   RQ_EXECUTABLE_HOME="${PYTHONPATH}"
