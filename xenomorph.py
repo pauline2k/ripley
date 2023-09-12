@@ -49,9 +49,9 @@ def create_app():
     return app
 
 
-def start_worker(redis_url, name='xenomorph', app_arg=None):
+def start_worker(redis_url, name='xenomorph'):
     global app
-    app = app_arg or create_app()
+    app = create_app()
     redis_conn = redis.from_url(redis_url)
     with Connection(redis_conn), app.app_context():
         q = Queue()
@@ -74,7 +74,7 @@ def start_worker(redis_url, name='xenomorph', app_arg=None):
 def stop_workers(redis_url, app_arg=None):
     global app
     if not app:
-        app = app_arg or create_app()
+        app = create_app()
     redis_conn = redis.from_url(redis_url)
     with Connection(redis_conn):
         worker_count = Worker.count(redis_conn)
