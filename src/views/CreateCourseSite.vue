@@ -56,17 +56,31 @@
             :selected-sections-list="selectedSectionsList"
           />
         </div>
-        <div
-          v-if="currentWorkflowStep === 'monitoringJob'"
-          id="page-create-course-site-monitor-step"
-          :aria-expanded="`${currentWorkflowStep === 'monitoringJob'}`"
-        >
-          <MonitoringJob
-            :fetch-feed="fetchFeed"
-            :job-status="jobStatus"
-            :percent-complete="percentComplete"
-            :show-confirmation="showConfirmation"
-          />
+        <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
+          <h2 id="updating-sections-header" class="text-no-wrap">
+            Updating Official Sections in Course Site
+          </h2>
+          <div class="pending-request-step">
+            <div v-if="jobStatus === 'sendingRequest'">
+              Sending request...
+            </div>
+            <div v-if="'queued' === jobStatus">
+              Request sent. Awaiting processing...
+            </div>
+            <div v-if="'started' === jobStatus">
+              Request received. Provisioning course site...
+            </div>
+            <div v-if="'finished' === jobStatus">
+              Finishing up...
+            </div>
+          </div>
+          <div class="px-5">
+            <v-progress-linear
+              color="primary"
+              height="10"
+              indeterminate
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -82,7 +96,6 @@ import ConfirmationStep from '@/components/bcourses/create/ConfirmationStep'
 import Context from '@/mixins/Context'
 import CreateCourseSiteHeader from '@/components/bcourses/create/CreateCourseSiteHeader'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
-import MonitoringJob from '@/components/bcourses/create/MonitoringJob'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
 import {each, get, includes, map, size} from 'lodash'
@@ -96,7 +109,6 @@ export default {
     ConfirmationStep,
     CreateCourseSiteHeader,
     MaintenanceNotice,
-    MonitoringJob,
     SelectSectionsStep
   },
   data: () => ({
@@ -300,25 +312,23 @@ export default {
       this.currentWorkflowStep = 'selecting'
     },
     startCourseSiteJob(siteName, siteAbbreviation) {
-      this.percentComplete = 0
-      this.currentWorkflowStep = 'monitoringJob'
-      this.$announcer.polite('Creating course site. Please wait.')
+      this.currentWorkflowStep = 'processing'
+      this.jobStatus = 'sendingRequest'
       this.showMaintenanceNotice = false
       this.updateSelected()
       const sectionIds = map(this.selectedSectionsList, 'id')
       if (sectionIds.length > 0) {
         const onSuccess = data => {
           this.jobId = data.jobId
-          this.currentWorkflowStep = 'monitoringJob'
+          this.jobStatus = data.jobStatus
           this.$announcer.polite('Started course site creation.')
           this.completedFocus = true
-          this.jobStatus = response.jobStatus
           this.trackBackgroundJob()
         }
         const onError = () => {
           this.percentComplete = 0
           this.currentWorkflowStep = null
-          this.jobStatus = 'Error'
+          this.jobStatus = 'error'
           this.displayError = 'Failed to create course provisioning job.'
         }
         courseCreate(
@@ -351,32 +361,26 @@ export default {
         courseProvisionJobStatus(this.backgroundJobId).then(
           response => {
             this.jobStatus = response.jobStatus
-            if (!(includes(['started', 'queued'], this.jobStatus))) {
+            if (!(includes(['started', 'queued'], this.jobStatus)) || get(response, 'jobData.courseSiteUrl')) {
               clearInterval(this.exportTimer)
-              if (this.jobStatus === 'finished') {
-                const courseSiteUrl = get(data.courseSite, 'url')
-                if (courseSiteUrl) {
-                  this.$announcer.polite('Done. Loading new course site now.')
-                  if (this.$isInIframe) {
-                    iframeParentLocation(courseSiteUrl)
-                  } else {
-                    window.location.href = courseSiteUrl
-                  }
+              if (get(response, 'jobData.courseSiteUrl')) {
+                this.$announcer.polite('Done. Loading new course site now.')
+                if (this.$isInIframe) {
+                  iframeParentLocation(response.jobData.courseSiteUrl)
+                } else {
+                  window.location.href = response.jobData.courseSiteUrl
                 }
               } else {
-                this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
-                if (response.workflowState === 'imported_with_messages' && size(response.messages)) {
-                  this.jobStatusDetails = map(response.messages, message => last(message))
-                }
+                this.jobStatus = 'error'
+                this.displayError = 'An error has occurred with your request. Please try again or contact bCourses support.'
               }
-              this.fetchFeed()
             }
           }
         ).catch(
           () => {
             this.currentWorkflowStep = null
             this.jobStatus = 'error'
-            this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
+            this.displayError = 'An error has occurred with your request. Please try again or contact bCourses support.'
             clearInterval(this.exportTimer)
           }
         )
