@@ -206,17 +206,10 @@ def get_provision_status():
     job = get_job(job_id)
     job_status = job.get_status(refresh=True)
     job_data = job.get_meta(refresh=True)
-    if 'sis_import_id' in job_data:
-        sis_import = canvas.get_sis_import(job_data['sis_import_id'])
-        if not sis_import:
-            raise ResourceNotFoundError(f'No SIS import with {job_data} was found.')
-        return tolerant_jsonify({
-            'jobStatus': job_status,
-            'workflowState': sis_import.workflow_state,
-            'messages': getattr(sis_import, 'processing_warnings', []),
-        })
+
     return tolerant_jsonify({
         'jobStatus': job_status,
+        'jobData': job_data,
     })
 
 

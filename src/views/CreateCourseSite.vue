@@ -312,7 +312,6 @@ export default {
           this.currentWorkflowStep = 'monitoringJob'
           this.$announcer.polite('Started course site creation.')
           this.completedFocus = true
-          this.jobStatusLoader()
           this.jobStatus = response.jobStatus
           this.trackBackgroundJob()
         }
