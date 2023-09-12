@@ -160,6 +160,7 @@
             "last_activity_at": "2023-02-01T21:29:50Z",
             "limit_privileges_to_course_section": false,
             "role": "StudentEnrollment",
+            "role_id": 6309,
             "root_account_id": 1,
             "sis_import_id": "10000001",
             "sis_section_id": "SEC:2023-B-32936",
