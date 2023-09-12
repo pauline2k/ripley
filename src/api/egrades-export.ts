@@ -28,7 +28,7 @@ export function getExportOptions(redirectOnError?: boolean) {
 }
 
 export function getExportJobStatus(jobId: string) {
-  return utils.post('/api/canvas_site/egrades_export/status', {jobId}, true)
+  return utils.post('/api/canvas_site/egrades_export/status', {jobId}, false)
 }
 
 export function prepareGradesCacheJob(
@@ -38,5 +38,5 @@ export function prepareGradesCacheJob(
   termId: string
 ) {
   const data = {gradeType, pnpCutoff, sectionId, termId}
-  return utils.post('/api/canvas_site/egrades_export/prepare', data, true)
+  return utils.post('/api/canvas_site/egrades_export/prepare', data, false)
 }
