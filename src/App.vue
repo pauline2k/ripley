@@ -65,8 +65,8 @@ export default {
 form {
   .validation-messages {
     color: $color-harley-davidson-orange;
-    font-size: 13px;
-    font-weight: 400;
+    font-size: 14px;
+    font-weight: 500;
     min-height: 20px;
     margin: 0 12px 4px;
   }
