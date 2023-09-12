@@ -26,12 +26,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from itertools import groupby
 import re
 import secrets
+from time import sleep
 
 from flask import current_app as app
 from flask_login import current_user
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.externals import canvas, data_loch
-from ripley.externals.canvas import get_course_sections
+from ripley.externals.canvas import get_course_sections, get_roles, set_tab_hidden
 from ripley.externals.s3 import upload_dated_csv
 from ripley.lib.berkeley_course import course_section_name, course_to_api_json, section_to_api_json, \
     sort_course_sections
@@ -63,54 +64,53 @@ def add_user_to_course_section(uid, role_id, course_section_id):
     )
 
 
-def create_canvas_project_site(name):
+def create_canvas_project_site(name, owner_uid):
     account_id = app.config['CANVAS_BERKELEY_ACCOUNT_ID']
-    term_id = app.config['CANVAS_PROJECTS_TERM_ID']
     project_site = canvas.get_account(account_id, api_call=False).create_course(
         course_code=name,
         name=name,
         sis_course_id=f'PROJ:{secrets.token_hex(8).upper()}',
-        term_id=term_id,
+        term_id=app.config['CANVAS_PROJECTS_TERM_ID'],
     )
-    # TODO: Ripley wants the logic below.
-    #
-    #    site_id = course_details['id']
-    #    response = Canvas::CourseCopyImport.new(canvas_course_id: site_id).import_course_template(template_id)
-    #    if (import_status = response[:body]) && import_status['workflow_state'] != 'completed'
-    #      progress_id = import_status['progress_url'].split('/').last
-    #      import_start_time = Time.now.to_i
-    #    end
-    #
-    #    tabs_worker = Canvas::ExternalTools.new(canvas_course_id: site_id)
-    #    if (conferences_tab = tabs_worker.course_site_tab_list.find { |t| t['label'].start_with?('BigBlueButton') })
-    #      # Tab modification API calls seem to stick better if we give them a moment's breather after site creation.
-    #      sleep 5
-    #      tabs_worker.hide_course_site_tab(conferences_tab)
-    #    end
-    #
-    #    enrollment = CanvasLti::CourseAddUser.new(user_id: @uid, canvas_course_id: site_id).add_user_to_course(@uid, 'Owner')
-    #
-    #    if progress_id
-    #      import_state = 'new'
-    #      15.times do
-    #        response = Canvas::Progress.new(progress_id: progress_id).get_progress
-    #        import_state = response[:body] && response[:body]['workflow_state']
-    #        break if !import_state || import_state == 'completed'
-    #        sleep 1
-    #      end
-    #      elapsed_time = Time.now.to_i - import_start_time
-    #      if import_state == 'completed'
-    #        logger.warn("Project site #{site_id} template import completed after #{elapsed_time} seconds")
-    #      else
-    #        logger.warn("Project site #{site_id} template import not completed after #{elapsed_time} seconds")
-    #      end
-    #    end
-    #
-    #    return {
-    #      projectSiteId: site_id,
-    #      projectSiteUrl: "#{Settings.canvas_proxy.url_root}/courses/#{site_id}",
-    #      enrollment_id: enrollment['id']
-    #    }
+    canvas_site_id = project_site['id']
+    course = canvas.get_course(course_id=canvas_site_id, api_call=False)
+    content_migration = course.create_content_migration(
+        migration_type=app.config['CANVAS_PROJECTS_TEMPLATE_ID'],
+    )
+    migration_progress_id = None
+    migration_start_time = None
+    if content_migration['workflow_state'] != 'completed':
+        migration_progress_id = content_migration['progress_url'].rsplit('/', 1)[-1]
+        migration_start_time = utc_now()
+
+    # Hide BigBlueButton, if present.
+    for tab in canvas.get_tabs(course_id=canvas_site_id):
+        tab_label = tab['label'].lower()
+        if all(b in tab_label for b in ['big', 'blue', 'button']):
+            set_tab_hidden(hidden=True, tab_id=tab['id'])
+            break
+    # Make the current_user the site owner.
+    sis_user_profile = canvas.get_sis_user_profile(uid=owner_uid)
+    owner_role = next((role for role in get_roles() if 'owner' in role.label.lower()), None)
+    course.enroll_user(
+        sis_user_profile['id'],
+        role_id=owner_role.id,
+        enrollment_state='active',
+        notify=False,
+    )
+    if migration_progress_id:
+        import_state = 'new'
+        # TODO: Improve on this hard-coded wait.
+        for index in range(0, 10):
+            progress = canvas.get_progres(migration_progress_id)
+            import_state = progress['body']['workflow_state']
+            if import_state and import_state != 'completed':
+                sleep(1)
+            else:
+                break
+        elapsed_time = utc_now().timestamp() - migration_start_time.timestamp()
+        status_description = 'completed' if import_state == 'completed' else 'not completed'
+        app.logger.warning(f'Template-import of Canvas project site {canvas_site_id} {status_description} after {elapsed_time} seconds')
     return project_site
 
 
