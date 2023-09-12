@@ -32,16 +32,22 @@
           <h2 class="grade-export-sub-header">1. Select a grading scheme</h2>
           <div class="pb-4 pl-5 pt-2">
             <span v-if="!noGradingStandardEnabled">
-              You have already set a grading scheme. You can view your grading scheme or select an alternate grading scheme in
-              <OutboundLink :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`">Course Settings</OutboundLink>
+              You have already set a grading scheme.
+              You can view your grading scheme or select an alternate grading scheme in
+              <a id="canvas-course-settings-href" :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`">
+                Course Settings
+              </a>
             </span>
             <span v-if="noGradingStandardEnabled">
               Set a grading scheme in
-              <OutboundLink :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`">Course Settings</OutboundLink>
+              <a id="canvas-course-settings-href" :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`">
+                Course Settings
+              </a>
               and return once completed.
             </span>
             <div class="pt-1">
-              For detailed instructions, see: "<OutboundLink href="https://community.canvaslms.com/docs/DOC-26521-how-do-i-enable-a-grading-scheme-for-a-course">How do I enable a grading scheme for a course?</OutboundLink>"
+              For detailed instructions, see:
+              "<OutboundLink href="https://community.canvaslms.com/docs/DOC-26521-how-do-i-enable-a-grading-scheme-for-a-course">How do I enable a grading scheme for a course?</OutboundLink>"
             </div>
           </div>
           <h2 class="grade-export-sub-header">2. Post all assignment grades:</h2>
@@ -72,10 +78,15 @@
               </span>
             </div>
             <div class="py-2">
-              <strong>In order to avoid errors, we suggest cross-checking final grades in the bCourses gradebook with the output CSV to confirm grades were exported as expected.</strong>
+              <strong>
+                In order to avoid errors, we suggest cross-checking final grades in the bCourses gradebook with the
+                output CSV to confirm grades were exported as expected.
+              </strong>
             </div>
             <div>
-              If you have used the <OutboundLink href="https://community.canvaslms.com/t5/Instructor-Guide/How-do-I-override-a-student-s-final-grade-in-the-Gradebook/ta-p/946">Final Grade Override</OutboundLink> feature to set student grades, the override grades will be included in the export.
+              If you have used the
+              <OutboundLink href="https://community.canvaslms.com/t5/Instructor-Guide/How-do-I-override-a-student-s-final-grade-in-the-Gradebook/ta-p/946">Final Grade Override</OutboundLink>
+              feature to set student grades, the override grades will be included in the export.
             </div>
           </div>
           <div class="text-right">
@@ -437,7 +448,6 @@ export default {
       )
     },
     retrySelection() {
-
       this.appState = 'selection'
       this.contactSupport = false
       this.error = null
