@@ -58,7 +58,7 @@
         </div>
         <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
           <h2 id="updating-sections-header" class="text-no-wrap">
-            Updating Official Sections in Course Site
+            Creating Course Site
           </h2>
           <div class="pending-request-step">
             <div v-if="jobStatus === 'sendingRequest'">
@@ -116,6 +116,7 @@ export default {
     adminBySectionIds: undefined,
     adminMode: 'actAs',
     adminTerms: [],
+    backgroundJobId: undefined,
     canvasSite: undefined,
     canvasSiteId: undefined,
     course: undefined,
@@ -158,7 +159,7 @@ export default {
       return count
     },
     clearCourseSiteJob() {
-      this.jobId = undefined
+      this.backgroundJobId = undefined
       this.jobStatus = undefined
       this.completedSteps = undefined
       this.percentComplete = undefined
@@ -319,7 +320,7 @@ export default {
       const sectionIds = map(this.selectedSectionsList, 'id')
       if (sectionIds.length > 0) {
         const onSuccess = data => {
-          this.jobId = data.jobId
+          this.backgroundJobId = data.backgroundJobId
           this.jobStatus = data.jobStatus
           this.$announcer.polite('Started course site creation.')
           this.completedFocus = true
