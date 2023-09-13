@@ -76,12 +76,7 @@ def egrades_export_prepare():
     except Exception as e:
         app.logger.error(f'Failed to enqueue egrades_export job where canvas_site_id = {current_user.canvas_site_id}')
         raise e
-    return tolerant_jsonify(
-        {
-            'jobId': job.id,
-            'jobRequestStatus': 'Success',
-        },
-    )
+    return tolerant_jsonify({'jobId': job.id})
 
 
 @app.route('/api/canvas_site/egrades_export/<canvas_site_id>/is_official_course')

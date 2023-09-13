@@ -1,4 +1,4 @@
-import {capitalize, concat, get, head, includes, initial, join, last, noop, trim} from 'lodash'
+import {capitalize, concat, get, head, includes, initial, join, last, noop, startsWith, trim} from 'lodash'
 import {nextTick} from 'vue'
 import {useContextStore} from '@/stores/context'
 
@@ -7,6 +7,12 @@ export const isInIframe = !!window.parent.frames.length
 export function decamelize(str: string, separator=' ') {
   const parsed = str.replace(/([a-z\d])([A-Z])/g, '$1' + separator + '$2')
   return capitalize(parsed.replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2'))
+}
+
+export function getTermName(termId: string) {
+  const seasonCodes: any = {'0': 'Winter', '2': 'Spring', '5': 'Summer', '8': 'Fall'}
+  const year = `${startsWith(termId, '1') ? 19 : 20}${termId.substring(1, 3)}`
+  return `${seasonCodes[termId.substring(3, 4)]} ${year}`
 }
 
 export function iframeParentLocation(location: string) {

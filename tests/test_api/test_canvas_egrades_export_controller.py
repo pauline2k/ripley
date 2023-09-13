@@ -162,7 +162,6 @@ class TestEgradesExportPrepare:
             # Verify
             job_id = api_json['jobId']
             assert job_id
-            assert api_json['jobRequestStatus'] == 'Success'
             # Verify that invalid job_id leads to not-found error.
             self._api_egrades_export_status(client, 'this-is-an-invalid-job-id', expected_status_code=400)
             api_json = self._api_egrades_export_status(client, job_id)
