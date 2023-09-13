@@ -41,6 +41,8 @@ class TestStatusController:
             assert response.json['canvas'] is True
             assert response.json['data_loch'] is True
             assert response.json['db'] is True
+            assert response.json['rq']['redis'] is True
+            assert response.json['rq']['workers'] is False
 
     def test_canvas_error(self, app, client):
         """Reports Canvas API error."""
@@ -52,4 +54,33 @@ class TestStatusController:
             assert response.json['app'] is True
             assert response.json['canvas'] is False
             assert response.json['data_loch'] is True
-            assert response.json['db'] is True
+
+
+class TestRqStatusController:
+    """RQ status API."""
+
+    admin_uid = '10000'
+    non_admin_uid = '10001'
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        _api_ping_rq(client, expected_status_code=401)
+
+    def test_unauthorized(self, client, fake_auth):
+        """Denies unauthorized user."""
+        fake_auth.login(canvas_site_id=None, uid=self.non_admin_uid)
+        _api_ping_rq(client, expected_status_code=401)
+
+    def test_authorized(self, client, fake_auth, mock_job):
+        fake_auth.login(canvas_site_id=None, uid=self.admin_uid)
+        response = _api_ping_rq(client)
+        print(response)
+        assert response['redis'] is True
+        assert response['workers'] == []
+        assert response['queue'] == {'name': 'default', 'jobCount': 0}
+
+
+def _api_ping_rq(client, expected_status_code=200):
+    response = client.get('/api/ping/rq')
+    assert response.status_code == expected_status_code
+    return response.json

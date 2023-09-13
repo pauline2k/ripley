@@ -29,11 +29,12 @@ from canvasapi.exceptions import CanvasException
 from flask import current_app as app
 import psycopg2
 from ripley import db
+from ripley.api.util import admin_required
 from ripley.externals import data_loch
 from ripley.externals.b_connected import BConnected
 from ripley.externals.canvas import ping_canvas
 from ripley.externals.rds import log_db_error
-from ripley.externals.redis import redis_status
+from ripley.externals.redis import redis_ping, redis_status
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.http import tolerant_jsonify
 from ripley.merged.emailer import send_system_error_email
@@ -55,7 +56,7 @@ def ping():
         canvas_ping = _ping_canvas()
         data_loch_ping = _data_loch_status()
         db_ping = _db_status()
-        _redis_queue_ping = _redis_queue_status()
+        _redis_queue_ping = _ping_redis()
     except Exception as e:
         subject = str(e)
         subject = f'{subject[:100]}...' if len(subject) > 100 else subject
@@ -80,6 +81,28 @@ def ping():
                 'rq': _redis_queue_ping,
             },
         )
+
+
+@app.route('/api/ping/rq')
+@admin_required
+def rq_status():
+    redis_queue_status = None
+    try:
+        redis_queue_status = redis_status()
+    except Exception as e:
+        redis_queue_status = {'error': True}
+        subject = str(e)
+        subject = f'{subject[:100]}...' if len(subject) > 100 else subject
+        message = f'Error during /api/ping/rq: {subject}'
+        app.logger.error(message)
+        app.logger.exception(e)
+        if app.config['EMAIL_IF_PING_HAS_ERROR']:
+            send_system_error_email(
+                message=f'{message}\n\n<pre>{traceback.format_exc()}</pre>',
+                subject=message,
+            )
+    finally:
+        return tolerant_jsonify(redis_queue_status)
 
 
 def _data_loch_status():
@@ -112,9 +135,8 @@ def _db_status():
 
 def _ping_calnet():
     try:
-        uid = '1022796'
-        calnet_user = get_calnet_user_for_uid(app, uid)
-        return calnet_user and calnet_user.get('uid', None)
+        calnet_user = get_calnet_user_for_uid(app, app.config['CALNET_TEST_UID'])
+        return calnet_user and (calnet_user.get('uid', None) is not None)
     except Exception as e:
         app.logger.error('Calnet error during /api/ping')
         app.logger.exception(e)
@@ -130,9 +152,9 @@ def _ping_canvas():
         return False
 
 
-def _redis_queue_status():
+def _ping_redis():
     try:
-        return redis_status()
+        return redis_ping()
     except Exception as e:
         app.logger.error('Redis error during /api/ping')
         app.logger.exception(e)
