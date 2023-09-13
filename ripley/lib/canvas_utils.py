@@ -134,20 +134,21 @@ def get_canvas_course_id(course_slug):
     return course_id
 
 
-def get_canvas_sis_section_id(term_id, sis_section_id):
+def get_canvas_sis_section_id(term_id, sis_section_id, ensure_unique=False):
     berkeley_term = BerkeleyTerm.from_sis_term_id(term_id)
     base_section_id = f'SEC:{berkeley_term.year}-{berkeley_term.season}-{sis_section_id}'
     section_id = base_section_id
-    attempts = 0
-    existing_section = None
-    while attempts < 10:
-        existing_section = canvas.get_section(section_id, use_sis_id=True)
-        if not existing_section:
-            break
-        attempts += 1
-        section_id = base_section_id + '-' + secrets.token_hex(4).upper()
-    if existing_section:
-        raise InternalServerError(f'Could not generate unique ID for Canvas section {term_id}-{sis_section_id}')
+    if ensure_unique:
+        attempts = 0
+        existing_section = None
+        while attempts < 10:
+            existing_section = canvas.get_section(section_id, use_sis_id=True)
+            if not existing_section:
+                break
+            attempts += 1
+            section_id = base_section_id + '-' + secrets.token_hex(4).upper()
+        if existing_section:
+            raise InternalServerError(f'Could not generate unique ID for Canvas section {term_id}-{sis_section_id}')
     return section_id
 
 
@@ -550,7 +551,7 @@ def _prepare_section_definition(
     section_roles,
     explicit_sections_for_instructor,
 ):
-    sis_section_id = get_canvas_sis_section_id(sis_term_id, section['id'])
+    sis_section_id = get_canvas_sis_section_id(sis_term_id, section['id'], ensure_unique=True)
     section_feed = {
         'section_id': sis_section_id,
         'course_id': course.sis_course_id,
