@@ -283,10 +283,7 @@
             color="primary"
             indeterminate
           />
-          Preparation request sent. Awaiting processing....
-        </div>
-        <div v-if="jobStatus">
-          <ProgressBar :percent-complete-rounded="percentCompleteRounded" />
+          Preparation request sent. Awaiting processing...
         </div>
       </v-container>
     </div>
@@ -297,13 +294,12 @@
 import BackToGradebook from '@/components/bcourses/egrades/BackToGradebook.vue'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
-import ProgressBar from '@/components/bcourses/shared/ProgressBar'
 import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/egrades-export'
 import {iframeParentLocation, iframeScrollToTop, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CourseGradeExport',
-  components: {BackToGradebook, OutboundLink, ProgressBar},
+  components: {BackToGradebook, OutboundLink},
   mixins: [Context],
   data: () => ({
     appState: null,
@@ -316,17 +312,11 @@ export default {
     jobStatus: null,
     noGradingStandardEnabled: false,
     officialSections: [],
-    percentCompleteRounded: null,
     selectedPnpCutoffGrade: null,
     selectedSection: null,
     selectedType: null,
     showRetryOption: null
   }),
-  watch: {
-    appState(value) {
-      this.debug(`appState: ${value}`)
-    }
-  },
   beforeUnmount() {
     clearInterval(this.exportTimer)
   },
@@ -342,19 +332,7 @@ export default {
     }
   },
   methods: {
-    debug(statement) {
-      if (this.config.isVueAppDebugMode) {
-        console.log(statement)
-      }
-    },
     downloadGrades() {
-      const pnpCutoff = this.enablePnpConversion === 'false' ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
-      this.debug(`downloadGrades:
-        selectedType: ${this.selectedType}
-        selectedSection.id: ${this.selectedSection.id}
-        selectedSection.termId: ${this.selectedSection.termId}
-        pnpCutoff: ${pnpCutoff}
-      `)
       downloadGradeCsv(
         this.selectedType,
         this.backgroundJobId,
@@ -422,9 +400,6 @@ export default {
       this.appState = 'loading'
       this.jobStatus = 'New'
       iframeScrollToTop()
-      this.debug(`preloadGrades:
-        selectedType: ${type}
-      `)
       const pnpCutoff = this.enablePnpConversion === 'false' ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
       prepareGradesCacheJob(
         this.selectedType,
@@ -433,12 +408,8 @@ export default {
         this.selectedSection.termId
       ).then(
         data => {
-          this.debug(`post-prepareGradesCacheJob:
-            data: ${data}
-          `)
           if (data.jobRequestStatus === 'Success') {
             this.backgroundJobId = data.jobId
-            this.debug(`startExportJob >> backgroundJobId = ${this.backgroundJobId}`)
             this.startExportJob()
           } else {
             this.appState = 'error'
@@ -462,23 +433,20 @@ export default {
       this.showRetryOption = false
     },
     startExportJob() {
-      this.debug(`startExportJob:
-        currentUser.canvasSiteId: ${this.currentUser.canvasSiteId, this.backgroundJobId}
-        backgroundJobId: ${this.backgroundJobId}
-      `)
       this.exportTimer = setInterval(() => {
         getExportJobStatus(this.backgroundJobId).then(
           data => {
-            this.debug(`post-getExportJobStatus:
-              data: ${data}
-            `)
             this.jobStatus = data.jobStatus
-            this.percentCompleteRounded = Math.round(data.percentComplete * 100)
-            if (!['New', 'Processing', 'queued'].includes(this.jobStatus)) {
-              this.percentCompleteRounded = null
+            // TODO: Remove the following line when done debugging.
+            console.log(`Export job status: ${this.jobStatus}`)
+            if (['canceled', 'deferred', 'failed', 'stopped'].includes(this.jobStatus)) {
               clearInterval(this.exportTimer)
-              this.$announcer.polite('Downloading export. Export form options presented for an additional download.')
               this.switchToSelection()
+              this.error = `Sorry, the job to prepare eGrades is ${this.jobStatus}.`
+            } else if (this.jobStatus === 'finished') {
+              clearInterval(this.exportTimer)
+              this.switchToSelection()
+              this.$announcer.polite('Downloading export. Export form options presented for an additional download.')
               this.downloadGrades()
             }
           },
