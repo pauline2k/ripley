@@ -41,7 +41,7 @@ BCOP_SMTP_PORT = 587
 BCOP_SMTP_SERVER = 'bcop.berkeley.edu'
 BCOP_SMTP_USERNAME = None
 
-CAS_SERVER = 'https://auth-test.berkeley.edu/cas/'
+CALNET_TEST_UID = '1022796'
 
 CANVAS_ACCESS_TOKEN = 'a token'
 CANVAS_API_URL = 'https://hard_knocks_api.instructure.com'
@@ -56,6 +56,8 @@ CANVAS_REFRESH_MAX_DELETED_ENROLLMENTS = 15000
 CANVAS_TEST_ADMIN_ID = 'test_admin_id'
 CANVAS_TEST_CAS_URL = 'https://auth-test.berkeley.edu/cas'
 CANVAS_TEST_SERVERS = ['https://hard_knocks_api.instructure.com']
+
+CAS_SERVER = 'https://auth-test.berkeley.edu/cas/'
 
 CURRENT_TERM_ID = '2023-B'
 

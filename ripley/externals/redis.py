@@ -22,6 +22,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+from datetime import datetime
 import json
 
 from fakeredis import FakeStrictRedis
@@ -99,6 +100,17 @@ def get_url(app):
     return f"rediss://default:{app.config['REDIS_PASSWORD']}@{app.config['REDIS_HOST']}:{app.config['REDIS_PORT']}"
 
 
+def redis_ping():
+    get_redis_conn(app)
+    redis_ping = redis_conn.ping()
+    q = Queue(connection=redis_conn)
+    workers = Worker.all(redis_conn) or []
+    return {
+        'redis': redis_ping and (q is not None),
+        'workers': (len(workers) > 0),
+    }
+
+
 def redis_status():
     get_redis_conn(app)
     redis_ping = redis_conn.ping()
@@ -107,6 +119,10 @@ def redis_status():
     return {
         'redis': redis_ping and (q is not None),
         'workers': [_worker_to_api_json(w) for w in workers],
+        'queue': {
+            'name': q.name,
+            'jobCount': len(q.jobs),
+        },
     }
 
 
@@ -114,7 +130,8 @@ def _worker_to_api_json(worker):
     return {
         'currentJobWorkingTime': worker.current_job_working_time,
         'failedJobCount': worker.failed_job_count,
-        'lastHeartbeat': worker.last_heartbeat,
+        'lastHeartbeat': worker.last_heartbeat and worker.last_heartbeat.strftime('%Y-%m-%dT%H:%M:%S'),
+        'lastHeartbeatMinutesAgo': worker.last_heartbeat and ((datetime.now() - worker.last_heartbeat).seconds / 60),
         'name': worker.name,
         'pid': worker.pid,
         'state': worker.get_state(),
