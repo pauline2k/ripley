@@ -35,6 +35,7 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_utils import get_official_sections, parse_canvas_sis_section_id, prepare_egrades_export
 from ripley.lib.egrade_utils import LETTER_GRADES
 from ripley.lib.http import tolerant_jsonify
+from rq.job import JobStatus
 
 
 @app.route('/api/canvas_site/egrades_export/options')
@@ -117,7 +118,7 @@ def egrades_download():
     job_id = params.get('jobId', None)
     job = get_job(job_id)
     job_status = job.get_status(refresh=True)
-    if job_status == 'finished':
+    if job_status == JobStatus.FINISHED:
         job_result = job.result
         grade_type = job_result['grade_type']
         rows = job_result['rows']
@@ -130,7 +131,7 @@ def egrades_download():
             fieldnames=['ID', 'Name', 'Grade', 'Grading Basis', 'Comments'],
         )
     else:
-        message = f'Sorry, job {job_id} has not finished or failed. (Job status: {job_status})'
+        message = f'Job {job_id} has not finished or failed. (Job status: {job_status})'
         app.logger.warning(message)
         raise BadRequestError(message)
 
@@ -141,7 +142,4 @@ def canvas_egrades_export_status():
     job_id = request.get_json().get('jobId', None)
     job = get_job(job_id)
     job_status = job.get_status(refresh=True)
-    return tolerant_jsonify({
-        'jobStatus': job_status,
-        'percentComplete': 0.5,  # TODO: Can we deduce 'percentComplete' value?
-    })
+    return tolerant_jsonify({'jobStatus': job_status})
