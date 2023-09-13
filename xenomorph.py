@@ -150,7 +150,7 @@ _xenomorph_spawned = r"""
 
 
 with app.app_context():
-    redis_url = get_redis_url()
+    redis_url = get_redis_url(app)
     while True:
         app.logger.debug('Checking worker status')
         # If we already have a worker (on this instance or another) that seems to be doing its job, leave it be.
