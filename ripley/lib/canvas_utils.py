@@ -261,7 +261,7 @@ def get_official_sections(canvas_site_id):
         data_loch.get_sections(term_id, section_ids) or [],
     )
     if len(sis_sections) != len(section_ids):
-        app.logger.warn(f'Canvas site ID {canvas_site_id} has {len(section_ids)} sections, but SIS has {len(sis_sections)} sections.')
+        app.logger.warning(f'Canvas site ID {canvas_site_id} has {len(section_ids)} sections, but SIS has {len(sis_sections)} sections.')
 
     def _section(section_id, rows):
         canvas_section = canvas_sections_by_id[section_id]

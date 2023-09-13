@@ -12,17 +12,22 @@
         <div class="pt-1">
           {{ error }}
         </div>
-        <div v-if="showRetryOption" class="pt-2">
-          <v-btn id="retry-selection-btn" color="primary" @click="retrySelection">
-            Retry
-          </v-btn>
-        </div>
         <div v-if="contactSupport" class="py-2">
           If this is not expected, please contact
           <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink>
           for further assistance.
         </div>
       </v-alert>
+      <div v-if="showRetryOption" class="py-6 text-center">
+        <v-btn
+          id="retry-selection-btn"
+          class="px-10"
+          color="primary"
+          @click="retrySelection"
+        >
+          Retry
+        </v-btn>
+      </div>
     </div>
     <v-container v-if="appState === 'preselection'">
       <v-row no-gutters>
@@ -443,7 +448,10 @@ export default {
           }
         },
         error => {
-          this.error = error
+          this.appState = 'error'
+          this.error = error || 'E-Grades job preparation failed.'
+          this.showRetryOption = true
+          this.contactSupport = false
         }
       )
     },
