@@ -22,6 +22,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+import urllib
 
 from flask import current_app as app, request
 from flask_login import current_user, login_required
@@ -54,6 +55,7 @@ def egrades_export_prepare():
     params = request.get_json()
     grade_type = params.get('gradeType', None)
     pnp_cutoff = params.get('pnpCutoff', None)
+    pnp_cutoff = urllib.parse.unquote(pnp_cutoff or '')
     section_id = params.get('sectionId', None)
     term_id = params.get('termId', None)
 
@@ -128,7 +130,9 @@ def egrades_download():
             fieldnames=['ID', 'Name', 'Grade', 'Grading Basis', 'Comments'],
         )
     else:
-        raise BadRequestError(f'Sorry, job {job_id} has not finished or failed. (Job status: {job_status})')
+        message = f'Sorry, job {job_id} has not finished or failed. (Job status: {job_status})'
+        app.logger.warning(message)
+        raise BadRequestError(message)
 
 
 @app.route('/api/canvas_site/egrades_export/status', methods=['POST'])
