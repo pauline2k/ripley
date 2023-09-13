@@ -4,15 +4,11 @@
       <v-alert
         v-if="error"
         class="ma-2"
-        density="compact"
-        prominent
         role="alert"
+        :text="error"
         type="warning"
       >
-        <div class="pt-1">
-          {{ error }}
-        </div>
-        <div v-if="contactSupport" class="py-2">
+        <div v-if="contactSupport" class="py-1">
           If this is not expected, please contact
           <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink>
           for further assistance.
@@ -127,6 +123,14 @@
           >
             Export E-Grades
           </h1>
+          <v-alert
+            v-if="filenameDownloaded"
+            class="ma-2"
+            :closable="true"
+            role="alert"
+            :text="`The job is done. The file '${filenameDownloaded}' should be in your downloads folder.`"
+            type="info"
+          />
         </v-col>
       </v-row>
       <v-row class="sr-only">
@@ -269,21 +273,14 @@
             <h1 class="grade-export-header mb-3 mt-2">Preparing E-Grades for Download</h1>
           </v-col>
         </v-row>
-        <div v-if="!jobStatus" class="grade-export-notice-pending-request">
+        <div class="align-center d-flex ma-3">
           <v-progress-circular
-            class="mr-2"
+            class="mr-3"
             color="primary"
             indeterminate
+            size="small"
           />
-          Sending preparation request...
-        </div>
-        <div v-if="jobStatus === 'New'" class="grade-export-notice-pending-request">
-          <v-progress-circular
-            class="mr-2"
-            color="primary"
-            indeterminate
-          />
-          Preparation request sent. Awaiting processing...
+          <div class="job-progress text-subtitle-1">The job {{ jobStatus === 'started' ? 'has' : 'is' }} {{ jobStatus }}</div>
         </div>
       </v-container>
     </div>
@@ -295,7 +292,7 @@ import BackToGradebook from '@/components/bcourses/egrades/BackToGradebook.vue'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/egrades-export'
-import {iframeParentLocation, iframeScrollToTop, putFocusNextTick} from '@/utils'
+import {getTermName, iframeParentLocation, iframeScrollToTop, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CourseGradeExport',
@@ -309,6 +306,7 @@ export default {
     courseUserRoles: [],
     enablePnpConversion: null,
     exportTimer: null,
+    filenameDownloaded: false,
     jobStatus: null,
     noGradingStandardEnabled: false,
     officialSections: [],
@@ -333,12 +331,14 @@ export default {
   },
   methods: {
     downloadGrades() {
-      downloadGradeCsv(
-        this.selectedType,
-        this.backgroundJobId,
-        this.selectedSection.id,
-        this.selectedSection.termId
-      )
+      const termId = this.selectedSection.termId
+      const termName = getTermName(termId).toLowerCase().replace(' ', '-')
+      this.filenameDownloaded = `egrades-${this.selectedType}-${this.selectedSection.id}-${termName}-${this.currentUser.canvasSiteId}.csv`
+      downloadGradeCsv(this.filenameDownloaded, this.backgroundJobId).then(() => {
+        setTimeout(() => {
+          this.filenameDownloaded = null
+        }, 30000)
+      })
     },
     goToGradebook() {
       const gradebookUrl = `${this.config.canvasApiUrl}/courses/${this.currentUser.canvasSiteId}/grades`
@@ -396,9 +396,10 @@ export default {
       }
     },
     preloadGrades(type) {
+      this.filenameDownloaded = null
       this.selectedType = type
       this.appState = 'loading'
-      this.jobStatus = 'New'
+      this.jobStatus = 'started'
       iframeScrollToTop()
       const pnpCutoff = this.enablePnpConversion === 'false' ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
       prepareGradesCacheJob(
@@ -408,21 +409,14 @@ export default {
         this.selectedSection.termId
       ).then(
         data => {
-          if (data.jobRequestStatus === 'Success') {
-            this.backgroundJobId = data.jobId
-            this.startExportJob()
-          } else {
-            this.appState = 'error'
-            this.error = 'Grade download request failed'
-            this.showRetryOption = true
-            this.contactSupport = false
-          }
+          this.backgroundJobId = data.jobId
+          this.startExportJob()
         },
         error => {
           this.appState = 'error'
           this.error = error || 'E-Grades job preparation failed.'
           this.showRetryOption = true
-          this.contactSupport = false
+          this.contactSupport = true
         }
       )
     },
@@ -437,17 +431,19 @@ export default {
         getExportJobStatus(this.backgroundJobId).then(
           data => {
             this.jobStatus = data.jobStatus
-            // TODO: Remove the following line when done debugging.
-            console.log(`Export job status: ${this.jobStatus}`)
             if (['canceled', 'deferred', 'failed', 'stopped'].includes(this.jobStatus)) {
               clearInterval(this.exportTimer)
               this.switchToSelection()
-              this.error = `Sorry, the job to prepare eGrades is ${this.jobStatus}.`
+              this.error = `Sorry, the eGrades download ${this.jobStatus === 'failed' ? 'has' : 'was'} ${this.jobStatus}.`
+              this.contactSupport = true
+              this.appState = 'error'
             } else if (this.jobStatus === 'finished') {
               clearInterval(this.exportTimer)
               this.switchToSelection()
               this.$announcer.polite('Downloading export. Export form options presented for an additional download.')
               this.downloadGrades()
+            } else if (this.config.isVueAppDebugMode) {
+              console.log(`[DEBUG] jobStatus: ${this.jobStatus}`)
             }
           },
           error => {
@@ -479,9 +475,6 @@ export default {
   height: 15px;
   margin-bottom: -3px;
 }
-.grade-export-notice-pending-request {
-  margin: 15px auto;
-}
 .grade-export-refresh-button {
   font-size: 11px;
   padding: 1px 5px;
@@ -490,5 +483,24 @@ export default {
 .grade-export-select-pnp-cutoff {
   padding-right: 25px;
   width: fit-content;
+}
+.job-progress:after {
+  animation: ellipsis steps(4,end) 1800ms infinite;
+  content: "\2026";
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  width: 0;
+  -webkit-animation: ellipsis steps(4,end) 1800ms infinite;
+}
+@keyframes ellipsis {
+  to {
+    width: 1.25em;
+  }
+}
+@-webkit-keyframes ellipsis {
+  to {
+    width: 1.25em;
+  }
 }
 </style>
