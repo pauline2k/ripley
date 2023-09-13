@@ -18,10 +18,6 @@
           variant="tonal"
         >
           <div class="font-size-16">{{ jobStatusMessage }}</div>
-          <div v-if="size(jobStatusDetails)" class="font-weight-bold py-2">Messages:</div>
-          <ul class="px-4" aria-label="error messages">
-            <li v-for="(msg, index) in jobStatusDetails" :key="index">{{ msg }}</li>
-          </ul>
         </v-alert>
         <h2 id="sr-context-header" class="sr-only">Viewing Sections</h2>
         <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-white-border">
@@ -224,7 +220,7 @@ import Context from '@/mixins/Context'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
-import {each, filter, find, flatMap, includes, keys, last, map, set, size, toString, union, unset} from 'lodash'
+import {each, filter, find, flatMap, includes, keys, set, size, toString, union, unset} from 'lodash'
 
 export default {
   name: 'CourseManageOfficialSections',
@@ -246,7 +242,6 @@ export default {
     isAdmin: false,
     isCourseCreator: false,
     jobStatus: null,
-    jobStatusDetails: [],
     jobStatusMessage: '',
     showAlert: false
   }),
@@ -405,6 +400,7 @@ export default {
       if (update) {
         this.changeWorkflowStep('processing')
         this.jobStatus = 'sendingRequest'
+        this.jobStatusMessage = ''
         updateSiteSections(
           this.currentUser.canvasSiteId,
           update.addSections,
@@ -463,13 +459,10 @@ export default {
             this.jobStatus = response.jobStatus
             if (!(includes(['started', 'queued'], this.jobStatus))) {
               clearInterval(this.exportTimer)
-              if (this.jobStatus === 'finished' && response.workflowState === 'imported') {
+              if (this.jobStatus === 'finished') {
                 this.jobStatusMessage = 'The sections in this course site have been updated successfully.'
               } else {
                 this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
-                if (response.workflowState === 'imported_with_messages' && size(response.messages)) {
-                  this.jobStatusDetails = map(response.messages, message => last(message))
-                }
               }
               this.fetchFeed()
             }
