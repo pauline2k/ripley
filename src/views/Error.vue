@@ -5,42 +5,40 @@
     class="background-splash"
     fill-height
     fluid
-    :style="{backgroundImage: `url(${derelictOnAlienPlanet})`}"
   >
-    <v-row class="mt-4 pt-4">
-      <v-col>
-        <v-card
-          class="mx-auto"
-          :max-width="applicationState.stacktrace ? 640 : 480"
+    <v-card
+      class="elevation-1 mx-auto text-center"
+      :max-width="applicationState.stacktrace ? 640 : 480"
+      outlined
+    >
+      <v-img
+        v-if="!isInIframe"
+        alt="TV screen with colored bars"
+        aria-label="TV screen with colored bars"
+        :aspect-ratio="16 / 9"
+        src="@/assets/images/color-bars.png"
+      />
+      <v-card-title class="mt-3">
+        <h2>{{ header }}</h2>
+      </v-card-title>
+      <v-card-text v-if="applicationState.message">
+        <div
+          id="error-message"
+          aria-live="polite"
+          role="alert"
         >
-          <v-card-title class="ml-2 mt-3">
-            <h2>{{ header }}</h2>
-          </v-card-title>
-          <v-card-text v-if="applicationState.message">
-            <div
-              id="error-message"
-              aria-live="polite"
-              class="ml-2"
-              role="alert"
-            >
-              {{ applicationState.message }}
-              <div v-if="applicationState.stacktrace" class="py-3">
-                <pre>{{ applicationState.stacktrace }}</pre>
-              </div>
-            </div>
-          </v-card-text>
-          <v-card-subtitle class="ml-2 mb-7">
-            <ContactUsPrompt />
-          </v-card-subtitle>
-        </v-card>
-      </v-col>
-    </v-row>
+          {{ applicationState.message }}
+          <div v-if="applicationState.stacktrace" class="py-3">
+            <pre>{{ applicationState.stacktrace }}</pre>
+          </div>
+        </div>
+      </v-card-text>
+      <v-card-subtitle class="mb-7">
+        <ContactUsPrompt />
+      </v-card-subtitle>
+    </v-card>
   </v-container>
 </template>
-
-<script setup>
-import derelictOnAlienPlanet from '@/assets/images/derelict-on-alien-planet.jpg'
-</script>
 
 <script>
 import AppBar from '@/layouts/standalone/AppBar.vue'
