@@ -31,6 +31,7 @@
           id="cancel-and-return-to-site-creation"
           aria-label="Cancel and return to Site Creation Overview"
           class="mx-1"
+          :disabled="isCreating"
           type="button"
           variant="text"
           @click="cancel"
@@ -49,9 +50,9 @@
           <span v-if="!isCreating">Create a Project Site</span>
           <span v-if="isCreating">
             <v-progress-circular
-              class="mr-2"
-              color="primary"
+              class="mr-1"
               indeterminate
+              size="18"
             />
             Creating...
           </span>
@@ -85,19 +86,26 @@ export default {
       this.$router.push({path: '/create_site'})
     },
     create() {
+      this.error = null
       this.isCreating = true
       this.$announcer.polite('Creating new project site...')
-      createProjectSite(this.name).then(data => {
-        if (data.projectSiteUrl) {
-          if (this.$isInIframe) {
-            iframeParentLocation(data.projectSiteUrl)
+      createProjectSite(this.name).then(
+        data => {
+          if (data.projectSiteUrl) {
+            if (this.$isInIframe) {
+              iframeParentLocation(data.projectSiteUrl)
+            } else {
+              window.location.href = data.projectSiteUrl
+            }
           } else {
-            window.location.href = data.projectSiteUrl
+            this.error = 'Failed to create project site.'
           }
-        } else {
-          this.error = 'Failed to create project site.'
-          this.isCreating = false
+        },
+        error => {
+          this.error = error
         }
+      ).finally(() => {
+        this.isCreating = false
       })
     },
     trim

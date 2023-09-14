@@ -6,6 +6,7 @@
         v-model="uid"
         :aria-invalid="!!error"
         class="text-field"
+        :disabled="isLoggingIn"
         hide-details
         label="UID"
         required
@@ -19,6 +20,7 @@
         v-model="password"
         autocomplete="off"
         class="my-2 text-field"
+        :disabled="isLoggingIn"
         :error-messages="error"
         hide-details
         label="Password"
@@ -34,6 +36,7 @@
         v-model="canvasSiteId"
         :aria-invalid="!!error"
         class="text-field"
+        :disabled="isLoggingIn"
         hide-details
         label="Canvas Course ID (optional)"
         required
@@ -43,10 +46,18 @@
     </div>
     <v-btn
       id="basic-auth-submit-button"
-      :disabled="disableSubmit"
+      :disabled="disableSubmit || isLoggingIn"
       @click="devAuth"
     >
-      Dev Auth
+      <span v-if="isLoggingIn">
+        <v-progress-circular
+          class="mr-1"
+          indeterminate
+          size="18"
+        />
+        Dev Auth
+      </span>
+      <span v-if="!isLoggingIn">Dev Auth</span>
     </v-btn>
   </div>
 </template>
@@ -64,6 +75,7 @@ export default {
   data: () => ({
     canvasSiteId: undefined,
     error: undefined,
+    isLoggingIn: false,
     password: undefined,
     showError: false,
     uid: undefined
@@ -79,6 +91,7 @@ export default {
       const password = trim(this.password)
       const uid = trim(this.uid)
       if (uid && password) {
+        this.isLoggingIn = true
         devAuthLogIn(canvasSiteId, uid, password).then(
           data => {
             if (data.isAuthenticated) {
@@ -93,7 +106,9 @@ export default {
           error => {
             this.reportError(error)
           }
-        )
+        ).finally(() => {
+          this.isLoggingIn = false
+        })
       } else if (uid) {
         this.reportError('Password required')
       } else {
