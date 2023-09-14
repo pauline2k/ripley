@@ -340,7 +340,19 @@ def import_users(uids):
     with SisImportCsv.create(['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) as users_csv:
         users_csv.writerows(users)
         users_csv.filehandle.close()
-        return canvas.post_sis_import(attachment=users_csv.tempfile.name)
+
+        upload_dated_csv(
+            users_csv.tempfile.name,
+            'user-provision-sis-import',
+            'canvas_sis_imports',
+            utc_now().strftime('%F_%H-%M-%S'),
+        )
+
+        app.logger.debug('Posting user provisioning SIS import.')
+        sis_import = canvas.post_sis_import(attachment=users_csv.tempfile.name)
+        if not sis_import:
+            raise InternalServerError('User provisioning SIS import failed.')
+        return sis_import
 
 
 def _build_courses_by_term(teaching_sections, term_id, section_ids):
