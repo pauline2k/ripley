@@ -111,3 +111,5 @@ tox -e lint-vue-fix
 # Lint specific file(s)
 tox -e lint-py -- scripts/foo.py
 ```
+
+![Image of the spacecraft Derelict having crashed on the Acheron LV-426 moon.](src/assets/images/derelict-on-alien-planet.jpg)
