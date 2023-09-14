@@ -68,53 +68,61 @@ def add_user_to_course_section(uid, role, course_section_id):
     )
 
 
+def assign_owner_role(canvas_site, uid):
+    for role in get_roles():
+        if 'owner' in role.label.lower():
+            sis_user_profile = canvas.get_sis_user_profile(uid=uid)
+            canvas_site.enroll_user(
+                sis_user_profile['id'],
+                role_id=role.id,
+                enrollment_state='active',
+                notify=False,
+            )
+            app.logger.debug(f'UID {uid} assigned role {role.label} within Canvas project site {canvas_site.id}')
+            break
+
+
 def create_canvas_project_site(name, owner_uid):
     account_id = app.config['CANVAS_BERKELEY_ACCOUNT_ID']
+    sis_course_id = f'PROJ:{secrets.token_hex(8).upper()}'
     project_site = canvas.get_account(account_id, api_call=False).create_course(
         course_code=name,
         name=name,
-        sis_course_id=f'PROJ:{secrets.token_hex(8).upper()}',
+        sis_course_id=sis_course_id,
         term_id=app.config['CANVAS_PROJECTS_TERM_ID'],
     )
-    canvas_site_id = project_site['id']
-    course = canvas.get_course(course_id=canvas_site_id, api_call=False)
-    content_migration = course.create_content_migration(
-        migration_type=app.config['CANVAS_PROJECTS_TEMPLATE_ID'],
+    canvas_site_id = project_site.id
+    app.logger.debug(f"Project site '{name}' ({canvas_site_id}) created with sis_course_id = {sis_course_id}.")
+    # Fetch all site metadata.
+    project_site = canvas.get_course(course_id=canvas_site_id, api_call=False)
+    content_migration = project_site.create_content_migration(
+        migration_type='course_copy_importer',
+        settings={'source_course_id': app.config['CANVAS_PROJECTS_TEMPLATE_ID']},
     )
     migration_progress_id = None
     migration_start_time = None
-    if content_migration['workflow_state'] != 'completed':
-        migration_progress_id = content_migration['progress_url'].rsplit('/', 1)[-1]
+    if content_migration.workflow_state != 'completed' and content_migration.progress_url:
+        migration_progress_id = content_migration.progress_url.rsplit('/', 1)[-1]
         migration_start_time = utc_now()
-
     # Hide BigBlueButton, if present.
-    for tab in canvas.get_tabs(course_id=canvas_site_id):
-        tab_label = tab['label'].lower()
-        if all(b in tab_label for b in ['big', 'blue', 'button']):
-            set_tab_hidden(hidden=True, tab_id=tab['id'])
-            break
-    # Make the current_user the site owner.
-    sis_user_profile = canvas.get_sis_user_profile(uid=owner_uid)
-    owner_role = next((role for role in get_roles() if 'owner' in role.label.lower()), None)
-    course.enroll_user(
-        sis_user_profile['id'],
-        role_id=owner_role.id,
-        enrollment_state='active',
-        notify=False,
-    )
+    hide_big_blue_button(canvas_site_id)
+    # Make current_user the project site owner.
+    assign_owner_role(project_site, owner_uid)
+    # Track progress of project site creation.
     if migration_progress_id:
         import_state = 'new'
         # TODO: Improve on this hard-coded wait.
         for index in range(0, 10):
-            progress = canvas.get_progres(migration_progress_id)
-            import_state = progress['body']['workflow_state']
+            progress = canvas.get_progress(migration_progress_id)
+            import_state = progress.body.workflow_state if hasattr(progress, 'body') else None
             if import_state and import_state != 'completed':
                 sleep(1)
             else:
                 break
         elapsed_time = utc_now().timestamp() - migration_start_time.timestamp()
         status_description = 'completed' if import_state == 'completed' else 'not completed'
-        app.logger.warning(f'Template-import of Canvas project site {canvas_site_id} {status_description} after {elapsed_time} seconds')
+        app.logger.warning(f'Template-import of {canvas_site_id} {status_description} after {elapsed_time} seconds')
+    # Done.
     return project_site
 
 
@@ -182,6 +190,17 @@ def get_grantable_roles():
 
     roles = [role.label for role in sorted(grantable_roles, key=_canvas_role_sort_key)]
     return [role for i, role in enumerate(roles) if role not in roles[:i]]
+
+
+def hide_big_blue_button(canvas_site_id):
+    big_blue_button_found = False
+    for tab in canvas.get_tabs(course_id=canvas_site_id):
+        tab_label = tab.label.lower()
+        if all(b in tab_label for b in ['big', 'blue', 'button']):
+            set_tab_hidden(hidden=True, tab_id=tab.id)
+            big_blue_button_found = True
+            break
+    app.logger.debug(f"The 'BigBlueButton' tab was {'hidden' if big_blue_button_found else 'not found'}.")
 
 
 def parse_canvas_sis_section_id(sis_section_id):
