@@ -177,7 +177,7 @@ import Context from '@/mixins/Context'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
-import {each, get, size} from 'lodash'
+import {capitalize, each, get, size} from 'lodash'
 import {populateMailingList} from '@/api/mailing-list'
 import {pluralize, putFocusNextTick} from '@/utils'
 
