@@ -7,7 +7,7 @@
         <div class="pr-3">
           <label for="page-create-project-site-name" class="font-weight-medium text-subtitle-1">Project Site Name</label>
         </div>
-        <div class="w-50">
+        <div class="mr-16 w-50">
           <v-text-field
             id="page-create-project-site-name"
             v-model="name"
@@ -91,14 +91,10 @@ export default {
       this.$announcer.polite('Creating new project site...')
       createProjectSite(this.name).then(
         data => {
-          if (data.projectSiteUrl) {
-            if (this.$isInIframe) {
-              iframeParentLocation(data.projectSiteUrl)
-            } else {
-              window.location.href = data.projectSiteUrl
-            }
+          if (this.$isInIframe) {
+            iframeParentLocation(data.url)
           } else {
-            this.error = 'Failed to create project site.'
+            window.location.href = data.url
           }
         },
         error => {

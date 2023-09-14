@@ -114,7 +114,10 @@ def create_course_site():
 
     if not section_ids or not len(section_ids):
         raise BadRequestError('Required parameters are missing.')
-    job = enqueue(func=provision_course_site, args=(uid, site_name, site_abbreviation, term_slug, section_ids, bool(admin_by_ccns)))
+    job = enqueue(
+        func=provision_course_site,
+        args=(uid, site_name, site_abbreviation, term_slug, section_ids, bool(admin_by_ccns)),
+    )
     if not job:
         raise InternalServerError('Updates cannot be completed at this time.')
     return tolerant_jsonify(
