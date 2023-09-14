@@ -66,33 +66,47 @@ def add_user_to_course_section(uid, role, course_section_id):
     )
 
 
-def assign_owner_role(canvas_site, uid):
-    for role in get_roles():
-        if 'owner' in role.label.lower():
+def enroll_user_with_role(account_id, canvas_site, role_label, uid):
+    assigned = False
+    all_role_labels = []
+    role_label = role_label.lower()
+    for role in get_roles(account_id):
+        all_role_labels.append(role.label)
+        if role_label.lower() == role.label.lower():
             sis_user_profile = canvas.get_sis_user_profile(uid=uid)
             canvas_site.enroll_user(
-                sis_user_profile['id'],
-                role_id=role.id,
-                enrollment_state='active',
-                notify=False,
+                user=sis_user_profile['id'],
+                **{
+                    'enrollment[role_id]': role.id,
+                    'enrollment[enrollment_state]': 'active',
+                    'enrollment[notify]': False,
+                },
             )
+            assigned = True
             app.logger.debug(f'UID {uid} assigned role {role.label} within Canvas project site {canvas_site.id}')
             break
+    if not assigned:
+        app.logger.debug(f"""
+            UID {uid} was NOT assigned role '{role_label}' within Canvas site {canvas_site.id}.
+            Available roles are {all_role_labels}.
+        """)
 
 
 def create_canvas_project_site(name, owner_uid):
-    account_id = app.config['CANVAS_BERKELEY_ACCOUNT_ID']
+    account_id = app.config['CANVAS_PROJECTS_ACCOUNT_ID']
     sis_course_id = f'PROJ:{secrets.token_hex(8).upper()}'
     project_site = canvas.get_account(account_id, api_call=False).create_course(
-        course_code=name,
-        name=name,
-        sis_course_id=sis_course_id,
-        term_id=app.config['CANVAS_PROJECTS_TERM_ID'],
+        course={
+            'course_code': name,
+            'name': name,
+            'sis_course_id': sis_course_id,
+            'term_id': app.config['CANVAS_PROJECTS_TERM_ID'],
+        },
     )
     canvas_site_id = project_site.id
     app.logger.debug(f"Project site '{name}' ({canvas_site_id}) created with sis_course_id = {sis_course_id}.")
     # Fetch all site metadata.
-    project_site = canvas.get_course(course_id=canvas_site_id, api_call=False)
+    project_site = canvas.get_course(course_id=canvas_site_id)
     content_migration = project_site.create_content_migration(
         migration_type='course_copy_importer',
         settings={'source_course_id': app.config['CANVAS_PROJECTS_TEMPLATE_ID']},
@@ -105,7 +119,12 @@ def create_canvas_project_site(name, owner_uid):
     # Hide BigBlueButton, if present.
     hide_big_blue_button(canvas_site_id)
     # Make current_user the project site owner.
-    assign_owner_role(project_site, owner_uid)
+    enroll_user_with_role(
+        account_id=project_site.account_id,
+        canvas_site=project_site,
+        role_label='Owner',
+        uid=owner_uid,
+    )
     # Track progress of project site creation.
     if migration_progress_id:
         import_state = 'new'
@@ -121,7 +140,7 @@ def create_canvas_project_site(name, owner_uid):
         status_description = 'completed' if import_state == 'completed' else 'not completed'
         app.logger.warning(f'Template-import of {canvas_site_id} {status_description} after {elapsed_time} seconds')
     # Done.
-    return project_site
+    return canvas.get_course(project_site.id)
 
 
 def get_canvas_course_id(course_slug):
@@ -200,9 +219,9 @@ def canvas_site_to_api_json(canvas_site):
     canvas_site_id = canvas_site.id
     return {
         'canvasSiteId': canvas_site_id,
-        'courseCode': canvas_site.course_code if canvas_site else None,
-        'name': canvas_site.name.strip() if canvas_site else None,
-        'sisCourseId': canvas_site.sis_course_id if canvas_site else None,
+        'courseCode': canvas_site.course_code,
+        'name': canvas_site.name.strip(),
+        'sisCourseId': canvas_site.sis_course_id,
         'term': _canvas_site_term_json(canvas_site),
         'url': f"{app.config['CANVAS_API_URL']}/courses/{canvas_site_id}",
     }
@@ -442,7 +461,6 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         _add_instructor_to_site(
             uid,
             course,
-            term.to_sis_term_id(),
             section_roles,
             teacher_role,
             explicit_sections_for_instructor,
@@ -513,7 +531,6 @@ def _prepare_section_definition(
 def _add_instructor_to_site(
     uid,
     course,
-    sis_term_id,
     section_roles,
     teacher_role,
     explicit_sections_for_instructor,
@@ -651,7 +668,7 @@ def _subaccount_for_department(dept_name):
             accounts_csv.filehandle.close()
             sis_import = canvas.post_sis_import(attachment=accounts_csv.tempfile.name)
             if not sis_import:
-                raise InternalServerError(f'Subccount SIS import failed (account_id={subaccount_id}).')
+                raise InternalServerError(f'Sub-account SIS import failed (account_id={subaccount_id}).')
 
         subaccount = canvas.get_account(subaccount_id, use_sis_id=True)
         if subaccount:

@@ -185,9 +185,9 @@ def get_progress(progress_id):
         app.logger.exception(e)
 
 
-def get_roles():
+def get_roles(account_id=None):
     canvas = _get_canvas()
-    account = canvas.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'])
+    account = canvas.get_account(account_id or app.config['CANVAS_BERKELEY_ACCOUNT_ID'])
     roles = None
     try:
         roles = account.get_roles(show_inherited=True)
