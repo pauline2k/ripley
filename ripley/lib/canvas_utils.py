@@ -416,7 +416,12 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     if not course:
         raise InternalServerError(f'Canvas course lookup failed (sis_course_id={sis_course_id}).')
 
-    # TODO Adjust settings (hide conferences and grade distributions, set default view)
+    hide_big_blue_button(course.id)
+    course.update_settings(hide_distribution_graphs=True)
+
+    # This is currently undocumented. Described at https://community.canvaslms.com/thread/11645.
+    if course.default_view != 'feed':
+        course.update(course={'default_view': 'feed'})
 
     # Section definitions
     section_feeds = []
