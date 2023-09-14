@@ -29,16 +29,14 @@ import secrets
 from time import sleep
 
 from flask import current_app as app
-from flask_login import current_user
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.externals import canvas, data_loch
-from ripley.externals.canvas import get_course_sections, get_roles, set_tab_hidden
+from ripley.externals.canvas import get_roles, set_tab_hidden
 from ripley.externals.s3 import upload_dated_csv
 from ripley.lib.berkeley_course import course_section_name, course_to_api_json, section_to_api_json, \
     sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_basic_attributes, roles_from_affiliations
-from ripley.lib.egrade_utils import convert_per_grading_basis, get_canvas_course_student_grades
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from rq.job import get_current_job
@@ -158,38 +156,6 @@ def get_canvas_sis_section_id(term_id, sis_section_id, ensure_unique=False):
         if existing_section:
             raise InternalServerError(f'Could not generate unique ID for Canvas section {term_id}-{sis_section_id}')
     return section_id
-
-
-def get_grantable_roles():
-    permission_to_grantable_role_types = {
-        'add_designer_to_course': {'DesignerEnrollment'},
-        'add_observer_to_course': {'ObserverEnrollment'},
-        'add_student_to_course': {'StudentEnrollment'},
-        'add_ta_to_course': {'TaEnrollment'},
-        'add_teacher_to_course': {'TeacherEnrollment'},
-        'manage_students': {'StudentEnrollment', 'ObserverEnrollment'},
-        'manage_admin_users': {'DesignerEnrollment', 'TaEnrollment', 'TeacherEnrollment'},
-    }
-
-    def _has_permission(role, permission):
-        return role.permissions.get(permission, {}).get('enabled', False)
-
-    all_roles = {r.role: r for r in canvas.get_roles()}
-    grantable_roles = []
-
-    if current_user.is_admin:
-        grantable_roles = [role for role in all_roles.values() if role.base_role_type.endswith('Enrollment')]
-    else:
-        grantable_role_types = set()
-        for user_role in current_user.canvas_site_user_roles:
-            role = all_roles[user_role]
-            for permission, role_types in permission_to_grantable_role_types.items():
-                if _has_permission(role, permission):
-                    grantable_role_types.update(role_types)
-        grantable_roles = [role for role in all_roles.values() if role.base_role_type in grantable_role_types]
-
-    roles = [role.label for role in sorted(grantable_roles, key=_canvas_role_sort_key)]
-    return [role for i, role in enumerate(roles) if role not in roles[:i]]
 
 
 def hide_big_blue_button(canvas_site_id):
@@ -374,84 +340,6 @@ def import_users(uids):
         return sis_import
 
 
-def _build_courses_by_term(teaching_sections, term_id, section_ids):
-    courses_by_term = {}
-    for section_id, sections in groupby(teaching_sections, lambda s: s['section_id']):
-        sections = list(sections)
-        section = next((s for s in sections if s.get('is_co_instructor', False) is False), None)
-        co_instructor_sections = [s for s in sections if s.get('is_co_instructor', True) is True]
-        course_id = section['course_id']
-        term_id = section['term_id']
-        if term_id not in courses_by_term:
-            courses_by_term[term_id] = {}
-        if course_id not in courses_by_term[term_id]:
-            term = BerkeleyTerm.from_sis_term_id(term_id)
-            courses_by_term[term_id][course_id] = course_to_api_json(term, section)
-        section_feed = section_to_api_json(section, co_instructor_sections)
-        if section_ids:
-            section_feed['isCourseSection'] = section_id in section_ids
-        courses_by_term[term_id][course_id]['sections'].append(section_feed)
-    return courses_by_term
-
-
-def prepare_egrades_export(canvas_site_id, grade_type, pnp_cutoff, section_id, term_id):
-    app.logger.warning(f'E-Grades job started for course {canvas_site_id}')
-    official_grades = []
-    canvas_section_id = None
-    for canvas_course_section in get_course_sections(canvas_site_id):
-        berkeley_section_id, berkeley_term = parse_canvas_sis_section_id(canvas_course_section.sis_section_id)
-        if berkeley_section_id == section_id:
-            canvas_section_id = canvas_course_section.id
-            break
-    if canvas_section_id:
-        enrollments = canvas.get_section(canvas_section_id, api_call=False).get_enrollments()
-        for enrollment in enrollments:
-            grades = _extract_grades([enrollment])
-            student = enrollment.user
-            uid = student['login_id'] if 'login_id' in student else None
-            official_grade = {
-                'current_grade': grades['current_grade'],
-                'final_grade': grades['final_grade'],
-                'name': student['sortable_name'],
-                'override_grade': grades['override_grade'],
-                'uid': uid,
-            }
-            official_grades.append(official_grade)
-    else:
-        raise BadRequestError(f'Section {section_id} not found in context of Canvas course site {canvas_site_id}.')
-
-    rows = []
-    for row in get_canvas_course_student_grades(canvas_site_id=canvas_site_id, section_id=section_id, term_id=term_id):
-        grading_basis = (row['grading_basis'] or '').upper()
-        comment = None
-        if grading_basis in ['CPN', 'DPN', 'EPN', 'PNP']:
-            comment = 'P/NP grade'
-        elif grading_basis in ['ESU', 'SUS']:
-            comment = 'S/U grade'
-        elif grading_basis == 'CNC':
-            comment = 'C/NC grade'
-        override_grade = row.get('grades', {}).get('override_grade')
-        grade = convert_per_grading_basis(
-            row['grades'][f'{grade_type}_grade'],
-            override_grade,
-            grading_basis,
-            pnp_cutoff,
-        )
-        rows.append({
-            'ID': row['sid'],
-            'Name': row['name'],
-            'Grade': grade,
-            'Grading Basis': grading_basis,
-            'Comments': comment or None,
-        })
-    return {
-        'grade_type': grade_type,
-        'rows': rows,
-        'section_id': section_id,
-        'term_id': term_id,
-    }
-
-
 def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_ids, is_admin_by_ccns):
     term = BerkeleyTerm.from_slug(term_slug)
 
@@ -568,6 +456,26 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         job.meta['courseSiteUrl'] = f"{app.config['CANVAS_API_URL']}/courses/{course.id}"
         job.save_meta()
     _update_section_enrollments(sis_term_id, course, section_feeds, [], sis_import)
+
+
+def _build_courses_by_term(teaching_sections, term_id, section_ids):
+    courses_by_term = {}
+    for section_id, sections in groupby(teaching_sections, lambda s: s['section_id']):
+        sections = list(sections)
+        section = next((s for s in sections if s.get('is_co_instructor', False) is False), None)
+        co_instructor_sections = [s for s in sections if s.get('is_co_instructor', True) is True]
+        course_id = section['course_id']
+        term_id = section['term_id']
+        if term_id not in courses_by_term:
+            courses_by_term[term_id] = {}
+        if course_id not in courses_by_term[term_id]:
+            term = BerkeleyTerm.from_sis_term_id(term_id)
+            courses_by_term[term_id][course_id] = course_to_api_json(term, section)
+        section_feed = section_to_api_json(section, co_instructor_sections)
+        if section_ids:
+            section_feed['isCourseSection'] = section_id in section_ids
+        courses_by_term[term_id][course_id]['sections'].append(section_feed)
+    return courses_by_term
 
 
 def _prepare_section_definition(
@@ -712,15 +620,6 @@ def user_id_from_attributes(attributes):
         return f"UID:{attributes['ldap_uid']}"
 
 
-def _canvas_role_sort_key(role):
-    # The default Canvas UX orders roles by base role type, then built-ins first, then role ID.
-    role_type_order = ['StudentEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'DesignerEnrollment', 'ObserverEnrollment']
-    type_key = role_type_order.index(role.base_role_type)
-    # Custom roles have a "workflow_state" of "active" rather than "built_in".
-    workflow_key = 0 if role.workflow_state == 'built_in' else 1
-    return f'{type_key}_{workflow_key}_{role.id}'
-
-
 def _canvas_site_term_json(canvas_site):
     api_json = None
     if canvas_site:
@@ -733,18 +632,6 @@ def _canvas_site_term_json(canvas_site):
                 'name': term.to_english(),
             }
     return api_json
-
-
-def _extract_grades(enrollments):
-    keys = ['current_score', 'current_grade', 'final_score', 'final_grade', 'override_score', 'override_grade']
-    grade_hash = dict.fromkeys(keys, None)
-    enrollments = list(filter(lambda e: hasattr(e, 'grades'), enrollments))
-    if enrollments:
-        api_grades = enrollments[0].grades
-        for key in keys:
-            if key in api_grades:
-                grade_hash[key] = api_grades[key]
-    return grade_hash
 
 
 def _subaccount_for_department(dept_name):

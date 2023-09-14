@@ -24,12 +24,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from flask import current_app as app, request
-from flask_login import login_required
+from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required
 from ripley.externals import canvas
 from ripley.externals.data_loch import find_people_by_email, find_people_by_name, find_person_by_uid
-from ripley.lib.canvas_utils import add_user_to_course_section, get_grantable_roles
+from ripley.lib.canvas_utils import add_user_to_course_section
 from ripley.lib.http import tolerant_jsonify
 
 
@@ -43,7 +43,7 @@ def get_add_user_options(canvas_site_id):
     course_sections = canvas.get_course_sections(canvas_site_id)
     return tolerant_jsonify({
         'courseSections': [{'id': section.id, 'name': section.name} for section in course_sections if section.sis_section_id],
-        'grantingRoles': get_grantable_roles(),
+        'grantingRoles': _get_grantable_roles(),
     })
 
 
@@ -105,6 +105,47 @@ def _campus_user_to_api_json(user):
         'type': user['person_type'],
         'uid': user['ldap_uid'],
     }
+
+
+def _canvas_role_sort_key(role):
+    # The default Canvas UX orders roles by base role type, then built-ins first, then role ID.
+    role_type_order = ['StudentEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'DesignerEnrollment', 'ObserverEnrollment']
+    type_key = role_type_order.index(role.base_role_type)
+    # Custom roles have a "workflow_state" of "active" rather than "built_in".
+    workflow_key = 0 if role.workflow_state == 'built_in' else 1
+    return f'{type_key}_{workflow_key}_{role.id}'
+
+
+def _get_grantable_roles():
+    permission_to_grantable_role_types = {
+        'add_designer_to_course': {'DesignerEnrollment'},
+        'add_observer_to_course': {'ObserverEnrollment'},
+        'add_student_to_course': {'StudentEnrollment'},
+        'add_ta_to_course': {'TaEnrollment'},
+        'add_teacher_to_course': {'TeacherEnrollment'},
+        'manage_students': {'StudentEnrollment', 'ObserverEnrollment'},
+        'manage_admin_users': {'DesignerEnrollment', 'TaEnrollment', 'TeacherEnrollment'},
+    }
+
+    def _has_permission(role, permission):
+        return role.permissions.get(permission, {}).get('enabled', False)
+
+    all_roles = {r.role: r for r in canvas.get_roles()}
+    grantable_roles = []
+
+    if current_user.is_admin:
+        grantable_roles = [role for role in all_roles.values() if role.base_role_type.endswith('Enrollment')]
+    else:
+        grantable_role_types = set()
+        for user_role in current_user.canvas_site_user_roles:
+            role = all_roles[user_role]
+            for permission, role_types in permission_to_grantable_role_types.items():
+                if _has_permission(role, permission):
+                    grantable_role_types.update(role_types)
+        grantable_roles = [role for role in all_roles.values() if role.base_role_type in grantable_role_types]
+
+    roles = [role.label for role in sorted(grantable_roles, key=_canvas_role_sort_key)]
+    return [role for i, role in enumerate(roles) if role not in roles[:i]]
 
 
 def _search_users(search_text, search_type):
