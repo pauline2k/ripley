@@ -56,7 +56,8 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
         return 'bcourses_provision_site'
 
     def _run(self, params={}):
-        self.dry_run = params.get('isDryRun', None) or False
+        # Unlike its sibling bCourses jobs, this job is triggered from LTI tools and should ignore any global dry run setting.
+        self.dry_run = False
 
         this_sync = utc_now()
         timestamp = this_sync.strftime('%F_%H-%M-%S')
