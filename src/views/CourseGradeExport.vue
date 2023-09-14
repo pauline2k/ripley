@@ -1,28 +1,30 @@
 <template>
   <div v-if="!isLoading">
     <div v-if="appState === 'error'">
-      <v-alert
-        v-if="error"
-        class="ma-2"
-        role="alert"
-        :text="error"
-        type="warning"
-      >
-        <div v-if="contactSupport" class="py-1">
-          If this is not expected, please contact
-          <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink>
-          for further assistance.
-        </div>
-      </v-alert>
-      <div v-if="showRetryOption" class="py-6 text-center">
-        <v-btn
-          id="retry-selection-btn"
-          class="px-10"
-          color="primary"
-          @click="retrySelection"
+      <div class="ma-2 pl-2 pr-4">
+        <h1 class="grade-export-header mb-3 mt-2">Error</h1>
+        <v-alert
+          v-if="error"
+          role="alert"
+          :text="error"
+          type="warning"
         >
-          Retry
-        </v-btn>
+          <div v-if="contactSupport" class="py-1">
+            If this is not expected, please contact
+            <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink>
+            for further assistance.
+          </div>
+        </v-alert>
+        <div v-if="showRetryOption" class="py-6 text-center">
+          <v-btn
+            id="retry-selection-btn"
+            class="px-10"
+            color="primary"
+            @click="retrySelection"
+          >
+            Retry
+          </v-btn>
+        </div>
       </div>
     </div>
     <v-container v-if="appState === 'preselection'">
@@ -368,6 +370,7 @@ export default {
           }
         },
         error => {
+          this.appState = 'error'
           this.error = error
         }
       )
