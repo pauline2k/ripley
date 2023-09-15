@@ -106,21 +106,21 @@ def create_canvas_project_site(name, owner_uid):
     canvas_site_id = project_site.id
     app.logger.debug(f"Project site '{name}' ({canvas_site_id}) created with sis_course_id = {sis_course_id}.")
     # Fetch all site metadata.
-    project_site = canvas.get_course(course_id=canvas_site_id)
-    content_migration = project_site.create_content_migration(
+    content_migration = canvas.get_course(course_id=canvas_site_id, api_call=False).create_content_migration(
         migration_type='course_copy_importer',
         settings={'source_course_id': app.config['CANVAS_PROJECTS_TEMPLATE_ID']},
     )
     migration_progress_id = None
     migration_start_time = None
-    if content_migration.workflow_state != 'completed' and content_migration.progress_url:
+    workflow_state = content_migration.workflow_state.lower()
+    if workflow_state != 'completed' and content_migration.progress_url:
         migration_progress_id = content_migration.progress_url.rsplit('/', 1)[-1]
         migration_start_time = utc_now()
     # Hide BigBlueButton, if present.
     hide_big_blue_button(canvas_site_id)
     # Make current_user the project site owner.
     enroll_user_with_role(
-        account_id=project_site.account_id,
+        account_id=account_id,
         canvas_site=project_site,
         role_label='Owner',
         uid=owner_uid,

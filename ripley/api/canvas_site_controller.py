@@ -87,7 +87,7 @@ def create_project_site():
         params = request.get_json()
         name = (params.get('name', None) or '').strip()
         if not name or len(name) > 255:
-            raise BadRequestError(f"'Invalid project site name: '{name}'")
+            raise BadRequestError(f"Invalid project site name: '{name}'")
         project_site = create_canvas_project_site(name=name, owner_uid=current_user.uid)
         return tolerant_jsonify(canvas_site_to_api_json(project_site))
     else:
