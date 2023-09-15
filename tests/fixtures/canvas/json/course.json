@@ -42,6 +42,27 @@
         },
         "status_code": 200
     },
+    "get_by_id_3030303": {
+        "method": "GET",
+        "endpoint": "courses/3030303",
+        "data": {
+            "id": 3030303,
+            "course_code": "ASTRON 3",
+            "name": "ASTRON 3: Introduction to Modern Cosmology",
+            "sis_course_id": "CRS:ASTRON-3-2022-D",
+            "account_id": 1,
+            "root_account_id": 1,
+            "enrollment_term_id": 1,
+            "grading_standard_id": 1,
+            "term": {
+                "name": "Fall 2020",
+                "sis_term_id": "TERM:2020-D"
+            },
+            "time_zone": "America/Los_Angeles",
+            "workflow_state": "available"
+        },
+        "status_code": 200
+    },
     "get_by_id_8876542": {
         "method": "GET",
         "endpoint": "courses/8876542",
@@ -84,6 +105,19 @@
             },
             "time_zone": "America/Los_Angeles",
             "workflow_state": "available"
+        },
+        "status_code": 200
+    },
+    "get_content_migrations_3030303": {
+        "method": "POST",
+        "endpoint": "courses/3030303/content_migrations",
+        "data": {
+            "workflow_state": "completed",
+            "name": "Ash 🤖",
+            "short_name": "Ash 🤖",
+            "sortable_name": "🤖, Ash",
+            "integration_id": null,
+            "login_id": "30000"
         },
         "status_code": 200
     },
@@ -587,6 +621,11 @@
             }
         ],
         "status_code": 200
+    },
+    "get_tabs_3030303": {
+        "method": "GET",
+        "endpoint": "courses/3030303/tabs",
+        "data": []
     },
     "get_tabs_1234567": {
         "method": "GET",
@@ -1483,6 +1522,21 @@
                 }
             ],
             "email": "synthetic.ash@berkeley.edu"
+        },
+        "status_code": 200
+    },
+    "post_course_enrollments_3030303": {
+        "method": "POST",
+        "endpoint": "courses/3030303/enrollments",
+        "data": {
+            "user_id": 4567890,
+            "course_id": 1010101,
+            "type": "TeacherEnrollment",
+            "enrollment_state": "active",
+            "role": "TeacherEnrollment",
+            "last_activity_at": "2023-03-02T06:04:43Z",
+            "sis_user_id": "300300000",
+            "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
         },
         "status_code": 200
     },

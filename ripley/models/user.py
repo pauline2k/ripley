@@ -239,7 +239,8 @@ class User(UserMixin):
                         is_admin
                         or (canvas_user_data.get('canvasSiteId') and canvas_site_user_roles)
                         or canvas_user_data.get('canvasUserId'))
-                    affiliations = set(calnet_profile.get('affiliations', []) or [])
+                    affiliations = calnet_profile.get('affiliations', [])
+                    affiliations = set([affiliations] if isinstance(affiliations, str) else affiliations or [])
                     is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
                     is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
                     is_student = bool(canvas_user_data and canvas_user_data['isStudent'])

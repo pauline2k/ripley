@@ -154,6 +154,26 @@
         },
         "status_code": 200
     },
+    "profile_90000": {
+        "method": "GET",
+        "endpoint": "users/sis_login_id:90000/profile",
+        "data": {
+            "id": 5678234,
+            "name": "Bolaji Badejo",
+            "short_name": "Bolaji Badejo",
+            "sortable_name": "Badejo, Bolaji",
+            "sis_user_id": "30090000",
+            "avatar_url": "https://bcourses.berkeley.edu/images/messages/avatar-50.png",
+            "integration_id": null,
+            "title": "Puppet Master",
+            "bio": null,
+            "primary_email": "bolaji.badejo@berkeley.edu",
+            "login_id": "90000",
+            "time_zone": "America/Los_Angeles",
+            "locale": null
+        },
+        "status_code": 200
+    },
     "profile_test_admin_id": {
         "method": "GET",
         "endpoint": "users/sis_login_id:test_admin_id/profile",
