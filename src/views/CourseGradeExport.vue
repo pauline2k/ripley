@@ -37,13 +37,21 @@
             <span v-if="!noGradingStandardEnabled">
               You have already set a grading scheme.
               You can view your grading scheme or select an alternate grading scheme in
-              <a id="canvas-course-settings-href" :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`">
+              <a
+                id="canvas-course-settings-href"
+                :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`"
+                target="_top"
+              >
                 Course Settings
               </a>
             </span>
             <span v-if="noGradingStandardEnabled">
               Set a grading scheme in
-              <a id="canvas-course-settings-href" :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`">
+              <a
+                id="canvas-course-settings-href"
+                :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`"
+                target="_top"
+              >
                 Course Settings
               </a>
               and return once completed.
