@@ -220,7 +220,7 @@ class TestGetAddUserOptions:
             assert 'courseSections' in results
             assert results['courseSections'] == [{'id': 10000, 'name': 'Section A'}, {'id': 20000, 'name': 'Section B'}]
             assert 'grantingRoles' in results
-            assert results['grantingRoles'] == ['Student', 'Observer']
+            assert results['grantingRoles'] == ['Student', 'Waitlist Student', 'Observer']
 
     def test_lead_ta(self, client, app, fake_auth):
         """Allows Lead TA."""
@@ -236,7 +236,7 @@ class TestGetAddUserOptions:
             assert 'courseSections' in results
             assert results['courseSections'] == [{'id': 10000, 'name': 'Section A'}, {'id': 20000, 'name': 'Section B'}]
             assert 'grantingRoles' in results
-            assert results['grantingRoles'] == ['Student', 'TA', 'Lead TA', 'Reader', 'Observer']
+            assert results['grantingRoles'] == ['Student', 'Waitlist Student', 'TA', 'Lead TA', 'Reader', 'Observer']
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -252,7 +252,7 @@ class TestGetAddUserOptions:
             assert 'courseSections' in results
             assert results['courseSections'] == [{'id': 10000, 'name': 'Section A'}, {'id': 20000, 'name': 'Section B'}]
             assert 'grantingRoles' in results
-            assert results['grantingRoles'] == ['Student', 'Teacher', 'TA', 'Lead TA', 'Reader', 'Designer', 'Observer']
+            assert results['grantingRoles'] == ['Student', 'Waitlist Student', 'Teacher', 'TA', 'Lead TA', 'Reader', 'Designer', 'Observer']
 
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
@@ -268,7 +268,7 @@ class TestGetAddUserOptions:
             assert 'courseSections' in results
             assert results['courseSections'] == [{'id': 10000, 'name': 'Section A'}, {'id': 20000, 'name': 'Section B'}]
             assert 'grantingRoles' in results
-            assert results['grantingRoles'] == ['Student', 'Teacher', 'TA', 'Lead TA', 'Reader', 'Designer', 'Observer']
+            assert results['grantingRoles'] == ['Student', 'Waitlist Student', 'Teacher', 'TA', 'Lead TA', 'Reader', 'Designer', 'Observer']
 
 
 def _api_get_add_user_options(client, canvas_site_id, expected_status_code=200):

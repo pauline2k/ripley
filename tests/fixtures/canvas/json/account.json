@@ -1039,6 +1039,59 @@
                 }
             },
             {
+                "id": 1531,
+                "role": "Waitlist Student",
+                "label": "Waitlist Student",
+                "last_updated_at": "2014-10-17T18:32:13Z",
+                "base_role_type": "StudentEnrollment",
+                "workflow_state": "active",
+                "created_at": "2013-07-16T12:41:32-07:00",
+                "permissions": {
+                    "add_designer_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_designer_enrollments"
+                    },
+                    "add_observer_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_observer_enrollments"
+                    },
+                    "add_student_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_student_enrollments"
+                    },
+                    "add_ta_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_ta_enrollments"
+                    },
+                    "add_teacher_to_course": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false,
+                        "group": "manage_course_teacher_enrollments"
+                    },
+                    "manage_students": {
+                        "enabled": false,
+                        "locked": true,
+                        "readonly": true,
+                        "explicit": false
+                    }
+                },
+                "is_account_role": false
+            },
+            {
                 "id": 6307,
                 "role": "Reader",
                 "label": "Reader",
