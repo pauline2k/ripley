@@ -1,17 +1,18 @@
 <template>
   <div class="template-sections-table-container">
-    <div v-if="mode === 'createCourseForm' && sections.length > 1" class="d-flex pl-2">
+    <div v-if="mode === 'createCourseForm' && sections.length > 1" class="pl-3">
       <v-checkbox
         :id="`select-all-toggle-${sections[0].id}`"
         v-model="allSelected"
-        class="my-2"
+        denisty="compact"
+        hide-details
         :indeterminate="indeterminate"
         @change="toggleAll"
       >
-        <div class="text-secondary">
+        <template #label>
           Select {{ allSelected ? 'None' : 'All' }}
           <span class="sr-only">of the course sections</span>
-        </div>
+        </template>
       </v-checkbox>
     </div>
     <table id="template-sections-table" class="bg-white">
@@ -31,13 +32,15 @@
       </thead>
       <tbody v-for="section in displayableSections" :key="section.id">
         <tr :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}`" :class="sectionDisplayClass[section.id]">
-          <td v-if="mode === 'createCourseForm'" class="align-top template-sections-table-cell-checkbox pl-2">
+          <td v-if="mode === 'createCourseForm'" class="align-top template-sections-table-cell-checkbox pl-2 pt-0">
             <v-checkbox
               :id="`template-canvas-manage-sections-checkbox-${section.id}`"
               v-model="selected"
               :aria-checked="section.selected"
               :aria-label="`Checkbox for ${section.courseCode} ${section.name}`"
               class="ml-2"
+              density="compact"
+              hide-details
               name="section-section-id"
               size="sm"
               :value="section.id"
@@ -281,8 +284,8 @@ export default {
       this.stageDeleteAction(section)
       this.eventHub.emit('sections-table-updated')
     },
-    toggleAll(checked) {
-      this.selected = checked ? map(this.sections, 'id').slice() : []
+    toggleAll() {
+      this.selected = this.allSelected ? map(this.sections, 'id').slice() : []
     },
     updateSectionDisplay() {
       this.displayableSections = filter(this.sections, s => this.rowDisplayLogic(this.mode, s))
@@ -303,7 +306,7 @@ td {
   padding: 10px;
 }
 .template-sections-table-cell-checkbox {
-  width: 30px;
+  width: 5%;
 }
 .template-sections-table-row-disabled td {
   color: $color-grey-disabled !important;
