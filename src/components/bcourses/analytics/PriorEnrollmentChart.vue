@@ -21,6 +21,7 @@
     <highcharts :options="chartSettings"></highcharts>
   </div>
 </template>
+
 <script>
 import Context from '@/mixins/Context'
 import {Chart} from 'highcharts-vue'

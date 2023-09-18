@@ -86,23 +86,25 @@ export default {
       this.$router.push({path: '/create_site'})
     },
     create() {
-      this.error = null
-      this.isCreating = true
-      this.$announcer.polite('Creating new project site...')
-      createProjectSite(this.name).then(
-        data => {
-          if (this.$isInIframe) {
-            iframeParentLocation(data.url)
-          } else {
-            window.location.href = data.url
+      if (!this.isCreating && trim(name)) {
+        this.error = null
+        this.isCreating = true
+        this.$announcer.polite('Creating new project site...')
+        createProjectSite(this.name).then(
+          data => {
+            if (this.$isInIframe) {
+              iframeParentLocation(data.url)
+            } else {
+              window.location.href = data.url
+            }
+          },
+          error => {
+            this.error = error
           }
-        },
-        error => {
-          this.error = error
-        }
-      ).finally(() => {
-        this.isCreating = false
-      })
+        ).finally(() => {
+          this.isCreating = false
+        })
+      }
     },
     trim
   }
