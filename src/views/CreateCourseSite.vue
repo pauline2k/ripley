@@ -12,7 +12,7 @@
         </div>
         <div>
           <CreateCourseSiteHeader
-            v-if="isAdmin && currentWorkflowStep !== 'monitoringJob'"
+            v-if="isAdmin && currentWorkflowStep !== 'processing'"
             :admin-mode="adminMode"
             :admin-terms="adminTerms"
             :current-admin-term="currentAdminTerm"
