@@ -35,6 +35,7 @@ dump.rdb
 tmp/
 .DS_Store
 *.log
+*.log.*
 .cache
 .flask_cache/
 .pytest_cache/

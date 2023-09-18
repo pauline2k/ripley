@@ -43,7 +43,7 @@ def get_add_user_options(canvas_site_id):
     course_sections = canvas.get_course_sections(canvas_site_id)
     return tolerant_jsonify({
         'courseSections': [{'id': section.id, 'name': section.name} for section in course_sections if section.sis_section_id],
-        'grantingRoles': _get_grantable_roles(),
+        'grantingRoles': _get_grantable_roles(course.account_id),
     })
 
 
@@ -58,7 +58,7 @@ def canvas_site_add_user(canvas_site_id):
     course_section_id = params.get('sectionId')
     role_label = params.get('role')
     uid = params.get('uid')
-    all_roles = canvas.get_roles()
+    all_roles = canvas.get_roles(course.account_id)
     role = next((r for r in all_roles if r.label == role_label), None)
     if not role:
         raise BadRequestError(f'Unknown role: {role_label}.')
@@ -116,7 +116,7 @@ def _canvas_role_sort_key(role):
     return f'{type_key}_{workflow_key}_{role.id}'
 
 
-def _get_grantable_roles():
+def _get_grantable_roles(account_id):
     permission_to_grantable_role_types = {
         'add_designer_to_course': {'DesignerEnrollment'},
         'add_observer_to_course': {'ObserverEnrollment'},
@@ -130,7 +130,7 @@ def _get_grantable_roles():
     def _has_permission(role, permission):
         return role.permissions.get(permission, {}).get('enabled', False)
 
-    all_roles = {r.role: r for r in canvas.get_roles()}
+    all_roles = {r.role: r for r in canvas.get_roles(account_id)}
     grantable_roles = []
 
     if current_user.is_admin:
