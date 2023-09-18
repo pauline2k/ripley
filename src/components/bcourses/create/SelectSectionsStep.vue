@@ -173,8 +173,7 @@ export default {
   }),
   methods: {
     cancel() {
-      const path = this.$isInIframe ? '/lti/create_site' : '/create_site'
-      this.$router.push({path})
+      this.$router.push({path: '/create_site'})
     },
     pluralize,
     size,

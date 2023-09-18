@@ -102,12 +102,10 @@ export default {
   },
   methods: {
     goCreateCourseSite() {
-      const path = this.$isInIframe ? '/lti/create_course_site' : '/create_course_site'
-      this.$router.push({path})
+      this.$router.push({path: '/create_course_site'})
     },
     goCreateProjectSite() {
-      const path = this.$isInIframe ? '/lti/create_project_site' : '/create_project_site'
-      this.$router.push({path})
+      this.$router.push({path: '/create_project_site'})
     }
   }
 }
