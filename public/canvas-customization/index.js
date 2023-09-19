@@ -13,13 +13,13 @@
     }
 
     // Load the JavaScript customizations
-    $.getScript(window.RIPLEY + '/static/canvas/canvas-customization.js');
+    $.getScript(window.RIPLEY + '/canvas-customization/canvas-customization.js');
 
     // Load the CSS customizations
     var css = $('<link>', {
       'rel': 'stylesheet',
       'type': 'text/css',
-      'href': window.RIPLEY + '/static/canvas/canvas-customization.css'
+      'href': window.RIPLEY + '/canvas-customization/canvas-customization.css'
     });
     $('head').append(css);
   };
