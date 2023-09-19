@@ -6,6 +6,7 @@
       aria-controls="page-create-course-site-admin-section-loader-form"
       class="page-create-course-site-admin-mode-switch pb-2 ptl-3 pr-2 pt-2"
       color="primary"
+      :disabled="isFetching"
       @click="setMode(adminMode === 'actAs' ? 'bySectionId' : 'actAs')"
     >
       Switch to {{ adminMode === 'actAs' ? 'Section ID input' : 'acting as instructor' }}
@@ -25,10 +26,11 @@
                 id="instructor-uid"
                 v-model="uid"
                 density="compact"
+                :disabled="isFetching"
                 placeholder="Instructor UID"
                 role="search"
                 variant="outlined"
-              ></v-text-field>
+              />
             </v-col>
             <v-col>
               <div>
@@ -37,8 +39,8 @@
                   aria-controls="page-create-course-site-steps-container"
                   aria-label="Load official sections for instructor"
                   color="primary"
+                  :disabled="isFetching || !uid"
                   type="submit"
-                  :disabled="!uid"
                 >
                   As instructor
                 </v-btn>
@@ -57,6 +59,7 @@
                 name="adminTerm"
                 :aria-selected="currentAdminTerm === term.slug"
                 :color="currentAdminTerm === term.slug ? 'primary' : ''"
+                :disabled="isFetching"
                 role="tab"
                 @click="switchAdminTerm(term)"
                 @keyup.enter="switchAdminTerm(term)"
@@ -75,17 +78,26 @@
                 id="page-create-course-site-section-id-list"
                 v-model="sectionIds"
                 class="page-create-course-site-section-id-input"
+                :disabled="isFetching"
                 placeholder="Paste your list of Section IDs here, separated by commas or spaces"
-              ></textarea>
+              />
             </div>
             <v-btn
               id="sections-by-ids-button"
               aria-controls="page-create-course-site-steps-container"
               color="primary"
+              :disabled="!trim(sectionIds) || isFetching"
               type="submit"
-              :disabled="!trim(sectionIds)"
             >
-              Review matching Section IDs
+              <span v-if="isFetching">
+                <v-progress-circular
+                  class="mr-1"
+                  indeterminate
+                  size="18"
+                />
+                Fetching sections...
+              </span>
+              <span v-if="!isFetching">Review matching Section IDs</span>
             </v-btn>
           </div>
         </form>
@@ -104,7 +116,7 @@
 
 <script>
 import Context from '@/mixins/Context'
-import {partition, size, trim} from 'lodash'
+import {partition, size, split, trim} from 'lodash'
 import {putFocusNextTick} from '@/utils'
 
 export default {
@@ -135,6 +147,10 @@ export default {
     fetchFeed: {
       required: true,
       type: Function
+    },
+    isFetching: {
+      required: true,
+      type: Boolean
     },
     setAdminActingAs: {
       required: true,
@@ -177,13 +193,13 @@ export default {
     submit() {
       if (this.adminMode === 'bySectionId') {
         const trimmed = trim(this.sectionIds)
-        const split = split(trimmed, /[,\r\n\t ]+/)
-        const notNumeric = partition(split, sectionId => /^\d+$/.test(trim(sectionId)))[1]
+        const sectionIds = split(trimmed, /[,\r\n\t ]+/)
+        const notNumeric = partition(sectionIds, sectionId => /^\d+$/.test(trim(sectionId)))[1]
         if (notNumeric.length) {
           this.error = 'Section IDs must be numeric.'
           putFocusNextTick('page-create-course-site-section-id-list')
         } else {
-          this.setAdminBySectionIds(split)
+          this.setAdminBySectionIds(sectionIds)
           this.fetchFeed()
         }
       } else {

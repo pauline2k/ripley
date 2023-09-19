@@ -17,6 +17,7 @@
             :admin-terms="adminTerms"
             :current-admin-term="currentAdminTerm"
             :fetch-feed="fetchFeed"
+            :is-fetching="isFetching"
             :set-admin-acting-as="setAdminActingAs"
             :set-admin-by-section-ids="setAdminBySectionIds"
             :set-admin-mode="setAdminMode"
@@ -28,7 +29,7 @@
       <div v-if="isAdmin && !currentWorkflowStep">
         Use inputs above to choose courses by Section ID or as an instructor.
       </div>
-      <div id="page-create-course-site-steps-container" class="p-0">
+      <div v-if="!isFetching" id="page-create-course-site-steps-container" class="p-0">
         <div
           v-if="currentWorkflowStep === 'selecting'"
           id="page-create-course-site-selecting-step"
@@ -132,6 +133,7 @@ export default {
       supportInfo: undefined
     },
     isAdmin: undefined,
+    isFetching: false,
     isTeacher: undefined,
     isUidInputMode: true,
     jobStatus: undefined,
@@ -161,13 +163,12 @@ export default {
     clearCourseSiteJob() {
       this.backgroundJobId = undefined
       this.jobStatus = undefined
-      this.completedSteps = undefined
       this.percentComplete = undefined
       this.showMaintenanceNotice = true
     },
     fetchFeed() {
+      this.isFetching = true
       this.clearCourseSiteJob()
-      this.currentWorkflowStep = 'selecting'
       this.selectedSectionsList = []
       this.$announcer.polite('Loading courses and sections')
 
@@ -186,6 +187,7 @@ export default {
             })
           })
           this.updateSelected()
+          this.currentWorkflowStep = 'selecting'
         }
         if (!this.isAdmin && !this.usersClassCount) {
           this.displayError = 'Sorry, you are not an admin user and you have no classes.'
@@ -207,7 +209,9 @@ export default {
         this.adminMode,
         semester,
         this.isAdmin
-      ).then(onSuccess, onError)
+      ).then(onSuccess, onError).finally(() => {
+        this.isFetching = false
+      })
     },
     fillCourseSites(semestersFeed, canvasSiteId=null) {
       each(semestersFeed, semester => {

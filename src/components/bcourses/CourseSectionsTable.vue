@@ -42,7 +42,6 @@
               density="compact"
               hide-details
               name="section-section-id"
-              size="sm"
               :value="section.id"
             />
           </td>
