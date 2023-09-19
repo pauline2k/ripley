@@ -149,7 +149,7 @@
               class="user-search-notice rounded-0 mx-8 mb-4"
               elevation="0"
             >
-              <!-- Note: This help text content is also maintained in the public/canvas/canvas-customization.js script -->
+              <!-- Note: This help text content is also maintained in the canvas-customization.js script -->
               <dl class="user-search-notice-description-list">
                 <dt class="user-search-notice-description-term">UC Berkeley Faculty, Staff and Students</dt>
                 <dd class="user-search-notice-description">
