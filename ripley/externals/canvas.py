@@ -314,14 +314,15 @@ def post_sis_import(attachment, extension='csv'):
 
 
 def set_tab_hidden(tab_id, hidden):
-    tab = None
+    success = False
     c = _get_canvas()
     try:
-        tab = Tab(c._Canvas__requester, {'id': tab_id}).update(hidden=hidden)
+        Tab(c._Canvas__requester, {'id': tab_id}).update(hidden=hidden)
+        success = True
     except Exception as e:
         app.logger.error(f'Failed to update Canvas course site tab (id={tab_id})')
         app.logger.exception(e)
-    return tab
+    return success
 
 
 def _get_canvas(api_url=None):
