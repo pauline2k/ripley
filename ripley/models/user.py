@@ -115,7 +115,7 @@ class User(UserMixin):
 
     @property
     def is_canvas_admin(self):
-        return self.user['isCanvasAdmin']
+        return self.user.get('isCanvasAdmin')
 
     @property
     def is_faculty(self):

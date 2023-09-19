@@ -362,6 +362,72 @@ class TestCanvasSiteProvisionSections:
             assert course['slug'] == 'astron-218-2023-B'
 
 
+class TestCreateCourseSite:
+
+    @classmethod
+    def _api_create_course_site(cls, client, params=None, expected_status_code=200):
+        response = client.post(
+            '/api/canvas_site/provision/create',
+            data=json.dumps(params or {}),
+            content_type='application/json',
+        )
+        assert response.status_code == expected_status_code
+        return response.json
+
+    @classmethod
+    def _api_get_creation_job_status(cls, client, job_id, expected_status_code=200):
+        response = client.get(f'/api/canvas_site/provision/status?jobId={job_id}')
+        print(response.json)
+        assert response.status_code == expected_status_code
+        return response.json
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        self._api_create_course_site(client, expected_status_code=401)
+        self._api_get_creation_job_status(client, '1234', expected_status_code=401)
+
+    def test_unauthorized_users(self, client, app, fake_auth):
+        """Denies Reader."""
+        with requests_mock.Mocker() as m:
+            account_id = '129407'
+            canvas_site_id = '8876542'
+            for unauthorized_uid, user_description in {
+                not_enrolled_uid: 'Non-enrolled user',
+                reader_uid: 'Reader',
+                student_uid: 'Student',
+                ta_uid: 'TA',
+            }.items():
+                has_canvas_account = unauthorized_uid != no_canvas_account_uid
+                register_canvas_uris(app, {
+                    'account': ['get_admins', f'get_courses_{account_id}'],
+                    'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', 'get_enrollments_4567890'],
+                    'user': [f'profile_{unauthorized_uid}'] if has_canvas_account else [],
+                }, m)
+                fake_auth.login(canvas_site_id=canvas_site_id, uid=unauthorized_uid)
+                self._api_create_course_site(client, expected_status_code=401)
+                self._api_get_creation_job_status(client, '1234', expected_status_code=401)
+
+    def test_create_course_site_teacher(self, client, app, fake_auth):
+        """Allows teacher."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}'],
+                'user': [f'profile_{teacher_uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            api_json = self._api_create_course_site(
+                client,
+                params={'sectionIds': [10000]},
+            )
+            assert api_json['jobId']
+            assert api_json['jobStatus'] == 'sendingRequest'
+
+            api_json = self._api_get_creation_job_status(client, api_json['jobId'])
+            assert api_json['jobStatus']
+
+
 class TestCreateProjectSite:
 
     @classmethod
