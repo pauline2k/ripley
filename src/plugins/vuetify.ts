@@ -24,6 +24,7 @@ import {VProgressLinear} from 'vuetify/components/VProgressLinear'
 import {VSnackbar} from 'vuetify/components/VSnackbar'
 import {VSwitch} from 'vuetify/components/VSwitch'
 import {VTooltip} from 'vuetify/components/VTooltip'
+import {VTextarea} from 'vuetify/components/VTextarea'
 import {VTextField} from 'vuetify/components/VTextField'
 
 // @ts-ignore
@@ -68,6 +69,7 @@ export default createVuetify({
     VSnackbar,
     VSpacer,
     VSwitch,
+    VTextarea,
     VTextField,
     VTooltip
   },
@@ -91,6 +93,7 @@ export default createVuetify({
     themes: {
       light: {
         colors: {
+          alert: '#fef6e6',
           error: '#b94a48',
           info: '#3a87ad',
           primary: '#3b7ea1',
