@@ -15,9 +15,9 @@
             density="comfortable"
             :disabled="isCreating"
             hide-details
-            maxlength="50"
-            required
+            maxlength="255"
             placeholder="Enter a name for your site"
+            required
             variant="outlined"
             @keydown.enter="create"
           />
