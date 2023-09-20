@@ -125,19 +125,16 @@ def create_canvas_project_site(name, owner_uid):
         role_label='Owner',
         uid=owner_uid,
     )
-    # Track progress of project site creation.
     if migration_progress_id:
-        import_state = 'new'
-        # TODO: Improve on this hard-coded wait.
-        for index in range(0, 10):
+        while True:
+            # Track progress of project site creation.
             progress = canvas.get_progress(migration_progress_id)
-            import_state = progress.body.workflow_state if hasattr(progress, 'body') else None
-            if import_state and import_state != 'completed':
-                sleep(1)
-            else:
+            elapsed_time = utc_now().timestamp() - migration_start_time.timestamp()
+            if progress.workflow_state == 'completed' or elapsed_time > 60:
                 break
-        elapsed_time = utc_now().timestamp() - migration_start_time.timestamp()
-        status_description = 'completed' if import_state == 'completed' else 'not completed'
+            else:
+                sleep(1)
+        status_description = 'completed' if progress.workflow_state == 'completed' else 'not completed'
         app.logger.warning(f'Template-import of {canvas_site_id} {status_description} after {elapsed_time} seconds')
     # Done.
     return canvas.get_course(project_site.id)
@@ -182,10 +179,9 @@ def hide_big_blue_button(canvas_site_id):
     for tab in canvas.get_tabs(course_id=canvas_site_id):
         tab_label = tab.label.lower()
         if all(b in tab_label for b in ['big', 'blue', 'button']):
-            set_tab_hidden(hidden=True, tab_id=tab.id)
-            big_blue_button_found = True
+            big_blue_button_found = set_tab_hidden(hidden=True, tab_id=tab.id)
             break
-    app.logger.debug(f"The 'BigBlueButton' tab was {'hidden' if big_blue_button_found else 'not found'}.")
+    app.logger.debug(f"The 'BigBlueButton' tab was {'hidden' if big_blue_button_found else 'NOT found'}.")
 
 
 def parse_canvas_sis_section_id(sis_section_id):
