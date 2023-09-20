@@ -86,7 +86,7 @@ export default {
       this.$router.push({path: '/create_site'})
     },
     create() {
-      if (!this.isCreating && trim(name)) {
+      if (!this.isCreating && trim(this.name)) {
         this.error = null
         this.isCreating = true
         this.$announcer.polite('Creating new project site...')
