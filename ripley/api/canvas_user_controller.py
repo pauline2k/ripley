@@ -35,21 +35,21 @@ from ripley.lib.http import tolerant_jsonify
 
 @app.route('/api/canvas_user/<canvas_site_id>/options')
 @login_required
-@canvas_role_required('TaEnrollment', 'TeacherEnrollment', 'Lead TA')
+@canvas_role_required('DesignerEnrollment', 'Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
 def get_add_user_options(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if not course:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
     course_sections = canvas.get_course_sections(canvas_site_id)
     return tolerant_jsonify({
-        'courseSections': [{'id': section.id, 'name': section.name} for section in course_sections if section.sis_section_id],
+        'courseSections': [{'id': section.id, 'name': section.name} for section in course_sections],
         'grantingRoles': _get_grantable_roles(course.account_id),
     })
 
 
 @app.route('/api/canvas_user/<canvas_site_id>/users', methods=['POST'])
 @login_required
-@canvas_role_required('TaEnrollment', 'TeacherEnrollment', 'Lead TA')
+@canvas_role_required('DesignerEnrollment', 'Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
 def canvas_site_add_user(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if not course:
@@ -76,7 +76,7 @@ def canvas_site_add_user(canvas_site_id):
 
 @app.route('/api/canvas_user/search')
 @login_required
-@canvas_role_required('TaEnrollment', 'TeacherEnrollment', 'Lead TA')
+@canvas_role_required('DesignerEnrollment', 'Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
 def search_users():
     search_text = request.args.get('searchText')
     if not search_text:

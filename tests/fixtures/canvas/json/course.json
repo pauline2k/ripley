@@ -121,7 +121,7 @@
         },
         "status_code": 200
     },
-    "get_enrollments_4567890": {
+    "get_enrollments_8876542_4567890": {
         "method": "GET",
         "endpoint": "courses/8876542/users/4567890?include=enrollments",
         "data": {
@@ -151,7 +151,7 @@
         },
         "status_code": 200
     },
-    "get_enrollments_4567890_past": {
+    "get_enrollments_8876542_4567890_past": {
         "method": "GET",
         "endpoint": "courses/1010101/users/4567890?include=enrollments",
         "data": {
@@ -181,7 +181,37 @@
         },
         "status_code": 200
     },
-    "get_enrollments_6789012": {
+    "get_enrollments_8876542_5678234": {
+        "method": "GET",
+        "endpoint": "courses/8876542/users/5678234?include=enrollments",
+        "data": {
+            "id": 5678234,
+            "name": "Bolaji Badejo",
+            "short_name": "Bolaji Badejo",
+            "sortable_name": "Badejo, Bolaji",
+            "integration_id": null,
+            "login_id": "90000",
+            "sis_user_id": "30090000",
+            "enrollments": [
+                {
+                    "id": 103,
+                    "user_id": 5678234,
+                    "course_id": 8876542,
+                    "course_section_id": 10000,
+                    "type": "TaEnrollment",
+                    "enrollment_state": "active",
+                    "role": "Owner",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "30090000",
+                    "sis_course_id": "CRS:ANTHRO-189-2023-B",
+                    "sis_section_id": "2023-B-32936",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/5678234"
+                }
+            ]
+        },
+        "status_code": 200
+    },
+    "get_enrollments_8876542_6789012": {
         "method": "GET",
         "endpoint": "courses/8876542/users/6789012?include=enrollments",
         "data": {
@@ -211,7 +241,7 @@
         },
         "status_code": 200
     },
-    "get_enrollments_7890123": {
+    "get_enrollments_8876542_7890123": {
         "method": "GET",
         "endpoint": "courses/8876542/users/7890123?include=enrollments",
         "data": {
@@ -241,7 +271,7 @@
         },
         "status_code": 200
     },
-    "get_enrollments_8901234": {
+    "get_enrollments_8876542_8901234": {
         "method": "GET",
         "endpoint": "courses/8876542/users/8901234?include=enrollments",
         "data": {

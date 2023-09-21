@@ -57,7 +57,7 @@ class TestCanvasSiteEditSections:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins', 'get_by_id'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_7890123'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_7890123'],
                 'user': ['profile_60000'],
             }, m)
             canvas_site_id = '8876542'
@@ -69,7 +69,7 @@ class TestCanvasSiteEditSections:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins', 'get_by_id'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_6789012'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_6789012'],
                 'user': ['profile_50000'],
             }, m)
             canvas_site_id = '8876542'
@@ -81,7 +81,7 @@ class TestCanvasSiteEditSections:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['create_sis_import', 'get_admins', 'get_by_id', 'get_sis_import'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '8876542'
@@ -95,7 +95,7 @@ class TestCanvasSiteEditSections:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '8876542'
@@ -129,7 +129,7 @@ class TestCanvasSiteProvision:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins', 'get_terms'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_30000'],
             }, m)
             fake_auth.login(canvas_site_id=None, uid=teacher_uid)
@@ -141,7 +141,7 @@ class TestCanvasSiteProvision:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins', 'get_terms'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_30000', f'profile_{admin_uid}'],
             }, m)
             fake_auth.login(canvas_site_id=None, uid=admin_uid)
@@ -153,7 +153,7 @@ class TestCanvasSiteProvision:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins', 'get_terms'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_30000', f'profile_{admin_uid}'],
             }, m)
             fake_auth.login(canvas_site_id=None, uid=admin_uid)
@@ -197,7 +197,7 @@ class TestCanvasSiteProvisionSections:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins', 'get_terms'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_7890123'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_7890123'],
                 'user': ['profile_60000'],
             }, m)
             canvas_site_id = '8876542'
@@ -225,7 +225,7 @@ class TestCanvasSiteProvisionSections:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins', 'get_terms'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_6789012'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_6789012'],
                 'user': ['profile_50000'],
             }, m)
             canvas_site_id = '8876542'
@@ -253,7 +253,7 @@ class TestCanvasSiteProvisionSections:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins', 'get_terms'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '8876542'
@@ -400,7 +400,7 @@ class TestCreateCourseSite:
                 has_canvas_account = unauthorized_uid != no_canvas_account_uid
                 register_canvas_uris(app, {
                     'account': ['get_admins', f'get_courses_{account_id}'],
-                    'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', 'get_enrollments_4567890'],
+                    'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', 'get_enrollments_8876542_4567890'],
                     'user': [f'profile_{unauthorized_uid}'] if has_canvas_account else [],
                 }, m)
                 fake_auth.login(canvas_site_id=canvas_site_id, uid=unauthorized_uid)
@@ -460,7 +460,7 @@ class TestCreateProjectSite:
                 has_canvas_account = unauthorized_uid != no_canvas_account_uid
                 register_canvas_uris(app, {
                     'account': ['get_admins', f'get_courses_{account_id}'],
-                    'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', 'get_enrollments_4567890'],
+                    'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', 'get_enrollments_8876542_4567890'],
                     'user': [f'profile_{unauthorized_uid}'] if has_canvas_account else [],
                 }, m)
                 fake_auth.login(canvas_site_id=canvas_site_id, uid=unauthorized_uid)
@@ -492,7 +492,7 @@ class TestCreateProjectSite:
                         f'get_by_id_{canvas_site_id}',
                         f'get_by_id_{project_site_id}',
                         f'get_content_migrations_{project_site_id}',
-                        'get_enrollments_4567890',
+                        'get_enrollments_8876542_4567890',
                         f'get_sections_{canvas_site_id}',
                         f'get_tabs_{project_site_id}',
                         'post_course_enrollments_3030303',
@@ -533,7 +533,7 @@ class TestGetRoster:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_7890123'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_7890123'],
                 'user': ['profile_60000'],
             }, m)
             canvas_site_id = '8876542'
@@ -545,7 +545,7 @@ class TestGetRoster:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_6789012'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_6789012'],
                 'user': ['profile_50000'],
             }, m)
             canvas_site_id = '8876542'
@@ -560,7 +560,7 @@ class TestGetRoster:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_10000'],
             }, m)
             canvas_site_id = '8876542'
@@ -603,7 +603,7 @@ class TestGetRoster:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '8876542'
@@ -618,7 +618,7 @@ class TestGetRoster:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins'],
-                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_4567890'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_40000'],
             }, m)
             canvas_site_id = '8876542'
@@ -714,7 +714,7 @@ class TestGradeDistributions:
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins'],
-                'course': ['get_by_id_1010101', 'get_sections_1010101', 'get_enrollments_4567890_past'],
+                'course': ['get_by_id_1010101', 'get_sections_1010101', 'get_enrollments_8876542_4567890_past'],
                 'user': ['profile_30000'],
             }, m)
             canvas_site_id = '1010101'
