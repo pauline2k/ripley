@@ -4,8 +4,8 @@
       You are currently not listed as the instructor of record for any courses, so you cannot create a course site in bCourses.
     </div>
     <div v-if="size(teachingTerms)">
-      <h2>Term</h2>
-      <div class="pl-3 py-2">
+      <h2 v-if="isAdmin">Term</h2>
+      <div :class="{'py-2': isAdmin}">
         <v-btn-toggle
           v-model="slug"
           class="term-btn-toggle"
@@ -22,12 +22,12 @@
         </v-btn-toggle>
         <div class="mt-5">
           <h3>Official Sections</h3>
-          <div class="pb-2 text-subtitle-1">
+          <div class="text-subtitle-1">
             All official sections you select below will be put in ONE, single course site.
           </div>
-          <v-alert closable color="alert">
-            <div class="align-center d-flex">
-              <div class="pr-1">
+          <v-alert class="mt-2" closable color="alert">
+            <div class="d-flex">
+              <div class="pr-2">
                 <v-icon
                   class="left page-help-notice-icon"
                   color="grey"
@@ -35,21 +35,22 @@
                 />
               </div>
               <div>
-                Need help deciding which official sections to select?
-              </div>
-            </div>
-            <div class="pl-8">
-              <div>
-                1. Create one, single course site which includes official sections for both your primary and secondary sections, or
-              </div>
-              <div>
-                2. Create multiple course sites, perhaps with one for each section, or
-              </div>
-              <div>
-                3. Create separate course sites based on instruction mode.
-                <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010732#instructionmode">
-                  Learn more about instruction modes in bCourses.
-                </OutboundLink>
+                <div class="font-weight-medium">
+                  Need help deciding which official sections to select?
+                </div>
+                If you have a course with multiple sections, you will need to decide whether you want to:
+                <div class="mt-1">
+                  1. Create one, single course site which includes official sections for both your primary and secondary sections, or
+                </div>
+                <div>
+                  2. Create multiple course sites, perhaps with one for each section, or
+                </div>
+                <div>
+                  3. Create separate course sites based on instruction mode.
+                  <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010732#instructionmode">
+                    Learn more about instruction modes in bCourses.
+                  </OutboundLink>
+                </div>
               </div>
             </div>
           </v-alert>
@@ -113,6 +114,7 @@
 </template>
 
 <script>
+import Context from '@/mixins/Context.vue'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {pluralize} from '@/utils'
@@ -120,6 +122,7 @@ import {find, size} from 'lodash'
 
 export default {
   name: 'SelectSectionsStep',
+  mixins: [Context],
   components: {CourseSectionsTable, OutboundLink},
   props: {
     coursesList: {
@@ -156,6 +159,9 @@ export default {
     term: undefined
   }),
   computed: {
+    isAdmin() {
+      return this.currentUser.isAdmin || this.currentUser.isCanvasAdmin
+    },
     slug: {
       get() {
         return this.currentSemester

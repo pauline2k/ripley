@@ -9,7 +9,7 @@
         />
       </div>
       <div>
-        <div class="font-weight-medium pb-2 pt-1">
+        <div class="font-weight-medium pb-1">
           From 8 - 9 AM, you may experience delays of up to 10 minutes before your {{ courseActionVerb }}.
         </div>
         <div id="maintenance-details">
