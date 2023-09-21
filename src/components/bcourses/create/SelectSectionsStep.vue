@@ -21,7 +21,7 @@
           </v-btn>
         </v-btn-toggle>
         <div class="mt-5">
-          <h2>Official Sections</h2>
+          <h3>Official Sections</h3>
           <div class="pb-2 text-subtitle-1">
             All official sections you select below will be put in ONE, single course site.
           </div>
@@ -54,63 +54,58 @@
             </div>
           </v-alert>
         </div>
-        <div class="page-create-course-site-select-sections">
-          <form class="canvas-page-form" @submit="showConfirmation">
-            <v-expansion-panels v-if="coursesList.length > 0" class="pb-4" multiple>
-              <v-expansion-panel
-                v-for="course in coursesList"
-                :id="`sections-course-${course.slug}`"
-                :key="course.course_id"
-                class="container px-1 mt-4"
-                style="border-radius: 3px !important"
-                :value="course.slug"
-              >
-                <v-expansion-panel-title class="d-flex align-start justify-start height-unset pa-0">
-                  <template #actions="{ expanded }">
-                    <v-icon class="mt-1 order-0" :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
-                  </template>
-                  <h3 class="d-flex flex-nowrap order-1 sections-course-title">
-                    {{ course.courseCode }}
-                    <span v-if="course.title">: {{ course.title }}</span>
-                    <span v-if="size(course.sections)" class="btn-course-title-text pt-1">
-                      ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
-                    </span>
-                  </h3>
-                </v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <v-row no-gutters>
-                    <v-col md="12">
-                      <CourseSectionsTable
-                        :key="course.slug"
-                        mode="createCourseForm"
-                        :sections="course.sections"
-                        :update-selected="updateSelected"
-                      />
-                    </v-col>
-                  </v-row>
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
-            <div class="d-flex justify-end">
-              <v-btn
-                id="page-create-course-site-cancel"
-                aria-label="Cancel and return to Site Creation Overview"
-                variant="text"
-                @click="cancel"
-              >
-                Cancel
-              </v-btn>
-              <v-btn
-                id="page-create-course-site-continue"
-                aria-label="Continue to next step"
-                color="primary"
-                :disabled="!selectedSectionsList.length"
-                @click="showConfirmation"
-              >
-                Next
-              </v-btn>
-            </div>
-          </form>
+        <v-expansion-panels
+          v-if="coursesList.length > 0"
+          class="my-5"
+          multiple
+        >
+          <v-expansion-panel
+            v-for="course in coursesList"
+            :id="`sections-course-${course.slug}`"
+            :key="course.course_id"
+            :value="course.slug"
+            bg-color="blue-lighten-5"
+          >
+            <v-expansion-panel-title>
+              <template #actions="{ expanded }">
+                <v-icon :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
+              </template>
+              <h3>
+                {{ course.courseCode }}
+                <span v-if="course.title">: {{ course.title }}</span>
+                <span v-if="size(course.sections)">
+                  ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
+                </span>
+              </h3>
+            </v-expansion-panel-title>
+            <v-expansion-panel-text>
+              <CourseSectionsTable
+                :key="course.slug"
+                mode="createCourseForm"
+                :sections="course.sections"
+                :update-selected="updateSelected"
+              />
+            </v-expansion-panel-text>
+          </v-expansion-panel>
+        </v-expansion-panels>
+        <div class="d-flex justify-end">
+          <v-btn
+            id="page-create-course-site-cancel"
+            aria-label="Cancel and return to Site Creation Overview"
+            variant="text"
+            @click="cancel"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            id="page-create-course-site-continue"
+            aria-label="Continue to next step"
+            color="primary"
+            :disabled="!selectedSectionsList.length"
+            @click="showConfirmation"
+          >
+            Next
+          </v-btn>
         </div>
       </div>
     </div>
@@ -184,32 +179,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.btn-course-title-text {
-  color: $color-black;
-  font-weight: 300;
-  text-decoration: none;
-}
 .term-btn-toggle {
   border-width: 1px;
-}
-</style>
-
-<style lang="scss">
-.page-create-course-site-select-sections {
-  .v-expansion-panel-title__overlay {
-    background-color: transparent !important;
-  }
-  .v-expansion-panel-text__wrapper {
-    padding: 6px 4px 0px 4px;
-  }
-  .v-expansion-panel-title__icon {
-    margin-inline-start: unset;
-  }
-  .v-expansion-panel__shadow {
-    display: none !important;
-  }
-  .v-expansion-panel::after {
-    border: none !important;
-  }
 }
 </style>
