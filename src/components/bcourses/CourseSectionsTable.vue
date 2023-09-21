@@ -1,21 +1,26 @@
 <template>
-  <div class="template-sections-table-container">
-    <div v-if="mode === 'createCourseForm' && sections.length > 1" class="pl-3">
+  <div class="bg-white mb-1 mt-4">
+    <div
+      v-if="mode === 'createCourseForm' && sections.length > 1"
+      class="pb-2 pl-4 pt-3"
+    >
       <v-checkbox
         :id="`select-all-toggle-${sections[0].id}`"
         v-model="allSelected"
-        denisty="compact"
+        density="compact"
         hide-details
         :indeterminate="indeterminate"
         @change="toggleAll"
       >
         <template #label>
-          Select {{ allSelected ? 'None' : 'All' }}
-          <span class="sr-only">of the course sections</span>
+          <span class="font-weight-medium ml-1">
+            Select {{ allSelected ? 'None' : 'All' }}
+            <span class="sr-only">of the course sections</span>
+          </span>
         </template>
       </v-checkbox>
     </div>
-    <table id="template-sections-table" class="bg-white">
+    <table id="template-sections-table">
       <thead>
         <tr>
           <th v-if="mode === 'createCourseForm'" class="template-sections-table-cell-checkbox">Action</th>
@@ -32,7 +37,7 @@
       </thead>
       <tbody v-for="section in displayableSections" :key="section.id">
         <tr :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}`" :class="sectionDisplayClass[section.id]">
-          <td v-if="mode === 'createCourseForm'" class="align-top template-sections-table-cell-checkbox pl-2 pt-0">
+          <td v-if="mode === 'createCourseForm'" class="align-top template-sections-table-cell-checkbox pl-2 py-0">
             <v-checkbox
               :id="`template-canvas-manage-sections-checkbox-${section.id}`"
               v-model="selected"
@@ -64,9 +69,11 @@
           <td class="template-sections-table-cell-section-id">{{ section.id }}</td>
           <td class="template-sections-table-cell-section-timestamps d-none d-sm-none d-md-table-cell">
             <div v-for="(schedule, index) in section.schedules.recurring" :key="index">{{ schedule.schedule }}</div>
+            <span v-if="!section.schedules.recurring.length">&mdash;</span>
           </td>
           <td class="template-sections-table-cell-section-locations d-none d-sm-none d-md-table-cell">
             <div v-for="(schedule, index) in section.schedules.recurring" :key="index">{{ schedule.buildingName }} {{ schedule.roomNumber }}</div>
+            <span v-if="!section.schedules.recurring.length">&mdash;</span>
           </td>
           <td class="template-sections-table-cell-section-instructors d-none d-sm-none d-lg-table-cell">
             <div v-for="instructor in section.instructors" :key="instructor.uid">{{ instructor.name }}</div>
