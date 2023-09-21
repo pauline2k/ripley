@@ -162,48 +162,46 @@ export default {
     },
     fetchFeed() {
       this.isFetching = true
+      this.currentWorkflowStep = 'selecting'
       this.clearCourseSiteJob()
       this.selectedSectionsList = []
       this.$announcer.polite('Loading courses and sections')
 
-      const onSuccess = data => {
-        this.updateMetadata(data)
-        this.usersClassCount = this.classCount(data.teachingTerms)
-        this.teachingTerms = data.teachingTerms
-        this.canvasSite = data.canvas_site
-        const canvasSiteId = this.canvasSite ? this.canvasSite.canvasSiteId : ''
-        this.fillCourseSites(data.teachingTerms, canvasSiteId)
-        this.$announcer.polite('Course section loaded successfully')
-        if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
-          each(this.coursesList, course => {
-            each(course.sections, section => {
-              section.selected = includes(this.adminBySectionIds, section.sectionId)
-            })
-          })
-          this.updateSelected()
-          this.currentWorkflowStep = 'selecting'
-        }
-        if (!this.isAdmin && !this.usersClassCount) {
-          this.displayError = 'Sorry, you are not an admin user and you have no classes.'
-        }
-        this.$ready()
-      }
-
-      const onError = () => {
-        this.$announcer.polite('Course section loading failed')
-        this.displayError = 'failure'
-        this.$ready()
-      }
-
       const semester = (this.adminMode === 'bySectionId' ? this.currentAdminTerm : this.currentSemester)
-
       getSections(
         this.adminActingAs,
         this.adminBySectionIds,
         this.adminMode,
         semester,
         this.isAdmin
-      ).then(onSuccess, onError).finally(() => {
+      ).then(
+        data => {
+          this.updateMetadata(data)
+          this.usersClassCount = this.classCount(data.teachingTerms)
+          this.teachingTerms = data.teachingTerms
+          this.canvasSite = data.canvas_site
+          const canvasSiteId = this.canvasSite ? this.canvasSite.canvasSiteId : ''
+          this.fillCourseSites(data.teachingTerms, canvasSiteId)
+          this.$announcer.polite('Course section loaded successfully')
+          if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
+            each(this.coursesList, course => {
+              each(course.sections, section => {
+                section.selected = includes(this.adminBySectionIds, section.sectionId)
+              })
+            })
+            this.updateSelected()
+          }
+          if (!this.isAdmin && !this.usersClassCount) {
+            this.displayError = 'Sorry, you are not an admin user and you have no classes.'
+          }
+          this.$ready()
+        },
+        error => {
+          this.$announcer.polite('Course section loading failed')
+          this.displayError = error || 'failure'
+          this.$ready()
+        }
+      ).finally(() => {
         this.isFetching = false
       })
     },
