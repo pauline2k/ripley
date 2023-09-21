@@ -194,7 +194,7 @@ def get_official_course_sections(canvas_site_id):
         'canvasSite': {
             'canEdit': can_edit,
             'officialSections': official_sections,
-            'term': term.to_api_json(),
+            'term': term.to_api_json() if term else None,
         },
         'teachingTerms': teaching_terms,
     })

@@ -73,7 +73,7 @@ class TestEgradeExportOptions:
                     f'get_by_id_{canvas_site_id}',
                     f'get_sections_{canvas_site_id}',
                     f'get_settings_{canvas_site_id}',
-                    'get_enrollments_4567890',
+                    'get_enrollments_8876542_4567890',
                 ],
                 'user': [f'profile_{teacher_uid}'],
             }, m)
@@ -147,7 +147,7 @@ class TestEgradesExportPrepare:
                     f'get_by_id_{canvas_site_id}',
                     f'get_sections_{canvas_site_id}',
                     f'get_settings_{canvas_site_id}',
-                    'get_enrollments_4567890',
+                    'get_enrollments_8876542_4567890',
                 ],
                 'user': [f'profile_{teacher_uid}'],
             }, m)
@@ -276,7 +276,7 @@ class TestOfficialCanvasCourse:
                 'course': [
                     f'get_by_id_{canvas_site_id}',
                     f'get_sections_{canvas_site_id}',
-                    'get_enrollments_4567890',
+                    'get_enrollments_8876542_4567890',
                 ],
                 'user': [f'profile_{teacher_uid}'],
             }, m)
@@ -295,7 +295,7 @@ class TestOfficialCanvasCourse:
                     'course': [
                         f'get_by_id_{canvas_site_id}',
                         f'get_sections_{canvas_site_id}',
-                        'get_enrollments_4567890',
+                        'get_enrollments_8876542_4567890',
                     ],
                     'user': [f'profile_{teacher_uid}'],
                 }, m)

@@ -324,7 +324,7 @@ class TestActivateMailingList:
         with requests_mock.Mocker() as m:
             canvas_site_id = '8876542'
             register_canvas_uris(app, {
-                'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', 'get_enrollments_4567890'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_30000'],
             }, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)

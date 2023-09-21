@@ -257,10 +257,12 @@ def get_official_sections(canvas_site_id):
     canvas_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
     canvas_sections_by_id = {cs['id']: cs for cs in canvas_sections if cs['id']}
     section_ids = list(canvas_sections_by_id.keys())
-    term_id = canvas_sections[0]['termId']
-    sis_sections = sort_course_sections(
-        data_loch.get_sections(term_id, section_ids) or [],
-    )
+    sis_sections = []
+    if len(canvas_sections):
+        term_id = canvas_sections[0]['termId']
+        sis_sections = sort_course_sections(
+            data_loch.get_sections(term_id, section_ids) or [],
+        )
     if len(sis_sections) != len(section_ids):
         app.logger.warning(f'Canvas site ID {canvas_site_id} has {len(section_ids)} sections, but SIS has {len(sis_sections)} sections.')
 
