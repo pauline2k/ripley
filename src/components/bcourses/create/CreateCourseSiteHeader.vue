@@ -11,32 +11,45 @@
     </v-btn>
     <div v-if="adminMode === 'actAs'" class="py-5">
       <h3 class="sr-only">Load Sections By Instructor UID</h3>
-      <div class="pb-5">
-        <label for="instructor-uid" class="sr-only">Instructor UID</label>
-        <v-text-field
-          id="instructor-uid"
-          v-model="uid"
-          class="instructor-uid-text-field"
-          density="comfortable"
-          :disabled="isFetching"
-          :error="isInvalidUID"
-          hide-details
-          maxlength="16"
-          placeholder="Instructor UID"
-          role="search"
-          variant="outlined"
-        />
+      <div class="align-center d-flex pb-5">
+        <div class="pr-3">
+          <label for="instructor-uid" class="sr-only">Instructor UID</label>
+          <v-text-field
+            id="instructor-uid"
+            v-model="uid"
+            class="instructor-uid-text-field"
+            density="comfortable"
+            :disabled="isFetching"
+            :error="isInvalidUID"
+            hide-details
+            maxlength="16"
+            placeholder="Instructor UID"
+            role="search"
+            variant="outlined"
+          />
+        </div>
+        <div>
+          <v-btn
+            id="sections-by-uid-button"
+            aria-controls="page-create-course-site-steps-container"
+            aria-label="Load official sections for instructor"
+            color="primary"
+            :disabled="isFetching || !trim(uid) || isInvalidUID"
+            size="large"
+            @click="submit"
+          >
+            <span v-if="isFetching">
+              <v-progress-circular
+                class="mr-1"
+                indeterminate
+                size="18"
+              />
+              Fetching...
+            </span>
+            <span v-if="!isFetching">As instructor</span>
+          </v-btn>
+        </div>
       </div>
-      <v-btn
-        id="sections-by-uid-button"
-        aria-controls="page-create-course-site-steps-container"
-        aria-label="Load official sections for instructor"
-        color="primary"
-        :disabled="isFetching || !trim(uid) || isInvalidUID"
-        @click="submit"
-      >
-        As instructor
-      </v-btn>
     </div>
     <div v-if="adminMode === 'bySectionId'" class="py-5">
       <h3 class="sr-only">Load Sections by ID</h3>
@@ -175,12 +188,15 @@ export default {
     }
   },
   data: () => ({
-    sectionIds: '',
     error: undefined,
+    sectionIds: '',
     uid: undefined
   }),
   methods: {
     setMode(mode) {
+      this.error = undefined
+      this.sectionIds = ''
+      this.uid = undefined
       this.setAdminMode(mode)
       if (mode === 'bySectionId') {
         this.$announcer.polite('Input mode switched to section ID')
@@ -232,13 +248,6 @@ export default {
     padding: 8px 12px;
     width: 140px;
   }
-}
-.page-create-course-site-header {
-  color: $color-headers;
-  font-family: $body-font-family;
-  font-weight: normal;
-  line-height: 40px;
-  margin: 5px 0;
 }
 .has-error {
   color: $color-alert-error-foreground;

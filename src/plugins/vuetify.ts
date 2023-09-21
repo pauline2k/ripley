@@ -6,6 +6,7 @@ import {VAlert} from 'vuetify/components/VAlert'
 import {VAppBar, VAppBarTitle} from 'vuetify/components/VAppBar'
 import {VApp} from 'vuetify/components/VApp'
 import {VBtn} from 'vuetify/components/VBtn'
+import {VBtnToggle} from 'vuetify/components/VBtnToggle'
 import {VCard, VCardActions, VCardSubtitle, VCardText, VCardTitle} from 'vuetify/components/VCard'
 import {VCheckbox} from 'vuetify/components/VCheckbox'
 import {VCol, VContainer, VSpacer, VRow} from 'vuetify/components/VGrid'
@@ -37,6 +38,7 @@ export default createVuetify({
     VAppBar,
     VAppBarTitle,
     VBtn,
+    VBtnToggle,
     VCard,
     VCardActions,
     VCardSubtitle,

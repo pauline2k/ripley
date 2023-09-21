@@ -9,24 +9,26 @@
         role="alert"
         course-action-verb="site is created"
       />
-      <h1 class="page-create-course-site-header page-create-course-site-header1">Create a Course Site</h1>
-      <CreateCourseSiteHeader
-        v-if="isAdmin && currentWorkflowStep !== 'processing'"
-        :admin-mode="adminMode"
-        :admin-terms="adminTerms"
-        :current-admin-term="currentAdminTerm"
-        :fetch-feed="fetchFeed"
-        :is-fetching="isFetching"
-        :set-admin-acting-as="setAdminActingAs"
-        :set-admin-by-section-ids="setAdminBySectionIds"
-        :set-admin-mode="setAdminMode"
-        :show-maintenance-notice="showMaintenanceNotice"
-        :switch-admin-term="switchAdminTerm"
-      />
-      <div v-if="isAdmin && !currentWorkflowStep">
-        Use inputs above to choose courses by Section ID or as an instructor.
+      <h1>Create a Course Site</h1>
+      <div class="pl-3">
+        <CreateCourseSiteHeader
+          v-if="isAdmin && currentWorkflowStep !== 'processing'"
+          :admin-mode="adminMode"
+          :admin-terms="adminTerms"
+          :current-admin-term="currentAdminTerm"
+          :fetch-feed="fetchFeed"
+          :is-fetching="isFetching"
+          :set-admin-acting-as="setAdminActingAs"
+          :set-admin-by-section-ids="setAdminBySectionIds"
+          :set-admin-mode="setAdminMode"
+          :show-maintenance-notice="showMaintenanceNotice"
+          :switch-admin-term="switchAdminTerm"
+        />
+        <div v-if="isAdmin && !currentWorkflowStep">
+          Use inputs above to choose courses by Section ID or as an instructor.
+        </div>
       </div>
-      <div v-if="!isFetching" id="page-create-course-site-steps-container" class="p-0">
+      <div v-if="!isFetching" id="page-create-course-site-steps-container">
         <div
           v-if="currentWorkflowStep === 'selecting'"
           id="page-create-course-site-selecting-step"
@@ -436,15 +438,6 @@ export default {
     &:focus, &:hover {
       text-decoration: none;
     }
-  }
-  .page-create-course-site-header {
-    color: $color-headers;
-    font-family: $body-font-family;
-    font-weight: normal;
-    line-height: 40px;
-  }
-  .page-create-course-site-header1 {
-    font-size: 23px;
   }
 }
 </style>
