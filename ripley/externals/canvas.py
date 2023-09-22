@@ -264,6 +264,18 @@ def get_user(user_id, api_call=True, api_url=None):
         return user
 
 
+def get_user_courses(uid):
+    courses = None
+    try:
+        user = get_user(f'sis_login_id:{uid}', api_call=False)
+        if user:
+            courses = user.get_courses(include=['term'])
+    except Exception as e:
+        app.logger.error(f'Failed to retrieve courses in which UID {uid} is enrolled.')
+        app.logger.exception(e)
+    return courses or []
+
+
 def get_sis_import(sis_import_id):
     c = _get_canvas()
     try:

@@ -179,6 +179,7 @@ export default {
         this.isAdmin
       ).then(
         data => {
+          console.log(data)
           this.updateMetadata(data)
           this.usersClassCount = this.classCount(data.teachingTerms)
           this.teachingTerms = data.teachingTerms
@@ -409,36 +410,3 @@ export default {
   }
 }
 </script>
-
-<style scoped lang="scss">
-.page-create-course-site {
-  .button {
-    padding: 10px;
-  }
-  .page-button-grey {
-    background: linear-gradient($color-button-grey-gradient-1, $color-button-grey-gradient-2);
-    border: 1px solid $color-button-grey-border;
-    color: $color-button-grey-text;
-  }
-  .page-create-course-site-choices {
-    overflow: hidden;
-    li {
-      border-left: 1px solid $color-very-light-grey;
-      float: left;
-      max-width: 250px;
-      padding: 15px;
-      width: 50%;
-      &:first-child {
-        border: 0;
-      }
-    }
-  }
-  .page-create-course-site-form-course-button {
-    color: $color-body-black;
-
-    &:focus, &:hover {
-      text-decoration: none;
-    }
-  }
-}
-</style>

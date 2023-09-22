@@ -23,21 +23,21 @@
     <table id="template-sections-table">
       <thead>
         <tr>
-          <th v-if="mode === 'createCourseForm'" class="template-sections-table-cell-checkbox">Action</th>
-          <th class="template-sections-table-cell-course-code">Course Code</th>
-          <th class="template-sections-table-cell-section-label">Section Label</th>
-          <th class="template-sections-table-cell-section-id">Class Number</th>
-          <th class="template-sections-table-cell-section-timestamps d-none d-sm-none d-md-table-cell">Schedule</th>
-          <th class="template-sections-table-cell-section-locations d-none d-sm-none d-md-table-cell">Location</th>
-          <th class="template-sections-table-cell-section-instructors d-none d-sm-none d-lg-table-cell">Instructors</th>
-          <th v-if="mode !== 'createCourseForm' && mode !== 'preview'" class="template-sections-table-cell-section-action-option">
+          <th v-if="mode === 'createCourseForm'" class="cell-checkbox">Action</th>
+          <th class="cell-course-code">Course Code</th>
+          <th class="cell-section-label">Section Label</th>
+          <th class="cell-section-id">Class Number</th>
+          <th class="cell-section-timestamps d-none d-sm-none d-md-table-cell">Schedule</th>
+          <th class="cell-section-locations d-none d-sm-none d-md-table-cell">Location</th>
+          <th class="cell-section-instructors d-none d-sm-none d-lg-table-cell">Instructors</th>
+          <th v-if="mode !== 'createCourseForm' && mode !== 'preview'" class="cell-section-action-option">
             <span v-if="mode !== 'preview'">Actions</span>
           </th>
         </tr>
       </thead>
       <tbody v-for="section in displayableSections" :key="section.id">
         <tr :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}`" :class="sectionDisplayClass[section.id]">
-          <td v-if="mode === 'createCourseForm'" class="align-top template-sections-table-cell-checkbox pl-2 py-0">
+          <td v-if="mode === 'createCourseForm'" class="align-top cell-checkbox pl-2 py-0">
             <v-checkbox
               :id="`template-canvas-manage-sections-checkbox-${section.id}`"
               v-model="selected"
@@ -50,10 +50,10 @@
               :value="section.id"
             />
           </td>
-          <td class="template-sections-table-cell-course-code">
+          <td class="cell-course-code">
             {{ section.courseCode }}
           </td>
-          <td class="template-sections-table-cell-section-label">
+          <td class="cell-section-label">
             <label
               v-if="mode === 'createCourseForm'"
               :for="`template-canvas-manage-sections-checkbox-${section.id}`"
@@ -66,26 +66,26 @@
               Use the "Update" button to rename your bCourses section name to match SIS.
             </span>
           </td>
-          <td class="template-sections-table-cell-section-id">{{ section.id }}</td>
-          <td class="template-sections-table-cell-section-timestamps d-none d-sm-none d-md-table-cell">
+          <td class="cell-section-id">{{ section.id }}</td>
+          <td class="cell-section-timestamps d-none d-sm-none d-md-table-cell">
             <div v-for="(schedule, index) in section.schedules.recurring" :key="index">{{ schedule.schedule }}</div>
             <span v-if="!section.schedules.recurring.length">&mdash;</span>
           </td>
-          <td class="template-sections-table-cell-section-locations d-none d-sm-none d-md-table-cell">
+          <td class="cell-section-locations d-none d-sm-none d-md-table-cell">
             <div v-for="(schedule, index) in section.schedules.recurring" :key="index">{{ schedule.buildingName }} {{ schedule.roomNumber }}</div>
             <span v-if="!section.schedules.recurring.length">&mdash;</span>
           </td>
-          <td class="template-sections-table-cell-section-instructors d-none d-sm-none d-lg-table-cell">
+          <td class="cell-section-instructors d-none d-sm-none d-lg-table-cell">
             <div v-for="instructor in section.instructors" :key="instructor.uid">{{ instructor.name }}</div>
           </td>
-          <td v-if="mode !== 'createCourseForm' && mode !== 'preview'" class="template-sections-table-cell-section-action-option">
+          <td v-if="!['createCourseForm', 'preview'].includes(mode)" class="cell-section-action-option">
             <!-- Current Staging Actions -->
             <div v-if="mode === 'currentStaging' && section.isCourseSection" class="d-flex flex-nowrap justify-end">
               <v-btn
                 v-if="section.nameDiscrepancy && section.stagedState !== 'update'"
                 :id="`section-${section.id}-update-btn`"
                 :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be updated`"
-                class="template-sections-table-button canvas-no-decoration ml-1"
+                class="button canvas-no-decoration ml-1"
                 @click="stageUpdate(section)"
               >
                 Update
@@ -94,7 +94,7 @@
                 v-if="section.stagedState === 'update'"
                 :id="`section-${section.id}-undo-update-btn`"
                 :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be updated from course site`"
-                class="template-sections-table-button template-sections-table-button-undo-delete canvas-no-decoration ml-1"
+                class="button button-undo-delete canvas-no-decoration ml-1"
                 @click="unstage(section)"
               >
                 Undo Update
@@ -103,7 +103,7 @@
                 v-if="section.stagedState !== 'update'"
                 :id="`section-${section.id}-unlink-btn`"
                 :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be unlinked from course site`"
-                class="template-sections-table-button canvas-no-decoration ml-1"
+                class="button canvas-no-decoration ml-1"
                 @click="stageDelete(section)"
               >
                 Unlink
@@ -112,7 +112,7 @@
             <div v-if="mode === 'currentStaging' && !section.isCourseSection">
               <v-btn
                 :id="`section-${section.id}-undo-unlink-btn`"
-                class="template-sections-table-button template-sections-table-button-undo-add canvas-no-decoration ml-1"
+                class="button button-undo-add canvas-no-decoration ml-1"
                 :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be linked to course site`"
                 @click="unstage(section)"
               >
@@ -123,7 +123,7 @@
             <div v-if="mode === 'availableStaging' && section.isCourseSection && section.stagedState === 'delete'">
               <v-btn
                 :id="`section-${section.id}-undo-unlink-btn`"
-                class="template-sections-table-button template-sections-table-button-undo-delete canvas-no-decoration ml-1"
+                class="button button-undo-delete canvas-no-decoration ml-1"
                 :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be unlinked from course site`"
                 @click="unstage(section)"
               >
@@ -136,8 +136,8 @@
             <div v-if="mode === 'availableStaging' && !section.isCourseSection && !section.stagedState">
               <v-btn
                 :id="`section-${section.id}-link-btn`"
-                class="template-sections-table-button canvas-no-decoration ml-1"
-                :class="{'template-sections-table-button-undo-add': section.stagedState === 'add'}"
+                class="button canvas-no-decoration ml-1"
+                :class="{'button-undo-add': section.stagedState === 'add'}"
                 :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be linked to course site`"
                 @click="stageAdd(section)"
               >
@@ -151,22 +151,43 @@
           aria-hidden="true"
           :class="sectionDisplayClass[section.id]"
         >
-          <td colspan="7" class="template-sections-table-sites-cell">
-            <div class="template-sections-table-sites-container">
-              <v-icon icon="mdi-info-circle" class="template-sections-table-sited-icon mr-1" />
+          <td></td>
+          <td colspan="6">
+            <div>
+              <v-icon icon="mdi-info-circle" class="sited-icon mr-1" />
               The section name in bCourses no longer matches the Student Information System.
               Use the "Update" button to rename your bCourses section name to match SIS.
             </div>
           </td>
         </tr>
         <tr
-          v-if="(mode !== 'preview' && mode !== 'currentStaging' && section.sites)"
+          v-if="!['currentStaging', 'preview'].includes(mode) && size(section.canvasSites)"
           :class="sectionDisplayClass[section.id]"
         >
-          <td colspan="7" class="template-sections-table-sites-cell">
-            <div v-for="(site, index) in section.sites" :key="index" class="template-sections-table-sites-container">
-              <v-icon icon="mdi-info-circle" class="template-sections-table-sited-icon mr-1" size="sm" />
-              This section is already in use by <OutboundLink :href="site.site_url">{{ site.name }}</OutboundLink>
+          <td colspan="7" class="border-top-zero pb-6 pl-12 pt-0">
+            <div v-if="section.canvasSites.length === 1">
+              <v-icon
+                color="error"
+                icon="mdi-alert"
+                size="medium"
+              />
+              This section is already in use by
+              <OutboundLink :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].id}`">{{ section.canvasSites[0].name }}</OutboundLink>
+            </div>
+            <div v-if="section.canvasSites.length > 1">
+              <div>
+                <v-icon
+                  color="error"
+                  icon="mdi-alert"
+                  size="medium"
+                />
+                This section is already in use by:
+              </div>
+              <div class="ml-6 pt-1">
+                <ul v-for="(canvasSite, index) in section.canvasSites" :key="index" class="sites-container">
+                  <li><OutboundLink :href="`${config.canvasApiUrl}/courses/${canvasSite.id}`">{{ canvasSite.name }}</OutboundLink></li>
+                </ul>
+              </div>
             </div>
           </td>
         </tr>
@@ -188,7 +209,7 @@
 <script>
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
-import {each, filter, includes, map} from 'lodash'
+import {each, filter, includes, map, size} from 'lodash'
 
 export default {
   name: 'CourseSectionsTable',
@@ -278,6 +299,7 @@ export default {
         return (section.isCourseSection && section.stagedState !== 'delete') || (!section.isCourseSection && section.stagedState === 'add')
       })
     },
+    size,
     stageAdd(section) {
       this.stageAddAction(section)
       this.eventHub.emit('sections-table-updated')
@@ -311,32 +333,16 @@ export default {
 td {
   padding: 10px;
 }
-.template-sections-table-cell-checkbox {
-  width: 5%;
+.border-top-zero {
+  border-top: 0;
 }
-.template-sections-table-row-disabled td {
-  color: $color-grey-disabled !important;
-}
-.template-sections-table-row-added td {
-  background-color: $color-yellow-row-highlighted !important;
-}
-.template-sections-table-row-deleted td {
-  background-color: $color-red-row-highlighted !important;
-}
-.template-sections-table-cell-section-action-option {
-  height: 45px;
-  min-width: 80px;
-  padding-right: 10px;
-  text-align: right !important;
-  width: 10%
-}
-.template-sections-table-button {
+.button {
   font-size: 13px !important;
   height: unset;
   padding: 2px 8px !important;
   white-space: nowrap;
 }
-.template-sections-table-button-undo-add {
+.button-undo-add {
   background-color: $color-orange-button-bg !important;
   border: $color-orange-button-border solid 1px !important;
   color: $color-white !important;
@@ -345,7 +351,7 @@ td {
     border-color: $color-orange-button-border-selected !important;
   }
 }
-.template-sections-table-button-undo-delete {
+.button-undo-delete {
   background-color: $color-red-button-bg !important;
   border: $color-red-button-border solid 1px !important;
   color: $color-white !important;
@@ -354,37 +360,47 @@ td {
     border-color: $color-red-button-border-selected !important;
   }
 }
-.template-sections-table-cell-course-code {
+.cell-checkbox {
+  width: 5%;
+}
+.cell-course-code {
   min-width: 100px;
   width: 5%
 }
-.template-sections-table-cell-section-id {
+.cell-section-action-option {
+  height: 45px;
+  min-width: 80px;
+  padding-right: 10px;
+  text-align: right !important;
+  width: 10%
+}
+.cell-section-id {
   min-width: 70px;
   width: 10%
 }
-.template-sections-table-cell-section-instructors {
+.cell-section-instructors {
   min-width: 183px;
   width: 15%
 }
-.template-sections-table-cell-section-label {
+.cell-section-label {
   min-width: 115px;
   width: 15%
 }
-.template-sections-table-cell-section-locations {
+.cell-section-locations {
   min-width: 150px;
   width: 15%
 }
-.template-sections-table-cell-section-timestamps {
+.cell-section-timestamps {
   min-width: 155px;
   width: 15%
 }
-.template-sections-table-sited-icon {
-  color: $color-help-link-blue;
+.row-added td {
+  background-color: $color-yellow-row-highlighted !important;
 }
-.template-sections-table-sites-cell {
-  padding: 0 14px;
+.row-deleted td {
+  background-color: $color-red-row-highlighted !important;
 }
-.template-sections-table-sites-container {
-  margin-bottom: 5px;
+.row-disabled td {
+  color: $color-grey-disabled !important;
 }
 </style>
