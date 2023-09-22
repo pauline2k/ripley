@@ -239,16 +239,6 @@ export default {
 .instructor-uid-text-field {
   width: 208px;
 }
-.page-create-course-site-act-as-form {
-  margin: 5px 0;
-  input[type="text"] {
-    font-family: $body-font-family;
-    font-size: 14px;
-    margin: 2px 10px 0 0;
-    padding: 8px 12px;
-    width: 140px;
-  }
-}
 .has-error {
   color: $color-alert-error-foreground;
   font-size: 14px;
