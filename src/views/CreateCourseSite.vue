@@ -32,6 +32,7 @@
         <div
           v-if="currentWorkflowStep === 'selecting'"
           id="page-create-course-site-selecting-step"
+          class="pl-3"
           :aria-expanded="`${currentWorkflowStep === 'selecting'}`"
         >
           <SelectSectionsStep

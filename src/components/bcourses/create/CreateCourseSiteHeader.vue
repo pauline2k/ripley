@@ -9,7 +9,7 @@
     >
       Switch to {{ adminMode === 'actAs' ? 'Section ID input' : 'acting as instructor' }}
     </v-btn>
-    <div v-if="adminMode === 'actAs'" class="py-5">
+    <div v-if="adminMode === 'actAs'" class="pt-5">
       <h3 class="sr-only">Load Sections By Instructor UID</h3>
       <div class="align-center d-flex pb-5">
         <div class="pr-3">
