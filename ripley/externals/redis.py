@@ -75,6 +75,7 @@ def enqueue(func, args):
             f=func,
             args=args,
             retry=Retry(max=3),
+            ttl=app.config['REDIS_RQ_JOB_TTL'],
         )
         return job
 
