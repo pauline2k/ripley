@@ -270,7 +270,7 @@ def get_official_sections(canvas_site_id):
         canvas_section = canvas_sections_by_id[section_id]
         return {
             **canvas_section,
-            **section_to_api_json(rows[0], rows[1:]),
+            **section_to_api_json(rows),
         }
     official_sections = []
     for section_id, rows in groupby(sis_sections, lambda s: s['section_id']):
@@ -481,18 +481,17 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
 
 def _build_courses_by_term(instructor_uid, teaching_sections, section_ids):
     courses_by_term = {}
-    for section_id, sections in groupby(teaching_sections, lambda s: s['section_id']):
-        sections = list(sections)
-        section = next((s for s in sections if s.get('is_co_instructor', False) is False), None)
-        co_instructor_sections = [s for s in sections if s.get('is_co_instructor', True) is True]
-        course_id = section['course_id']
-        term_id = section['term_id']
+    for section_id, section_rows in groupby(teaching_sections, lambda s: s['section_id']):
+        # Python sorting orders False before True, guaranteeing that primary instructor comes first.
+        section_rows = sorted(section_rows, key=lambda r: r.get('is_co_instructor'))
+        course_id = section_rows[0]['course_id']
+        term_id = section_rows[0]['term_id']
         if term_id not in courses_by_term:
             courses_by_term[term_id] = {}
         if course_id not in courses_by_term[term_id]:
             term = BerkeleyTerm.from_sis_term_id(term_id)
-            courses_by_term[term_id][course_id] = course_to_api_json(term, section)
-        section_feed = section_to_api_json(section, co_instructor_sections)
+            courses_by_term[term_id][course_id] = course_to_api_json(term, section_rows[0])
+        section_feed = section_to_api_json(section_rows)
         if section_ids:
             section_feed['isCourseSection'] = section_id in section_ids
         courses_by_term[term_id][course_id]['sections'].append(section_feed)

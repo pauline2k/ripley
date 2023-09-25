@@ -58,47 +58,67 @@ def instruction_mode_description(instruction_mode):
     return mode_map.get(instruction_mode) or instruction_mode
 
 
-def section_to_api_json(section, co_instructor_sections=None):
+def section_to_api_json(section_rows):
 
-    def _instructor(section):
+    def _instructor(row):
         return {
-            'name': section['instructor_name'],
-            'role': section['instructor_role_code'],
-            'uid': section['instructor_uid'],
+            'name': row['instructor_name'],
+            'role': row['instructor_role_code'],
+            'uid': row['instructor_uid'],
         }
+
+    instructors = []
     schedules = {
         'oneTime': [],
         'recurring': [],
     }
-    if section['meeting_days'] and section['meeting_location']:
-        meeting = {}
-        if section['meeting_location'] == 'Requested General Assignment':
-            meeting['buildingName'] = 'Room not yet assigned'
-        else:
-            m = re.fullmatch(r'^(?P<building_name>.+?)\s?(?P<room_number>\w*\d[^\s]*)?$', section['meeting_location'])
-            meeting['buildingName'] = m['building_name']
-            if m['room_number']:
-                meeting['roomNumber'] = m['room_number']
-        if section['meeting_start_date'] == section['meeting_end_date']:
-            schedules['oneTime'].append({
-                **meeting,
-                'date': ' '.join([_meeting_days(section), section['meeting_start_date']]),
-            })
-        else:
-            schedules['recurring'].append({
-                **meeting,
-                'schedule': ' '.join([_meeting_days(section), _meeting_time(section)]),
-            })
+
+    for row in section_rows:
+        if not next((i for i in instructors if i['uid'] == row['instructor_uid']), None):
+            instructors.append(_instructor(row))
+
+        if row['meeting_days'] and row['meeting_location']:
+            meeting = {}
+            if row['meeting_location'] == 'Requested General Assignment':
+                meeting['buildingName'] = 'Room not yet assigned'
+            else:
+                m = re.fullmatch(r'^(?P<building_name>.+?)\s?(?P<room_number>\w*\d[^\s]*)?$', row['meeting_location'])
+                meeting['buildingName'] = m['building_name']
+                if m['room_number']:
+                    meeting['roomNumber'] = m['room_number']
+            if row['meeting_start_date'] == row['meeting_end_date']:
+                meeting_date = ' '.join([_meeting_days(row), row['meeting_start_date']])
+                if not next(
+                    (s for s in schedules['oneTime'] if s['date'] == meeting_date
+                        and s['buildingName'] == meeting['buildingName'] and s['roomNumber'] == meeting['roomNumber']),
+                    None,
+                ):
+                    schedules['oneTime'].append({
+                        **meeting,
+                        'date': meeting_date,
+                    })
+            else:
+                meeting_schedule = ' '.join([_meeting_days(row), _meeting_time(row)])
+                if not next(
+                    (s for s in schedules['recurring'] if s['schedule'] == meeting_schedule
+                        and s['buildingName'] == meeting['buildingName'] and s['roomNumber'] == meeting['roomNumber']),
+                    None,
+                ):
+                    schedules['recurring'].append({
+                        **meeting,
+                        'schedule': meeting_schedule,
+                    })
+
     return {
-        'courseCode': section['course_name'],
-        'id': section['section_id'],
-        'instructionFormat': section['instruction_format'],
-        'instructionMode': instruction_mode_description(section['instruction_mode']),
-        'isPrimarySection': section['is_primary'],
-        'instructors': [_instructor(s) for s in ([section] + (co_instructor_sections or []))],
-        'name': course_section_name(section),
+        'courseCode': section_rows[0]['course_name'],
+        'id': section_rows[0]['section_id'],
+        'instructionFormat': section_rows[0]['instruction_format'],
+        'instructionMode': instruction_mode_description(section_rows[0]['instruction_mode']),
+        'isPrimarySection': section_rows[0]['is_primary'],
+        'instructors': instructors,
+        'name': course_section_name(section_rows[0]),
         'schedules': schedules,
-        'sectionNumber': section['section_number'],
+        'sectionNumber': section_rows[0]['section_number'],
     }
 
 
