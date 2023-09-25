@@ -501,7 +501,7 @@ def _build_courses_by_term(instructor_uid, teaching_sections, section_ids):
 
 
 def _inject_canvas_course_sites(courses_by_term, instructor_uid):
-    if courses_by_term and not app.config['TESTING']:
+    if courses_by_term and instructor_uid and not app.config['TESTING']:
         for canvas_course in canvas.get_user_courses(instructor_uid):
             term_id = extract_berkeley_term_id(canvas_course)
             if term_id in courses_by_term:
