@@ -40,7 +40,7 @@ def send_system_error_email(message, subject=None):
             message=_scrub(message),
             recipient={
                 'email': email_address,
-                'name': app.config['EMAIL_RIPLEY_OPS_LABEL'],
+                'name': app.config['EMAIL_RIPLEY_OPERATIONS_LABEL'],
             },
             subject_line=f'Alert: {_scrub(subject)}',
         )
