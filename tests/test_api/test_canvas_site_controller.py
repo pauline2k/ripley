@@ -192,6 +192,14 @@ class TestCanvasSiteProvisionSections:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
             _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=401)
 
+    def test_student(self, client, app, fake_auth):
+        """Denies user with no course enrollment."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {'course': ['get_by_id_8876542'], 'user': [f'profile_{student_uid}']}, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
+            _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=401)
+
     def test_reader(self, client, app, fake_auth):
         """Allows Reader, read-only."""
         with requests_mock.Mocker() as m:
@@ -360,6 +368,29 @@ class TestCanvasSiteProvisionSections:
             ]
             assert sections[2]['sectionNumber'] == '101'
             assert course['slug'] == 'astron-218-2023-B'
+
+    def test_admin(self, client, app, fake_auth):
+        """Allows admin."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
+                'user': [f'profile_{admin_uid}'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            response = _api_canvas_course_provision_sections(client, canvas_site_id)
+            assert response['canvasSite']
+            assert response['canvasSite']['canEdit'] is False
+            # Official sections
+            assert len(response['canvasSite']['officialSections']) == 2
+            # All available sections
+            assert len(response['teachingTerms']) == 1
+            spring_term = response['teachingTerms'][0]
+            assert spring_term['name'] == 'Spring 2023'
+            assert len(spring_term['classes']) == 1
+            assert spring_term['classes'][0]
+            assert spring_term['classes'][0]['slug'] == 'anthro-189-2023-B'
 
 
 class TestCreateCourseSite:

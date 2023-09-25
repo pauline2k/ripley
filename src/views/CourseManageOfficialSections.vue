@@ -246,7 +246,7 @@ export default {
     showAlert: false
   }),
   created() {
-    this.fetchFeed().then(() => {
+    this.fetchFeed().finally(() => {
       this.$ready()
     })
   },
@@ -310,8 +310,7 @@ export default {
           } else {
             this.displayError = 'Failed to retrieve section data.'
           }
-        },
-        this.$errorHandler
+        }
       )
     },
     getStagedSections() {
@@ -468,12 +467,11 @@ export default {
             }
           }
         ).catch(
-          (error, vm, info) => {
+          () => {
             this.changeWorkflowStep('preview')
             this.jobStatus = 'error'
             this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
             clearInterval(this.exportTimer)
-            this.$errorHandler((error, vm, info))
           }
         )
       }, 4000)
