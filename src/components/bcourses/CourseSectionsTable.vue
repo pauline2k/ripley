@@ -172,7 +172,7 @@
                 size="medium"
               />
               This section is already in use by
-              <OutboundLink :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].id}`">{{ section.canvasSites[0].name }}</OutboundLink>
+              <OutboundLink :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`">{{ section.canvasSites[0].name }}</OutboundLink>
             </div>
             <div v-if="section.canvasSites.length > 1">
               <div>
@@ -185,7 +185,7 @@
               </div>
               <div class="ml-6 pt-1">
                 <ul v-for="(canvasSite, index) in section.canvasSites" :key="index" class="sites-container">
-                  <li><OutboundLink :href="`${config.canvasApiUrl}/courses/${canvasSite.id}`">{{ canvasSite.name }}</OutboundLink></li>
+                  <li><OutboundLink :href="`${config.canvasApiUrl}/courses/${canvasSite.canvasSiteId}`">{{ canvasSite.name }}</OutboundLink></li>
                 </ul>
               </div>
             </div>
