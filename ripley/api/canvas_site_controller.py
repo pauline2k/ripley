@@ -253,13 +253,16 @@ def _course_provision_feed(is_admin, admin_acting_as):
 
 def _course_provision_feed_by_ccns(admin_by_ccns, admin_term_slug):
     term_id = BerkeleyTerm.from_slug(admin_term_slug).to_sis_term_id()
-    sections = sort_course_sections(
-        data_loch.get_sections(term_id, admin_by_ccns) or [],
+    sections = data_loch.get_sections(term_id, admin_by_ccns) or []
+    teaching_terms = get_teaching_terms(
+        current_user=current_user,
+        section_ids=admin_by_ccns,
+        sections=sort_course_sections(sections),
     )
     return {
-        'isAdmin': True,
         'adminTerms': _get_admin_terms(),
-        'teachingTerms': get_teaching_terms(current_user, section_ids=admin_by_ccns, sections=sections),
+        'isAdmin': True,
+        'teachingTerms': teaching_terms,
     }
 
 

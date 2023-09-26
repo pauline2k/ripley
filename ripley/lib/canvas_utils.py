@@ -305,7 +305,11 @@ def get_teaching_terms(current_user=None, section_ids=None, sections=None, term_
     if not len(teaching_sections) and sections:
         teaching_sections = sections
 
-    courses_by_term = _build_courses_by_term(instructor_uid, teaching_sections, section_ids)
+    courses_by_term = _build_courses_by_term(
+        instructor_uid=instructor_uid,
+        section_ids=section_ids,
+        teaching_sections=teaching_sections,
+    )
 
     def _term_courses(term_id, courses_by_id):
         term = BerkeleyTerm.from_sis_term_id(term_id)
@@ -479,11 +483,11 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     _update_section_enrollments(sis_term_id, course, section_feeds, [], sis_import)
 
 
-def _build_courses_by_term(instructor_uid, teaching_sections, section_ids):
+def _build_courses_by_term(instructor_uid, section_ids, teaching_sections):
     courses_by_term = {}
     for section_id, section_rows in groupby(teaching_sections, lambda s: s['section_id']):
         # Python sorting orders False before True, guaranteeing that primary instructor comes first.
-        section_rows = sorted(section_rows, key=lambda r: r.get('is_co_instructor'))
+        section_rows = sorted(section_rows, key=lambda r: r.get('is_co_instructor', False))
         course_id = section_rows[0]['course_id']
         term_id = section_rows[0]['term_id']
         if term_id not in courses_by_term:
@@ -496,25 +500,25 @@ def _build_courses_by_term(instructor_uid, teaching_sections, section_ids):
             section_feed['isCourseSection'] = section_id in section_ids
         courses_by_term[term_id][course_id]['sections'].append(section_feed)
 
-    _inject_canvas_course_sites(courses_by_term, instructor_uid)
+    if courses_by_term and instructor_uid and not app.config['TESTING']:
+        _inject_canvas_course_sites(courses_by_term, instructor_uid)
     return courses_by_term
 
 
 def _inject_canvas_course_sites(courses_by_term, instructor_uid):
-    if courses_by_term and instructor_uid and not app.config['TESTING']:
-        for canvas_course in canvas.get_user_courses(instructor_uid):
-            term_id = extract_berkeley_term_id(canvas_course)
-            if term_id in courses_by_term:
-                for s in canvas_course.get_sections():
-                    section_id, berkeley_term = parse_canvas_sis_section_id(s.sis_section_id)
-                    if section_id:
-                        for course in courses_by_term[term_id].values():
-                            for section in course.get('sections', []):
-                                if 'canvasSites' not in section:
-                                    section['canvasSites'] = []
-                                if section['id'] == section_id:
-                                    canvas_course_json = canvas_site_to_api_json(canvas_course)
-                                    section['canvasSites'].append(canvas_course_json)
+    for canvas_course in canvas.get_user_courses(instructor_uid):
+        term_id = extract_berkeley_term_id(canvas_course)
+        if term_id in courses_by_term:
+            for s in canvas_course.get_sections():
+                section_id, berkeley_term = parse_canvas_sis_section_id(s.sis_section_id)
+                if section_id:
+                    for course in courses_by_term[term_id].values():
+                        for section in course.get('sections', []):
+                            if 'canvasSites' not in section:
+                                section['canvasSites'] = []
+                            if section['id'] == section_id:
+                                canvas_course_json = canvas_site_to_api_json(canvas_course)
+                                section['canvasSites'].append(canvas_course_json)
 
 
 def _prepare_section_definition(

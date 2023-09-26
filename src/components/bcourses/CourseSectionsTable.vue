@@ -23,10 +23,10 @@
     <table id="template-sections-table">
       <thead>
         <tr>
-          <th v-if="mode === 'createCourseForm'" class="cell-checkbox">Action</th>
+          <th v-if="mode === 'createCourseForm'" class="cell-checkbox pl-4">Action</th>
           <th class="cell-course-code">Course Code</th>
-          <th class="cell-section-label">Section Label</th>
-          <th class="cell-section-id">Class Number</th>
+          <th class="cell-section-label">Section Name</th>
+          <th class="cell-section-id">Section ID</th>
           <th class="cell-section-timestamps d-none d-sm-none d-md-table-cell">Schedule</th>
           <th class="cell-section-locations d-none d-sm-none d-md-table-cell">Location</th>
           <th class="cell-section-instructors d-none d-sm-none d-lg-table-cell">Instructors</th>
@@ -330,7 +330,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-td {
+td, th {
   padding: 10px;
 }
 .border-top-zero {

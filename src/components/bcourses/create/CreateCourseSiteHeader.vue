@@ -54,7 +54,7 @@
     <div v-if="adminMode === 'bySectionId'" class="py-5">
       <h3 class="sr-only">Load Sections by ID</h3>
       <div v-if="size(adminTerms)">
-        <div class="d-flex pb-5">
+        <div class="d-flex pb-3">
           <div
             v-for="(term, index) in adminTerms"
             :key="index"
@@ -74,7 +74,7 @@
             </v-btn>
           </div>
         </div>
-        <div class="pb-5">
+        <div class="pb-3">
           <label
             for="page-create-course-site-section-id-list"
             class="sr-only"
@@ -90,7 +90,7 @@
             :disabled="isFetching"
             hide-details
             placeholder="Paste your list of Section IDs here, separated by commas or spaces"
-            rows="3"
+            rows="2"
           />
         </div>
         <v-btn
