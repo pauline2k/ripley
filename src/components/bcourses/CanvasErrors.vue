@@ -2,6 +2,7 @@
   <v-alert
     id="canvas-error-container"
     aria-live="polite"
+    color="red-lighten-3"
     density="compact"
     role="alert"
   >

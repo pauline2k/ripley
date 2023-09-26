@@ -1,9 +1,9 @@
 <template>
   <div class="pa-5">
-    <div v-if="displayError">
+    <div v-if="displayError" class="mb-2">
       <CanvasErrors :message="displayError" />
     </div>
-    <div v-if="!isLoading && !displayError">
+    <div v-if="!isLoading">
       <MaintenanceNotice
         v-if="showMaintenanceNotice"
         role="alert"
@@ -164,6 +164,7 @@ export default {
       this.showMaintenanceNotice = true
     },
     fetchFeed() {
+      this.displayError = null
       this.isFetching = true
       this.currentWorkflowStep = 'selecting'
       this.clearCourseSiteJob()
@@ -179,7 +180,6 @@ export default {
         this.isAdmin
       ).then(
         data => {
-          console.log(data)
           this.updateMetadata(data)
           this.usersClassCount = this.classCount(data.teachingTerms)
           this.teachingTerms = data.teachingTerms

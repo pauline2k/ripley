@@ -4,9 +4,10 @@
       You are currently not listed as the instructor of record for any courses, so you cannot create a course site in bCourses.
     </div>
     <div v-if="size(teachingTerms)">
-      <h2 v-if="isAdmin">Term</h2>
+      <h2 v-if="isAdmin && teachingTerms.length > 1">Term</h2>
       <div :class="{'py-2': isAdmin}">
         <v-btn-toggle
+          v-if="teachingTerms.length > 1"
           v-model="slug"
           class="term-btn-toggle"
           color="primary"
@@ -20,8 +21,9 @@
             {{ term.name }}
           </v-btn>
         </v-btn-toggle>
-        <div class="mt-5">
-          <h3>Official Sections</h3>
+        <div :class="{'mt-5': teachingTerms.length > 1}">
+          <h2 v-if="teachingTerms.length === 1">{{ teachingTerms[0].name }} Official Sections</h2>
+          <h3 v-if="teachingTerms.length > 1">Official Sections</h3>
           <div class="text-subtitle-1">
             All official sections you select below will be put in ONE, single course site.
           </div>
