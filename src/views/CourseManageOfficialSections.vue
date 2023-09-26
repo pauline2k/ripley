@@ -113,7 +113,7 @@
             </v-col>
           </v-row>
         </div>
-        <div class="page-course-official-sections-sections-area">
+        <div class="page-course-official-sections-sections-area mt-5">
           <v-row no-gutters>
             <v-col md="12">
               <h3 id="available-sections-header" class="page-course-official-sections-available-sections-header-label">
@@ -130,36 +130,35 @@
               v-for="(course, index) in courseSemesterClasses"
               :id="`sections-course-${course.slug}`"
               :key="index"
-              class="container px-1 mt-4"
-              style="border-radius: 3px !important"
+              bg-color="blue-lighten-5"
               :value="course.slug"
             >
-              <v-expansion-panel-title class="d-flex align-start justify-start height-unset pa-0">
+              <v-expansion-panel-title>
                 <template #actions="{ expanded }">
-                  <v-icon class="mt-1 order-0" :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
+                  <v-icon :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
                 </template>
-                <h4 id="available-course-header" class="d-flex flex-nowrap order-1 sections-course-title">
-                  <div class="text-no-wrap">{{ course.courseCode }}<span v-if="course.title">&nbsp;:&nbsp;</span></div>
-                  <div>
-                    {{ course.title }}&nbsp;
-                    <span v-if="course.sections && (course.sections.length === 1)" class="sections-course-subtitle text-no-wrap">(1 section)</span>
-                    <span v-if="course.sections && (course.sections.length !== 1)" class="sections-course-subtitle text-no-wrap">({{ course.sections.length }} sections)</span>
-                  </div>
+                <h4 id="available-course-header" class="sections-course-title">
+                  {{ course.courseCode }}
+                  <span v-if="course.title">: {{ course.title }}</span>
+                  <span v-if="size(course.sections)">
+                    ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
+                  </span>
                 </h4>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
-                <div v-if="course.sections.length > 1" class="mx-2 mb-1">
+                <div v-if="course.sections.length > 1">
                   <v-btn
-                    v-if="!allSectionsAdded(course)"
                     :id="`course-${index}-add-all-sections-btn`"
                     aria-label="Add all sections for this course to the list of sections to be added"
-                    color="primary"
+                    class="course-add-all-sections-btn"
+                    :color="allSectionsAdded(course) ? '' : 'primary'"
+                    :disabled="allSectionsAdded(course)"
                     variant="plain"
                     @click="addAllSections(course)"
                   >
-                    Add All
+                    <template v-if="allSectionsAdded(course)">All Added</template>
+                    <template v-else>Add All</template>
                   </v-btn>
-                  <span v-if="allSectionsAdded(course)" class="d-inline-block px-4 py-2">All Added</span>
                 </div>
                 <v-row no-gutters>
                   <v-col md="12">
@@ -220,6 +219,7 @@ import Context from '@/mixins/Context'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
+import {pluralize} from '@/utils'
 import {each, filter, find, flatMap, includes, keys, set, size, toString, union, unset} from 'lodash'
 
 export default {
@@ -364,6 +364,7 @@ export default {
         this.usersClassCount = 0
       }
     },
+    pluralize,
     refreshFromFeed(feed) {
       if (feed.teachingTerms) {
         this.loadCourseLists(feed.teachingTerms)
@@ -533,6 +534,9 @@ export default {
   }
   .page-course-official-sections-sections-area {
     min-width: 420px;
+    .course-add-all-sections-btn:disabled {
+      opacity: .5 !important;
+    }
   }
   .page-course-official-sections-sections-area.page-course-official-sections-current-sections-grey-border {
     padding: 15px;
@@ -546,34 +550,9 @@ export default {
     }
   }
   h4.sections-course-title {
-    font-size: 15px !important;
-    font-weight: 500 !important;
-    line-height: 20px;
-  }
-  .sections-course-subtitle {
-    font-size: 14px !important;
-    font-weight: 400;
-    line-height: 20px;
-  }
-}
-</style>
-
-<style lang="scss">
-.page-course-official-sections {
-  .v-expansion-panel-title__overlay {
-    background-color: transparent !important;
-  }
-  .v-expansion-panel-text__wrapper {
-    padding: 6px 4px 0px 4px;
-  }
-  .v-expansion-panel-title__icon {
-    margin-inline-start: unset;
-  }
-  .v-expansion-panel__shadow {
-    display: none !important;
-  }
-  .v-expansion-panel::after {
-    border: none !important;
+    font-size: 18px !important;
+    font-weight: 400 !important;
+    line-height: 18px;
   }
 }
 </style>
