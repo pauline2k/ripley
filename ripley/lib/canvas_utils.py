@@ -483,7 +483,7 @@ def _build_courses_by_term(instructor_uid, teaching_sections, section_ids):
     courses_by_term = {}
     for section_id, section_rows in groupby(teaching_sections, lambda s: s['section_id']):
         # Python sorting orders False before True, guaranteeing that primary instructor comes first.
-        section_rows = sorted(section_rows, key=lambda r: r.get('is_co_instructor'))
+        section_rows = sorted(section_rows, key=lambda r: r.get('is_co_instructor', False))
         course_id = section_rows[0]['course_id']
         term_id = section_rows[0]['term_id']
         if term_id not in courses_by_term:
