@@ -1,17 +1,28 @@
 <template>
   <div>
     <h2 class="sr-only">Administrator Options</h2>
-    <v-btn
-      id="toggle-admin-mode-button"
+    <div class="text-subtitle-1">Choose courses by:</div>
+    <v-radio-group
+      v-model="adminModeModel"
       color="primary"
+      density="compact"
       :disabled="isFetching"
-      @click="setMode(adminMode === 'actAs' ? 'bySectionId' : 'actAs')"
+      hide-details
     >
-      Switch to {{ adminMode === 'actAs' ? 'Section ID input' : 'acting as instructor' }}
-    </v-btn>
+      <v-radio id="radio-btn-mode-act-as" value="actAs">
+        <template #label>
+          <div class="font-weight-medium pl-1 text-subtitle-1">Instructor UID</div>
+        </template>
+      </v-radio>
+      <v-radio id="radio-btn-mode-section-id" value="bySectionId">
+        <template #label>
+          <div class="font-weight-medium pl-1 text-subtitle-1">Section IDs</div>
+        </template>
+      </v-radio>
+    </v-radio-group>
     <div v-if="adminMode === 'actAs'" class="pt-5">
       <h3 class="sr-only">Load Sections By Instructor UID</h3>
-      <div class="align-center d-flex pb-5">
+      <div class="align-center d-flex pb-3">
         <div class="pr-3">
           <label for="instructor-uid" class="sr-only">Instructor UID</label>
           <v-text-field
@@ -24,8 +35,8 @@
             hide-details
             maxlength="16"
             placeholder="Instructor UID"
-            role="search"
             variant="outlined"
+            @keydown.enter="submit"
           />
         </div>
         <div>
@@ -55,24 +66,21 @@
       <h3 class="sr-only">Load Sections by ID</h3>
       <div v-if="size(adminTerms)">
         <div class="d-flex pb-3">
-          <div
-            v-for="(term, index) in adminTerms"
-            :key="index"
-            class="pr-2"
+          <v-btn-toggle
+            v-model="slug"
+            class="term-btn-toggle"
+            color="primary"
           >
             <v-btn
+              v-for="(term, index) in adminTerms"
               :id="`term${index}`"
-              name="adminTerm"
-              :aria-selected="currentAdminTerm === term.slug"
-              :color="currentAdminTerm === term.slug ? 'primary' : ''"
+              :key="index"
               :disabled="isFetching"
-              role="tab"
-              @click="switchAdminTerm(term)"
-              @keyup.enter="switchAdminTerm(term)"
+              :value="term.slug"
             >
               {{ term.name }}
             </v-btn>
-          </div>
+          </v-btn-toggle>
         </div>
         <div class="pb-3">
           <label
@@ -125,7 +133,7 @@
 
 <script>
 import Context from '@/mixins/Context'
-import {partition, size, split, trim} from 'lodash'
+import {find, partition, size, split, trim} from 'lodash'
 import {putFocusNextTick} from '@/utils'
 
 export default {
@@ -183,8 +191,35 @@ export default {
     }
   },
   computed: {
+    adminModeModel: {
+      get() {
+        return this.adminMode
+      },
+      set(mode) {
+        this.error = undefined
+        this.sectionIds = ''
+        this.uid = undefined
+        this.setAdminMode(mode)
+        if (mode === 'bySectionId') {
+          this.$announcer.polite('Input mode switched to section ID')
+          putFocusNextTick('load-sections-by-id')
+        } else {
+          this.$announcer.polite(`Input mode switched to ${mode === 'bySectionId' ? 'section ID' : 'UID'}`)
+          putFocusNextTick(mode === 'bySectionId' ? 'load-sections-by-id' : 'instructor-uid')
+        }
+      }
+    },
     isInvalidUID() {
       return !!this.trim(this.uid) && !this.uid.match(/^\d+$/)
+    },
+    slug: {
+      get() {
+        return this.currentAdminTerm
+      },
+      set(slug) {
+        const term = find(this.adminTerms, ['slug', slug])
+        this.switchAdminTerm(term)
+      }
     }
   },
   data: () => ({
@@ -193,40 +228,29 @@ export default {
     uid: undefined
   }),
   methods: {
-    setMode(mode) {
-      this.error = undefined
-      this.sectionIds = ''
-      this.uid = undefined
-      this.setAdminMode(mode)
-      if (mode === 'bySectionId') {
-        this.$announcer.polite('Input mode switched to section ID')
-        putFocusNextTick('load-sections-by-id')
-      } else {
-        this.$announcer.polite(`Input mode switched to ${mode === 'bySectionId' ? 'section ID' : 'UID'}`)
-        putFocusNextTick(mode === 'bySectionId' ? 'load-sections-by-id' : 'instructor-uid')
-      }
-    },
     size,
     submit() {
-      if (this.adminMode === 'bySectionId') {
-        const trimmed = trim(this.sectionIds)
-        const sectionIds = split(trimmed, /[,\r\n\t ]+/)
-        const notNumeric = partition(sectionIds, sectionId => /^\d+$/.test(trim(sectionId)))[1]
-        if (notNumeric.length) {
-          this.error = 'Section IDs must be numeric.'
-          putFocusNextTick('page-create-course-site-section-id-list')
-        } else {
-          this.setAdminBySectionIds(sectionIds)
-          this.fetchFeed()
-        }
-      } else {
-        const trimmed = trim(this.uid)
-        if (/^\d+$/.test(trimmed)) {
-          this.setAdminActingAs(trimmed)
-          this.fetchFeed()
-        } else {
-          this.error = 'UID must be numeric.'
-          putFocusNextTick('instructor-uid')
+      if (!this.isFetching) {
+        if (this.adminMode === 'bySectionId' && trim(this.sectionIds)) {
+          const trimmed = trim(this.sectionIds)
+          const sectionIds = split(trimmed, /[,\r\n\t ]+/)
+          const notNumeric = partition(sectionIds, sectionId => /^\d+$/.test(trim(sectionId)))[1]
+          if (notNumeric.length) {
+            this.error = 'Section IDs must be numeric.'
+            putFocusNextTick('page-create-course-site-section-id-list')
+          } else {
+            this.setAdminBySectionIds(sectionIds)
+            this.fetchFeed()
+          }
+        } else if (this.adminMode === 'actAs' && trim(this.uid) && !this.isInvalidUID) {
+          const trimmed = trim(this.uid)
+          if (/^\d+$/.test(trimmed)) {
+            this.setAdminActingAs(trimmed)
+            this.fetchFeed()
+          } else {
+            this.error = 'UID must be numeric.'
+            putFocusNextTick('instructor-uid')
+          }
         }
       }
     },
@@ -243,5 +267,8 @@ export default {
   color: $color-alert-error-foreground;
   font-size: 14px;
   font-weight: bolder;
+}
+.term-btn-toggle {
+  border-width: 1px;
 }
 </style>
