@@ -9,7 +9,7 @@
         role="alert"
         course-action-verb="site is created"
       />
-      <h1>Create a Course Site</h1>
+      <h1 class="my-2">Create a Course Site</h1>
       <div class="pl-3">
         <CreateCourseSiteHeader
           v-if="isAdmin && currentWorkflowStep !== 'processing'"
@@ -24,9 +24,6 @@
           :show-maintenance-notice="showMaintenanceNotice"
           :switch-admin-term="switchAdminTerm"
         />
-        <div v-if="isAdmin && !currentWorkflowStep">
-          Use inputs above to choose courses by Section ID or as an instructor.
-        </div>
       </div>
       <div v-if="!isFetching" id="page-create-course-site-steps-container">
         <div
