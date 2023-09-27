@@ -205,7 +205,7 @@
       </div>
     </div>
     <div v-if="displayError" role="alert">
-      <i class="fa fa-warning canvas-notice-icon"></i>
+      <v-icon icon="mdi-alert-circle-outline" color="red" />
       <div>
         <h1 id="notice-text-header" class="notice-text-header">Error</h1>
         <p>{{ displayError }}</p>
@@ -500,7 +500,7 @@ export default {
 <style scoped lang="scss">
 .pending-request-step {
   height: 24px;
-  margin: 20px 0;
+  margin: 20px;
   text-align: center;
 }
 .page-course-official-sections {

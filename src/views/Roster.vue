@@ -99,11 +99,11 @@
               :students="students"
             />
             <div v-if="!roster.students.length">
-              <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
+              <v-icon icon="mdi-alert-circle-outline" class="icon-gold" />
               Students have not yet signed up for this class.
             </div>
             <div v-if="roster.students.length && !students.length">
-              <v-icon icon="mdi-exclamation-circle" class="icon-gold" />
+              <v-icon icon="mdi-alert-circle-outline" class="icon-gold" />
               No students found matching your query.
             </div>
           </v-col>

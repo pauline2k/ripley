@@ -94,14 +94,6 @@ form {
       font-weight: 500;
     }
   }
-  .form-label {
-    display: block;
-    font-size: 13px;
-    font-weight: 400;
-    margin-right: 10px;
-    margin-top: 8px;
-    text-align: right;
-  }
   select {
     -moz-appearance: none;
     -webkit-appearance: none;

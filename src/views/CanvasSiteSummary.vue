@@ -80,7 +80,7 @@
                 Log in<span class="sr-only"> as {{ user.name }}</span>
               </v-btn>
               <div v-if="user.uid.includes('inactive')" class="text-red">
-                <v-icon class="mr-2" icon="mdi-exclamation-circle" />
+                <v-icon class="mr-2" icon="mdi-alert-circle-outline" />
                 <span class="sr-only"> as {{ user.name }} is </span>Inactive
               </div>
             </div>

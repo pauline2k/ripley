@@ -116,7 +116,7 @@
             />
             Fetching...
           </span>
-          <span v-if="!isFetching">Review matching Section IDs</span>
+          <span v-if="!isFetching">Fetch matching Sections</span>
         </v-btn>
       </div>
     </div>
