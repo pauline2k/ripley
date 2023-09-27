@@ -1,58 +1,65 @@
 <template>
-  <div class="d-flex flex-wrap text-center">
-    <v-card
+  <ul
+    class="text-center"
+    style="display: block; overflow: hidden; width: 100%; padding-top: 1rem; margin-left: 1rem"
+  >
+    <li
       v-for="student in students"
       :key="student.studentId"
-      :border="false"
-      class="avoid-break-inside-when-print mb-2 text-center v-card-roster-photo"
-      elevation="0"
+      style="display:block; float: left; height: auto; padding: 5px; width: 173px;"
     >
-      <a
-        :id="`student-profile-url-${student.studentId}`"
-        class="text-decoration-none"
-        :href="student.profileUrl || `${config.apiBaseUrl}/redirect/canvas/${currentUser.canvasSiteId}/user/${student.uid}`"
-        target="_top"
+      <v-card
+        :border="false"
+        class="avoid-break-inside-when-print mb-2 text-center v-card-roster-photo"
+        elevation="0"
       >
-        <RosterPhoto
-          :on-load="() => student.hasRosterPhotoLoaded = true"
-          :student="student"
-        />
-      </a>
-      <v-card-title class="py-0 text-subtitle-2">
-        <div v-if="!student.email" :id="`student-without-email-${student.studentId}`">
-          <div class="page-roster-student-name">{{ student.firstName }}</div>
-          <div class="page-roster-student-name font-weight-bolder">{{ student.lastName }}</div>
-        </div>
-        <div v-if="student.email" class="pt-2">
-          <OutboundLink :id="`student-email-${student.studentId}`" :href="`mailto:${student.email}`">
-            <div class="sr-only">Email</div>
+        <a
+          :id="`student-profile-url-${student.studentId}`"
+          class="text-decoration-none"
+          :href="student.profileUrl || `${config.apiBaseUrl}/redirect/canvas/${currentUser.canvasSiteId}/user/${student.uid}`"
+          target="_top"
+        >
+          <RosterPhoto
+            :on-load="() => student.hasRosterPhotoLoaded = true"
+            :student="student"
+          />
+        </a>
+        <v-card-title class="py-0 text-subtitle-2">
+          <div v-if="!student.email" :id="`student-without-email-${student.studentId}`">
             <div class="page-roster-student-name">{{ student.firstName }}</div>
             <div class="page-roster-student-name font-weight-bolder">{{ student.lastName }}</div>
-          </OutboundLink>
-        </div>
-      </v-card-title>
-      <v-card-text>
-        <div :id="`student-id-${student.studentId}`" class="print-hide">
-          <span class="sr-only">Student ID: </span>
-          {{ student.studentId }}
-        </div>
-        <div
-          v-if="student.terms_in_attendance"
-          :id="`student-terms-in-attendance-${student.studentId}`"
-          class="page-roster-student-terms print-hide"
-        >
-          Terms: {{ student.terms_in_attendance }}
-        </div>
-        <div
-          v-if="student.majors"
-          :id="`student-majors-${student.studentId}`"
-          class="page-roster-student-majors print-hide"
-        >
-          {{ truncate(student.majors.join(', '), {length: 50}) }}
-        </div>
-      </v-card-text>
-    </v-card>
-  </div>
+          </div>
+          <div v-if="student.email" class="pt-2">
+            <OutboundLink :id="`student-email-${student.studentId}`" :href="`mailto:${student.email}`">
+              <div class="sr-only">Email</div>
+              <div class="page-roster-student-name">{{ student.firstName }}</div>
+              <div class="page-roster-student-name font-weight-bolder">{{ student.lastName }}</div>
+            </OutboundLink>
+          </div>
+        </v-card-title>
+        <v-card-text>
+          <div :id="`student-id-${student.studentId}`">
+            <span class="sr-only">Student ID: </span>
+            {{ student.studentId }}
+          </div>
+          <div
+            v-if="student.terms_in_attendance"
+            :id="`student-terms-in-attendance-${student.studentId}`"
+            class="page-roster-student-terms print-hide"
+          >
+            Terms: {{ student.terms_in_attendance }}
+          </div>
+          <div
+            v-if="student.majors"
+            :id="`student-majors-${student.studentId}`"
+            class="page-roster-student-majors print-hide"
+          >
+            {{ truncate(student.majors.join(', '), {length: 50}) }}
+          </div>
+        </v-card-text>
+      </v-card>
+    </li>
+  </ul>
 </template>
 
 <script>
@@ -100,11 +107,10 @@ export default {
     font-size: 18px;
     overflow: visible;
     text-overflow: ellipsis;
-    white-space: normal;
   }
   *.v-card-roster-photo {
     margin: 0 !important;
-    width: 132px !important;
+    width: 173px !important;
   }
 }
 </style>
