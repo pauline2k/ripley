@@ -59,6 +59,7 @@
         </div>
         <v-expansion-panels
           v-if="coursesList.length > 0"
+          v-model="panels"
           class="my-5"
           multiple
         >
@@ -73,13 +74,12 @@
               <template #actions="{ expanded }">
                 <v-icon :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
               </template>
-              <h3>
-                {{ course.courseCode }}
-                <span v-if="course.title">: {{ course.title }}</span>
-                <span v-if="size(course.sections)">
-                  ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
-                </span>
+              <h3 v-if="teachingTerms.length === 1">
+                <CourseCodeAndTitle :course="course" />
               </h3>
+              <h4 v-if="teachingTerms.length > 1">
+                <CourseCodeAndTitle :course="course" />
+              </h4>
             </v-expansion-panel-title>
             <v-expansion-panel-text>
               <CourseSectionsTable
@@ -117,6 +117,7 @@
 
 <script>
 import Context from '@/mixins/Context.vue'
+import CourseCodeAndTitle from '@/components/bcourses/create/CourseCodeAndTitle.vue'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {pluralize} from '@/utils'
@@ -125,7 +126,7 @@ import {find, size} from 'lodash'
 export default {
   name: 'SelectSectionsStep',
   mixins: [Context],
-  components: {CourseSectionsTable, OutboundLink},
+  components: {CourseCodeAndTitle, CourseSectionsTable, OutboundLink},
   props: {
     coursesList: {
       required: true,
@@ -158,6 +159,7 @@ export default {
   },
   data: () => ({
     linkToSiteOverview: undefined,
+    panels: [],
     term: undefined
   }),
   computed: {
@@ -174,6 +176,11 @@ export default {
           this.switchSemester(term)
         }
       }
+    }
+  },
+  created() {
+    if (this.coursesList.length === 1) {
+      this.panels = [0]
     }
   },
   methods: {
