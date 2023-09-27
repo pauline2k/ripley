@@ -1,98 +1,120 @@
 <template>
-  <div>
-    <div class="alert alert-info" role="alert">
-      <h2 id="confirm-course-site-details-header" class="sr-only" tabindex="-1">Confirm Course Site Details</h2>
-      <strong>
-        You are about to create a {{ currentSemesterName }} course site with {{ pluralize('section', selectedSectionsList.length) }}:
-      </strong>
+  <h2 id="course-site-details-header" class="mb-1 mt-3" tabindex="-1">Course Site Details</h2>
+  <v-alert color="alert" border rounded>
+    <div v-if="selectedSectionsList.length === 1">
+      You are about to create a {{ currentSemesterName }} course site for
+      {{ selectedSectionsList[0].courseTitle }} - {{ selectedSectionsList[0].courseCode }} ({{ selectedSectionsList[0].id }})
+    </div>
+    <div v-if="selectedSectionsList.length > 1">
+      <div class="font-weight-medium">
+        You are about to create a {{ currentSemesterName }} course site for:
+      </div>
       <ul id="page-create-course-site-section-list" class="page-create-course-site-section-list">
         <li v-for="section in selectedSectionsList" :key="section.sectionId">
           {{ section.courseTitle }} - {{ section.courseCode }} ({{ section.id }})
         </li>
       </ul>
     </div>
-    <div>
-      <form
-        id="create-course-site-form"
-        name="createCourseSiteForm"
-        class="canvas-page-form"
-        @submit.prevent="create"
-      >
-        <v-container fluid>
-          <v-row>
-            <v-col class="pr-1" md="3">
-              <label for="siteName" class="form-label">
-                Site Name:
-              </label>
-            </v-col>
-            <v-col class="pl-0" md="6">
-              <v-text-field
-                id="siteName"
-                v-model="siteName"
-                class="w-100"
-                name="siteName"
-                :required="true"
-              />
-              <div v-if="!trim(siteName)" class="alert notice-error">
-                <v-icon icon="mdi-exclamation-circle" class="left icon-red canvas-notice-icon" />
-                Please fill out a site name.
-              </div>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col class="pr-1" md="3">
-              <label for="siteAbbreviation" class="form-label">Site Abbreviation:</label>
-            </v-col>
-            <v-col class="pl-0" md="6">
-              <v-text-field
-                id="siteAbbreviation"
-                v-model="siteAbbreviation"
-                class="w-100"
-                :required="true"
-              />
-              <div v-if="!trim(siteAbbreviation)" class="alert notice-error">
-                <v-icon icon="mdi-exclamation-circle" class="left icon-red canvas-notice-icon" />
-                Please fill out a site abbreviation.
-              </div>
-            </v-col>
-          </v-row>
-        </v-container>
-        <div class="d-flex flex-row-reverse">
-          <div>
-            <v-btn
-              id="create-course-site-button"
-              aria-controls="page-create-course-site-steps-container"
-              aria-label="Create Course Site"
-              color="primary"
-              type="submit"
-              :disabled="!trim(siteName) || !trim(siteAbbreviation)"
-            >
-              Create Course Site
-            </v-btn>
-          </div>
+  </v-alert>
+  <v-container fluid>
+    <v-row align="center">
+      <v-col cols="2">
+        <label class="float-right font-weight-medium" for="course-site-name">
+          Site Name
+        </label>
+      </v-col>
+      <v-col cols="10">
+        <v-text-field
+          id="course-site-name"
+          v-model="siteName"
+          class="w-75"
+          density="comfortable"
+          :disabled="isCreating"
+          :error="!trim(siteName)"
+          hide-details
+          maxlength="255"
+          placeholder="Please provide site name"
+          :required="true"
+          variant="outlined"
+          @keydown.enter="create"
+        />
+      </v-col>
+    </v-row>
+    <v-row align="center">
+      <v-col cols="2">
+        <label class="float-right font-weight-medium" for="course-site-abbreviation">
+          Site Abbreviation
+        </label>
+      </v-col>
+      <v-col cols="10">
+        <v-text-field
+          id="course-site-abbreviation"
+          v-model="siteAbbreviation"
+          class="w-50"
+          density="comfortable"
+          :error="!trim(siteAbbreviation)"
+          :disabled="isCreating"
+          hide-details
+          maxlength="42"
+          placeholder="Please provide site abbreviation"
+          :required="true"
+          variant="outlined"
+          @keydown.enter="create"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12">
+        <div class="align-center d-flex float-right">
           <div class="pr-2">
             <v-btn
               id="go-back-button"
+              :disabled="isCreating"
+              variant="text"
               @click="goBack"
             >
-              Go Back
+              Cancel
+            </v-btn>
+          </div>
+          <div>
+            <v-btn
+              id="create-course-site-button"
+              color="primary"
+              :disabled="isCreating || !trim(siteName) || !trim(siteAbbreviation)"
+              @click="create"
+            >
+              <span v-if="isCreating">
+                <v-progress-circular
+                  class="mr-1"
+                  indeterminate
+                  size="18"
+                />
+                Creating...
+              </span>
+              <span v-if="!isCreating">
+                Create Course Site
+              </span>
             </v-btn>
           </div>
         </div>
-      </form>
-    </div>
-  </div>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
 import Context from '@/mixins/Context'
-import {iframeScrollToTop, pluralize, putFocusNextTick} from '@/utils'
+import {iframeScrollToTop, putFocusNextTick} from '@/utils'
 import {trim} from 'lodash'
 
 export default {
   name: 'ConfirmationStep',
   mixins: [Context],
   props: {
+    courseSiteCreationPromise: {
+      required: true,
+      type: Function
+    },
     currentSemesterName: {
       required: true,
       type: String
@@ -104,13 +126,10 @@ export default {
     selectedSectionsList: {
       required: true,
       type: Array
-    },
-    startCourseSiteJob: {
-      required: true,
-      type: Function
     }
   },
   data: () => ({
+    isCreating: false,
     siteAbbreviation: undefined,
     siteName: undefined
   }),
@@ -119,12 +138,16 @@ export default {
     this.siteName = `${section.courseTitle} (${this.currentSemesterName})`
     this.siteAbbreviation = `${section.courseCode}-${section.instructionFormat}-${section.sectionNumber}`
     iframeScrollToTop()
-    putFocusNextTick('confirm-course-site-details-header')
+    putFocusNextTick('course-site-details-header')
   },
   methods: {
-    pluralize,
     create() {
-      this.startCourseSiteJob(this.siteName, this.siteAbbreviation)
+      if (!this.isCreating && trim(this.siteAbbreviation) && trim(this.siteName)) {
+        this.isCreating = true
+        this.courseSiteCreationPromise(this.siteName, this.siteAbbreviation).then(() => {
+          this.isCreating = false
+        })
+      }
     },
     trim
   }

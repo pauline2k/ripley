@@ -10,7 +10,7 @@
     >
       <v-row no-gutters>
         <v-col cols="2">
-          <label for="page-user-provision-uid-list" class="form-label user-provision-uid-label">
+          <label for="page-user-provision-uid-list" class="user-provision-uid-label">
             <span aria-hidden="true">UID</span>
             <span class="sr-only">U I D</span>
             List
@@ -70,7 +70,7 @@
               class="d-flex align-center"
             >
               <div v-if="status === 'error'">
-                <v-icon icon="mdi-exclamation-circle" class="icon-red mr-2" />
+                <v-icon icon="mdi-alert-circle-outline" class="icon-red mr-2" />
                 <strong>Error : {{ error }}</strong>
               </div>
               <div v-if="status === 'success'">

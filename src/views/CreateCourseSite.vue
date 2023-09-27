@@ -48,16 +48,13 @@
           :aria-expanded="`${currentWorkflowStep === 'confirmation'}`"
         >
           <ConfirmationStep
-            :start-course-site-job="startCourseSiteJob"
+            :course-site-creation-promise="courseSiteCreationPromise"
             :current-semester-name="currentSemesterName"
             :go-back="showSelecting"
             :selected-sections-list="selectedSectionsList"
           />
         </div>
         <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
-          <h2 id="updating-sections-header" class="text-no-wrap">
-            Creating Course Site
-          </h2>
           <div class="pending-request-step">
             <div v-if="jobStatus === 'sendingRequest'">
               Sending request...
@@ -159,6 +156,44 @@ export default {
       this.jobStatus = undefined
       this.percentComplete = undefined
       this.showMaintenanceNotice = true
+    },
+    courseSiteCreationPromise(siteName, siteAbbreviation) {
+      return new Promise((resolve, reject) => {
+        const onError = message => {
+          this.percentComplete = 0
+          this.currentWorkflowStep = null
+          this.jobStatus = 'error'
+          this.displayError = message
+          reject()
+        }
+        this.currentWorkflowStep = 'processing'
+        this.jobStatus = 'sendingRequest'
+        this.showMaintenanceNotice = false
+        this.updateSelected()
+        const sectionIds = map(this.selectedSectionsList, 'id')
+        if (sectionIds.length > 0) {
+          courseCreate(
+            this.isAdmin && this.adminMode === 'actAs' ? this.adminActingAs : null,
+            this.isAdmin && this.adminMode === 'bySectionId' ? this.adminBySectionIds : null,
+            this.isAdmin && this.adminMode === 'bySectionId' ? this.currentAdminTerm : null,
+            sectionIds,
+            siteAbbreviation,
+            siteName,
+            this.currentSemester
+          ).then(
+            data => {
+              this.backgroundJobId = data.jobId
+              this.jobStatus = data.jobStatus
+              this.$announcer.polite('Started course site creation.')
+              this.trackBackgroundJob()
+              resolve()
+            },
+            () => onError('Failed to create course provisioning job.')
+          )
+        } else {
+          onError('No section IDs were provided.')
+        }
+      })
     },
     fetchFeed() {
       this.displayError = null
@@ -308,37 +343,6 @@ export default {
     },
     showSelecting() {
       this.currentWorkflowStep = 'selecting'
-    },
-    startCourseSiteJob(siteName, siteAbbreviation) {
-      this.currentWorkflowStep = 'processing'
-      this.jobStatus = 'sendingRequest'
-      this.showMaintenanceNotice = false
-      this.updateSelected()
-      const sectionIds = map(this.selectedSectionsList, 'id')
-      if (sectionIds.length > 0) {
-        const onSuccess = data => {
-          this.backgroundJobId = data.jobId
-          this.jobStatus = data.jobStatus
-          this.$announcer.polite('Started course site creation.')
-          this.completedFocus = true
-          this.trackBackgroundJob()
-        }
-        const onError = () => {
-          this.percentComplete = 0
-          this.currentWorkflowStep = null
-          this.jobStatus = 'error'
-          this.displayError = 'Failed to create course provisioning job.'
-        }
-        courseCreate(
-          this.isAdmin && this.adminMode === 'actAs' ? this.adminActingAs : null,
-          this.isAdmin && this.adminMode === 'bySectionId' ? this.adminBySectionIds : null,
-          this.isAdmin && this.adminMode === 'bySectionId' ? this.currentAdminTerm : null,
-          sectionIds,
-          siteAbbreviation,
-          siteName,
-          this.currentSemester
-        ).then(onSuccess, onError)
-      }
     },
     switchAdminTerm(semester) {
       this.currentAdminTerm = semester.slug
