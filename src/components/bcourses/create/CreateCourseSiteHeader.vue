@@ -114,7 +114,7 @@
               indeterminate
               size="18"
             />
-            Fetching sections...
+            Fetching...
           </span>
           <span v-if="!isFetching">Review matching Section IDs</span>
         </v-btn>

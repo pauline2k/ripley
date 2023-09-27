@@ -23,7 +23,7 @@
     <table id="template-sections-table">
       <thead>
         <tr>
-          <th v-if="mode === 'createCourseForm'" class="cell-checkbox pl-4">Action</th>
+          <th v-if="mode === 'createCourseForm'" class="cell-checkbox pl-4 pr-0">Action</th>
           <th class="cell-course-code">Course Code</th>
           <th class="cell-section-label">Section Name</th>
           <th class="cell-section-id">Section ID</th>
@@ -37,7 +37,7 @@
       </thead>
       <tbody v-for="section in displayableSections" :key="section.id">
         <tr :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}`" :class="sectionDisplayClass[section.id]">
-          <td v-if="mode === 'createCourseForm'" class="align-top cell-checkbox pl-2 py-0">
+          <td v-if="mode === 'createCourseForm'" class="align-top cell-checkbox pl-3 pr-0 py-0">
             <v-checkbox
               :id="`template-canvas-manage-sections-checkbox-${section.id}`"
               v-model="selected"
@@ -164,7 +164,8 @@
           v-if="!['currentStaging', 'preview'].includes(mode) && size(section.canvasSites)"
           :class="sectionDisplayClass[section.id]"
         >
-          <td colspan="7" class="border-top-zero pb-6 pl-12 pt-0">
+          <td class="border-top-zero pa-0"></td>
+          <td colspan="6" class="border-top-zero pb-4 pt-0">
             <div v-if="section.canvasSites.length === 1">
               <v-icon
                 color="error"
