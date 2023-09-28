@@ -1,11 +1,16 @@
 <template>
   <div class="mx-10 my-5">
-    <h1>Create a Project Site</h1>
+    <Header1 text="Create a Project Site" />
     <div v-if="!isLoading">
       <CanvasErrors v-if="error" :message="error" />
       <div class="align-center d-flex justify-center pb-8 pt-4">
         <div class="pr-3">
-          <label for="page-create-project-site-name" class="font-weight-medium text-subtitle-1">Project Site Name</label>
+          <label
+            for="page-create-project-site-name"
+            class="text-subtitle-1 font-weight-medium"
+          >
+            Project Site Name
+          </label>
         </div>
         <div class="mr-16 w-50">
           <v-text-field
@@ -62,6 +67,7 @@
 <script>
 import CanvasErrors from '@/components/bcourses/CanvasErrors'
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import {createProjectSite} from '@/api/canvas-site'
 import {iframeParentLocation} from '@/utils'
 import {trim} from 'lodash'
@@ -69,14 +75,14 @@ import {trim} from 'lodash'
 export default {
   name: 'CreateProjectSite',
   mixins: [Context],
-  components: {CanvasErrors},
+  components: {CanvasErrors, Header1},
   data: () => ({
     isCreating: undefined,
     error: undefined,
     name: undefined
   }),
   created() {
-    this.$ready('page-create-project-site-name')
+    this.$ready()
   },
   methods: {
     cancel() {
@@ -86,9 +92,10 @@ export default {
       if (!this.isCreating && trim(this.name)) {
         this.error = null
         this.isCreating = true
-        this.$announcer.polite('Creating new project site...')
+        this.$announcer.polite('Creating...')
         createProjectSite(this.name).then(
           data => {
+            setTimeout(() => {this.$announcer.polite('Loading Canvas site...')}, 500)
             if (this.$isInIframe) {
               iframeParentLocation(data.url)
             } else {

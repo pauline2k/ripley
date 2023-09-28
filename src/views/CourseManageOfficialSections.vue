@@ -4,7 +4,7 @@
       <div v-if="currentWorkflowStep === 'staging'">
         <MaintenanceNotice course-action-verb="site is updated" />
       </div>
-      <h1 id="page-header" class="page-course-official-sections-header1">Official Sections</h1>
+      <Header1 class="page-course-official-sections-header1" text="Official Sections" />
       <div v-if="currentWorkflowStep === 'preview'">
         <v-alert
           id="page-course-official-sections-job-status-notice"
@@ -207,7 +207,7 @@
     <div v-if="displayError" role="alert">
       <v-icon icon="mdi-alert-circle-outline" color="red" />
       <div>
-        <h1 id="notice-text-header" class="notice-text-header">Error</h1>
+        <Header1 class="notice-text-header" text="Error" />
         <p>{{ displayError }}</p>
       </div>
     </div>
@@ -217,6 +217,7 @@
 <script>
 import Context from '@/mixins/Context'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
+import Header1 from '@/components/utils/Header1.vue'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
 import {pluralize} from '@/utils'
@@ -225,6 +226,7 @@ import {each, filter, find, flatMap, includes, keys, set, size, toString, union,
 export default {
   name: 'CourseManageOfficialSections',
   components: {
+    Header1,
     CourseSectionsTable,
     MaintenanceNotice
   },

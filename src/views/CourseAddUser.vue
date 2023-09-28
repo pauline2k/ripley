@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading" class="page-course-add-user">
     <MaintenanceNotice course-action-verb="user is added" />
-    <h1 id="page-header">Find a Person to Add</h1>
+    <Header1 text="Find a Person to Add" />
     <div>
       <v-row v-if="showAlerts" role="alert">
         <v-col md="12">
@@ -289,6 +289,7 @@
 
 <script>
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {addUser, getAddUserOptions, searchUsers} from '@/api/canvas-user'
@@ -297,7 +298,7 @@ import {find, get, trim} from 'lodash'
 
 export default {
   name: 'CourseAddUser',
-  components: {MaintenanceNotice, OutboundLink},
+  components: {Header1, MaintenanceNotice, OutboundLink},
   mixins: [Context],
   data: () => ({
     additionSuccessMessage: false,
