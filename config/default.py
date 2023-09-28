@@ -45,7 +45,9 @@ CALNET_TEST_UID = '1022796'
 
 CANVAS_ACCESS_TOKEN = 'a token'
 CANVAS_API_URL = 'https://hard_knocks_api.instructure.com'
+CANVAS_ADMIN_TOOLS_ACCOUNT_ID = 129607
 CANVAS_BERKELEY_ACCOUNT_ID = 1
+CANVAS_COURSES_ACCOUNT_ID = 129410
 CANVAS_CURRENT_ENROLLMENT_TERM = 'auto'
 CANVAS_FUTURE_ENROLLMENT_TERM = 'auto'
 CANVAS_EXPORT_PATH = 'tmp/canvas'
@@ -106,6 +108,7 @@ LDAP_POOL_SIZE_MAX = 10
 LDAP_TIMEOUT = 30
 
 LTI_CONFIG_PATH = 'path/to/lti-config.json'
+LTI_HOST = 'https://rip-dev.example.com'
 
 # background_job_manager configs.
 JOB_HISTORY_DAYS_UNTIL_EXPIRE = 7
