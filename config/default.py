@@ -95,6 +95,8 @@ INACTIVE_SESSION_LIFETIME = 120
 # These "INDEX_HTML" defaults are good in ripley-[dev|qa|prod]. See development.py for local configs.
 INDEX_HTML = 'dist/static/index.html'
 
+JUNCTION_COMPARISON_CSV_BUCKET = 'csvs-from-junction'
+
 LDAP_HOST = 'ldap-test.berkeley.edu'
 LDAP_PORT = 636
 LDAP_BIND = 'mybind'

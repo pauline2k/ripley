@@ -52,6 +52,23 @@ def find_last_dated_csvs(folder, csv_names):
     return csvs_by_name
 
 
+def get_keys_with_prefix(prefix, bucket=None):
+    if not bucket:
+        bucket = app.config['AWS_S3_BUCKET']
+    client = _get_s3_client()
+    objects = []
+    paginator = client.get_paginator('list_objects')
+    page_iterator = paginator.paginate(Bucket=bucket, Prefix=prefix)
+    try:
+        for page in page_iterator:
+            if 'Contents' in page:
+                objects += [o.get('Key') for o in page['Contents']]
+    except (ClientError, ConnectionError, ValueError) as e:
+        app.logger.error(f'Error listing S3 keys with prefix: bucket={bucket}, prefix={prefix}, error={e}')
+        return None
+    return objects
+
+
 def get_object_text(key):
     s3 = _get_s3_client()
     bucket = app.config['AWS_S3_BUCKET']
@@ -135,8 +152,10 @@ def stream_folder_zipped(folder_key):
         return None
 
 
-def stream_object_text(object_key):
-    s3_url = f"s3://{app.config['AWS_S3_BUCKET']}/{object_key}"
+def stream_object_text(object_key, bucket=None):
+    if not bucket:
+        bucket = app.config['AWS_S3_BUCKET']
+    s3_url = f's3://{bucket}/{object_key}'
     try:
         return smart_open.open(s3_url, 'r', transport_params={'session': _get_session()})
     except Exception as e:

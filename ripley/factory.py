@@ -71,6 +71,7 @@ def _register_jobs(app):
     from ripley.jobs.bcourses_refresh_accounts_job import BcoursesRefreshAccountsJob  # noqa
     from ripley.jobs.bcourses_refresh_full_job import BcoursesRefreshFullJob  # noqa
     from ripley.jobs.bcourses_refresh_incremental_job import BcoursesRefreshIncrementalJob  # noqa
+    from ripley.jobs.compare_sis_import_csvs import CompareSisImportCsvs  # noqa
     from ripley.jobs.export_term_enrollments_job import ExportTermEnrollmentsJob  # noqa
     from ripley.jobs.house_keeping_job import HouseKeepingJob  # noqa
     from ripley.jobs.lti_usage_report_job import LtiUsageReportJob  # noqa
