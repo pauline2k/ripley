@@ -3,7 +3,7 @@
     <v-container fluid>
       <v-row no-gutters>
         <v-col>
-          <h1>Create a Site</h1>
+          <Header1 text="Create a Site" />
         </v-col>
       </v-row>
       <v-row no-gutters>
@@ -91,13 +91,14 @@
 
 <script>
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
 
 export default {
   name: 'SiteCreation',
   mixins: [Context],
-  components: {OutboundLink},
+  components: {Header1, OutboundLink},
   data: () => ({
     canCreateCourseSite: undefined,
     canCreateProjectSite: undefined,

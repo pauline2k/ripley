@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading" class="pa-5">
-    <h1 id="page-header" tabindex="-1">Manage Mailing Lists</h1>
+    <Header1 text="Manage Mailing Lists" />
     <v-alert
       v-if="error"
       class="ma-2"
@@ -46,6 +46,7 @@
 
 <script>
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {getMailingList} from '@/api/mailing-list'
@@ -55,7 +56,7 @@ import {trim} from 'lodash'
 export default {
   name: 'MailingListSelectCourse',
   mixins: [Context, MailingList],
-  components: {SpinnerWithinButton},
+  components: {Header1, SpinnerWithinButton},
   data: () => ({
     canvasSiteId: undefined,
     error: undefined,

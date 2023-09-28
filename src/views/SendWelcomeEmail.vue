@@ -1,8 +1,6 @@
 <template>
   <div v-if="!isLoading" class="ma-5">
-    <h1 id="page-header" tabindex="-1">
-      Mailing List
-    </h1>
+    <Header1 text="Mailing List" />
     <v-alert
       density="compact"
       role="alert"
@@ -185,6 +183,7 @@
 import CKEditor from '@ckeditor/ckeditor5-vue'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import MailingList from '@/mixins/MailingList'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
@@ -202,6 +201,7 @@ export default {
   name: 'SendWelcomeEmail',
   components: {
     ckeditor: CKEditor.component,
+    Header1,
     OutboundLink,
     SpinnerWithinButton
   },

@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading" class="page-site-mailing-list">
-    <h1 id="page-header" tabindex="-1">Update Mailing List</h1>
+    <Header1 text="Update Mailing List" />
     <v-alert
       v-if="!hasUpdatedSincePageLoad"
       class="mb-2"
@@ -174,6 +174,7 @@
 
 <script>
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
@@ -183,7 +184,7 @@ import {pluralize, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'MailingListUpdate',
-  components: {OutboundLink, SpinnerWithinButton},
+  components: {Header1, OutboundLink, SpinnerWithinButton},
   mixins: [MailingList, Context],
   data: () => ({
     alerts: [],

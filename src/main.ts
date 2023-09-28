@@ -17,9 +17,7 @@ initializeAxios(app, axios)
 // Globals
 app.config.globalProperties.$isInIframe = !!window.parent.frames.length
 app.config.globalProperties.$moment = moment
-app.config.globalProperties.$ready = (focusTarget?: string) => {
-  useContextStore().loadingComplete(focusTarget)
-}
+app.config.globalProperties.$ready = (focusTarget?: string) => useContextStore().loadingComplete(focusTarget)
 
 const apiBaseUrl = import.meta.env.VITE_APP_API_BASE_URL
 

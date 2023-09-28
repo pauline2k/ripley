@@ -3,7 +3,7 @@
     <v-card class="elevation-1 mb-2">
       <v-card-title class="d-flex align-start">
         <div class="pl-2 pt-4">
-          <h1>
+          <Header1>
             <v-icon
               class="pr-3 pb-3"
               color="primary"
@@ -12,7 +12,7 @@
               mdi-desktop-classic
             </v-icon>
             <span id="page-title" tabindex="0">MU-TH-UR 6000</span>
-          </h1>
+          </Header1>
         </div>
       </v-card-title>
       <v-card-text>
@@ -139,6 +139,7 @@
 <script>
 import Context from '@/mixins/Context'
 import DisableJobToggle from '@/components/job/DisableJobToggle'
+import Header1 from '@/components/utils/Header1.vue'
 import JobHistory from '@/components/job/JobHistory'
 import {cloneDeep, find, get} from 'lodash'
 import {getJobHistory, getJobSchedule, setJobDisabled, startJob, updateJobSchedule} from '@/api/job'
@@ -148,6 +149,7 @@ export default {
   mixins: [Context],
   components: {
     DisableJobToggle,
+    Header1,
     JobHistory
   },
   data: () => ({

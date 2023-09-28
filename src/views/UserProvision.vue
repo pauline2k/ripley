@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading" class="page-user-provision">
-    <h1 id="page-header" class="page-user-provision-heading">Add Users to bCourses</h1>
+    <Header1 id="page-header" class="page-user-provision-heading" text="Add Users to bCourses" />
     <form
       v-if="currentUser.isAdmin"
       id="user-import-form"
@@ -96,13 +96,14 @@
 
 <script>
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {each, isEmpty, size} from 'lodash'
 import {importUsers} from '@/api/canvas-utility'
 
 export default {
   name: 'UserProvision',
-  components: {SpinnerWithinButton},
+  components: {Header1, SpinnerWithinButton},
   mixins: [Context],
   data: () => ({
     error: null,

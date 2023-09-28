@@ -1,7 +1,5 @@
 import mitt from 'mitt'
 import {defineStore} from 'pinia'
-import {nextTick} from 'vue'
-import {noop} from 'lodash'
 import {putFocusNextTick} from '@/utils'
 
 const $_getDefaultApplicationState = () => ({
@@ -25,22 +23,7 @@ export const useContextStore = defineStore('context', {
   actions: {
     loadingComplete(focusTarget?: string) {
       this.isLoading = false
-      if (focusTarget) {
-        putFocusNextTick(focusTarget)
-      } else {
-        const callable = () => {
-          const elements = document.getElementsByTagName('h1')
-          if (elements.length > 0) {
-            elements[0].setAttribute('tabindex', '-1')
-            elements[0].focus()
-          }
-          return elements.length > 0
-        }
-        nextTick(() => {
-          let counter = 0
-          const job: any = setInterval(() => (callable() || ++counter > 3) && clearInterval(job), 500)
-        }).then(noop)
-      }
+      putFocusNextTick(focusTarget || 'page-title')
     },
     loadingStart() {
       this.isLoading = true

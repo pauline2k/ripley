@@ -1,7 +1,7 @@
 <template>
   <div class="pa-5">
     <div v-if="!isLoading">
-      <h1 id="page-header" tabindex="-1">Grade Distribution</h1>
+      <Header1 text="Grade Distribution" />
       <div v-if="get(gradeDistribution, 'demographics')" class="container mb-4">
         <DemographicsChart
           :change-series-color="changeSeriesColor"
@@ -23,6 +23,7 @@
 <script>
 import Context from '@/mixins/Context'
 import DemographicsChart from '@/components/bcourses/analytics/DemographicsChart'
+import Header1 from '@/components/utils/Header1.vue'
 import PriorEnrollmentChart from '@/components/bcourses/analytics/PriorEnrollmentChart'
 import {each, get} from 'lodash'
 import {getGradeDistribution} from '@/api/canvas-site'
@@ -31,6 +32,7 @@ export default {
   name: 'CourseGradeDistribution',
   components: {
     DemographicsChart,
+    Header1,
     PriorEnrollmentChart
   },
   mixins: [Context],

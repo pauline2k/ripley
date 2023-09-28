@@ -4,12 +4,12 @@
       <CanvasErrors :message="displayError" />
     </div>
     <div v-if="!isLoading">
+      <Header1 text="Create a Course Site" />
       <MaintenanceNotice
         v-if="showMaintenanceNotice"
-        role="alert"
+        class="my-2"
         course-action-verb="site is created"
       />
-      <h1 class="my-2">Create a Course Site</h1>
       <div class="pl-3">
         <CreateCourseSiteHeader
           v-if="isAdmin && currentWorkflowStep !== 'processing'"
@@ -54,7 +54,11 @@
             :selected-sections-list="selectedSectionsList"
           />
         </div>
-        <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
+        <div
+          v-if="currentWorkflowStep === 'processing'"
+          aria-live="polite"
+          role="alert"
+        >
           <div class="pl-8 pr-16 py-4">
             <div class="pb-3">
               <span v-if="jobStatus === 'sendingRequest'">Sending request...</span>
@@ -79,6 +83,7 @@ import CanvasErrors from '@/components/bcourses/CanvasErrors'
 import ConfirmationStep from '@/components/bcourses/create/ConfirmationStep'
 import Context from '@/mixins/Context'
 import CreateCourseSiteHeader from '@/components/bcourses/create/CreateCourseSiteHeader'
+import Header1 from '@/components/utils/Header1.vue'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
@@ -92,6 +97,7 @@ export default {
     CanvasErrors,
     ConfirmationStep,
     CreateCourseSiteHeader,
+    Header1,
     MaintenanceNotice,
     SelectSectionsStep
   },

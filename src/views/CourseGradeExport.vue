@@ -2,7 +2,7 @@
   <div v-if="!isLoading">
     <div v-if="appState === 'error'">
       <div class="ma-2 pl-2 pr-4">
-        <h1 class="grade-export-header mb-3 mt-2">Error</h1>
+        <Header1 class="grade-export-header mb-3 mt-2" text="Error" />
         <v-alert
           v-if="error"
           role="alert"
@@ -31,7 +31,7 @@
       <v-row no-gutters>
         <v-col>
           <BackToGradebook />
-          <h1 class="grade-export-header mb-3 mt-2">Before exporting your E-Grades:</h1>
+          <Header1 class="grade-export-header mb-3 mt-2" text="Before exporting your E-Grades:" />
           <h2 class="grade-export-sub-header">1. Select a grading scheme</h2>
           <div class="pb-4 pl-5 pt-2">
             <span v-if="!noGradingStandardEnabled">
@@ -126,13 +126,11 @@
       <v-row no-gutters aria-hidden="true">
         <v-col>
           <BackToGradebook />
-          <h1
+          <Header1
             id="grade-export-header"
             class="grade-export-header mb-3 mt-2"
-            tabindex="-1"
-          >
-            Export E-Grades
-          </h1>
+            text="Export E-Grades"
+          />
           <v-alert
             v-if="filenameDownloaded"
             class="ma-2"
@@ -280,7 +278,7 @@
       <v-container v-if="appState === 'loading'">
         <v-row no-gutters>
           <v-col>
-            <h1 class="grade-export-header mb-3 mt-2">Preparing E-Grades for Download</h1>
+            <Header1 class="grade-export-header mb-3 mt-2" text="Preparing E-Grades for Download" />
           </v-col>
         </v-row>
         <div class="align-center d-flex ma-3">
@@ -300,13 +298,14 @@
 <script>
 import BackToGradebook from '@/components/bcourses/egrades/BackToGradebook.vue'
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/egrades-export'
 import {getTermName, iframeParentLocation, iframeScrollToTop, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CourseGradeExport',
-  components: {BackToGradebook, OutboundLink},
+  components: {BackToGradebook, Header1, OutboundLink},
   mixins: [Context],
   data: () => ({
     appState: null,

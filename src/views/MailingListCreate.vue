@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading" class="mx-10 my-5">
-    <h1 id="page-header" class="my-3" tabindex="-1">Create Mailing List</h1>
+    <Header1 class="my-3" text="Create Mailing List" />
     <v-alert
       v-if="!error && !success"
       density="compact"
@@ -103,18 +103,7 @@
               <v-row v-if="currentUser.isTeaching || currentUser.isAdmin" no-gutters>
                 <v-col>
                   <div class="d-flex float-right">
-                    <div v-if="isAdminToolMode">
-                      <v-btn
-                        id="btn-cancel"
-                        class="mx-1"
-                        :disabled="isCreating"
-                        variant="text"
-                        @click="cancel"
-                      >
-                        Cancel
-                      </v-btn>
-                    </div>
-                    <div>
+                    <div :class="{'mr-1': isAdminToolMode}">
                       <v-btn
                         id="btn-create-mailing-list"
                         color="primary"
@@ -125,6 +114,16 @@
                         <span v-if="isCreating">
                           <SpinnerWithinButton /> Creating...
                         </span>
+                      </v-btn>
+                    </div>
+                    <div v-if="isAdminToolMode">
+                      <v-btn
+                        id="btn-cancel"
+                        :disabled="isCreating"
+                        variant="text"
+                        @click="cancel"
+                      >
+                        Cancel
                       </v-btn>
                     </div>
                   </div>
@@ -140,6 +139,7 @@
 
 <script>
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
@@ -150,7 +150,7 @@ import {putFocusNextTick, toInt} from '@/utils'
 
 export default {
   name: 'MailingListCreate',
-  components: {OutboundLink, SpinnerWithinButton},
+  components: {Header1, OutboundLink, SpinnerWithinButton},
   mixins: [Context, MailingList],
   data: () => ({
     canvasSiteId: undefined,

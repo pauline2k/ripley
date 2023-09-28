@@ -1,5 +1,10 @@
 <template>
-  <v-alert closable color="alert">
+  <v-alert
+    aria-live="polite"
+    closable
+    color="alert"
+    role="alert"
+  >
     <div class="d-flex">
       <div class="pr-2">
         <v-icon
