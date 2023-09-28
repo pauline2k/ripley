@@ -47,6 +47,34 @@ def ping_canvas():
     return get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID']) is not None
 
 
+def create_external_tool(account_id, client_id):
+    account = get_account(account_id, api_call=False)
+    tool = None
+    try:
+        tool = account.create_external_tool(
+            client_id=client_id,
+            name='name',
+            privacy_level='public',
+            consumer_key='consumer_key',
+            shared_secret='shared_secret',
+        )
+    except Exception as e:
+        app.logger.error(f'Failed to create Canvas external tool (client_id={client_id}, account_id={account_id})')
+        app.logger.exception(e)
+    return tool
+
+
+def edit_external_tool(tool_id, url, obj_type, obj_id=None):
+    tool = get_external_tool(tool_id, obj_type, obj_id)
+    tools = None
+    try:
+        tools = tool.edit(url=url)
+    except Exception as e:
+        app.logger.error(f'Failed to update Canvas external tool URL (id={tool_id}, url={url}, {obj_type}_id={obj_id})')
+        app.logger.exception(e)
+    return tools
+
+
 def get_account(account_id, api_call=True, api_url=None, use_sis_id=False):
     c = _get_canvas(api_url)
     if api_call is False:
@@ -159,6 +187,23 @@ def get_csv_report(report_type, download_path=None, term_id=None):
     app.logger.error(f'Failed to retrieve CSV {report_type} report after {MAX_REPORT_RETRIEVAL_ATTEMPTS} attempts')
 
 
+def get_external_tool(tool_id, obj_type, obj_id=None):
+    if obj_type == 'account':
+        obj = get_account(obj_id, api_call=False)
+    elif obj_type == 'course':
+        obj = get_course(obj_id, api_call=False)
+    else:
+        raise ValueError
+
+    tool = None
+    try:
+        tool = obj.get_external_tool(tool_id)
+    except Exception as e:
+        app.logger.error(f'Failed to retrieve Canvas external tool (tool_id={tool_id} {obj_type}_id={obj_id})')
+        app.logger.exception(e)
+    return tool
+
+
 def get_external_tools(obj_type, obj_id=None):
     if obj_type == 'account':
         obj = get_account(obj_id, api_call=False)
@@ -209,6 +254,16 @@ def get_section(section_id, api_call=True, use_sis_id=False):
             app.logger.error(f'Failed to retrieve Canvas section (id={section_id})')
             app.logger.exception(e)
         return section
+
+
+def get_sis_import(sis_import_id):
+    c = _get_canvas()
+    try:
+        account = c.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False)
+        return account.get_sis_import(sis_import_id)
+    except Exception as e:
+        app.logger.error(f'Failed to retrieve Canvas SIS import (sis_import_id={sis_import_id})')
+        app.logger.exception(e)
 
 
 def get_sis_user_profile(uid, api_url=None):
@@ -274,16 +329,6 @@ def get_user_courses(uid):
         app.logger.error(f'Failed to retrieve courses in which UID {uid} is enrolled.')
         app.logger.exception(e)
     return courses or []
-
-
-def get_sis_import(sis_import_id):
-    c = _get_canvas()
-    try:
-        account = c.get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID'], api_call=False)
-        return account.get_sis_import(sis_import_id)
-    except Exception as e:
-        app.logger.error(f'Failed to retrieve Canvas SIS import (sis_import_id={sis_import_id})')
-        app.logger.exception(e)
 
 
 def post_sis_import(attachment, extension='csv'):

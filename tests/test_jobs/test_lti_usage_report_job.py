@@ -74,14 +74,14 @@ class TestLtiUsageReportJob:
                 assert summary_report[0] == 'Tool,URL,Accounts,Courses Visible'
                 assert summary_report[1] == 'Canvas Data Portal,https://beta.example.com/session/lti/launch,1,N/A'
                 assert summary_report[2] == 'Chat,https://chat.instructure.com/lti/launch,1,1'
-                assert summary_report[3] == 'Create a Site,https://cc-dev.example.com/canvas/embedded/site_creation,1,N/A'
-                assert summary_report[4] == 'Find a Person to Add,https://cc-dev.example.com/canvas/embedded/course_add_user,1,0'
+                assert summary_report[3] == 'Create a Site,https://cc-dev.example.com/api/lti/create_site,1,N/A'
+                assert summary_report[4] == 'Find a Person to Add,https://cc-dev.example.com/api/lti/add_user,1,0'
                 assert summary_report[5] == 'SCORM,https://scone-test.instructure.com/packages,1,0'
                 assert summary_report[6] == 'SensusAccess,https://www.edu-apps.org/redirect,1,N/A'
-                assert summary_report[7] == 'User Provisioning,https://cc-dev.example.com/canvas/embedded/user_provision,1,N/A'
-                assert summary_report[8] == 'Course Captures,https://cc-dev.example.com/canvas/embedded/course_mediacasts,1,0'
+                assert summary_report[7] == 'User Provisioning,https://cc-dev.example.com/api/lti/provision_user,1,N/A'
+                assert summary_report[8] == 'Course Captures,https://cc-dev.example.com/api/lti/course_mediacasts,1,0'
                 assert summary_report[9] == 'Attendance,https://rollcall-beta.instructure.com/launch,129409,3'
-                assert summary_report[10] == 'Download E-Grades,https://cc-dev.example.com/canvas/embedded/course_grade_export,129410,0'
+                assert summary_report[10] == 'Download E-Grades,https://cc-dev.example.com/api/lti/export_grade,129410,0'
 
                 courses_report = read_s3_csv(app, s3, 'lti_usage_courses-2023-B')
                 assert len(courses_report) == 19
