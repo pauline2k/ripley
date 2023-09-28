@@ -23,13 +23,8 @@ export const useContextStore = defineStore('context', {
     isLoading: false
   }),
   actions: {
-    loadingComplete(label?: string, focusTarget?: string) {
-      document.title = `${label || 'bCourses'} | UC Berkeley`
+    loadingComplete(focusTarget?: string) {
       this.isLoading = false
-      if (label) {
-        // TODO: use '@vue-a11y/announcer' instead
-        // state.screenReaderAlert = `${label} page is ready`
-      }
       if (focusTarget) {
         putFocusNextTick(focusTarget)
       } else {
@@ -47,11 +42,7 @@ export const useContextStore = defineStore('context', {
         }).then(noop)
       }
     },
-    loadingStart(label?: string) {
-      if (label) {
-        // TODO: use '@vue-a11y/announcer'
-        console.log(`TODO: Screen-reader announce "${label}"`)
-      }
+    loadingStart() {
       this.isLoading = true
     },
     resetApplicationState() {

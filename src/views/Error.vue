@@ -63,7 +63,7 @@ export default {
       error || this.applicationState.message
     )
     this.header = show404 ? 'Page Not Found' : 'Uh oh, there was a problem.'
-    this.$ready(this.header)
+    this.$ready()
   }
 }
 </script>

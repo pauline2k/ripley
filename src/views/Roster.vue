@@ -167,10 +167,10 @@ export default {
           this.$announcer.polite(this.printButtonTooltip)
         },
         error => this.error = error
-      ).finally(() => this.$ready('Roster'))
+      ).finally(() => this.$ready())
     } else {
       this.error = 'You must be a teacher in this bCourses course to view official student rosters.'
-      this.$ready('Roster')
+      this.$ready()
     }
   },
   methods: {

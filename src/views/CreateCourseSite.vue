@@ -130,7 +130,7 @@ export default {
   created() {
     getCourseProvisioningMetadata().then(data => {
       this.updateMetadata(data)
-      this.$ready('Create Canvas Course Site')
+      this.$ready()
     })
   },
   methods: {

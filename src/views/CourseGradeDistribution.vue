@@ -113,7 +113,7 @@ export default {
         this.gradeDistribution = data
         this.loadPrimarySeries()
       }
-    ).finally(() => this.$ready('Grade Distribution'))
+    ).finally(() => this.$ready())
   },
   methods: {
     changeSeriesColor(chartSettings) {

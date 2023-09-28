@@ -93,21 +93,22 @@
         </v-expansion-panels>
         <div class="d-flex justify-end mb-4 pr-8">
           <v-btn
+            id="page-create-course-site-continue"
+            aria-label="Continue to next step"
+            class="mr-1"
+            color="primary"
+            :disabled="!selectedSectionsList.length"
+            @click="showConfirmation"
+          >
+            Next
+          </v-btn>
+          <v-btn
             id="page-create-course-site-cancel"
             aria-label="Cancel and return to Site Creation Overview"
             variant="text"
             @click="cancel"
           >
             Cancel
-          </v-btn>
-          <v-btn
-            id="page-create-course-site-continue"
-            aria-label="Continue to next step"
-            color="primary"
-            :disabled="!selectedSectionsList.length"
-            @click="showConfirmation"
-          >
-            Next
           </v-btn>
         </div>
       </div>

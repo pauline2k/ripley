@@ -49,111 +49,146 @@ const routes:RouteRecordRaw[] = [
     children: [
       {
         component: CanvasSiteSummary,
+        meta: {
+          announcer: {
+            skip: true
+          }
+        },
         path: '/canvas_site/:id'
       },
       {
         component: CourseAddUser,
         path: '/add_user',
         meta: {
-          title: 'Find a User to Add'
+          announcer: {
+            message: 'Find a User to Add'
+          }
         }
       },
       {
         component: CourseGradeDistribution,
         path: '/grade_distribution',
         meta: {
-          title: 'Grade Distribution'
+          announcer: {
+            message: 'Grade Distribution'
+          }
         }
       },
       {
         component: CourseGradeExport,
         path: '/export_grade',
         meta: {
-          title: 'E-Grade Export'
+          announcer: {
+            message: 'E-Grade Export'
+          }
         }
       },
       {
         component: CourseManageOfficialSections,
         path: '/manage_official_sections',
         meta: {
-          title: 'Official Sections'
+          announcer: {
+            message: 'Official Sections'
+          }
         }
       },
       {
         component: Profile,
         path: '/profile/:uid',
         meta: {
-          title: 'Profile'
+          announcer: {
+            message: 'Profile'
+          }
         }
       },
       {
         component: Roster,
         path: '/roster',
         meta: {
-          title: 'Roster Photos'
+          announcer: {
+            message: 'Roster Photos'
+          }
         }
       },
       {
         component: SiteCreation,
         path: '/create_site',
         meta: {
-          title: 'bCourses Site Creation'
+          announcer: {
+            message: 'bCourses Site Creation'
+          }
         }
       },
       {
         component: CreateCourseSite,
         path: '/create_course_site',
         meta: {
-          title: 'Create a Course Site'
+          announcer: {
+            message: 'Create a Course Site'
+          }
         }
       },
       {
         component: CreateProjectSite,
         path: '/create_project_site',
         meta: {
-          title: 'Create a Project Site'
+          announcer: {
+            message: 'Create a Project Site'
+          }
         }
       },
       {
         component: MailingListCreate,
         path: '/mailing_list/create',
         meta: {
-          title: 'Create Mailing List'
+          announcer: {
+            message: 'Create Mailing List'
+          }
         }
       },
       {
         component: MailingListSelectCourse,
         path: '/mailing_list/select_course',
         meta: {
-          title: 'Select Course Site'
+          announcer: {
+            message: 'Select Course Site'
+          }
         }
       },
       {
         component: MailingListCreate,
         path: '/mailing_list/create/:canvasSiteId',
         meta: {
-          title: 'Create Mailing List'
+          announcer: {
+            message: 'Create Mailing List'
+          }
         }
       },
       {
         component: MailingListUpdate,
         path: '/mailing_list/update',
         meta: {
-          title: 'Update Mailing List'
+          announcer: {
+            message: 'Update Mailing List'
+          }
         }
       },
       {
         component: SendWelcomeEmail,
         path: '/mailing_list/send_welcome_email',
         meta: {
-          title: 'Send Welcome Email'
+          announcer: {
+            message: 'Send Welcome Email'
+          }
         }
       },
       {
         component: UserProvision,
         path: '/provision_user',
         meta: {
-          title: 'bCourses User Provision'
+          announcer: {
+            message: 'bCourses User Provision'
+          }
         }
       },
       {
@@ -161,6 +196,9 @@ const routes:RouteRecordRaw[] = [
         name: 'Welcome',
         path: '/welcome',
         meta: {
+          announcer: {
+            message: 'Welcome'
+          },
           isHome: true
         }
       }
@@ -174,7 +212,11 @@ const routes:RouteRecordRaw[] = [
       {
         path: '/jobs',
         component: Jobs,
-        meta: {title: 'MU-TH-UR 6000'}
+        meta: {
+          announcer: {
+            message: 'MU-TH-UR 6000'
+          }
+        }
       }
     ]
   },
@@ -202,7 +244,7 @@ const router = createRouter({
 router.afterEach((to: any) => {
   useContextStore().loadingStart()
   useContextStore().resetApplicationState()
-  const title = get(to, 'meta.title') || capitalize(to.name) || 'Welcome'
+  const title = get(to, 'announcer.message') || capitalize(to.name) || 'bCourses'
   document.title = `${title} | UC Berkeley`
 })
 
