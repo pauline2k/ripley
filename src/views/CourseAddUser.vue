@@ -335,7 +335,7 @@ export default {
       this.showUnauthorized
     ).catch(this.showUnauthorized
     ).finally(() => {
-      this.$ready('Find Person to Add')
+      this.$ready()
     })
   },
   methods: {

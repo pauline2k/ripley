@@ -66,17 +66,7 @@
     <v-row>
       <v-col cols="12">
         <div class="align-center d-flex float-right">
-          <div class="pr-2">
-            <v-btn
-              id="go-back-button"
-              :disabled="isCreating"
-              variant="text"
-              @click="goBack"
-            >
-              Cancel
-            </v-btn>
-          </div>
-          <div>
+          <div class="mr-1">
             <v-btn
               id="create-course-site-button"
               color="primary"
@@ -94,6 +84,16 @@
               <span v-if="!isCreating">
                 Create Course Site
               </span>
+            </v-btn>
+          </div>
+          <div>
+            <v-btn
+              id="go-back-button"
+              :disabled="isCreating"
+              variant="text"
+              @click="goBack"
+            >
+              Cancel
             </v-btn>
           </div>
         </div>

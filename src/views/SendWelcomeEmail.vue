@@ -231,7 +231,7 @@ export default {
     getMyMailingList().then(
       data => {
         this.updateDisplay(data)
-        this.$ready('Mailing List', 'page-header')
+        this.$ready('page-header')
       }
     )
   },

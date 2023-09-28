@@ -172,7 +172,7 @@ export default {
     getJobSchedule().then(data => {
       this.jobSchedule = data
       this.refresh(true).then(() => {
-        this.$ready('MU-TH-UR 6000')
+        this.$ready()
       })
     })
   },

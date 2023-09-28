@@ -42,7 +42,7 @@ export default {
   components: {DevAuth},
   created() {
     const showDevAuth = false
-    this.$ready('Welcome. Please log in.')
+    this.$ready()
     return {showDevAuth}
   },
   methods: {

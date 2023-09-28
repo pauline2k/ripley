@@ -16,8 +16,6 @@
             :disabled="isCreating"
             hide-details
             maxlength="255"
-            placeholder="Enter a name for your site"
-            required
             variant="outlined"
             @keydown.enter="create"
           />
@@ -28,20 +26,9 @@
       </div>
       <div class="d-flex justify-end">
         <v-btn
-          id="cancel-and-return-to-site-creation"
-          aria-label="Cancel and return to Site Creation Overview"
-          class="mx-1"
-          :disabled="isCreating"
-          type="button"
-          variant="text"
-          @click="cancel"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
           id="create-project-site-button"
           aria-controls="page-reader-alert"
-          class="mr-2"
+          class="mr-1"
           color="primary"
           type="submit"
           :disabled="isCreating || !trim(name)"
@@ -56,6 +43,16 @@
             />
             Creating...
           </span>
+        </v-btn>
+        <v-btn
+          id="cancel-and-return-to-site-creation"
+          aria-label="Cancel and return to Site Creation Overview"
+          :disabled="isCreating"
+          type="button"
+          variant="text"
+          @click="cancel"
+        >
+          Cancel
         </v-btn>
       </div>
     </div>
@@ -79,7 +76,7 @@ export default {
     name: undefined
   }),
   created() {
-    this.$ready('Create bCourses Project Site', 'page-create-project-site-name')
+    this.$ready('page-create-project-site-name')
   },
   methods: {
     cancel() {

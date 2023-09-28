@@ -18,7 +18,7 @@
     "@ckeditor/ckeditor5-vue": "5.1.0",
     "@mdi/font": "7.2.96",
     "@vue-a11y/announcer": "3.1.5",
-    "axios": "1.5.0",
+    "axios": "1.5.1",
     "core-js": "3.32.2",
     "highcharts-vue": "1.4.3",
     "js-file-download": "0.4.12",
@@ -30,8 +30,8 @@
     "pinia": "2.1.6",
     "roboto-fontface": "*",
     "vue": "3.3.4",
-    "vue-router": "4.2.4",
-    "vuetify": "3.3.16",
+    "vue-router": "4.2.5",
+    "vuetify": "3.3.19",
     "webfontloader": "1.6.28"
   },
   "devDependencies": {
