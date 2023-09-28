@@ -132,7 +132,7 @@ def _worker_to_api_json(worker):
         'currentJobWorkingTime': worker.current_job_working_time,
         'failedJobCount': worker.failed_job_count,
         'lastHeartbeat': worker.last_heartbeat and worker.last_heartbeat.strftime('%Y-%m-%dT%H:%M:%S'),
-        'lastHeartbeatMinutesAgo': worker.last_heartbeat and ((datetime.now() - worker.last_heartbeat).seconds / 60),
+        'lastHeartbeatSecondsAgo': worker.last_heartbeat and ((datetime.now() - worker.last_heartbeat).seconds),
         'name': worker.name,
         'pid': worker.pid,
         'state': worker.get_state(),
