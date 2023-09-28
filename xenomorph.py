@@ -50,7 +50,11 @@ db.init_app(app)
 def is_worker_alive(redis_url):
     redis_conn = redis.from_url(redis_url)
     workers = Worker.all(redis_conn)
-    live_worker = next((w for w in workers if w.pid and w.last_heartbeat and (datetime.now() - w.last_heartbeat).seconds < 600), False)
+    live_worker = next(
+        (w for w in workers if w.pid and w.last_heartbeat
+            and (datetime.now() - w.last_heartbeat).seconds < (app.config['XENOMORPH_HEARTBEAT_SECONDS'] + 15)),
+        False,
+    )
     return bool(live_worker)
 
 
@@ -65,6 +69,7 @@ def start_worker(redis_url, name='xenomorph'):
             connection=redis_conn,
             name=name,
             work_horse_killed_handler=work_horse_killed_handler,
+            default_worker_ttl=app.config['XENOMORPH_HEARTBEAT_SECONDS'],
         )
         app.logger.info(_xenomorph_spawned)
         w.work(
@@ -156,7 +161,7 @@ with app.app_context():
         # If we already have a worker (on this instance or another) that seems to be doing its job, leave it be.
         if is_worker_alive(redis_url):
             app.logger.debug('Worker alive, will recheck in 60 seconds')
-            time.sleep(60)
+            time.sleep(app.config['XENOMORPH_HEARTBEAT_SECONDS'])
         else:
             # Any existing workers have quit, either quietly or loudly. Clear them out of Redis.
             stop_workers(redis_url)
