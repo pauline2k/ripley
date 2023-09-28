@@ -156,7 +156,7 @@ def get_canvas_course_id(course_slug):
     return course_id
 
 
-def get_canvas_sis_section_id(term_id, sis_section_id, ensure_unique=False):
+def get_canvas_sis_section_id(sis_section_id, term_id, ensure_unique=False):
     berkeley_term = BerkeleyTerm.from_sis_term_id(term_id)
     base_section_id = f'SEC:{berkeley_term.year}-{berkeley_term.season}-{sis_section_id}'
     section_id = base_section_id
@@ -363,16 +363,12 @@ def import_users(uids):
 
 def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_ids, is_admin_by_ccns):
     term = BerkeleyTerm.from_slug(term_slug)
-
-    terms_feed = []
-    # Admins can specify semester and CCNs directly, without access checks.
     if is_admin_by_ccns:
-        sections = sort_course_sections(
-            data_loch.get_sections(term.to_sis_term_id(), section_ids) or [],
-        )
-        terms_feed = get_teaching_terms(sections=sections)
-    # Otherwise, the user must have instructor access (direct or inherited via section nesting) to all sections.
+        # Admins can specify semester and CCNs directly, without access checks.
+        sections = data_loch.get_sections(term.to_sis_term_id(), section_ids) or []
+        terms_feed = get_teaching_terms(sections=sort_course_sections(sections))
     else:
+        # Otherwise, the user must have instructor access (direct or inherited via section nesting) to all sections.
         terms_feed = get_teaching_terms(section_ids=section_ids, term_id=term.to_canvas_sis_term_id(), uid=uid)
 
     courses_list = terms_feed[0]['classes'] if terms_feed else []
@@ -414,7 +410,7 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         if not sis_import:
             raise InternalServerError(f'Course sections SIS import failed (sis_course_id={sis_course_id}).')
 
-    course = canvas.get_course(sis_course_id, use_sis_id=True)
+    course = canvas.get_course(course_id=sis_course_id, use_sis_id=True)
     if not course:
         raise InternalServerError(f'Canvas course lookup failed (sis_course_id={sis_course_id}).')
 
@@ -436,16 +432,16 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
             if s['id'] in section_ids:
                 all_sections.append(s)
                 _prepare_section_definition(
-                    s,
-                    course,
-                    uid,
-                    term.to_sis_term_id(),
-                    lead_ta_role,
-                    teacher_role,
-                    is_admin_by_ccns,
-                    section_feeds,
-                    section_roles,
-                    explicit_sections_for_instructor,
+                    course=course,
+                    explicit_sections_for_instructor=explicit_sections_for_instructor,
+                    is_admin_by_ccns=is_admin_by_ccns,
+                    lead_ta_role=lead_ta_role,
+                    section=s,
+                    section_feeds=section_feeds,
+                    section_roles=section_roles,
+                    sis_term_id=term.to_sis_term_id(),
+                    teacher_role=teacher_role,
+                    uid=uid,
                 )
 
     with SisImportCsv.create(fieldnames=['section_id', 'course_id', 'name', 'status', 'start_date', 'end_date']) as sections_csv:
@@ -466,12 +462,12 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
 
     if not is_admin_by_ccns:
         _add_instructor_to_site(
-            uid,
-            course,
-            section_roles,
-            teacher_role,
-            explicit_sections_for_instructor,
-            section_feeds,
+            course=course,
+            explicit_sections_for_instructor=explicit_sections_for_instructor,
+            section_feeds=section_feeds,
+            section_roles=section_roles,
+            teacher_role=teacher_role,
+            uid=uid,
         )
 
     # Background enrollment update
@@ -480,7 +476,13 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         job = get_current_job()
         job.meta['courseSiteUrl'] = f"{app.config['CANVAS_API_URL']}/courses/{course.id}"
         job.save_meta()
-    _update_section_enrollments(sis_term_id, course, section_feeds, [], sis_import)
+    _update_section_enrollments(
+        all_sections=section_feeds,
+        course=course,
+        deleted_section_ids=[],
+        sis_import=sis_import,
+        sis_term_id=sis_term_id,
+    )
 
 
 def _build_courses_by_term(instructor_uid, section_ids, teaching_sections):
@@ -498,6 +500,8 @@ def _build_courses_by_term(instructor_uid, section_ids, teaching_sections):
         section_feed = section_to_api_json(section_rows)
         if section_ids:
             section_feed['isCourseSection'] = section_id in section_ids
+        if not instructor_uid and section_feed.get('instructors'):
+            instructor_uid = section_feed['instructors'][0]['uid']
         courses_by_term[term_id][course_id]['sections'].append(section_feed)
 
     if courses_by_term and instructor_uid and not app.config['TESTING']:
@@ -522,18 +526,22 @@ def _inject_canvas_course_sites(courses_by_term, instructor_uid):
 
 
 def _prepare_section_definition(
-    section,
     course,
-    uid,
-    sis_term_id,
-    lead_ta_role,
-    teacher_role,
+    explicit_sections_for_instructor,
     is_admin_by_ccns,
+    lead_ta_role,
     section_feeds,
     section_roles,
-    explicit_sections_for_instructor,
+    sis_term_id,
+    section,
+    teacher_role,
+    uid,
 ):
-    sis_section_id = get_canvas_sis_section_id(sis_term_id, section['id'], ensure_unique=True)
+    sis_section_id = get_canvas_sis_section_id(
+        ensure_unique=True,
+        sis_section_id=section['id'],
+        term_id=sis_term_id,
+    )
     section_feed = {
         'section_id': sis_section_id,
         'course_id': course.sis_course_id,
@@ -554,14 +562,13 @@ def _prepare_section_definition(
 
 
 def _add_instructor_to_site(
-    uid,
     course,
-    section_roles,
-    teacher_role,
     explicit_sections_for_instructor,
     section_feeds,
+    section_roles,
+    teacher_role,
+    uid,
 ):
-    instructor_role_id = section_roles[section_feeds[0]['section_id']] or (teacher_role and teacher_role.id)
     sis_user_profile = canvas.get_sis_user_profile(uid)
     if not sis_user_profile:
         user_result = data_loch.get_users(uids=[uid])
@@ -578,12 +585,19 @@ def _add_instructor_to_site(
 
     user_section_feed = explicit_sections_for_instructor[0] if explicit_sections_for_instructor else section_feeds[0]
     sis_section_id = user_section_feed['section_id']
-    canvas_section = canvas.get_section(section_id=f'sis_section_id:{sis_section_id}', api_call=False, use_sis_id=True)
+    canvas_section = canvas.get_section(
+        api_call=False,
+        section_id=f'sis_section_id:{sis_section_id}',
+        use_sis_id=True,
+    )
+    instructor_role_id = section_roles[section_feeds[0]['section_id']] or (teacher_role and teacher_role.id)
     canvas_section.enroll_user(
-        sis_user_profile['id'],
-        role_id=instructor_role_id,
-        enrollment_state='active',
-        notify=False,
+        user=sis_user_profile['id'],
+        ** {
+            'enrollment[role_id]': instructor_role_id,
+            'enrollment[enrollment_state]': 'active',
+            'enrollment[notify]': False,
+        },
     )
 
 
@@ -615,7 +629,10 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
 
     def _section(section):
         return {
-            'section_id': get_canvas_sis_section_id(section['term_id'], section['section_id']),
+            'section_id': get_canvas_sis_section_id(
+                sis_section_id=section['section_id'],
+                term_id=section['term_id'],
+            ),
             'course_id': course.sis_course_id,
             'name': f"{section['course_name']} {course_section_name(section)}",
             'status': 'deleted' if section['section_id'] in section_ids_to_remove else 'active',
@@ -648,7 +665,14 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
         if job:
             job.meta['sis_import_id'] = sis_import.id
             job.save_meta()
-        _update_section_enrollments(canvas_sis_term_id, course, sections, section_ids_to_remove, sis_import, primary_sections)
+        _update_section_enrollments(
+            all_sections=sections,
+            course=course,
+            deleted_section_ids=section_ids_to_remove,
+            primary_sections=primary_sections,
+            sis_import=sis_import,
+            sis_term_id=canvas_sis_term_id,
+        )
 
 
 def user_id_from_attributes(attributes):
@@ -702,7 +726,14 @@ def _subaccount_for_department(dept_name):
             raise InternalServerError(f'Could not find bCourses account for department {dept_name}')
 
 
-def _update_section_enrollments(sis_term_id, course, all_sections, deleted_section_ids, sis_import, primary_sections=None):
+def _update_section_enrollments(
+        all_sections,
+        course,
+        deleted_section_ids,
+        sis_import,
+        sis_term_id,
+        primary_sections=None,
+):
     from ripley.jobs.bcourses_provision_site_job import BcoursesProvisionSiteJob
 
     params = {
@@ -713,6 +744,8 @@ def _update_section_enrollments(sis_term_id, course, all_sections, deleted_secti
         'sis_term_id': sis_term_id,
         'updated_sis_section_ids': [s['section_id'] for s in all_sections if s['status'] == 'active'],
     }
-    app.logger.info(f'SIS import (id={sis_import.id}) {sis_import.workflow_state}; starting job BcoursesProvisionSiteJob \
-                    (sis_course_id={course.sis_course_id}).')
+    app.logger.info(f"""
+        SIS import (id={sis_import.id}) {sis_import.workflow_state}
+        Starting job BcoursesProvisionSiteJob with sis_course_id={course.sis_course_id}
+    """)
     BcoursesProvisionSiteJob(app.app_context).run(force_run=True, concurrent=True, params=params)

@@ -55,21 +55,13 @@
           />
         </div>
         <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
-          <div class="pending-request-step">
-            <div v-if="jobStatus === 'sendingRequest'">
-              Sending request...
+          <div class="pl-8 pr-16 py-4">
+            <div class="pb-3">
+              <span v-if="jobStatus === 'sendingRequest'">Sending request...</span>
+              <span v-if="jobStatus === 'queued'">Request sent. Awaiting processing...</span>
+              <span v-if="jobStatus === 'started'">Request received. Provisioning course site...</span>
+              <span v-if="jobStatus === 'finished'">Finishing up...</span>
             </div>
-            <div v-if="'queued' === jobStatus">
-              Request sent. Awaiting processing...
-            </div>
-            <div v-if="'started' === jobStatus">
-              Request received. Provisioning course site...
-            </div>
-            <div v-if="'finished' === jobStatus">
-              Finishing up...
-            </div>
-          </div>
-          <div class="px-5">
             <v-progress-linear
               color="primary"
               height="10"
@@ -172,10 +164,13 @@ export default {
         this.updateSelected()
         const sectionIds = map(this.selectedSectionsList, 'id')
         if (sectionIds.length > 0) {
+          const adminActingAs = this.isAdmin && this.adminMode === 'actAs' ? this.adminActingAs : null
+          const adminBySectionIds = this.isAdmin && this.adminMode === 'bySectionId' ? this.adminBySectionIds : null
+          const adminTermSlug = this.isAdmin && this.adminMode === 'bySectionId' ? this.currentAdminTerm : null
           courseCreate(
-            this.isAdmin && this.adminMode === 'actAs' ? this.adminActingAs : null,
-            this.isAdmin && this.adminMode === 'bySectionId' ? this.adminBySectionIds : null,
-            this.isAdmin && this.adminMode === 'bySectionId' ? this.currentAdminTerm : null,
+            adminActingAs,
+            adminBySectionIds,
+            adminTermSlug,
             sectionIds,
             siteAbbreviation,
             siteName,
@@ -215,9 +210,7 @@ export default {
           this.updateMetadata(data)
           this.usersClassCount = this.classCount(data.teachingTerms)
           this.teachingTerms = data.teachingTerms
-          this.canvasSite = data.canvas_site
-          const canvasSiteId = this.canvasSite ? this.canvasSite.canvasSiteId : ''
-          this.fillCourseSites(data.teachingTerms, canvasSiteId)
+          this.fillCourseSites(data.teachingTerms)
           this.$announcer.polite('Course section loaded successfully')
           if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
             each(this.coursesList, course => {
@@ -241,26 +234,13 @@ export default {
         this.isFetching = false
       })
     },
-    fillCourseSites(semestersFeed, canvasSiteId=null) {
+    fillCourseSites(semestersFeed) {
       each(semestersFeed, semester => {
         each(semester.classes, course => {
           course.allSelected = false
           course.selectToggleText = 'All'
           let hasSites = false
           let sectionIdToSites = {}
-          each(course.class_sites, site => {
-            if (site.emitter === 'bCourses') {
-              if (site.id !== canvasSiteId) {
-                each(site.sections, siteSection => {
-                  hasSites = true
-                  if (!sectionIdToSites[siteSection.sectionId]) {
-                    sectionIdToSites[siteSection.sectionId] = []
-                  }
-                  sectionIdToSites[siteSection.sectionId].push(site)
-                })
-              }
-            }
-          })
           if (hasSites) {
             course.hasSites = hasSites
             each(course.sections, section => {
