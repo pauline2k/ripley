@@ -116,7 +116,7 @@
             />
             Fetching...
           </span>
-          <span v-if="!isFetching">Fetch matching Sections</span>
+          <span v-if="!isFetching">Find Matching Sections</span>
         </v-btn>
       </div>
     </div>

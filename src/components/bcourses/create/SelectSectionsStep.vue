@@ -91,7 +91,7 @@
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
-        <div class="d-flex justify-end">
+        <div class="d-flex justify-end mb-4 pr-8">
           <v-btn
             id="page-create-course-site-cancel"
             aria-label="Cancel and return to Site Creation Overview"
