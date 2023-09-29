@@ -111,14 +111,15 @@ def _collect_csv_keys(): # noqa C901
 
     yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
 
+    for key in s3.get_keys_with_prefix(f'provisioned-users-{yesterday}', app.config['JUNCTION_COMPARISON_CSV_BUCKET']):
+        junction_csvs['users-initial'].append(key)
+
     for key in s3.get_keys_with_prefix(f'canvas-{yesterday}', app.config['JUNCTION_COMPARISON_CSV_BUCKET']):
-        if 'users-report' in key:
-            junction_csvs['users-initial'].append(key)
-        elif 'term-enrollments-export' in key:
+        if 'term-enrollments-export' in key:
             term_id = _get_term_id(key)
             if term_id:
                 junction_csvs[f'enrollments-{term_id}-initial'].append(key)
-        elif 'users' in key:
+        elif 'users' in key and 'users-report' not in key:
             junction_csvs['users-update'].append(key)
         elif 'sis-ids' in key:
             junction_csvs['sis-ids-update'].append(key)
