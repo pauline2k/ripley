@@ -87,7 +87,7 @@
                 :stage-update-action="stageUpdate"
                 :row-class-logic="rowClassLogic"
                 :row-display-logic="rowDisplayLogic"
-              ></CourseSectionsTable>
+              />
             </v-col>
           </v-row>
           <v-row v-if="totalStagedCount > 12" class="row">
@@ -169,7 +169,7 @@
                       :stage-add-action="stageAdd"
                       :row-class-logic="rowClassLogic"
                       :row-display-logic="rowDisplayLogic"
-                    ></CourseSectionsTable>
+                    />
                   </v-col>
                 </v-row>
               </v-expansion-panel-text>

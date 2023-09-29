@@ -10,7 +10,7 @@
         You are about to create a {{ currentSemesterName }} course site for:
       </div>
       <ul id="page-create-course-site-section-list" class="page-create-course-site-section-list">
-        <li v-for="section in selectedSectionsList" :key="section.sectionId">
+        <li v-for="section in selectedSectionsList" :key="section.id">
           {{ section.courseTitle }} - {{ section.courseCode }} ({{ section.id }})
         </li>
       </ul>
