@@ -276,10 +276,12 @@ export default {
       this.currentWorkflowStep = 'selecting'
     },
     switchAdminTerm(semester) {
-      this.currentAdminTerm = semester.slug
-      this.selectedSectionsList = []
-      this.updateSelected()
-      this.$announcer.polite(`Switched to ${semester.name} for Section ID input`)
+      if (semester && this.currentAdminTerm !== semester.slug) {
+        this.currentAdminTerm = semester.slug
+        this.selectedSectionsList = []
+        this.updateSelected()
+        this.$announcer.polite(`Switched to ${semester.name} for Section ID input`)
+      }
     },
     switchSemester(semester) {
       this.currentSemester = semester.slug
