@@ -201,7 +201,7 @@ class TestCanvasSiteProvisionSections:
             _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=401)
 
     def test_reader(self, client, app, fake_auth):
-        """Allows Reader, read-only."""
+        """Denies Reader."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins', 'get_terms'],
@@ -210,23 +210,7 @@ class TestCanvasSiteProvisionSections:
             }, m)
             canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=reader_uid)
-            response = _api_canvas_course_provision_sections(client, canvas_site_id)
-            assert response['canvasSite']
-            assert response['canvasSite']['canEdit'] is False
-            assert response['canvasSite']['term'] == {
-                'id': '2232',
-                'name': 'Spring 2023',
-                'season': 'B',
-                'year': '2023',
-            }
-            assert len(response['canvasSite']['officialSections']) == 2
-            section = response['canvasSite']['officialSections'][0]
-            assert section['canvasName'] == 'Section A'
-            assert section['id'] == '32936'
-            assert section['name'] == 'LEC 001 (In Person)'
-            assert section['sisId'] == 'SEC:2023-B-32936'
-            assert section['termId'] == '2232'
-            assert len(response['teachingTerms']) == 1
+            _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=401)
 
     def test_ta(self, client, app, fake_auth):
         """Allows TA, read-only."""
@@ -391,6 +375,12 @@ class TestCanvasSiteProvisionSections:
             assert len(spring_term['classes']) == 1
             assert spring_term['classes'][0]
             assert spring_term['classes'][0]['slug'] == 'anthro-189-2023-B'
+
+
+def _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=200):
+    response = client.get(f'/api/canvas_site/{canvas_site_id}/provision/sections')
+    assert response.status_code == expected_status_code
+    return response.json
 
 
 class TestCreateCourseSite:
@@ -763,12 +753,6 @@ class TestGradeDistributions:
                 'totalCount': 16,
                 'totalPercentage': 17.6,
             }
-
-
-def _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=200):
-    response = client.get(f'/api/canvas_site/{canvas_site_id}/provision/sections')
-    assert response.status_code == expected_status_code
-    return response.json
 
 
 def _api_get_grade_distributions(client, canvas_site_id, expected_status_code=200):
