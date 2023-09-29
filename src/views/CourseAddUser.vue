@@ -3,7 +3,12 @@
     <MaintenanceNotice course-action-verb="user is added" />
     <Header1 text="Find a Person to Add" />
     <div>
-      <v-row v-if="showAlerts" role="alert">
+      <v-row
+        v-if="showAlerts"
+        id="alerts-container"
+        role="alert"
+        tabindex="-1"
+      >
         <v-col md="12">
           <div v-if="errorStatus" class="alert alert-error page-course-add-user-alert">
             <div class="d-flex align-center">
@@ -82,7 +87,7 @@
           <form @submit.prevent="searchUsers">
             <v-row class="horizontal-form" no-gutters>
               <v-col cols="12" sm="6" class="d-flex align-center my-1 pr-sm-3">
-                <label for="search-type" class="text-no-wrap mt-0 pr-3">Search By:</label>
+                <label for="search-type" class="text-no-wrap mt-0 pr-3">Search By</label>
                 <select
                   id="search-type"
                   v-model="searchType"
@@ -200,7 +205,7 @@
                       >
                     </td>
                     <td :id="`user-search-result-row-name-${index}`" class="px-3 py-4">
-                      <label :for="`user-search-result-${index}-input`" class="form-input-label-no-align">
+                      <label :for="`user-search-result-input-${index}`" class="form-input-label-no-align">
                         {{ user.firstName }} {{ user.lastName }}
                       </label>
                     </td>
@@ -223,12 +228,15 @@
                     offset-md="4"
                     class="d-flex align-center justify-end pr-3"
                   >
-                    <label for="user-role"><strong><span class="required-field-indicator">*</span> Role</strong>:</label>
+                    <label for="user-role"><strong>Role</strong></label>
                   </v-col>
                   <v-col cols="10" sm="8" md="6">
                     <select id="user-role" v-model="selectedRole">
                       <option v-for="role in grantingRoles" :key="role" :value="role">
-                        {{ role }}
+                        <template v-if="role === 'TA' || role === 'Lead TA'">
+                          <span>{{ replace(role, 'TA', 'T&#8203;A') }}</span>
+                        </template>
+                        <template v-else>{{ role }}</template>
                       </option>
                     </select>
                   </v-col>
@@ -240,7 +248,7 @@
                     offset-md="4"
                     class="d-flex align-center justify-end pr-3"
                   >
-                    <label for="course-section"><strong><span class="required-field-indicator">*</span> Section</strong>:</label>
+                    <label for="course-section"><strong>Section</strong></label>
                   </v-col>
                   <v-col cols="10" sm="8" md="6">
                     <select id="course-section" v-model="selectedSection">
@@ -287,8 +295,8 @@ import Header1 from '@/components/utils/Header1.vue'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {addUser, getAddUserOptions, searchUsers} from '@/api/canvas-user'
-import {iframeScrollToTop, putFocusNextTick} from '@/utils'
-import {find, get, trim} from 'lodash'
+import {iframeScrollToTop} from '@/utils'
+import {find, get, replace, trim} from 'lodash'
 
 export default {
   name: 'CourseAddUser',
@@ -334,6 +342,7 @@ export default {
     })
   },
   methods: {
+    replace,
     resetForm() {
       this.searchTextType = 'text'
       this.searchText = ''
@@ -341,7 +350,6 @@ export default {
       this.searchTypeNotice = ''
       this.selectedRole = this.grantingRoles[0]
       this.selectedSection = this.courseSections[0]
-      putFocusNextTick('search-text')
     },
     resetImportState() {
       this.userAdded = false
@@ -373,7 +381,7 @@ export default {
           if (response.users && response.users.length) {
             this.userSearchResultsCount = response.users[0].resultCount
             this.selectedUser = response.users[0]
-            putFocusNextTick('user-search-results-header')
+            this.$ready('user-search-results-header')
           } else {
             this.userSearchResultsCount = 0
             let noResultsAlert = 'Your search did not match any users with a CalNet ID.'
@@ -381,13 +389,13 @@ export default {
               noResultsAlert += ' CalNet UIDs must be an exact match.'
             }
             this.showSearchAlert(noResultsAlert)
+            this.$ready('alerts-container')
           }
           this.showAlerts = true
         }, () => {
           this.showErrorStatus('User search failed.')
           this.showSearchForm = true
-        }).finally(() => {
-          this.$ready()
+          this.$ready('alerts-container')
         })
       }
     },
@@ -401,6 +409,7 @@ export default {
     },
     showUnauthorized() {
       this.showErrorStatus('Authorization check failed.')
+      this.$ready('alerts-container')
     },
     startOver() {
       this.showAlerts = false
@@ -433,7 +442,7 @@ export default {
         this.showUsersArea = true
       }).finally(() => {
         this.showSearchForm = true
-        this.$ready()
+        this.$ready('alerts-container')
       })
     },
     updateSearchTextType() {
@@ -470,8 +479,5 @@ export default {
   .column-align-center {
     text-align: center;
   }
-}
-.required-field-indicator {
-  color: $color-harley-davidson-orange;
 }
 </style>
