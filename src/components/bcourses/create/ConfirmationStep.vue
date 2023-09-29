@@ -17,8 +17,8 @@
     </div>
   </v-alert>
   <v-container fluid>
-    <v-row align="center">
-      <v-col cols="2">
+    <v-row align="center" class="mb-2" no-gutters>
+      <v-col class="pr-2" cols="2">
         <label class="float-right font-weight-medium" for="course-site-name">
           Site Name
         </label>
@@ -40,8 +40,25 @@
         />
       </v-col>
     </v-row>
-    <v-row align="center">
-      <v-col cols="2">
+    <v-expand-transition>
+      <v-row
+        v-if="!trim(siteName)"
+        align="center"
+        class="mb-2"
+        no-gutters
+      >
+        <v-col cols="2" />
+        <v-col cols="10">
+          <FormValidationAlert
+            id="validation-error-in-site-name"
+            class="w-75"
+            text="Please provide site name."
+          />
+        </v-col>
+      </v-row>
+    </v-expand-transition>
+    <v-row align="center" class="mt-2" no-gutters>
+      <v-col class="pr-2" cols="2">
         <label class="float-right font-weight-medium" for="course-site-abbreviation">
           Site Abbreviation
         </label>
@@ -63,7 +80,24 @@
         />
       </v-col>
     </v-row>
-    <v-row>
+    <v-expand-transition>
+      <v-row
+        v-if="!trim(siteAbbreviation)"
+        align="center"
+        class="mt-2"
+        no-gutters
+      >
+        <v-col cols="2" />
+        <v-col cols="10">
+          <FormValidationAlert
+            id="validation-error-in-site-abbreviation"
+            class="w-50"
+            text="Please provide site abbreviation."
+          />
+        </v-col>
+      </v-row>
+    </v-expand-transition>
+    <v-row class="mt-2" no-gutters>
       <v-col cols="12">
         <div class="align-center d-flex float-right">
           <div class="mr-1">
@@ -104,11 +138,13 @@
 
 <script>
 import Context from '@/mixins/Context'
+import FormValidationAlert from '@/components/utils/FormValidationAlert.vue'
 import {iframeScrollToTop, putFocusNextTick} from '@/utils'
 import {trim} from 'lodash'
 
 export default {
   name: 'ConfirmationStep',
+  components: {FormValidationAlert},
   mixins: [Context],
   props: {
     courseSiteCreationPromise: {
