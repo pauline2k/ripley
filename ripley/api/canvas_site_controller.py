@@ -180,7 +180,7 @@ def get_grade_distribution(canvas_site_id):
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections')
-@canvas_role_required('DesignerEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('DesignerEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'Lead TA')
 def get_official_course_sections(canvas_site_id):
     can_edit = bool(next((role for role in current_user.canvas_site_user_roles if role in ['TeacherEnrollment', 'Lead TA']), None))
     course = canvas.get_course(canvas_site_id)
