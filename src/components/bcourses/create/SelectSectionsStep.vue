@@ -91,7 +91,7 @@
             </v-expansion-panel-text>
           </v-expansion-panel>
         </v-expansion-panels>
-        <div class="d-flex justify-end mb-4 pr-8">
+        <div class="d-flex justify-end mb-4">
           <v-btn
             id="page-create-course-site-continue"
             aria-label="Continue to next step"

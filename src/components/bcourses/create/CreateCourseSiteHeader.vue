@@ -11,12 +11,12 @@
     >
       <v-radio id="radio-btn-mode-act-as" value="actAs">
         <template #label>
-          <div class="font-weight-medium pl-1 text-subtitle-1">Instructor UID</div>
+          <div class="pl-1 text-black text-body-2">Instructor UID</div>
         </template>
       </v-radio>
       <v-radio id="radio-btn-mode-section-id" value="bySectionId">
         <template #label>
-          <div class="font-weight-medium pl-1 text-subtitle-1">Section IDs</div>
+          <div class="pl-1 text-black text-body-2">Section IDs</div>
         </template>
       </v-radio>
     </v-radio-group>

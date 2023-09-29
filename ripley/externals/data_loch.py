@@ -106,7 +106,7 @@ def get_instructing_sections(uid, term_ids):
         'term_ids': term_ids,
     }
     sql = f"""WITH instructing_courses AS (
-            SELECT DISTINCT sis_term_id, cs_course_id
+            SELECT DISTINCT sis_term_id, cs_course_id, sis_section_id
             FROM sis_data.edo_sections
             WHERE instructor_uid = %(instructor_uid)s
             AND sis_term_id = ANY(%(term_ids)s)
@@ -129,7 +129,10 @@ def get_instructing_sections(uid, term_ids):
          AND cs.sis_term_id = ss.sis_term_id
          AND cs.sis_section_id = ss.sis_section_id
         WHERE ss.instructor_uid = %(instructor_uid)s
-          OR ss.is_primary IS FALSE
+          OR (
+              ss.is_primary IS FALSE
+              AND ss.primary_associated_section_id IN (SELECT sis_section_id FROM instructing_courses WHERE sis_term_id = ss.sis_term_id)
+          )
           OR EXISTS (
               SELECT * FROM course_sections cs2
               WHERE cs2.sis_term_id = ss.sis_term_id

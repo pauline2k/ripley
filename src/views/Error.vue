@@ -12,7 +12,7 @@
       outlined
     >
       <v-img
-        v-if="!isInIframe"
+        v-if="!$isInIframe"
         alt="TV screen with colored bars"
         aria-label="TV screen with colored bars"
         :aspect-ratio="16 / 9"
