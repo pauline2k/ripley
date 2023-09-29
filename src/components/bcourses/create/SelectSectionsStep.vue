@@ -121,7 +121,6 @@ import Context from '@/mixins/Context.vue'
 import CourseCodeAndTitle from '@/components/bcourses/create/CourseCodeAndTitle.vue'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import OutboundLink from '@/components/utils/OutboundLink'
-import {pluralize} from '@/utils'
 import {find, size} from 'lodash'
 
 export default {
@@ -180,7 +179,9 @@ export default {
     }
   },
   created() {
-    if (this.coursesList.length === 1) {
+    if (this.selectedSectionsList.length) {
+      this.panels = Array.from({length: this.coursesList.length}, (value, index) => index)
+    } else if (this.coursesList.length === 1) {
       this.panels = [0]
     }
   },
@@ -188,7 +189,6 @@ export default {
     cancel() {
       this.$router.push({path: '/create_site'})
     },
-    pluralize,
     size
   }
 }

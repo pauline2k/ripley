@@ -149,12 +149,6 @@ export default {
       }
       return count
     },
-    clearCourseSiteJob() {
-      this.backgroundJobId = undefined
-      this.jobStatus = undefined
-      this.percentComplete = undefined
-      this.showMaintenanceNotice = true
-    },
     courseSiteCreationPromise(siteName, siteAbbreviation) {
       return new Promise((resolve, reject) => {
         const onError = message => {
@@ -200,7 +194,10 @@ export default {
       this.displayError = null
       this.isFetching = true
       this.currentWorkflowStep = 'selecting'
-      this.clearCourseSiteJob()
+      this.backgroundJobId = undefined
+      this.jobStatus = undefined
+      this.percentComplete = undefined
+      this.showMaintenanceNotice = true
       this.selectedSectionsList = []
       this.$announcer.polite('Loading courses and sections')
 
@@ -221,7 +218,7 @@ export default {
           if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
             each(this.coursesList, course => {
               each(course.sections, section => {
-                section.selected = includes(this.adminBySectionIds, section.sectionId)
+                section.selected = includes(this.adminBySectionIds, section.id)
               })
             })
             this.updateSelected()
@@ -250,65 +247,13 @@ export default {
           if (hasSites) {
             course.hasSites = hasSites
             each(course.sections, section => {
-              let sectionId = section.sectionId
-              if (sectionIdToSites[sectionId]) {
-                section.sites = sectionIdToSites[sectionId]
+              if (sectionIdToSites[section.id]) {
+                section.sites = sectionIdToSites[section.id]
               }
             })
           }
         })
       })
-    },
-    loadCourseLists() {
-      this.courseSemester = false
-      // identify semester matching current course site
-      each(this.teachingTerms, term => {
-        if ((term.termYear === this.canvasSite.term.term_yr) && (term.termCode === this.canvasSite.term.term_cd)) {
-          this.courseSemester = semester
-          return false
-        }
-      })
-      if (this.courseSemester) {
-        // count classes only in course semester to determine authorization to use this tool
-        this.usersClassCount = this.courseSemester.classes.length
-
-        // generate list of existing course sections for preview table
-        // and flattened array of all sections for current sections staging table
-        this.existingCourseSections = []
-        this.allSections = []
-        const existingSectionIds = []
-        each(this.courseSemester.classes, classItem => {
-          each(classItem.sections, section => {
-            section.parentClass = classItem
-            this.allSections.push(section)
-            section.stagedState = null
-            each(this.canvasSite.officialSections, officialSection => {
-              if (officialSection.sectionId === section.sectionId && existingSectionIds.indexOf(section.sectionId) === -1) {
-                existingSectionIds.push(section.sectionId)
-                this.existingCourseSections.push(section)
-                if (officialSection.name !== `${section.courseCode} ${section.section_label}`) {
-                  section.nameDiscrepancy = true
-                }
-              }
-            })
-          })
-        })
-      } else {
-        this.usersClassCount = 0
-      }
-    },
-    selectedSections(coursesList) {
-      const selected = []
-      each(coursesList, course => {
-        each(course.sections, section => {
-          if (section.selected) {
-            section.courseTitle = course.title
-            section.courseCatalog = course.course_catalog
-            selected.push(section)
-          }
-        })
-      })
-      return selected
     },
     setAdminActingAs(uid) {
       this.adminActingAs = uid
@@ -392,7 +337,15 @@ export default {
       }
     },
     updateSelected() {
-      this.selectedSectionsList = this.selectedSections(this.coursesList)
+      this.selectedSectionsList = []
+      each(this.coursesList, course => {
+        each(course.sections, section => {
+          if (section.selected) {
+            section.courseTitle = course.title
+            this.selectedSectionsList.push(section)
+          }
+        })
+      })
     }
   }
 }
