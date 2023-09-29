@@ -81,36 +81,30 @@
         <v-col>
           <form @submit.prevent="searchUsers">
             <v-row class="horizontal-form" no-gutters>
-              <v-col cols="12" sm="4" class="my-1">
+              <v-col cols="12" sm="6" class="d-flex align-center my-1 pr-sm-3">
+                <label for="search-type" class="text-no-wrap mt-0 pr-3">Search By:</label>
+                <select
+                  id="search-type"
+                  v-model="searchType"
+                  class="d-flex align-center mb-0"
+                  @change="updateSearchTextType"
+                >
+                  <option value="name">Last Name, First Name</option>
+                  <option value="email">Email</option>
+                  <option value="uid" aria-label="CalNet U I D">CalNet UID</option>
+                </select>
+              </v-col>
+              <v-col cols="12" sm="4" class="d-flex align-center my-1 pr-sm-3">
                 <label for="search-text" class="sr-only">Find a person to add</label>
                 <input
                   id="search-text"
                   v-model="searchText"
-                  class="d-flex align-center mb-0"
+                  class="mb-0"
                   :type="searchTextType"
                   placeholder="Find a person to add"
                 >
               </v-col>
-              <v-col cols="12" sm="6" class="my-1">
-                <v-row no-gutters>
-                  <v-col class="d-none d-sm-flex justify-end align-center" sm="2">
-                    <label for="search-type" class="mt-0 pr-3"><span class="sr-only">Search </span>By:</label>
-                  </v-col>
-                  <v-col sm="10" class="pr-sm-4">
-                    <select
-                      id="search-type"
-                      v-model="searchType"
-                      class="d-flex align-center mb-0"
-                      @change="updateSearchTextType"
-                    >
-                      <option value="name">Last Name, First Name</option>
-                      <option value="email">Email</option>
-                      <option value="uid" aria-label="CalNet U I D">CalNet UID</option>
-                    </select>
-                  </v-col>
-                </v-row>
-              </v-col>
-              <v-col cols="12" sm="2" class="column-align-center my-1">
+              <v-col cols="12" sm="2" class="column-align-center d-flex align-center my-1">
                 <v-btn
                   id="add-user-submit-search-btn"
                   color="primary"
