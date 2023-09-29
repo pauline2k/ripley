@@ -324,7 +324,8 @@ def get_user_courses(uid):
     try:
         user = get_user(f'sis_login_id:{uid}', api_call=False)
         if user:
-            courses = user.get_courses(include=['term'])
+            # Load all courses because ResourceDoesNotExist is possible when paging.
+            courses = [course for course in user.get_courses(include=['term'])]
     except Exception as e:
         app.logger.error(f'Failed to retrieve courses in which UID {uid} is enrolled.')
         app.logger.exception(e)
