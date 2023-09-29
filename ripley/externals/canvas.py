@@ -51,12 +51,14 @@ def create_external_tool(account_id, client_id):
     account = get_account(account_id, api_call=False)
     tool = None
     try:
+        # Per Instructure documentation, if the client_id is supplied the other parameters will be ignored.
+        # However, canvasapi still requires them.
         tool = account.create_external_tool(
             client_id=client_id,
             name='name',
             privacy_level='public',
-            consumer_key='consumer_key',
-            shared_secret='shared_secret',
+            consumer_key=None,
+            shared_secret=None,
         )
     except Exception as e:
         app.logger.error(f'Failed to create Canvas external tool (client_id={client_id}, account_id={account_id})')

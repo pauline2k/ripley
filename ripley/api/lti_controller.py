@@ -30,6 +30,7 @@ from pylti1p3.tool_config import ToolConfJsonFile
 from ripley import cache
 from ripley.api.errors import BadRequestError, InternalServerError
 from ripley.api.util import start_login_session
+from ripley.lib.canvas_lti import lti_tool_definitions
 from ripley.lib.http import redirect_unauthorized, tolerant_jsonify
 from ripley.models.user import User
 
@@ -58,33 +59,36 @@ class MessageLaunch(FlaskMessageLaunch):
 
 @app.route('/api/lti/config/add_user.json')
 def config_add_user():
+    tool_definition = lti_tool_definitions()['add_user']
     return _tool_config(
-        title='Find a Person to Add (LTI 1.3)',
-        description='Search and add users to course sections',
+        title=tool_definition['name'],
+        description=tool_definition['description'],
         target='launch_add_user',
-        placement='course_navigation',
-        default='disabled',
+        placement=tool_definition['placement'],
+        default=tool_definition['default'],
     )
 
 
 @app.route('/api/lti/config/create_site.json')
 def config_create_site():
+    tool_definition = lti_tool_definitions()['create_site']
     return _tool_config(
-        title='Create a Site (LTI 1.3)',
-        description='Provides access to Course and Project site creation',
+        title=tool_definition['name'],
+        description=tool_definition['description'],
         target='launch_create_site',
-        placement='user_navigation',
+        placement=tool_definition['placement'],
     )
 
 
 @app.route('/api/lti/config/export_grade.json')
 def config_export_grade():
+    tool_definition = lti_tool_definitions()['export_grade']
     return _tool_config(
-        title='Download E-Grades (LTI 1.3)',
-        description='Exports Course Grades to E-Grades CSV file',
+        title=tool_definition['name'],
+        description=tool_definition['description'],
         target='launch_export_grade',
-        placement='course_navigation',
-        default='disabled',
+        placement=tool_definition['placement'],
+        default=tool_definition['default'],
     )
 
 
@@ -101,52 +105,57 @@ def config_grade_distribution():
 
 @app.route('/api/lti/config/mailing_list.json')
 def config_mailing_list():
+    tool_definition = lti_tool_definitions()['mailing_list']
     return _tool_config(
-        title='Mailing List (LTI 1.3)',
-        description='Create and manage a mailing list for a course site',
+        title=tool_definition['name'],
+        description=tool_definition['description'],
         target='launch_mailing_list',
-        placement='course_navigation',
-        default='disabled',
+        placement=tool_definition['placement'],
+        default=tool_definition['default'],
     )
 
 
 @app.route('/api/lti/config/mailing_lists.json')
 def config_mailing_lists():
+    tool_definition = lti_tool_definitions()['mailing_lists']
     return _tool_config(
-        title='Mailing Lists (LTI 1.3)',
-        description='Create and manage mailing lists for all course sites',
+        title=tool_definition['name'],
+        description=tool_definition['description'],
         target='launch_mailing_lists',
-        placement='account_navigation',
+        placement=tool_definition['placement'],
     )
 
 
 @app.route('/api/lti/config/manage_official_sections.json')
 def config_manage_official_sections():
+    tool_definition = lti_tool_definitions()['manage_official_sections']
     return _tool_config(
-        title='Manage Official Sections (LTI 1.3)',
-        description='Provides management options for official course sections',
+        title=tool_definition['name'],
+        description=tool_definition['description'],
         target='launch_manage_official_sections',
-        placement='course_navigation',
+        placement=tool_definition['placement'],
     )
 
 
 @app.route('/api/lti/config/provision_user.json')
 def config_provision_user():
+    tool_definition = lti_tool_definitions()['provision_user']
     return _tool_config(
-        title='User Provisioning (LTI 1.3)',
-        description='Automated user provisioning',
+        title=tool_definition['name'],
+        description=tool_definition['description'],
         target='launch_provision_user',
-        placement='account_navigation',
+        placement=tool_definition['placement'],
     )
 
 
 @app.route('/api/lti/config/roster_photos.json')
 def config_roster_photos():
+    tool_definition = lti_tool_definitions()['roster_photos']
     return _tool_config(
-        title='Roster Photos (LTI 1.3)',
-        description='Browse and search official roster photos',
+        title=tool_definition['name'],
+        description=tool_definition['description'],
         target='launch_roster_photos',
-        placement='course_navigation',
+        placement=tool_definition['placement'],
     )
 
 
