@@ -61,7 +61,7 @@ const routes:RouteRecordRaw[] = [
         path: '/add_user',
         meta: {
           announcer: {
-            message: 'Find a User to Add'
+            message: 'Find a Person to Add'
           }
         }
       },

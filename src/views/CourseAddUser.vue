@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading" class="page-course-add-user">
-    <MaintenanceNotice course-action-verb="user is added" />
+    <MaintenanceNotice course-action-verb="person is added" />
     <Header1 text="Find a Person to Add" />
     <div>
       <v-row
@@ -27,7 +27,7 @@
             </div>
           </div>
           <div v-if="noUserSelectedAlert" class="alert alert-error page-course-add-user-alert">
-            Please select a user.
+            Please select a person from the search results.
             <div class="alert-close-button-container d-flex ml-4">
               <button
                 id="hide-select-user-alert-button"
@@ -60,7 +60,7 @@
             Please refine your search to limit the number of results.
           </div>
           <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="sr-only">
-            {{ userSearchResultsCount }} user search results loaded.
+            {{ userSearchResultsCount }} search results loaded.
           </div>
           <div
             v-if="additionSuccessMessage"
@@ -92,6 +92,7 @@
                   id="search-type"
                   v-model="searchType"
                   class="d-flex align-center mb-0"
+                  :disabled="isSearching"
                   @change="updateSearchTextType"
                 >
                   <option value="name">Last Name, First Name</option>
@@ -105,6 +106,7 @@
                   id="search-text"
                   v-model="searchText"
                   class="mb-0"
+                  :disabled="isSearching"
                   :type="searchTextType"
                   placeholder="Find a person to add"
                 >
@@ -114,11 +116,14 @@
                   id="add-user-submit-search-btn"
                   color="primary"
                   type="submit"
-                  :disabled="!searchText"
+                  :disabled="!searchText || isSearching"
                   class="w-100"
-                  aria-label="Perform User Search"
+                  aria-label="Submit search"
                 >
-                  Go
+                  <span v-if="!isSearching">Go</span>
+                  <span v-if="isSearching">
+                    <SpinnerWithinButton /> Searching...
+                  </span>
                 </v-btn>
               </v-col>
             </v-row>
@@ -174,115 +179,111 @@
         </v-col>
       </v-row>
       <v-row v-if="showUsersArea" no-gutters>
-        <h2 id="user-search-results-header" class="sr-only" tabindex="-1">User Search Results</h2>
+        <h2 id="user-search-results-header" class="sr-only" tabindex="-1">Person Search Results. Sorted by last name.</h2>
         <v-col v-if="userSearchResults.length > 0" md="12">
-          <form class="canvas-page-form">
-            <fieldset class="mb-4">
-              <legend class="sr-only">Select the user you wish to add to the course site:</legend>
-              <table class="table table-striped">
-                <thead>
-                  <tr>
-                    <th scope="col"><span class="sr-only">Actions</span></th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Calnet UID</th>
-                    <th scope="col">Email</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(user, index) in userSearchResults"
-                    :id="`user-search-result-row-${index}`"
-                    :key="user.uid"
+          <table class="table table-striped">
+            <caption class="sr-only">Select the person you wish to add to the course site:</caption>
+            <thead>
+              <tr>
+                <th scope="col"><span class="sr-only">Actions</span></th>
+                <th scope="col">Name</th>
+                <th scope="col">Calnet UID</th>
+                <th scope="col">Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(user, index) in userSearchResults"
+                :id="`user-search-result-row-${index}`"
+                :key="user.uid"
+              >
+                <td :id="`user-search-result-row-select-${index}`" class="px-3 py-4">
+                  <input
+                    :id="`user-search-result-input-${index}`"
+                    v-model="selectedUser"
+                    type="radio"
+                    name="selectedUser"
+                    :value="user"
+                    :aria-labelled-by="`user-search-result-row-name-${index} user-search-result-row-ldap-uid-${index}`"
                   >
-                    <td :id="`user-search-result-row-select-${index}`" class="px-3 py-4">
-                      <input
-                        :id="`user-search-result-input-${index}`"
-                        v-model="selectedUser"
-                        type="radio"
-                        name="selectedUser"
-                        :value="user"
-                        :aria-labelled-by="`user-search-result-row-name-${index} user-search-result-row-ldap-uid-${index}`"
-                      >
-                    </td>
-                    <td :id="`user-search-result-row-name-${index}`" class="px-3 py-4">
-                      <label :for="`user-search-result-input-${index}`" class="form-input-label-no-align">
-                        {{ user.firstName }} {{ user.lastName }}
-                      </label>
-                    </td>
-                    <td :id="`user-search-result-row-ldap-uid-${index}`" class="px-3 py-4">
-                      {{ user.uid }}
-                    </td>
-                    <td :id="`user-search-result-row-email-${index}`" class="px-3 py-4">
-                      {{ user.emailAddress }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </fieldset>
-            <v-row no-gutters>
-              <v-col>
-                <v-row no-gutters class="mb-2">
-                  <v-col
-                    cols="2"
-                    offset-sm="2"
-                    offset-md="4"
-                    class="d-flex align-center justify-end pr-3"
-                  >
-                    <label for="user-role"><strong>Role</strong></label>
-                  </v-col>
-                  <v-col cols="10" sm="8" md="6">
-                    <select id="user-role" v-model="selectedRole">
-                      <option v-for="role in grantingRoles" :key="role" :value="role">
-                        <template v-if="role === 'TA' || role === 'Lead TA'">
-                          <span>{{ replace(role, 'TA', 'T&#8203;A') }}</span>
-                        </template>
-                        <template v-else>{{ role }}</template>
-                      </option>
-                    </select>
-                  </v-col>
-                </v-row>
-                <v-row no-gutters class="mb-2">
-                  <v-col
-                    cols="2"
-                    offset-sm="2"
-                    offset-md="4"
-                    class="d-flex align-center justify-end pr-3"
-                  >
-                    <label for="course-section"><strong>Section</strong></label>
-                  </v-col>
-                  <v-col cols="10" sm="8" md="6">
-                    <select id="course-section" v-model="selectedSection">
-                      <option v-for="section in courseSections" :key="section.name" :value="section">
-                        {{ section.name }}
-                      </option>
-                    </select>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-            <v-row no-gutters>
-              <v-col md="12">
-                <div class="d-flex justify-end">
-                  <v-btn
-                    id="add-user-btn"
-                    class="mx-1"
-                    color="primary"
-                    :disabled="!selectedUser"
-                    @click="submitUser"
-                  >
-                    Add User
-                  </v-btn>
-                  <v-btn
-                    id="start-over-btn"
-                    class="mx-1"
-                    @click="startOver"
-                  >
-                    Start Over
-                  </v-btn>
-                </div>
-              </v-col>
-            </v-row>
-          </form>
+                </td>
+                <td :id="`user-search-result-row-name-${index}`" class="px-3 py-4">
+                  <label :for="`user-search-result-input-${index}`" class="form-input-label-no-align">
+                    {{ user.firstName }} {{ user.lastName }}
+                  </label>
+                </td>
+                <td :id="`user-search-result-row-ldap-uid-${index}`" class="px-3 py-4">
+                  {{ user.uid }}
+                </td>
+                <td :id="`user-search-result-row-email-${index}`" class="px-3 py-4">
+                  {{ user.emailAddress }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <v-row no-gutters>
+            <v-col>
+              <v-row no-gutters class="my-2">
+                <v-col
+                  cols="2"
+                  offset-sm="2"
+                  offset-md="4"
+                  class="d-flex align-center justify-end pr-3"
+                >
+                  <label for="user-role"><strong>Role</strong></label>
+                </v-col>
+                <v-col cols="10" sm="8" md="6">
+                  <select id="user-role" v-model="selectedRole">
+                    <option v-for="role in grantingRoles" :key="role" :value="role">
+                      <template v-if="role === 'TA' || role === 'Lead TA'">
+                        {{ replace(role, 'TA', 'T&ZeroWidthSpace;A') }}
+                      </template>
+                      <template v-else>{{ role }}</template>
+                    </option>
+                  </select>
+                </v-col>
+              </v-row>
+              <v-row no-gutters class="mb-2">
+                <v-col
+                  cols="2"
+                  offset-sm="2"
+                  offset-md="4"
+                  class="d-flex align-center justify-end pr-3"
+                >
+                  <label for="course-section"><strong>Section</strong></label>
+                </v-col>
+                <v-col cols="10" sm="8" md="6">
+                  <select id="course-section" v-model="selectedSection">
+                    <option v-for="section in courseSections" :key="section.name" :value="section">
+                      {{ section.name }}
+                    </option>
+                  </select>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
+          <v-row no-gutters>
+            <v-col md="12">
+              <div class="d-flex justify-end">
+                <v-btn
+                  id="add-user-btn"
+                  class="mx-1"
+                  color="primary"
+                  :disabled="!selectedUser"
+                  @click="submitUser"
+                >
+                  Add Person
+                </v-btn>
+                <v-btn
+                  id="start-over-btn"
+                  class="mx-1"
+                  @click="startOver"
+                >
+                  Start Over
+                </v-btn>
+              </div>
+            </v-col>
+          </v-row>
         </v-col>
       </v-row>
     </div>
@@ -294,19 +295,21 @@ import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1.vue'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {addUser, getAddUserOptions, searchUsers} from '@/api/canvas-user'
-import {iframeScrollToTop} from '@/utils'
+import {iframeScrollToTop, putFocusNextTick} from '@/utils'
 import {find, get, replace, trim} from 'lodash'
 
 export default {
   name: 'CourseAddUser',
-  components: {Header1, MaintenanceNotice, OutboundLink},
+  components: {Header1, MaintenanceNotice, OutboundLink, SpinnerWithinButton},
   mixins: [Context],
   data: () => ({
     additionSuccessMessage: false,
     courseSections: [],
     errorStatus: null,
     grantingRoles: [],
+    isSearching: false,
     noUserSelectedAlert: null,
     searchAlert: null,
     searchText: null,
@@ -326,6 +329,11 @@ export default {
     userSearchResultsCount: 0,
     userSearchResults: [],
   }),
+  computed: {
+    selectedUserFullName() {
+      return `${this.selectedUser.firstName} ${this.selectedUser.lastName}`
+    }
+  },
   created() {
     getAddUserOptions(this.currentUser.canvasSiteId).then(
       response => {
@@ -373,9 +381,9 @@ export default {
       } else if (this.searchType === 'uid' && !isFinite(this.searchText)) {
         this.showSearchAlert('UID search terms must be numeric.')
       } else {
-        this.$announcer.polite('Loading user search results')
+        this.$announcer.polite('Loading person search results')
         this.showUsersArea = true
-        this.loadingStart()
+        this.isSearching = true
         searchUsers(this.searchText, this.searchType).then(response => {
           this.userSearchResults = response.users
           if (response.users && response.users.length) {
@@ -384,7 +392,7 @@ export default {
             this.$ready('user-search-results-header')
           } else {
             this.userSearchResultsCount = 0
-            let noResultsAlert = 'Your search did not match any users with a CalNet ID.'
+            let noResultsAlert = 'Your search did not match anyone with a CalNet ID.'
             if (this.searchType === 'uid') {
               noResultsAlert += ' CalNet UIDs must be an exact match.'
             }
@@ -393,10 +401,10 @@ export default {
           }
           this.showAlerts = true
         }, () => {
-          this.showErrorStatus('User search failed.')
+          this.showErrorStatus('Person search failed.')
           this.showSearchForm = true
           this.$ready('alerts-container')
-        })
+        }).finally(() => this.isSearching = false)
       }
     },
     showErrorStatus(message) {
@@ -413,21 +421,23 @@ export default {
     },
     startOver() {
       this.showAlerts = false
+      this.$announcer.polite('Starting a new search.')
       this.resetForm()
       this.resetSearchState()
       this.resetImportState()
+      putFocusNextTick('search-type')
     },
     submitUser() {
       this.loadingStart()
       iframeScrollToTop()
       this.showUsersArea = false
       this.showSearchForm = false
-      this.$announcer.polite('Adding user')
+      this.$announcer.polite(`Adding ${this.selectedUserFullName} with role ${this.selectedRole}`)
       this.showAlerts = true
       addUser(this.currentUser.canvasSiteId, this.selectedUser.uid, this.selectedSection.id, this.selectedRole).then(response => {
         this.userAdded = {
           ...response.userAdded,
-          fullName: this.selectedUser.firstName + ' ' + this.selectedUser.lastName,
+          fullName: this.selectedUserFullName,
           role: response.role,
           sectionName: get(find(this.courseSections, {'id': response.sectionId}), 'name', this.selectedSection.name)
         }
@@ -435,10 +445,10 @@ export default {
         this.resetForm()
         this.additionSuccessMessage = true
       }, () => {
-        this.errorStatus = 'Request to add user failed'
+        this.errorStatus = 'Request to add person failed'
         this.showUsersArea = true
       }).catch(() => {
-        this.errorStatus = 'Request to add user failed'
+        this.errorStatus = 'Request to add person failed'
         this.showUsersArea = true
       }).finally(() => {
         this.showSearchForm = true
