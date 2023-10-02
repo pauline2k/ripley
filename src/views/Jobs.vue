@@ -31,50 +31,50 @@
           </template>
           <template #item.key="{ item } ">
             <v-btn
-              v-if="!isRunning(item.raw.key)"
-              :id="`run-job-${item.raw.key}`"
-              :aria-label="`Run job ${item.raw.key}`"
+              v-if="!isRunning(item.key)"
+              :id="`run-job-${item.key}`"
+              :aria-label="`Run job ${item.key}`"
               icon
               size="large"
-              @click="runJob(item.raw)"
+              @click="runJob(item)"
             >
               <v-icon color="success" size="large">mdi-play</v-icon>
             </v-btn>
             <v-progress-circular
-              v-if="isRunning(item.raw.key)"
+              v-if="isRunning(item.key)"
               indeterminate
               size="24"
               width="4"
             />
           </template>
           <template #item.description="{ item }">
-            <span v-html="item.raw.description"></span>
+            <span v-html="item.description"></span>
           </template>
           <template #item.schedule="{ item }">
             <div class="d-flex align-center text-no-wrap">
               <v-btn
-                :id="`edit-job-schedule-${item.raw.key}`"
-                :aria-label="`Edit job schedule ${item.raw.key}`"
-                :disabled="!item.raw.disabled || isRunning(item.raw.key)"
+                :id="`edit-job-schedule-${item.key}`"
+                :aria-label="`Edit job schedule ${item.key}`"
+                :disabled="!item.disabled || isRunning(item.key)"
                 class="px-0"
                 icon
                 variant="plain"
-                @click.stop="scheduleEditOpen(item.raw)"
+                @click.stop="scheduleEditOpen(item)"
               >
                 <v-icon>mdi-playlist-edit</v-icon>
               </v-btn>
               <div>
-                <span v-if="item.raw.schedule.type === 'day_at'" :for="`edit-job-schedule-${item.raw.key}`">
-                  Daily at {{ item.raw.schedule.value }} (UTC)
+                <span v-if="item.schedule.type === 'day_at'" :for="`edit-job-schedule-${item.key}`">
+                  Daily at {{ item.schedule.value }} (UTC)
                 </span>
-                <span v-if="item.raw.schedule.type !== 'day_at'" :for="`edit-job-schedule-${item.raw.key}`">
-                  Every {{ item.raw.schedule.value }} {{ item.raw.schedule.type }}
+                <span v-if="item.schedule.type !== 'day_at'" :for="`edit-job-schedule-${item.key}`">
+                  Every {{ item.schedule.value }} {{ item.schedule.type }}
                 </span>
               </div>
             </div>
           </template>
           <template #item.enabled="{ item }">
-            <DisableJobToggle :key="item.raw.disabled" :job="item.raw" :on-change="toggleDisabled" />
+            <DisableJobToggle :key="item.disabled" :job="item" :on-change="toggleDisabled" />
           </template>
         </v-data-table-virtual>
         <v-checkbox id="dry-run-checkbox" v-model="isDryRun" label="Dry run">
