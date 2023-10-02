@@ -76,6 +76,7 @@ def _register_jobs(app):
     from ripley.jobs.house_keeping_job import HouseKeepingJob  # noqa
     from ripley.jobs.lti_usage_report_job import LtiUsageReportJob  # noqa
     from ripley.jobs.mailing_list_refresh_job import MailingListRefreshJob  # noqa
+    from ripley.jobs.reconfigure_canvas_test_servers_job import ReconfigureCanvasTestServersJob  # noqa
 
     if app.config['JOBS_AUTO_START'] and (not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true'):
         background_job_manager.start(app)
