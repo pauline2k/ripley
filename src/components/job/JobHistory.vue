@@ -38,11 +38,11 @@
           </div>
         </template>
         <template #item.failed="{item}">
-          <v-icon v-if="item.raw.finishedAt" :color="item.raw.failed ? 'error' : 'success'">
-            {{ item.raw.failed ? 'mdi-exclamation-thick' : 'mdi-check-bold' }}
+          <v-icon v-if="item.finishedAt" :color="item.failed ? 'error' : 'success'">
+            {{ item.failed ? 'mdi-exclamation-thick' : 'mdi-check-bold' }}
           </v-icon>
           <v-progress-circular
-            v-if="!item.raw.finishedAt"
+            v-if="!item.finishedAt"
             :indeterminate="true"
             rotate="5"
             size="24"
@@ -51,10 +51,10 @@
           ></v-progress-circular>
         </template>
         <template #item.startedAt="{item}">
-          {{ $moment(item.raw.startedAt).format(dateFormat) }}
+          {{ $moment(item.startedAt).format(dateFormat) }}
         </template>
         <template #item.finishedAt="{item}">
-          <span v-if="item.raw.finishedAt">{{ $moment(item.raw.finishedAt).format(dateFormat) }}</span>
+          <span v-if="item.finishedAt">{{ $moment(item.finishedAt).format(dateFormat) }}</span>
         </template>
       </v-data-table>
     </v-card-text>
