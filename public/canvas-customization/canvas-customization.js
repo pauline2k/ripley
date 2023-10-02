@@ -693,7 +693,7 @@ addMentalHealthResourcesResponsiveLink();
     var footerLinks = [
       '<div class="footer-rows">',
       '  <div>',
-      '    <a href="https://dls.berkeley.edu/services/bcourses-0" target="_blank">About</a>',
+      '    <a href="https://rtl.berkeley.edu/services-programs/bcourses" target="_blank">About</a>',
       '    <a href="https://rtl.berkeley.edu/services-programs/bcourses/bcourses-accessibility" target="_blank">Accessibility</a>',
       '    <a href="https://ophd.berkeley.edu/policies-and-procedures/nondiscrimination-policy-statement" target="_blank">Nondiscrimination</a>',
       '    <a href="https://www.instructure.com/policies/privacy" target="_blank">Privacy Policy</a>',
