@@ -76,6 +76,10 @@ export function getSections(
   return utils.get(feedUrl)
 }
 
+export function myCurrentCanvasCourses(redirectOnError?: boolean) {
+  return utils.get('/api/canvas_site/my_current_courses', redirectOnError)
+}
+
 export function updateSiteSections(
   canvasSiteId: string,
   sectionIdsToAdd: string[],

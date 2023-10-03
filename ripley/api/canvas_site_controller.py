@@ -81,6 +81,24 @@ def get_canvas_site(canvas_site_id):
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
 
 
+@app.route('/api/canvas_site/my_current_courses')
+def my_current_courses():
+    if current_user.is_authenticated:
+        api_json = {}
+        terms = BerkeleyTerm.get_current_terms()
+        canvas_courses = canvas.get_user_courses(current_user.uid)
+        for term in [terms['current'], terms['next']]:
+            term_id = term.to_sis_term_id()
+            sis_term_id = term.to_canvas_sis_term_id()
+            api_json[term_id] = []
+            for canvas_course in list(filter(lambda c: c.term['sis_term_id'] == sis_term_id, canvas_courses)):
+                api_json[term_id].append(canvas_site_to_api_json(canvas_course))
+            return tolerant_jsonify(api_json)
+    else:
+        app.logger.warning(f'Unauthorized request to {request.path}')
+        return app.login_manager.unauthorized()
+
+
 @app.route('/api/canvas_site/project_site/create', methods=['POST'])
 def create_project_site():
     if current_user.is_authenticated and current_user.can_create_canvas_project_site:
