@@ -172,7 +172,7 @@ class TestGetUserProvisioningConfig:
             target='launch_provision_user',
             expected_title='User Provisioning (LTI 1.3)',
             expected_description='Automated user provisioning',
-            expected_placement='link_selection',
+            expected_placement='account_navigation',
         )
 
 
