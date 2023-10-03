@@ -14,6 +14,7 @@ const Login = () => import('./views/Login.vue')
 const MailingListCreate = () => import('./views/MailingListCreate.vue')
 const MailingListSelectCourse = () => import('./views/MailingListSelectCourse.vue')
 const MailingListUpdate = () => import('./views/MailingListUpdate.vue')
+const ManageSites = () => import('./views/ManageSites.vue')
 const Profile = () => import('./views/Profile.vue')
 const Roster = () => import('./views/Roster.vue')
 const SendWelcomeEmail = () => import('./views/SendWelcomeEmail.vue')
@@ -170,6 +171,15 @@ const routes:RouteRecordRaw[] = [
         meta: {
           announcer: {
             message: 'Update Mailing List'
+          }
+        }
+      },
+      {
+        component: ManageSites,
+        path: '/manage_sites',
+        meta: {
+          announcer: {
+            message: 'Manage Sites'
           }
         }
       },

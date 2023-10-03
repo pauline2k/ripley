@@ -64,7 +64,7 @@
                 <v-col>
                   <div class="mb-4 w-auto">
                     <div v-if="canvasSite.term" class="text-subtitle-1">{{ canvasSite.term.name }}</div>
-                    <div>Site ID: {{ canvasSite.canvasSiteId }}</div>
+                    <div>Site ID {{ canvasSite.canvasSiteId }}</div>
                   </div>
                 </v-col>
               </v-row>
