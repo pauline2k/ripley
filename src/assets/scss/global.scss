@@ -104,3 +104,9 @@ html, body {
     }
   }
 }
+@page {
+  margin-top: .8in;
+}
+@page :first {
+  margin-top: .4in;
+}
