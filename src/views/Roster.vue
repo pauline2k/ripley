@@ -30,7 +30,6 @@
               id="roster-search"
               v-model="search"
               aria-label="Search people by name or SID"
-              clearable
               hide-details
               placeholder="Search People"
               type="search"
