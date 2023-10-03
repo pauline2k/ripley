@@ -83,9 +83,9 @@ def lti_tool_definitions():
                 'name': 'Find a Person to Add (LTI 1.3)',
                 'account_id': app.config['CANVAS_BERKELEY_ACCOUNT_ID'],
                 'client_id': '10720000000000621',
-                'default': 'disabled',
                 'description': 'Search and add users to course sections',
-                'placement': 'course_navigation',
+                'placement': 'link_selection',
+                'default': 'disabled',
             },
             'create_site': {
                 'name': 'Create a Site (LTI 1.3)',
@@ -99,7 +99,7 @@ def lti_tool_definitions():
                 'account_id': app.config['CANVAS_COURSES_ACCOUNT_ID'],
                 'client_id': '10720000000000623',
                 'description': 'Exports Course Grades to E-Grades CSV file',
-                'placement': 'course_navigation',
+                'placement': 'link_selection',
                 'default': 'disabled',
             },
             'mailing_list': {
@@ -122,14 +122,14 @@ def lti_tool_definitions():
                 'account_id': app.config['CANVAS_COURSES_ACCOUNT_ID'],
                 'client_id': '10720000000000626',
                 'description': 'Provides management options for official course sections',
-                'placement': 'course_navigation',
+                'placement': 'link_selection',
             },
             'provision_user': {
                 'name': 'User Provisioning (LTI 1.3)',
                 'account_id': app.config['CANVAS_BERKELEY_ACCOUNT_ID'],
                 'client_id': '10720000000000627',
                 'description': 'Automated user provisioning',
-                'placement': 'account_navigation',
+                'placement': 'link_selection',
             },
             'roster_photos': {
                 'name': 'Roster Photos (LTI 1.3)',

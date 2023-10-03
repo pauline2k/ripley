@@ -48,7 +48,7 @@ class TestGetAddUserConfig:
             target='launch_add_user',
             expected_title='Find a Person to Add (LTI 1.3)',
             expected_description='Search and add users to course sections',
-            expected_placement='course_navigation',
+            expected_placement='link_selection',
             expected_default='disabled',
         )
 
@@ -79,7 +79,7 @@ class TestGetGradeExportConfig:
             target='launch_export_grade',
             expected_title='Download E-Grades (LTI 1.3)',
             expected_description='Exports Course Grades to E-Grades CSV file',
-            expected_placement='course_navigation',
+            expected_placement='link_selection',
             expected_default='disabled',
         )
 
@@ -142,7 +142,7 @@ class TestGetManageOfficialSectionsConfig:
             target='launch_manage_official_sections',
             expected_title='Official Sections (LTI 1.3)',
             expected_description='Provides management options for official course sections',
-            expected_placement='course_navigation',
+            expected_placement='link_selection',
         )
 
 
@@ -172,7 +172,7 @@ class TestGetUserProvisioningConfig:
             target='launch_provision_user',
             expected_title='User Provisioning (LTI 1.3)',
             expected_description='Automated user provisioning',
-            expected_placement='account_navigation',
+            expected_placement='link_selection',
         )
 
 
