@@ -1,32 +1,29 @@
 <template>
   <div v-if="!isLoading" class="page-user-provision">
-    <Header1 id="page-header" class="page-user-provision-heading" text="Add Users to bCourses" />
+    <Header1 id="page-title" class="page-user-provision-heading" text="Add Users to bCourses" />
     <form
       v-if="currentUser.isAdmin"
       id="user-import-form"
-      class="pr-16"
       name="userImportForm"
       @submit.prevent="onSubmit"
     >
       <v-row no-gutters>
-        <v-col cols="2">
-          <label for="page-user-provision-uid-list" class="user-provision-uid-label">
-            <span aria-hidden="true">UID</span>
-            <span class="sr-only">U I D</span>
-            List
-          </label>
-        </v-col>
-        <v-col cols="10">
-          <textarea
-            id="page-user-provision-uid-list"
-            v-model="rawUids"
-            :class="{'error': !isEmpty(validationErrors)}"
-            rows="4"
-            name="uids"
-            placeholder="Paste your list of UIDs here organized one UID per a line, or separated by spaces or commas."
-          >
-          </textarea>
+        <label for="page-user-provision-uid-list" class="user-provision-uid-label mb-2 mt-3">
+          Type or paste a list of U&ZeroWidthSpace;I&ZeroWidthSpace;D<span class="sr-only">'</span>s separated by spaces, commas, or line breaks
+        </label>
+        <textarea
+          id="page-user-provision-uid-list"
+          v-model="rawUids"
+          :class="{'error': !isEmpty(validationErrors)}"
+          rows="4"
+          name="uids"
+        >
+        </textarea>
+      </v-row>
+      <v-row no-gutters>
+        <v-col cols="8" class="pt-2">
           <div
+            v-if="!status"
             id="user-provision-validation-msg"
             aria-live="polite"
             class="validation-messages"
@@ -35,49 +32,57 @@
             <div v-if="validationErrors.required">
               You must provide at least one
               <span aria-hidden="true">UID</span>
-              <span class="sr-only">U I D</span>
-              .
+              <span class="sr-only">U I D</span>.
             </div>
             <div v-if="validationErrors.isNotNumeric">
               The following items in your list are not numeric: {{ invalidValues.join(', ') }}
             </div>
             <div v-if="validationErrors.isExceedingLimit">
-              Maximum IDs: 200. {{ listLength }} IDs found in list.
+              Maximum U&ZeroWidthSpace;I&ZeroWidthSpace;D<span class="sr-only">'</span>s: 200.
+              {{ listLength }} U&ZeroWidthSpace;I&ZeroWidthSpace;D<span class="sr-only">'</span>s found in list.
+            </div>
+          </div>
+          <div
+            v-if="status"
+            id="user-provision-status-msg"
+            aria-live="polite"
+            class="mx-3"
+            role="alert"
+          >
+            <div v-if="status === 'error'">
+              <v-icon icon="mdi-alert-circle-outline" class="icon-red mr-2" />
+              <strong>Error: {{ error }}</strong>
+            </div>
+            <div v-if="status === 'success'" class="d-flex">
+              <v-icon icon="mdi-check-circle" class="icon-green mr-2" />
+              <div>
+                <strong>
+                  Success: the following <span v-if="size(importedUids) > 1">
+                    {{ size(importedUids) }}
+                  </span> U&ZeroWidthSpace;I&ZeroWidthSpace;D<span v-if="size(importedUids) > 1"><span class="sr-only">'</span>s
+                  </span> <template v-if="size(importedUids) > 1">were</template><template v-else>was</template> imported into bCourses.
+                </strong>
+                <ul id="imported-uids-list" class="ml-3">
+                  <li v-for="(uid, index) in importedUids" :key="index">{{ uid }}</li>
+                </ul>
+              </div>
             </div>
           </div>
         </v-col>
-      </v-row>
-      <v-row no-gutters>
-        <v-col cols="2"></v-col>
-        <v-col cols="10">
-          <div class="d-flex flex-wrap">
+        <v-col cols="4">
+          <div class="d-flex justify-end w-100">
             <v-btn
               id="user-provision-import-btn"
-              class="text-no-wrap mr-4 my-2"
+              class="text-no-wrap my-2"
               color="primary"
               type="submit"
               :disabled="importButtonDisabled"
             >
               <span v-if="!importProcessing">Import Users</span>
               <span v-if="importProcessing">
-                <SpinnerWithinButton /> Processing Import...
+                <SpinnerWithinButton /> Importing Users...
               </span>
             </v-btn>
-            <div
-              id="user-provision-status-msg"
-              role="alert"
-              aria-live="polite"
-              class="d-flex align-center"
-            >
-              <div v-if="status === 'error'">
-                <v-icon icon="mdi-alert-circle-outline" class="icon-red mr-2" />
-                <strong>Error : {{ error }}</strong>
-              </div>
-              <div v-if="status === 'success'">
-                <v-icon icon="mdi-check-circle" class="icon-green mr-2" />
-                Success : The users specified were imported into bCourses.
-              </div>
-            </div>
           </div>
         </v-col>
       </v-row>
@@ -106,12 +111,13 @@ export default {
   components: {Header1, SpinnerWithinButton},
   mixins: [Context],
   data: () => ({
-    error: null,
+    error: undefined,
+    importedUids: undefined,
     importProcessing: false,
     invalidValues: [],
-    listLength: null,
+    listLength: undefined,
     rawUids: '',
-    status: null,
+    status: undefined,
     validationErrors: {}
   }),
   computed: {
@@ -128,23 +134,29 @@ export default {
     }
   },
   methods: {
+    handleError(errorMessage) {
+      this.importProcessing = false
+      this.status = 'error'
+      this.error = errorMessage || 'Request to import users failed.'
+    },
     isEmpty,
     onSubmit() {
       this.error = null
+      this.importedUids = null
       this.status = null
       const validatedUids = this.validateUids()
       if (validatedUids) {
         this.importProcessing = true
+        this.$announcer.polite('Importing users')
         importUsers(validatedUids).then(response => {
+          this.importedUids = response.uids
           this.importProcessing = false
+          this.rawUids = ''
           this.status = response.status
-        }).catch(response => {
-          this.importProcessing = false
-          this.status = 'error'
-          this.error = response.error
-        })
+        }, this.handleError).catch(this.handleError)
       }
     },
+    size,
     validateUids() {
       this.validationErrors = {}
       this.invalidValues = []
@@ -184,7 +196,7 @@ export default {
     margin: 10px 0;
   }
   .user-provision-uid-label {
-    margin-top: 12px;
+    font-weight: 400;
   }
 }
 </style>
