@@ -1,7 +1,6 @@
 <template>
   <span>
-    {{ course.courseCode }}
-    <span v-if="course.title">: {{ course.title }}</span>
+    {{ course.courseCode }}<span v-if="course.title"> &mdash; {{ course.title }}</span>
     <span v-if="size(course.sections)">
       ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
     </span>
