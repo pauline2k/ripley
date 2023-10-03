@@ -1,27 +1,27 @@
 <template>
-  <div v-if="!isLoading" class="mx-10 my-5">
-    <v-container fluid>
+  <div class="px-16">
+    <v-container v-if="!isLoading" class="mb-5">
       <v-row no-gutters>
-        <v-col class="mx-16">
+        <v-col>
           <Header1 text="Manage Sites" />
         </v-col>
       </v-row>
       <v-row no-gutters>
-        <v-col class="mx-16">
+        <v-col>
           <v-divider class="mb-4" />
         </v-col>
       </v-row>
       <template v-for="option in options" :key="option.path">
         <v-row no-gutters>
           <v-col cols="2">
-            <div class="bg-blue-lighten-5 float-right pa-2">
+            <div class="bg-blue-lighten-5 float-right">
               <v-icon :icon="option.icon" size="120" />
             </div>
           </v-col>
           <v-col cols="10">
-            <div class="pl-4 pr-16">
+            <div class="pl-4">
               <h2>{{ option.header }}</h2>
-              <div class="pb-4 pr-2 pt-2">
+              <div class="pb-4 pt-2">
                 <div v-if="option.id === 'create-course-site'">
                   <div v-if="option.isAvailable">
                     Set up course sites to communicate with and manage the work of students enrolled in your classes.
@@ -40,8 +40,8 @@
                   <OutboundLink id="bcourses-project-sites-service-page" href="https://rtl.berkeley.edu/services-programs/bcourses-project-sites">Project Sites</OutboundLink> and
                   <OutboundLink id="berkeley-collaboration-services-information" href="https://bconnected.berkeley.edu/collaboration-services">other collaboration tools at UC Berkeley</OutboundLink>.
                 </div>
-                <div v-if="option.id === 'manage-site-sections'">
-                  Foo.
+                <div v-if="option.id === 'manage-official-sections'">
+                  Add or remove official section rosters in already-created course sites.
                 </div>
               </div>
               <div v-if="option.isAvailable">
@@ -57,7 +57,7 @@
           </v-col>
         </v-row>
         <v-row no-gutters>
-          <v-col class="mx-16">
+          <v-col>
             <v-divider class="my-4" />
           </v-col>
         </v-row>
@@ -102,11 +102,11 @@ export default {
           path: '/create_project_site'
         },
         {
-          header: 'Manage Site Sections',
+          header: 'Official Sections',
           icon: 'mdi-view-dashboard-edit',
-          id: 'manage-site-sections',
+          id: 'manage-official-sections',
           isAvailable: canCreateCourseSite,
-          label: 'Manage Sections',
+          label: 'Manage Official Sections',
           path: '/manage_sites'
         }
       ]
