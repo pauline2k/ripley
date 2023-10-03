@@ -22,6 +22,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+from datetime import timedelta
 from itertools import groupby
 from operator import itemgetter
 
@@ -32,7 +33,7 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_basic_attributes
 from ripley.lib.canvas_utils import csv_formatted_course_role, csv_row_for_campus_user, parse_canvas_sis_section_id, \
     sis_enrollment_status_to_canvas_course_role, user_id_from_attributes
-from ripley.models.canvas_synchronization import CanvasSynchronization
+from ripley.lib.util import utc_now
 
 
 def initialize_recent_updates(sis_term_ids, uids_for_updates):
@@ -56,9 +57,12 @@ def initialize_recent_updates(sis_term_ids, uids_for_updates):
                         collector[canvas_term_id][section_id].append(list(uid_rows)[0])
         return collector
 
-    instructor_results = get_edo_instructor_updates(CanvasSynchronization.get_last_instructor_sync())
+    # Timestamps from the last CanvasSynchronization job don't tell us when the Junction-via-Nessie source data was originally
+    # queried, so just set a cutoff 24 hours back to ensure nothing is missed.
+    yesterday = utc_now() - timedelta(days=1)
+    instructor_results = get_edo_instructor_updates(yesterday)
     instructor_updates = _collect_enrollment_updates(instructor_results, 'role_code')
-    enrollment_results = get_edo_enrollment_updates(CanvasSynchronization.get_last_enrollment_sync())
+    enrollment_results = get_edo_enrollment_updates(yesterday)
     enrollment_updates = _collect_enrollment_updates(enrollment_results, 'sis_enrollment_status')
     return instructor_updates, enrollment_updates
 
