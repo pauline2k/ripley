@@ -131,14 +131,6 @@
             class="grade-export-header mb-3 mt-2"
             text="Export E-Grades"
           />
-          <v-alert
-            v-if="filenameDownloaded"
-            class="ma-2"
-            :closable="true"
-            role="alert"
-            :text="`The job is done. The file '${filenameDownloaded}' should be in your downloads folder.`"
-            type="info"
-          />
         </v-col>
       </v-row>
       <v-row class="sr-only">
@@ -346,6 +338,7 @@ export default {
       downloadGradeCsv(this.filenameDownloaded, this.backgroundJobId).then(() => {
         setTimeout(() => {
           this.filenameDownloaded = null
+          this.$announcer.polite('File download is complete.')
         }, 30000)
       })
     },
