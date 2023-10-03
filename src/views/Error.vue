@@ -18,8 +18,8 @@
         :aspect-ratio="16 / 9"
         src="@/assets/images/color-bars.png"
       />
-      <v-card-title class="mt-3">
-        <h2>{{ header }}</h2>
+      <v-card-title>
+        <h1>{{ header }}</h1>
       </v-card-title>
       <v-card-text v-if="applicationState.message">
         <div
