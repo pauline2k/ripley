@@ -1,12 +1,12 @@
 <template>
   <ul
     class="text-center"
-    style="display: block; overflow: hidden; width: 100%; padding-top: 1rem; margin-left: 1rem"
+    style="display: flex; flex-wrap: wrap; width: 100%; padding-top: 1rem; margin-left: 1rem"
   >
     <li
       v-for="student in students"
       :key="student.studentId"
-      style="display:block; float: left; height: auto; padding: 5px; width: 173px;"
+      style="display: flex; height: auto; padding: 5px; width: 173px;"
     >
       <v-card
         :border="false"
