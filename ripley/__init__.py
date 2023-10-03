@@ -31,7 +31,7 @@ from flask_caching import Cache
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 
-__version__ = '1.0'
+__version__ = '0.8'
 
 cache = Cache()
 
