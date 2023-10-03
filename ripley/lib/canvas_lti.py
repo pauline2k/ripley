@@ -129,7 +129,7 @@ def lti_tool_definitions():
                 'account_id': app.config['CANVAS_BERKELEY_ACCOUNT_ID'],
                 'client_id': '10720000000000627',
                 'description': 'Automated user provisioning',
-                'placement': 'link_selection',
+                'placement': 'account_navigation',
             },
             'roster_photos': {
                 'name': 'Roster Photos (LTI 1.3)',
