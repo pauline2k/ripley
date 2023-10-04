@@ -220,11 +220,11 @@ import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import Header1 from '@/components/utils/Header1.vue'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
-import {pluralize} from '@/utils'
-import {each, filter, find, flatMap, includes, keys, set, size, toString, union, unset} from 'lodash'
+import {pluralize, toInt} from '@/utils'
+import {each, filter, find, flatMap, get, includes, keys, set, size, toString, union, unset} from 'lodash'
 
 export default {
-  name: 'CourseManageOfficialSections',
+  name: 'ManageOfficialSections',
   components: {
     Header1,
     CourseSectionsTable,
@@ -236,6 +236,7 @@ export default {
     adminTerms: null,
     availableSectionsPanel: [],
     canvasSite: {},
+    canvasSiteId: undefined,
     courseSemesterClasses: [],
     currentWorkflowStep: null,
     displayError: null,
@@ -248,6 +249,7 @@ export default {
     showAlert: false
   }),
   created() {
+    this.canvasSiteId = toInt(get(this.$route, 'params.canvasSiteId'))
     this.fetchFeed().finally(() => {
       this.$ready()
     })
@@ -303,9 +305,8 @@ export default {
       this.currentWorkflowStep = step
     },
     fetchFeed() {
-      return getCourseSections(this.currentUser.canvasSiteId).then(
+      return getCourseSections(this.canvasSiteId).then(
         response => {
-          this.jobProgress = null
           if (response.canvasSite) {
             this.canvasSite = response.canvasSite
             this.refreshFromFeed(response)
@@ -404,7 +405,7 @@ export default {
         this.jobStatus = 'sendingRequest'
         this.jobStatusMessage = ''
         updateSiteSections(
-          this.currentUser.canvasSiteId,
+          this.canvasSiteId,
           update.addSections,
           update.deleteSections,
           update.updateSections

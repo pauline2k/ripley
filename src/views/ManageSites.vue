@@ -5,7 +5,7 @@
       <h2>{{ getTermName(termId) }}</h2>
       <select
         id="course-sections"
-        v-model="selectedCourse"
+        v-model="canvasSiteId"
       >
         <option :value="null">Choose...</option>
         <option
@@ -31,9 +31,16 @@ export default defineComponent({
   name: 'ManageSites',
   components: {Header1},
   data: () => ({
-    coursesByTerm: undefined,
-    selectedCourse: null
+    canvasSiteId: null,
+    coursesByTerm: undefined
   }),
+  watch: {
+    canvasSiteId(value) {
+      if (value) {
+        this.$router.push({path: `/manage_official_sections/${value}`})
+      }
+    }
+  },
   created() {
     this.coursesByTerm = {}
     myCurrentCanvasCourses().then(data => {
@@ -51,7 +58,3 @@ export default defineComponent({
   }
 })
 </script>
-
-<style scoped lang="scss">
-
-</style>

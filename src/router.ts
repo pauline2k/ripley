@@ -5,7 +5,6 @@ const CanvasSiteSummary = () => import('./views/CanvasSiteSummary.vue')
 const CourseAddUser = () => import('./views/CourseAddUser.vue')
 const CourseGradeDistribution = () => import('./views/CourseGradeDistribution.vue')
 const CourseGradeExport = () => import('./views/CourseGradeExport.vue')
-const CourseManageOfficialSections = () => import('./views/CourseManageOfficialSections.vue')
 const CreateCourseSite = () => import('./views/CreateCourseSite.vue')
 const CreateProjectSite = () => import('./views/CreateProjectSite.vue')
 const Error = () => import('./views/Error.vue')
@@ -14,6 +13,7 @@ const Login = () => import('./views/Login.vue')
 const MailingListCreate = () => import('./views/MailingListCreate.vue')
 const MailingListSelectCourse = () => import('./views/MailingListSelectCourse.vue')
 const MailingListUpdate = () => import('./views/MailingListUpdate.vue')
+const ManageOfficialSections = () => import('./views/ManageOfficialSections.vue')
 const ManageSites = () => import('./views/ManageSites.vue')
 const Profile = () => import('./views/Profile.vue')
 const Roster = () => import('./views/Roster.vue')
@@ -85,11 +85,11 @@ const routes:RouteRecordRaw[] = [
         }
       },
       {
-        component: CourseManageOfficialSections,
-        path: '/manage_official_sections',
+        component: ManageOfficialSections,
+        path: '/manage_official_sections/:canvasSiteId',
         meta: {
           announcer: {
-            message: 'Official Sections'
+            message: 'Manage Official Sections'
           }
         }
       },
