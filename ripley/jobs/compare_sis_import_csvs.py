@@ -39,7 +39,7 @@ class CompareSisImportCsvs(BaseJob):
     def _run(self, params={}):
         timestamp = utc_now().strftime('%F_%H-%M-%S')
 
-        junction_csvs, ripley_csvs = _collect_csv_keys()
+        junction_csvs, ripley_csvs = _collect_csv_keys(days_ago=params.get('days_ago', 1))
         junction_lines = {}
         ripley_lines = {}
 
@@ -95,7 +95,7 @@ class CompareSisImportCsvs(BaseJob):
         return 'compare_sis_import_csvs'
 
 
-def _collect_csv_keys(): # noqa C901
+def _collect_csv_keys(days_ago): # noqa C901
     csv_keys = [
         'users-initial',
         'users-update',
@@ -109,12 +109,12 @@ def _collect_csv_keys(): # noqa C901
     junction_csvs = {k: [] for k in csv_keys}
     ripley_csvs = {k: [] for k in csv_keys}
 
-    yesterday = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+    datestamp = (datetime.now() - timedelta(days=days_ago)).strftime('%Y-%m-%d')
 
-    for key in s3.get_keys_with_prefix(f'provisioned-users-{yesterday}', app.config['JUNCTION_COMPARISON_CSV_BUCKET']):
+    for key in s3.get_keys_with_prefix(f'provisioned-users-{datestamp}', app.config['JUNCTION_COMPARISON_CSV_BUCKET']):
         junction_csvs['users-initial'].append(key)
 
-    for key in s3.get_keys_with_prefix(f'canvas-{yesterday}', app.config['JUNCTION_COMPARISON_CSV_BUCKET']):
+    for key in s3.get_keys_with_prefix(f'canvas-{datestamp}', app.config['JUNCTION_COMPARISON_CSV_BUCKET']):
         if 'term-enrollments-export' in key:
             term_id = _get_term_id(key)
             if term_id:
@@ -131,7 +131,7 @@ def _collect_csv_keys(): # noqa C901
                 junction_csvs[f'enrollments-{term_id}-update'].append(key)
 
     for key in s3.iterate_monthly_folder('canvas_provisioning_reports'):
-        if not _within_daily_window(key):
+        if not _within_daily_window(key, days_ago):
             continue
         if 'user-provision-report' in key:
             ripley_csvs['users-initial'].append(key)
@@ -141,7 +141,7 @@ def _collect_csv_keys(): # noqa C901
                 ripley_csvs[f'enrollments-{term_id}-initial'].append(key)
 
     for key in s3.iterate_monthly_folder('canvas_sis_imports'):
-        if not _within_daily_window(key):
+        if not _within_daily_window(key, days_ago):
             continue
         if 'user-sis-import' in key:
             ripley_csvs['users-update'].append(key)
@@ -161,16 +161,16 @@ def _get_term_id(string):
         return match[0]
 
 
-def _within_daily_window(string):
+def _within_daily_window(string, days_ago):
     match = re.search('\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}', string)
     if not match or not match[0]:
         return False
 
-    today_cutoff = utc_now().replace(hour=7, minute=0, second=0)
-    yesterday_cutoff = today_cutoff - timedelta(days=1)
+    end_cutoff = (utc_now() - timedelta(days=(days_ago - 1))).replace(hour=7, minute=0, second=0)
+    start_cutoff = end_cutoff - timedelta(days=1)
     timestamp_format = '%F_%H-%M-%S'
 
-    if match[0] > yesterday_cutoff.strftime(timestamp_format) and match[0] < today_cutoff.strftime(timestamp_format):
+    if match[0] > start_cutoff.strftime(timestamp_format) and match[0] < end_cutoff.strftime(timestamp_format):
         return True
     else:
         return False
