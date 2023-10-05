@@ -175,7 +175,7 @@ export default {
     getTermName,
     goNext() {
       if (!this.isButtonDisabled) {
-        const path = this.selection.id === 'manage-official-sections' ? `/manage_official_sections/${this.canvasSiteId}` : this.selection.path
+        const path = this.selection.id === 'manage-official-sections' ? `/official_sections/${this.canvasSiteId}` : this.selection.path
         this.$router.push({path})
       }
     },

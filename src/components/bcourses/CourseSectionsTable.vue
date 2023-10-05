@@ -31,7 +31,7 @@
           <th class="cell-section-locations d-none d-sm-none d-md-table-cell">Location</th>
           <th class="cell-section-instructors d-none d-sm-none d-lg-table-cell">Instructors</th>
           <th v-if="mode !== 'createCourseForm' && mode !== 'preview'" class="cell-section-action-option">
-            <span v-if="mode !== 'preview'">Actions</span>
+            <span v-if="mode !== 'preview'" class="mr-5">Actions</span>
           </th>
         </tr>
       </thead>
@@ -85,7 +85,7 @@
                 v-if="section.nameDiscrepancy && section.stagedState !== 'update'"
                 :id="`section-${section.id}-update-btn`"
                 :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be updated`"
-                class="button canvas-no-decoration ml-1"
+                class="ml-1"
                 @click="stageUpdate(section)"
               >
                 Update
@@ -94,7 +94,8 @@
                 v-if="section.stagedState === 'update'"
                 :id="`section-${section.id}-undo-update-btn`"
                 :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be updated from course site`"
-                class="button button-undo-delete canvas-no-decoration ml-1"
+                class="button-undo-delete ml-1"
+                density="compact"
                 @click="unstage(section)"
               >
                 Undo Update
@@ -103,7 +104,8 @@
                 v-if="section.stagedState !== 'update'"
                 :id="`section-${section.id}-unlink-btn`"
                 :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be unlinked from course site`"
-                class="button canvas-no-decoration ml-1"
+                class="ml-1"
+                density="compact"
                 @click="stageDelete(section)"
               >
                 Unlink
@@ -112,8 +114,9 @@
             <div v-if="mode === 'currentStaging' && !section.isCourseSection">
               <v-btn
                 :id="`section-${section.id}-undo-unlink-btn`"
-                class="button button-undo-add canvas-no-decoration ml-1"
+                class="button-undo-add ml-1"
                 :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be linked to course site`"
+                density="compact"
                 @click="unstage(section)"
               >
                 Undo Link
@@ -123,8 +126,9 @@
             <div v-if="mode === 'availableStaging' && section.isCourseSection && section.stagedState === 'delete'">
               <v-btn
                 :id="`section-${section.id}-undo-unlink-btn`"
-                class="button button-undo-delete canvas-no-decoration ml-1"
                 :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be unlinked from course site`"
+                class="button-undo-delete ml-1"
+                density="compact"
                 @click="unstage(section)"
               >
                 Undo Unlink
@@ -136,9 +140,9 @@
             <div v-if="mode === 'availableStaging' && !section.isCourseSection && !section.stagedState">
               <v-btn
                 :id="`section-${section.id}-link-btn`"
-                class="button canvas-no-decoration ml-1"
-                :class="{'button-undo-add': section.stagedState === 'add'}"
                 :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be linked to course site`"
+                class="ml-1"
+                :class="{'button-undo-add': section.stagedState === 'add'}"
                 @click="stageAdd(section)"
               >
                 Link
