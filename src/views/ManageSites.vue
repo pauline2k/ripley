@@ -17,20 +17,18 @@
           }"
         >
           <div class="d-flex">
-            <v-list-item-action class="align-self-start" start>
+            <div class="radio-button-container">
               <v-radio
                 :id="option.id"
                 :class="{'text-grey': !option.isAvailable}"
                 :disabled="!option.isAvailable"
                 :value="option"
               />
-            </v-list-item-action>
+            </div>
             <div class="list-item-content">
-              <v-list-item-title>
-                <h2>
-                  <label :for="option.id">{{ option.header }}</label>
-                </h2>
-              </v-list-item-title>
+              <label class="w-100" :for="option.id">
+                <h2>{{ option.header }}</h2>
+              </label>
               <div v-if="option.id === 'create-course-site'">
                 <div v-if="option.isAvailable">
                   Set up course sites to communicate with and manage the work of students enrolled in your classes.
@@ -205,5 +203,8 @@ ul {
 .list-item-content {
   color: black;
   padding: 6px 0;
+}
+.radio-button-container {
+  padding: 2px 8px 0 0;
 }
 </style>
