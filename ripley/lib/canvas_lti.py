@@ -117,13 +117,6 @@ def lti_tool_definitions():
                 'description': 'Create and manage mailing lists for all course sites',
                 'placement': 'account_navigation',
             },
-            'manage_official_sections': {
-                'name': 'Official Sections (LTI 1.3)',
-                'account_id': app.config['CANVAS_COURSES_ACCOUNT_ID'],
-                'client_id': '10720000000000626',
-                'description': 'Provides management options for official course sections',
-                'placement': 'link_selection',
-            },
             'provision_user': {
                 'name': 'User Provisioning (LTI 1.3)',
                 'account_id': app.config['CANVAS_BERKELEY_ACCOUNT_ID'],

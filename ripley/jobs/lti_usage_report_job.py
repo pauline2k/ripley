@@ -35,7 +35,7 @@ from ripley.jobs.base_job import BaseJob
 from ripley.jobs.errors import BackgroundJobError
 
 # Basic enabled-out-of-the-box course apps do not need to be included in the detailed course tools report.
-COMMONPLACE_APPS = re.compile('/api/lti/(add_user|export_grade|manage_official_sections|roster_photos)$')
+COMMONPLACE_APPS = re.compile('/api/lti/(add_user|export_grade|roster_photos)$')
 EXTERNAL_TOOL_ID_PATTERN = re.compile('context_external_tool_([0-9]+)')
 
 
