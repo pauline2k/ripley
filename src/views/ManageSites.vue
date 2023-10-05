@@ -3,18 +3,18 @@
     <Header1 class="mb-2" text="Create or Update bCourses Sites" />
     <v-radio-group
       v-model="selection"
+      class="d-flex"
       hide-details
     >
-      <v-list
-        class="py-0"
-        density="compact"
-        lines="three"
-      >
-        <v-list-item
+      <ul>
+        <li
           v-for="option in options"
           :key="option.id"
-          :active="selection === option"
-          color="primary"
+          class="my-2 px-3 py-1"
+          :class="{
+            'highlight-when-hover': !selection,
+            'highlight-when-selected': selection === option
+          }"
         >
           <div class="d-flex">
             <v-list-item-action class="align-self-start" start>
@@ -84,10 +84,10 @@
               </div>
             </div>
           </div>
-        </v-list-item>
-      </v-list>
+        </li>
+      </ul>
     </v-radio-group>
-    <div class="pt-3 w-100">
+    <div class="w-100">
       <v-btn
         id="go-next-btn"
         class="float-right"
@@ -177,11 +177,8 @@ export default {
     getTermName,
     goNext() {
       if (!this.isButtonDisabled) {
-        if (this.selection.id === 'manage-official-sections') {
-          this.$router.push({path: `/manage_official_sections/${this.canvasSiteId}`})
-        } else {
-          this.$router.push({path: this.selection.path})
-        }
+        const path = this.selection.id === 'manage-official-sections' ? `/manage_official_sections/${this.canvasSiteId}` : this.selection.path
+        this.$router.push({path})
       }
     },
     size
@@ -190,6 +187,21 @@ export default {
 </script>
 
 <style scoped>
+li {
+  border: 1px solid #fff;
+}
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+.highlight-when-hover:hover {
+  background-color: rgb(233, 239, 243);
+}
+.highlight-when-selected {
+  background-color: rgb(233, 239, 243);
+  border: 1px solid #d0d0d0 !important;
+}
 .list-item-content {
   color: black;
   padding: 6px 0;
