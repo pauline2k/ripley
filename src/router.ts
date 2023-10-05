@@ -18,7 +18,6 @@ const ManageSites = () => import('./views/ManageSites.vue')
 const Profile = () => import('./views/Profile.vue')
 const Roster = () => import('./views/Roster.vue')
 const SendWelcomeEmail = () => import('./views/SendWelcomeEmail.vue')
-const SiteCreation = () => import('./views/SiteCreation.vue')
 const UserProvision = () => import('./views/UserProvision.vue')
 const Welcome = () => import('@/views/Welcome.vue')
 import {capitalize, get} from 'lodash'
@@ -112,11 +111,11 @@ const routes:RouteRecordRaw[] = [
         }
       },
       {
-        component: SiteCreation,
+        component: ManageSites,
         path: '/create_site',
         meta: {
           announcer: {
-            message: 'bCourses Site Creation'
+            message: 'Manage bCourses Sites'
           }
         }
       },
@@ -171,15 +170,6 @@ const routes:RouteRecordRaw[] = [
         meta: {
           announcer: {
             message: 'Update Mailing List'
-          }
-        }
-      },
-      {
-        component: ManageSites,
-        path: '/manage_sites',
-        meta: {
-          announcer: {
-            message: 'Manage Sites'
           }
         }
       },
