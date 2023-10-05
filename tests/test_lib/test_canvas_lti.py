@@ -45,7 +45,6 @@ class TestConfigureToolsFromCurrentHost:
                     'edit_external_tool_roster',
                     'edit_external_tool_export_grade',
                     'edit_external_tool_create_site',
-                    'edit_external_tool_manage_official_sections',
                     'edit_external_tool_mailing_list',
                     'edit_external_tool_mailing_lists',
                     'get_external_tool_provision_user',
@@ -53,7 +52,6 @@ class TestConfigureToolsFromCurrentHost:
                     'get_external_tool_roster',
                     'get_external_tool_export_grade',
                     'get_external_tool_create_site',
-                    'get_external_tool_manage_official_sections',
                     'get_external_tool_mailing_list',
                     'get_external_tool_mailing_lists',
                 ],
@@ -61,7 +59,7 @@ class TestConfigureToolsFromCurrentHost:
 
             with caplog.at_level(logging.INFO):
                 response = configure_tools_from_current_host()
-                assert len(response) == 8
+                assert len(response) == 7
                 assert 'Overwriting configuration for add_user (id=35251), provider from https://cc-dev.example.com to https://rip-dev.example.com' \
                     in caplog.text
                 assert 'Overwriting configuration for create_site (id=40897), provider from https://cc-dev.example.com to https://rip-dev.example.' \
@@ -70,8 +68,6 @@ class TestConfigureToolsFromCurrentHost:
                     '.com' in caplog.text
                 assert 'Adding configuration for mailing_list to account 129410' in caplog.text
                 assert 'Adding configuration for mailing_lists to account 129607' in caplog.text
-                assert 'Overwriting configuration for manage_official_sections (id=41468), provider from https://cc-dev.example.com to https://rip' \
-                    '-dev.example.com' in caplog.text
                 assert 'Overwriting configuration for provision_user (id=27784), provider from https://cc-dev.example.com to https://rip-dev.examp' \
                     'le.com' in caplog.text
                 assert 'Overwriting configuration for roster_photos (id=36940), provider from https://cc-dev.example.com to https://rip-dev.exampl' \

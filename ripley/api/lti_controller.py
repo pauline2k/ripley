@@ -126,17 +126,6 @@ def config_mailing_lists():
     )
 
 
-@app.route('/api/lti/config/manage_official_sections.json')
-def config_manage_official_sections():
-    tool_definition = lti_tool_definitions()['manage_official_sections']
-    return _tool_config(
-        title=tool_definition['name'],
-        description=tool_definition['description'],
-        target='launch_manage_official_sections',
-        placement=tool_definition['placement'],
-    )
-
-
 @app.route('/api/lti/config/provision_user.json')
 def config_provision_user():
     tool_definition = lti_tool_definitions()['provision_user']
@@ -219,11 +208,6 @@ def launch_mailing_list():
 @app.route('/api/lti/mailing_lists', methods=['GET', 'POST'])
 def launch_mailing_lists():
     return _launch_tool('mailing_list/select_course')
-
-
-@app.route('/api/lti/manage_official_sections', methods=['GET', 'POST'])
-def launch_manage_official_sections():
-    return _launch_tool('manage_official_sections')
 
 
 @app.route('/api/lti/provision_user', methods=['GET', 'POST'])

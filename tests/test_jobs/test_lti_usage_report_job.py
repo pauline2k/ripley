@@ -70,7 +70,7 @@ class TestLtiUsageReportJob:
                 LtiUsageReportJob(app)._run()
 
                 summary_report = read_s3_csv(app, s3, 'lti_usage_summary-2023-B')
-                assert len(summary_report) == 18
+                assert len(summary_report) == 17
                 assert summary_report[0] == 'Tool,URL,Accounts,Courses Visible'
                 assert summary_report[1] == 'Canvas Data Portal,https://beta.example.com/session/lti/launch,1,N/A'
                 assert summary_report[2] == 'Chat,https://chat.instructure.com/lti/launch,1,1'
@@ -84,7 +84,7 @@ class TestLtiUsageReportJob:
                 assert summary_report[10] == 'Download E-Grades,https://cc-dev.example.com/api/lti/export_grade,129410,0'
 
                 courses_report = read_s3_csv(app, s3, 'lti_usage_courses-2023-B')
-                assert len(courses_report) == 19
+                assert len(courses_report) == 16
                 assert courses_report[0] == 'Course URL,Name,Tool,Teacher,Email'
                 assert courses_report[1] == 'https://hard_knocks_api.instructure.com/courses/1234567,COM LIT ABC,W. W. Norton,,'
                 assert courses_report[2] == 'https://hard_knocks_api.instructure.com/courses/1234567,COM LIT ABC,Chat,,'

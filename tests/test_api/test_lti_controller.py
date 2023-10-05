@@ -131,21 +131,6 @@ class TestGetMailingListsConfig:
         )
 
 
-class TestGetManageOfficialSectionsConfig:
-
-    def test_anonymous(self, client, app):
-        """Anonymous user can get the Official Sections tool config JSON."""
-        _api_get_tool_config(
-            client,
-            app,
-            config_uri='manage_official_sections.json',
-            target='launch_manage_official_sections',
-            expected_title='Official Sections (LTI 1.3)',
-            expected_description='Provides management options for official course sections',
-            expected_placement='link_selection',
-        )
-
-
 class TestGetRosterPhotosConfig:
 
     def test_anonymous(self, client, app):

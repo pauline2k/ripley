@@ -4,7 +4,10 @@
     <div class="text-subtitle-1">
       What do you want to do?
     </div>
-    <v-radio-group v-model="selection">
+    <v-radio-group
+      v-model="selection"
+      hide-details
+    >
       <v-list
         class="py-0"
         density="compact"
@@ -54,22 +57,24 @@
                 <div class="pt-2">
                   <div v-if="size(coursesByTerm)">
                     Add or remove official section rosters in already-created course sites.
-                    <div v-for="(courses, termId) in coursesByTerm" :key="termId">
-                      <div class="text-subtitle-1">{{ getTermName(termId) }}</div>
-                      <select
-                        id="course-sections"
-                        v-model="canvasSiteId"
-                        :disabled="!selection || selection.id !== 'manage-official-sections'"
-                      >
-                        <option :value="null">Choose...</option>
-                        <option
-                          v-for="course in courses"
-                          :key="course.canvasSiteId"
-                          :value="course.canvasSiteId"
+                    <div class="pl-3 py-2">
+                      <div v-for="(courses, termId) in coursesByTerm" :key="termId">
+                        <div class="text-subtitle-1">{{ getTermName(termId) }}</div>
+                        <select
+                          id="course-sections"
+                          v-model="canvasSiteId"
+                          :disabled="!selection || selection.id !== 'manage-official-sections'"
                         >
-                          {{ course.courseCode }} &mdash; {{ course.name }}
-                        </option>
-                      </select>
+                          <option :value="null">Choose...</option>
+                          <option
+                            v-for="course in courses"
+                            :key="course.canvasSiteId"
+                            :value="course.canvasSiteId"
+                          >
+                            {{ course.courseCode }} &mdash; {{ course.name }}
+                          </option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                   <div v-if="!size(coursesByTerm)">
@@ -85,8 +90,9 @@
         </v-list-item>
       </v-list>
     </v-radio-group>
-    <div class="w-100">
+    <div class="pt-3 w-100">
       <v-btn
+        id="go-next-btn"
         class="float-right"
         color="primary"
         :disabled="isButtonDisabled"
