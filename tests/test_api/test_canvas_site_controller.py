@@ -378,7 +378,7 @@ class TestCanvasSiteProvisionSections:
 
 
 def _api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=200):
-    response = client.get(f'/api/canvas_site/{canvas_site_id}/provision/sections')
+    response = client.get(f'/api/canvas_site/{canvas_site_id}/official_sections')
     assert response.status_code == expected_status_code
     return response.json
 

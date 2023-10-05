@@ -197,22 +197,30 @@ def get_grade_distribution(canvas_site_id):
     return tolerant_jsonify(distribution)
 
 
-@app.route('/api/canvas_site/<canvas_site_id>/provision/sections')
+@app.route('/api/canvas_site/<canvas_site_id>/official_sections')
 @canvas_role_required('DesignerEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'Lead TA')
 def get_official_course_sections(canvas_site_id):
-    can_edit = bool(next((role for role in current_user.canvas_site_user_roles if role in ['TeacherEnrollment', 'Lead TA']), None))
     course = canvas.get_course(canvas_site_id)
     if not course:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
-    canvas_sis_term_id = course.term['sis_term_id']
-    term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
+    canvas_site_user = canvas.get_course_user(canvas_site_id, current_user.canvas_user_id)
+    enrollments = canvas_site_user.enrollments if canvas_site_user and canvas_site_user.enrollments else []
+    can_edit = bool(next((e for e in enrollments if e['role'] in ['TeacherEnrollment', 'Lead TA']), None))
+    term = BerkeleyTerm.from_canvas_sis_term_id(course.term['sis_term_id'])
     official_sections, section_ids, sections = get_official_sections(canvas_site_id)
-    teaching_terms = [] if not len(section_ids) else get_teaching_terms(current_user, section_ids=section_ids, sections=sections)
+    teaching_terms = [] if not len(section_ids) else get_teaching_terms(
+        current_user=current_user,
+        section_ids=section_ids,
+        sections=sections,
+    )
     return tolerant_jsonify({
         'canvasSite': {
-            'canEdit': can_edit,
-            'officialSections': official_sections,
-            'term': term.to_api_json() if term else None,
+            **canvas_site_to_api_json(course),
+            **{
+                'canEdit': can_edit,
+                'officialSections': official_sections,
+                'term': term.to_api_json() if term else None,
+            },
         },
         'teachingTerms': teaching_terms,
     })

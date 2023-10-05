@@ -85,7 +85,7 @@ const routes:RouteRecordRaw[] = [
       },
       {
         component: ManageOfficialSections,
-        path: '/manage_official_sections/:canvasSiteId',
+        path: '/official_sections/:canvasSiteId',
         meta: {
           announcer: {
             message: 'Manage Official Sections'

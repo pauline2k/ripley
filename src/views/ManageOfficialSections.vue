@@ -1,201 +1,172 @@
 <template>
-  <div v-if="!isLoading" class="page-course-official-sections">
+  <div v-if="!isLoading" class="pt-3 px-6">
     <div v-if="feedFetched && !displayError">
-      <div v-if="currentWorkflowStep === 'staging'">
-        <MaintenanceNotice course-action-verb="site is updated" />
-      </div>
-      <Header1 class="page-course-official-sections-header1" text="Official Sections" />
-      <div v-if="currentWorkflowStep === 'preview'">
-        <v-alert
-          id="page-course-official-sections-job-status-notice"
-          v-model="showAlert"
-          class="d-flex align-center justify-space-between my-2"
-          closable
-          close-label="Hide notice"
-          :type="jobStatus !== 'finished' ? 'error' : 'success'"
-          density="compact"
-          role="alert"
-          variant="tonal"
-        >
-          <div class="font-size-16">{{ jobStatusMessage }}</div>
-        </v-alert>
-        <h2 id="sr-context-header" class="sr-only">Viewing Sections</h2>
-        <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-white-border">
-          <div class="d-flex align-start justify-space-between pb-2">
-            <h3 id="course-site-sections-header">
-              Sections in this Course Site
-            </h3>
-            <div class="d-flex align-end">
-              <v-btn
-                v-if="canvasSite.canEdit"
-                id="official-sections-edit-btn"
-                class="canvas-no-decoration text-no-wrap"
-                color="primary"
-                @click="changeWorkflowStep('staging')"
-              >
-                Edit Sections
-              </v-btn>
-            </div>
-          </div>
-          <v-row no-gutters class="page-course-official-sections-courses-container">
-            <v-col md="12" class="page-course-official-sections-current-course">
-              <CourseSectionsTable
-                mode="preview"
-                :sections="existingCourseSections"
-                :row-class-logic="rowClassLogic"
-                :row-display-logic="rowDisplayLogic"
-              />
-            </v-col>
-          </v-row>
+      <Header1 class="mb-2 mt-0" :text="`${canvasSite.name}, ${canvasSite.term.name}`" />
+      <div class="align-center d-flex h2-container justify-space-between">
+        <div class="pr-2">
+          <h2>Official Sections</h2>
         </div>
-      </div>
-      <div v-if="currentWorkflowStep === 'staging'">
-        <div class="page-course-official-sections-sections-area page-course-official-sections-current-sections-grey-border">
-          <h2 id="sr-context-header" class="sr-only">Managing Sections</h2>
-          <div class="d-flex align-center flex-wrap justify-space-between">
-            <h3 id="course-site-sections" class="text-no-wrap mb-2">
-              Sections in this Course Site
-            </h3>
-            <div class="mb-2 ml-auto">
-              <v-btn
-                id="official-sections-cancel-btn"
-                class="mx-1"
-                aria-label="Cancel section modifications for this course site"
-                @click="cancel"
-              >
-                Cancel
-              </v-btn>
-              <v-btn
-                id="official-sections-save-btn"
-                aria-label="Apply pending modifications to this course site"
-                class="text-no-wrap"
-                color="primary"
-                :disabled="totalStagedCount === 0"
-                @click="saveChanges"
-              >
-                Save Changes
-              </v-btn>
-            </div>
-          </div>
-          <v-row no-gutters class="page-course-official-sections-courses-container">
-            <v-col md="12" class="page-course-official-sections-current-course">
-              <CourseSectionsTable
-                mode="currentStaging"
-                :sections="allSections"
-                :unstage-action="unstage"
-                :stage-delete-action="stageDelete"
-                :stage-update-action="stageUpdate"
-                :row-class-logic="rowClassLogic"
-                :row-display-logic="rowDisplayLogic"
-              />
-            </v-col>
-          </v-row>
-          <v-row v-if="totalStagedCount > 12" class="row">
-            <v-col md="12" class="text-right">
-              <v-btn
-                id="official-sections-secondary-cancel-btn"
-                aria-label="Cancel section modifications for this course site"
-                class="mx-1"
-                @click="cancel"
-              >
-                Cancel
-              </v-btn>
-              <v-btn
-                id="official-sections-secondary-save-btn"
-                aria-label="Apply pending modifications to this course site"
-                :disabled="totalStagedCount === 0"
-                class="text-no-wrap"
-                color="primary"
-                @click="saveChanges"
-              >
-                Save Changes
-              </v-btn>
-            </v-col>
-          </v-row>
-        </div>
-        <div class="page-course-official-sections-sections-area mt-5">
-          <v-row no-gutters>
-            <v-col md="12">
-              <h3 id="available-sections-header" class="page-course-official-sections-available-sections-header-label">
-                All sections available to add to this Course Site
-              </h3>
-            </v-col>
-          </v-row>
-          <v-expansion-panels
-            v-if="courseSemesterClasses.length > 0"
-            v-model="availableSectionsPanel"
-            multiple
+        <div v-if="canvasSite.canEdit && currentWorkflowStep === 'preview'">
+          <v-btn
+            id="official-sections-edit-btn"
+            class="text-no-wrap"
+            color="primary"
+            @click="changeWorkflowStep('staging')"
           >
-            <v-expansion-panel
-              v-for="(course, index) in courseSemesterClasses"
-              :id="`sections-course-${course.slug}`"
-              :key="index"
-              bg-color="blue-lighten-5"
-              :value="course.slug"
-            >
-              <v-expansion-panel-title>
-                <template #actions="{ expanded }">
-                  <v-icon :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
-                </template>
-                <h4 id="available-course-header" class="sections-course-title">
-                  {{ course.courseCode }}
-                  <span v-if="course.title">: {{ course.title }}</span>
-                  <span v-if="size(course.sections)">
-                    ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
-                  </span>
-                </h4>
-              </v-expansion-panel-title>
-              <v-expansion-panel-text>
-                <div v-if="course.sections.length > 1">
-                  <v-btn
-                    :id="`course-${index}-add-all-sections-btn`"
-                    aria-label="Add all sections for this course to the list of sections to be added"
-                    class="course-add-all-sections-btn"
-                    :color="allSectionsAdded(course) ? '' : 'primary'"
-                    :disabled="allSectionsAdded(course)"
-                    variant="plain"
-                    @click="addAllSections(course)"
-                  >
-                    <template v-if="allSectionsAdded(course)">All Added</template>
-                    <template v-else>Add All</template>
-                  </v-btn>
-                </div>
-                <v-row no-gutters>
-                  <v-col md="12">
-                    <CourseSectionsTable
-                      mode="availableStaging"
-                      :sections="course.sections"
-                      :unstage-action="unstage"
-                      :stage-add-action="stageAdd"
-                      :row-class-logic="rowClassLogic"
-                      :row-display-logic="rowDisplayLogic"
-                    />
-                  </v-col>
-                </v-row>
-              </v-expansion-panel-text>
-            </v-expansion-panel>
-          </v-expansion-panels>
+            Edit Sections
+          </v-btn>
         </div>
       </div>
-      <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
-        <h2 id="updating-sections-header" class="text-no-wrap">
-          Updating Official Sections in Course Site
-        </h2>
-        <div class="pending-request-step">
-          <div v-if="jobStatus === 'sendingRequest'">
-            Sending request...
+      <MaintenanceNotice class="mt-3" course-action-verb="site is updated" />
+      <div class="mb-8">
+        <div v-if="currentWorkflowStep === 'preview'">
+          <v-alert
+            id="page-course-official-sections-job-status-notice"
+            v-model="showAlert"
+            class="my-2"
+            closable
+            close-label="Hide notice"
+            density="compact"
+            role="alert"
+            :type="jobStatus !== 'finished' ? 'error' : 'success'"
+            variant="tonal"
+          >
+            <div class="font-size-16">{{ jobStatusMessage }}</div>
+          </v-alert>
+          <CourseSectionsTable
+            mode="preview"
+            :sections="existingCourseSections"
+            :row-class-logic="rowClassLogic"
+            :row-display-logic="rowDisplayLogic"
+          />
+        </div>
+        <div v-if="currentWorkflowStep === 'staging'">
+          <h3 class="sr-only">Managing Sections</h3>
+          <div class="float-right pb-3">
+            <v-btn
+              id="official-sections-save-btn"
+              class="mr-1 text-no-wrap"
+              color="primary"
+              :disabled="totalStagedCount === 0"
+              @click="saveChanges"
+            >
+              Save Changes
+            </v-btn>
+            <v-btn
+              id="official-sections-cancel-btn"
+              variant="text"
+              @click="cancel"
+            >
+              Cancel
+            </v-btn>
           </div>
-          <div v-if="'queued' === jobStatus">
-            Request sent. Awaiting processing...
+          <CourseSectionsTable
+            mode="currentStaging"
+            :sections="allSections"
+            :unstage-action="unstage"
+            :stage-delete-action="stageDelete"
+            :stage-update-action="stageUpdate"
+            :row-class-logic="rowClassLogic"
+            :row-display-logic="rowDisplayLogic"
+          />
+          <div v-if="totalStagedCount > 12">
+            <v-btn
+              id="official-sections-secondary-cancel-btn"
+              aria-label="Cancel section modifications for this course site"
+              class="mx-1"
+              @click="cancel"
+            >
+              Cancel
+            </v-btn>
+            <v-btn
+              id="official-sections-secondary-save-btn"
+              aria-label="Apply pending modifications to this course site"
+              :disabled="totalStagedCount === 0"
+              class="text-no-wrap"
+              color="primary"
+              @click="saveChanges"
+            >
+              Save Changes
+            </v-btn>
           </div>
-          <div v-if="'started' === jobStatus">
-            Request received. Updating sections...
-          </div>
-          <div v-if="'finished' === jobStatus">
-            Finishing up...
+          <div>
+            <div class="mb-3 mt-8">
+              <h2>Sections Available to Add</h2>
+            </div>
+            <v-expansion-panels
+              v-if="courseSemesterClasses.length > 0"
+              v-model="availableSectionsPanel"
+              multiple
+            >
+              <v-expansion-panel
+                v-for="(course, index) in courseSemesterClasses"
+                :id="`sections-course-${course.slug}`"
+                :key="index"
+                bg-color="blue-lighten-5"
+                :value="course.slug"
+              >
+                <v-expansion-panel-title>
+                  <template #actions="{ expanded }">
+                    <v-icon :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
+                  </template>
+                  <h5 id="available-course-header" class="sections-course-title">
+                    {{ course.courseCode }}
+                    <span v-if="course.title">: {{ course.title }}</span>
+                    <span v-if="size(course.sections)">
+                      ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
+                    </span>
+                  </h5>
+                </v-expansion-panel-title>
+                <v-expansion-panel-text>
+                  <div v-if="course.sections.length > 1">
+                    <v-btn
+                      :id="`course-${index}-add-all-sections-btn`"
+                      aria-label="Add all sections for this course to the list of sections to be added"
+                      class="course-add-all-sections-btn"
+                      :color="allSectionsAdded(course) ? '' : 'primary'"
+                      :disabled="allSectionsAdded(course)"
+                      variant="plain"
+                      @click="addAllSections(course)"
+                    >
+                      <template v-if="allSectionsAdded(course)">All Added</template>
+                      <template v-else>Add All</template>
+                    </v-btn>
+                  </div>
+                  <v-row no-gutters>
+                    <v-col md="12">
+                      <CourseSectionsTable
+                        mode="availableStaging"
+                        :sections="course.sections"
+                        :unstage-action="unstage"
+                        :stage-add-action="stageAdd"
+                        :row-class-logic="rowClassLogic"
+                        :row-display-logic="rowDisplayLogic"
+                      />
+                    </v-col>
+                  </v-row>
+                </v-expansion-panel-text>
+              </v-expansion-panel>
+            </v-expansion-panels>
           </div>
         </div>
-        <div class="px-5">
+        <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
+          <h3 id="updating-sections-header" class="mt-6 text-no-wrap">
+            Updating Official Sections in Course Site
+          </h3>
+          <div class="py-3">
+            <div v-if="jobStatus === 'sendingRequest'">
+              Sending request...
+            </div>
+            <div v-if="'queued' === jobStatus">
+              Request sent. Awaiting processing...
+            </div>
+            <div v-if="'started' === jobStatus">
+              Request received. Updating sections...
+            </div>
+            <div v-if="'finished' === jobStatus">
+              Finishing up...
+            </div>
+          </div>
           <v-progress-linear
             color="primary"
             height="10"
@@ -226,8 +197,8 @@ import {each, filter, find, flatMap, get, includes, keys, set, size, toString, u
 export default {
   name: 'ManageOfficialSections',
   components: {
-    Header1,
     CourseSectionsTable,
+    Header1,
     MaintenanceNotice
   },
   mixins: [Context],
@@ -235,7 +206,7 @@ export default {
     adminActingAs: null,
     adminTerms: null,
     availableSectionsPanel: [],
-    canvasSite: {},
+    canvasSite: undefined,
     canvasSiteId: undefined,
     courseSemesterClasses: [],
     currentWorkflowStep: null,
@@ -245,8 +216,7 @@ export default {
     isAdmin: false,
     isCourseCreator: false,
     jobStatus: null,
-    jobStatusMessage: '',
-    showAlert: false
+    jobStatusMessage: ''
   }),
   created() {
     this.canvasSiteId = toInt(get(this.$route, 'params.canvasSiteId'))
@@ -254,18 +224,21 @@ export default {
       this.$ready()
     })
   },
-  watch: {
-    jobStatusMessage(msg) {
-      if (msg.length) {
-        this.showAlert = true
-      }
-    }
-  },
   computed: {
     allSections() {
       return flatMap(this.courseSemesterClasses, classItem => {
         return classItem.sections
       })
+    },
+    showAlert: {
+      get() {
+        return !!size(this.jobStatusMessage)
+      },
+      set(show) {
+        if (!show) {
+          this.jobStatusMessage = ''
+        }
+      }
     },
     totalStagedCount() {
       return size(filter(this.allSections, section => {
@@ -501,61 +474,20 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.pending-request-step {
-  height: 24px;
-  margin: 20px;
-  text-align: center;
+.h2-container {
+  min-height: 36px;
 }
-.page-course-official-sections {
-  background-color: $color-white;
-  font-family: $body-font-family;
-  padding: 25px;
-  .button {
-    padding: 10px;
-  }
-  .page-course-official-sections-header1 {
-    font-size: 24px;
-    font-weight: 400;
-    line-height: 30px;
-    margin: 15px 0 16px;
-  }
-  .page-course-official-sections-courses-container {
-    margin: 0;
-  }
-  .page-course-official-sections-current-sections-grey-border {
-    border: $color-grey-area-border-dark solid 1px;
-    .page-course-official-sections-courses-container {
-      margin-bottom: 15px;
-    }
-  }
-  .page-course-official-sections-current-course {
-    margin-left: 0;
-    margin-top: 10px;
-  }
-  .page-course-official-sections-current-sections-white-border {
-    border: $color-white solid 1px;
-  }
-  .page-course-official-sections-sections-area {
-    min-width: 420px;
-    .course-add-all-sections-btn:disabled {
-      opacity: .5 !important;
-    }
-  }
-  .page-course-official-sections-sections-area.page-course-official-sections-current-sections-grey-border {
-    padding: 15px;
-  }
-  .page-course-official-sections-available-sections-header-label {
-    font-size: 19px;
-  }
-  @media #{$small-only} {
-    .page-course-official-sections-small-only-align-left {
-      text-align: left;
-    }
-  }
-  h4.sections-course-title {
-    font-size: 18px !important;
-    font-weight: 400 !important;
-    line-height: 18px;
+h5.sections-course-title {
+  font-size: 18px !important;
+  font-weight: 400 !important;
+  line-height: 18px;
+}
+.course-add-all-sections-btn:disabled {
+  opacity: .5 !important;
+}
+@media #{$small-only} {
+  .page-course-official-sections-small-only-align-left {
+    text-align: left;
   }
 }
 </style>
