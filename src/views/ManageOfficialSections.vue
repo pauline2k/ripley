@@ -34,15 +34,16 @@
             <div class="font-size-16">{{ jobStatusMessage }}</div>
           </v-alert>
           <CourseSectionsTable
+            class="mb-1 mt-4"
             mode="preview"
-            :sections="existingCourseSections"
             :row-class-logic="rowClassLogic"
             :row-display-logic="rowDisplayLogic"
+            :sections="existingCourseSections"
           />
         </div>
         <div v-if="currentWorkflowStep === 'staging'">
           <h3 class="sr-only">Managing Sections</h3>
-          <div class="float-right pb-3">
+          <div class="float-right py-3">
             <v-btn
               id="official-sections-save-btn"
               class="mr-1 text-no-wrap"
@@ -61,13 +62,14 @@
             </v-btn>
           </div>
           <CourseSectionsTable
+            class="mb-1"
             mode="currentStaging"
-            :sections="allSections"
-            :unstage-action="unstage"
-            :stage-delete-action="stageDelete"
-            :stage-update-action="stageUpdate"
             :row-class-logic="rowClassLogic"
             :row-display-logic="rowDisplayLogic"
+            :sections="allSections"
+            :stage-delete-action="stageDelete"
+            :stage-update-action="stageUpdate"
+            :unstage-action="unstage"
           />
           <div v-if="totalStagedCount > 12">
             <v-btn
@@ -121,26 +123,25 @@
                   <div v-if="course.sections.length > 1">
                     <v-btn
                       :id="`course-${index}-add-all-sections-btn`"
-                      aria-label="Add all sections for this course to the list of sections to be added"
-                      class="course-add-all-sections-btn"
+                      aria-label="Add all sections listed below to the course site"
                       :color="allSectionsAdded(course) ? '' : 'primary'"
                       :disabled="allSectionsAdded(course)"
-                      variant="plain"
                       @click="addAllSections(course)"
                     >
-                      <template v-if="allSectionsAdded(course)">All Added</template>
-                      <template v-else>Add All</template>
+                      <span v-if="allSectionsAdded(course)">All Added</span>
+                      <span v-else>Add All</span>
                     </v-btn>
                   </div>
                   <v-row no-gutters>
                     <v-col md="12">
                       <CourseSectionsTable
+                        class="mb-1 mt-4"
                         mode="availableStaging"
-                        :sections="course.sections"
-                        :unstage-action="unstage"
-                        :stage-add-action="stageAdd"
                         :row-class-logic="rowClassLogic"
                         :row-display-logic="rowDisplayLogic"
+                        :sections="course.sections"
+                        :stage-add-action="stageAdd"
+                        :unstage-action="unstage"
                       />
                     </v-col>
                   </v-row>
@@ -481,9 +482,6 @@ h5.sections-course-title {
   font-size: 18px !important;
   font-weight: 400 !important;
   line-height: 18px;
-}
-.course-add-all-sections-btn:disabled {
-  opacity: .5 !important;
 }
 @media #{$small-only} {
   .page-course-official-sections-small-only-align-left {

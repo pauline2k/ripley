@@ -84,6 +84,7 @@
             <v-expansion-panel-text>
               <CourseSectionsTable
                 :key="course.slug"
+                class="mb-1 mt-4"
                 mode="createCourseForm"
                 :sections="course.sections"
                 :update-selected="updateSelected"
