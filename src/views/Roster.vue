@@ -26,10 +26,12 @@
       <v-container v-if="!error" fluid>
         <v-row align-v="center" class="display-none-when-print">
           <v-col class="pr-2 roster-column-when-print" sm="3">
+            <label for="roster-search" class="sr-only">Input automatically searches upon text entry</label>
             <v-text-field
               id="roster-search"
               v-model="search"
               aria-label="Search people by name or SID"
+              density="compact"
               hide-details
               placeholder="Search People"
               type="search"
@@ -42,6 +44,7 @@
                 id="section-select"
                 v-model="selectedSectionId"
                 aria-label="Search specific section (defaults to all sections)"
+                class="section-select"
                 @change="onSelectSection"
               >
                 <option :value="null">All Sections</option>
@@ -61,6 +64,7 @@
                 <v-btn
                   id="download-csv"
                   :disabled="!students.length"
+                  size="large"
                   variant="outlined"
                   @click="downloadCsv"
                 >
@@ -79,6 +83,7 @@
                       id="print-roster"
                       color="primary"
                       :disabled="!students.length || disablePrintButton"
+                      size="large"
                       v-bind="props"
                       @click="printRoster"
                     >
@@ -92,16 +97,19 @@
           </v-col>
         </v-row>
         <v-row>
+          <v-col role="alert" aria-live="polite" class="py-1">{{ pluralize('student', students.length, {0: 'No', 1: 'One'}) }} found</v-col>
+        </v-row>
+        <v-row no-gutters>
           <v-col sm="12">
             <RosterPhotos
               v-if="students.length"
               :students="students"
             />
-            <div v-if="!roster.students.length">
+            <div v-if="!roster.students.length" role="alert" aria-live="polite">
               <v-icon icon="mdi-alert-circle-outline" class="icon-gold" />
               Students have not yet signed up for this class.
             </div>
-            <div v-if="roster.students.length && !students.length">
+            <div v-if="roster.students.length && !students.length" role="alert" aria-live="polite">
               <v-icon icon="mdi-alert-circle-outline" class="icon-gold" />
               No students found matching your query.
             </div>
@@ -117,7 +125,7 @@ import Context from '@/mixins/Context'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
 import {each, filter, map, size, trim} from 'lodash'
 import {exportRoster, getRoster} from '@/api/canvas-site'
-import {printPage} from '@/utils'
+import {printPage, pluralize} from '@/utils'
 
 export default {
   name: 'Roster',
@@ -199,6 +207,7 @@ export default {
     idx(value) {
       return value && trim(value).replace(/[^\w\s]/gi, '').toLowerCase()
     },
+    pluralize,
     printRoster() {
       printPage(`${this.idx(this.currentUser.canvasSiteName).replace(/\s/g, '-')}_roster`)
     }
@@ -207,6 +216,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.section-select {
+  height: 44px;
+}
 @media print {
   .roster-column-when-print {
     padding: 0;
