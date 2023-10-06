@@ -79,6 +79,7 @@
                       v-model="canvasSiteId"
                       density="compact"
                       :disabled="!selection || selection.id !== 'manage-official-sections'"
+                      :error="!!trim(this.canvasSiteId) && !isCanvasSiteIdValid"
                       hide-details
                       label="Canvas Site ID"
                       maxlength="10"
@@ -89,8 +90,8 @@
                   </div>
                   <div v-if="!size(coursesByTerm) && !currentUser.isAdmin">
                     <span class="text-red">
-                      Sorry, this option is not available.
-                      You are an instructor of neither current nor upcoming classes.
+                      Sorry, we found no {{ config.terms.current.name }} or {{ config.terms.next.name }}
+                      course in which you are listed as an instructor.
                     </span>
                   </div>
                 </div>
@@ -119,9 +120,9 @@
 import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
-import {each, size} from 'lodash'
+import {each, size, trim} from 'lodash'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
-import {getTermName} from '@/utils'
+import {getTermName, isValidCanvasSiteId} from '@/utils'
 import {myCurrentCanvasCourses} from '@/api/canvas-site'
 
 export default {
@@ -136,7 +137,10 @@ export default {
   }),
   computed: {
     isButtonDisabled() {
-      return !this.selection || (this.selection.id === 'manage-official-sections' && !this.canvasSiteId)
+      return !this.selection || (this.selection.id === 'manage-official-sections' && !this.isCanvasSiteIdValid)
+    },
+    isCanvasSiteIdValid() {
+      return isValidCanvasSiteId(this.canvasSiteId)
     }
   },
   watch: {
@@ -194,7 +198,8 @@ export default {
         this.$router.push({path})
       }
     },
-    size
+    size,
+    trim
   }
 }
 </script>
