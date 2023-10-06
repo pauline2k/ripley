@@ -381,7 +381,7 @@ export default {
       } else if (this.searchType === 'uid' && !isFinite(this.searchText)) {
         this.showSearchAlert('UID search terms must be numeric.')
       } else {
-        this.$announcer.polite('Loading person search results')
+        this.alertScreenReader('Loading person search results')
         this.showUsersArea = true
         this.isSearching = true
         searchUsers(this.searchText, this.searchType).then(response => {
@@ -421,7 +421,7 @@ export default {
     },
     startOver() {
       this.showAlerts = false
-      this.$announcer.polite('Starting a new search.')
+      this.alertScreenReader('Starting a new search.')
       this.resetForm()
       this.resetSearchState()
       this.resetImportState()
@@ -432,7 +432,7 @@ export default {
       iframeScrollToTop()
       this.showUsersArea = false
       this.showSearchForm = false
-      this.$announcer.polite(`Adding ${this.selectedUserFullName} with role ${this.selectedRole}`)
+      this.alertScreenReader(`Adding ${this.selectedUserFullName} with role ${this.selectedRole}`)
       this.showAlerts = true
       addUser(this.currentUser.canvasSiteId, this.selectedUser.uid, this.selectedSection.id, this.selectedRole).then(response => {
         this.userAdded = {

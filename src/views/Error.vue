@@ -19,11 +19,12 @@
         src="@/assets/images/color-bars.png"
       />
       <v-card-title>
-        <h1>{{ header }}</h1>
+        <Header1 :text="header" />
       </v-card-title>
-      <v-card-text v-if="applicationState.message">
+      <v-card-text>
         <div
           id="error-message"
+          aria-atomic="true"
           aria-live="polite"
           role="alert"
         >
@@ -44,12 +45,13 @@
 import AppBar from '@/layouts/standalone/AppBar.vue'
 import Context from '@/mixins/Context'
 import ContactUsPrompt from '@/components/utils/ContactUsPrompt'
+import Header1 from '@/components/utils/Header1.vue'
 import {useContextStore} from '@/stores/context'
 
 export default {
   name: 'Error',
   mixins: [Context],
-  components: {AppBar, ContactUsPrompt},
+  components: {AppBar, ContactUsPrompt, Header1},
   data: () => ({
     header: undefined
   }),

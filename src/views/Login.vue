@@ -5,6 +5,7 @@
     fluid
     :style="{backgroundImage: `url(${nostromoCrew})`}"
   >
+    <Header1 id="page-title" class="sr-only" text="Login" />
     <v-row>
       <v-col v-if="!currentUser.isAuthenticated">
         <div class="py-5">
@@ -19,7 +20,7 @@
           <hr />
         </div>
         <div v-if="config.devAuthEnabled">
-          <h4 class="sr-only">DevAuth</h4>
+          <h2 class="sr-only">DevAuth</h2>
           <DevAuth />
         </div>
       </v-col>
@@ -34,12 +35,13 @@ import nostromoCrew from '@/assets/images/nostromo-crew-eating-breakfast.png'
 <script>
 import Context from '@/mixins/Context'
 import DevAuth from '@/components/utils/DevAuth'
+import Header1 from '@/components/utils/Header1.vue'
 import {getCasLoginURL} from '@/api/auth'
 
 export default {
   name: 'Login',
   mixins: [Context],
-  components: {DevAuth},
+  components: {DevAuth, Header1},
   created() {
     const showDevAuth = false
     this.$ready()

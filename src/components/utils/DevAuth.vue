@@ -96,7 +96,7 @@ export default {
           data => {
             if (data.isAuthenticated) {
               useContextStore().setCurrentUser(data)
-              this.$announcer.polite('You are logged in.')
+              this.alertScreenReader('You are logged in.')
               this.$router.push({path: '/welcome'})
             } else {
               const message = get(data, 'error') || get(data, 'message') || 'Authentication failed'
@@ -117,7 +117,7 @@ export default {
     },
     reportError(message, putFocus='basic-auth-uid') {
       this.error = typeof message === 'string' ? message : get(message, 'message')
-      this.$announcer.polite(this.error || 'Uh oh, an error occurred.')
+      this.alertScreenReader(this.error || 'Uh oh, an error occurred.')
       putFocusNextTick(putFocus)
     }
   }

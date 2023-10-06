@@ -92,10 +92,10 @@ export default {
       if (!this.isCreating && trim(this.name)) {
         this.error = null
         this.isCreating = true
-        this.$announcer.polite('Creating...')
+        this.alertScreenReader('Creating...')
         createProjectSite(this.name).then(
           data => {
-            setTimeout(() => {this.$announcer.polite('Loading Canvas site...')}, 500)
+            setTimeout(() => {this.alertScreenReader('Loading Canvas site...')}, 500)
             if (this.$isInIframe) {
               iframeParentLocation(data.url)
             } else {

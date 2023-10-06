@@ -1,6 +1,13 @@
 <template>
   <v-app>
-    <VueAnnouncer class="sr-only" />
+    <div
+      id="announcer"
+      aria-atomic="true"
+      :aria-live="screenReaderAlert.politeness"
+      class="sr-only"
+    >
+      {{ screenReaderAlert.message }}
+    </div>
     <div v-if="!$isInIframe">
       <a
         id="skip-to-content-link"

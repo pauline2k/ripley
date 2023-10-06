@@ -150,7 +150,7 @@
             </v-expansion-panels>
           </div>
         </div>
-        <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
+        <div v-if="currentWorkflowStep === 'processing'" aria-live="polite" aria-atomic="true">
           <h3 id="updating-sections-header" class="mt-6 text-no-wrap">
             Updating Official Sections in Course Site
           </h3>
@@ -249,7 +249,7 @@ export default {
   },
   methods: {
     addAllSections(course) {
-      this.$announcer.polite('All sections selected for course: ' + course.title)
+      this.alertScreenReader('All sections selected for course: ' + course.title)
       course.sections.forEach(section => {
         if (section.isCourseSection) {
           section.stagedState = null
@@ -270,11 +270,11 @@ export default {
     },
     changeWorkflowStep(step) {
       if (step === 'staging') {
-        this.$announcer.polite('Edit section form loaded')
+        this.alertScreenReader('Edit section form loaded')
         this.jobStatus = null
         this.jobStatusMessage = ''
       } else if (step === 'preview') {
-        this.$announcer.polite('Read only section list loaded')
+        this.alertScreenReader('Read only section list loaded')
       }
       this.currentWorkflowStep = step
     },
@@ -406,7 +406,7 @@ export default {
     stageAdd(section) {
       if (!section.isCourseSection) {
         set(section, 'stagedState', 'add')
-        this.$announcer.polite('Included in the list of sections to be added')
+        this.alertScreenReader('Included in the list of sections to be added')
       } else {
         this.displayError = 'Unable to add ' + this.sectionString(section) + ', as it already exists within the course site.'
       }
@@ -415,7 +415,7 @@ export default {
       if (section.isCourseSection) {
         this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
         set(section, 'stagedState', 'delete')
-        this.$announcer.polite('Included in the list of sections to be deleted')
+        this.alertScreenReader('Included in the list of sections to be deleted')
       } else {
         this.displayError = 'Unable to delete Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
       }
@@ -424,7 +424,7 @@ export default {
       if (section.isCourseSection) {
         this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
         set(section, 'stagedState', 'update')
-        this.$announcer.polite('Included in the list of sections to be updated')
+        this.alertScreenReader('Included in the list of sections to be updated')
       } else {
         this.displayError = 'Unable to update Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
       }
@@ -457,11 +457,11 @@ export default {
     unstage(section) {
       if (section.stagedState === 'add') {
         this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
-        this.$announcer.polite('Removed section from the list of sections to be added')
+        this.alertScreenReader('Removed section from the list of sections to be added')
       } else if (section.stagedState === 'delete') {
-        this.$announcer.polite('Removed section from the list of sections to be deleted')
+        this.alertScreenReader('Removed section from the list of sections to be deleted')
       } else if (section.stagedState === 'update') {
-        this.$announcer.polite('Removed section from the list of sections to be updated')
+        this.alertScreenReader('Removed section from the list of sections to be updated')
       }
       section.stagedState = null
     },

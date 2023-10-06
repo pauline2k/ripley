@@ -20,7 +20,7 @@ const Roster = () => import('./views/Roster.vue')
 const SendWelcomeEmail = () => import('./views/SendWelcomeEmail.vue')
 const UserProvision = () => import('./views/UserProvision.vue')
 const Welcome = () => import('@/views/Welcome.vue')
-import {capitalize, get} from 'lodash'
+import {capitalize} from 'lodash'
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 import {useContextStore} from '@/stores/context'
 
@@ -58,149 +58,91 @@ const routes:RouteRecordRaw[] = [
       },
       {
         component: CourseAddUser,
-        path: '/add_user',
-        meta: {
-          announcer: {
-            message: 'Find a Person to Add'
-          }
-        }
+        name: 'Find a Person to Add',
+        path: '/add_user'
       },
       {
         component: CourseGradeDistribution,
-        path: '/grade_distribution',
-        meta: {
-          announcer: {
-            message: 'Grade Distribution'
-          }
-        }
+        name: 'Grade Distribution',
+        path: '/grade_distribution'
       },
       {
         component: CourseGradeExport,
-        path: '/export_grade',
-        meta: {
-          announcer: {
-            message: 'E-Grade Export'
-          }
-        }
+        name: 'E-Grade Export',
+        path: '/export_grade'
       },
       {
         component: ManageOfficialSections,
-        path: '/official_sections/:canvasSiteId',
-        meta: {
-          announcer: {
-            message: 'Manage Official Sections'
-          }
-        }
+        name: 'Manage Official Sections',
+        path: '/official_sections/:canvasSiteId'
       },
       {
         component: Profile,
-        path: '/profile/:uid',
-        meta: {
-          announcer: {
-            message: 'Profile'
-          }
-        }
+        name: 'Profile',
+        path: '/profile/:uid'
       },
       {
         component: Roster,
-        path: '/roster',
-        meta: {
-          announcer: {
-            message: 'Roster Photos'
-          }
-        }
+        name: 'Roster Photos',
+        path: '/roster'
       },
       {
         component: ManageSites,
-        path: '/create_site',
-        meta: {
-          announcer: {
-            message: 'Manage bCourses Sites'
-          }
-        }
+        name: 'Manage bCourses Sites',
+        path: '/create_site'
       },
       {
         component: CreateCourseSite,
-        path: '/create_course_site',
-        meta: {
-          announcer: {
-            message: 'Create a Course Site'
-          }
-        }
+        name: 'Create a Course Site',
+        path: '/create_course_site'
       },
       {
         component: CreateProjectSite,
-        path: '/create_project_site',
-        meta: {
-          announcer: {
-            message: 'Create a Project Site'
-          }
-        }
+        name: 'Create a Project Site',
+        path: '/create_project_site'
       },
       {
         component: MailingListCreate,
-        path: '/mailing_list/create',
-        meta: {
-          announcer: {
-            message: 'Create Mailing List'
-          }
-        }
+        name: 'Create Mailing List',
+        path: '/mailing_list/create'
       },
       {
         component: MailingListSelectCourse,
-        path: '/mailing_list/select_course',
-        meta: {
-          announcer: {
-            message: 'Select Course Site'
-          }
-        }
+        name: 'Select Course Site',
+        path: '/mailing_list/select_course'
       },
       {
         component: MailingListCreate,
-        path: '/mailing_list/create/:canvasSiteId',
-        meta: {
-          announcer: {
-            message: 'Create Mailing List'
-          }
-        }
+        name: 'Create Mailing List',
+        path: '/mailing_list/create/:canvasSiteId'
       },
       {
         component: MailingListUpdate,
-        path: '/mailing_list/update',
-        meta: {
-          announcer: {
-            message: 'Update Mailing List'
-          }
-        }
+        name: 'Update Mailing List',
+        path: '/mailing_list/update'
+      },
+      {
+        component: ManageSites,
+        name: 'Manage Sites',
+        path: '/manage_sites'
       },
       {
         component: SendWelcomeEmail,
-        path: '/mailing_list/send_welcome_email',
-        meta: {
-          announcer: {
-            message: 'Send Welcome Email'
-          }
-        }
+        name: 'Send Welcome Email',
+        path: '/mailing_list/send_welcome_email'
       },
       {
         component: UserProvision,
-        path: '/provision_user',
-        meta: {
-          announcer: {
-            message: 'bCourses User Provision'
-          }
-        }
+        name: 'bCourses User Provision',
+        path: '/provision_user'
       },
       {
         component: Welcome,
         name: 'Welcome',
-        path: '/welcome',
         meta: {
-          announcer: {
-            message: 'Welcome'
-          },
           isHome: true
-        }
+        },
+        path: '/welcome'
       }
     ]
   },
@@ -212,11 +154,7 @@ const routes:RouteRecordRaw[] = [
       {
         path: '/jobs',
         component: Jobs,
-        meta: {
-          announcer: {
-            message: 'MU-TH-UR 6000'
-          }
-        }
+        name: 'MU-TH-UR 6000'
       }
     ]
   },
@@ -244,7 +182,7 @@ const router = createRouter({
 router.afterEach((to: any) => {
   useContextStore().loadingStart()
   useContextStore().resetApplicationState()
-  const title = get(to, 'announcer.message') || capitalize(to.name) || 'bCourses'
+  const title = capitalize(to.name) || 'bCourses'
   document.title = `${title} | UC Berkeley`
 })
 

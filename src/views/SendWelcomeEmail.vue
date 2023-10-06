@@ -244,15 +244,15 @@ export default {
     },
     downloadMessageLog() {
       this.isDownloading = true
-      this.$announcer.polite('Downloading')
+      this.alertScreenReader('Downloading')
       downloadWelcomeEmailCsv().then(() => {
         this.isDownloading = false
-        this.$announcer.polite('Downloaded.')
+        this.alertScreenReader('Downloaded.')
       })
     },
     saveWelcomeEmail() {
       if (this.isWelcomeEmailValid) {
-        this.$announcer.polite('Saving welcome email')
+        this.alertScreenReader('Saving welcome email')
         this.isSaving = true
         updateWelcomeEmail(false, this.body, this.subject).then(
           response => {
@@ -274,7 +274,7 @@ export default {
       toggleEmailActivation().then(data => {
         this.isWelcomeEmailActive = !!data.welcomeEmailActive
         this.isToggling = false
-        this.$announcer.polite(`${this.isWelcomeEmailActive ? 'Enabled' : 'Disabled' } welcome email`)
+        this.alertScreenReader(`${this.isWelcomeEmailActive ? 'Enabled' : 'Disabled' } welcome email`)
       })
     },
     updateDisplay(data) {

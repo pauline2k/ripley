@@ -75,6 +75,7 @@
               <div>
                 <v-tooltip
                   v-model="showPrintButtonTooltip"
+                  attach="true"
                   location="top"
                   :text="printButtonTooltip"
                 >
@@ -133,7 +134,7 @@ export default {
   components: {RosterPhotos},
   data: () => ({
     error: undefined,
-    printButtonTooltip: 'You can print when student images have loaded.',
+    printButtonTooltip: 'You can print once student images have loaded.',
     roster: undefined,
     search: undefined,
     selectedSectionId: null,
@@ -171,7 +172,7 @@ export default {
           // If student count is low then tooltip is not necessary.
           const threshold = 36
           this.showPrintButtonTooltip = (this.students.length >= threshold) && this.disablePrintButton
-          this.$announcer.polite(this.printButtonTooltip)
+          this.alertScreenReader(this.printButtonTooltip)
         },
         error => this.error = error
       ).finally(() => this.$ready())
@@ -183,7 +184,7 @@ export default {
   methods: {
     downloadCsv() {
       exportRoster(this.currentUser.canvasSiteId).then(() => {
-        this.$announcer.polite(`${this.roster.canvasSiteName} CSV downloaded`)
+        this.alertScreenReader(`${this.roster.canvasSiteName} CSV downloaded`)
       })
     },
     onSelectSection() {
@@ -199,7 +200,7 @@ export default {
           }
           return showStudent
         })
-        this.$announcer.polite(`${this.students.length} student${this.students.length === 1 ? '' : 's'} shown.`)
+        this.alertScreenReader(`${this.students.length} student${this.students.length === 1 ? '' : 's'} shown.`)
       } else {
         this.students = this.roster.students
       }

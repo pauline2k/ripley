@@ -266,7 +266,7 @@
       </v-row>
     </v-container>
 
-    <div aria-live="polite">
+    <div aria-atomic="true" aria-live="polite">
       <v-container v-if="appState === 'loading'">
         <v-row no-gutters>
           <v-col>
@@ -338,7 +338,7 @@ export default {
       downloadGradeCsv(this.filenameDownloaded, this.backgroundJobId).then(() => {
         setTimeout(() => {
           this.filenameDownloaded = null
-          this.$announcer.polite('File download is complete.')
+          this.alertScreenReader('File download is complete.')
         }, 30000)
       })
     },
@@ -443,7 +443,7 @@ export default {
             } else if (this.jobStatus === 'finished') {
               clearInterval(this.exportTimer)
               this.switchToSelection()
-              this.$announcer.polite('Downloading export. Export form options presented for an additional download.')
+              this.alertScreenReader('Downloading export. Export form options presented for an additional download.')
               this.downloadGrades()
             } else if (this.config.isVueAppDebugMode) {
               console.log(`[DEBUG] jobStatus: ${this.jobStatus}`)

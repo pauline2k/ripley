@@ -242,7 +242,7 @@ export default {
     },
     size,
     update() {
-      this.$announcer.polite('Updating')
+      this.alertScreenReader('Updating')
       this.isUpdating = true
       populateMailingList(this.mailingList.id).then(
         data => {

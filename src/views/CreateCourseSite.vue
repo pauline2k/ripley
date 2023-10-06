@@ -56,6 +56,7 @@
         </div>
         <div
           v-if="currentWorkflowStep === 'processing'"
+          aria-atomic="true"
           aria-live="polite"
           role="alert"
         >
@@ -179,7 +180,7 @@ export default {
             data => {
               this.backgroundJobId = data.jobId
               this.jobStatus = data.jobStatus
-              this.$announcer.polite('Started course site creation.')
+              this.alertScreenReader('Started course site creation.')
               this.trackBackgroundJob()
               resolve()
             },
@@ -199,7 +200,7 @@ export default {
       this.percentComplete = undefined
       this.showMaintenanceNotice = true
       this.selectedSectionsList = []
-      this.$announcer.polite('Loading courses and sections')
+      this.alertScreenReader('Loading courses and sections')
 
       const semester = (this.adminMode === 'bySectionId' ? this.currentAdminTerm : this.currentSemester)
       getSections(
@@ -214,7 +215,7 @@ export default {
           this.usersClassCount = this.classCount(data.teachingTerms)
           this.teachingTerms = data.teachingTerms
           this.fillCourseSites(data.teachingTerms)
-          this.$announcer.polite('Course section loaded successfully')
+          this.alertScreenReader('Course section loaded successfully')
           if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
             each(this.coursesList, course => {
               each(course.sections, section => {
@@ -229,7 +230,7 @@ export default {
           this.$ready()
         },
         error => {
-          this.$announcer.polite('Course section loading failed')
+          this.alertScreenReader('Course section loading failed')
           this.displayError = error || 'failure'
           this.$ready()
         }
@@ -269,7 +270,7 @@ export default {
     },
     showConfirmation() {
       this.updateSelected()
-      this.$announcer.polite('Course site details form loaded.')
+      this.alertScreenReader('Course site details form loaded.')
       this.currentWorkflowStep = 'confirmation'
     },
     showSelecting() {
@@ -280,7 +281,7 @@ export default {
         this.currentAdminTerm = semester.slug
         this.selectedSectionsList = []
         this.updateSelected()
-        this.$announcer.polite(`Switched to ${semester.name} for Section ID input`)
+        this.alertScreenReader(`Switched to ${semester.name} for Section ID input`)
       }
     },
     switchSemester(semester) {
@@ -288,7 +289,7 @@ export default {
       this.coursesList = semester.classes
       this.selectedSectionsList = []
       this.currentSemesterName = semester.name
-      this.$announcer.polite(`Course sections for ${semester.name} loaded`)
+      this.alertScreenReader(`Course sections for ${semester.name} loaded`)
       this.updateSelected()
     },
     trackBackgroundJob() {
@@ -299,7 +300,7 @@ export default {
             if (!(includes(['started', 'queued'], this.jobStatus)) || get(response, 'jobData.courseSiteUrl')) {
               clearInterval(this.exportTimer)
               if (get(response, 'jobData.courseSiteUrl')) {
-                this.$announcer.polite('Done. Loading new course site now.')
+                this.alertScreenReader('Done. Loading new course site now.')
                 if (this.$isInIframe) {
                   iframeParentLocation(response.jobData.courseSiteUrl)
                 } else {

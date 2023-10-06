@@ -1,5 +1,6 @@
 <template>
   <v-alert
+    aria-atomic="true"
     aria-live="polite"
     closable
     color="alert"
