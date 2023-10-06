@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white mb-1 mt-4">
+  <div class="bg-white">
     <div
       v-if="mode === 'createCourseForm' && sections.length > 1"
       class="pb-2 pl-4 pt-3"

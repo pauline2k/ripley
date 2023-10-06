@@ -63,6 +63,7 @@
                           <option :value="null">Choose...</option>
                           <option
                             v-for="course in courses"
+                            :id="`canvas-site-${course.canvasSiteId}`"
                             :key="course.canvasSiteId"
                             :value="course.canvasSiteId"
                           >
@@ -72,7 +73,21 @@
                       </div>
                     </div>
                   </div>
-                  <div v-if="!size(coursesByTerm)">
+                  <div v-if="currentUser.isAdmin">
+                    <v-text-field
+                      id="canvas-site-id-input"
+                      v-model="canvasSiteId"
+                      density="compact"
+                      :disabled="!selection || selection.id !== 'manage-official-sections'"
+                      hide-details
+                      label="Canvas Site ID"
+                      maxlength="10"
+                      style="width: 200px"
+                      variant="outlined"
+                      @keydown.enter="goNext"
+                    />
+                  </div>
+                  <div v-if="!size(coursesByTerm) && !currentUser.isAdmin">
                     <span class="text-red">
                       Sorry, this option is not available.
                       You are an instructor of neither current nor upcoming classes.
@@ -161,7 +176,7 @@ export default {
             header: 'Manage official sections of an existing site',
             icon: 'mdi-view-dashboard-edit',
             id: 'manage-official-sections',
-            isAvailable: canCreateCourseSite && size(this.coursesByTerm),
+            isAvailable: canCreateCourseSite && (this.currentUser.isAdmin || size(this.coursesByTerm)),
             label: 'Manage Official Sections',
             path: '/manage_sites'
           }
