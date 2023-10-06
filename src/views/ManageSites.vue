@@ -27,20 +27,20 @@
             </div>
             <div class="list-item-content">
               <label class="w-100" :for="option.id">
-                <h2>{{ option.header }}</h2>
+                <h2 :class="{'text-grey': !option.isAvailable}">{{ option.header }}</h2>
               </label>
               <div v-if="option.id === 'create-course-site'">
                 <div v-if="option.isAvailable">
                   Set up course sites to communicate with and manage the work of students enrolled in your classes.
                 </div>
-                <div v-if="!option.isAvailable">
+                <div v-if="!option.isAvailable" class="text-grey">
                   To create a course site, you will need to be the official instructor of record for a course.
                   If you have not been assigned as the official instructor of record for the course,
                   please contact your department scheduler.
                   You will be able to create a course site the day after you have been officially assigned to teach the course.
                 </div>
               </div>
-              <div v-if="option.id === 'create-project-site'">
+              <div v-if="option.id === 'create-project-site'" :class="{'text-grey': !option.isAvailable}">
                 Share files and collaborate. Project sites are best suited for instructors and GSIs who already use bCourses.
                 Project sites cannot access all bCourses features and are not intended for lecture, lab, or discussion sections.
                 Learn more about
@@ -74,6 +74,7 @@
                     </div>
                   </div>
                   <div v-if="currentUser.isAdmin">
+                    <label class="sr-only" for="canvas-site-id-input">Canvas Site I D:</label>
                     <v-text-field
                       id="canvas-site-id-input"
                       v-model="canvasSiteId"
@@ -89,9 +90,9 @@
                     />
                   </div>
                   <div v-if="!size(coursesByTerm) && !currentUser.isAdmin">
-                    <span class="text-red">
-                      Sorry, we found no {{ config.terms.current.name }} or {{ config.terms.next.name }}
-                      course in which you are listed as an instructor.
+                    <span class="font-italic font-weight-medium text-red">
+                      Sorry, we found neither {{ config.terms.current.name }} nor {{ config.terms.next.name }}
+                      courses in which you are listed as an instructor.
                     </span>
                   </div>
                 </div>
@@ -222,7 +223,8 @@ ul {
 }
 .list-item-content {
   color: black;
-  padding: 6px 0;
+  min-width: 100%;
+  padding: 6px 48px 12px 0;
 }
 .radio-button-container {
   padding: 2px 8px 0 0;
