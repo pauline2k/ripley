@@ -266,7 +266,7 @@
       </v-row>
     </v-container>
 
-    <div aria-atomic="true" aria-live="polite">
+    <div aria-live="polite">
       <v-container v-if="appState === 'loading'">
         <v-row no-gutters>
           <v-col>

@@ -25,7 +25,6 @@
           <div
             v-if="!status"
             id="user-provision-validation-msg"
-            aria-atomic="true"
             aria-live="polite"
             class="validation-messages"
             role="alert"
@@ -46,7 +45,6 @@
           <div
             v-if="status"
             id="user-provision-status-msg"
-            aria-atomic="true"
             aria-live="polite"
             class="mx-3"
             role="alert"

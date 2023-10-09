@@ -2,7 +2,6 @@
   <v-app>
     <div
       id="announcer"
-      aria-atomic="true"
       :aria-live="screenReaderAlert.politeness"
       class="sr-only"
     >

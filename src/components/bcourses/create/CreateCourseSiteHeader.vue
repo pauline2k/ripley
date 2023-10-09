@@ -122,7 +122,6 @@
     </div>
     <div
       v-if="error"
-      aria-atomic="true"
       aria-live="polite"
       class="has-error pl-2 pt-2"
       role="alert"
