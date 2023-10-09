@@ -1,6 +1,6 @@
 <template>
   <v-progress-circular
-    aria-valuetext="loading"
+    aria-valuetext="in progress"
     class="mr-2"
     :color="color"
     indeterminate

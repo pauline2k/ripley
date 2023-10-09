@@ -25,6 +25,7 @@
           <div
             v-if="!status"
             id="user-provision-validation-msg"
+            aria-atomic="true"
             aria-live="polite"
             class="validation-messages"
             role="alert"
@@ -45,6 +46,7 @@
           <div
             v-if="status"
             id="user-provision-status-msg"
+            aria-atomic="true"
             aria-live="polite"
             class="mx-3"
             role="alert"
@@ -141,14 +143,16 @@ export default {
     },
     isEmpty,
     onSubmit() {
+      this.alertScreenReader('Validating users')
       this.error = null
       this.importedUids = null
       this.status = null
       const validatedUids = this.validateUids()
       if (validatedUids) {
         this.importProcessing = true
-        this.$announcer.polite('Importing users')
+        this.alertScreenReader('Importing users')
         importUsers(validatedUids).then(response => {
+          this.alertScreenReader('Imported users')
           this.importedUids = response.uids
           this.importProcessing = false
           this.rawUids = ''

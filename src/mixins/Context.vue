@@ -11,11 +11,13 @@ export default {
       'config',
       'currentUser',
       'eventHub',
-      'isLoading'
+      'isLoading',
+      'screenReaderAlert'
     ]),
   },
   methods: {
     ...mapActions(useContextStore, [
+      'alertScreenReader',
       'loadingComplete',
       'loadingStart'
     ])

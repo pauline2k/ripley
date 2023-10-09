@@ -17,7 +17,6 @@
     "@ckeditor/ckeditor5-build-classic": "39.0.2",
     "@ckeditor/ckeditor5-vue": "5.1.0",
     "@mdi/font": "7.2.96",
-    "@vue-a11y/announcer": "3.1.5",
     "axios": "1.5.1",
     "core-js": "3.33.0",
     "highcharts-vue": "1.4.3",

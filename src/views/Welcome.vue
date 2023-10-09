@@ -6,6 +6,7 @@
     fluid
     :style="{backgroundImage: `url(${muthur})`}"
   >
+    <Header1 id="page-title" class="sr-only" text="Welcome" />
     <v-row align="center" class="mt-8" justify="center">
       <v-col>
         <v-card class="mx-auto" width="480">
@@ -45,13 +46,14 @@ import muthur from '@/assets/images/muthur.png'
 
 <script>
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
 import {sortBy} from 'lodash'
 
 export default {
   name: 'Welcome',
   mixins: [Context],
-  components: {StandaloneToolsList},
+  components: {StandaloneToolsList, Header1},
   data: () => ({
     adminTools: [],
     embeddedTools: [],

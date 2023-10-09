@@ -198,14 +198,14 @@ export default {
   },
   methods: {
     cancel() {
-      this.$announcer.polite('Canceled.')
+      this.alertScreenReader('Canceled.')
       this.$router.push({path: '/mailing_list/select_course'})
     },
     create() {
       const name = trim(this.mailingListName)
       if (name && !this.hasInvalidCharacters) {
         this.isCreating = true
-        this.$announcer.polite('Creating list')
+        this.alertScreenReader('Creating list')
         createMailingList(this.canvasSiteId, name, !this.isAdminToolMode).then(
           data => {
             this.error = null

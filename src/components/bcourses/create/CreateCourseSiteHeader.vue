@@ -122,6 +122,7 @@
     </div>
     <div
       v-if="error"
+      aria-atomic="true"
       aria-live="polite"
       class="has-error pl-2 pt-2"
       role="alert"
@@ -201,10 +202,10 @@ export default {
         this.uid = undefined
         this.setAdminMode(mode)
         if (mode === 'bySectionId') {
-          this.$announcer.polite('Input mode switched to section ID')
+          this.alertScreenReader('Input mode switched to section ID')
           putFocusNextTick('load-sections-by-id')
         } else {
-          this.$announcer.polite(`Input mode switched to ${mode === 'bySectionId' ? 'section ID' : 'UID'}`)
+          this.alertScreenReader(`Input mode switched to ${mode === 'bySectionId' ? 'section ID' : 'UID'}`)
           putFocusNextTick(mode === 'bySectionId' ? 'load-sections-by-id' : 'instructor-uid')
         }
       }
