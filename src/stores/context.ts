@@ -1,6 +1,7 @@
 import mitt from 'mitt'
 import {defineStore} from 'pinia'
 import {get} from 'lodash'
+import {nextTick} from 'vue'
 import {putFocusNextTick} from '@/utils'
 import {useRoute} from 'vue-router'
 
@@ -30,10 +31,13 @@ export const useContextStore = defineStore('context', {
   }),
   actions: {
     alertScreenReader(message: string, politeness?: string) {
-      this.screenReaderAlert = {
-        message: message,
-        politeness: politeness || 'polite'
-      }
+      this.screenReaderAlert.message = ''
+      nextTick(() => {
+        this.screenReaderAlert = {
+          message: message,
+          politeness: politeness || 'polite'
+        }
+      })
     },
     loadingComplete(focusTarget?: string) {
       this.isLoading = false

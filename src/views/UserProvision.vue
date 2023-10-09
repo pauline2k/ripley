@@ -73,16 +73,21 @@
           <div class="d-flex justify-end w-100">
             <v-btn
               id="user-provision-import-btn"
+              aria-describedby="user-provisioning-progress"
+              :aria-disabled="importButtonDisabled"
               class="text-no-wrap my-2"
               color="primary"
-              type="submit"
               :disabled="importButtonDisabled"
+              type="submit"
             >
               <span v-if="!importProcessing">Import Users</span>
               <span v-if="importProcessing">
                 <SpinnerWithinButton /> Importing Users...
               </span>
             </v-btn>
+            <span id="user-provisioning-progress" class="sr-only" role="status">
+              <span v-if="importProcessing">Importing Users</span>
+            </span>
           </div>
         </v-col>
       </v-row>
@@ -141,15 +146,18 @@ export default {
     },
     isEmpty,
     onSubmit() {
-      this.alertScreenReader('Validating users')
       this.error = null
       this.importedUids = null
       this.status = null
       const validatedUids = this.validateUids()
+      let importTimer
       if (validatedUids) {
         this.importProcessing = true
-        this.alertScreenReader('Importing users')
+        importTimer = setInterval(() => {
+          this.alertScreenReader('Still processing user import')
+        }, 7000)
         importUsers(validatedUids).then(response => {
+          clearInterval(importTimer)
           this.alertScreenReader('Imported users')
           this.importedUids = response.uids
           this.importProcessing = false
