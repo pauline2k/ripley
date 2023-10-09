@@ -38,7 +38,6 @@ export const useContextStore = defineStore('context', {
     loadingComplete(focusTarget?: string) {
       this.isLoading = false
       const route = useRoute()
-      console.log(route)
       if (!get(route, 'meta.announcer.skip')) {
         this.screenReaderAlert.message = `${String(get(route, 'name', ''))} page has loaded.`
       }
@@ -47,7 +46,6 @@ export const useContextStore = defineStore('context', {
     loadingStart() {
       this.isLoading = true
       const route = useRoute()
-      console.log(route)
       if (!get(route, 'meta.announcer.skip')) {
         this.screenReaderAlert.message = `${String(get(route, 'name', ''))} page is loading.`
       }

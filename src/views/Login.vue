@@ -50,7 +50,6 @@ export default {
   methods: {
     toCasLogin() {
       getCasLoginURL().then(data => {
-        console.log(data)
         window.location.href = data.casLoginUrl
       })
     }
