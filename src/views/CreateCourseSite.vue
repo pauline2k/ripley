@@ -56,7 +56,6 @@
         </div>
         <div
           v-if="currentWorkflowStep === 'processing'"
-          aria-atomic="true"
           aria-live="polite"
           role="alert"
         >

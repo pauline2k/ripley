@@ -1,6 +1,5 @@
 <template>
   <v-alert
-    aria-atomic="true"
     aria-live="assertive"
     color="red-lighten-2"
     density="compact"

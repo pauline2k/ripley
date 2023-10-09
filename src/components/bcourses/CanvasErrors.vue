@@ -1,7 +1,6 @@
 <template>
   <v-alert
     id="canvas-error-container"
-    aria-atomic="true"
     aria-live="polite"
     color="red-lighten-3"
     density="compact"

@@ -24,7 +24,6 @@
       <v-card-text>
         <div
           id="error-message"
-          aria-atomic="true"
           aria-live="polite"
           role="alert"
         >

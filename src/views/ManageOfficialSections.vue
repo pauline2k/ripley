@@ -150,7 +150,7 @@
             </v-expansion-panels>
           </div>
         </div>
-        <div v-if="currentWorkflowStep === 'processing'" aria-live="polite" aria-atomic="true">
+        <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
           <h3 id="updating-sections-header" class="mt-6 text-no-wrap">
             Updating Official Sections in Course Site
           </h3>
