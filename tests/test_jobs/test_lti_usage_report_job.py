@@ -74,7 +74,7 @@ class TestLtiUsageReportJob:
                 assert summary_report[0] == 'Tool,URL,Accounts,Courses Visible'
                 assert summary_report[1] == 'Canvas Data Portal,https://beta.example.com/session/lti/launch,1,N/A'
                 assert summary_report[2] == 'Chat,https://chat.instructure.com/lti/launch,1,1'
-                assert summary_report[3] == 'Create a Site,https://cc-dev.example.com/api/lti/create_site,1,N/A'
+                assert summary_report[3] == 'Manage Sites,https://cc-dev.example.com/api/lti/manage_sites,1,N/A'
                 assert summary_report[4] == 'Find a Person to Add,https://cc-dev.example.com/api/lti/add_user,1,0'
                 assert summary_report[5] == 'SCORM,https://scone-test.instructure.com/packages,1,0'
                 assert summary_report[6] == 'SensusAccess,https://www.edu-apps.org/redirect,1,N/A'

@@ -78,13 +78,6 @@ def lti_tool_definitions():
                 'placement': 'link_selection',
                 'default': 'disabled',
             },
-            'create_site': {
-                'name': 'Create a Site (LTI 1.3)',
-                'account_id': app.config['CANVAS_BERKELEY_ACCOUNT_ID'],
-                'client_id': '10720000000000625',
-                'description': 'Provides access to Course and Project site creation',
-                'placement': 'user_navigation',
-            },
             'export_grade': {
                 'name': 'Download E-Grades (LTI 1.3)',
                 'account_id': app.config['CANVAS_COURSES_ACCOUNT_ID'],
@@ -107,6 +100,13 @@ def lti_tool_definitions():
                 'client_id': '10720000000000624',
                 'description': 'Create and manage mailing lists for all course sites',
                 'placement': 'account_navigation',
+            },
+            'manage_sites': {
+                'name': 'Manage Sites (LTI 1.3)',
+                'account_id': app.config['CANVAS_BERKELEY_ACCOUNT_ID'],
+                'client_id': '10720000000000625',
+                'description': 'Create or update bCourses sites',
+                'placement': 'user_navigation',
             },
             'provision_user': {
                 'name': 'User Provisioning (LTI 1.3)',

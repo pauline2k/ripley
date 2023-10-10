@@ -89,7 +89,7 @@ const routes:RouteRecordRaw[] = [
       {
         component: ManageSites,
         name: 'Manage bCourses Sites',
-        path: '/create_site'
+        path: '/manage_sites'
       },
       {
         component: CreateCourseSite,

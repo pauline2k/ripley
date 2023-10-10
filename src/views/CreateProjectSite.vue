@@ -86,7 +86,7 @@ export default {
   },
   methods: {
     cancel() {
-      this.$router.push({path: '/create_site'})
+      this.$router.push({path: '/manage_sites'})
     },
     create() {
       if (!this.isCreating && trim(this.name)) {

@@ -69,13 +69,13 @@ def config_add_user():
     )
 
 
-@app.route('/api/lti/config/create_site.json')
-def config_create_site():
-    tool_definition = lti_tool_definitions()['create_site']
+@app.route('/api/lti/config/manage_sites.json')
+def config_manage_sites():
+    tool_definition = lti_tool_definitions()['manage_sites']
     return _tool_config(
         title=tool_definition['name'],
         description=tool_definition['description'],
-        target='launch_create_site',
+        target='launch_manage_sites',
         placement=tool_definition['placement'],
     )
 
@@ -185,9 +185,9 @@ def launch_add_user():
     return _launch_tool('add_user')
 
 
-@app.route('/api/lti/create_site', methods=['GET', 'POST'])
-def launch_create_site():
-    return _launch_tool('create_site')
+@app.route('/api/lti/manage_sites', methods=['GET', 'POST'])
+def launch_manage_sites():
+    return _launch_tool('manage_sites')
 
 
 @app.route('/api/lti/export_grade', methods=['GET', 'POST'])

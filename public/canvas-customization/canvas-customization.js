@@ -76,7 +76,7 @@
 
   setInterval(checkElements, 200);
 
-  /* CREATE A SITE */
+  /* MANAGE SITES */
 
   /**
    * Check whether the current user is allowed to create a new site
@@ -91,32 +91,32 @@
   };
 
   /**
-   * Add the 'Create a Site' button that will provide access to the custom LTI tool
+   * Add the 'Manage sites' button that will provide access to the custom LTI tool
    * that allows a user to create a course site and/or a project site
    */
   var addCreateSiteButton = function() {
-    // Only add the 'Create a Site' button from the dashboard or courses page
+    // Only add the 'Manage Sites' button from the dashboard or courses page
     if (['/', '/courses'].indexOf(window.location.pathname) !== -1 && window.ENV.current_user_id) {
       // Check if the user is allowed to create a new site
       canUserCreateSite(function(canCreateSite) {
         if (canCreateSite) {
-          // Get the id of the Create Site LTI tool
-          getExternalToolId('globalTools', 'Create a Site', function(createSiteId) {
+          // Get the id of the 'Manage Sites' LTI tool
+          getExternalToolId('globalTools', 'Manage Sites', function(createSiteId) {
             if (createSiteId) {
               var linkUrl = '/users/' + window.ENV.current_user_id + '/external_tools/' + createSiteId;
               var $createSiteButton = $('<a/>', {
                 'href': linkUrl,
-                'text': 'Create a Site',
+                'text': 'Manage Sites',
                 'class': 'btn btn-primary button-sidebar-wide'
               });
 
-              // Add the 'Create a Site' button to the Dashboard page
+              // Add the 'Manage Sites' button to the Dashboard page
               waitUntilAvailable('#right-side > div:not([class])', false, function($container) {
                 $('#start_new_course').remove();
                 $container.prepend($createSiteButton);
               });
 
-              // Add the 'Create a Site' button to the Courses page
+              // Add the 'Manage Sites' button to the Courses page
               waitUntilAvailable('.ic-Action-header', false, function($actionHeader) {
                 $actionHeader.remove();
                 // Add the button to the header
@@ -136,17 +136,17 @@
   };
 
   /**
-   * Remove the 'Create a Site' menu item from the 'User Settings' page
+   * Remove the 'Manage Sites' menu item from the 'User Settings' page
    * if the current user is not allowed to create a new site
    */
   var removeCreateSiteUserNav = function() {
-    // Only attempt to remove the 'Create a Site' item on the 'User Settings' page
+    // Only attempt to remove the 'Manage Sites' item on the 'User Settings' page
     if (window.location.pathname === '/profile/settings' && window.ENV.current_user_id) {
-      // Remove the 'Create a Site' item if the current user is not allowed
+      // Remove the 'Manage Sites' item if the current user is not allowed
       // to create a new site
       canUserCreateSite(function(canCreateSite) {
         if (canCreateSite) {
-          waitUntilAvailable('nav ul#section-tabs li.section a:contains("Create a Site")', false, function($createSiteLink) {
+          waitUntilAvailable('nav ul#section-tabs li.section a:contains("Manage Sites")', false, function($createSiteLink) {
             $createSiteLink.parent().remove();
           });
         }
