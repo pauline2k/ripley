@@ -31,7 +31,7 @@
             <v-text-field
               id="roster-search"
               v-model="search"
-              aria-label="Search people by name or SID"
+              aria-label="Search people by name or S I D"
               density="compact"
               hide-details
               placeholder="Search People"

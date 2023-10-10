@@ -101,7 +101,7 @@ export default createVuetify({
           alert: '#fef6e6',
           error: '#b94a48',
           info: '#3a87ad',
-          primary: '#3b7ea1',
+          primary: '#377695',
           red: colors.red.darken1,
           secondary: '#eee',
           success: '#468847'

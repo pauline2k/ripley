@@ -150,7 +150,7 @@ form {
   margin: 4px 0;
 }
 a {
-  color: $primary-color;
+  color: $color-primary-text;
   text-decoration: none;
   &:hover {
     cursor: pointer;

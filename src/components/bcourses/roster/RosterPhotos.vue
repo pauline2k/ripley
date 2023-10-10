@@ -26,14 +26,14 @@
         </a>
         <v-card-title class="py-0 text-subtitle-2">
           <div v-if="!student.email" :id="`student-without-email-${student.studentId}`">
-            <div class="page-roster-student-name">{{ student.firstName }}</div>
-            <div class="page-roster-student-name font-weight-bolder">{{ student.lastName }}</div>
+            <div class="page-roster-student-name font-weight-regular">{{ student.firstName }} </div>
+            <div class="page-roster-student-name">{{ student.lastName }}</div>
           </div>
           <div v-if="student.email" class="pt-2">
             <OutboundLink :id="`student-email-${student.studentId}`" :href="`mailto:${student.email}`">
-              <div class="sr-only">Email</div>
-              <div class="page-roster-student-name">{{ student.firstName }}</div>
-              <div class="page-roster-student-name font-weight-bolder">{{ student.lastName }}</div>
+              <div class="sr-only">Email </div>
+              <div class="page-roster-student-name font-weight-regular">{{ student.firstName }}</div>
+              <span class="sr-only">&NonBreakingSpace;</span><div class="page-roster-student-name">{{ student.lastName }}</div>
             </OutboundLink>
           </div>
         </v-card-title>
