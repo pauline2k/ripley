@@ -30,7 +30,7 @@
                 <h2 :class="{'text-grey': !option.isAvailable}">{{ option.header }}</h2>
               </label>
               <div v-if="option.id === 'create-course-site'">
-                <div v-if="option.isAvailable">
+                <div v-if="option.isAvailable" @click="() => selection = option">
                   Set up course sites to communicate with and manage the work of students enrolled in your classes.
                 </div>
                 <div v-if="!option.isAvailable" class="text-grey">
@@ -40,7 +40,11 @@
                   You will be able to create a course site the day after you have been officially assigned to teach the course.
                 </div>
               </div>
-              <div v-if="option.id === 'create-project-site'" :class="{'text-grey': !option.isAvailable}">
+              <div
+                v-if="option.id === 'create-project-site'"
+                :class="{'text-grey': !option.isAvailable}"
+                @click="() => selection = option"
+              >
                 Share files and collaborate. Project sites are best suited for instructors and GSIs who already use bCourses.
                 Project sites cannot access all bCourses features and are not intended for lecture, lab, or discussion sections.
                 Learn more about
@@ -51,7 +55,9 @@
               <div v-if="option.id === 'manage-official-sections'">
                 <div class="pt-2">
                   <div v-if="size(coursesByTerm)">
-                    Add or remove official section rosters in already-created course sites.
+                    <div @click="() => selection = option">
+                      Add or remove official section rosters in already-created course sites.
+                    </div>
                     <div class="pl-3 py-2">
                       <div v-for="(courses, termId) in coursesByTerm" :key="termId">
                         <div class="text-subtitle-1">{{ getTermName(termId) }}</div>

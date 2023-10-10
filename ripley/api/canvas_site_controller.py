@@ -42,20 +42,19 @@ from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
 @app.route('/api/canvas_site/provision')
 def canvas_site_provision():
-    if not current_user.is_authenticated or not current_user.can_create_canvas_course_site:
+    if current_user.is_authenticated and current_user.can_create_canvas_course_site:
+        admin_acting_as = request.args.get('adminActingAs')
+        admin_by_ccns = request.args.getlist('adminBySectionIds[]')
+        admin_term_slug = request.args.get('adminTermSlug')
+        return tolerant_jsonify({
+            'adminActingAs': admin_acting_as,
+            'adminTerms': _get_admin_terms(),
+            'isAdmin': current_user.is_admin or current_user.is_canvas_admin,
+            'teachingTerms': _get_teaching_terms(admin_acting_as, admin_by_ccns, admin_term_slug),
+        })
+    else:
         app.logger.warning(f'Unauthorized request to {request.path}')
         return app.login_manager.unauthorized()
-
-    admin_acting_as = request.args.get('adminActingAs')
-    admin_by_ccns = request.args.getlist('adminBySectionIds[]')
-    admin_term_slug = request.args.get('adminTermSlug')
-
-    is_admin = (current_user.is_admin or current_user.is_canvas_admin)
-    if is_admin and admin_by_ccns and admin_term_slug:
-        feed = _course_provision_feed_by_ccns(admin_by_ccns, admin_term_slug)
-    else:
-        feed = _course_provision_feed(is_admin, admin_acting_as)
-    return tolerant_jsonify(feed)
 
 
 @app.route('/api/canvas_site/<canvas_site_id>')
@@ -267,16 +266,6 @@ def redirect_to_canvas_profile(canvas_site_id, uid):
         raise ResourceNotFoundError(f'No bCourses site with ID "{canvas_site_id}" was found.')
 
 
-def _course_provision_feed(is_admin, admin_acting_as):
-    uid = (is_admin and admin_acting_as) or current_user.uid
-    return {
-        'isAdmin': is_admin,
-        'adminActingAs': admin_acting_as,
-        'teachingTerms': get_teaching_terms(current_user, uid=uid),
-        'adminTerms': _get_admin_terms(),
-    }
-
-
 def _course_provision_feed_by_ccns(admin_by_ccns, admin_term_slug):
     term_id = BerkeleyTerm.from_slug(admin_term_slug).to_sis_term_id()
     sections = data_loch.get_sections(term_id, admin_by_ccns) or []
@@ -301,3 +290,23 @@ def _get_admin_terms():
             'year': term.year,
         }
     return [_term_feed(t) for t in BerkeleyTerm.get_current_terms().values()]
+
+
+def _get_teaching_terms(admin_acting_as, admin_by_ccns, admin_term_slug):
+    is_admin = current_user.is_admin or current_user.is_canvas_admin
+    if is_admin and admin_by_ccns and admin_term_slug:
+        sections = data_loch.get_sections(
+            section_ids=admin_by_ccns,
+            term_id=BerkeleyTerm.from_slug(admin_term_slug).to_sis_term_id(),
+        )
+        teaching_terms = get_teaching_terms(
+            current_user=current_user,
+            section_ids=admin_by_ccns,
+            sections=sort_course_sections(sections),
+        )
+    else:
+        teaching_terms = get_teaching_terms(
+            current_user=current_user,
+            uid=(is_admin and admin_acting_as) or current_user.uid,
+        )
+    return teaching_terms

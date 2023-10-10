@@ -59,30 +59,28 @@ def instruction_mode_description(instruction_mode):
 
 
 def section_to_api_json(section_rows):
-
-    def _instructor(row):
-        return {
-            'name': row['instructor_name'],
-            'role': row['instructor_role_code'],
-            'uid': row['instructor_uid'],
-        }
-
     instructors = []
     schedules = {
         'oneTime': [],
         'recurring': [],
     }
-
     for row in section_rows:
         if not next((i for i in instructors if i['uid'] == row['instructor_uid']), None):
-            instructors.append(_instructor(row))
+            instructors.append({
+                'name': row['instructor_name'],
+                'role': row['instructor_role_code'],
+                'uid': row['instructor_uid'],
+            })
 
-        if row['meeting_days'] and row['meeting_location']:
+        meeting_location = row['meeting_location']
+        if row['meeting_days']:
             meeting = {}
-            if row['meeting_location'] == 'Requested General Assignment':
+            if not meeting_location:
+                meeting['buildingName'] = None
+            elif meeting_location == 'Requested General Assignment':
                 meeting['buildingName'] = 'Room not yet assigned'
             else:
-                m = re.fullmatch(r'^(?P<building_name>.+?)\s?(?P<room_number>\w*\d[^\s]*)?$', row['meeting_location'])
+                m = re.fullmatch(r'^(?P<building_name>.+?)\s?(?P<room_number>\w*\d[^\s]*)?$', meeting_location)
                 meeting['buildingName'] = m['building_name']
                 if m['room_number']:
                     meeting['roomNumber'] = m['room_number']
@@ -99,15 +97,22 @@ def section_to_api_json(section_rows):
                     })
             else:
                 meeting_schedule = ' '.join([_meeting_days(row), _meeting_time(row)])
+                recurring = {
+                    'buildingName': None,
+                    'roomNumber': None,
+                    'schedule': meeting_schedule,
+                }
                 if not next(
                     (s for s in schedules['recurring'] if s['schedule'] == meeting_schedule
-                        and s['buildingName'] == meeting['buildingName'] and s['roomNumber'] == meeting['roomNumber']),
+                        and 'roomNumber' in meeting
+                        and 'buildingName' in meeting
+                        and s['buildingName'] == meeting['buildingName']
+                        and s['roomNumber'] == meeting['roomNumber']
+                     ),
                     None,
                 ):
-                    schedules['recurring'].append({
-                        **meeting,
-                        'schedule': meeting_schedule,
-                    })
+                    recurring.update(meeting)
+                schedules['recurring'].append(recurring)
 
     return {
         'courseCode': section_rows[0]['course_name'],
