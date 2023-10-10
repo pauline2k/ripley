@@ -12,7 +12,7 @@
         <v-col md="12">
           <div v-if="errorStatus" class="alert alert-error page-course-add-user-alert">
             <div class="d-flex align-center">
-              <v-icon icon="mdi-alert" class="canvas-notice-icon" />
+              <v-icon icon="mdi-alert" class="canvas-notice-icon mr-2" />
               {{ errorStatus }}
             </div>
             <div class="alert-close-button-container d-flex ml-4">
