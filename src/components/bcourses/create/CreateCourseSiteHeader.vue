@@ -42,7 +42,7 @@
         <div>
           <v-btn
             id="sections-by-uid-button"
-            aria-controls="page-create-course-site-steps-container"
+            aria-controls="select-and-confirm"
             aria-label="Load official sections for instructor"
             color="primary"
             :disabled="isFetching || !trim(uid) || isInvalidUID"
@@ -103,7 +103,7 @@
         </div>
         <v-btn
           id="sections-by-ids-button"
-          aria-controls="page-create-course-site-steps-container"
+          aria-controls="select-and-confirm"
           color="primary"
           :disabled="!trim(sectionIds) || isFetching"
           @click="submit"

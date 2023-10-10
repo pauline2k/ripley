@@ -23,21 +23,25 @@
     <table id="template-sections-table">
       <thead>
         <tr>
-          <th v-if="mode === 'createCourseForm'" class="cell-checkbox pl-4 pr-0">Action</th>
-          <th class="cell-course-code">Course Code</th>
-          <th class="cell-section-label">Section Name</th>
-          <th class="cell-section-id">Section ID</th>
-          <th class="cell-section-timestamps d-none d-sm-none d-md-table-cell">Schedule</th>
-          <th class="cell-section-locations d-none d-sm-none d-md-table-cell">Location</th>
-          <th class="cell-section-instructors d-none d-sm-none d-lg-table-cell">Instructors</th>
-          <th v-if="mode !== 'createCourseForm' && mode !== 'preview'" class="cell-section-action-option">
+          <th v-if="mode === 'createCourseForm'" class="pl-4 pr-0 td-checkbox">Action</th>
+          <th class="td-course-code">Course Code</th>
+          <th class="td-section-name">Section Name</th>
+          <th class="td-section-id text-no-wrap">Section ID</th>
+          <th :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
+            Schedule
+          </th>
+          <th :class="{'td-meeting-location': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
+            Location
+          </th>
+          <th class="td-instructors">Instructors</th>
+          <th v-if="mode !== 'createCourseForm' && mode !== 'preview'" class="td-actions">
             <span v-if="mode !== 'preview'" class="mr-5">Actions</span>
           </th>
         </tr>
       </thead>
       <tbody v-for="section in displayableSections" :key="section.id">
         <tr :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}`" :class="sectionDisplayClass[section.id]">
-          <td v-if="mode === 'createCourseForm'" class="align-top cell-checkbox pl-3 pr-0 py-0">
+          <td v-if="mode === 'createCourseForm'" class="align-top td-checkbox pl-3 pr-0 py-0">
             <v-checkbox
               :id="`template-canvas-manage-sections-checkbox-${section.id}`"
               v-model="selected"
@@ -50,10 +54,10 @@
               :value="section.id"
             />
           </td>
-          <td class="cell-course-code">
+          <td class="td-course-code">
             {{ section.courseCode }}
           </td>
-          <td class="cell-section-label">
+          <td class="td-section-name">
             <label
               v-if="mode === 'createCourseForm'"
               :for="`template-canvas-manage-sections-checkbox-${section.id}`"
@@ -66,19 +70,41 @@
               Use the "Update" button to rename your bCourses section name to match SIS.
             </span>
           </td>
-          <td class="cell-section-id">{{ section.id }}</td>
-          <td class="cell-section-timestamps d-none d-sm-none d-md-table-cell">
-            <div v-for="(schedule, index) in section.schedules.recurring" :key="index">{{ schedule.schedule }}</div>
-            <span v-if="!section.schedules.recurring.length">&mdash;</span>
+          <td class="td-section-id">{{ section.id }}</td>
+          <td :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
+            <div v-if="filterRecurring(section, 'schedule').length">
+              <div
+                v-for="(schedule, index) in filterRecurring(section, 'schedule')"
+                :key="index"
+              >
+                {{ schedule.schedule }}
+              </div>
+            </div>
+            <span v-if="!filterRecurring(section, 'schedule').length">&mdash;</span>
           </td>
-          <td class="cell-section-locations d-none d-sm-none d-md-table-cell">
-            <div v-for="(schedule, index) in section.schedules.recurring" :key="index">{{ schedule.buildingName }} {{ schedule.roomNumber }}</div>
-            <span v-if="!section.schedules.recurring.length">&mdash;</span>
+          <td :class="{'td-meeting-location': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
+            <div v-if="filterRecurring(section, 'buildingName').length">
+              <div
+                v-for="(schedule, index) in filterRecurring(section, 'buildingName')"
+                :key="index"
+              >
+                {{ schedule.buildingName }} {{ schedule.roomNumber }}
+              </div>
+            </div>
+            <span v-if="!filterRecurring(section, 'buildingName').length">&mdash;</span>
           </td>
-          <td class="cell-section-instructors d-none d-sm-none d-lg-table-cell">
-            <div v-for="instructor in section.instructors" :key="instructor.uid">{{ instructor.name }}</div>
+          <td class="td-instructors">
+            <div v-if="filter(section.instructors, 'name').length">
+              <div
+                v-for="instructor in section.instructors"
+                :key="instructor.uid"
+              >
+                {{ instructor.name }}
+              </div>
+            </div>
+            <span v-if="!filter(section.instructors, 'name').length">&mdash;</span>
           </td>
-          <td v-if="!['createCourseForm', 'preview'].includes(mode)" class="cell-section-action-option">
+          <td v-if="!['createCourseForm', 'preview'].includes(mode)" class="td-actions">
             <!-- Current Staging Actions -->
             <div v-if="mode === 'currentStaging' && section.isCourseSection" class="d-flex flex-nowrap justify-end">
               <v-btn
@@ -169,7 +195,7 @@
           :class="sectionDisplayClass[section.id]"
         >
           <td class="border-top-zero pa-0"></td>
-          <td colspan="6" class="border-top-zero pb-4 pt-0">
+          <td colspan="7" class="border-top-zero pb-4 pt-0">
             <div v-if="section.canvasSites.length === 1">
               <v-icon
                 color="error"
@@ -214,7 +240,7 @@
 <script>
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
-import {each, filter, includes, map, size} from 'lodash'
+import {each, filter, find, get, includes, map, size} from 'lodash'
 
 export default {
   name: 'CourseSectionsTable',
@@ -284,18 +310,24 @@ export default {
     }
   },
   data: () => ({
-    selected: undefined,
     allSelected: false,
-    indeterminate: false,
     displayableSections: [],
-    sectionDisplayClass: {}
+    hasSectionScheduleData: false,
+    indeterminate: false,
+    sectionDisplayClass: {},
+    selected: undefined
   }),
   created() {
     this.selected = map(filter(this.sections, 'selected'), 'id')
     this.updateSectionDisplay()
+    this.hasSectionScheduleData = !!find(this.displayableSections, s => get(s, 'schedules.recurring', []).length)
     this.eventHub.on('sections-table-updated', this.updateSectionDisplay)
   },
   methods: {
+    filter,
+    filterRecurring(section, key) {
+      return filter(section.schedules.recurring, key)
+    },
     noCurrentSections() {
       if (this.sections.length < 1) {
         return true
@@ -341,12 +373,6 @@ td, th {
 .border-top-zero {
   border-top: 0;
 }
-.button {
-  font-size: 13px !important;
-  height: unset;
-  padding: 2px 8px !important;
-  white-space: nowrap;
-}
 .button-undo-add {
   background-color: $color-orange-button-bg !important;
   border: $color-orange-button-border solid 1px !important;
@@ -365,40 +391,6 @@ td, th {
     border-color: $color-red-button-border-selected !important;
   }
 }
-.cell-checkbox {
-  width: 5%;
-}
-.cell-course-code {
-  min-width: 100px;
-  width: 5%
-}
-.cell-section-action-option {
-  height: 45px;
-  min-width: 80px;
-  padding-right: 10px;
-  text-align: right !important;
-  width: 10%
-}
-.cell-section-id {
-  min-width: 70px;
-  width: 10%
-}
-.cell-section-instructors {
-  min-width: 183px;
-  width: 15%
-}
-.cell-section-label {
-  min-width: 115px;
-  width: 15%
-}
-.cell-section-locations {
-  min-width: 150px;
-  width: 15%
-}
-.cell-section-timestamps {
-  min-width: 155px;
-  width: 15%
-}
 .row-added td {
   background-color: $color-yellow-row-highlighted !important;
 }
@@ -407,5 +399,43 @@ td, th {
 }
 .row-disabled td {
   color: $color-grey-disabled !important;
+}
+.td-checkbox {
+  width: 5%;
+}
+.td-course-code {
+  min-width: 100px;
+  width: 5%
+}
+.td-actions {
+  height: 45px;
+  min-width: 80px;
+  padding-right: 10px;
+  text-align: right !important;
+  width: 10%
+}
+.td-section-id {
+  min-width: 70px;
+  width: 10%
+}
+.td-instructors {
+  min-width: 183px;
+  width: 15%
+}
+.td-section-name {
+  min-width: 115px;
+  width: 15%
+}
+.td-meeting-location {
+  min-width: 150px;
+  width: 15%
+}
+.td-schedule {
+  min-width: 155px;
+  width: 15%
+}
+.td-shrink-to-fit {
+  width: 1%;
+  white-space: nowrap;
 }
 </style>

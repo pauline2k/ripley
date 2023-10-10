@@ -331,6 +331,11 @@ class TestCanvasSiteProvisionSections:
                     'roomNumber': '426',
                     'schedule': 'TuTh 9:00A-1:30P',
                 },
+                {
+                    'buildingName': None,
+                    'roomNumber': None,
+                    'schedule': 'TuTh 9:00A-1:30P',
+                },
             ]
             assert sections[1]['sectionNumber'] == '002'
             assert sections[2]['id'] == '12347'
@@ -347,6 +352,7 @@ class TestCanvasSiteProvisionSections:
             assert sections[2]['schedules']['recurring'] == [
                 {
                     'buildingName': 'Sevastopol Station',
+                    'roomNumber': None,
                     'schedule': 'Tu 2:00P-3:00P',
                 },
             ]

@@ -25,7 +25,7 @@
           :switch-admin-term="switchAdminTerm"
         />
       </div>
-      <div v-if="!isFetching" id="page-create-course-site-steps-container">
+      <div v-if="!isFetching" id="select-and-confirm">
         <div
           v-if="currentWorkflowStep === 'selecting'"
           id="page-create-course-site-selecting-step"
@@ -42,11 +42,7 @@
             :update-selected="updateSelected"
           />
         </div>
-        <div
-          v-if="currentWorkflowStep === 'confirmation'"
-          id="page-create-course-site-confirmation-step"
-          :aria-expanded="`${currentWorkflowStep === 'confirmation'}`"
-        >
+        <div v-if="currentWorkflowStep === 'confirmation'" :aria-expanded="`${currentWorkflowStep === 'confirmation'}`">
           <ConfirmationStep
             :course-site-creation-promise="courseSiteCreationPromise"
             :current-semester-name="currentSemesterName"

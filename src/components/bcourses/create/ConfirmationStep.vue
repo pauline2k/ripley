@@ -180,9 +180,12 @@ export default {
     create() {
       if (!this.isCreating && trim(this.siteAbbreviation) && trim(this.siteName)) {
         this.isCreating = true
-        this.courseSiteCreationPromise(this.siteName, this.siteAbbreviation).then(() => {
-          this.isCreating = false
-        })
+        this.courseSiteCreationPromise(this.siteName, this.siteAbbreviation).then(
+          () => {
+            this.isCreating = false
+          },
+          error => error
+        )
       }
     },
     trim
