@@ -182,7 +182,7 @@
         <h2 id="user-search-results-header" class="sr-only" tabindex="-1">Person Search Results. Sorted by last name.</h2>
         <v-col v-if="userSearchResults.length > 0" md="12">
           <table class="table table-striped">
-            <caption class="sr-only">Select the person you wish to add to the course site:</caption>
+            <caption class="sr-only">Select the person you wish to add to the course site</caption>
             <thead>
               <tr>
                 <th scope="col"><span class="sr-only">Actions</span></th>
