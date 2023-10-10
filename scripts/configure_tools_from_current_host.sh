@@ -24,7 +24,4 @@ LOGIT="tee -a $LOG"
 echo | $LOGIT
 echo "------------------------------------------" | $LOGIT
 echo "`date`: About to run the LTI application configuration script..." | $LOGIT
-"${PYTHONPATH}/python" -c "import os; from ripley.lib.canvas_lti import configure_tools_from_current_host; \
-    os.environ['RIPLEY_ENV'] = '${RIPLEY_ENV}'; \
-    os.environ['RIPLEY_LOCAL_CONFIGS'] = '${RIPLEY_LOCAL_CONFIGS}'; \
-    configure_tools_from_current_host()" | $LOGIT
+"${PYTHONPATH}/python" "${app_dir}/scripts/configure_tools_from_current_host.py" | $LOGIT

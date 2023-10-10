@@ -25,54 +25,45 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import re
 from urllib.parse import urljoin
 
-from flask import Flask
-from ripley import cache
-from ripley.configs import load_configs
+from flask import current_app as app
 from ripley.externals import canvas
-from ripley.logger import initialize_logger
 
 
-app = Flask(__name__.split('.')[0])
-load_configs(app)
-initialize_logger(app)
-cache.init_app(app)
-cache.clear()
 LTI_TOOL_DEFINITIONS = None
 
 
 def configure_tools_from_current_host():
-    with app.app_context():
-        current_host = app.config['LTI_HOST']
-        main_account_tools = canvas.get_external_tools(obj_type='account', obj_id=app.config['CANVAS_BERKELEY_ACCOUNT_ID'])
-        course_account_tools = canvas.get_external_tools(obj_type='account', obj_id=app.config['CANVAS_COURSES_ACCOUNT_ID'])
-        admin_account_tools = canvas.get_external_tools(obj_type='account', obj_id=app.config['CANVAS_ADMIN_TOOLS_ACCOUNT_ID'])
-        existing_tools = {}
-        for tool in main_account_tools + course_account_tools + admin_account_tools:
-            if not tool.url:
-                continue
-            host, key = _parse_launch_url(tool.url)
-            if host and key:
-                existing_tools[key] = {'host': host, 'id': tool.id, 'name': tool.name}
-        results = {}
-        for key, tool_definition in lti_tool_definitions().items():
-            existing_tool = existing_tools.get(key, None)
-            if existing_tool:
-                log_message = f"Overwriting configuration for {key} (id={existing_tool['id']})"
-                if existing_tool['host'] != current_host:
-                    log_message += f", provider from {existing_tool['host']} to {current_host}"
-                if existing_tool['name'] != tool_definition['name']:
-                    log_message += f", name from {existing_tool['name']} to {tool_definition['name']}"
-                app.logger.info(log_message)
-                results[key] = canvas.edit_external_tool(
-                    tool_id=existing_tool['id'],
-                    url=urljoin(current_host, 'api/lti', key),
-                    obj_type='account',
-                    obj_id=tool_definition['account_id'],
-                )
-            else:
-                app.logger.info(f"Adding configuration for {key} to account {tool_definition['account_id']}")
-                results[key] = canvas.create_external_tool(account_id=tool_definition['account_id'], client_id=tool_definition['client_id'])
-        return results
+    current_host = app.config['LTI_HOST']
+    main_account_tools = canvas.get_external_tools(obj_type='account', obj_id=app.config['CANVAS_BERKELEY_ACCOUNT_ID'])
+    course_account_tools = canvas.get_external_tools(obj_type='account', obj_id=app.config['CANVAS_COURSES_ACCOUNT_ID'])
+    admin_account_tools = canvas.get_external_tools(obj_type='account', obj_id=app.config['CANVAS_ADMIN_TOOLS_ACCOUNT_ID'])
+    existing_tools = {}
+    for tool in main_account_tools + course_account_tools + admin_account_tools:
+        if not tool.url:
+            continue
+        host, key = _parse_launch_url(tool.url)
+        if host and key:
+            existing_tools[key] = {'host': host, 'id': tool.id, 'name': tool.name}
+    results = {}
+    for key, tool_definition in lti_tool_definitions().items():
+        existing_tool = existing_tools.get(key, None)
+        if existing_tool:
+            log_message = f"Overwriting configuration for {key} (id={existing_tool['id']})"
+            if existing_tool['host'] != current_host:
+                log_message += f", provider from {existing_tool['host']} to {current_host}"
+            if existing_tool['name'] != tool_definition['name']:
+                log_message += f", name from {existing_tool['name']} to {tool_definition['name']}"
+            app.logger.info(log_message)
+            results[key] = canvas.edit_external_tool(
+                tool_id=existing_tool['id'],
+                url=urljoin(current_host, 'api/lti', key),
+                obj_type='account',
+                obj_id=tool_definition['account_id'],
+            )
+        else:
+            app.logger.info(f"Adding configuration for {key} to account {tool_definition['account_id']}")
+            results[key] = canvas.create_external_tool(account_id=tool_definition['account_id'], client_id=tool_definition['client_id'])
+    return results
 
 
 def lti_tool_definitions():
