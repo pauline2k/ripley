@@ -1,5 +1,6 @@
 <template>
   <div>
+    <Header1 id="page-title" class="sr-only" text="Roster Photos" />
     <div class="display-none-when-print">
       <v-alert
         v-if="error"
@@ -76,7 +77,9 @@
                 <v-tooltip
                   v-model="showPrintButtonTooltip"
                   attach="true"
+                  :eager="false"
                   location="top"
+                  :open-on-focus="true"
                   :text="printButtonTooltip"
                 >
                   <template #activator="{props}">
@@ -123,6 +126,7 @@
 
 <script>
 import Context from '@/mixins/Context'
+import Header1 from '@/components/utils/Header1.vue'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
 import {each, filter, map, size, trim} from 'lodash'
 import {exportRoster, getRoster} from '@/api/canvas-site'
@@ -131,7 +135,7 @@ import {printPage, pluralize} from '@/utils'
 export default {
   name: 'Roster',
   mixins: [Context],
-  components: {RosterPhotos},
+  components: {RosterPhotos, Header1},
   data: () => ({
     error: undefined,
     printButtonTooltip: 'You can print once student images have loaded.',
@@ -172,7 +176,6 @@ export default {
           // If student count is low then tooltip is not necessary.
           const threshold = 36
           this.showPrintButtonTooltip = (this.students.length >= threshold) && this.disablePrintButton
-          this.alertScreenReader(this.printButtonTooltip)
         },
         error => this.error = error
       ).finally(() => this.$ready())
