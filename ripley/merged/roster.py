@@ -34,8 +34,7 @@ from ripley.lib.canvas_utils import parse_canvas_sis_section_id
 
 
 def canvas_site_roster(canvas_site_id):
-    canvas_sections = canvas.get_course_sections(canvas_site_id)
-    sections = [_section(cs) for cs in canvas_sections if cs.sis_section_id]
+    sections = [_section(s) for s in canvas.get_course_sections(canvas_site_id) if s.sis_section_id]
     students = []
     if len(sections):
         term_id = sections[0]['termId']
