@@ -56,14 +56,14 @@ class TestGetAddUserConfig:
 class TestGetCreateSiteConfig:
 
     def test_anonymous(self, client, app):
-        """Anonymous user can get the Create a Site tool config JSON."""
+        """Anonymous user can get the 'Manage Sites' tool config JSON."""
         _api_get_tool_config(
             client,
             app,
-            config_uri='create_site.json',
-            target='launch_create_site',
-            expected_title='Create a Site (LTI 1.3)',
-            expected_description='Provides access to Course and Project site creation',
+            config_uri='manage_sites.json',
+            target='launch_manage_sites',
+            expected_title='Manage Sites (LTI 1.3)',
+            expected_description='Create or update bCourses sites',
             expected_placement='user_navigation',
         )
 

@@ -44,16 +44,16 @@ class TestConfigureToolsFromCurrentHost:
                     'edit_external_tool_add_user',
                     'edit_external_tool_roster',
                     'edit_external_tool_export_grade',
-                    'edit_external_tool_create_site',
                     'edit_external_tool_mailing_list',
                     'edit_external_tool_mailing_lists',
+                    'edit_external_tool_manage_sites',
                     'get_external_tool_provision_user',
                     'get_external_tool_add_user',
                     'get_external_tool_roster',
                     'get_external_tool_export_grade',
-                    'get_external_tool_create_site',
                     'get_external_tool_mailing_list',
                     'get_external_tool_mailing_lists',
+                    'get_external_tool_manage_sites',
                 ],
             }, m)
 
@@ -62,7 +62,7 @@ class TestConfigureToolsFromCurrentHost:
                 assert len(response) == 7
                 assert 'Overwriting configuration for add_user (id=35251), provider from https://cc-dev.example.com to https://rip-dev.example.com' \
                     in caplog.text
-                assert 'Overwriting configuration for create_site (id=40897), provider from https://cc-dev.example.com to https://rip-dev.example.' \
+                assert 'Overwriting configuration for manage_sites (id=40897), provider from https://cc-dev.example.com to https://rip-dev.example.' \
                     'com' in caplog.text
                 assert 'Overwriting configuration for export_grade (id=37784), provider from https://cc-dev.example.com to https://rip-dev.example' \
                     '.com' in caplog.text

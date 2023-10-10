@@ -243,9 +243,9 @@
                 "description": "Provides access to Course and Project site creation",
                 "domain": null,
                 "id": 40897,
-                "name": "Create a Site",
+                "name": "Manage Sites",
                 "updated_at": "2015-09-24T14:15:28Z",
-                "url": "https://cc-dev.example.com/api/lti/create_site",
+                "url": "https://cc-dev.example.com/api/lti/manage_sites",
                 "privacy_level": "public",
                 "custom_fields": {
                     "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
@@ -253,10 +253,10 @@
                 "workflow_state": "public",
                 "vendor_help_link": null,
                 "user_navigation": {
-                    "url": "https://cc-dev.example.com/api/lti/create_site",
-                    "text": "Create a Site",
+                    "url": "https://cc-dev.example.com/api/lti/manage_sites",
+                    "text": "Manage Sites",
                     "enabled": "true",
-                    "label": "Create a Site",
+                    "label": "Manage Sites",
                     "selection_width": 800,
                     "selection_height": 400,
                     "icon_url": "NO ICO"

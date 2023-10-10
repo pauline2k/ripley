@@ -72,7 +72,7 @@ export default {
     loadTools() {
       const canvasSiteId = this.currentUser.canvasSiteId
       this.adminTools = sortBy([
-        {disabled: false, icon: 'mdi-web', path: '/create_site', title: 'Create a Site'},
+        {disabled: false, icon: 'mdi-web', path: '/manage_sites', title: 'Manage Sites'},
         {disabled: false, icon: 'mdi-account-plus-outline', path: '/provision_user', title: 'User Provision'},
         {disabled: false, icon: 'mdi-email-multiple-outline', path: '/mailing_list/select_course', title: 'Mailing Lists Manager'},
       ], tool => tool.title)
