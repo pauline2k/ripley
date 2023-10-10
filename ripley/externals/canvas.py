@@ -127,7 +127,8 @@ def get_course(course_id, api_call=True, use_sis_id=False):
 
 def get_course_sections(course_id):
     try:
-        return get_course(course_id, api_call=False).get_sections()
+        # Eagerly fetch all sections because mysterious ResourceDoesNotExist error occasionally happens.
+        return [section for section in get_course(course_id, api_call=False).get_sections()]
     except Exception as e:
         app.logger.error(f'Failed to retrieve Canvas course sections (course_id={course_id})')
         app.logger.exception(e)
