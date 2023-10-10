@@ -113,7 +113,7 @@
                   </template>
                   <h5 id="available-course-header" class="sections-course-title">
                     {{ course.courseCode }}
-                    <span v-if="course.title">: {{ course.title }}</span>
+                    <span v-if="course.title">&mdash; {{ course.title }}</span>
                     <span v-if="size(course.sections)">
                       ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
                     </span>
