@@ -35,7 +35,7 @@ from ripley.lib.http import tolerant_jsonify
 
 @app.route('/api/canvas_user/<canvas_site_id>/options')
 @login_required
-@canvas_role_required('DesignerEnrollment', 'Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
+@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
 def get_add_user_options(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if not course:
@@ -49,7 +49,7 @@ def get_add_user_options(canvas_site_id):
 
 @app.route('/api/canvas_user/<canvas_site_id>/users', methods=['POST'])
 @login_required
-@canvas_role_required('DesignerEnrollment', 'Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
+@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
 def canvas_site_add_user(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if not course:
@@ -76,7 +76,7 @@ def canvas_site_add_user(canvas_site_id):
 
 @app.route('/api/canvas_user/search')
 @login_required
-@canvas_role_required('DesignerEnrollment', 'Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
+@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
 def search_users():
     search_text = request.args.get('searchText')
     if not search_text:
