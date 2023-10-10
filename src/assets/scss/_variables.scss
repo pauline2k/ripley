@@ -28,7 +28,7 @@ $color-button-grey-border: #d0d0d0;
 $color-button-grey-gradient-1: #fefefe;
 $color-button-grey-gradient-2: #ececec;
 $color-button-grey-text: #464646;
-$color-button-primary-background: #3b7ea1;
+$color-button-primary-background: #377695;
 $color-button-primary-border: #265269;
 $color-button-primary-color: #fff;
 $color-button-primary-hover-background: #346f8e;
@@ -52,6 +52,7 @@ $color-orange-button-bg: #c88926;
 $color-orange-button-border-selected: #553d0d;
 $color-orange-button-border: #705012;
 $color-primary: #3ba1c4;
+$color-primary-text: #2376A9;
 $color-red-button-bg-selected: #89242a;
 $color-red-button-bg: #af333a;
 $color-red-button-border-selected: #4e191f;
@@ -70,7 +71,6 @@ $color-white-smoke: #f6f6f6;
 $color-white-translucent: rgba(255, 255, 255, .5);
 $color-yellow-row-highlighted: #fefae4;
 
-$primary-color: #2683bc;
 $theme-colors: () !default;
 $theme-colors: map-merge(
     (

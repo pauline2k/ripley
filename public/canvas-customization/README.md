@@ -9,7 +9,7 @@ Configure the following values:
 | Property              | Value   |
 |-----------------------|---------|
 | Primary Color         | #003262 |
-| Primary Button        | #3b7ea1 |
+| Primary Button        | #377695 |
 | Primary Button Text   | #ffffff |
 | Secondary Button      | #3b7ea1 |
 | Secondary Button Text | #ffffff |
