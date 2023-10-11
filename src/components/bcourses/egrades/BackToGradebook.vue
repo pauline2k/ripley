@@ -1,7 +1,7 @@
 <template>
   <div class="align-center d-flex">
     <div class="pr-1">
-      <v-icon icon="mdi-chevron-left" />
+      <v-icon :icon="mdiChevronLeft" />
     </div>
     <div>
       <a
@@ -14,6 +14,10 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import {mdiChevronLeft} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context.vue'

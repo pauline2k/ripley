@@ -37,7 +37,7 @@
                   size="18"
                   width="3"
                 />
-                <v-icon v-if="!isDownloading" icon="mdi-file-download-outline" size="large" />
+                <v-icon v-if="!isDownloading" :icon="mdiFileDownloadOutline" size="large" />
               </span>
               {{ isDownloading ? 'Downloading' : 'Download' }}
             </v-btn>
@@ -178,6 +178,10 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import {mdiFileDownloadOutline} from '@mdi/js'
+</script>
 
 <script>
 import CKEditor from '@ckeditor/ckeditor5-vue'

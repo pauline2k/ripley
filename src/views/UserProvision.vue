@@ -50,11 +50,11 @@
             role="alert"
           >
             <div v-if="status === 'error'">
-              <v-icon icon="mdi-alert-circle-outline" class="icon-red mr-2" />
+              <v-icon class="icon-red mr-2" :icon="mdiAlertCircleOutline" />
               <strong>Error: {{ error }}</strong>
             </div>
             <div v-if="status === 'success'" class="d-flex">
-              <v-icon icon="mdi-check-circle" class="icon-green mr-2" />
+              <v-icon class="icon-green mr-2" :icon="mdiCheckCircle" />
               <div>
                 <strong>
                   Success: the following <span v-if="size(importedUids) > 1">
@@ -103,6 +103,10 @@
     </v-alert>
   </div>
 </template>
+
+<script setup>
+import {mdiAlertCircleOutline, mdiCheckCircle} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'

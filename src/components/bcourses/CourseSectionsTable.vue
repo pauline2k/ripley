@@ -54,7 +54,7 @@
               :value="section.id"
             />
           </td>
-          <td class="td-course-code">
+          <td class="td-course-code text-no-wrap">
             {{ section.courseCode }}
           </td>
           <td class="td-section-name">
@@ -184,7 +184,7 @@
           <td></td>
           <td colspan="6">
             <div>
-              <v-icon icon="mdi-info-circle" class="sited-icon mr-1" />
+              <v-icon class="sited-icon mr-1" :icon="mdiInformationVariantCircle" />
               The section name in bCourses no longer matches the Student Information System.
               Use the "Update" button to rename your bCourses section name to match SIS.
             </div>
@@ -200,7 +200,7 @@
               <div class="section-in-use-icon">
                 <v-icon
                   color="error"
-                  icon="mdi-alert"
+                  :icon="mdiAlert"
                   size="medium"
                 />
               </div>
@@ -215,7 +215,7 @@
                 <div class="section-in-use-icon">
                   <v-icon
                     color="error"
-                    icon="mdi-alert"
+                    :icon="mdiAlert"
                     size="medium"
                   />
                 </div>
@@ -245,6 +245,10 @@
     </table>
   </div>
 </template>
+
+<script setup>
+import {mdiAlert, mdiInformationVariantCircle} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'

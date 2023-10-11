@@ -109,7 +109,7 @@
               >
                 <v-expansion-panel-title>
                   <template #actions="{ expanded }">
-                    <v-icon :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
+                    <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
                   </template>
                   <h5 id="available-course-header" class="sections-course-title">
                     {{ course.courseCode }}
@@ -177,7 +177,7 @@
       </div>
     </div>
     <div v-if="displayError" role="alert">
-      <v-icon icon="mdi-alert-circle-outline" color="red" />
+      <v-icon :icon="mdiAlertCircleOutline" color="red" />
       <div>
         <Header1 class="notice-text-header" text="Error" />
         <p>{{ displayError }}</p>
@@ -185,6 +185,10 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import {mdiAlertCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'

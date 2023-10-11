@@ -12,7 +12,7 @@
         <v-col md="12">
           <div v-if="errorStatus" class="alert alert-error page-course-add-user-alert">
             <div class="d-flex align-center">
-              <v-icon icon="mdi-alert" class="canvas-notice-icon mr-2" />
+              <v-icon class="canvas-notice-icon mr-2" :icon="mdiAlert" />
               {{ errorStatus }}
             </div>
             <div class="alert-close-button-container d-flex ml-4">
@@ -21,7 +21,7 @@
                 class="align-self-center"
                 @click="errorStatus = ''"
               >
-                <v-icon icon="mdi-close-circle" />
+                <v-icon :icon="mdiCloseCircle" />
                 <span class="sr-only">Hide Alert</span>
               </button>
             </div>
@@ -34,7 +34,7 @@
                 class="align-self-center"
                 @click="noUserSelectedAlert = ''"
               >
-                <v-icon icon="mdi-close-circle" />
+                <v-icon :icon="mdiCloseCircle" />
                 <span class="sr-only">Hide Alert</span>
               </button>
             </div>
@@ -49,7 +49,7 @@
                 class="align-self-center"
                 @click="searchAlert = null"
               >
-                <v-icon icon="mdi-close-circle" />
+                <v-icon :icon="mdiCloseCircle" />
                 <span class="sr-only">Hide Alert</span>
               </button>
             </div>
@@ -75,7 +75,7 @@
                 class="align-self-center"
                 @click="additionSuccessMessage = false"
               >
-                <v-icon icon="mdi-close-circle" />
+                <v-icon :icon="mdiCloseCircle" />
                 <span class="sr-only">Hide Alert</span>
               </button>
             </div>
@@ -135,10 +135,10 @@
             <v-btn
               id="add-user-help-btn"
               aria-controls="page-help-notice"
-              aria-haspopup="true"
               :aria-expanded="`${toggle.displayHelp}`"
+              aria-haspopup="true"
               class="font-weight-regular text-no-wrap my-2"
-              prepend-icon="mdi-help-circle"
+              :prepend-icon="mdiHelpCircle"
               variant="text"
               @click="toggle.displayHelp = !toggle.displayHelp"
             >
@@ -288,6 +288,10 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import {mdiAlert, mdiCloseCircle, mdiHelpCircle} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'

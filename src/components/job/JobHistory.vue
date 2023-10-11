@@ -6,10 +6,9 @@
           <v-icon
             class="pb-1"
             :color="$vuetify.theme.dark ? 'white' : 'primary'"
+            :icon="mdiHistory"
             size="small"
-          >
-            mdi-history
-          </v-icon>
+          />
           History
         </h2>
       </div>
@@ -17,7 +16,7 @@
       <v-text-field
         v-if="size(jobHistory)"
         v-model="search"
-        append-inner-icon="mdi-magnify"
+        :append-inner-icon="mdiMagnify"
         hide-details
         label="Search History"
         single-line
@@ -38,9 +37,11 @@
           </div>
         </template>
         <template #item.failed="{item}">
-          <v-icon v-if="item.finishedAt" :color="item.failed ? 'error' : 'success'">
-            {{ item.failed ? 'mdi-exclamation-thick' : 'mdi-check-bold' }}
-          </v-icon>
+          <v-icon
+            v-if="item.finishedAt"
+            :color="item.failed ? 'error' : 'success'"
+            :icon="item.failed ? mdiExclamationThick : mdiCheckBold"
+          />
           <v-progress-circular
             v-if="!item.finishedAt"
             :indeterminate="true"
@@ -48,7 +49,7 @@
             size="24"
             width="4"
             color="orange"
-          ></v-progress-circular>
+          />
         </template>
         <template #item.startedAt="{item}">
           {{ $moment(item.startedAt).format(dateFormat) }}
@@ -60,6 +61,10 @@
     </v-card-text>
   </v-card>
 </template>
+
+<script setup>
+import {mdiCheckBold, mdiExclamationThick, mdiHistory, mdiMagnify} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'

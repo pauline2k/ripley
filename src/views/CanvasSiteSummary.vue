@@ -76,11 +76,11 @@
                 variant="text"
                 @click="devAuth(user.uid)"
               >
-                <v-icon class="mr-2" icon="mdi-arrow-right-circle-outline" />
+                <v-icon class="mr-2" :icon="mdiArrowRightCircleOutline" />
                 Log in<span class="sr-only"> as {{ user.name }}</span>
               </v-btn>
               <div v-if="user.uid.includes('inactive')" class="text-red">
-                <v-icon class="mr-2" icon="mdi-alert-circle-outline" />
+                <v-icon class="mr-2" :icon="mdiAlertCircleOutline" />
                 <span class="sr-only"> as {{ user.name }} is </span>Inactive
               </div>
             </div>
@@ -90,6 +90,10 @@
     </v-card-text>
   </v-card>
 </template>
+
+<script setup>
+import {mdiAlertCircleOutline, mdiArrowRightCircleOutline} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'

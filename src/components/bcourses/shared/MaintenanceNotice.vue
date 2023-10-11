@@ -8,9 +8,9 @@
     <div class="d-flex">
       <div class="pr-2">
         <v-icon
-          icon="mdi-alert"
           aria-hidden="true"
           class="icon-gold"
+          :icon="mdiAlert"
         />
       </div>
       <div>
@@ -27,6 +27,10 @@
     </div>
   </v-alert>
 </template>
+
+<script setup>
+import {mdiAlert} from '@mdi/js'
+</script>
 
 <script>
 import OutboundLink from '@/components/utils/OutboundLink'

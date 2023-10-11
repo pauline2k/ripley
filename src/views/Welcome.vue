@@ -48,6 +48,16 @@ import muthur from '@/assets/images/muthur.png'
 import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1.vue'
 import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
+import {
+  mdiAccountMultiple,
+  mdiAccountPlusOutline,
+  mdiAccountSchool,
+  mdiChartBarStacked,
+  mdiCog,
+  mdiEmailMultipleOutline,
+  mdiExport,
+  mdiWeb
+} from '@mdi/js'
 import {sortBy} from 'lodash'
 
 export default {
@@ -58,7 +68,7 @@ export default {
     adminTools: [],
     embeddedTools: [],
     utilities: [
-      {icon: 'mdi-cog', title: 'Jobs', path: '/jobs'}
+      {icon: mdiCog, title: 'Jobs', path: '/jobs'}
     ]
   }),
   created() {
@@ -72,16 +82,16 @@ export default {
     loadTools() {
       const canvasSiteId = this.currentUser.canvasSiteId
       this.adminTools = sortBy([
-        {disabled: false, icon: 'mdi-web', path: '/manage_sites', title: 'Manage Sites'},
-        {disabled: false, icon: 'mdi-account-plus-outline', path: '/provision_user', title: 'User Provision'},
-        {disabled: false, icon: 'mdi-email-multiple-outline', path: '/mailing_list/select_course', title: 'Mailing Lists Manager'},
+        {disabled: false, icon: mdiWeb, path: '/manage_sites', title: 'Manage Sites'},
+        {disabled: false, icon: mdiAccountPlusOutline, path: '/provision_user', title: 'User Provision'},
+        {disabled: false, icon: mdiEmailMultipleOutline, path: '/mailing_list/select_course', title: 'Mailing Lists Manager'},
       ], tool => tool.title)
       this.embeddedTools = sortBy([
-        {disabled: !canvasSiteId, icon: 'mdi-email-multiple-outline', path: '/mailing_list/create', title: 'Mailing List'},
-        {disabled: !canvasSiteId, icon: 'mdi-export', path: '/export_grade', title: 'E-Grade Export'},
-        {disabled: !canvasSiteId, icon: 'mdi-chart-bar-stacked', path: '/grade_distribution', title: 'Grade Distribution'},
-        {disabled: !canvasSiteId, icon: 'mdi-account-school', path: '/add_user', title: 'Find a Person to Add'},
-        {disabled: !canvasSiteId, icon: 'mdi-account-multiple', path: '/roster', title: 'Roster Photos'}
+        {disabled: !canvasSiteId, icon: mdiEmailMultipleOutline, path: '/mailing_list/create', title: 'Mailing List'},
+        {disabled: !canvasSiteId, icon: mdiExport, path: '/export_grade', title: 'E-Grade Export'},
+        {disabled: !canvasSiteId, icon: mdiChartBarStacked, path: '/grade_distribution', title: 'Grade Distribution'},
+        {disabled: !canvasSiteId, icon: mdiAccountSchool, path: '/add_user', title: 'Find a Person to Add'},
+        {disabled: !canvasSiteId, icon: mdiAccountMultiple, path: '/roster', title: 'Roster Photos'}
       ], tool => tool.title)
     }
   }

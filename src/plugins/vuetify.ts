@@ -1,5 +1,5 @@
 import 'vuetify/styles'
-import {aliases, mdi} from 'vuetify/iconsets/mdi'
+import {aliases, mdi} from 'vuetify/iconsets/mdi-svg'
 import {createVuetify} from 'vuetify'
 import {VAlert} from 'vuetify/components/VAlert'
 import {VAppBar, VAppBarTitle} from 'vuetify/components/VAppBar'
@@ -91,8 +91,8 @@ export default createVuetify({
     defaultSet: 'mdi',
     aliases,
     sets: {
-      mdi,
-    },
+      mdi
+    }
   },
   theme: {
     themes: {
@@ -105,8 +105,8 @@ export default createVuetify({
           red: colors.red.darken1,
           secondary: '#eee',
           success: '#468847'
-        },
-      },
-    },
-  },
+        }
+      }
+    }
+  }
 })
