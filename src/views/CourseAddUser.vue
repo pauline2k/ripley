@@ -101,14 +101,13 @@
                 </select>
               </v-col>
               <v-col cols="12" sm="4" class="d-flex align-center my-1 pr-sm-3">
-                <label for="search-text" class="sr-only">Find a person to add</label>
                 <input
                   id="search-text"
                   v-model="searchText"
+                  :aria-label="`enter search terms. search by ${searchType === 'uid' ? 'CalNet U I D' : searchType}`"
                   class="mb-0"
                   :disabled="isSearching"
                   :type="searchTextType"
-                  placeholder="Find a person to add"
                 >
               </v-col>
               <v-col cols="12" sm="2" class="column-align-center d-flex align-center my-1">
