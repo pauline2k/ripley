@@ -34,4 +34,3 @@ artifacts:
   - 'requirements.txt'
   - 'ripley/**/*'
   - 'scripts/**/*'
-  - 'xenomorph.py'
