@@ -127,6 +127,8 @@ def start_xenomorph_loop():
                 if xenomorph.exit_now:
                     xenomorph.stop_workers()
                     break
+        elif xenomorph.exit_now:
+            break
         else:
             # Any existing workers have quit, either quietly or loudly. Clear them out of Redis.
             xenomorph.stop_workers()
