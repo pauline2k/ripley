@@ -180,7 +180,7 @@ const router = createRouter({
 })
 
 router.afterEach((to: any) => {
-  useContextStore().loadingStart()
+  useContextStore().loadingStart(to)
   useContextStore().resetApplicationState()
   const title = capitalize(to.name) || 'bCourses'
   document.title = `${title} | UC Berkeley`

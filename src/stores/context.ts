@@ -3,7 +3,7 @@ import {defineStore} from 'pinia'
 import {get} from 'lodash'
 import {nextTick} from 'vue'
 import {putFocusNextTick} from '@/utils'
-import {useRoute} from 'vue-router'
+import router from '@/router'
 
 
 
@@ -41,15 +41,14 @@ export const useContextStore = defineStore('context', {
     },
     loadingComplete(focusTarget?: string) {
       this.isLoading = false
-      const route = useRoute()
-      if (!get(route, 'meta.announcer.skip')) {
-        this.screenReaderAlert.message = `${String(get(route, 'name', ''))} page has loaded.`
+      const route = router.currentRoute
+      if (!get(route, 'value.meta.announcer.skip')) {
+        this.screenReaderAlert.message = `${String(get(route, 'value.name', ''))} page has loaded.`
       }
       putFocusNextTick(focusTarget || 'page-title')
     },
-    loadingStart() {
+    loadingStart(route?: Object) {
       this.isLoading = true
-      const route = useRoute()
       if (!get(route, 'meta.announcer.skip')) {
         this.screenReaderAlert.message = `${String(get(route, 'name', ''))} page is loading.`
       }
