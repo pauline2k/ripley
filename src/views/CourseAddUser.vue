@@ -6,6 +6,7 @@
       <v-row
         v-if="showAlerts"
         id="alerts-container"
+        aria-live="polite"
         role="alert"
         tabindex="-1"
       >
@@ -19,7 +20,7 @@
               <button
                 id="hide-search-error-button"
                 class="align-self-center"
-                @click="errorStatus = ''"
+                @click="hideAlert('errorStatus')"
               >
                 <v-icon :icon="mdiCloseCircle" />
                 <span class="sr-only">Hide Alert</span>
@@ -32,7 +33,7 @@
               <button
                 id="hide-select-user-alert-button"
                 class="align-self-center"
-                @click="noUserSelectedAlert = ''"
+                @click="hideAlert('noUserSelectedAlert')"
               >
                 <v-icon :icon="mdiCloseCircle" />
                 <span class="sr-only">Hide Alert</span>
@@ -47,7 +48,7 @@
               <button
                 id="hide-search-alert-button"
                 class="align-self-center"
-                @click="searchAlert = null"
+                @click="hideAlert('searchAlert')"
               >
                 <v-icon :icon="mdiCloseCircle" />
                 <span class="sr-only">Hide Alert</span>
@@ -60,7 +61,7 @@
             Please refine your search to limit the number of results.
           </div>
           <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="sr-only">
-            {{ userSearchResultsCount }} search results loaded.
+            {{ userSearchResultsCount }} search result<span v-if="userSearchResultsCount !== 1">s</span> loaded.
           </div>
           <div
             v-if="additionSuccessMessage"
@@ -73,7 +74,7 @@
               <button
                 id="hide-search-success-button"
                 class="align-self-center"
-                @click="additionSuccessMessage = false"
+                @click="hideAlert('additionSuccessMessage')"
               >
                 <v-icon :icon="mdiCloseCircle" />
                 <span class="sr-only">Hide Alert</span>
@@ -87,10 +88,11 @@
           <form @submit.prevent="searchUsers">
             <v-row class="horizontal-form" no-gutters>
               <v-col cols="12" sm="6" class="d-flex align-center my-1 pr-sm-3">
-                <label for="search-type" class="text-no-wrap mt-0 pr-3">Search By</label>
+                <label :aria-hidden="true" class="text-no-wrap mt-0 pr-3">Search By</label>
                 <select
                   id="search-type"
                   v-model="searchType"
+                  aria-label="Search by"
                   class="d-flex align-center mb-0"
                   :disabled="isSearching"
                   @change="updateSearchTextType"
@@ -104,7 +106,7 @@
                 <input
                   id="search-text"
                   v-model="searchText"
-                  :aria-label="`enter search terms. search by ${searchType === 'uid' ? 'CalNet U I D' : searchType}`"
+                  :aria-label="`enter search terms, search by ${searchType === 'uid' ? 'CalNet U I D' : searchType}`"
                   class="mb-0"
                   :disabled="isSearching"
                   :type="searchTextType"
@@ -178,13 +180,14 @@
         </v-col>
       </v-row>
       <v-row v-if="showUsersArea" no-gutters>
-        <h2 id="user-search-results-header" class="sr-only" tabindex="-1">Person Search Results. Sorted by last name.</h2>
         <v-col v-if="userSearchResults.length > 0" md="12">
-          <table class="table table-striped">
-            <caption class="sr-only">Select the person you wish to add to the course site</caption>
+          <table id="person-search-results" class="table table-striped">
+            <caption class="text-left font-weight-bold pl-3 py-2">
+              Search Results
+              <span class="sr-only">Sorted by last name. Select the person you wish to add to the course site using the radio button in column one.</span>
+            </caption>
             <thead>
               <tr>
-                <th scope="col"><span class="sr-only">Actions</span></th>
                 <th scope="col">Name</th>
                 <th scope="col">Calnet UID</th>
                 <th scope="col">Email</th>
@@ -196,26 +199,25 @@
                 :id="`user-search-result-row-${index}`"
                 :key="user.uid"
               >
-                <td :id="`user-search-result-row-select-${index}`" class="px-3 py-4">
+                <td :id="`user-search-result-row-select-${index}`" class="d-flex align-center flex-nowrap px-3 py-4">
                   <input
                     :id="`user-search-result-input-${index}`"
                     v-model="selectedUser"
-                    type="radio"
+                    class="mr-4"
                     name="selectedUser"
+                    type="radio"
                     :value="user"
                     :aria-labelled-by="`user-search-result-row-name-${index} user-search-result-row-ldap-uid-${index}`"
                   >
-                </td>
-                <td :id="`user-search-result-row-name-${index}`" class="px-3 py-4">
-                  <label :for="`user-search-result-input-${index}`" class="form-input-label-no-align">
+                  <label :id="`user-search-result-row-name-${index}`" :for="`user-search-result-input-${index}`" class="form-input-label-no-align">
                     {{ user.firstName }} {{ user.lastName }}
                   </label>
                 </td>
                 <td :id="`user-search-result-row-ldap-uid-${index}`" class="px-3 py-4">
-                  {{ user.uid }}
+                  <span class="sr-only">Calnet U I D, </span>{{ user.uid }}
                 </td>
                 <td :id="`user-search-result-row-email-${index}`" class="px-3 py-4">
-                  {{ user.emailAddress }}
+                  <span class="sr-only">Email, </span>{{ user.emailAddress }}
                 </td>
               </tr>
             </tbody>
@@ -347,12 +349,15 @@ export default {
         this.showSearchForm = true
       },
       this.showUnauthorized
-    ).catch(this.showUnauthorized
-    ).finally(() => {
-      this.$ready()
-    })
+    ).catch(() => this.showUnauthorized()
+    ).finally(() => this.$ready())
   },
   methods: {
+    hideAlert(alertName) {
+      this.$data[alertName] = null
+      this.alertScreenReader('Alert hidden')
+      putFocusNextTick('page-title')
+    },
     replace,
     resetForm() {
       this.searchTextType = 'text'
@@ -392,7 +397,6 @@ export default {
           if (response.users && response.users.length) {
             this.userSearchResultsCount = response.users[0].resultCount
             this.selectedUser = response.users[0]
-            this.$ready('user-search-results-header')
           } else {
             this.userSearchResultsCount = 0
             let noResultsAlert = 'Your search did not match anyone with a CalNet ID.'
@@ -400,14 +404,15 @@ export default {
               noResultsAlert += ' CalNet UIDs must be an exact match.'
             }
             this.showSearchAlert(noResultsAlert)
-            this.$ready('alerts-container')
           }
           this.showAlerts = true
         }, () => {
           this.showErrorStatus('Person search failed.')
           this.showSearchForm = true
-          this.$ready('alerts-container')
-        }).finally(() => this.isSearching = false)
+        }).finally(() => {
+          this.isSearching = false
+          this.$ready('add-user-submit-search-btn')
+        })
       }
     },
     showErrorStatus(message) {
@@ -420,7 +425,7 @@ export default {
     },
     showUnauthorized() {
       this.showErrorStatus('Authorization check failed.')
-      this.$ready('alerts-container')
+      this.$ready()
     },
     startOver() {
       this.showAlerts = false
