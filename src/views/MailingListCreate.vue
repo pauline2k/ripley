@@ -5,29 +5,26 @@
       v-if="!error && !success"
       density="compact"
       role="alert"
+      text="No Mailing List has been created for this site."
       type="info"
-    >
-      No Mailing List has been created for this site.
-    </v-alert>
+    />
     <v-alert
       v-if="success"
       class="ma-2"
       :closable="true"
       density="compact"
       role="alert"
+      :text="success"
       type="success"
-    >
-      {{ success }}
-    </v-alert>
+    />
     <v-alert
       v-if="error"
       class="ma-2"
       density="compact"
       role="alert"
+      :text="error"
       type="warning"
-    >
-      {{ error }}
-    </v-alert>
+    />
     <div v-if="!error && !currentUser.isStudent" class="mt-2">
       <v-card id="mailing-list-details" elevation="1">
         <v-card-text>
@@ -50,7 +47,7 @@
                           <h2>{{ canvasSite.name }}</h2>
                         </div>
                         <div class="pb-1">
-                          <v-icon icon="mdi-open-in-new" size="small" />
+                          <v-icon :icon="mdiOpenInNew" size="small" />
                         </div>
                       </div>
                     </OutboundLink>
@@ -136,6 +133,10 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import {mdiOpenInNew} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'

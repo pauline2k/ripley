@@ -34,7 +34,7 @@
             <v-icon
               v-if="size(alert.emailAddresses)"
               color="white"
-              :icon="alert.type === 'errors' ? 'mdi-alert-circle' : 'mdi-check'"
+              :icon="alert.type === 'errors' ? mdiAlertCircle : mdiCheck"
             />
           </template>
         </v-expansion-panel-title>
@@ -51,7 +51,7 @@
                 <v-icon
                   class="mr-4"
                   :color="alert.type === 'errors' ? 'red' : 'primary'"
-                  icon="mdi-account"
+                  :icon="mdiAccount"
                 />
               </template>
               <v-list-item-subtitle>{{ emailAddress }}</v-list-item-subtitle>
@@ -171,6 +171,10 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import {mdiAccount, mdiAlertCircle, mdiCheck} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'

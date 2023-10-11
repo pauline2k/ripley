@@ -169,7 +169,6 @@ export default {
         this.options = [
           {
             header: 'Create a course site',
-            icon: 'mdi-school',
             id: 'create-course-site',
             isAvailable: canCreateCourseSite,
             label: 'Create a Course Site',
@@ -177,7 +176,6 @@ export default {
           },
           {
             header: 'Create a project site',
-            icon: 'mdi-chart-bar-stacked',
             id: 'create-project-site',
             isAvailable: canCreateProjectSite,
             label: 'Create a Project Site',
@@ -185,7 +183,6 @@ export default {
           },
           {
             header: 'Manage official sections of an existing site',
-            icon: 'mdi-view-dashboard-edit',
             id: 'manage-official-sections',
             isAvailable: canCreateCourseSite && (this.currentUser.isAdmin || size(this.coursesByTerm)),
             label: 'Manage Official Sections',

@@ -24,7 +24,7 @@
             <v-text-field
               id="update-canvas-course-id"
               v-model="canvasSiteId"
-              :append-inner-icon="isUpdatingCanvasSiteId ? 'mdi-progress-check' : 'mdi-arrow-right-circle-outline'"
+              :append-inner-icon="isUpdatingCanvasSiteId ? mdiProgressCheck : mdiArrowRightCircleOutline"
               density="compact"
               :disabled="isUpdatingCanvasSiteId || isLoading"
               :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
@@ -56,6 +56,10 @@
     {{ error }}
   </v-snackbar>
 </template>
+
+<script setup>
+import {mdiArrowRightCircleOutline, mdiProgressCheck} from '@mdi/js'
+</script>
 
 <script>
 import AppBarMenu from '@/components/utils/AppBarMenu.vue'

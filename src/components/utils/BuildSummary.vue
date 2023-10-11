@@ -2,7 +2,7 @@
   <div class="align-center d-flex">
     <div class="pr-2">
       <span v-if="$route.meta.isHome">
-        <v-icon color="primary" icon="mdi-alien" size="large" />
+        <v-icon color="primary" :icon="mdiAlien" size="large" />
       </span>
       <router-link
         v-if="!$route.meta.isHome"
@@ -11,7 +11,7 @@
         to="/"
       >
         <span class="sr-only">Home</span>
-        <v-icon color="primary" icon="mdi-alien" size="large" />
+        <v-icon color="primary" :icon="mdiAlien" size="large" />
       </router-link>
     </div>
     <div>
@@ -29,6 +29,10 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import {mdiAlien} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'

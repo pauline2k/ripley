@@ -69,7 +69,7 @@
                   variant="outlined"
                   @click="downloadCsv"
                 >
-                  <v-icon class="pr-2" icon="mdi-download" />
+                  <v-icon class="pr-2" :icon="mdiDownload" />
                   Export<span class="sr-only"> CSV file</span>
                 </v-btn>
               </div>
@@ -91,7 +91,7 @@
                       v-bind="props"
                       @click="printRoster"
                     >
-                      <v-icon class="pr-2 text-white" icon="mdi-printer" />
+                      <v-icon class="pr-2 text-white" :icon="mdiPrinter" />
                       Print<span class="sr-only"> roster of students</span>
                     </v-btn>
                   </template>
@@ -110,11 +110,11 @@
               :students="students"
             />
             <div v-if="!roster.students.length" role="alert" aria-live="polite">
-              <v-icon icon="mdi-alert-circle-outline" class="icon-gold" />
+              <v-icon class="icon-gold" :icon="mdiAlertCircleOutline" />
               Students have not yet signed up for this class.
             </div>
             <div v-if="roster.students.length && !students.length" role="alert" aria-live="polite">
-              <v-icon icon="mdi-alert-circle-outline" class="icon-gold" />
+              <v-icon class="icon-gold" :icon="mdiAlertCircleOutline" />
               No students found matching your query.
             </div>
           </v-col>
@@ -123,6 +123,10 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import {mdiAlertCircleOutline, mdiDownload, mdiPrinter} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'

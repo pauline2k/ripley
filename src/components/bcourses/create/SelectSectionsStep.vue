@@ -33,7 +33,7 @@
                 <v-icon
                   class="left page-help-notice-icon"
                   color="grey"
-                  icon="mdi-help-circle-outline"
+                  :icon="mdiHelpCircleOutline"
                 />
               </div>
               <div>
@@ -72,7 +72,7 @@
           >
             <v-expansion-panel-title>
               <template #actions="{ expanded }">
-                <v-icon :icon="expanded ? ' mdi-menu-down' : 'mdi-menu-right'" />
+                <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
               </template>
               <h3 v-if="teachingTerms.length === 1">
                 <CourseCodeAndTitle :course="course" />
@@ -115,6 +115,10 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import {mdiHelpCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context.vue'

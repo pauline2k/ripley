@@ -1,4 +1,3 @@
-import '@mdi/font/css/materialdesignicons.min.css'
 import App from './App.vue'
 import axios from 'axios'
 import moment from 'moment'

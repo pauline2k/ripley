@@ -6,7 +6,7 @@
   >
     <div class="align-center d-flex">
       <div class="mr-1">
-        <v-icon icon="mdi-alert-circle" />
+        <v-icon :icon="mdiAlertCircle" />
       </div>
       <div class="text-white">
         {{ text }}
@@ -15,7 +15,11 @@
   </v-alert>
 </template>
 
-<script lang="ts">
+<script setup>
+import {mdiAlertCircle} from '@mdi/js'
+</script>
+
+<script>
 export default {
   name: 'FormValidationAlert',
   props: {

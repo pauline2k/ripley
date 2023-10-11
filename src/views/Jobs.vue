@@ -7,10 +7,9 @@
             <v-icon
               class="pr-3 pb-3"
               color="primary"
+              :icon="mdiDesktopClassic"
               size="small"
-            >
-              mdi-desktop-classic
-            </v-icon>
+            />
             <span id="page-title" tabindex="0">MU-TH-UR 6000</span>
           </Header1>
         </div>
@@ -38,7 +37,7 @@
               size="large"
               @click="runJob(item)"
             >
-              <v-icon color="success" size="large">mdi-play</v-icon>
+              <v-icon color="success" :icon="mdiPlay" size="large" />
             </v-btn>
             <v-progress-circular
               v-if="isRunning(item.key)"
@@ -61,7 +60,7 @@
                 variant="plain"
                 @click.stop="scheduleEditOpen(item)"
               >
-                <v-icon>mdi-playlist-edit</v-icon>
+                <v-icon :icon="mdiPlaylistEdit" />
               </v-btn>
               <div>
                 <span v-if="item.schedule.type === 'day_at'" :for="`edit-job-schedule-${item.key}`">
@@ -135,6 +134,10 @@
     </v-dialog>
   </div>
 </template>
+
+<script setup>
+import {mdiDesktopClassic, mdiPlay, mdiPlaylistEdit} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'
