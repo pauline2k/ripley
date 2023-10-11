@@ -196,23 +196,32 @@
         >
           <td class="border-top-zero pa-0"></td>
           <td colspan="7" class="border-top-zero pb-4 pt-0">
-            <div v-if="section.canvasSites.length === 1">
-              <v-icon
-                color="error"
-                icon="mdi-alert"
-                size="medium"
-              />
-              This section is already in use by
-              <OutboundLink :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`">{{ section.canvasSites[0].name }}</OutboundLink>
-            </div>
-            <div v-if="section.canvasSites.length > 1">
-              <div>
+            <div v-if="section.canvasSites.length === 1" class="align-center d-flex">
+              <div class="section-in-use-icon">
                 <v-icon
                   color="error"
                   icon="mdi-alert"
                   size="medium"
                 />
-                This section is already in use by:
+              </div>
+              <div>
+                bCourses site
+                <OutboundLink :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`">{{ section.canvasSites[0].name }}</OutboundLink>
+                includes this section.
+              </div>
+            </div>
+            <div v-if="section.canvasSites.length > 1">
+              <div class="align-center d-flex">
+                <div class="section-in-use-icon">
+                  <v-icon
+                    color="error"
+                    icon="mdi-alert"
+                    size="medium"
+                  />
+                </div>
+                <div>
+                  The following bCourses sites include this section.
+                </div>
               </div>
               <div class="ml-6 pt-1">
                 <ul v-for="(canvasSite, index) in section.canvasSites" :key="index" class="sites-container">
@@ -399,6 +408,9 @@ td, th {
 }
 .row-disabled td {
   color: $color-grey-disabled !important;
+}
+.section-in-use-icon {
+  padding: 0 4px 2px 0;
 }
 .td-checkbox {
   width: 5%;
