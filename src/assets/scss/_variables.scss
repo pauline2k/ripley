@@ -12,39 +12,19 @@ $color-alert-background: #fef6e6;
 $color-alert-error-background: #f2dede;
 $color-alert-error-foreground: #b94a48;
 $color-alert-foreground: #976707;
-$color-alert-foreground-selected: #876c3b;
 $color-alert-info-foreground: #3a87ad;
 $color-alert-info-background: #d9edf7;
-$color-alert-info-background-dark: #3a87ad;
 $color-alert-success-background: #dff0d8;
 $color-alert-success-foreground: #468847;
-
-
-$color-black: #000;
 $color-body-black: #474747;
-$color-button-background: #f7f7f7;
 $color-button-border: #d1d1d1;
-$color-button-grey-border: #d0d0d0;
-$color-button-grey-gradient-1: #fefefe;
-$color-button-grey-gradient-2: #ececec;
-$color-button-grey-text: #464646;
-$color-button-primary-background: #377695;
-$color-button-primary-border: #265269;
-$color-button-primary-color: #fff;
-$color-button-primary-hover-background: #346f8e;
 $color-container-grey-background: #edf0f2;
 $color-container-grey-border: #e5e5e5;
 $color-dark-tangerine: #f1a91e;
-$color-feature-icon-box-background: #f7f7f7;
-$color-feature-icon-box-border: #eee;
-$color-feature-icon-color: #cbcbcb;
 $color-grey: #ccc;
-$color-grey-area-border-dark: #d5d5d5;
 $color-grey-disabled: #757575;
 $color-harley-davidson-orange: #cf1715;
-$color-headers: #424242;
 $color-help-link-blue: #2274a7;
-$color-item-group-item-border: #c1c7cf;
 $color-nobel: #999;
 $color-off-black: #333;
 $color-orange-button-bg-selected: #a16e1e;
@@ -59,9 +39,6 @@ $color-red-button-border-selected: #4e191f;
 $color-red-button-border: #6c232b;
 $color-red-row-highlighted: #f2dddf;
 $color-salem: #0d863d;
-$color-success: #dff0d8;
-$color-table-border-grey: #d3dbe0;
-$color-table-header-border-grey: #ababab;
 $color-table-cell-border-grey: #d6d6d6;
 $color-table-cell-bg-grey: #f5f5f5;
 $color-very-light-grey: #ccc;
@@ -70,12 +47,3 @@ $color-white: #fff;
 $color-white-smoke: #f6f6f6;
 $color-white-translucent: rgba(255, 255, 255, .5);
 $color-yellow-row-highlighted: #fefae4;
-
-$theme-colors: () !default;
-$theme-colors: map-merge(
-    (
-      'cc-light': #f7f7f7,
-      'cc-primary': $color-primary
-    ),
-    $theme-colors
-);

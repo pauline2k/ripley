@@ -125,13 +125,13 @@
 </template>
 
 <script setup>
+import Header1 from '@/components/utils/Header1.vue'
+import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
 import {mdiAlertCircleOutline, mdiDownload, mdiPrinter} from '@mdi/js'
 </script>
 
 <script>
 import Context from '@/mixins/Context'
-import Header1 from '@/components/utils/Header1.vue'
-import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
 import {each, filter, map, size, trim} from 'lodash'
 import {exportRoster, getRoster} from '@/api/canvas-site'
 import {printPage, pluralize} from '@/utils'
@@ -139,7 +139,6 @@ import {printPage, pluralize} from '@/utils'
 export default {
   name: 'Roster',
   mixins: [Context],
-  components: {RosterPhotos, Header1},
   data: () => ({
     error: undefined,
     printButtonTooltip: 'You can print once student images have loaded.',
@@ -150,11 +149,6 @@ export default {
     students: undefined,
     success: undefined
   }),
-  watch: {
-    search() {
-      this.recalculateStudents()
-    }
-  },
   computed: {
     disablePrintButton() {
       return !size(this.students) || !!this.students.find(s => !s.hasRosterPhotoLoaded)
@@ -168,6 +162,11 @@ export default {
           this.showTooltip = false
         }
       }
+    }
+  },
+  watch: {
+    search() {
+      this.recalculateStudents()
     }
   },
   created() {

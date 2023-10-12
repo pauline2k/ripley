@@ -29,19 +29,18 @@
 </template>
 
 <script setup>
+import DevAuth from '@/components/utils/DevAuth'
+import Header1 from '@/components/utils/Header1.vue'
 import nostromoCrew from '@/assets/images/nostromo-crew-eating-breakfast.png'
 </script>
 
 <script>
 import Context from '@/mixins/Context'
-import DevAuth from '@/components/utils/DevAuth'
-import Header1 from '@/components/utils/Header1.vue'
 import {getCasLoginURL} from '@/api/auth'
 
 export default {
   name: 'Login',
   mixins: [Context],
-  components: {DevAuth, Header1},
   created() {
     const showDevAuth = false
     this.$ready()
@@ -56,16 +55,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-button {
-  height: 48px;
-  width: 200px;
-}
-h1 {
-  color: #025a86;
-  font-size: 23px;
-  font-weight: bold;
-  margin: 0 0 10px;
-}
-</style>

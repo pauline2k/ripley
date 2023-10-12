@@ -24,7 +24,6 @@ import {decamelize} from '@/utils'
 
 export default {
   name: 'CanvasErrors',
-  methods: {decamelize},
   components: {OutboundLink},
   props: {
     errorType: {
@@ -37,6 +36,7 @@ export default {
       required: false,
       type: String
     }
-  }
+  },
+  methods: {decamelize}
 }
 </script>

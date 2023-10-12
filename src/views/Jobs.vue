@@ -136,25 +136,20 @@
 </template>
 
 <script setup>
+import DisableJobToggle from '@/components/job/DisableJobToggle'
+import Header1 from '@/components/utils/Header1.vue'
+import JobHistory from '@/components/job/JobHistory'
 import {mdiDesktopClassic, mdiPlay, mdiPlaylistEdit} from '@mdi/js'
 </script>
 
 <script>
 import Context from '@/mixins/Context'
-import DisableJobToggle from '@/components/job/DisableJobToggle'
-import Header1 from '@/components/utils/Header1.vue'
-import JobHistory from '@/components/job/JobHistory'
 import {cloneDeep, find, get} from 'lodash'
 import {getJobHistory, getJobSchedule, setJobDisabled, startJob, updateJobSchedule} from '@/api/job'
 
 export default {
   name: 'Jobs',
   mixins: [Context],
-  components: {
-    DisableJobToggle,
-    Header1,
-    JobHistory
-  },
   data: () => ({
     disableScheduleSave: false,
     editJob: undefined,

@@ -478,11 +478,6 @@ export default {
   height: 15px;
   margin-bottom: -3px;
 }
-.grade-export-refresh-button {
-  font-size: 11px;
-  padding: 1px 5px;
-  text-decoration: none;
-}
 .grade-export-select-pnp-cutoff {
   padding-right: 25px;
   width: fit-content;
@@ -497,11 +492,6 @@ export default {
   -webkit-animation: ellipsis steps(4,end) 1800ms infinite;
 }
 @keyframes ellipsis {
-  to {
-    width: 1.25em;
-  }
-}
-@-webkit-keyframes ellipsis {
   to {
     width: 1.25em;
   }

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="page-site-mailing-list">
+  <div v-if="!isLoading" class="pa-3">
     <Header1 text="Update Mailing List" />
     <v-alert
       v-if="!hasUpdatedSincePageLoad"
@@ -269,36 +269,11 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .alert-message-without-email-addresses {
   font-size: 16px;
   font-weight: 700;
 }
-.page-site-mailing-list {
-  padding: 20px;
-
-  .page-site-mailing-list-button-primary {
-    margin: 0 4px;
-  }
-  .page-site-mailing-list-header3 {
-    font-size: 15px;
-    line-height: 22px;
-  }
-  .page-site-mailing-list-form {
-    margin: 20px 0;
-  }
-  .page-site-mailing-list-form-label-long {
-    display: inline;
-    font-weight: 300;
-    text-align: left;
-  }
-  .page-site-mailing-list-text {
-    font-size: 14px;
-    font-weight: 300;
-    line-height: 1.6;
-    margin: 15px;
-  }
-  }
 .toggle-show-hide {
   color: lightblue;
   text-decoration: none;

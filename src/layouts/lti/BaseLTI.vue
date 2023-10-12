@@ -9,6 +9,11 @@ import {iframePostMessage} from '@/utils'
 export default {
   name: 'Embedded',
   mixins: [Context],
+  mounted() {
+    if (this.$isInIframe) {
+      setInterval(this.iframeUpdateHeight, 250)
+    }
+  },
   methods: {
     /**
      * Update the iframe height on a regular basis to avoid embedded scrollbars on
@@ -27,11 +32,6 @@ export default {
         }
         iframePostMessage(JSON.stringify(message))
       }
-    }
-  },
-  mounted() {
-    if (this.$isInIframe) {
-      setInterval(this.iframeUpdateHeight, 250)
     }
   }
 }

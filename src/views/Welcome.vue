@@ -41,13 +41,13 @@
 </template>
 
 <script setup>
+import Header1 from '@/components/utils/Header1.vue'
 import muthur from '@/assets/images/muthur.png'
+import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
 </script>
 
 <script>
 import Context from '@/mixins/Context'
-import Header1 from '@/components/utils/Header1.vue'
-import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
 import {
   mdiAccountMultiple,
   mdiAccountPlusOutline,
@@ -63,7 +63,6 @@ import {sortBy} from 'lodash'
 export default {
   name: 'Welcome',
   mixins: [Context],
-  components: {StandaloneToolsList, Header1},
   data: () => ({
     adminTools: [],
     embeddedTools: [],
