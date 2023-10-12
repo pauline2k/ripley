@@ -92,7 +92,7 @@ def my_current_courses():
             api_json[term_id] = []
             for canvas_course in list(filter(lambda c: c.term['sis_term_id'] == sis_term_id, canvas_courses)):
                 api_json[term_id].append(canvas_site_to_api_json(canvas_course))
-            return tolerant_jsonify(api_json)
+        return tolerant_jsonify(api_json)
     else:
         app.logger.warning(f'Unauthorized request to {request.path}')
         return app.login_manager.unauthorized()
