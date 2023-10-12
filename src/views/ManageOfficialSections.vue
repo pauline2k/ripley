@@ -187,25 +187,21 @@
 </template>
 
 <script setup>
+import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
+import Header1 from '@/components/utils/Header1.vue'
+import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import {mdiAlertCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
+import {pluralize} from '@/utils'
 </script>
 
 <script>
 import Context from '@/mixins/Context'
-import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
-import Header1 from '@/components/utils/Header1.vue'
-import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
-import {pluralize, toInt} from '@/utils'
+import {toInt} from '@/utils'
 import {each, filter, find, flatMap, get, includes, keys, set, size, toString, union, unset} from 'lodash'
 
 export default {
   name: 'ManageOfficialSections',
-  components: {
-    CourseSectionsTable,
-    Header1,
-    MaintenanceNotice
-  },
   mixins: [Context],
   data: () => ({
     adminActingAs: null,
@@ -345,7 +341,6 @@ export default {
         this.usersClassCount = 0
       }
     },
-    pluralize,
     refreshFromFeed(feed) {
       if (feed.teachingTerms) {
         this.loadCourseLists(feed.teachingTerms)
