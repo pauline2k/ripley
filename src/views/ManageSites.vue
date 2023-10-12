@@ -61,25 +61,26 @@
                   <div>
                     Add or remove official section rosters in already-created course sites.
                   </div>
-                  <div v-if="option.isAvailable" class="pl-3">
-                    <div v-for="(courses, termId) in coursesByTerm" :key="termId" class="py-2">
-                      <div class="text-subtitle-1">{{ getTermName(termId) }}</div>
-                      <select
-                        id="course-sections"
-                        v-model="canvasSiteId"
-                        :disabled="!selection || selection.id !== 'manage-official-sections' || isProcessing"
-                      >
-                        <option :value="null">Choose...</option>
-                        <option
-                          v-for="course in courses"
-                          :id="`canvas-site-${course.canvasSiteId}`"
-                          :key="course.canvasSiteId"
-                          :value="course.canvasSiteId"
-                        >
-                          {{ course.courseCode }} &mdash; {{ course.name }}
-                        </option>
-                      </select>
-                    </div>
+                  <div v-if="option.isAvailable" class="pl-3 py-2">
+                    <select
+                      id="course-sections"
+                      v-model="canvasSiteId"
+                      :disabled="!selection || selection.id !== 'manage-official-sections' || isProcessing"
+                    >
+                      <option :value="null">Choose...</option>
+                      <template v-for="(courses, termId) in coursesByTerm" :key="termId">
+                        <optgroup class="text-subtitle-1" :label="getTermName(termId)">
+                          <option
+                            v-for="course in courses"
+                            :id="`canvas-site-${course.canvasSiteId}`"
+                            :key="course.canvasSiteId"
+                            :value="course.canvasSiteId"
+                          >
+                            {{ course.courseCode }} &mdash; {{ course.name }}
+                          </option>
+                        </optgroup>
+                      </template>
+                    </select>
                   </div>
                 </div>
                 <div v-if="currentUser.isAdmin">
