@@ -70,8 +70,8 @@ import {truncate} from 'lodash'
 
 export default {
   name: 'RosterPhotos',
-  mixins: [Context],
   components: {OutboundLink, RosterPhoto},
+  mixins: [Context],
   props: {
     students: {
       required: true,

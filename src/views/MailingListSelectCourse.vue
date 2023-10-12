@@ -17,7 +17,7 @@
           id="page-site-mailing-list-site-id"
           v-model="canvasSiteId"
           aria-required="true"
-          :error="!!trim(this.canvasSiteId) && !isCanvasSiteIdValid"
+          :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
           hide-details
           maxlength="10"
           label="Canvas Course ID"
@@ -55,8 +55,8 @@ import {trim} from 'lodash'
 
 export default {
   name: 'MailingListSelectCourse',
-  mixins: [Context, MailingList],
   components: {Header1, SpinnerWithinButton},
+  mixins: [Context, MailingList],
   data: () => ({
     canvasSiteId: undefined,
     error: undefined,

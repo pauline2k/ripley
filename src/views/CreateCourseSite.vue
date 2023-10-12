@@ -88,7 +88,6 @@ import {iframeParentLocation} from '@/utils'
 
 export default {
   name: 'CreateCourseSite',
-  mixins: [Context],
   components: {
     CanvasErrors,
     ConfirmationStep,
@@ -97,6 +96,7 @@ export default {
     MaintenanceNotice,
     SelectSectionsStep
   },
+  mixins: [Context],
   data: () => ({
     adminActingAs: undefined,
     adminBySectionIds: undefined,

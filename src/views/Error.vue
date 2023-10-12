@@ -1,5 +1,5 @@
 <template>
-  <AppBar  v-if="!$isInIframe" />
+  <AppBar v-if="!$isInIframe" />
   <v-container
     v-if="!isLoading"
     id="content"
@@ -50,8 +50,8 @@ import {useContextStore} from '@/stores/context'
 
 export default {
   name: 'Error',
-  mixins: [Context],
   components: {AppBar, ContactUsPrompt, Header1},
+  mixins: [Context],
   data: () => ({
     header: undefined
   }),

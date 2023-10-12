@@ -219,10 +219,6 @@ export default {
     jobStatus: null,
     jobStatusMessage: ''
   }),
-  created() {
-    this.canvasSiteId = toInt(get(this.$route, 'params.canvasSiteId'))
-    this.fetchFeed().finally(() => this.$ready())
-  },
   computed: {
     allSections() {
       return flatMap(this.courseSemesterClasses, classItem => classItem.sections)
@@ -242,6 +238,10 @@ export default {
         return (section.isCourseSection && includes(keys(section), 'stagedState')) || (!section.isCourseSection && section.stagedState === 'add')
       }))
     }
+  },
+  created() {
+    this.canvasSiteId = toInt(get(this.$route, 'params.canvasSiteId'))
+    this.fetchFeed().finally(() => this.$ready())
   },
   methods: {
     addAllSections(course) {
@@ -461,17 +461,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.h2-container {
-  min-height: 36px;
-}
 h5.sections-course-title {
   font-size: 18px !important;
   font-weight: 400 !important;
   line-height: 18px;
 }
-@media #{$small-only} {
-  .page-course-official-sections-small-only-align-left {
-    text-align: left;
-  }
+.h2-container {
+  min-height: 36px;
 }
 </style>

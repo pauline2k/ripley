@@ -74,8 +74,8 @@ import {trim} from 'lodash'
 
 export default {
   name: 'CreateProjectSite',
-  mixins: [Context],
   components: {CanvasErrors, Header1},
+  mixins: [Context],
   data: () => ({
     isCreating: undefined,
     error: undefined,

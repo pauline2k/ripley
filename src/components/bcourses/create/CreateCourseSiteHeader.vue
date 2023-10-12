@@ -139,14 +139,6 @@ import {putFocusNextTick} from '@/utils'
 export default {
   name: 'CreateCourseSiteHeader',
   mixins: [Context],
-  watch: {
-    sectionIds() {
-      this.error = null
-    },
-    uid() {
-      this.error = null
-    }
-  },
   props: {
     adminMode: {
       required: true,
@@ -190,6 +182,11 @@ export default {
       type: Function
     }
   },
+  data: () => ({
+    error: undefined,
+    sectionIds: '',
+    uid: undefined
+  }),
   computed: {
     adminModeModel: {
       get() {
@@ -222,11 +219,14 @@ export default {
       }
     }
   },
-  data: () => ({
-    error: undefined,
-    sectionIds: '',
-    uid: undefined
-  }),
+  watch: {
+    sectionIds() {
+      this.error = null
+    },
+    uid() {
+      this.error = null
+    }
+  },
   methods: {
     size,
     submit() {

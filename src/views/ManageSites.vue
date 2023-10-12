@@ -89,7 +89,7 @@
                     v-model="canvasSiteId"
                     density="compact"
                     :disabled="isProcessing || !selection || selection.id !== 'manage-official-sections'"
-                    :error="!!trim(this.canvasSiteId) && !isCanvasSiteIdValid"
+                    :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
                     hide-details
                     label="Canvas Site ID"
                     maxlength="9"
@@ -200,6 +200,9 @@ export default {
             path: '/manage_sites'
           }
         ]
+        if (!canCreateCourseSite && !canCreateProjectSite) {
+          this.selection = this.options[2]
+        }
         this.$ready()
       })
     })

@@ -134,13 +134,13 @@ export default {
       return this.importProcessing || isEmpty(this.rawUids)
     }
   },
-  created() {
-    this.$ready()
-  },
   watch: {
     rawUids() {
       this.validationErrors = {}
     }
+  },
+  created() {
+    this.$ready()
   },
   methods: {
     handleError(errorMessage) {

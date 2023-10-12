@@ -257,8 +257,8 @@ import {each, filter, find, get, includes, map, size} from 'lodash'
 
 export default {
   name: 'CourseSectionsTable',
-  mixins: [Context],
   components: {OutboundLink},
+  mixins: [Context],
   props: {
     mode: {
       required: true,
@@ -304,6 +304,14 @@ export default {
       type: Function
     }
   },
+  data: () => ({
+    allSelected: false,
+    displayableSections: [],
+    hasSectionScheduleData: false,
+    indeterminate: false,
+    sectionDisplayClass: {},
+    selected: undefined
+  }),
   watch: {
     selected(objects) {
       if (!objects.length) {
@@ -322,14 +330,6 @@ export default {
       this.updateSelected()
     }
   },
-  data: () => ({
-    allSelected: false,
-    displayableSections: [],
-    hasSectionScheduleData: false,
-    indeterminate: false,
-    sectionDisplayClass: {},
-    selected: undefined
-  }),
   created() {
     this.selected = map(filter(this.sections, 'selected'), 'id')
     this.updateSectionDisplay()

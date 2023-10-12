@@ -117,20 +117,19 @@
 </template>
 
 <script setup>
+import CourseCodeAndTitle from '@/components/bcourses/create/CourseCodeAndTitle.vue'
+import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
+import OutboundLink from '@/components/utils/OutboundLink'
 import {mdiHelpCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
 </script>
 
 <script>
 import Context from '@/mixins/Context.vue'
-import CourseCodeAndTitle from '@/components/bcourses/create/CourseCodeAndTitle.vue'
-import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
-import OutboundLink from '@/components/utils/OutboundLink'
 import {find, size} from 'lodash'
 
 export default {
   name: 'SelectSectionsStep',
   mixins: [Context],
-  components: {CourseCodeAndTitle, CourseSectionsTable, OutboundLink},
   props: {
     coursesList: {
       required: true,
