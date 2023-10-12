@@ -61,8 +61,8 @@
                   <div>
                     Add or remove official section rosters in already-created course sites.
                   </div>
-                  <div v-if="option.isAvailable" class="pl-3 py-2">
-                    <div v-for="(courses, termId) in coursesByTerm" :key="termId">
+                  <div v-if="option.isAvailable" class="pl-3">
+                    <div v-for="(courses, termId) in coursesByTerm" :key="termId" class="py-2">
                       <div class="text-subtitle-1">{{ getTermName(termId) }}</div>
                       <select
                         id="course-sections"
@@ -130,13 +130,14 @@
 <script setup>
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
+import {getTermName} from '@/utils'
 </script>
 
 <script>
 import Context from '@/mixins/Context'
 import {each, get, size, trim} from 'lodash'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
-import {getTermName, isValidCanvasSiteId, putFocusNextTick} from '@/utils'
+import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 import {getCanvasSite, myCurrentCanvasCourses} from '@/api/canvas-site'
 
 export default {
@@ -209,7 +210,6 @@ export default {
   },
   methods: {
     each,
-    getTermName,
     goNext() {
       if (!this.isButtonDisabled) {
         this.isProcessing = true
