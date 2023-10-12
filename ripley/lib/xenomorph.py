@@ -41,8 +41,9 @@ class Xenomorph:
     exit_now = False
 
     def __init__(self):
-        signal.signal(signal.SIGINT, self.exit_gracefully)
-        signal.signal(signal.SIGTERM, self.exit_gracefully)
+        # This wrapper script is configured under systemd to be killed by a user-defined signal rather
+        # than SIGTERM, which the rq worker itself is listening for.
+        signal.signal(signal.SIGUSR1, self.exit_gracefully)
         self.redis_url = get_redis_url(app)
 
     def is_worker_alive(self):
@@ -93,7 +94,10 @@ class Xenomorph:
             for w in workers:
                 if w.pid:
                     app.logger.info(f'Existing worker (PID {w.pid}) did not stop when asked.')
-                    os.kill(w.pid, signal.SIGINT)
+                    try:
+                        os.kill(w.pid, signal.SIGINT)
+                    except ProcessLookupError:
+                        app.logger.info(f'Failed to find a process under PID {w.pid}.')
                     w.teardown()
                 else:
                     # A worker without a PID is incapable of doing any work and needs to be taken off the payroll.
@@ -113,11 +117,17 @@ class Xenomorph:
 
     def exit_gracefully(self, *args):
         self.exit_now = True
+        # Pass along a SIGTERM to the rq worker loop in this same process, if it's alive and listening.
+        os.kill(os.getpid(), signal.SIGTERM)
 
 
 def start_xenomorph_loop():
     xenomorph = Xenomorph()
     while True:
+        if xenomorph.exit_now:
+            app.logger.info('Received exit signal, quitting wrapper script')
+            break
+
         app.logger.debug('Checking worker status')
         # If we already have a worker (on this instance or another) that seems to be doing its job, leave it be.
         if xenomorph.is_worker_alive():
@@ -127,8 +137,6 @@ def start_xenomorph_loop():
                 if xenomorph.exit_now:
                     xenomorph.stop_workers()
                     break
-        elif xenomorph.exit_now:
-            break
         else:
             # Any existing workers have quit, either quietly or loudly. Clear them out of Redis.
             xenomorph.stop_workers()
