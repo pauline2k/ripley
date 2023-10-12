@@ -57,11 +57,11 @@
                 <OutboundLink id="berkeley-collaboration-services-information" href="https://bconnected.berkeley.edu/collaboration-services">other collaboration tools at UC Berkeley</OutboundLink>.
               </div>
               <div v-if="option.id === 'manage-official-sections'" class="pt-2" @click="() => selection = option">
-                <div v-if="size(coursesByTerm)">
+                <div v-if="size(coursesByTerm)" :class="{'text-grey': !option.isAvailable}">
                   <div>
                     Add or remove official section rosters in already-created course sites.
                   </div>
-                  <div class="pl-3 py-2">
+                  <div v-if="option.isAvailable" class="pl-3 py-2">
                     <div v-for="(courses, termId) in coursesByTerm" :key="termId">
                       <div class="text-subtitle-1">{{ getTermName(termId) }}</div>
                       <select
@@ -195,7 +195,7 @@ export default {
           {
             header: 'Manage official sections of an existing site',
             id: 'manage-official-sections',
-            isAvailable: canCreateCourseSite && (this.currentUser.isAdmin || size(this.coursesByTerm)),
+            isAvailable: this.currentUser.isAdmin || size(this.coursesByTerm),
             label: 'Manage Official Sections',
             path: '/manage_sites'
           }

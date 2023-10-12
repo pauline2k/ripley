@@ -221,15 +221,11 @@ export default {
   }),
   created() {
     this.canvasSiteId = toInt(get(this.$route, 'params.canvasSiteId'))
-    this.fetchFeed().finally(() => {
-      this.$ready()
-    })
+    this.fetchFeed().finally(() => this.$ready())
   },
   computed: {
     allSections() {
-      return flatMap(this.courseSemesterClasses, classItem => {
-        return classItem.sections
-      })
+      return flatMap(this.courseSemesterClasses, classItem => classItem.sections)
     },
     showAlert: {
       get() {
@@ -250,13 +246,7 @@ export default {
   methods: {
     addAllSections(course) {
       this.alertScreenReader('All sections selected for course: ' + course.title)
-      course.sections.forEach(section => {
-        if (section.isCourseSection) {
-          section.stagedState = null
-        } else {
-          section.stagedState = 'add'
-        }
-      })
+      course.sections.forEach(section => section.stagedState = section.isCourseSection ? null : 'add')
       this.eventHub.emit('sections-table-updated')
     },
     allSectionsAdded(course) {
@@ -280,10 +270,18 @@ export default {
     },
     fetchFeed() {
       return getCourseSections(this.canvasSiteId).then(
-        response => {
-          if (response.canvasSite) {
-            this.canvasSite = response.canvasSite
-            this.refreshFromFeed(response)
+        data => {
+          if (data.canvasSite) {
+            this.canvasSite = data.canvasSite
+            if (data.teachingTerms) {
+              this.loadCourseLists(data.teachingTerms)
+            }
+            this.isAdmin = data.is_admin
+            this.adminActingAs = data.adminActingAs
+            this.adminTerms = data.adminTerms
+            this.isCourseCreator = this.usersClassCount > 0
+            this.feedFetched = true
+            this.changeWorkflowStep('preview')
           } else {
             this.displayError = 'Failed to retrieve section data.'
           }
@@ -340,17 +338,6 @@ export default {
       } else {
         this.usersClassCount = 0
       }
-    },
-    refreshFromFeed(feed) {
-      if (feed.teachingTerms) {
-        this.loadCourseLists(feed.teachingTerms)
-      }
-      this.isAdmin = feed.is_admin
-      this.adminActingAs = feed.adminActingAs
-      this.adminTerms = feed.adminTerms
-      this.isCourseCreator = this.usersClassCount > 0
-      this.feedFetched = true
-      this.changeWorkflowStep('preview')
     },
     rowClassLogic(listMode, section) {
       return {
