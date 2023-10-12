@@ -58,14 +58,13 @@
 </template>
 
 <script setup>
+import AppBarMenu from '@/components/utils/AppBarMenu.vue'
+import BuildSummary from '@/components/utils/BuildSummary'
 import {mdiArrowRightCircleOutline, mdiProgressCheck} from '@mdi/js'
 </script>
 
 <script>
-import AppBarMenu from '@/components/utils/AppBarMenu.vue'
-import BuildSummary from '@/components/utils/BuildSummary'
 import Context from '@/mixins/Context'
-import moment from 'moment'
 import {updateUserSession} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
 import {isNil, trim} from 'lodash'
@@ -74,7 +73,6 @@ import {isValidCanvasSiteId} from '@/utils'
 export default {
   name: 'AppBar',
   mixins: [Context],
-  components: {AppBarMenu, BuildSummary},
   props: {
     includeBuildSummary: {
       required: false,
@@ -106,7 +104,6 @@ export default {
     })
   },
   methods: {
-    moment,
     trim,
     updateCanvasSiteId() {
       const canvasSiteId = trim(this.canvasSiteId) || null

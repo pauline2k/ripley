@@ -98,7 +98,12 @@
                     @keydown.enter="goNext"
                   />
                 </div>
-                <div v-if="error" class="font-italic font-weight-medium text-red">
+                <div
+                  v-if="error"
+                  aria-live="polite"
+                  class="font-italic font-weight-medium text-red"
+                  role="alert"
+                >
                   {{ error }}
                 </div>
               </div>
@@ -122,19 +127,21 @@
   </div>
 </template>
 
-<script>
-import Context from '@/mixins/Context'
+<script setup>
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
-import {each, size, trim} from 'lodash'
+</script>
+
+<script>
+import Context from '@/mixins/Context'
+import {each, get, size, trim} from 'lodash'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
-import {getTermName, isValidCanvasSiteId} from '@/utils'
-import {getCourseSections, myCurrentCanvasCourses} from '@/api/canvas-site'
+import {getTermName, isValidCanvasSiteId, putFocusNextTick} from '@/utils'
+import {getCanvasSite, myCurrentCanvasCourses} from '@/api/canvas-site'
 
 export default {
   name: 'ManageSites',
   mixins: [Context],
-  components: {Header1, OutboundLink},
   data: () => ({
     canvasSiteId: null,
     coursesByTerm: undefined,
@@ -154,6 +161,9 @@ export default {
   watch: {
     selection() {
       this.canvasSiteId = null
+      if (get(this.selection, 'id') === 'manage-official-sections') {
+        putFocusNextTick('canvas-site-id-input')
+      }
     }
   },
   created() {
@@ -201,7 +211,7 @@ export default {
       if (!this.isButtonDisabled) {
         this.isProcessing = true
         if (this.selection.id === 'manage-official-sections') {
-          getCourseSections(this.canvasSiteId).then(
+          getCanvasSite(this.canvasSiteId).then(
             () => this.$router.push({path: `/official_sections/${this.canvasSiteId}`}),
             error => this.error = error
           ).finally(() => this.isProcessing = false)
