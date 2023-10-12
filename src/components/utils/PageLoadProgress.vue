@@ -1,6 +1,5 @@
 <template>
   <v-progress-circular
-    v-if="true || $isInIframe"
     class="spinner"
     :size="50"
     color="primary"
@@ -8,19 +7,13 @@
   />
 </template>
 
-<script>
-export default {
-  name: 'PageLoadProgress'
-}
-</script>
-
 <style scoped>
 .spinner {
   bottom: 0;
   height: 2em;
   left: 0;
   margin: auto;
-  overflow: show;
+  overflow: visible;
   position: fixed;
   right: 0;
   top: 0;

@@ -2,10 +2,10 @@
   <v-app>
     <div
       id="announcer"
-      :aria-live="screenReaderAlert.politeness"
+      :aria-live="context.screenReaderAlert.politeness"
       class="sr-only"
     >
-      {{ screenReaderAlert.message }}
+      {{ context.screenReaderAlert.message }}
     </div>
     <div v-if="!$isInIframe">
       <a
@@ -13,32 +13,24 @@
         href="#content"
         class="sr-only sr-only-focusable"
         tabindex="0"
-        @click="skipTo('#main-content')"
       >
         Skip to content
       </a>
     </div>
     <v-main class="v-main-when-print">
-      <PageLoadProgress v-if="isLoading" />
-      <router-view v-if="applicationState.status === 200" />
-      <Error v-if="applicationState.status !== 200" />
+      <PageLoadProgress v-if="context.isLoading" />
+      <router-view v-if="context.applicationState.status === 200" />
+      <Error v-if="context.applicationState.status !== 200" />
     </v-main>
   </v-app>
 </template>
 
-<script>
-import Context from '@/mixins/Context'
+<script setup>
 import Error from '@/views/Error'
 import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'App',
-  components: {Error, PageLoadProgress},
-  mixins: [Context],
-  methods: {
-    skipTo: anchor => console.log(`TODO: VueScrollTo.scrollTo(${anchor}, 400)`)
-  }
-}
+const context = useContextStore()
 </script>
 
 <style lang="scss">
