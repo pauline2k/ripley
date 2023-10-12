@@ -2,6 +2,7 @@
   <AppBar  v-if="!$isInIframe" />
   <v-container
     v-if="!isLoading"
+    id="content"
     class="background-splash"
     fill-height
     fluid

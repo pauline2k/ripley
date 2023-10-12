@@ -54,7 +54,7 @@ export function courseProvisionJobStatus(jobId: number) {
 }
 
 export function getCourseSections(canvasSiteId: number) {
-  return utils.get(`/api/canvas_site/${canvasSiteId}/official_sections`, true)
+  return utils.get(`/api/canvas_site/${canvasSiteId}/official_sections`, false)
 }
 
 export function getSections(

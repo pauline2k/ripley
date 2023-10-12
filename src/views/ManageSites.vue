@@ -1,6 +1,10 @@
 <template>
   <div v-if="!isLoading" class="pt-3 px-16">
-    <Header1 class="mb-2" text="Create or Update bCourses Sites" />
+    <Header1 class="mb-1" text="Create or Update bCourses Sites" />
+    <div v-if="!size(coursesByTerm) && !currentUser.isAdmin" class="font-italic font-weight-medium text-red">
+      Sorry, we found neither {{ config.terms.current.name }} nor {{ config.terms.next.name }}
+      courses in which you are listed as an instructor.
+    </div>
     <v-radio-group
       v-model="selection"
       class="d-flex"
@@ -21,7 +25,7 @@
               <v-radio
                 :id="option.id"
                 :class="{'text-grey': !option.isAvailable}"
-                :disabled="!option.isAvailable"
+                :disabled="!option.isAvailable || isProcessing"
                 :value="option"
               />
             </div>
@@ -52,55 +56,50 @@
                 and
                 <OutboundLink id="berkeley-collaboration-services-information" href="https://bconnected.berkeley.edu/collaboration-services">other collaboration tools at UC Berkeley</OutboundLink>.
               </div>
-              <div v-if="option.id === 'manage-official-sections'">
-                <div class="pt-2">
-                  <div v-if="size(coursesByTerm)">
-                    <div @click="() => selection = option">
-                      Add or remove official section rosters in already-created course sites.
-                    </div>
-                    <div class="pl-3 py-2">
-                      <div v-for="(courses, termId) in coursesByTerm" :key="termId">
-                        <div class="text-subtitle-1">{{ getTermName(termId) }}</div>
-                        <select
-                          id="course-sections"
-                          v-model="canvasSiteId"
-                          :disabled="!selection || selection.id !== 'manage-official-sections'"
+              <div v-if="option.id === 'manage-official-sections'" class="pt-2" @click="() => selection = option">
+                <div v-if="size(coursesByTerm)">
+                  <div>
+                    Add or remove official section rosters in already-created course sites.
+                  </div>
+                  <div class="pl-3 py-2">
+                    <div v-for="(courses, termId) in coursesByTerm" :key="termId">
+                      <div class="text-subtitle-1">{{ getTermName(termId) }}</div>
+                      <select
+                        id="course-sections"
+                        v-model="canvasSiteId"
+                        :disabled="!selection || selection.id !== 'manage-official-sections' || isProcessing"
+                      >
+                        <option :value="null">Choose...</option>
+                        <option
+                          v-for="course in courses"
+                          :id="`canvas-site-${course.canvasSiteId}`"
+                          :key="course.canvasSiteId"
+                          :value="course.canvasSiteId"
                         >
-                          <option :value="null">Choose...</option>
-                          <option
-                            v-for="course in courses"
-                            :id="`canvas-site-${course.canvasSiteId}`"
-                            :key="course.canvasSiteId"
-                            :value="course.canvasSiteId"
-                          >
-                            {{ course.courseCode }} &mdash; {{ course.name }}
-                          </option>
-                        </select>
-                      </div>
+                          {{ course.courseCode }} &mdash; {{ course.name }}
+                        </option>
+                      </select>
                     </div>
                   </div>
-                  <div v-if="currentUser.isAdmin">
-                    <label class="sr-only" for="canvas-site-id-input">Canvas Site I D:</label>
-                    <v-text-field
-                      id="canvas-site-id-input"
-                      v-model="canvasSiteId"
-                      density="compact"
-                      :disabled="!selection || selection.id !== 'manage-official-sections'"
-                      :error="!!trim(this.canvasSiteId) && !isCanvasSiteIdValid"
-                      hide-details
-                      label="Canvas Site ID"
-                      maxlength="10"
-                      style="width: 200px"
-                      variant="outlined"
-                      @keydown.enter="goNext"
-                    />
-                  </div>
-                  <div v-if="!size(coursesByTerm) && !currentUser.isAdmin">
-                    <span class="font-italic font-weight-medium text-red">
-                      Sorry, we found neither {{ config.terms.current.name }} nor {{ config.terms.next.name }}
-                      courses in which you are listed as an instructor.
-                    </span>
-                  </div>
+                </div>
+                <div v-if="currentUser.isAdmin">
+                  <label class="sr-only" for="canvas-site-id-input">Canvas Site I D:</label>
+                  <v-text-field
+                    id="canvas-site-id-input"
+                    v-model="canvasSiteId"
+                    density="compact"
+                    :disabled="isProcessing || !selection || selection.id !== 'manage-official-sections'"
+                    :error="!!trim(this.canvasSiteId) && !isCanvasSiteIdValid"
+                    hide-details
+                    label="Canvas Site ID"
+                    maxlength="9"
+                    style="width: 148px"
+                    variant="outlined"
+                    @keydown.enter="goNext"
+                  />
+                </div>
+                <div v-if="error" class="font-italic font-weight-medium text-red">
+                  {{ error }}
                 </div>
               </div>
             </div>
@@ -113,7 +112,7 @@
         id="go-next-btn"
         class="float-right"
         color="primary"
-        :disabled="isButtonDisabled"
+        :disabled="isButtonDisabled || isProcessing"
         size="large"
         @click="goNext"
       >
@@ -130,7 +129,7 @@ import OutboundLink from '@/components/utils/OutboundLink'
 import {each, size, trim} from 'lodash'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
 import {getTermName, isValidCanvasSiteId} from '@/utils'
-import {myCurrentCanvasCourses} from '@/api/canvas-site'
+import {getCourseSections, myCurrentCanvasCourses} from '@/api/canvas-site'
 
 export default {
   name: 'ManageSites',
@@ -139,6 +138,8 @@ export default {
   data: () => ({
     canvasSiteId: null,
     coursesByTerm: undefined,
+    error: undefined,
+    isProcessing: false,
     options: undefined,
     selection: undefined
   }),
@@ -198,8 +199,16 @@ export default {
     getTermName,
     goNext() {
       if (!this.isButtonDisabled) {
-        const path = this.selection.id === 'manage-official-sections' ? `/official_sections/${this.canvasSiteId}` : this.selection.path
-        this.$router.push({path})
+        this.isProcessing = true
+        if (this.selection.id === 'manage-official-sections') {
+          getCourseSections(this.canvasSiteId).then(
+            () => this.$router.push({path: `/official_sections/${this.canvasSiteId}`}),
+            error => this.error = error
+          ).finally(() => this.isProcessing = false)
+        } else {
+          this.$router.push({path: this.selection.path})
+          this.isProcessing = false
+        }
       }
     },
     size,

@@ -31,21 +31,9 @@
 </template>
 
 <script setup>
-import {mdiAlien} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
 import {get} from 'lodash'
+import {mdiAlien} from '@mdi/js'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'BuildSummary',
-  mixins: [Context],
-  data: () => ({
-    summary: undefined
-  }),
-  methods: {
-    get
-  }
-}
+const config = useContextStore().config
 </script>
