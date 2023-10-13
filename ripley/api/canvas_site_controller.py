@@ -39,6 +39,10 @@ from ripley.merged.grade_distributions import get_grade_distribution_with_demogr
     get_grade_distribution_with_enrollments
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
+ROLES_CAN_EDIT_OFFICIAL_SECTIONS = ['Lead TA', 'TeacherEnrollment']
+
+ROLES_CAN_VIEW_OFFICIAL_SECTIONS = ['DesignerEnrollment', 'Lead TA', 'TaEnrollment', 'TeacherEnrollment']
+
 
 @app.route('/api/canvas_site/provision')
 @login_required
@@ -85,7 +89,6 @@ def get_canvas_site(canvas_site_id):
 @app.route('/api/canvas_site/manage_official_sections')
 @login_required
 def manage_official_sections():
-    authorized_roles = ['DesignerEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'Lead TA']
     canvas_courses = canvas.get_user_courses(current_user.uid)
     terms = BerkeleyTerm.get_current_terms()
     api_json = {}
@@ -96,8 +99,8 @@ def manage_official_sections():
         for canvas_course in canvas_courses:
             if canvas_course.term['sis_term_id'] == sis_term_id:
                 enrollments = list(filter(lambda e: e.get('user_id') == current_user.canvas_user_id, canvas_course.enrollments))
-                roles = [e['role'] for e in enrollments]
-                if next((role for role in roles if role in authorized_roles), None):
+                current_user_roles = [e['role'] for e in enrollments]
+                if next((role for role in current_user_roles if role in ROLES_CAN_VIEW_OFFICIAL_SECTIONS), None):
                     api_json[term_id].append(canvas_site_to_api_json(canvas_course))
     return tolerant_jsonify(api_json)
 
@@ -152,7 +155,7 @@ def create_course_site():
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections', methods=['POST'])
-@canvas_role_required('TeacherEnrollment', 'Lead TA')
+@canvas_role_required(*ROLES_CAN_EDIT_OFFICIAL_SECTIONS)
 def edit_sections(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
@@ -204,13 +207,13 @@ def get_grade_distribution(canvas_site_id):
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/official_sections')
-@canvas_role_required('DesignerEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'Lead TA')
+@canvas_role_required(*ROLES_CAN_VIEW_OFFICIAL_SECTIONS)
 def get_official_course_sections(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
         canvas_site_user = canvas.get_course_user(canvas_site_id, current_user.canvas_user_id)
         enrollments = canvas_site_user.enrollments if canvas_site_user and canvas_site_user.enrollments else []
-        can_edit = bool(next((e for e in enrollments if e['role'] in ['TeacherEnrollment', 'Lead TA']), None))
+        can_edit = bool(next((e for e in enrollments if e['role'] in ROLES_CAN_EDIT_OFFICIAL_SECTIONS), None))
         term = BerkeleyTerm.from_canvas_sis_term_id(course.term['sis_term_id'])
         official_sections, section_ids, sections = get_official_sections(canvas_site_id)
         teaching_terms = [] if not len(section_ids) else get_teaching_terms(
