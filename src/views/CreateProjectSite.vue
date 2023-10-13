@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-10 my-5">
+  <div v-if="!isLoading" class="mx-10 my-5">
     <Header1 text="Create a Project Site" />
     <div v-if="!isLoading">
       <CanvasErrors v-if="error" :message="error" />
@@ -26,9 +26,6 @@
           />
         </div>
       </div>
-      <div class="pb-8 pr-2">
-        <v-divider />
-      </div>
       <div class="d-flex justify-end">
         <v-btn
           id="create-project-site-button"
@@ -46,7 +43,7 @@
               indeterminate
               size="18"
             />
-            Creating...
+            Creating<span aria-hidden="true">...</span><span class="sr-only"> Project Site</span>
           </span>
         </v-btn>
         <v-btn

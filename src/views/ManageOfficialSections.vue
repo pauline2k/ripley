@@ -1,5 +1,6 @@
 <template>
   <div v-if="!isLoading" class="pt-3 px-6">
+    <MaintenanceNotice class="mb-3" course-action-verb="site is updated" />
     <div v-if="feedFetched && !displayError">
       <Header1 class="mb-2 mt-0" :text="`${canvasSite.name}, ${canvasSite.term.name}`" />
       <div class="align-center d-flex h2-container justify-space-between">
@@ -17,7 +18,6 @@
           </v-btn>
         </div>
       </div>
-      <MaintenanceNotice class="mt-3" course-action-verb="site is updated" />
       <div class="mb-8">
         <div v-if="currentWorkflowStep === 'preview'">
           <v-alert
@@ -34,11 +34,13 @@
             <div class="font-size-16">{{ jobStatusMessage }}</div>
           </v-alert>
           <CourseSectionsTable
+            id="template-sections-table-preview"
             class="mb-1 mt-4"
             mode="preview"
             :row-class-logic="rowClassLogic"
             :row-display-logic="rowDisplayLogic"
             :sections="existingCourseSections"
+            table-caption="Official sections in this course. To edit, use the Edit Sections button above."
           />
         </div>
         <div v-if="currentWorkflowStep === 'staging'">
@@ -58,9 +60,10 @@
               variant="text"
               @click="cancel"
             >
-              Cancel
+              Cancel<span class="sr-only"> edit sections</span>
             </v-btn>
           </div>
+          id="template-sections-table-currentStaging"
           <CourseSectionsTable
             class="mb-1"
             mode="currentStaging"
@@ -69,6 +72,7 @@
             :sections="allSections"
             :stage-delete-action="stageDelete"
             :stage-update-action="stageUpdate"
+            table-caption="Official sections in this course. Use the buttons in the Actions column to make changes."
             :unstage-action="unstage"
           />
           <div v-if="totalStagedCount > 12">
@@ -78,7 +82,7 @@
               class="mx-1"
               @click="cancel"
             >
-              Cancel
+              Cancel<span class="sr-only"> edit sections</span>
             </v-btn>
             <v-btn
               id="official-sections-secondary-save-btn"
@@ -111,13 +115,18 @@
                   <template #actions="{ expanded }">
                     <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
                   </template>
-                  <h5 id="available-course-header" class="sections-course-title">
+                  <span
+                    :id="`sections-course-${course.slug}-available-course-header`"
+                    aria-level="5"
+                    class="sections-course-title"
+                    role="heading"
+                  >
                     {{ course.courseCode }}
                     <span v-if="course.title">&mdash; {{ course.title }}</span>
                     <span v-if="size(course.sections)">
                       ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
                     </span>
-                  </h5>
+                  </span>
                 </v-expansion-panel-title>
                 <v-expansion-panel-text>
                   <div v-if="course.sections.length > 1">
@@ -135,12 +144,14 @@
                   <v-row no-gutters>
                     <v-col md="12">
                       <CourseSectionsTable
+                        :id="`template-sections-table-availableStaging-${index}`"
                         class="mb-1 mt-4"
                         mode="availableStaging"
                         :row-class-logic="rowClassLogic"
                         :row-display-logic="rowDisplayLogic"
                         :sections="course.sections"
                         :stage-add-action="stageAdd"
+                        :table-caption="`Official sections in this course. ${allSectionsAdded(course) ? ' All sections added.' : ' Use the Add All button above, or'} use the buttons in the Actions column to make changes.`"
                         :unstage-action="unstage"
                       />
                     </v-col>
@@ -191,13 +202,12 @@ import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import Header1 from '@/components/utils/Header1.vue'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import {mdiAlertCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
-import {pluralize} from '@/utils'
 </script>
 
 <script>
 import Context from '@/mixins/Context'
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
-import {toInt} from '@/utils'
+import {pluralize, putFocusNextTick, toInt} from '@/utils'
 import {each, filter, find, flatMap, get, includes, keys, set, size, toString, union, unset} from 'lodash'
 
 export default {
@@ -257,10 +267,12 @@ export default {
     cancel() {
       this.changeWorkflowStep('preview')
       this.unstageAll()
+      putFocusNextTick('official-sections-edit-btn')
     },
     changeWorkflowStep(step) {
       if (step === 'staging') {
         this.alertScreenReader('Edit section form loaded')
+        putFocusNextTick('official-sections-cancel-btn')
         this.jobStatus = null
         this.jobStatusMessage = ''
       } else if (step === 'preview') {
@@ -443,11 +455,11 @@ export default {
     unstage(section) {
       if (section.stagedState === 'add') {
         this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
-        this.alertScreenReader('Removed section from the list of sections to be added')
+        this.alertScreenReader(`Removed '${this.sectionString(section)}' from sections to be added to the course`)
       } else if (section.stagedState === 'delete') {
-        this.alertScreenReader('Removed section from the list of sections to be deleted')
+        this.alertScreenReader(`Removed '${this.sectionString(section)}' from sections to be deleted`)
       } else if (section.stagedState === 'update') {
-        this.alertScreenReader('Removed section from the list of sections to be updated')
+        this.alertScreenReader(`Removed '${this.sectionString(section)}' from sections to be updated`)
       }
       section.stagedState = null
     },
@@ -461,12 +473,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
-h5.sections-course-title {
+.h2-container {
+  min-height: 36px;
+}
+.sections-course-title {
   font-size: 18px !important;
   font-weight: 400 !important;
   line-height: 18px;
-}
-.h2-container {
-  min-height: 36px;
 }
 </style>

@@ -8,7 +8,6 @@
     <v-radio-group
       v-model="selection"
       class="d-flex"
-      hide-details
     >
       <ul>
         <li
@@ -32,6 +31,7 @@
             <div class="list-item-content">
               <label class="w-100" :for="option.id">
                 <h2 :class="{'text-grey': !option.isAvailable}">{{ option.header }}</h2>
+                <span class="sr-only">.</span>
               </label>
               <div v-if="option.id === 'create-course-site'">
                 <div v-if="option.isAvailable" @click="() => selection = option">
@@ -49,7 +49,7 @@
                 :class="{'text-grey': !option.isAvailable}"
                 @click="() => selection = option"
               >
-                Share files and collaborate. Project sites are best suited for instructors and GSIs who already use bCourses.
+                Share files and collaborate. Project sites are best suited for instructors and <span :aria-hidden="true">GSIs</span><span class="sr-only">G S I's</span> who already use bCourses.
                 Project sites cannot access all bCourses features and are not intended for lecture, lab, or discussion sections.
                 Learn more about
                 <OutboundLink id="bcourses-project-sites-service-page" href="https://rtl.berkeley.edu/services-programs/bcourses-project-sites">Project Sites</OutboundLink>
@@ -65,9 +65,10 @@
                     <select
                       id="course-sections"
                       v-model="canvasSiteId"
-                      :disabled="!selection || selection.id !== 'manage-official-sections' || isProcessing"
+                      aria-label="All courses"
+                      :disabled="isManageOfficialSectionsDisabled"
                     >
-                      <option :value="null">Choose...</option>
+                      <option :value="null">Choose a course</option>
                       <optgroup
                         v-for="(courses, termId) in coursesByTerm"
                         :key="termId"
@@ -86,13 +87,13 @@
                     </select>
                   </div>
                 </div>
-                <div v-if="currentUser.isAdmin">
+                <div v-if="currentUser.isAdmin" class="mt-2 pl-3">
                   <label class="sr-only" for="canvas-site-id-input">Canvas Site I D:</label>
                   <v-text-field
                     id="canvas-site-id-input"
                     v-model="canvasSiteId"
                     density="compact"
-                    :disabled="isProcessing || !selection || selection.id !== 'manage-official-sections'"
+                    :disabled="isManageOfficialSectionsDisabled"
                     :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
                     hide-details
                     label="Canvas Site ID"
@@ -161,6 +162,9 @@ export default {
     },
     isCanvasSiteIdValid() {
       return isValidCanvasSiteId(this.canvasSiteId)
+    },
+    isManageOfficialSectionsDisabled() {
+      return !this.selection || this.selection.id !== 'manage-official-sections' || this.isProcessing
     }
   },
   watch: {
@@ -234,7 +238,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 li {
   border: 1px solid #fff;
 }
