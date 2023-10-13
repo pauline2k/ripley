@@ -39,7 +39,7 @@ background_job_manager = BackgroundJobManager()
 q = None
 
 
-def create_app():
+def create_app(routes=True, jobs=True):
     """Initialize Ripley."""
     app = Flask(__name__.split('.')[0])
     load_configs(app)
@@ -50,8 +50,10 @@ def create_app():
     _initialize_queue(app)
 
     with app.app_context():
-        register_routes(app)
-        _register_jobs(app)
+        if routes:
+            register_routes(app)
+        if jobs:
+            _register_jobs(app)
 
     return app
 

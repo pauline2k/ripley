@@ -34,7 +34,7 @@ from ripley.factory import create_app
 def in_app(func):
     @wraps(func)
     def _in_app_func(*args, **kw):
-        app = create_app()
+        app = create_app(routes=False, jobs=False)
         ac = app.app_context()
         try:
             ac.push()
