@@ -68,18 +68,21 @@
                       :disabled="!selection || selection.id !== 'manage-official-sections' || isProcessing"
                     >
                       <option :value="null">Choose...</option>
-                      <template v-for="(courses, termId) in coursesByTerm" :key="termId">
-                        <optgroup class="text-subtitle-1" :label="getTermName(termId)">
-                          <option
-                            v-for="course in courses"
-                            :id="`canvas-site-${course.canvasSiteId}`"
-                            :key="course.canvasSiteId"
-                            :value="course.canvasSiteId"
-                          >
-                            {{ course.courseCode }} &mdash; {{ course.name }}
-                          </option>
-                        </optgroup>
-                      </template>
+                      <optgroup
+                        v-for="(courses, termId) in coursesByTerm"
+                        :key="termId"
+                        class="text-subtitle-1"
+                        :label="getTermName(termId)"
+                      >
+                        <option
+                          v-for="course in courses"
+                          :id="`canvas-site-${course.canvasSiteId}`"
+                          :key="course.canvasSiteId"
+                          :value="course.canvasSiteId"
+                        >
+                          {{ course.courseCode }} &mdash; {{ course.name }}
+                        </option>
+                      </optgroup>
                     </select>
                   </div>
                 </div>
@@ -139,7 +142,7 @@ import Context from '@/mixins/Context'
 import {each, get, size, trim} from 'lodash'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
 import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
-import {getCanvasSite, myCurrentCanvasCourses} from '@/api/canvas-site'
+import {getCanvasSite, getManageOfficialSections} from '@/api/canvas-site'
 
 export default {
   name: 'ManageSites',
@@ -170,7 +173,7 @@ export default {
   },
   created() {
     this.coursesByTerm = {}
-    myCurrentCanvasCourses().then(data => {
+    getManageOfficialSections().then(data => {
       each(data, (courses, term) => {
         if (courses.length) {
           this.coursesByTerm[term] = courses

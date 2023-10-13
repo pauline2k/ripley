@@ -41,8 +41,9 @@ from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
 
 @app.route('/api/canvas_site/provision')
+@login_required
 def canvas_site_provision():
-    if current_user.is_authenticated and current_user.can_create_canvas_course_site:
+    if current_user.can_create_canvas_course_site:
         admin_acting_as = request.args.get('adminActingAs')
         admin_by_ccns = request.args.getlist('adminBySectionIds[]')
         admin_term_slug = request.args.get('adminTermSlug')
@@ -58,6 +59,7 @@ def canvas_site_provision():
 
 
 @app.route('/api/canvas_site/<canvas_site_id>')
+@login_required
 def get_canvas_site(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
@@ -77,30 +79,33 @@ def get_canvas_site(canvas_site_id):
             api_json['users'] = sorted(users, key=lambda u: u['sortableName'])
         return tolerant_jsonify(api_json)
     else:
-        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}.')
 
 
-@app.route('/api/canvas_site/my_current_courses')
-def my_current_courses():
-    if current_user.is_authenticated:
-        api_json = {}
-        terms = BerkeleyTerm.get_current_terms()
-        canvas_courses = canvas.get_user_courses(current_user.uid)
-        for term in [terms['current'], terms['next']]:
-            term_id = term.to_sis_term_id()
-            sis_term_id = term.to_canvas_sis_term_id()
-            api_json[term_id] = []
-            for canvas_course in list(filter(lambda c: c.term['sis_term_id'] == sis_term_id, canvas_courses)):
-                api_json[term_id].append(canvas_site_to_api_json(canvas_course))
-        return tolerant_jsonify(api_json)
-    else:
-        app.logger.warning(f'Unauthorized request to {request.path}')
-        return app.login_manager.unauthorized()
+@app.route('/api/canvas_site/manage_official_sections')
+@login_required
+def manage_official_sections():
+    authorized_roles = ['DesignerEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'Lead TA']
+    canvas_courses = canvas.get_user_courses(current_user.uid)
+    terms = BerkeleyTerm.get_current_terms()
+    api_json = {}
+    for term in [terms['current'], terms['next']]:
+        term_id = term.to_sis_term_id()
+        sis_term_id = term.to_canvas_sis_term_id()
+        api_json[term_id] = []
+        for canvas_course in canvas_courses:
+            if canvas_course.term['sis_term_id'] == sis_term_id:
+                enrollments = list(filter(lambda e: e.get('user_id') == current_user.canvas_user_id, canvas_course.enrollments))
+                roles = [e['role'] for e in enrollments]
+                if next((role for role in roles if role in authorized_roles), None):
+                    api_json[term_id].append(canvas_site_to_api_json(canvas_course))
+    return tolerant_jsonify(api_json)
 
 
 @app.route('/api/canvas_site/project_site/create', methods=['POST'])
+@login_required
 def create_project_site():
-    if current_user.is_authenticated and current_user.can_create_canvas_project_site:
+    if current_user.can_create_canvas_project_site:
         params = request.get_json()
         name = (params.get('name', None) or '').strip()
         if not name or len(name) > 255:
@@ -113,60 +118,62 @@ def create_project_site():
 
 
 @app.route('/api/canvas_site/provision/create', methods=['POST'])
+@login_required
 def create_course_site():
-    if not current_user.is_authenticated or not current_user.can_create_canvas_course_site:
+    if current_user.can_create_canvas_course_site:
+        params = request.get_json()
+        admin_acting_as = params.get('adminActingAs')
+        admin_by_ccns = params.get('adminBySectionIds')
+        site_name = params.get('siteName')
+        site_abbreviation = params.get('siteAbbreviation')
+        term_slug = params.get('termSlug')
+        section_ids = params.get('sectionIds')
+
+        is_admin = (current_user.is_admin or current_user.is_canvas_admin)
+        uid = (is_admin and admin_acting_as) or current_user.uid
+
+        if not section_ids or not len(section_ids):
+            raise BadRequestError('Required parameters are missing.')
+        job = enqueue(
+            func=provision_course_site,
+            args=(uid, site_name, site_abbreviation, term_slug, section_ids, bool(admin_by_ccns)),
+        )
+        if not job:
+            raise InternalServerError('Updates cannot be completed at this time.')
+        return tolerant_jsonify(
+            {
+                'jobId': job.id,
+                'jobStatus': 'sendingRequest',
+            },
+        )
+    else:
         app.logger.warning(f'Unauthorized request to {request.path}')
         return app.login_manager.unauthorized()
-
-    params = request.get_json()
-    admin_acting_as = params.get('adminActingAs')
-    admin_by_ccns = params.get('adminBySectionIds')
-    site_name = params.get('siteName')
-    site_abbreviation = params.get('siteAbbreviation')
-    term_slug = params.get('termSlug')
-    section_ids = params.get('sectionIds')
-
-    is_admin = (current_user.is_admin or current_user.is_canvas_admin)
-    uid = (is_admin and admin_acting_as) or current_user.uid
-
-    if not section_ids or not len(section_ids):
-        raise BadRequestError('Required parameters are missing.')
-    job = enqueue(
-        func=provision_course_site,
-        args=(uid, site_name, site_abbreviation, term_slug, section_ids, bool(admin_by_ccns)),
-    )
-    if not job:
-        raise InternalServerError('Updates cannot be completed at this time.')
-    return tolerant_jsonify(
-        {
-            'jobId': job.id,
-            'jobStatus': 'sendingRequest',
-        },
-    )
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'Lead TA')
 def edit_sections(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
-    if not course:
-        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
-    params = request.get_json()
-    section_ids_to_add = params.get('sectionIdsToAdd', [])
-    section_ids_to_remove = params.get('sectionIdsToRemove', [])
-    section_ids_to_update = params.get('sectionIdsToUpdate', [])
-    all_section_ids = section_ids_to_add + section_ids_to_remove + section_ids_to_update
-    if not len(all_section_ids):
-        raise BadRequestError('Required parameters are missing.')
-    job = enqueue(func=update_canvas_sections, args=(course, all_section_ids, section_ids_to_remove))
-    if not job:
-        raise InternalServerError('Updates cannot be completed at this time.')
-    return tolerant_jsonify(
-        {
-            'jobId': job.id,
-            'jobStatus': 'sendingRequest',
-        },
-    )
+    if course:
+        params = request.get_json()
+        section_ids_to_add = params.get('sectionIdsToAdd', [])
+        section_ids_to_remove = params.get('sectionIdsToRemove', [])
+        section_ids_to_update = params.get('sectionIdsToUpdate', [])
+        all_section_ids = section_ids_to_add + section_ids_to_remove + section_ids_to_update
+        if not len(all_section_ids):
+            raise BadRequestError('Required parameters are missing.')
+        job = enqueue(func=update_canvas_sections, args=(course, all_section_ids, section_ids_to_remove))
+        if not job:
+            raise InternalServerError('Updates cannot be completed at this time.')
+        return tolerant_jsonify(
+            {
+                'jobId': job.id,
+                'jobStatus': 'sendingRequest',
+            },
+        )
+    else:
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}.')
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/grade_distribution')
@@ -200,46 +207,47 @@ def get_grade_distribution(canvas_site_id):
 @canvas_role_required('DesignerEnrollment', 'TeacherEnrollment', 'TaEnrollment', 'Lead TA')
 def get_official_course_sections(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
-    if not course:
-        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
-    canvas_site_user = canvas.get_course_user(canvas_site_id, current_user.canvas_user_id)
-    enrollments = canvas_site_user.enrollments if canvas_site_user and canvas_site_user.enrollments else []
-    can_edit = bool(next((e for e in enrollments if e['role'] in ['TeacherEnrollment', 'Lead TA']), None))
-    term = BerkeleyTerm.from_canvas_sis_term_id(course.term['sis_term_id'])
-    official_sections, section_ids, sections = get_official_sections(canvas_site_id)
-    teaching_terms = [] if not len(section_ids) else get_teaching_terms(
-        current_user=current_user,
-        section_ids=section_ids,
-        sections=sections,
-    )
-    return tolerant_jsonify({
-        'canvasSite': {
-            **canvas_site_to_api_json(course),
-            **{
-                'canEdit': can_edit,
-                'officialSections': official_sections,
-                'term': term.to_api_json() if term else None,
+    if course:
+        canvas_site_user = canvas.get_course_user(canvas_site_id, current_user.canvas_user_id)
+        enrollments = canvas_site_user.enrollments if canvas_site_user and canvas_site_user.enrollments else []
+        can_edit = bool(next((e for e in enrollments if e['role'] in ['TeacherEnrollment', 'Lead TA']), None))
+        term = BerkeleyTerm.from_canvas_sis_term_id(course.term['sis_term_id'])
+        official_sections, section_ids, sections = get_official_sections(canvas_site_id)
+        teaching_terms = [] if not len(section_ids) else get_teaching_terms(
+            current_user=current_user,
+            section_ids=section_ids,
+            sections=sections,
+        )
+        return tolerant_jsonify({
+            'canvasSite': {
+                **canvas_site_to_api_json(course),
+                **{
+                    'canEdit': can_edit,
+                    'officialSections': official_sections,
+                    'term': term.to_api_json() if term else None,
+                },
             },
-        },
-        'teachingTerms': teaching_terms,
-    })
+            'teachingTerms': teaching_terms,
+        })
+    else:
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}.')
 
 
 @app.route('/api/canvas_site/provision/status')
 @canvas_site_creation_required
 def get_provision_status():
     job_id = request.args.get('jobId', None)
-    if not job_id:
+    if job_id:
+        job = get_job(job_id)
+        job_status = job.get_status(refresh=True)
+        job_data = job.get_meta(refresh=True)
+
+        return tolerant_jsonify({
+            'jobStatus': job_status,
+            'jobData': job_data,
+        })
+    else:
         raise BadRequestError('Required parameters are missing.')
-
-    job = get_job(job_id)
-    job_status = job.get_status(refresh=True)
-    job_data = job.get_meta(refresh=True)
-
-    return tolerant_jsonify({
-        'jobStatus': job_status,
-        'jobData': job_data,
-    })
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/roster')

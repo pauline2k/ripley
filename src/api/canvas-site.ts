@@ -76,8 +76,8 @@ export function getSections(
   return utils.get(feedUrl)
 }
 
-export function myCurrentCanvasCourses(redirectOnError?: boolean) {
-  return utils.get('/api/canvas_site/my_current_courses', redirectOnError)
+export function getManageOfficialSections(redirectOnError?: boolean) {
+  return utils.get('/api/canvas_site/manage_official_sections', redirectOnError)
 }
 
 export function updateSiteSections(
