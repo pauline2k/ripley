@@ -64,7 +64,7 @@
               <div class="pr-2">
                 <v-btn
                   id="download-csv"
-                  :disabled="!students.length"
+                  :disabled="isDownloading || !students.length"
                   size="large"
                   variant="outlined"
                   @click="downloadCsv"
@@ -76,7 +76,7 @@
               <div>
                 <v-tooltip
                   v-model="showPrintButtonTooltip"
-                  attach="true"
+                  :attach="true"
                   :eager="false"
                   location="top"
                   :open-on-focus="true"
@@ -86,7 +86,7 @@
                     <v-btn
                       id="print-roster"
                       color="primary"
-                      :disabled="!students.length || disablePrintButton"
+                      :disabled="disablePrintButton"
                       size="large"
                       v-bind="props"
                       @click="printRoster"
@@ -141,6 +141,7 @@ export default {
   mixins: [Context],
   data: () => ({
     error: undefined,
+    isDownloading: false,
     printButtonTooltip: 'You can print once student images have loaded.',
     roster: undefined,
     search: undefined,
@@ -189,8 +190,10 @@ export default {
   },
   methods: {
     downloadCsv() {
+      this.isDownloading = true
       exportRoster(this.currentUser.canvasSiteId).then(() => {
         this.alertScreenReader(`${this.roster.canvasSiteName} CSV downloaded`)
+        setTimeout(() => this.isDownloading = false, 1500)
       })
     },
     onSelectSection() {

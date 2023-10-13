@@ -74,7 +74,7 @@
           <td :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
             <div v-if="filterRecurring(section, 'schedule').length">
               <div
-                v-for="(schedule, index) in filterRecurring(section, 'schedule')"
+                v-for="(schedule, index) in uniqBy(filterRecurring(section, 'schedule'), 'schedule')"
                 :key="index"
               >
                 {{ schedule.schedule }}
@@ -248,6 +248,7 @@
 
 <script setup>
 import {mdiAlert, mdiInformationVariantCircle} from '@mdi/js'
+import {uniqBy} from 'lodash'
 </script>
 
 <script>
