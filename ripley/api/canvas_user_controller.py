@@ -39,7 +39,7 @@ from ripley.lib.http import tolerant_jsonify
 def get_add_user_options(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if not course:
-        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}.')
     course_sections = canvas.get_course_sections(canvas_site_id)
     return tolerant_jsonify({
         'courseSections': [{'id': section.id, 'name': section.name} for section in course_sections],
@@ -53,7 +53,7 @@ def get_add_user_options(canvas_site_id):
 def canvas_site_add_user(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if not course:
-        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}')
+        raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}.')
     params = request.get_json()
     course_section_id = params.get('sectionId')
     role_label = params.get('role')
