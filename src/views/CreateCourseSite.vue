@@ -30,7 +30,6 @@
           v-if="currentWorkflowStep === 'selecting'"
           id="page-create-course-site-selecting-step"
           class="pl-3"
-          :aria-expanded="`${currentWorkflowStep === 'selecting'}`"
         >
           <SelectSectionsStep
             :courses-list="coursesList"
@@ -42,7 +41,7 @@
             :update-selected="updateSelected"
           />
         </div>
-        <div v-if="currentWorkflowStep === 'confirmation'" :aria-expanded="`${currentWorkflowStep === 'confirmation'}`">
+        <div v-if="currentWorkflowStep === 'confirmation'">
           <ConfirmationStep
             :course-site-creation-promise="courseSiteCreationPromise"
             :current-semester-name="currentSemesterName"
@@ -84,7 +83,7 @@ import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
 import {each, get, includes, map, size} from 'lodash'
-import {iframeParentLocation} from '@/utils'
+import {iframeParentLocation, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CreateCourseSite',
@@ -222,15 +221,14 @@ export default {
           if (!this.isAdmin && !this.usersClassCount) {
             this.displayError = 'Sorry, you are not an admin user and you have no classes.'
           }
-          this.$ready()
         },
         error => {
           this.alertScreenReader('Course section loading failed')
           this.displayError = error || 'failure'
-          this.$ready()
         }
       ).finally(() => {
         this.isFetching = false
+        putFocusNextTick(this.adminMode === 'bySectionId' ? 'sections-by-ids-button' : 'sections-by-uid-button')
       })
     },
     fillCourseSites(semestersFeed) {

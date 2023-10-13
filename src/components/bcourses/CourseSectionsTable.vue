@@ -20,33 +20,39 @@
         </template>
       </v-checkbox>
     </div>
-    <table id="template-sections-table">
+    <table :id="id">
+      <caption class="sr-only">{{ tableCaption }}</caption>
       <thead>
         <tr>
-          <th v-if="mode === 'createCourseForm'" class="pl-4 pr-0 td-checkbox">Action</th>
-          <th class="td-course-code">Course Code</th>
-          <th class="td-section-name">Section Name</th>
-          <th class="td-section-id text-no-wrap">Section ID</th>
-          <th :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
+          <th
+            v-if="mode === 'createCourseForm'"
+            class="pl-4 pr-0 td-checkbox"
+            scope="col"
+          >
+            Action
+          </th>
+          <th class="td-course-code" scope="col">Course Code</th>
+          <th class="td-section-name" scope="col">Section Name</th>
+          <th class="td-section-id text-no-wrap" scope="col">Section ID</th>
+          <th :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}" scope="col">
             Schedule
           </th>
-          <th :class="{'td-meeting-location': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
+          <th :class="{'td-meeting-location': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}" scope="col">
             Location
           </th>
           <th class="td-instructors">Instructors</th>
-          <th v-if="mode !== 'createCourseForm' && mode !== 'preview'" class="td-actions">
+          <th v-if="mode !== 'createCourseForm' && mode !== 'preview'" class="td-actions" scope="col">
             <span v-if="mode !== 'preview'" class="mr-5">Actions</span>
           </th>
         </tr>
       </thead>
       <tbody v-for="section in displayableSections" :key="section.id">
-        <tr :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}`" :class="sectionDisplayClass[section.id]">
-          <td v-if="mode === 'createCourseForm'" class="align-top td-checkbox pl-3 pr-0 py-0">
+        <tr :id="`${id}-${section.id}`" :class="sectionDisplayClass[section.id]">
+          <td v-if="mode === 'createCourseForm'" :id="`${id}-${section.id}-action`" class="align-top td-checkbox pl-3 pr-0 py-0">
             <v-checkbox
               :id="`template-canvas-manage-sections-checkbox-${section.id}`"
               v-model="selected"
-              :aria-checked="section.selected"
-              :aria-label="`Checkbox for ${section.courseCode} ${section.name}`"
+              :aria-label="`${section.selected ? 'Deselect' : 'Select'} ${section.courseCode} ${section.name}`"
               class="ml-2"
               density="compact"
               hide-details
@@ -54,10 +60,10 @@
               :value="section.id"
             />
           </td>
-          <td class="td-course-code text-no-wrap">
+          <td :id="`${id}-${section.id}-course`" class="td-course-code text-no-wrap">
             {{ section.courseCode }}
           </td>
-          <td class="td-section-name">
+          <td :id="`${id}-${section.id}-name`" class="td-section-name">
             <label
               v-if="mode === 'createCourseForm'"
               :for="`template-canvas-manage-sections-checkbox-${section.id}`"
@@ -70,8 +76,8 @@
               Use the "Update" button to rename your bCourses section name to match SIS.
             </span>
           </td>
-          <td class="td-section-id">{{ section.id }}</td>
-          <td :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
+          <td :id="`${id}-${section.id}-id`" class="td-section-id">{{ section.id }}</td>
+          <td :id="`${id}-${section.id}-schedule`" :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
             <div v-if="filterRecurring(section, 'schedule').length">
               <div
                 v-for="(schedule, index) in uniqBy(filterRecurring(section, 'schedule'), 'schedule')"
@@ -82,7 +88,7 @@
             </div>
             <span v-if="!filterRecurring(section, 'schedule').length">&mdash;</span>
           </td>
-          <td :class="{'td-meeting-location': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
+          <td :id="`${id}-${section.id}-location`" :class="{'td-meeting-location': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
             <div v-if="filterRecurring(section, 'buildingName').length">
               <div
                 v-for="(schedule, index) in filterRecurring(section, 'buildingName')"
@@ -93,7 +99,7 @@
             </div>
             <span v-if="!filterRecurring(section, 'buildingName').length">&mdash;</span>
           </td>
-          <td class="td-instructors">
+          <td :id="`${id}-${section.id}-instructors`" class="td-instructors">
             <div v-if="filter(section.instructors, 'name').length">
               <div
                 v-for="instructor in section.instructors"
@@ -104,14 +110,15 @@
             </div>
             <span v-if="!filter(section.instructors, 'name').length">&mdash;</span>
           </td>
-          <td v-if="!['createCourseForm', 'preview'].includes(mode)" class="td-actions">
+          <td v-if="!['createCourseForm', 'preview'].includes(mode)" :id="`${id}-${section.id}-actions`" class="td-actions">
             <!-- Current Staging Actions -->
             <div v-if="mode === 'currentStaging' && section.isCourseSection" class="d-flex flex-nowrap justify-end">
               <v-btn
                 v-if="section.nameDiscrepancy && section.stagedState !== 'update'"
                 :id="`section-${section.id}-update-btn`"
-                :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be updated`"
+                :aria-label="`Add '${section.courseCode} ${section.name}' to the list of sections to be updated`"
                 class="ml-1"
+                density="compact"
                 @click="stageUpdate(section)"
               >
                 Update
@@ -129,7 +136,7 @@
               <v-btn
                 v-if="section.stagedState !== 'update'"
                 :id="`section-${section.id}-unlink-btn`"
-                :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be unlinked from course site`"
+                :aria-label="`Add '${section.courseCode} ${section.name}' to the list of sections to be unlinked from course site`"
                 class="ml-1"
                 density="compact"
                 @click="stageDelete(section)"
@@ -160,29 +167,32 @@
                 Undo Unlink
               </v-btn>
             </div>
-            <div v-if="mode === 'availableStaging' && !section.isCourseSection && section.stagedState === 'add'">
+            <div v-if="mode === 'availableStaging' && !section.isCourseSection && section.stagedState === 'add'" class="mr-5">
               Linked <span class="sr-only">to pending list of new sections</span>
             </div>
             <div v-if="mode === 'availableStaging' && !section.isCourseSection && !section.stagedState">
               <v-btn
                 :id="`section-${section.id}-link-btn`"
-                :aria-label="`Include '${section.courseCode} ${section.name}' in the list of sections to be linked to course site`"
+                :aria-label="`Add '${section.courseCode} ${section.name}' to the list of sections to be linked to course site`"
                 class="ml-1"
                 :class="{'button-undo-add': section.stagedState === 'add'}"
+                density="compact"
                 @click="stageAdd(section)"
               >
                 Link
               </v-btn>
             </div>
+            <div v-if="mode === 'availableStaging' && section.isCourseSection && !section.stagedState" class="sr-only">No action available</div>
           </td>
         </tr>
         <tr
           v-if="mode === 'currentStaging' && section.nameDiscrepancy && section.stagedState !== 'update'"
+          :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}-discrepancy`"
           aria-hidden="true"
           :class="sectionDisplayClass[section.id]"
         >
           <td></td>
-          <td colspan="6">
+          <td :id="`${id}-${section.id}-discrepancy`" colspan="6">
             <div>
               <v-icon class="sited-icon mr-1" :icon="mdiInformationVariantCircle" />
               The section name in bCourses no longer matches the Student Information System.
@@ -192,10 +202,15 @@
         </tr>
         <tr
           v-if="!['currentStaging', 'preview'].includes(mode) && size(section.canvasSites)"
+          :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}-warning`"
           :class="sectionDisplayClass[section.id]"
         >
           <td class="border-top-zero pa-0"></td>
-          <td colspan="7" class="border-top-zero pb-4 pt-0">
+          <td
+            :id="`${id}-${section.id}-warning`"
+            colspan="6"
+            class="border-top-zero pb-4 pt-0"
+          >
             <div v-if="section.canvasSites.length === 1" class="align-center d-flex">
               <div class="section-in-use-icon">
                 <v-icon
@@ -206,7 +221,7 @@
               </div>
               <div>
                 bCourses site
-                <OutboundLink :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`">{{ section.canvasSites[0].name }}</OutboundLink>
+                <OutboundLink :id="`${id}-${section.id}-warning-link`" :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`">{{ section.canvasSites[0].name }}</OutboundLink>
                 includes this section.
               </div>
             </div>
@@ -225,7 +240,7 @@
               </div>
               <div class="ml-6 pt-1">
                 <ul v-for="(canvasSite, index) in section.canvasSites" :key="index" class="sites-container">
-                  <li><OutboundLink :href="`${config.canvasApiUrl}/courses/${canvasSite.canvasSiteId}`">{{ canvasSite.name }}</OutboundLink></li>
+                  <li><OutboundLink :id="`${id}-${section.id}-warning-link`" :href="`${config.canvasApiUrl}/courses/${canvasSite.canvasSiteId}`">{{ canvasSite.name }}</OutboundLink></li>
                 </ul>
               </div>
             </div>
@@ -233,13 +248,13 @@
         </tr>
       </tbody>
       <tbody v-if="mode === 'preview' && sections.length < 1">
-        <tr>
-          <td colspan="7">There are no currently maintained official sections in this course site.</td>
+        <tr :id="`${id}-no-current-sections-row`">
+          <td :id="`${id}-no-current-sections`" colspan="7">There are no currently maintained official sections in this course site.</td>
         </tr>
       </tbody>
       <tbody v-if="mode === 'currentStaging' && noCurrentSections()">
-        <tr>
-          <td colspan="7">No official sections will remain in course site</td>
+        <tr :id="`${id}-no-remaining-sections-row`">
+          <td :id="`${id}-no-remaining-sections`" colspan="7">No official sections will remain in course site</td>
         </tr>
       </tbody>
     </table>
@@ -261,6 +276,11 @@ export default {
   components: {OutboundLink},
   mixins: [Context],
   props: {
+    id: {
+      default: 'template-sections-table',
+      required: false,
+      type: String
+    },
     mode: {
       required: true,
       type: String
@@ -293,6 +313,11 @@ export default {
       default: () => {},
       required: false,
       type: Function
+    },
+    tableCaption: {
+      default: 'Official sections in this course',
+      required: false,
+      type: String
     },
     unstageAction: {
       default: () => {},

@@ -13,12 +13,12 @@
           color="primary"
         >
           <v-btn
-            v-for="(term, index) in teachingTerms"
+            v-for="(teachingTerm, index) in teachingTerms"
             :id="`term${index}`"
             :key="index"
-            :value="term.slug"
+            :value="teachingTerm.slug"
           >
-            {{ term.name }}
+            {{ teachingTerm.name }}
           </v-btn>
         </v-btn-toggle>
         <div :class="{'mt-5': teachingTerms.length > 1}">
@@ -27,7 +27,7 @@
           <div class="text-subtitle-1">
             All official sections you select below will be put in ONE, single course site.
           </div>
-          <v-alert class="mt-2" closable color="alert">
+          <v-alert class="mt-2" closable>
             <div class="d-flex">
               <div class="pr-2">
                 <v-icon
@@ -74,19 +74,22 @@
               <template #actions="{ expanded }">
                 <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
               </template>
-              <h3 v-if="teachingTerms.length === 1">
+              <span
+                :aria-level="teachingTerms.length === 1 ? 3 : 4"
+                class="sections-course-title"
+                role="heading"
+              >
                 <CourseCodeAndTitle :course="course" />
-              </h3>
-              <h4 v-if="teachingTerms.length > 1">
-                <CourseCodeAndTitle :course="course" />
-              </h4>
+              </span>
             </v-expansion-panel-title>
             <v-expansion-panel-text>
               <CourseSectionsTable
+                :id="`template-sections-table-${course.slug}`"
                 :key="course.slug"
                 class="mb-1 mt-4"
                 mode="createCourseForm"
                 :sections="course.sections"
+                table-caption="Official sections in this course. Use the checkboxes in the Action column to select sections, or use the 'Select All' button above."
                 :update-selected="updateSelected"
               />
             </v-expansion-panel-text>
@@ -198,6 +201,11 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.sections-course-title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 15px;
+}
 .term-btn-toggle {
   border-width: 1px;
 }
