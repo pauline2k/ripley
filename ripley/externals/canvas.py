@@ -31,6 +31,7 @@ from time import sleep
 from canvasapi import Canvas
 from canvasapi.account import Account
 from canvasapi.course import Course
+from canvasapi.exceptions import ResourceDoesNotExist
 from canvasapi.section import Section
 from canvasapi.sis_import import SisImport
 from canvasapi.tab import Tab
@@ -111,7 +112,7 @@ def get_communication_channels(canvas_user_id):
         app.logger.exception(e)
 
 
-def get_course(course_id, api_call=True, use_sis_id=False):
+def get_course(course_id, api_call=True, use_sis_id=False, log_not_found=True):
     c = _get_canvas()
     if api_call is False:
         return Course(c._Canvas__requester, {'id': course_id})
@@ -120,8 +121,9 @@ def get_course(course_id, api_call=True, use_sis_id=False):
         try:
             course = c.get_course(course_id, include=['term'], use_sis_id=use_sis_id)
         except Exception as e:
-            app.logger.error(f'Failed to retrieve Canvas course (id={course_id})')
-            app.logger.exception(e)
+            if not isinstance(e, ResourceDoesNotExist) or log_not_found:
+                app.logger.error(f'Failed to retrieve Canvas course (id={course_id})')
+                app.logger.exception(e)
         return course
 
 
@@ -245,7 +247,7 @@ def get_roles(account_id=None):
     return roles
 
 
-def get_section(section_id, api_call=True, use_sis_id=False):
+def get_section(section_id, api_call=True, use_sis_id=False, log_not_found=True):
     c = _get_canvas()
     if api_call is False:
         return Section(c._Canvas__requester, {'id': section_id})
@@ -254,8 +256,9 @@ def get_section(section_id, api_call=True, use_sis_id=False):
         try:
             section = c.get_section(section_id, include=['term'], use_sis_id=use_sis_id)
         except Exception as e:
-            app.logger.error(f'Failed to retrieve Canvas section (id={section_id})')
-            app.logger.exception(e)
+            if not isinstance(e, ResourceDoesNotExist) or log_not_found:
+                app.logger.error(f'Failed to retrieve Canvas section (id={section_id})')
+                app.logger.exception(e)
         return section
 
 
