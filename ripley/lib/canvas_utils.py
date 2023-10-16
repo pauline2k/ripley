@@ -590,7 +590,7 @@ def _add_instructor_to_site(
         section_id=f'sis_section_id:{sis_section_id}',
         use_sis_id=True,
     )
-    instructor_role_id = section_roles[section_feeds[0]['section_id']] or (teacher_role and teacher_role.id)
+    instructor_role_id = section_roles.get(section_feeds[0]['section_id']) or (teacher_role and teacher_role.id)
     canvas_section.enroll_user(
         user=sis_user_profile['id'],
         ** {
