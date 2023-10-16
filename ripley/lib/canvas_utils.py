@@ -146,7 +146,7 @@ def get_canvas_course_id(course_slug):
     attempts = 0
     existing_site = None
     while attempts < 10:
-        existing_site = canvas.get_course(course_id, use_sis_id=True)
+        existing_site = canvas.get_course(course_id, use_sis_id=True, log_not_found=False)
         if not existing_site:
             break
         attempts += 1
@@ -164,7 +164,7 @@ def get_canvas_sis_section_id(sis_section_id, term_id, ensure_unique=False):
         attempts = 0
         existing_section = None
         while attempts < 10:
-            existing_section = canvas.get_section(section_id, use_sis_id=True)
+            existing_section = canvas.get_section(section_id, use_sis_id=True, log_not_found=False)
             if not existing_section:
                 break
             attempts += 1
