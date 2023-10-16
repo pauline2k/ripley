@@ -61,15 +61,17 @@
             Please refine your search to limit the number of results.
           </div>
           <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="sr-only">
-            {{ userSearchResultsCount }} search result<span v-if="userSearchResultsCount !== 1">s</span> loaded.
+            {{ pluralize('search result', userSearchResultsCount) }} loaded.
           </div>
           <div
             v-if="additionSuccessMessage"
             id="success-message"
             class="alert alert-success page-course-add-user-alert"
           >
-            {{ userAdded.fullName }} was added to the
-            &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course as a {{ userAdded.role }}.
+            <span>{{ userAdded.fullName }} was added to the &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course as a
+              <span aria-hidden="true">{{ userAdded.role }}.</span>
+              <span class="sr-only">{{ srFriendlyRole(userAdded.role) }}.</span>
+            </span>
             <div class="alert-close-button-container d-flex ml-4">
               <button
                 id="hide-search-success-button"
@@ -94,7 +96,7 @@
                   v-model="searchType"
                   aria-label="Search by"
                   class="d-flex align-center mb-0"
-                  :disabled="isSearching"
+                  :disabled="isSearching || isAddingUser"
                   @change="updateSearchTextType"
                 >
                   <option value="name">Last Name, First Name</option>
@@ -108,7 +110,7 @@
                   v-model="searchText"
                   :aria-label="`enter search terms, search by ${searchType === 'uid' ? 'CalNet U I D' : searchType}`"
                   class="mb-0"
-                  :disabled="isSearching"
+                  :disabled="isSearching || isAddingUser"
                   :type="searchTextType"
                 >
               </v-col>
@@ -117,7 +119,7 @@
                   id="add-user-submit-search-btn"
                   color="primary"
                   type="submit"
-                  :disabled="!searchText || isSearching"
+                  :disabled="!searchText || isSearching || isAddingUser"
                   class="w-100"
                   aria-label="Submit search"
                 >
@@ -204,6 +206,7 @@
                     :id="`user-search-result-input-${index}`"
                     v-model="selectedUser"
                     class="mr-4"
+                    :disabled="isAddingUser"
                     name="selectedUser"
                     type="radio"
                     :value="user"
@@ -231,15 +234,22 @@
                   offset-md="4"
                   class="d-flex align-center justify-end pr-3"
                 >
-                  <label for="user-role"><strong>Role</strong></label>
+                  <label aria-hidden="true" for="user-role"><strong>Role</strong></label>
                 </v-col>
                 <v-col cols="10" sm="8" md="6">
-                  <select id="user-role" v-model="selectedRole">
-                    <option v-for="role in grantingRoles" :key="role" :value="role">
-                      <template v-if="role === 'TA' || role === 'Lead TA'">
-                        {{ replace(role, 'TA', 'T&ZeroWidthSpace;A') }}
-                      </template>
-                      <template v-else>{{ role }}</template>
+                  <select
+                    id="user-role"
+                    v-model="selectedRole"
+                    aria-label="Role"
+                    :disabled="isAddingUser"
+                  >
+                    <option
+                      v-for="role in grantingRoles"
+                      :key="role"
+                      :aria-label="srFriendlyRole(role)"
+                      :value="role"
+                    >
+                      <span aria-hidden="true">{{ role }}</span>
                     </option>
                   </select>
                 </v-col>
@@ -251,10 +261,15 @@
                   offset-md="4"
                   class="d-flex align-center justify-end pr-3"
                 >
-                  <label for="course-section"><strong>Section</strong></label>
+                  <label aria-hidden="true" for="course-section"><strong>Section</strong></label>
                 </v-col>
                 <v-col cols="10" sm="8" md="6">
-                  <select id="course-section" v-model="selectedSection">
+                  <select
+                    id="course-section"
+                    v-model="selectedSection"
+                    aria-label="Section"
+                    :disabled="isAddingUser"
+                  >
                     <option v-for="section in courseSections" :key="section.name" :value="section">
                       {{ section.name }}
                     </option>
@@ -270,14 +285,18 @@
                   id="add-user-btn"
                   class="mx-1"
                   color="primary"
-                  :disabled="!selectedUser"
+                  :disabled="!selectedUser || isAddingUser"
                   @click="submitUser"
                 >
-                  Add Person
+                  <span v-if="!isAddingUser">Add Person</span>
+                  <span v-if="isAddingUser">
+                    <SpinnerWithinButton />Adding Person...
+                  </span>
                 </v-btn>
                 <v-btn
                   id="start-over-btn"
                   class="mx-1"
+                  :disabled="isAddingUser"
                   @click="startOver"
                 >
                   Start Over
@@ -302,7 +321,7 @@ import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {addUser, getAddUserOptions, searchUsers} from '@/api/canvas-user'
-import {iframeScrollToTop, putFocusNextTick} from '@/utils'
+import {iframeScrollToTop, pluralize, putFocusNextTick} from '@/utils'
 import {find, get, replace, trim} from 'lodash'
 
 export default {
@@ -314,6 +333,7 @@ export default {
     courseSections: [],
     errorStatus: null,
     grantingRoles: [],
+    isAddingUser: false,
     isSearching: false,
     noUserSelectedAlert: null,
     searchAlert: null,
@@ -358,7 +378,7 @@ export default {
       this.alertScreenReader('Alert hidden')
       putFocusNextTick('page-title')
     },
-    replace,
+    pluralize,
     resetForm() {
       this.searchTextType = 'text'
       this.searchText = ''
@@ -393,6 +413,9 @@ export default {
       this.showErrorStatus('Authorization check failed.')
       this.$ready()
     },
+    srFriendlyRole(role) {
+      return role === 'TA' || role === 'Lead TA' ? replace(role, 'TA', 'T A') : role
+    },
     startOver() {
       this.showAlerts = false
       this.alertScreenReader('Starting a new search.')
@@ -409,10 +432,14 @@ export default {
       } else if (this.searchType === 'uid' && !isFinite(this.searchText)) {
         this.showSearchAlert('UID search terms must be numeric.')
       } else {
-        this.alertScreenReader('Loading person search results')
+        this.alertScreenReader('Loading person search results.')
         this.showUsersArea = true
         this.isSearching = true
+        let searchTimer = setInterval(() => {
+          this.alertScreenReader('Still searching.')
+        }, 7000)
         searchUsers(this.searchText, this.searchType).then(response => {
+          clearInterval(searchTimer)
           this.userSearchResults = response.users
           if (response.users && response.users.length) {
             this.userSearchResultsCount = response.users[0].resultCount
@@ -436,19 +463,21 @@ export default {
       }
     },
     submitUser() {
-      this.loadingStart()
-      iframeScrollToTop()
-      this.showUsersArea = false
-      this.showSearchForm = false
-      this.alertScreenReader(`Adding ${this.selectedUserFullName} with role ${this.selectedRole}`)
+      this.isAddingUser = true
       this.showAlerts = true
+      this.alertScreenReader(`Adding ${this.selectedUserFullName} with role ${this.srFriendlyRole(this.selectedRole)}.`)
+      let addUserTimer = setInterval(() => {
+        this.alertScreenReader('Still processing.')
+      }, 7000)
       addUser(this.currentUser.canvasSiteId, this.selectedUser.uid, this.selectedSection.id, this.selectedRole).then(response => {
+        clearInterval(addUserTimer)
         this.userAdded = {
           ...response.userAdded,
           fullName: this.selectedUserFullName,
           role: response.role,
           sectionName: get(find(this.courseSections, {'id': response.sectionId}), 'name', this.selectedSection.name)
         }
+        this.alertScreenReader('success')
         this.resetSearchState()
         this.resetForm()
         this.additionSuccessMessage = true
@@ -459,7 +488,9 @@ export default {
         this.errorStatus = 'Request to add person failed'
         this.showUsersArea = true
       }).finally(() => {
+        this.isAddingUser = false
         this.showSearchForm = true
+        iframeScrollToTop()
         this.$ready('alerts-container')
       })
     },
