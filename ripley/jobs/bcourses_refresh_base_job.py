@@ -177,6 +177,9 @@ class BcoursesRefreshBaseJob(BaseJob):
                                 'sis_login_id': uid,
                                 'sis_user_id': row['user_id'],
                             })
+                        elif not existing_row['sis_import_id']:
+                            existing_row['sis_import_id'] = 'Mock SIS import'
+
                     # If a previous incremental job deleted this enrollment, remove it from the provisioning report index.
                     elif row['status'] == 'deleted':
                         for report_row in term_report[sis_section_id]:
