@@ -85,7 +85,7 @@
       </v-row>
       <v-row v-if="showSearchForm" no-gutters>
         <v-col>
-          <form @submit.prevent="searchUsers">
+          <form @submit.prevent="submitSearch">
             <v-row class="horizontal-form" no-gutters>
               <v-col cols="12" sm="6" class="d-flex align-center my-1 pr-sm-3">
                 <label :aria-hidden="true" class="text-no-wrap mt-0 pr-3">Search By</label>
@@ -381,7 +381,27 @@ export default {
       this.userSearchResults = []
       this.userSearchResultsCount = 0
     },
-    searchUsers() {
+    showErrorStatus(message) {
+      this.showAlerts = true
+      this.errorStatus = message
+    },
+    showSearchAlert(message) {
+      this.showAlerts = true
+      this.searchAlert = message
+    },
+    showUnauthorized() {
+      this.showErrorStatus('Authorization check failed.')
+      this.$ready()
+    },
+    startOver() {
+      this.showAlerts = false
+      this.alertScreenReader('Starting a new search.')
+      this.resetForm()
+      this.resetSearchState()
+      this.resetImportState()
+      putFocusNextTick('search-type')
+    },
+    submitSearch() {
       this.resetSearchState()
       this.resetImportState()
       if (!trim(this.searchText)) {
@@ -414,26 +434,6 @@ export default {
           this.$ready('add-user-submit-search-btn')
         })
       }
-    },
-    showErrorStatus(message) {
-      this.showAlerts = true
-      this.errorStatus = message
-    },
-    showSearchAlert(message) {
-      this.showAlerts = true
-      this.searchAlert = message
-    },
-    showUnauthorized() {
-      this.showErrorStatus('Authorization check failed.')
-      this.$ready()
-    },
-    startOver() {
-      this.showAlerts = false
-      this.alertScreenReader('Starting a new search.')
-      this.resetForm()
-      this.resetSearchState()
-      this.resetImportState()
-      putFocusNextTick('search-type')
     },
     submitUser() {
       this.loadingStart()
