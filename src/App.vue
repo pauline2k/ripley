@@ -60,14 +60,53 @@ const context = useContextStore()
 .bg-white {
   background: $color-white;
 }
-form {
-  .validation-messages {
-    color: $color-harley-davidson-orange;
-    font-size: 14px;
-    font-weight: 500;
-    min-height: 20px;
-    margin: 0 12px 4px;
+.container {
+  background: $color-container-grey-background !important;
+  border: 1px solid $color-container-grey-border !important;
+  border-radius: 3px !important;
+  padding: 9px !important;
+}
+.icon-blue {
+  color: $color-help-link-blue;
+}
+.icon-gold {
+  color: $color-dark-tangerine;
+}
+.icon-green {
+  color: $color-salem;
+}
+.icon-red {
+  color: $color-harley-davidson-orange;
+}
+.notice-text-header {
+  color: $color-off-black;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 20px;
+  margin: 4px 0;
+}
+.validation-messages {
+  color: $color-harley-davidson-orange;
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 20px;
+  margin: 0 12px 4px;
+}
+a {
+  color: $color-primary-text;
+  text-decoration: none;
+  &:hover {
+    cursor: pointer;
   }
+  &:hover, &:focus {
+    text-decoration: underline;
+  }
+}
+body, .v-application {
+  color: $color-body-black !important;
+  font-family: $body-font-family !important;
+}
+form {
   input[type="number"],
   input[type="password"],
   input[type="text"],
@@ -115,45 +154,6 @@ form {
   ::placeholder {
     color: $color-nobel;
   }
-}
-.container {
-  background: $color-container-grey-background !important;
-  border: 1px solid $color-container-grey-border !important;
-  border-radius: 3px !important;
-  padding: 9px !important;
-}
-.icon-blue {
-  color: $color-help-link-blue;
-}
-.icon-gold {
-  color: $color-dark-tangerine;
-}
-.icon-green {
-  color: $color-salem;
-}
-.icon-red {
-  color: $color-harley-davidson-orange;
-}
-.notice-text-header {
-  color: $color-off-black;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 20px;
-  margin: 4px 0;
-}
-a {
-  color: $color-primary-text;
-  text-decoration: none;
-  &:hover {
-    cursor: pointer;
-  }
-  &:hover, &:focus {
-    text-decoration: underline;
-  }
-}
-body, .v-application {
-  color: $color-body-black !important;
-  font-family: $body-font-family !important;
 }
 h1 {
   color: $color-off-black;
