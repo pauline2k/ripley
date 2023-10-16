@@ -12,20 +12,23 @@
     </v-alert>
     <div v-if="currentUser.isAdmin" class="align-center d-flex flex-wrap pa-3">
       <div class="pr-3">
-        <label for="page-site-mailing-list-site-id" class="sr-only">Course Site ID</label>
         <v-text-field
           id="page-site-mailing-list-site-id"
           v-model="canvasSiteId"
+          :aria-describedby="!!trim(canvasSiteId) && !isCanvasSiteIdValid ? 'mailing-list-site-id-messages' : null"
+          aria-label="bCourses Course ID"
           aria-required="true"
           :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
           hide-details
           maxlength="10"
-          label="Canvas Course ID"
-          required
+          label="bCourses Course ID"
           style="width: 200px"
           variant="outlined"
           @keydown.enter="proceed"
         />
+        <span v-if="!!trim(canvasSiteId) && !isCanvasSiteIdValid" id="mailing-list-site-id-messages" class="position-absolute validation-messages">
+          <span class="sr-only">Invalid entry. </span>{{ 'Only numbers allowed.' }}
+        </span>
       </div>
       <div>
         <v-btn
@@ -50,7 +53,7 @@ import Header1 from '@/components/utils/Header1.vue'
 import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {getMailingList} from '@/api/mailing-list'
-import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
+import {isValidCanvasSiteId} from '@/utils'
 import {trim} from 'lodash'
 
 export default {
@@ -70,7 +73,6 @@ export default {
   mounted() {
     if (this.currentUser.isAdmin) {
       this.init()
-      putFocusNextTick('page-header')
     } else {
       this.error = 'Unauthorized'
     }
