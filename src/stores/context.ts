@@ -44,6 +44,7 @@ export const useContextStore = defineStore('context', {
       const route = router.currentRoute
       if (!get(route, 'value.meta.announcer.skip')) {
         this.screenReaderAlert.message = `${String(get(route, 'value.name', ''))} page has loaded.`
+        this.screenReaderAlert.politeness = 'assertive'
       }
       putFocusNextTick(focusTarget || 'page-title')
     },

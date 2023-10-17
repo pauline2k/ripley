@@ -1,15 +1,18 @@
 <template>
   <div v-if="!isLoading" class="pa-5">
     <Header1 text="Manage Mailing Lists" />
-    <v-alert
-      v-if="error"
-      class="ma-2"
-      density="compact"
-      role="alert"
-      type="warning"
-    >
-      {{ error }}
-    </v-alert>
+    <div id="mailing-lists-alert" aria-live="polite">
+      <v-alert
+        v-if="error"
+        class="ma-2"
+        density="compact"
+        role="alert"
+        type="warning"
+      >
+        {{ error }}
+      </v-alert>
+    </div>
+
     <div v-if="currentUser.isAdmin" class="align-center d-flex flex-wrap pa-3">
       <div class="pr-3">
         <v-text-field
@@ -54,6 +57,7 @@ import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {getMailingList} from '@/api/mailing-list'
 import {isValidCanvasSiteId} from '@/utils'
+import {nextTick} from 'vue'
 import {trim} from 'lodash'
 
 export default {
@@ -82,21 +86,27 @@ export default {
     proceed() {
       if (!this.isProcessing) {
         this.isProcessing = true
+        this.alertScreenReader('Searching for mailing list.')
+        let searchTimer = setInterval(() => {
+          this.alertScreenReader('Still searching.')
+        }, 7000)
         getMailingList(this.canvasSiteId).then(
           data => {
             this.error = undefined
             if (data) {
+              this.alertScreenReader('Mailing list found.', 'assertive')
               this.setMailingList(data)
               this.$router.push('/mailing_list/update')
             } else {
-              this.$router.push(`/mailing_list/create/${this.canvasSiteId}`)
+              this.alertScreenReader('No mailing list found.', 'assertive')
+              nextTick(() => this.$router.push(`/mailing_list/create/${this.canvasSiteId}`))
             }
           },
           error => {
             this.error = error
             this.isProcessing = false
           }
-        )
+        ).finally(() => clearInterval(searchTimer))
       }
     },
     trim
