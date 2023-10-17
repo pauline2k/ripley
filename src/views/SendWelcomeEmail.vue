@@ -157,6 +157,7 @@
                 id="btn-cancel-welcome-email-edit"
                 color="secondary"
                 :disabled="isSaving || isToggling"
+                variant="tonal"
                 @click="cancelEditMode"
               >
                 Cancel

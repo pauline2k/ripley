@@ -48,6 +48,7 @@
           <div class="float-right py-3">
             <v-btn
               id="official-sections-save-btn"
+              aria-label="Apply pending modifications to this course site"
               class="mr-1 text-no-wrap"
               color="primary"
               :disabled="totalStagedCount === 0"
@@ -57,7 +58,9 @@
             </v-btn>
             <v-btn
               id="official-sections-cancel-btn"
-              variant="text"
+              aria-label="Cancel section modifications for this course site"
+              class="mx-1"
+              variant="tonal"
               @click="cancel"
             >
               Cancel<span class="sr-only"> edit sections</span>
@@ -76,22 +79,23 @@
           />
           <div v-if="totalStagedCount > 12">
             <v-btn
-              id="official-sections-secondary-cancel-btn"
-              aria-label="Cancel section modifications for this course site"
-              class="mx-1"
-              @click="cancel"
-            >
-              Cancel<span class="sr-only"> edit sections</span>
-            </v-btn>
-            <v-btn
               id="official-sections-secondary-save-btn"
               aria-label="Apply pending modifications to this course site"
-              :disabled="totalStagedCount === 0"
-              class="text-no-wrap"
+              class="mr-1 text-no-wrap"
               color="primary"
+              :disabled="totalStagedCount === 0"
               @click="saveChanges"
             >
               Save Changes
+            </v-btn>
+            <v-btn
+              id="official-sections-secondary-cancel-btn"
+              aria-label="Cancel section modifications for this course site"
+              class="mx-1"
+              variant="tonal"
+              @click="cancel"
+            >
+              Cancel<span class="sr-only"> edit sections</span>
             </v-btn>
           </div>
           <div>

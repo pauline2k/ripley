@@ -42,16 +42,14 @@
               <v-row v-if="isAdminToolMode" no-gutters>
                 <v-col cols="auto" class="me-auto">
                   <div v-if="canvasSite.url">
-                    <OutboundLink id="course-site-href" :href="canvasSite.url">
-                      <div class="d-flex">
-                        <div class="pr-2">
-                          <span class="sr-only">View course site </span>
-                          <h2>{{ canvasSite.name }}</h2>
-                        </div>
-                        <div class="pb-1">
-                          <v-icon :icon="mdiOpenInNew" size="small" />
-                        </div>
-                      </div>
+                    <OutboundLink
+                      id="course-site-href"
+                      class="d-flex align-center mb-2"
+                      :href="canvasSite.url"
+                      title="View course site"
+                    >
+                      <div class="font-size-20 pr-1" level="2" role="heading">{{ canvasSite.name }}</div>
+                      <v-icon :icon="mdiOpenInNew" size="small" />
                     </OutboundLink>
                   </div>
                   <div v-if="!canvasSite.url">
@@ -102,7 +100,7 @@
               <v-row v-if="currentUser.isTeaching || currentUser.isAdmin" no-gutters>
                 <v-col>
                   <div class="d-flex float-right">
-                    <div :class="{'mr-1': isAdminToolMode}">
+                    <div :class="{'mr-2': isAdminToolMode}">
                       <v-btn
                         id="btn-create-mailing-list"
                         color="primary"
@@ -119,7 +117,7 @@
                       <v-btn
                         id="btn-cancel"
                         :disabled="isCreating"
-                        variant="text"
+                        variant="tonal"
                         @click="cancel"
                       >
                         Cancel
@@ -216,7 +214,7 @@ export default {
             this.alertScreenReader('Success.', 'assertive')
             this.error = null
             this.setMailingList(data)
-            this.goToNextPage()
+            nextTick(this.goToNextPage())
           },
           error => {
             this.alertScreenReader('Error.', 'assertive')

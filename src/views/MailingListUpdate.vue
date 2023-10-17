@@ -26,10 +26,13 @@
           :key="index"
           :disabled="!size(alert.emailAddresses)"
         >
-          <v-expansion-panel-title :color="alert.type === 'warning' ? 'error' : 'success'">
+          <v-expansion-panel-title
+            :id="`mailing-list-alert-${index}`"
+            :color="alert.type === 'warning' ? 'error' : 'success'"
+          >
             <span v-if="size(alert.emailAddresses)">
               {{ alert.message }}
-              [<span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> users</span>]
+              [&ThinSpace;<span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> users</span>&ThinSpace;]
             </span>
             <span v-if="!size(alert.emailAddresses)" class="alert-message-without-email-addresses">
               {{ alert.message }}
@@ -77,13 +80,17 @@
                 </div>
               </v-col>
               <v-col>
-                <OutboundLink
-                  id="mailing-list-course-site-name"
-                  class="pr-2"
-                  :href="canvasSite.url"
-                >
-                  {{ canvasSite.name }}
-                </OutboundLink>
+                <div>
+                  <OutboundLink
+                    id="mailing-list-course-site-name"
+                    class="d-flex align-center"
+                    :href="canvasSite.url"
+                    title="View course site"
+                  >
+                    <span class="font-size-15 font-weight-medium pr-1">{{ canvasSite.name }}</span>
+                    <v-icon :icon="mdiOpenInNew" size="small" />
+                  </OutboundLink>
+                </div>
               </v-col>
             </v-row>
             <v-row class="pt-1" no-gutters>
@@ -169,7 +176,7 @@
           id="btn-cancel"
           class="mr-2"
           :disabled="isUpdating"
-          variant="outlined"
+          variant="tonal"
           @click="cancel"
         >
           Cancel
@@ -180,7 +187,7 @@
 </template>
 
 <script setup>
-import {mdiAccount, mdiAlertCircle, mdiCheck} from '@mdi/js'
+import {mdiAccount, mdiAlertCircle, mdiCheck, mdiOpenInNew} from '@mdi/js'
 </script>
 
 <script>
@@ -292,6 +299,7 @@ export default {
   font-size: 16px;
   font-weight: 700;
 }
+
 .toggle-show-hide {
   color: lightblue;
   text-decoration: none;
@@ -299,6 +307,12 @@ export default {
     cursor: pointer;
   }
   &:hover, &:focus {
+    text-decoration: underline;
+  }
+}
+/* eslint-disable-next-line vue-scoped-css/no-unused-selector */
+button:hover, :focus, :focus-visible {
+  .toggle-show-hide {
     text-decoration: underline;
   }
 }
