@@ -382,7 +382,11 @@ export default {
         this.contactSupport = true
       } else {
         this.officialSections = officialSections
-        this.selectedSection = null
+        if (officialSections.length === 1) {
+          this.selectedSection = officialSections[0]
+        } else {
+          this.selectedSection = null
+        }
       }
     },
     loadSectionTerms(sectionTerms) {
