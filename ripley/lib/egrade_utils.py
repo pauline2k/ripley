@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from flask import current_app as app
 from ripley.api.errors import BadRequestError
 from ripley.externals import canvas, data_loch
-from ripley.lib.canvas_utils import parse_canvas_sis_section_id
+from ripley.lib.canvas_site_utils import parse_canvas_sis_section_id
 
 GRADING_BASIS_CODES = ['CPN', 'DPN', 'EPN', 'ESU', 'PNP', 'SUS']
 LETTER_GRADES = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
@@ -114,7 +114,7 @@ def _extract_grades(enrollments):
 
 
 def _get_canvas_course_student_grades(canvas_site_id, section_id, term_id):
-    from ripley.lib.canvas_utils import parse_canvas_sis_section_id
+    from ripley.lib.canvas_site_utils import parse_canvas_sis_section_id
 
     enrollments = data_loch.get_basic_profile_and_grades_per_enrollments(term_id=term_id, section_ids=[section_id])
     loch_enrollments_by_uid = {e['ldap_uid']: e for e in enrollments}

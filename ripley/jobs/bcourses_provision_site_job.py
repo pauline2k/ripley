@@ -31,7 +31,7 @@ from ripley.externals import canvas
 from ripley.jobs.bcourses_refresh_base_job import BcoursesRefreshBaseJob
 from ripley.jobs.errors import BackgroundJobError
 from ripley.lib.canvas_site_provisioning import process_course_enrollments
-from ripley.lib.canvas_utils import csv_formatted_course_role, parse_canvas_sis_section_id
+from ripley.lib.canvas_site_utils import csv_formatted_course_role, parse_canvas_sis_section_id
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from ripley.models.canvas_synchronization import CanvasSynchronization

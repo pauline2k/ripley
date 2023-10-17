@@ -31,65 +31,15 @@ from time import sleep
 from flask import current_app as app
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.externals import canvas, data_loch
-from ripley.externals.canvas import get_roles, set_tab_hidden
+from ripley.externals.canvas import set_tab_hidden
 from ripley.externals.s3 import upload_dated_csv
 from ripley.lib.berkeley_course import course_section_name, course_to_api_json, section_to_api_json, \
     sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.calnet_utils import get_basic_attributes, roles_from_affiliations
+from ripley.lib.canvas_user_utils import csv_row_for_campus_user, enroll_user_with_role
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from rq.job import get_current_job
-
-
-def add_user_to_course_section(uid, role, course_section_id):
-    canvas_user = canvas.get_sis_user_profile(uid)
-    if not canvas_user:
-        import_users([uid])
-        canvas_user = canvas.get_sis_user_profile(uid)
-    if not canvas_user:
-        app.logger.warning(f'Unable to find or create Canvas user for UID={uid}')
-        return None
-    canvas_section = canvas.get_section(section_id=course_section_id, api_call=False, use_sis_id=True)
-    if not canvas_section:
-        app.logger.warning(f'No Canvas section found with course_section_id={course_section_id})')
-        return None
-    return canvas_section.enroll_user(
-        canvas_user['id'],
-        **{
-            'enrollment[type]': role.base_role_type,
-            'enrollment[role_id]': role.id,
-            'enrollment[enrollment_state]': 'active',
-            'enrollment[course_section_id]': course_section_id,
-            'enrollment[notify]': False,
-        },
-    )
-
-
-def enroll_user_with_role(account_id, canvas_site, role_label, uid):
-    assigned = False
-    all_role_labels = []
-    role_label = role_label.lower()
-    for role in get_roles(account_id):
-        all_role_labels.append(role.label)
-        if role_label.lower() == role.label.lower():
-            sis_user_profile = canvas.get_sis_user_profile(uid=uid)
-            canvas_site.enroll_user(
-                user=sis_user_profile['id'],
-                **{
-                    'enrollment[role_id]': role.id,
-                    'enrollment[enrollment_state]': 'active',
-                    'enrollment[notify]': False,
-                },
-            )
-            assigned = True
-            app.logger.debug(f'UID {uid} assigned role {role.label} within Canvas project site {canvas_site.id}')
-            break
-    if not assigned:
-        app.logger.debug(f"""
-            UID {uid} was NOT assigned role '{role_label}' within Canvas site {canvas_site.id}.
-            Available roles are {all_role_labels}.
-        """)
 
 
 def create_canvas_project_site(name, owner_uid):
@@ -231,17 +181,6 @@ def csv_formatted_course_role(role):
     }.get(role, role)
 
 
-def csv_row_for_campus_user(user):
-    return {
-        'user_id': user_id_from_attributes(user),
-        'login_id': str(user['ldap_uid']),
-        'first_name': user['first_name'],
-        'last_name': user['last_name'],
-        'email': user['email_address'],
-        'status': 'active',
-    }
-
-
 def extract_berkeley_term_id(canvas_site):
     sis_term_id = canvas_site.term['sis_term_id']
     term = BerkeleyTerm.from_canvas_sis_term_id(sis_term_id) if sis_term_id else None
@@ -321,44 +260,6 @@ def get_teaching_terms(current_user=None, section_ids=None, sections=None, term_
             'termYear': term.year,
         }
     return [_term_courses(term_id, courses_by_id) for term_id, courses_by_id in courses_by_term.items()]
-
-
-def import_users(uids):
-    users = []
-    batch_size = 1000
-    for batch in [uids[i:i + batch_size] for i in range(0, len(uids), batch_size)]:
-        rows = get_basic_attributes(batch)
-        for uid, row in rows.items():
-            person_type = getattr(row, 'person_type', None)
-            if person_type == 'Z':
-                continue
-            user = {
-                'affiliations': row['affiliations'],
-                'email_address': row['email_address'],
-                'first_name': row['first_name'],
-                'last_name': row['last_name'],
-                'ldap_uid': uid,
-                'roles': roles_from_affiliations(row['affiliations']),
-                'sid': row['sid'],
-            }
-            if person_type != 'A' or any(item for item in ['student', 'staff', 'faculty', 'guest'] if user['roles'][item]):
-                users.append(csv_row_for_campus_user(user))
-    with SisImportCsv.create(['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) as users_csv:
-        users_csv.writerows(users)
-        users_csv.filehandle.close()
-
-        upload_dated_csv(
-            users_csv.tempfile.name,
-            'user-provision-sis-import',
-            'canvas_sis_imports',
-            utc_now().strftime('%F_%H-%M-%S'),
-        )
-
-        app.logger.debug('Posting user provisioning SIS import.')
-        sis_import = canvas.post_sis_import(attachment=users_csv.tempfile.name)
-        if not sis_import:
-            raise InternalServerError('User provisioning SIS import failed.')
-        return sis_import
 
 
 def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_ids, is_admin_by_ccns):
@@ -673,17 +574,6 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
             sis_import=sis_import,
             sis_term_id=canvas_sis_term_id,
         )
-
-
-def user_id_from_attributes(attributes):
-    if (
-        attributes['sid']
-        and attributes['affiliations']
-        and ('STUDENT-TYPE-REGISTERED' in attributes['affiliations'] or 'STUDENT-TYPE-NOT REGISTERED' in attributes['affiliations'])
-    ):
-        return attributes['sid']
-    else:
-        return f"UID:{attributes['ldap_uid']}"
 
 
 def _canvas_site_term_json(canvas_site):

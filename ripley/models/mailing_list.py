@@ -30,7 +30,7 @@ from ripley import db, std_commit
 from ripley.externals import canvas, data_loch
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_authorization import has_instructing_role, is_project_maintainer, is_project_owner
-from ripley.lib.canvas_utils import canvas_site_to_api_json, extract_berkeley_term_id
+from ripley.lib.canvas_site_utils import canvas_site_to_api_json, extract_berkeley_term_id
 from ripley.lib.mailing_list_utils import send_welcome_emails
 from ripley.lib.util import to_isoformat, utc_now
 from ripley.models.base import Base

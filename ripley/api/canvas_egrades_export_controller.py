@@ -32,7 +32,7 @@ from ripley.externals import canvas
 from ripley.externals.canvas import get_course_sections
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_utils import get_official_sections, parse_canvas_sis_section_id
+from ripley.lib.canvas_site_utils import get_official_sections, parse_canvas_sis_section_id
 from ripley.lib.egrade_utils import LETTER_GRADES, prepare_egrades_export
 from ripley.lib.http import tolerant_jsonify
 from rq.job import JobStatus
