@@ -80,6 +80,17 @@ export function isValidCanvasSiteId(canvasSiteId: string) {
   return !!canvasSiteId && canvasSiteId.match(/^\d+$/) && parseInt(canvasSiteId, 10) <= maxValidCanvasSiteId
 }
 
+export function isValidCanvasUserId(canvasUserId: string) {
+  canvasUserId = trim(canvasUserId)
+  const maxValidCanvasSiteId = get(useContextStore(), 'config.maxValidCanvasSiteId') || 10
+  return !!canvasUserId && canvasUserId.match(/^\d+$/) && parseInt(canvasUserId, 10) <= maxValidCanvasSiteId
+}
+
+export function isValidUID(uid: string) {
+  uid = trim(uid)
+  return !!uid && uid.match(/^\d+$/) && parseInt(uid, 10) <= 1000000
+}
+
 export function oxfordJoin(arr: any[]) {
   switch(arr.length) {
   case 0: return ''

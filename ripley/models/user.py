@@ -31,7 +31,7 @@ from ripley.externals.data_loch import has_instructor_history
 from ripley.externals.redis import cache_dict_object, fetch_cached_dict_object, remove_cached_dict_object
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
-from ripley.lib.canvas_authorization import can_administrate_canvas
+from ripley.lib.canvas_user_utils import canvas_user_profile_to_api_json
 from ripley.models.user_auth import UserAuth
 
 
@@ -127,7 +127,7 @@ class User(UserMixin):
 
     @property
     def is_teaching(self):
-        return self.user['isTeaching']
+        return self.user.get('isTeaching', None)
 
     def logout(self):
         remove_cached_dict_object(self._get_cache_key())
@@ -163,50 +163,14 @@ class User(UserMixin):
             'canvas_masquerading_user_id': canvas_masquerading_user_id,
         })
 
-    @classmethod
-    def load_canvas_user_data(cls, canvas_site_id, canvas_user_profile, uid):
-        canvas_user_id = canvas_user_profile.get('id')
-        course = canvas.get_course(course_id=canvas_site_id) if uid and canvas_site_id else None
-        canvas_user_data = {
-            'canvasSiteId': canvas_site_id,
-            'canvasSiteCourseCode': course.course_code if course else None,
-            'canvasSiteEnrollmentTermId': course.enrollment_term_id if course else None,
-            'canvasSiteName': course.name if course else None,
-            'canvasSiteSisCourseId': course.sis_course_id if course else None,
-            'canvasSiteUserRoles': [],
-
-            'canvasUserId': canvas_user_id,
-            'canvasUserAvatarUrl': canvas_user_profile.get('avatar_url'),
-            'canvasUserLoginId': canvas_user_profile.get('login_id'),
-            'canvasUserName': canvas_user_profile.get('name'),
-            'canvasUserPrimaryEmail': canvas_user_profile.get('primary_email'),
-            'canvasUserShortName': canvas_user_profile.get('short_name'),
-            'canvasUserSisUserId': canvas_user_profile.get('sis_user_id'),
-            'canvasUserSortableName': canvas_user_profile.get('sortable_name'),
-            'canvasUserTitle': canvas_user_profile.get('title'),
-            'isCanvasAdmin': can_administrate_canvas(uid),
-        }
-        is_student = False
-        is_teaching = False
-        canvas_site_user = canvas.get_course_user(canvas_site_id, canvas_user_id) if course else None
-        if canvas_site_user and canvas_site_user.enrollments:
-            roles = list({e['role'] for e in canvas_site_user.enrollments})
-            canvas_user_data['canvasSiteUserRoles'] = roles
-            roles_that_teach = ['TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader']
-            is_teaching = bool(next((role for role in roles if role in roles_that_teach), None))
-            is_student = not is_teaching and 'StudentEnrollment' in roles
-        canvas_user_data['isStudent'] = is_student
-        canvas_user_data['isTeaching'] = is_teaching
-        return canvas_user_data
-
     def _load_canvas_user_data(self, user_profile=None):
         cache_key = self._get_cache_key()
         canvas_user_data = fetch_cached_dict_object(cache_key)
         if not canvas_user_data:
             if not user_profile and self.uid:
-                user_profile = canvas.get_sis_user_profile(self.uid) or canvas.get_sis_user_profile(f'inactive-{self.uid}')
+                user_profile = canvas.get_canvas_user_profile_by_uid(self.uid) or canvas.get_canvas_user_profile_by_uid(f'inactive-{self.uid}')
             if user_profile:
-                canvas_user_data = self.load_canvas_user_data(
+                canvas_user_data = canvas_user_profile_to_api_json(
                     canvas_site_id=self.__canvas_site_id,
                     canvas_user_profile=user_profile,
                     uid=self.uid,
@@ -222,8 +186,6 @@ class User(UserMixin):
         is_admin = False
         is_faculty = False
         is_staff = False
-        is_student = False
-        is_teaching = False
         name = None
         # Deduce user metadata.
         if self.uid:
@@ -244,8 +206,6 @@ class User(UserMixin):
                     affiliations = set([affiliations] if isinstance(affiliations, str) else affiliations or [])
                     is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
                     is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
-                    is_student = bool(canvas_user_data and canvas_user_data['isStudent'])
-                    is_teaching = bool(canvas_user_data and canvas_user_data['isTeaching'])
         api_json = {
             **{
                 'canvasMasqueradingUserId': self.__canvas_masquerading_user_id,
@@ -257,8 +217,6 @@ class User(UserMixin):
                 'isAuthenticated': is_active,
                 'isFaculty': is_faculty,
                 'isStaff': is_staff,
-                'isStudent': is_student,
-                'isTeaching': is_teaching,
                 'name': name,
                 'uid': self.uid,
             },

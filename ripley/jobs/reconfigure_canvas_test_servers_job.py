@@ -44,7 +44,7 @@ class ReconfigureCanvasTestServersJob(BaseJob):
 
             test_admin = next((a for a in account.get_admins() if a.user['login_id'] == app.config['CANVAS_TEST_ADMIN_ID']), None)
             if not test_admin:
-                profile = canvas.get_sis_user_profile(app.config['CANVAS_TEST_ADMIN_ID'], api_url=server)
+                profile = canvas.get_canvas_user_profile_by_uid(app.config['CANVAS_TEST_ADMIN_ID'], api_url=server)
                 if not profile:
                     raise BackgroundJobError(f"SIS profile for test admin {app.config['CANVAS_TEST_ADMIN_ID']} not found on {server}")
                 app.logger.info(f"Adding test admin to {server} (id={profile['id']}, login_id={profile['login_id']})")

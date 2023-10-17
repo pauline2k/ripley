@@ -1,4 +1,5 @@
 import auth from '@/auth'
+const Acheron = () => import('./views/Acheron.vue')
 const BaseLTI = () => import('./layouts/lti/BaseLTI.vue')
 const BaseStandalone = () => import('./layouts/standalone/BaseStandalone.vue')
 const CanvasSiteSummary = () => import('./views/CanvasSiteSummary.vue')
@@ -47,6 +48,11 @@ const routes:RouteRecordRaw[] = [
     component: BaseView,
     path: '/',
     children: [
+      {
+        component: Acheron,
+        name: 'Acheron (LV-426)',
+        path: '/Acheron'
+      },
       {
         component: CanvasSiteSummary,
         meta: {

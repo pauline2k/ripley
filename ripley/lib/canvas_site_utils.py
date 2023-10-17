@@ -470,7 +470,7 @@ def _add_instructor_to_site(
     teacher_role,
     uid,
 ):
-    sis_user_profile = canvas.get_sis_user_profile(uid)
+    sis_user_profile = canvas.get_canvas_user_profile_by_uid(uid)
     if not sis_user_profile:
         user_result = data_loch.get_users(uids=[uid])
         if user_result:
@@ -480,7 +480,7 @@ def _add_instructor_to_site(
                 sis_import = canvas.post_sis_import(attachment=users_csv.tempfile.name)
                 if not sis_import:
                     raise InternalServerError(f'Course sections SIS import failed (canvas_site_id={course.id}).')
-        sis_user_profile = canvas.get_sis_user_profile(uid)
+        sis_user_profile = canvas.get_canvas_user_profile_by_uid(uid)
         if not sis_user_profile:
             raise InternalServerError(f'Failed to create instructor account (uids={uid}).')
 

@@ -29,15 +29,16 @@ from ripley.externals import canvas
 from ripley.externals.canvas import get_roles
 from ripley.externals.s3 import upload_dated_csv
 from ripley.lib.calnet_utils import get_basic_attributes, roles_from_affiliations
+from ripley.lib.canvas_authorization import can_administrate_canvas
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 
 
 def add_user_to_course_section(uid, role, course_section_id):
-    canvas_user = canvas.get_sis_user_profile(uid)
+    canvas_user = canvas.get_canvas_user_profile_by_uid(uid)
     if not canvas_user:
         import_users([uid])
-        canvas_user = canvas.get_sis_user_profile(uid)
+        canvas_user = canvas.get_canvas_user_profile_by_uid(uid)
     if not canvas_user:
         app.logger.warning(f'Unable to find or create Canvas user for UID={uid}')
         return None
@@ -75,7 +76,7 @@ def enroll_user_with_role(account_id, canvas_site, role_label, uid):
     for role in get_roles(account_id):
         all_role_labels.append(role.label)
         if role_label.lower() == role.label.lower():
-            sis_user_profile = canvas.get_sis_user_profile(uid=uid)
+            sis_user_profile = canvas.get_canvas_user_profile_by_uid(uid=uid)
             canvas_site.enroll_user(
                 user=sis_user_profile['id'],
                 **{
@@ -130,6 +131,44 @@ def import_users(uids):
         if not sis_import:
             raise InternalServerError('User provisioning SIS import failed.')
         return sis_import
+
+
+def canvas_user_profile_to_api_json(canvas_user_profile, uid, canvas_site_id=None):
+    canvas_user_id = canvas_user_profile.get('id')
+    api_json = {
+        'canvasUserId': canvas_user_id,
+        'canvasUserAvatarUrl': canvas_user_profile.get('avatar_url'),
+        'canvasUserLoginId': canvas_user_profile.get('login_id'),
+        'canvasUserName': canvas_user_profile.get('name'),
+        'canvasUserPrimaryEmail': canvas_user_profile.get('primary_email'),
+        'canvasUserShortName': canvas_user_profile.get('short_name'),
+        'canvasUserSisUserId': canvas_user_profile.get('sis_user_id'),
+        'canvasUserSortableName': canvas_user_profile.get('sortable_name'),
+        'canvasUserTitle': canvas_user_profile.get('title'),
+        'isCanvasAdmin': can_administrate_canvas(uid),
+    }
+    if canvas_site_id:
+        course = canvas.get_course(course_id=canvas_site_id) if canvas_site_id else None
+        api_json.update({
+            'canvasSiteId': canvas_site_id,
+            'canvasSiteCourseCode': course.course_code if course else None,
+            'canvasSiteEnrollmentTermId': course.enrollment_term_id if course else None,
+            'canvasSiteName': course.name if course else None,
+            'canvasSiteSisCourseId': course.sis_course_id if course else None,
+            'canvasSiteUserRoles': [],
+        })
+        is_student = False
+        is_teaching = False
+        canvas_site_user = canvas.get_course_user(canvas_site_id, canvas_user_id) if course else None
+        if canvas_site_user and canvas_site_user.enrollments:
+            roles = list({e['role'] for e in canvas_site_user.enrollments})
+            api_json['canvasSiteUserRoles'] = roles
+            roles_that_teach = ['TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader']
+            is_teaching = bool(next((role for role in roles if role in roles_that_teach), None))
+            is_student = not is_teaching and 'StudentEnrollment' in roles
+        api_json['isStudent'] = is_student
+        api_json['isTeaching'] = is_teaching
+    return api_json
 
 
 def user_id_from_attributes(attributes):

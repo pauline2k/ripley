@@ -36,31 +36,27 @@ export default {
     options: []
   }),
   created() {
-    this.options = [
-      {
-        id: 'my-profile',
-        label: 'My Profile',
-        onClick: () => {
-          this.$router.push({path: `/profile/${this.currentUser.uid}`})
-        }
-      }
-    ]
-    if (this.currentUser.canvasSiteId) {
-      this.options.push({
-        id: 'current-user-canvas-site',
-        label: `Canvas Site ${this.currentUser.canvasSiteId}`,
-        onClick: () => {
-          this.$router.push({path: `/canvas_site/${this.currentUser.canvasSiteId}`})
-        }
-      })
+    this.addOption('my-profile', 'My Profile', this.goProfile)
+    const canvasSiteId = this.currentUser.canvasSiteId
+    if (canvasSiteId) {
+      this.addOption('current-user-canvas-site', `Canvas Site ${canvasSiteId}`, this.goCanvasSiteSummary)
+      this.addOption('acheron-lv-426', 'Acheron (LV-426)', this.goAcheron)
     }
-    this.options.push({
-      id: 'log-out',
-      label: 'Log Out',
-      onClick: this.logOut
-    })
+    this.addOption('log-out', 'Log Out', this.logOut)
   },
   methods: {
+    addOption(id, label, onClick) {
+      this.options.push({id, label, onClick})
+    },
+    goAcheron() {
+      this.$router.push({path: '/acheron'})
+    },
+    goCanvasSiteSummary() {
+      this.$router.push({path: `/canvas_site/${this.currentUser.canvasSiteId}`})
+    },
+    goProfile() {
+      this.$router.push({path: `/profile/${this.currentUser.uid}`})
+    },
     logOut() {
       this.loadingStart()
       logOut().then(data => window.location.href = data.casLogoutUrl)
