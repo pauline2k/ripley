@@ -45,7 +45,6 @@
                 id="section-select"
                 v-model="selectedSectionId"
                 aria-label="Search specific section (defaults to all sections)"
-                class="section-select"
                 @change="onSelectSection"
               >
                 <option :value="null">All Sections</option>
@@ -100,14 +99,25 @@
             </div>
           </v-col>
         </v-row>
+        <v-row no-gutters class="display-none-when-print" justify="end">
+          <div class="d-flex flex-wrap float-right pr-2">
+            <v-checkbox
+              v-model="showOnePhotoPerPage"
+              label="Print one student per page"
+              density="comfortable"
+            >
+            </v-checkbox>
+          </div>
+        </v-row>
         <v-row v-if="students.length">
-          <v-col role="alert" aria-live="polite" class="py-1">{{ pluralize('student', students.length, {0: 'No', 1: 'One'}) }} found</v-col>
+          <v-col role="alert" aria-live="polite" class="py-1 display-none-when-print">{{ pluralize('student', students.length, {0: 'No', 1: 'One'}) }} found</v-col>
         </v-row>
         <v-row no-gutters>
           <v-col sm="12">
             <RosterPhotos
               v-if="students.length"
               :students="students"
+              :show-one-photo-per-page="showOnePhotoPerPage"
             />
             <div v-if="!roster.students.length" role="alert" aria-live="polite">
               <v-icon class="icon-gold" :icon="mdiAlertCircleOutline" />
@@ -142,6 +152,7 @@ export default {
   data: () => ({
     error: undefined,
     isDownloading: false,
+    showOnePhotoPerPage: false,
     printButtonTooltip: 'You can print once student images have loaded.',
     roster: undefined,
     search: undefined,
@@ -226,7 +237,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.section-select {
+select {
   height: 44px;
 }
 @media print {
