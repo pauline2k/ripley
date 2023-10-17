@@ -10,9 +10,9 @@
           type="warning"
         >
           <div v-if="contactSupport" class="py-1">
-            If this is not expected, please contact
+            Contact
             <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink>
-            for further assistance.
+            if you need assistance.
           </div>
         </v-alert>
         <div v-if="showRetryOption" class="py-6 text-center">

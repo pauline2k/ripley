@@ -63,7 +63,6 @@
               Cancel<span class="sr-only"> edit sections</span>
             </v-btn>
           </div>
-          id="template-sections-table-currentStaging"
           <CourseSectionsTable
             class="mb-1"
             mode="currentStaging"
