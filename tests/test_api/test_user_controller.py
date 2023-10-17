@@ -30,7 +30,11 @@ from tests.util import register_canvas_uris
 from werkzeug.http import parse_cookie
 
 admin_uid = '10000'
+no_canvas_account_uid = '10001'
+reader_uid = '60000'
+site_owner_uid = '90000'
 student_uid = '40000'
+ta_uid = '50000'
 teacher_uid = '30000'
 
 
@@ -92,8 +96,8 @@ class TestUserProfile:
         fake_auth.login(canvas_site_id=None, uid=admin_uid)
         api_json = self._api_user_profile(client, uid=student_uid)
         assert api_json['uid'] == student_uid
-        assert api_json['isStudent'] is False
-        assert api_json['isTeaching'] is False
+        assert 'isStudent' not in api_json
+        assert 'isTeaching' not in api_json
 
     def test_masquerading_cookies(self, app, client, fake_auth):
         """Masquerading user gets profile of masqueradee."""
@@ -143,3 +147,139 @@ class TestUserProfile:
             assert '{"canvas_site_id": 1234567, "uid": "40000", "canvas_masquerading_user_id": null}' in user_session['remember_ripley_token']
             assert 'Secure' in user_session
             assert user_session['SameSite'] == 'None'
+
+
+class TestSearchUsers:
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        _api_search_users(client, params={'searchText': 'ABC', 'searchType': 'name'}, expected_status_code=401)
+
+    def test_no_canvas_account(self, client, app, fake_auth):
+        """Denies user with no Canvas account."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}']}, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+            _api_search_users(client, params={'searchText': 'ABC', 'searchType': 'name'}, expected_status_code=401)
+
+    def test_student(self, client, app, fake_auth):
+        """Denies student."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', f'get_enrollments_{canvas_site_id}_4567890'],
+                'user': [f'profile_{student_uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
+            _api_search_users(client, params={'searchText': 'ABC', 'searchType': 'name'}, expected_status_code=401)
+
+    def test_reader(self, client, app, fake_auth):
+        """Denies reader."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', f'get_enrollments_{canvas_site_id}_7890123'],
+                'user': [f'profile_{reader_uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=reader_uid)
+            _api_search_users(client, params={'searchText': 'ABC', 'searchType': 'name'}, expected_status_code=401)
+
+    def test_ta(self, client, app, fake_auth):
+        """Allows TA."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', f'get_enrollments_{canvas_site_id}_6789012'],
+                'user': [f'profile_{ta_uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=ta_uid)
+            for params in [
+                {'searchText': 'BRE', 'searchType': 'name'},
+                {'searchText': 'BRE', 'searchType': 'email'},
+                {'searchText': '60000', 'searchType': 'uid'},
+            ]:
+                results = _api_search_users(client, params=params)
+                assert len(results['users']) == 1
+                assert results['users'][0]['uid'] == '60000'
+
+    def test_teacher(self, client, app, fake_auth):
+        """Allows teacher."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', f'get_enrollments_{canvas_site_id}_4567890'],
+                'user': [f'profile_{teacher_uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            for params in [
+                {'searchText': '🤖', 'searchType': 'name'},
+                {'searchText': 'Ash', 'searchType': 'email'},
+                {'searchText': '30000', 'searchType': 'uid'},
+            ]:
+                results = _api_search_users(client, params=params)
+                assert len(results['users']) == 1
+                assert results['users'][0]['uid'] == '30000'
+
+    def test_site_owner(self, client, app, fake_auth):
+        """Allows site_owner."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', f'get_enrollments_{canvas_site_id}_5678234'],
+                'user': [f'profile_{site_owner_uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=site_owner_uid)
+            for params in [
+                {'searchText': '🤖', 'searchType': 'name'},
+                {'searchText': 'Ash', 'searchType': 'email'},
+                {'searchText': '30000', 'searchType': 'uid'},
+            ]:
+                results = _api_search_users(client, params=params)
+                assert len(results['users']) == 1
+                assert results['users'][0]['uid'] == '30000'
+
+    def test_admin(self, client, app, fake_auth):
+        """Allows admin."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', f'get_enrollments_{canvas_site_id}_4567890'],
+                'user': [f'profile_{admin_uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            for params in [
+                {'searchText': 'Lambert, Joan', 'searchType': 'name'},
+                {'searchText': 'lam', 'searchType': 'email'},
+                {'searchText': '20000', 'searchType': 'uid'},
+            ]:
+                results = _api_search_users(client, params=params)
+                assert len(results['users']) == 1
+                assert results['users'][0]['uid'] == '20000'
+
+    def test_invalid_params(self, client, app, fake_auth):
+        """Returns an error if searchText is blank or searchType is invalid."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}']}, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            _api_search_users(client, expected_status_code=400)
+            _api_search_users(client, params={'searchType': 'name'}, expected_status_code=400)
+            _api_search_users(client, params={'searchText': '', 'searchType': 'name'}, expected_status_code=400)
+            _api_search_users(client, params={'searchText': 'ABC'}, expected_status_code=400)
+            _api_search_users(client, params={'searchText': 'ABC', 'searchType': 'pizza'}, expected_status_code=400)
+
+
+def _api_search_users(client, params=None, expected_status_code=200):
+    path = '/api/user/search'
+    if params:
+        path += f'?{"&".join([k + "=" + v for k, v in params.items()])}'
+    response = client.get(path)
+    assert response.status_code == expected_status_code
+    return response.json

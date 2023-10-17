@@ -7,3 +7,7 @@ export function getUserProfile(uid: number) {
 export function getMyUserProfile() {
   return utils.get('/api/user/my_profile')
 }
+
+export function searchUsers(searchText: string, searchType: string) {
+  return utils.get(`/api/user/search?searchText=${searchText}&searchType=${searchType}`, false)
+}

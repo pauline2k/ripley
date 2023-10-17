@@ -24,17 +24,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from flask import current_app as app, request
-from flask_login import current_user, login_required
+from flask_login import current_user
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
-from ripley.api.util import canvas_role_required
+from ripley.api.util import admin_required, canvas_role_required
 from ripley.externals import canvas
-from ripley.externals.data_loch import find_people_by_email, find_people_by_name, find_person_by_uid
-from ripley.lib.canvas_user_utils import add_user_to_course_section
+from ripley.lib.canvas_user_utils import add_user_to_course_section, canvas_user_profile_to_api_json
 from ripley.lib.http import tolerant_jsonify
 
 
 @app.route('/api/canvas_user/<canvas_site_id>/options')
-@login_required
 @canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
 def get_add_user_options(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
@@ -48,7 +46,6 @@ def get_add_user_options(canvas_site_id):
 
 
 @app.route('/api/canvas_user/<canvas_site_id>/users', methods=['POST'])
-@login_required
 @canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
 def canvas_site_add_user(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
@@ -74,37 +71,44 @@ def canvas_site_add_user(canvas_site_id):
         raise InternalServerError('Encountered a problem while trying to add a user.')
 
 
-@app.route('/api/canvas_user/search')
-@login_required
-@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
-def search_users():
-    search_text = request.args.get('searchText')
-    if not search_text:
-        raise BadRequestError('Search text is required.')
-
-    search_type = request.args.get('searchType')
-    if search_type not in ['name', 'email', 'uid']:
-        raise BadRequestError('Invalid search type.')
-
-    search_results = _search_users(search_text, search_type)
-    return tolerant_jsonify(
-        {
-            'users': [_campus_user_to_api_json(user) for user in search_results],
-        },
-    )
+@app.route('/api/canvas_user/<canvas_user_id>')
+@admin_required
+def canvas_user_by_id(canvas_user_id):
+    user_profile = canvas.get_canvas_user_profile(canvas_user_id)
+    if user_profile:
+        return tolerant_jsonify(canvas_user_profile_to_api_json(
+            canvas_user_profile=user_profile,
+            uid=current_user.uid,
+        ))
+    else:
+        raise ResourceNotFoundError(f'No Canvas user found with Canvas user ID {canvas_user_id}.')
 
 
-def _campus_user_to_api_json(user):
-    return {
-        'affiliations': user['affiliations'],
-        'emailAddress': user['email_address'],
-        'firstName': user['first_name'],
-        'lastName': user['last_name'],
-        'resultCount': user['result_count'],
-        'rowNumber': user['row_number'],
-        'type': user['person_type'],
-        'uid': user['ldap_uid'],
-    }
+@app.route('/api/canvas_user/<canvas_user_id>/canvas_site/<canvas_site_id>')
+@admin_required
+def canvas_site_user(canvas_user_id, canvas_site_id):
+    user_profile = canvas.get_canvas_user_profile(canvas_user_id)
+    if user_profile:
+        return tolerant_jsonify(canvas_user_profile_to_api_json(
+            canvas_site_id=canvas_site_id,
+            canvas_user_profile=user_profile,
+            uid=current_user.uid,
+        ))
+    else:
+        raise ResourceNotFoundError(f'No Canvas user found with Canvas user ID {canvas_user_id}.')
+
+
+@app.route('/api/canvas_user/by_uid/<uid>')
+@admin_required
+def canvas_user_by_uid(uid):
+    user_profile = canvas.get_canvas_user_profile_by_uid(uid) or canvas.get_canvas_user_profile_by_uid(f'inactive-{uid}')
+    if user_profile:
+        return tolerant_jsonify(canvas_user_profile_to_api_json(
+            canvas_user_profile=user_profile,
+            uid=current_user.uid,
+        ))
+    else:
+        raise ResourceNotFoundError(f'No Canvas user profile found for UID {uid}.')
 
 
 def _canvas_role_sort_key(role):
@@ -146,12 +150,3 @@ def _get_grantable_roles(account_id):
 
     roles = [role.label for role in sorted(grantable_roles, key=_canvas_role_sort_key)]
     return [role for i, role in enumerate(roles) if role not in roles[:i]]
-
-
-def _search_users(search_text, search_type):
-    if search_type == 'name':
-        return find_people_by_name(search_text)
-    elif search_type == 'email':
-        return find_people_by_email(search_text)
-    elif search_type == 'uid':
-        return find_person_by_uid(search_text)

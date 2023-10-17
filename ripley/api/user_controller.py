@@ -25,6 +25,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from flask import current_app as app, request
 from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError
+from ripley.api.util import canvas_role_required
+from ripley.externals.data_loch import find_people_by_email, find_people_by_name, find_person_by_uid
 from ripley.lib.http import tolerant_jsonify
 from ripley.models.user import User
 
@@ -48,3 +50,37 @@ def get_user_profile():
         return tolerant_jsonify(User(user_id).to_api_json())
     else:
         raise BadRequestError('Invalid UID')
+
+
+@app.route('/api/user/search')
+@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
+def search_users():
+    search_text = request.args.get('searchText')
+    search_type = request.args.get('searchType')
+    if search_text and search_type:
+        if search_type == 'name':
+            search_results = find_people_by_name(search_text)
+        elif search_type == 'email':
+            search_results = find_people_by_email(search_text)
+        elif search_type == 'uid':
+            search_results = find_person_by_uid(search_text)
+        else:
+            raise BadRequestError(f'Invalid search type: {search_type}')
+
+        users = [_campus_user_to_api_json(user) for user in search_results]
+        return tolerant_jsonify({'users': users})
+    else:
+        raise BadRequestError('Required HTTP request parameters: searchText, searchType.')
+
+
+def _campus_user_to_api_json(user):
+    return {
+        'affiliations': user['affiliations'],
+        'emailAddress': user['email_address'],
+        'firstName': user['first_name'],
+        'lastName': user['last_name'],
+        'resultCount': user['result_count'],
+        'rowNumber': user['row_number'],
+        'type': user['person_type'],
+        'uid': user['ldap_uid'],
+    }

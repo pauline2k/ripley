@@ -12,6 +12,14 @@ export function getAddUserOptions(canvasSiteId: number) {
   return utils.get(`/api/canvas_user/${canvasSiteId}/options`, false)
 }
 
-export function searchUsers(searchText: string, searchType: string) {
-  return utils.get(`/api/canvas_user/search?searchText=${searchText}&searchType=${searchType}`, false)
+export function getCanvasUserProfileById(canvasUserId: number) {
+  return utils.get(`/api/canvas_user/${canvasUserId}`, false)
+}
+
+export function getCanvasUserProfileByUID(uid: number) {
+  return utils.get(`/api/canvas_user/by_uid/${uid}`, false)
+}
+
+export function getCanvasSiteUserProfile(canvasSiteId: number, canvasUserId: number) {
+  return utils.get(`/api/canvas_user/${canvasUserId}/canvas_site/${canvasSiteId}`, false)
 }

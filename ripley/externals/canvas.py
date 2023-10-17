@@ -272,7 +272,16 @@ def get_sis_import(sis_import_id):
         app.logger.exception(e)
 
 
-def get_sis_user_profile(uid, api_url=None):
+def get_canvas_user_profile(canvas_user_id, api_url=None):
+    try:
+        user = get_user(canvas_user_id, api_call=False, api_url=api_url)
+        return user.get_profile() if user else None
+    except Exception as e:
+        app.logger.error(f'No Canvas user found with Canvas user ID {canvas_user_id}.')
+        app.logger.exception(e)
+
+
+def get_canvas_user_profile_by_uid(uid, api_url=None):
     try:
         user = get_user(f'sis_login_id:{uid}', api_call=False, api_url=api_url)
         return user.get_profile() if user else None

@@ -320,9 +320,10 @@ import Header1 from '@/components/utils/Header1.vue'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
-import {addUser, getAddUserOptions, searchUsers} from '@/api/canvas-user'
+import {addUser, getAddUserOptions} from '@/api/canvas-user'
 import {iframeScrollToTop, pluralize, putFocusNextTick} from '@/utils'
 import {find, get, replace, trim} from 'lodash'
+import {searchUsers} from '@/api/user'
 
 export default {
   name: 'CourseAddUser',
