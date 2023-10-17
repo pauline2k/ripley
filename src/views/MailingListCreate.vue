@@ -1,30 +1,32 @@
 <template>
   <div v-if="!isLoading" class="mx-10 my-5">
     <Header1 class="my-3" text="Create Mailing List" />
-    <v-alert
-      v-if="!error && !success"
-      density="compact"
-      role="alert"
-      text="No Mailing List has been created for this site."
-      type="info"
-    />
-    <v-alert
-      v-if="success"
-      class="ma-2"
-      :closable="true"
-      density="compact"
-      role="alert"
-      :text="success"
-      type="success"
-    />
-    <v-alert
-      v-if="error"
-      class="ma-2"
-      density="compact"
-      role="alert"
-      :text="error"
-      type="warning"
-    />
+    <div id="mailing-lists-alert" aria-live="polite">
+      <v-alert
+        v-if="!error && !success"
+        density="compact"
+        role="alert"
+        text="No Mailing List has been created for this site."
+        type="info"
+      />
+      <v-alert
+        v-if="success"
+        class="ma-2"
+        :closable="true"
+        density="compact"
+        role="alert"
+        :text="success"
+        type="success"
+      />
+      <v-alert
+        v-if="error"
+        class="ma-2"
+        density="compact"
+        role="alert"
+        :text="error"
+        type="warning"
+      />
+    </div>
     <div v-if="!error && !currentUser.isStudent" class="mt-2">
       <v-card id="mailing-list-details" elevation="1">
         <v-card-text>
@@ -147,7 +149,8 @@ import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {createMailingList, getMailingList, getSuggestedMailingListName} from '@/api/mailing-list'
 import {get, trim} from 'lodash'
 import {getCanvasSite} from '@/api/canvas-site'
-import {putFocusNextTick, toInt} from '@/utils'
+import {nextTick} from 'vue'
+import {toInt} from '@/utils'
 
 export default {
   name: 'MailingListCreate',
@@ -184,7 +187,6 @@ export default {
             this.setCanvasSite(data)
             getSuggestedMailingListName(this.canvasSiteId).then(data => {
               this.mailingListName = data
-              putFocusNextTick('page-header')
               this.$ready()
             })
           })
@@ -192,29 +194,38 @@ export default {
       },
       error => {
         this.error = error
-        putFocusNextTick('page-header')
         this.$ready()
       }
     )
   },
   methods: {
     cancel() {
-      this.alertScreenReader('Canceled.')
-      this.$router.push({path: '/mailing_list/select_course'})
+      this.alertScreenReader('Canceled. Nothing saved.', 'assertive')
+      nextTick(this.$router.push({path: '/mailing_list/select_course'}))
     },
     create() {
       const name = trim(this.mailingListName)
       if (name && !this.hasInvalidCharacters) {
         this.isCreating = true
-        this.alertScreenReader('Creating list')
+        this.alertScreenReader('Creating mailing list.')
+        let createTimer = setInterval(() => {
+          this.alertScreenReader('Still creating mailing list.')
+        }, 7000)
         createMailingList(this.canvasSiteId, name, !this.isAdminToolMode).then(
           data => {
+            this.alertScreenReader('Success.', 'assertive')
             this.error = null
             this.setMailingList(data)
             this.goToNextPage()
           },
-          error => this.error = error
-        ).then(() => this.isCreating = false)
+          error => {
+            this.alertScreenReader('Error.', 'assertive')
+            this.error = error
+          }
+        ).finally(() => {
+          clearInterval(createTimer)
+          this.isCreating = false
+        })
       }
     },
     getCanvasSite() {

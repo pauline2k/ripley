@@ -1,65 +1,70 @@
 <template>
   <div v-if="!isLoading" class="pa-3">
     <Header1 text="Update Mailing List" />
-    <v-alert
-      v-if="!hasUpdatedSincePageLoad"
-      class="mb-2"
-      density="compact"
-      role="alert"
-      type="info"
-    >
-      The list "{{ mailingList.name }}@{{ mailingList.domain }}" has been created.
-      To add members, click the "Update Memberships" button below.
-    </v-alert>
-    <v-expansion-panels
-      v-if="alerts.length"
-      id="mailing-list-update-alert"
-      v-model="openPanelIndex"
-      color="info"
-    >
-      <v-expansion-panel
-        v-for="(alert, index) in alerts"
-        :key="index"
-        :disabled="!size(alert.emailAddresses)"
+    <div id="mailing-lists-alert" aria-live="polite">
+      <v-alert
+        v-if="showCreatedAlert && !hasUpdatedSincePageLoad"
+        id="mailing-list-created-alert"
+        class="mb-2"
+        density="compact"
+        role="alert"
+        type="info"
       >
-        <v-expansion-panel-title :color="alert.type === 'warning' ? 'error' : 'success'">
-          <span v-if="size(alert.emailAddresses)">
-            {{ alert.message }}
-            [<span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> users</span>]
-          </span>
-          <span v-if="!size(alert.emailAddresses)" class="alert-message-without-email-addresses">
-            {{ alert.message }}
-          </span>
-          <template #actions>
-            <v-icon
-              v-if="size(alert.emailAddresses)"
-              color="white"
-              :icon="alert.type === 'errors' ? mdiAlertCircle : mdiCheck"
-            />
-          </template>
-        </v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <v-list class="py-0" density="compact">
-            <v-list-item
-              v-for="emailAddress in alert.emailAddresses"
-              :key="emailAddress"
-              class="py-0"
-              density="compact"
-              rounded
-            >
-              <template #prepend>
-                <v-icon
-                  class="mr-4"
-                  :color="alert.type === 'errors' ? 'red' : 'primary'"
-                  :icon="mdiAccount"
-                />
-              </template>
-              <v-list-item-subtitle>{{ emailAddress }}</v-list-item-subtitle>
-            </v-list-item>
-          </v-list>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
+        The list "{{ mailingList.name }}@{{ mailingList.domain }}" has been created.
+        To add members, click the "Update Memberships" button below.
+      </v-alert>
+    </div>
+    <div aria-live="polite">
+      <v-expansion-panels
+        v-if="alerts.length"
+        id="mailing-list-update-alert"
+        v-model="openPanelIndex"
+        color="info"
+      >
+        <v-expansion-panel
+          v-for="(alert, index) in alerts"
+          :key="index"
+          :disabled="!size(alert.emailAddresses)"
+        >
+          <v-expansion-panel-title :color="alert.type === 'warning' ? 'error' : 'success'">
+            <span v-if="size(alert.emailAddresses)">
+              {{ alert.message }}
+              [<span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> users</span>]
+            </span>
+            <span v-if="!size(alert.emailAddresses)" class="alert-message-without-email-addresses">
+              {{ alert.message }}
+            </span>
+            <template #actions>
+              <v-icon
+                v-if="size(alert.emailAddresses)"
+                color="white"
+                :icon="alert.type === 'errors' ? mdiAlertCircle : mdiCheck"
+              />
+            </template>
+          </v-expansion-panel-title>
+          <v-expansion-panel-text>
+            <v-list class="py-0" density="compact">
+              <v-list-item
+                v-for="emailAddress in alert.emailAddresses"
+                :key="emailAddress"
+                class="py-0"
+                density="compact"
+                rounded
+              >
+                <template #prepend>
+                  <v-icon
+                    class="mr-4"
+                    :color="alert.type === 'errors' ? 'red' : 'primary'"
+                    :icon="mdiAccount"
+                  />
+                </template>
+                <v-list-item-subtitle>{{ emailAddress }}</v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </v-expansion-panel-text>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </div>
     <div class="mt-2">
       <v-card id="mailing-list-details" class="pl-3">
         <v-card-text>
@@ -112,7 +117,9 @@
                 </div>
               </v-col>
               <v-col>
-                {{ mailingList.name }}@{{ mailingList.domain }}
+                <div id="mailing-list-name">
+                  {{ mailingList.name }}@{{ mailingList.domain }}
+                </div>
               </v-col>
             </v-row>
             <v-row class="pt-1" no-gutters>
@@ -147,15 +154,6 @@
       </v-card>
       <div class="d-flex justify-end mt-4">
         <v-btn
-          id="btn-cancel"
-          class="mr-2"
-          :disabled="isUpdating"
-          variant="outlined"
-          @click="cancel"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
           id="btn-populate-mailing-list"
           class="mr-2"
           color="primary"
@@ -166,6 +164,15 @@
           <span v-if="isUpdating">
             <SpinnerWithinButton /> Updating...
           </span>
+        </v-btn>
+        <v-btn
+          id="btn-cancel"
+          class="mr-2"
+          :disabled="isUpdating"
+          variant="outlined"
+          @click="cancel"
+        >
+          Cancel
         </v-btn>
       </div>
     </div>
@@ -183,6 +190,7 @@ import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {capitalize, each, get, size} from 'lodash'
+import {nextTick} from 'vue'
 import {populateMailingList} from '@/api/mailing-list'
 import {pluralize, putFocusNextTick} from '@/utils'
 
@@ -196,14 +204,14 @@ export default {
     isUpdating: false,
     messageType: undefined,
     openPanelIndex: [],
-    showAlertDetails: false
+    showAlertDetails: false,
+    showCreatedAlert: true
   }),
   created() {
     if (this.mailingList && this.canvasSite) {
       if (this.updateSummary) {
         this.showUpdateSummary()
       }
-      putFocusNextTick('page-header')
       this.$ready()
     } else {
       this.$router.push({path: '/mailing_list/select_course'})
@@ -211,7 +219,8 @@ export default {
   },
   methods: {
     cancel() {
-      this.$router.push({path: '/mailing_list/select_course'})
+      this.alertScreenReader('Canceled. Nothing saved.', 'assertive')
+      nextTick(this.$router.push({path: '/mailing_list/select_course'}))
     },
     get,
     pluralize,
@@ -246,23 +255,32 @@ export default {
     },
     size,
     update() {
-      this.alertScreenReader('Updating')
+      this.alerts = []
+      this.alertScreenReader('Updating mailing list.')
       this.isUpdating = true
+      this.showCreatedAlert = false
+      let updateTimer = setInterval(() => {
+        this.alertScreenReader('Still processing updates.')
+      }, 7000)
       populateMailingList(this.mailingList.id).then(
         data => {
+          this.alertScreenReader('Success.', 'assertive')
           this.setMailingList(data.mailingList)
           this.setUpdateSummary(data.summary)
           this.showUpdateSummary()
         },
         error => {
+          this.alertScreenReader('Error.', 'assertive')
           this.alerts = [{
             message: error,
             type: 'warning'
           }]
         }
-      ).then(() => {
+      ).then(() => this.hasUpdatedSincePageLoad = true
+      ).finally(() => {
+        clearInterval(updateTimer)
         this.isUpdating = false
-        this.hasUpdatedSincePageLoad = true
+        putFocusNextTick('btn-populate-mailing-list')
       })
     }
   }

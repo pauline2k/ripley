@@ -161,13 +161,14 @@ export default {
           this.alertScreenReader('Still processing user import')
         }, 7000)
         importUsers(validatedUids).then(response => {
-          clearInterval(importTimer)
           this.alertScreenReader('Imported users')
           this.importedUids = response.uids
           this.importProcessing = false
           this.rawUids = ''
           this.status = response.status
-        }, this.handleError).catch(this.handleError)
+        }, this.handleError).catch(
+          this.handleError
+        ).finally(() => clearInterval(importTimer))
       }
     },
     size,

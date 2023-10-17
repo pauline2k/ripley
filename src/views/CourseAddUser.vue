@@ -439,7 +439,6 @@ export default {
           this.alertScreenReader('Still searching.')
         }, 7000)
         searchUsers(this.searchText, this.searchType).then(response => {
-          clearInterval(searchTimer)
           this.userSearchResults = response.users
           if (response.users && response.users.length) {
             this.userSearchResultsCount = response.users[0].resultCount
@@ -457,6 +456,7 @@ export default {
           this.showErrorStatus('Person search failed.')
           this.showSearchForm = true
         }).finally(() => {
+          clearInterval(searchTimer)
           this.isSearching = false
           this.$ready('add-user-submit-search-btn')
         })
@@ -470,28 +470,31 @@ export default {
         this.alertScreenReader('Still processing.')
       }, 7000)
       addUser(this.currentUser.canvasSiteId, this.selectedUser.uid, this.selectedSection.id, this.selectedRole).then(response => {
-        clearInterval(addUserTimer)
         this.userAdded = {
           ...response.userAdded,
           fullName: this.selectedUserFullName,
           role: response.role,
           sectionName: get(find(this.courseSections, {'id': response.sectionId}), 'name', this.selectedSection.name)
         }
-        this.alertScreenReader('success')
+        this.alertScreenReader('success', 'assertive')
         this.resetSearchState()
         this.resetForm()
         this.additionSuccessMessage = true
+        putFocusNextTick('hide-search-success-button')
       }, () => {
+        this.alertScreenReader('Error', 'assertive')
         this.errorStatus = 'Request to add person failed'
         this.showUsersArea = true
+        putFocusNextTick('add-user-btn')
       }).catch(() => {
         this.errorStatus = 'Request to add person failed'
         this.showUsersArea = true
+        putFocusNextTick('add-user-btn')
       }).finally(() => {
+        clearInterval(addUserTimer)
         this.isAddingUser = false
         this.showSearchForm = true
         iframeScrollToTop()
-        this.$ready('alerts-container')
       })
     },
     updateSearchTextType() {
