@@ -6,7 +6,6 @@
     class="photo"
     :class="`photo-${showOnePhotoPerPage ? 1 : 'all'}`"
     cover
-    eager
     :lazy-src="photoPlaceholder"
     width="72"
     :src="photoUrl"
