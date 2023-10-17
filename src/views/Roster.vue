@@ -109,7 +109,7 @@
             </v-checkbox>
           </div>
         </v-row>
-        <v-row>
+        <v-row v-if="students.length">
           <v-col role="alert" aria-live="polite" class="py-1 display-none-when-print">{{ pluralize('student', students.length, {0: 'No', 1: 'One'}) }} found</v-col>
         </v-row>
         <v-row no-gutters>
