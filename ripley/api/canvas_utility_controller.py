@@ -27,7 +27,7 @@ import re
 from flask import current_app as app, request
 from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError
-from ripley.lib.canvas_utils import import_users
+from ripley.lib.canvas_user_utils import import_users
 from ripley.lib.http import tolerant_jsonify
 from ripley.models.user import User
 

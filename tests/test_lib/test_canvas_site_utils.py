@@ -23,19 +23,19 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from ripley.lib import canvas_utils
+from ripley.lib.canvas_site_utils import parse_canvas_sis_section_id, uid_from_canvas_login_id
 
 
 class TestCanvasUtils:
 
     def test_parse_login_id_inactive(self):
-        assert canvas_utils.uid_from_canvas_login_id('666') == {'uid': '666', 'inactivePrefix': False}
-        assert canvas_utils.uid_from_canvas_login_id('inactive-666') == {'uid': '666', 'inactivePrefix': True}
-        assert canvas_utils.uid_from_canvas_login_id('xenomorph') == {'uid': None, 'inactivePrefix': None}
-        assert canvas_utils.uid_from_canvas_login_id('inactive-xenomorph') == {'uid': None, 'inactivePrefix': None}
+        assert uid_from_canvas_login_id('666') == {'uid': '666', 'inactivePrefix': False}
+        assert uid_from_canvas_login_id('inactive-666') == {'uid': '666', 'inactivePrefix': True}
+        assert uid_from_canvas_login_id('xenomorph') == {'uid': None, 'inactivePrefix': None}
+        assert uid_from_canvas_login_id('inactive-xenomorph') == {'uid': None, 'inactivePrefix': None}
 
     def test_parse_canvas_sis_section_id(self):
-        assert canvas_utils.parse_canvas_sis_section_id(None) == (None, None)
-        assert canvas_utils.parse_canvas_sis_section_id('666') == (None, None)
-        assert canvas_utils.parse_canvas_sis_section_id('SEC:2023-B-12345')[0] == '12345'
-        assert canvas_utils.parse_canvas_sis_section_id('SEC:2023-B-12345')[1].to_sis_term_id() == '2232'
+        assert parse_canvas_sis_section_id(None) == (None, None)
+        assert parse_canvas_sis_section_id('666') == (None, None)
+        assert parse_canvas_sis_section_id('SEC:2023-B-12345')[0] == '12345'
+        assert parse_canvas_sis_section_id('SEC:2023-B-12345')[1].to_sis_term_id() == '2232'

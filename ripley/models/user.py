@@ -174,6 +174,7 @@ class User(UserMixin):
             'canvasSiteName': course.name if course else None,
             'canvasSiteSisCourseId': course.sis_course_id if course else None,
             'canvasSiteUserRoles': [],
+
             'canvasUserId': canvas_user_id,
             'canvasUserAvatarUrl': canvas_user_profile.get('avatar_url'),
             'canvasUserLoginId': canvas_user_profile.get('login_id'),

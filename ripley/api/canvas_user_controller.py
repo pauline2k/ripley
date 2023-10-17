@@ -29,7 +29,7 @@ from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotF
 from ripley.api.util import canvas_role_required
 from ripley.externals import canvas
 from ripley.externals.data_loch import find_people_by_email, find_people_by_name, find_person_by_uid
-from ripley.lib.canvas_utils import add_user_to_course_section
+from ripley.lib.canvas_user_utils import add_user_to_course_section
 from ripley.lib.http import tolerant_jsonify
 
 

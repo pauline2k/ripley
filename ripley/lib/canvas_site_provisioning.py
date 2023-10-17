@@ -22,17 +22,19 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+
 from datetime import timedelta
 from itertools import groupby
 from operator import itemgetter
 
 from flask import current_app as app
-from ripley.externals.data_loch import get_edo_enrollment_updates, get_edo_instructor_updates, get_section_enrollments, \
-    get_section_instructors, get_sections
+from ripley.externals.data_loch import get_edo_enrollment_updates, get_edo_instructor_updates, \
+    get_section_enrollments, get_section_instructors, get_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_basic_attributes
-from ripley.lib.canvas_utils import csv_formatted_course_role, csv_row_for_campus_user, parse_canvas_sis_section_id, \
-    sis_enrollment_status_to_canvas_course_role, user_id_from_attributes
+from ripley.lib.canvas_site_utils import csv_formatted_course_role, parse_canvas_sis_section_id, \
+    sis_enrollment_status_to_canvas_course_role
+from ripley.lib.canvas_user_utils import csv_row_for_campus_user, user_id_from_attributes
 from ripley.lib.util import utc_now
 
 

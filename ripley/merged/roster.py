@@ -30,7 +30,7 @@ from flask import current_app as app
 from ripley.externals import canvas
 from ripley.externals.data_loch import get_section_enrollments
 from ripley.externals.s3 import get_signed_urls
-from ripley.lib.canvas_utils import parse_canvas_sis_section_id
+from ripley.lib.canvas_site_utils import parse_canvas_sis_section_id
 
 
 def canvas_site_roster(canvas_site_id):

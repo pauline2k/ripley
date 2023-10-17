@@ -33,7 +33,8 @@ from ripley.externals.data_loch import get_all_active_users
 from ripley.externals.s3 import upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.jobs.errors import BackgroundJobError
-from ripley.lib.canvas_utils import csv_row_for_campus_user, uid_from_canvas_login_id
+from ripley.lib.canvas_site_utils import uid_from_canvas_login_id
+from ripley.lib.canvas_user_utils import csv_row_for_campus_user
 
 
 class AddNewUsersJob(BaseJob):
