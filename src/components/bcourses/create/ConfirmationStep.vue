@@ -124,7 +124,7 @@
             <v-btn
               id="go-back-button"
               :disabled="isCreating"
-              variant="text"
+              variant="tonal"
               @click="goBack"
             >
               Cancel

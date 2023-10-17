@@ -108,7 +108,7 @@
           <v-btn
             id="page-create-course-site-cancel"
             aria-label="Cancel and return to Site Creation Overview"
-            variant="text"
+            variant="tonal"
             @click="cancel"
           >
             Cancel

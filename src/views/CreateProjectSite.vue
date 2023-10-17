@@ -51,7 +51,7 @@
           aria-label="Cancel and return to Site Creation Overview"
           :disabled="isCreating"
           type="button"
-          variant="text"
+          variant="tonal"
           @click="cancel"
         >
           Cancel

@@ -104,7 +104,7 @@
             <v-btn
               id="cancel-button"
               class="mr-2"
-              variant="outlined"
+              variant="tonal"
               @click="goToGradebook"
             >
               Cancel<span class="sr-only"> and return to Gradebook</span>
