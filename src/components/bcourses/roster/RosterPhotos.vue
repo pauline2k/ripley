@@ -1,11 +1,13 @@
 <template>
   <ul
     class="text-center"
+    :class="`override-flex-${showOnePhotoPerPage ? 1 : 'all'}`"
     style="display: flex; flex-wrap: wrap; width: 100%; padding-top: 1rem; margin-left: 1rem"
   >
     <li
       v-for="student in students"
       :key="student.studentId"
+      :class="`show-one-photo-per-page-${showOnePhotoPerPage ? 1 : 'all'}`"
       style="display: flex; height: auto; padding: 5px; width: 173px;"
     >
       <v-card
@@ -21,6 +23,7 @@
         >
           <RosterPhoto
             :on-load="() => student.hasRosterPhotoLoaded = true"
+            :show-one-photo-per-page="showOnePhotoPerPage ? 1 : 'all'"
             :student="student"
           />
         </a>
@@ -73,6 +76,10 @@ export default {
   components: {OutboundLink, RosterPhoto},
   mixins: [Context],
   props: {
+    showOnePhotoPerPage: {
+      required: true,
+      type: Boolean
+    },
     students: {
       required: true,
       type: Array
@@ -111,6 +118,15 @@ export default {
   *.v-card-roster-photo {
     margin: 0 !important;
     width: 173px !important;
+  }
+  .override-flex-1 {
+    flex-direction: column;
+  }
+  .show-one-photo-per-page-1 {
+    page-break-after: always;
+  }
+  .show-one-photo-per-page-1:last-child {
+    page-break-after: avoid;
   }
 }
 </style>

@@ -4,6 +4,7 @@
     :alt="`Photo of ${student.firstName} ${student.lastName}`"
     :aria-label="`Photo of ${student.firstName} ${student.lastName}`"
     class="photo"
+    :class="`photo-${showOnePhotoPerPage ? 1 : 'all'}`"
     cover
     eager
     :lazy-src="photoPlaceholder"
@@ -41,6 +42,10 @@ export default {
       required: false,
       type: Function
     },
+    showOnePhotoPerPage: {
+      required: true,
+      type: Boolean
+    },
     student: {
       required: true,
       type: Object
@@ -71,8 +76,12 @@ export default {
   min-height: 96px;
 }
 @media print {
-  .photo {
+  .photo-all {
     height: 72px;
+  }
+  .photo-1 {
+    height: 250px !important;
+    width: 250px !important;
   }
 }
 </style>
