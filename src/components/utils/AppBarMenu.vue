@@ -37,10 +37,10 @@ export default {
   }),
   created() {
     this.addOption('my-profile', 'My Profile', this.goProfile)
+    this.addOption('acheron-lv-426', 'Acheron (LV-426)', this.goAcheron)
     const canvasSiteId = this.currentUser.canvasSiteId
     if (canvasSiteId) {
       this.addOption('current-user-canvas-site', `Canvas Site ${canvasSiteId}`, this.goCanvasSiteSummary)
-      this.addOption('acheron-lv-426', 'Acheron (LV-426)', this.goAcheron)
     }
     this.addOption('log-out', 'Log Out', this.logOut)
   },
