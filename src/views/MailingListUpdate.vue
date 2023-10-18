@@ -132,11 +132,11 @@
             <v-row class="pt-1" no-gutters>
               <v-col cols="2">
                 <div class="float-right font-weight-medium pr-3">
-                  Count:
+                  Member count:
                 </div>
               </v-col>
               <v-col>
-                <div id="mailing-list-member-count">{{ pluralize('member', mailingList.membersCount, {0: 'No'}) }}</div>
+                <div id="mailing-list-member-count">{{ pluralize('member', mailingList.membersCount) }}</div>
               </v-col>
             </v-row>
             <v-row class="pt-1" no-gutters>
@@ -151,7 +151,7 @@
                     {{ $moment(mailingList.populatedAt).format('MMM D, YYYY') }}
                   </span>
                   <span v-if="!get(mailingList, 'populatedAt')">
-                    Never.
+                    Never
                   </span>
                 </div>
               </v-col>
