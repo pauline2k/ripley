@@ -16,6 +16,7 @@
                 v-model="byUID"
                 clearable
                 density="compact"
+                :disabled="disableAll"
                 hide-details
                 label="By UID"
                 maxlength="10"
@@ -30,8 +31,8 @@
               />
             </div>
             <v-btn
-              id="canvas-user-profile-by-uid"
-              :disabled="!trim(byUID) && !isValidUID(byUID)"
+              id="by-uid-btn"
+              :disabled="!trim(byUID) && !isValidUID(byUID) || disableAll"
               variant="tonal"
               @click="fetchByUID"
             >
@@ -50,10 +51,11 @@
           <div class="align-center d-flex">
             <div class="mr-2">
               <v-text-field
-                id="canvas-user-profile-by-uid"
+                id="canvas-user-profile-by-id"
                 v-model="byCanvasUserId"
                 clearable
                 density="compact"
+                :disabled="disableAll"
                 hide-details
                 label="By Canvas User ID"
                 maxlength="10"
@@ -68,8 +70,8 @@
               />
             </div>
             <v-btn
-              id="canvas-user-profile-by-uid"
-              :disabled="!trim(byCanvasUserId) || !isValidCanvasUserId(byCanvasUserId)"
+              id="by-ui-btn"
+              :disabled="!trim(byCanvasUserId) || !isValidCanvasUserId(byCanvasUserId) || disableAll"
               variant="tonal"
               @click="fetchByCanvasUserId"
             >
@@ -97,6 +99,7 @@
                 v-model="canvasSiteId"
                 clearable
                 density="compact"
+                :disabled="disableAll"
                 hide-details
                 label="Canvas Site ID"
                 maxlength="10"
@@ -111,10 +114,11 @@
             </div>
             <div class="mr-2">
               <v-text-field
-                id="canvas-user-profile-by-uid"
+                id="canvas-site-id-btn"
                 v-model="canvasUserId"
                 clearable
                 density="compact"
+                :disabled="disableAll"
                 hide-details
                 label="Canvas User ID"
                 maxlength="10"
@@ -129,7 +133,7 @@
             </div>
             <v-btn
               id="canvas-user-profile-by-uid"
-              :disabled="!trim(canvasSiteId) || !trim(canvasUserId) || !isValidCanvasSiteId(canvasSiteId) || !isValidCanvasUserId(canvasUserId)"
+              :disabled="!trim(canvasSiteId) || !trim(canvasUserId) || !isValidCanvasSiteId(canvasSiteId) || !isValidCanvasUserId(canvasUserId) || disableAll"
               variant="tonal"
               @click="fetchCanvasSiteUserProfile"
             >
@@ -148,6 +152,7 @@
     <h2>Payload</h2>
     <div
       v-if="error"
+      id="error"
       aria-live="polite"
       class="font-italic font-weight-medium text-red"
       role="alert"
@@ -155,7 +160,7 @@
       {{ error }}
     </div>
     <div class="payload-container">
-      <pre>{{ payload }}</pre>
+      <pre id="payload">{{ payload }}</pre>
     </div>
   </div>
 </template>
@@ -183,6 +188,11 @@ export default {
     payload: undefined,
     byUID: undefined
   }),
+  computed: {
+    disableAll() {
+      return this.isFetchingByCanvasUserId || this.isFetchingByUID || this.isFetchingCanvasSiteUserProfile
+    }
+  },
   created() {
     this.$ready()
   },
