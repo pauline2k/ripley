@@ -1,18 +1,20 @@
 <template>
   <div v-if="!isLoading" class="pa-3">
-    <Header1 text="Update Mailing List" />
-    <div id="mailing-lists-alert" aria-live="polite">
-      <v-alert
-        v-if="showCreatedAlert && !hasUpdatedSincePageLoad"
-        id="mailing-list-created-alert"
-        class="mb-2"
-        density="compact"
-        role="alert"
-        type="info"
-      >
-        The list "{{ mailingList.name }}@{{ mailingList.domain }}" has been created.
-        To add members, click the "Update Memberships" button below.
-      </v-alert>
+    <div class="d-flex flex-column-reverse">
+      <div id="mailing-lists-alert" aria-live="polite">
+        <v-alert
+          v-if="showCreatedAlert && !hasUpdatedSincePageLoad"
+          id="mailing-list-created-alert"
+          class="my-2"
+          density="compact"
+          role="alert"
+          type="info"
+        >
+          The list "{{ mailingList.name }}@{{ mailingList.domain }}" has been created.
+          To add members, click the "Update Memberships" button below.
+        </v-alert>
+      </div>
+      <Header1 text="Update Mailing List" />
     </div>
     <div aria-live="polite">
       <v-expansion-panels

@@ -1,18 +1,19 @@
 <template>
   <div v-if="!isLoading" class="pa-5">
-    <Header1 text="Manage Mailing Lists" />
-    <div id="mailing-lists-alert" aria-live="polite">
-      <v-alert
-        v-if="error"
-        class="ma-2"
-        density="compact"
-        role="alert"
-        type="warning"
-      >
-        {{ error }}
-      </v-alert>
+    <div class="d-flex flex-column-reverse">
+      <div id="mailing-lists-alert" aria-live="polite">
+        <v-alert
+          v-if="error"
+          class="my-2"
+          density="compact"
+          role="alert"
+          type="warning"
+        >
+          {{ error }}
+        </v-alert>
+      </div>
+      <Header1 text="Manage Mailing Lists" />
     </div>
-
     <div v-if="currentUser.isAdmin" class="align-center d-flex flex-wrap pa-3">
       <div class="pr-3">
         <v-text-field
@@ -56,7 +57,7 @@ import Header1 from '@/components/utils/Header1.vue'
 import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {getMailingList} from '@/api/mailing-list'
-import {isValidCanvasSiteId} from '@/utils'
+import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 import {nextTick} from 'vue'
 import {trim} from 'lodash'
 
@@ -105,6 +106,7 @@ export default {
           error => {
             this.error = error
             this.isProcessing = false
+            putFocusNextTick('btn-get-mailing-list')
           }
         ).finally(() => clearInterval(searchTimer))
       }

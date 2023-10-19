@@ -1,31 +1,34 @@
 <template>
   <div v-if="!isLoading" class="mx-10 my-5">
-    <Header1 class="my-3" text="Create Mailing List" />
-    <div id="mailing-lists-alert" aria-live="polite">
-      <v-alert
-        v-if="!error && !success"
-        density="compact"
-        role="alert"
-        text="No Mailing List has been created for this site."
-        type="info"
-      />
-      <v-alert
-        v-if="success"
-        class="ma-2"
-        :closable="true"
-        density="compact"
-        role="alert"
-        :text="success"
-        type="success"
-      />
-      <v-alert
-        v-if="error"
-        class="ma-2"
-        density="compact"
-        role="alert"
-        :text="error"
-        type="warning"
-      />
+    <div class="d-flex flex-column-reverse">
+      <div id="mailing-lists-alert" aria-live="polite">
+        <v-alert
+          v-if="!error && !success"
+          class="my-2"
+          density="compact"
+          role="alert"
+          text="No Mailing List has been created for this site."
+          type="info"
+        />
+        <v-alert
+          v-if="success"
+          class="my-2"
+          :closable="true"
+          density="compact"
+          role="alert"
+          :text="success"
+          type="success"
+        />
+        <v-alert
+          v-if="error"
+          class="my-2"
+          density="compact"
+          role="alert"
+          :text="error"
+          type="warning"
+        />
+      </div>
+      <Header1 text="Create Mailing List" />
     </div>
     <div v-if="!error && !currentUser.isStudent" class="mt-2">
       <v-card id="mailing-list-details" elevation="1">
