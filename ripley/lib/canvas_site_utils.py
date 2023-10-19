@@ -129,7 +129,11 @@ def hide_big_blue_button(canvas_site_id):
     for tab in canvas.get_tabs(course_id=canvas_site_id):
         tab_label = tab.label.lower()
         if all(b in tab_label for b in ['big', 'blue', 'button']):
-            big_blue_button_found = set_tab_hidden(hidden=True, tab_id=tab.id)
+            big_blue_button_found = set_tab_hidden(
+                canvas_site_id=canvas_site_id,
+                hidden=True,
+                tab_id=tab.id,
+            )
             break
     app.logger.debug(f"The 'BigBlueButton' tab was {'hidden' if big_blue_button_found else 'NOT found'}.")
 
