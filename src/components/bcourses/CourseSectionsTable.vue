@@ -46,7 +46,7 @@
           </th>
         </tr>
       </thead>
-      <tbody v-for="section in displayableSections" :key="section.id">
+      <tbody v-for="(section, sectionIndex) in displayableSections" :key="section.id">
         <tr :id="`${id}-${section.id}`" :class="sectionDisplayClass[section.id]">
           <td v-if="mode === 'createCourseForm'" :id="`${id}-${section.id}-action`" class="align-top td-checkbox pl-3 pr-0 py-0">
             <v-checkbox
@@ -116,7 +116,7 @@
               <v-btn
                 v-if="section.nameDiscrepancy && section.stagedState !== 'update'"
                 :id="`section-${section.id}-update-btn`"
-                :aria-label="`Add '${section.courseCode} ${section.name}' to the list of sections to be updated`"
+                :aria-label="`Update '${section.courseCode} ${section.name}' section name`"
                 class="ml-1"
                 density="compact"
                 @click="stageUpdate(section)"
@@ -126,31 +126,31 @@
               <v-btn
                 v-if="section.stagedState === 'update'"
                 :id="`section-${section.id}-undo-update-btn`"
-                :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be updated from course site`"
+                :aria-label="`Undo update '${section.courseCode} ${section.name}' section name`"
                 class="button-undo-delete ml-1"
                 density="compact"
-                @click="unstage(section)"
+                @click="unstage(section, sectionIndex, 'undo-update')"
               >
                 Undo Update
               </v-btn>
               <v-btn
                 v-if="section.stagedState !== 'update'"
                 :id="`section-${section.id}-unlink-btn`"
-                :aria-label="`Add '${section.courseCode} ${section.name}' to the list of sections to be unlinked from course site`"
+                :aria-label="`Unlink '${section.courseCode} ${section.name}' from the course site`"
                 class="ml-1"
                 density="compact"
-                @click="stageDelete(section)"
+                @click="stageDelete(section, sectionIndex)"
               >
                 Unlink
               </v-btn>
             </div>
             <div v-if="mode === 'currentStaging' && !section.isCourseSection">
               <v-btn
-                :id="`section-${section.id}-undo-unlink-btn`"
+                :id="`section-${section.id}-undo-link-btn`"
                 class="button-undo-add ml-1"
-                :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be linked to course site`"
+                :aria-label="`Undo link '${section.courseCode} ${section.name}' to the course site`"
                 density="compact"
-                @click="unstage(section)"
+                @click="unstage(section, sectionIndex, 'undo-link')"
               >
                 Undo Link
               </v-btn>
@@ -159,10 +159,10 @@
             <div v-if="mode === 'availableStaging' && section.isCourseSection && section.stagedState === 'delete'">
               <v-btn
                 :id="`section-${section.id}-undo-unlink-btn`"
-                :aria-label="`Remove '${section.courseCode} ${section.name}' from list of sections to be unlinked from course site`"
+                :aria-label="`Undo unlink '${section.courseCode} ${section.name}' from the course site`"
                 class="button-undo-delete ml-1"
                 density="compact"
-                @click="unstage(section)"
+                @click="unstage(section, sectionIndex, 'undo-unlink')"
               >
                 Undo Unlink
               </v-btn>
@@ -173,11 +173,11 @@
             <div v-if="mode === 'availableStaging' && !section.isCourseSection && !section.stagedState">
               <v-btn
                 :id="`section-${section.id}-link-btn`"
-                :aria-label="`Add '${section.courseCode} ${section.name}' to the list of sections to be linked to course site`"
+                :aria-label="`Link '${section.courseCode} ${section.name}' to the course site`"
                 class="ml-1"
                 :class="{'button-undo-add': section.stagedState === 'add'}"
                 density="compact"
-                @click="stageAdd(section)"
+                @click="stageAdd(section, sectionIndex)"
               >
                 Link
               </v-btn>
@@ -186,13 +186,13 @@
           </td>
         </tr>
         <tr
-          v-if="mode === 'currentStaging' && section.nameDiscrepancy && section.stagedState !== 'update'"
+          v-if="showUpdateButton(section)"
           :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}-discrepancy`"
           aria-hidden="true"
           :class="sectionDisplayClass[section.id]"
         >
-          <td></td>
-          <td :id="`${id}-${section.id}-discrepancy`" colspan="6">
+          <td class="border-none"></td>
+          <td :id="`${id}-${section.id}-discrepancy`" class="border-none" colspan="6">
             <div>
               <v-icon class="sited-icon mr-1" :icon="mdiInformationVariantCircle" />
               The section name in bCourses no longer matches the Student Information System.
@@ -270,6 +270,7 @@ import {uniqBy} from 'lodash'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {each, filter, find, get, includes, map, size} from 'lodash'
+import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CourseSectionsTable',
@@ -332,12 +333,16 @@ export default {
   },
   data: () => ({
     allSelected: false,
-    displayableSections: [],
     hasSectionScheduleData: false,
     indeterminate: false,
     sectionDisplayClass: {},
     selected: undefined
   }),
+  computed: {
+    displayableSections() {
+      return filter(this.sections, s => this.rowDisplayLogic(this.mode, s))
+    }
+  },
   watch: {
     selected(objects) {
       if (!objects.length) {
@@ -363,6 +368,42 @@ export default {
     this.eventHub.on('sections-table-updated', this.updateSectionDisplay)
   },
   methods: {
+    getNextFocusTarget(section, sectionIndex, totalStagedCount, action) {
+      // Allow focus to toggle between Update and Undo Update buttons on the same row.
+      if (action === 'update') {
+        return `section-${section.id}-undo-update-btn`
+      } else if (action === 'undo-update') {
+        return `section-${section.id}-update-btn`
+      }
+      if (size(this.displayableSections) > 0) {
+        // If any section rows remain, try to move focus to the next row that has a button.
+        const nextFocusSection = this.mode === 'currentStaging' ? get(this.displayableSections, sectionIndex) : find(this.displayableSections, s => s.stagedState, sectionIndex)
+        if (this.showUpdateButton(nextFocusSection)) {
+          return `section-${nextFocusSection.id}-update-btn`
+        }
+        if (nextFocusSection) {
+          let nextAction
+          if (this.mode === 'availableStaging' && nextFocusSection.stagedState === 'delete') {
+            nextAction = 'undo-unlink'
+          }
+          if (nextFocusSection.stagedState === 'add') {
+            nextAction = 'undo-link'
+          }
+          if (this.mode === 'currentStaging' && !nextFocusSection.stagedState) {
+            nextAction = 'unlink'
+          }
+          if (document.getElementById(`section-${nextFocusSection.id}-${nextAction}-btn`)) {
+            return `section-${nextFocusSection.id}-${nextAction}-btn`
+          }
+        }
+      }
+      // If we've reached the end of the staging area and there's a secondary save button, go there.
+      if (this.mode === 'currentStaging' && totalStagedCount > 12) {
+        return 'official-sections-secondary-save-btn'
+      }
+      // If no other buttons, move focus to the expansion panel button for this section's course.
+      return `sections-course-${section.courseSlug}-btn`
+    },
     filter,
     filterRecurring(section, key) {
       return filter(section.schedules.recurring, key)
@@ -375,30 +416,36 @@ export default {
         return (section.isCourseSection && section.stagedState !== 'delete') || (!section.isCourseSection && section.stagedState === 'add')
       })
     },
+    showUpdateButton(section) {
+      return section && this.mode === 'currentStaging' && section.nameDiscrepancy && section.stagedState !== 'update'
+    },
     size,
-    stageAdd(section) {
-      this.stageAddAction(section)
+    stageAdd(section, index) {
+      const totalStagedCount = this.stageAddAction(section)
+      putFocusNextTick(this.getNextFocusTarget(section, index, totalStagedCount, 'link'))
       this.eventHub.emit('sections-table-updated')
     },
     stageUpdate(section) {
       this.stageUpdateAction(section)
+      putFocusNextTick(`section-${section.id}-undo-update-btn`)
       this.eventHub.emit('sections-table-updated')
     },
-    stageDelete(section) {
-      this.stageDeleteAction(section)
+    stageDelete(section, index) {
+      const totalStagedCount = this.stageDeleteAction(section)
+      putFocusNextTick(this.getNextFocusTarget(section, index, totalStagedCount, 'unlink'))
       this.eventHub.emit('sections-table-updated')
     },
     toggleAll() {
       this.selected = this.allSelected ? map(this.sections, 'id').slice() : []
     },
     updateSectionDisplay() {
-      this.displayableSections = filter(this.sections, s => this.rowDisplayLogic(this.mode, s))
       this.displayableSections.forEach(s => {
         this.sectionDisplayClass[s.id] = this.rowClassLogic(this.mode, s)
       })
     },
-    unstage(section) {
-      this.unstageAction(section)
+    unstage(section, index, action) {
+      const totalStagedCount = this.unstageAction(section)
+      putFocusNextTick(this.getNextFocusTarget(section, index, totalStagedCount, action))
       this.eventHub.emit('sections-table-updated')
     }
   }

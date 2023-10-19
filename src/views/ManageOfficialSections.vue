@@ -77,7 +77,7 @@
             table-caption="Official sections in this course. Use the buttons in the Actions column to make changes."
             :unstage-action="unstage"
           />
-          <div v-if="totalStagedCount > 12">
+          <div v-if="totalStagedCount > 12" class="py-2">
             <v-btn
               id="official-sections-secondary-save-btn"
               aria-label="Apply pending modifications to this course site"
@@ -114,22 +114,20 @@
                 bg-color="blue-lighten-5"
                 :value="course.slug"
               >
-                <v-expansion-panel-title>
+                <v-expansion-panel-title :id="`sections-course-${course.slug}-btn`">
                   <template #actions="{ expanded }">
                     <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
                   </template>
-                  <span
+                  <h3
                     :id="`sections-course-${course.slug}-available-course-header`"
-                    aria-level="5"
                     class="sections-course-title"
-                    role="heading"
                   >
                     {{ course.courseCode }}
                     <span v-if="course.title">&mdash; {{ course.title }}</span>
                     <span v-if="size(course.sections)">
                       ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
                     </span>
-                  </span>
+                  </h3>
                 </v-expansion-panel-title>
                 <v-expansion-panel-text>
                   <div v-if="course.sections.length > 1">
@@ -148,13 +146,13 @@
                     <v-col md="12">
                       <CourseSectionsTable
                         :id="`template-sections-table-availableStaging-${index}`"
-                        class="mb-1 mt-4"
+                        class="mb-1 mt-3"
                         mode="availableStaging"
                         :row-class-logic="rowClassLogic"
                         :row-display-logic="rowDisplayLogic"
                         :sections="course.sections"
                         :stage-add-action="stageAdd"
-                        :table-caption="`Official sections in this course. ${allSectionsAdded(course) ? ' All sections added.' : ' Use the Add All button above, or'} use the buttons in the Actions column to make changes.`"
+                        :table-caption="availableSectionsTableCaption(course)"
                         :unstage-action="unstage"
                       />
                     </v-col>
@@ -211,7 +209,7 @@ import {mdiAlertCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
 import Context from '@/mixins/Context'
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
 import {pluralize, putFocusNextTick, toInt} from '@/utils'
-import {each, filter, find, flatMap, get, includes, keys, set, size, toString, union, unset} from 'lodash'
+import {each, filter, find, flatMap, get, includes, set, size, toString, union, unset} from 'lodash'
 
 export default {
   name: 'ManageOfficialSections',
@@ -248,7 +246,7 @@ export default {
     },
     totalStagedCount() {
       return size(filter(this.allSections, section => {
-        return (section.isCourseSection && includes(keys(section), 'stagedState')) || (!section.isCourseSection && section.stagedState === 'add')
+        return (section.isCourseSection && get(section, 'stagedState')) || (!section.isCourseSection && section.stagedState === 'add')
       }))
     }
   },
@@ -258,14 +256,23 @@ export default {
   },
   methods: {
     addAllSections(course) {
-      this.alertScreenReader('All sections selected for course: ' + course.title)
       course.sections.forEach(section => section.stagedState = section.isCourseSection ? null : 'add')
+      this.alertScreenReader(`Linked all ${course.title} sections to the course site.`)
+      putFocusNextTick(`sections-course-${course.slug}-btn`)
       this.eventHub.emit('sections-table-updated')
     },
     allSectionsAdded(course) {
       return !find(course.sections, section => {
         return (!section.isCourseSection && section.stagedState !== 'add') || (section.isCourseSection && section.stagedState === 'delete')
       })
+    },
+    availableSectionsTableCaption(course) {
+      let caption = 'Official sections in this course.'
+      if (course.sections.length > 1) {
+        caption += `${this.allSectionsAdded(course) ? ' All sections linked to the course site.' : ' Use the Add All button above, or '}`
+      }
+      caption += 'Use the buttons in the Actions column to make changes.'
+      return caption
     },
     cancel() {
       this.changeWorkflowStep('preview')
@@ -407,27 +414,29 @@ export default {
     stageAdd(section) {
       if (!section.isCourseSection) {
         set(section, 'stagedState', 'add')
-        this.alertScreenReader('Included in the list of sections to be added')
+        this.alertScreenReader(`Linked ${this.sectionString(section)} to the course site.`)
       } else {
-        this.displayError = 'Unable to add ' + this.sectionString(section) + ', as it already exists within the course site.'
+        this.displayError = `Cannot link ${this.sectionString(section)} because it is already linked to the course site.`
       }
+      return this.totalStagedCount
     },
     stageDelete(section) {
       if (section.isCourseSection) {
         this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
         set(section, 'stagedState', 'delete')
-        this.alertScreenReader('Included in the list of sections to be deleted')
+        this.alertScreenReader(`Unlinked ${this.sectionString(section)} from the course site.`)
       } else {
-        this.displayError = 'Unable to delete Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
+        this.displayError = `Cannot unlink ${this.sectionString(section)} because it is not linked to the course site.`
       }
+      return this.totalStagedCount
     },
     stageUpdate(section) {
       if (section.isCourseSection) {
         this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
         set(section, 'stagedState', 'update')
-        this.alertScreenReader('Included in the list of sections to be updated')
+        this.alertScreenReader(`Updated ${this.sectionString(section)}.`)
       } else {
-        this.displayError = 'Unable to update Section ID ' + this.sectionString(section) + ' which does not exist within the course site.'
+        this.displayError = `Cannot update ${this.sectionString(section)} because it is not linked to the course site.`
       }
     },
     trackSectionUpdateJob() {
@@ -458,13 +467,14 @@ export default {
     unstage(section) {
       if (section.stagedState === 'add') {
         this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
-        this.alertScreenReader(`Removed '${this.sectionString(section)}' from sections to be added to the course`)
+        this.alertScreenReader(`${this.sectionString(section)} will not be added to the course site.`)
       } else if (section.stagedState === 'delete') {
-        this.alertScreenReader(`Removed '${this.sectionString(section)}' from sections to be deleted`)
+        this.alertScreenReader(`${this.sectionString(section)} will not be removed from the course site.`)
       } else if (section.stagedState === 'update') {
-        this.alertScreenReader(`Removed '${this.sectionString(section)}' from sections to be updated`)
+        this.alertScreenReader(`${this.sectionString(section)} will not be updated.`)
       }
       section.stagedState = null
+      return this.totalStagedCount
     },
     unstageAll() {
       return each(this.allSections, section => {
