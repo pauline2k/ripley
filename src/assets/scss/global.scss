@@ -62,7 +62,9 @@ html, body {
   background-size: cover;
   min-height: 100vh;
 }
-
+.border-none {
+  border: none !important;
+}
 .canvas-page-form {
   background: transparent;
   border: 0;
