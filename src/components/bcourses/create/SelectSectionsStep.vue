@@ -27,7 +27,12 @@
           <div class="text-subtitle-1">
             All official sections you select below will be put in ONE, single course site.
           </div>
-          <v-alert class="mt-2" closable>
+          <v-alert
+            class="mt-2"
+            closable
+            close-label="Hide help"
+            @click:close="onCloseHelp"
+          >
             <div class="d-flex">
               <div class="pr-2">
                 <v-icon
@@ -70,7 +75,7 @@
             :value="course.slug"
             bg-color="blue-lighten-5"
           >
-            <v-expansion-panel-title>
+            <v-expansion-panel-title :id="`sections-course-${course.slug}-btn`">
               <template #actions="{ expanded }">
                 <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
               </template>
@@ -123,13 +128,14 @@
 <script setup>
 import CourseCodeAndTitle from '@/components/bcourses/create/CourseCodeAndTitle.vue'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
-import OutboundLink from '@/components/utils/OutboundLink'
 import {mdiHelpCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
+import OutboundLink from '@/components/utils/OutboundLink'
 </script>
 
 <script>
 import Context from '@/mixins/Context.vue'
-import {find, size} from 'lodash'
+import {get, find, size} from 'lodash'
+import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'SelectSectionsStep',
@@ -195,6 +201,10 @@ export default {
   methods: {
     cancel() {
       this.$router.push({path: '/manage_sites'})
+    },
+    onCloseHelp() {
+      this.alertScreenReader('help hidden')
+      putFocusNextTick(size(this.coursesList) ? `sections-course-${get(this.coursesList, '0.slug')}-btn` : 'page-create-course-site-cancel')
     },
     size
   }

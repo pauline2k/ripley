@@ -185,7 +185,7 @@ export default {
             this.isCreating = false
           },
           error => error
-        )
+        ).finally(putFocusNextTick('page-title'))
       }
     },
     trim
