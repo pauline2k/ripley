@@ -443,23 +443,32 @@ export default {
       this.exportTimer = setInterval(() => {
         courseProvisionJobStatus(this.backgroundJobId).then(
           response => {
-            this.jobStatus = response.jobStatus
+            if (response.jobStatus !== this.jobStatus) {
+              this.jobStatus = response.jobStatus
+            } else {
+              this.alertScreenReader(`Still ${includes(['sendingRequest', 'queued'], this.jobStatus) ? 'waiting' : 'processing'}`)
+            }
             if (!(includes(['started', 'queued'], this.jobStatus))) {
               clearInterval(this.exportTimer)
               if (this.jobStatus === 'finished') {
+                this.alertScreenReader('Success.', 'assertive')
                 this.jobStatusMessage = 'The sections in this course site have been updated successfully.'
               } else {
+                this.alertScreenReader('Error', 'assertive')
                 this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
               }
               this.fetchFeed()
+              this.putFocusNextTick('official-sections-edit-btn')
             }
           }
         ).catch(
           () => {
             this.changeWorkflowStep('preview')
+            this.alertScreenReader('Error.', 'assertive')
             this.jobStatus = 'error'
             this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
             clearInterval(this.exportTimer)
+            this.putFocusNextTick('official-sections-edit-btn')
           }
         )
       }, 4000)

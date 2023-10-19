@@ -151,6 +151,7 @@ export default {
           this.currentWorkflowStep = null
           this.jobStatus = 'error'
           this.displayError = message
+          putFocusNextTick('page-title')
           reject()
         }
         this.currentWorkflowStep = 'processing'
@@ -268,6 +269,7 @@ export default {
     },
     showSelecting() {
       this.currentWorkflowStep = 'selecting'
+      putFocusNextTick('page-create-course-site-continue')
     },
     switchAdminTerm(semester) {
       if (semester && this.currentAdminTerm !== semester.slug) {
@@ -289,7 +291,11 @@ export default {
       this.exportTimer = setInterval(() => {
         courseProvisionJobStatus(this.backgroundJobId).then(
           response => {
-            this.jobStatus = response.jobStatus
+            if (response.jobStatus !== this.jobStatus) {
+              this.jobStatus = response.jobStatus
+            } else {
+              this.alertScreenReader(`Still ${includes(['sendingRequest', 'queued'], this.jobStatus) ? 'waiting' : 'processing'}`)
+            }
             if (!(includes(['started', 'queued'], this.jobStatus)) || get(response, 'jobData.courseSiteUrl')) {
               clearInterval(this.exportTimer)
               if (get(response, 'jobData.courseSiteUrl')) {
@@ -300,17 +306,21 @@ export default {
                   window.location.href = response.jobData.courseSiteUrl
                 }
               } else {
+                this.alertScreenReader('Error.', 'assertive')
                 this.jobStatus = 'error'
                 this.displayError = 'An error has occurred with your request. Please try again or contact bCourses support.'
+                putFocusNextTick('page-title')
               }
             }
           }
         ).catch(
           () => {
+            this.alertScreenReader('Error.', 'assertive')
             this.currentWorkflowStep = null
             this.jobStatus = 'error'
             this.displayError = 'An error has occurred with your request. Please try again or contact bCourses support.'
             clearInterval(this.exportTimer)
+            putFocusNextTick('page-title')
           }
         )
       }, 4000)
