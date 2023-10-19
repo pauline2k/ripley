@@ -99,6 +99,7 @@
           <v-btn
             id="page-create-course-site-continue"
             aria-label="Continue to next step"
+            class="mr-2"
             color="primary"
             :disabled="!selectedSectionsList.length"
             @click="showConfirmation"
