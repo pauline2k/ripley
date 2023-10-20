@@ -1,10 +1,10 @@
 <template>
-  <div class="pa-5">
+  <div class="pb-5 px-5">
+    <Header1 text="Create a Course Site" />
     <div v-if="displayError" class="mb-2">
       <CanvasErrors :message="displayError" />
     </div>
     <div v-if="!isLoading">
-      <Header1 text="Create a Course Site" />
       <MaintenanceNotice
         v-if="showMaintenanceNotice"
         class="my-2"

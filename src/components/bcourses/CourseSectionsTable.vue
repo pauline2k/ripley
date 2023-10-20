@@ -61,7 +61,10 @@
             />
           </td>
           <td :id="`${id}-${section.id}-course`" class="td-course-code text-no-wrap">
-            {{ section.courseCode }}
+            <label v-if="mode === 'createCourseForm'" :for="`template-canvas-manage-sections-checkbox-${section.id}`">
+              {{ section.courseCode }}
+            </label>
+            <span v-if="mode !== 'createCourseForm'">{{ section.courseCode }}</span>
           </td>
           <td :id="`${id}-${section.id}-name`" class="td-section-name">
             <label
