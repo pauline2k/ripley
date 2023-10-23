@@ -65,7 +65,7 @@
                     <select
                       id="course-sections"
                       v-model="canvasSiteId"
-                      aria-label="All courses"
+                      aria-label="All your courses"
                       :disabled="isManageOfficialSectionsDisabled"
                     >
                       <option :value="null">Choose a course</option>
@@ -79,6 +79,7 @@
                           v-for="course in courses"
                           :id="`canvas-site-${course.canvasSiteId}`"
                           :key="course.canvasSiteId"
+                          :aria-label="`${getTermName(termId)} group: ${course.courseCode} ${course.name}`"
                           :value="course.canvasSiteId"
                         >
                           {{ course.courseCode }} &mdash; {{ course.name }}

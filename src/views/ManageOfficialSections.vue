@@ -208,8 +208,8 @@ import {mdiAlertCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
 <script>
 import Context from '@/mixins/Context'
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
-import {pluralize, putFocusNextTick, toInt} from '@/utils'
 import {each, filter, find, flatMap, get, includes, set, size, toString, union, unset} from 'lodash'
+import {pluralize, putFocusNextTick, toInt} from '@/utils'
 
 export default {
   name: 'ManageOfficialSections',
@@ -275,18 +275,21 @@ export default {
       return caption
     },
     cancel() {
-      this.changeWorkflowStep('preview')
       this.unstageAll()
-      putFocusNextTick('official-sections-edit-btn')
+      this.changeWorkflowStep('preview')
+      this.alertScreenReader('Canceled. Nothing saved.', 'assertive')
     },
     changeWorkflowStep(step) {
       if (step === 'staging') {
-        this.alertScreenReader('Edit section form loaded')
+        this.alertScreenReader('Edit sections form loaded')
         putFocusNextTick('official-sections-cancel-btn')
         this.jobStatus = null
         this.jobStatusMessage = ''
       } else if (step === 'preview') {
-        this.alertScreenReader('Read only section list loaded')
+        this.alertScreenReader('Read-only sections list loaded')
+        if (this.canvasSite.canEdit) {
+          putFocusNextTick('official-sections-edit-btn')
+        }
       }
       this.currentWorkflowStep = step
     },
@@ -458,7 +461,6 @@ export default {
                 this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
               }
               this.fetchFeed()
-              this.putFocusNextTick('official-sections-edit-btn')
             }
           }
         ).catch(
@@ -468,7 +470,6 @@ export default {
             this.jobStatus = 'error'
             this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
             clearInterval(this.exportTimer)
-            this.putFocusNextTick('official-sections-edit-btn')
           }
         )
       }, 4000)
