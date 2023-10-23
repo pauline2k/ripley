@@ -23,7 +23,8 @@
         >
           <RosterPhoto
             :on-load="() => student.hasRosterPhotoLoaded = true"
-            :show-one-photo-per-page="showOnePhotoPerPage ? 1 : 'all'"
+            :photo-url="photoUrls[student.studentId]"
+            :show-one-photo-per-page="showOnePhotoPerPage"
             :student="student"
           />
         </a>
@@ -69,7 +70,7 @@
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import RosterPhoto from '@/components/bcourses/roster/RosterPhoto'
-import {truncate} from 'lodash'
+import {each, trim, truncate} from 'lodash'
 
 export default {
   name: 'RosterPhotos',
@@ -86,9 +87,26 @@ export default {
     }
   },
   data: () => ({
-    context: 'canvas'
+    context: 'canvas',
+    photoUrls: {}
   }),
+  mounted() {
+    // Distribute photo loading requests with a slight delay so as not to bottleneck the browser.
+    let interval = 0
+    each(this.students, student => {
+      setTimeout(() => this.loadPhoto(student), interval)
+      interval = interval + 10
+    })
+  },
   methods: {
+    loadPhoto(student) {
+      const photoUrl = trim(student.photoUrl || '')
+      if (photoUrl) {
+        this.photoUrls[student.studentId] = photoUrl.startsWith('http') ? photoUrl : `${this.config.apiBaseUrl}${photoUrl}`
+      } else {
+        this.imageError()
+      }
+    },
     truncate
   }
 }

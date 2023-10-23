@@ -6,20 +6,13 @@
     class="photo"
     :class="`photo-${showOnePhotoPerPage ? 1 : 'all'}`"
     cover
+    eager
     :lazy-src="photoPlaceholder"
     width="72"
     :src="photoUrl"
     @error="imageError"
     @load="onLoad"
   >
-    <template #placeholder>
-      <div class="d-flex align-center justify-center fill-height">
-        <v-progress-circular
-          color="grey-lighten-4"
-          indeterminate
-        />
-      </div>
-    </template>
   </v-img>
 </template>
 
@@ -30,7 +23,6 @@ import photoUnavailable from '@/assets/images/photo_unavailable.svg'
 
 <script>
 import Context from '@/mixins/Context'
-import {trim} from 'lodash'
 
 export default {
   name: 'RosterPhoto',
@@ -40,6 +32,11 @@ export default {
       default: () => {},
       required: false,
       type: Function
+    },
+    photoUrl: {
+      default: undefined,
+      required: false,
+      type: String
     },
     showOnePhotoPerPage: {
       required: true,
@@ -51,19 +48,21 @@ export default {
     }
   },
   data: () => ({
-    photoUrl: undefined
+    imageErrored: false
   }),
-  created() {
-    const photoUrl = trim(this.student.photoUrl || '')
-    if (photoUrl) {
-      this.photoUrl = photoUrl.startsWith('http') ? photoUrl : `${this.config.apiBaseUrl}${photoUrl}`
-    } else {
-      this.imageError()
+  computed: {
+    photoSrc() {
+      if (this.imageErrored) {
+        return photoUnavailable
+      } else {
+        return this.photoUrl
+      }
     }
   },
   methods: {
     imageError() {
-      this.photoUrl = photoUnavailable
+      this.onLoad()
+      this.imageErrored = true
     }
   }
 }
