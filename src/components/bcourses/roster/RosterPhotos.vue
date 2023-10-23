@@ -90,13 +90,13 @@ export default {
     context: 'canvas',
     photoUrls: {}
   }),
+  watch: {
+    students() {
+      this.reloadPhotos()
+    }
+  },
   mounted() {
-    // Distribute photo loading requests with a slight delay so as not to bottleneck the browser.
-    let interval = 0
-    each(this.students, student => {
-      setTimeout(() => this.loadPhoto(student), interval)
-      interval = interval + 10
-    })
+    this.reloadPhotosDelayed()
   },
   methods: {
     loadPhoto(student) {
@@ -106,6 +106,17 @@ export default {
       } else {
         this.imageError()
       }
+    },
+    reloadPhotos() {
+      each(this.students, this.loadPhoto)
+    },
+    reloadPhotosDelayed() {
+      // Distribute photo loading requests with a slight delay so as not to bottleneck the browser.
+      let interval = 0
+      each(this.students, student => {
+        setTimeout(() => this.loadPhoto(student), interval)
+        interval = interval + 10
+      })
     },
     truncate
   }
