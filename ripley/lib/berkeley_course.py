@@ -88,7 +88,7 @@ def section_to_api_json(section_rows):
                 meeting_date = ' '.join([_meeting_days(row), row['meeting_start_date']])
                 if not next(
                     (s for s in schedules['oneTime'] if s['date'] == meeting_date
-                        and s['buildingName'] == meeting['buildingName'] and s['roomNumber'] == meeting['roomNumber']),
+                        and s['buildingName'] == meeting['buildingName'] and s.get('roomNumber') == meeting.get('roomNumber')),
                     None,
                 ):
                     schedules['oneTime'].append({

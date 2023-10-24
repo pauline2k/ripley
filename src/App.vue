@@ -33,6 +33,7 @@ import {useContextStore} from '@/stores/context'
 const context = useContextStore()
 </script>
 
+<!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
 <style lang="scss">
 .alert {
   background-color: $color-alert-background;

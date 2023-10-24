@@ -1,5 +1,5 @@
 <template>
-  <h2 id="course-site-details-header" class="mb-1 mt-3" tabindex="-1">Course Site Details</h2>
+  <h2 id="course-site-details-header" class="mb-2" tabindex="-1">Course Site Details</h2>
   <v-alert color="alert" border rounded>
     <div v-if="selectedSectionsList.length === 1">
       You are about to create a {{ currentSemesterName }} course site for

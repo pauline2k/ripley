@@ -25,11 +25,10 @@
           :switch-admin-term="switchAdminTerm"
         />
       </div>
-      <div v-if="!isFetching" id="select-and-confirm">
+      <div v-if="!isFetching" id="select-and-confirm" class="pt-2">
         <div
           v-if="currentWorkflowStep === 'selecting'"
           id="page-create-course-site-selecting-step"
-          class="pl-3"
         >
           <SelectSectionsStep
             :courses-list="coursesList"

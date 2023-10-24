@@ -295,6 +295,7 @@ export default {
 }
 </script>
 
+<!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
 <style>
 ol {
   margin-left: 16px;
