@@ -25,9 +25,11 @@ import {VRadio} from 'vuetify/components/VRadio'
 import {VRadioGroup} from 'vuetify/components/VRadioGroup'
 import {VSnackbar} from 'vuetify/components/VSnackbar'
 import {VSwitch} from 'vuetify/components/VSwitch'
+import {VTab, VTabs} from 'vuetify/components/VTabs'
 import {VTooltip} from 'vuetify/components/VTooltip'
 import {VTextarea} from 'vuetify/components/VTextarea'
 import {VTextField} from 'vuetify/components/VTextField'
+import {VWindow, VWindowItem} from 'vuetify/components/VWindow'
 
 // @ts-ignore
 import colors from 'vuetify/lib/util/colors'
@@ -74,9 +76,13 @@ export default createVuetify({
     VSnackbar,
     VSpacer,
     VSwitch,
+    VTab,
+    VTabs,
     VTextarea,
     VTextField,
-    VTooltip
+    VTooltip,
+    VWindow,
+    VWindowItem
   },
   display: {
     thresholds: {

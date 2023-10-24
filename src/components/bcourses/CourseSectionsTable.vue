@@ -20,7 +20,7 @@
         </template>
       </v-checkbox>
     </div>
-    <table :id="id">
+    <table :id="id" :class="tableClazz">
       <caption class="sr-only">{{ tableCaption }}</caption>
       <thead>
         <tr>
@@ -320,6 +320,11 @@ export default {
     },
     tableCaption: {
       default: 'Official sections in this course',
+      required: false,
+      type: String
+    },
+    tableClazz: {
+      default: undefined,
       required: false,
       type: String
     },

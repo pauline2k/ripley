@@ -172,7 +172,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
+/* eslint-disable vue-scoped-css/no-unused-selector */
 .chart-tooltip-key {
   font-size: 15px;
   font-weight: bold;
@@ -198,4 +199,5 @@ export default {
 .chart-tooltip-value {
   font-size: 14px;
 }
+/* eslint-enable vue-scoped-css/no-unused-selector */
 </style>

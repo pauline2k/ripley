@@ -124,7 +124,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .text-field {
   background-color: white;
   opacity: 0.7;
