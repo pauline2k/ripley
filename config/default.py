@@ -123,7 +123,7 @@ LOGGING_LEVEL = logging.DEBUG
 LOGGING_PROPAGATION_LEVEL = logging.WARN
 LOGGING_PROPAGATION_TARGETS = ['boto3', 'botocore', 'canvasapi', 'rq.worker', 's3transfer', 'werkzeug']
 
-MAILGUN_API_KEY = None
+MAILGUN_API_KEY = 'some_key'
 MAILGUN_BASE_URL = 'https://api.mailgun.net/v3'
 MAILGUN_DOMAIN = 'bcourses-mail.berkeley.edu'
 MAILGUN_MAX_RETRIES = 4
