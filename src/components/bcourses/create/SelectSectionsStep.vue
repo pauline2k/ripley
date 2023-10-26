@@ -7,7 +7,7 @@
       <v-tabs
         v-if="size(teachingTerms) > 1"
         v-model="selectedTerm"
-        aria-labelledby="official-sections-heading"
+        aria-label="Official Sections"
         selected-class="selected-term-tab"
       >
         <v-tab
@@ -15,6 +15,7 @@
           :id="`term${index}`"
           :key="index"
           aria-controls="official-sections-tabpanel"
+          :aria-selected="term.slug === selectedTerm"
           class="rounded"
           :tabindex="term.slug === selectedTerm ? 0 : -1"
           :value="term.slug"
