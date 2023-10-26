@@ -428,6 +428,45 @@ class TestPopulateMailingList:
             assert api_json['summary']['restore']['successes'][0] == original_email_address
             assert api_json['summary']['remove']['successes'][0] == interim_email_address
 
+    def test_send_welcome_emails(self, client, app, fake_auth):
+        """Sends welcome emails on population if enabled."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [
+                    f'get_by_id_{canvas_site_id}',
+                    f'get_sections_{canvas_site_id}',
+                    f'get_enrollments_{canvas_site_id}_4567890',
+                    f'search_users_{canvas_site_id}',
+                ],
+                'user': ['profile_10000', 'profile_30000'],
+            }, m)
+            m.register_uri(
+                'POST',
+                'https://fake-o-mailgun.example.com/v3/bcourses-mail.berkeley.edu/messages',
+                status_code=200,
+                headers={},
+                json={'message': 'Queued. Awaiting processing.'},
+            )
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            canvas_site = canvas.get_course(canvas_site_id)
+            mailing_list = MailingList.create(
+                canvas_site=canvas_site,
+                list_name='Nostromo BBS 6000!',
+                welcome_email_body='Body',
+                welcome_email_subject='Subject',
+            )
+            api_json = _api_activate_mailing_list(
+                activate=True,
+                client=client,
+            )
+            api_json = self._api_populate_mailing_list(client, mailing_list_id=mailing_list.id)
+            assert api_json['summary']['welcomeEmails']['total'] == 2
+            assert len(api_json['summary']['welcomeEmails']['successes']) == 2
+            assert 'synthetic.ash@berkeley.edu' in api_json['summary']['welcomeEmails']['successes']
+            assert 'xo.kane@berkeley.edu' in api_json['summary']['welcomeEmails']['successes']
+
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
         with requests_mock.Mocker() as m:

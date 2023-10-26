@@ -144,7 +144,9 @@ class MailingList(Base):
             mailing_list_members=mailing_list_members,
         )
         if mailing_list.welcome_email_active and mailing_list.welcome_email_body and mailing_list.welcome_email_subject:
-            send_welcome_emails()
+            welcome_email_results = send_welcome_emails(mailing_list)
+            if welcome_email_results:
+                update_summary['welcomeEmails'] = welcome_email_results
         return mailing_list, update_summary
 
     @classmethod

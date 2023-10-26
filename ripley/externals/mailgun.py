@@ -50,15 +50,22 @@ def send_message(mailing_list, member, subject, sender, body_html, body_plain, m
     # Mailgun limits batch sending to 1000 members at a time.
     members = MailingListMembers.get_mailing_list_members(mailing_list_id=mailing_list.id)
     for i in range(0, len(members), 1000):
-        recipient_fields = _get_recipient_fields(members[i:i + 1000])
-        response = authorized_request(
-            f"{app.config['MAILGUN_BASE_URL']}/{app.config['MAILGUN_DOMAIN']}/messages",
-            method='post',
-            data={**payload, **recipient_fields},
-        )
-        if not response or not response.content or 'Queued' not in response.content:
+        if not send_payload_to_recipients(payload, members[i:i + 1000]):
             return False
     return True
+
+
+def send_payload_to_recipients(payload, recipients):
+    recipient_fields = _get_recipient_fields(recipients)
+    response = authorized_request(
+        f"{app.config['MAILGUN_BASE_URL']}/{app.config['MAILGUN_DOMAIN']}/messages",
+        method='post',
+        data={**payload, **recipient_fields},
+    )
+    if not response or not response.content or 'Queued' not in str(response.content):
+        return False
+    else:
+        return True
 
 
 def authorized_request(url, **kwargs):

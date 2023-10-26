@@ -23,25 +23,60 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from html.parser import HTMLParser
+from io import StringIO
+import re
 
-def send_welcome_emails():
-    # TODO:
-    #   payload = {
-    #     'from' => 'bCourses Mailing Lists <no-reply@bcourses-mail.berkeley.edu>',
-    #     'subject' => self.welcome_email_subject,
-    #     'html' => self.welcome_email_body,
-    #     'text' => text_format_email(self.welcome_email_body)
-    #   }
-    #
-    #   unwelcomed_members = active_members.where(welcomed_at: nil)
-    #   population_results[:welcome_emails][:total] = unwelcomed_members.count
-    #   unwelcomed_members.each_slice(1000) do |unwelcomed_slice|
-    #     recipient_fields = MailingLists::OutgoingMessage.get_recipient_fields unwelcomed_slice
-    #     response = Mailgun::SendMessage.new.post payload.merge(recipient_fields)
-    #     break unless response.try(:[], :response).try(:[], :sending)
-    #     ActiveRecord::Base.transaction do
-    #       unwelcomed_slice.each { |member| member.update(welcomed_at: DateTime.now) }
-    #     end
-    #     population_results[:welcome_emails][:success] += unwelcomed_slice.count
-    #   end
-    pass
+from ripley import std_commit
+from ripley.externals import mailgun
+from ripley.lib.util import utc_now
+from ripley.models.mailing_list_members import MailingListMembers
+
+
+def send_welcome_emails(mailing_list):
+    payload = {
+        'from': 'bCourses Mailing Lists <no-reply@bcourses-mail.berkeley.edu>',
+        'subject': mailing_list.welcome_email_subject,
+        'html': mailing_list.welcome_email_body,
+        'text': TagStripper().text_format_email_body(mailing_list.welcome_email_body),
+    }
+    results = {'successes': [], 'total': 0}
+    unwelcomed_members = MailingListMembers.query.filter_by(
+        mailing_list_id=mailing_list.id,
+        welcomed_at=None,
+        deleted_at=None,
+    ).all()
+    results['total'] = len(unwelcomed_members)
+    for i in range(0, len(unwelcomed_members), 1000):
+        recipients = unwelcomed_members[i:i + 1000]
+        if not mailgun.send_payload_to_recipients(payload, recipients):
+            return results
+        welcomed_at = utc_now()
+        for r in recipients:
+            r.welcomed_at = welcomed_at
+        std_commit()
+        results['successes'] += [r.email_address for r in recipients]
+
+    return results
+
+
+class TagStripper(HTMLParser):
+
+    def __init__(self):
+        super().__init__()
+        self.reset()
+        self.strict = False
+        self.convert_charrefs = True
+        self.text = StringIO()
+
+    def handle_data(self, d):
+        self.text.write(d)
+
+    def get_data(self):
+        return self.text.getvalue()
+
+    def text_format_email_body(self, body):
+        # Before stripping HTML tags, pad end tags on block elements with a couple of line breaks.
+        spaced_body = re.sub(r'(<\/[ol|ul|p]>)\s*', '\\1\n\n', body)
+        self.feed(spaced_body)
+        return self.get_data()

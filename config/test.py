@@ -45,6 +45,8 @@ LOGGING_LOCATION = 'STDOUT'
 
 LTI_CONFIG_PATH = f'{BASE_DIR}/tests/config/test-lti-config.json'
 
+MAILGUN_BASE_URL = 'https://fake-o-mailgun.example.com/v3'
+
 REDIS_USE_FAKE_CLIENT = True
 REDIS_QUEUE_IS_ASYNC = False
 
