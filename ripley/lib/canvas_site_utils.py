@@ -330,9 +330,11 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     for role_type in ['StudentEnrollment', 'TaEnrollment', 'TeacherEnrollment']:
         account_roles[role_type] = next((r for r in list(account.get_roles()) if r.base_role_type == role_type), None)
 
+    includes_primary_section = False
     for c in courses_list:
         for s in c['sections']:
             if s['id'] in section_ids:
+                includes_primary_section = includes_primary_section or s['isPrimarySection']
                 all_sections.append(s)
                 canvas_section = _prepare_section_definition(
                     account_roles=account_roles,
@@ -362,10 +364,12 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
 
     if not is_admin_by_ccns:
         canvas_sis_section_id = canvas_section_payload[0]['section_id']
+        teacher_role_id = account_roles['TeacherEnrollment'].id
+        role_id = section_roles.get(canvas_sis_section_id) if includes_primary_section else teacher_role_id
         _enroll_user_in_canvas_section(
-            canvas_user_profile=_get_canvas_user_profile(course=course, uid=uid),
-            instructor_role_id=section_roles.get(canvas_sis_section_id),
             canvas_sis_section_id=canvas_sis_section_id,
+            canvas_user_profile=_get_canvas_user_profile(course=course, uid=uid),
+            role_id=role_id,
         )
 
     # Background enrollment update
@@ -481,7 +485,7 @@ def _build_courses_by_term(instructor_uid, section_ids, teaching_sections):
     return courses_by_term
 
 
-def _enroll_user_in_canvas_section(canvas_sis_section_id, canvas_user_profile, instructor_role_id):
+def _enroll_user_in_canvas_section(canvas_sis_section_id, canvas_user_profile, role_id):
     canvas_section = canvas.get_section(
         api_call=False,
         section_id=f'sis_section_id:{canvas_sis_section_id}',
@@ -490,7 +494,7 @@ def _enroll_user_in_canvas_section(canvas_sis_section_id, canvas_user_profile, i
     canvas_section.enroll_user(
         user=canvas_user_profile['id'],
         **{
-            'enrollment[role_id]': instructor_role_id,
+            'enrollment[role_id]': role_id,
             'enrollment[enrollment_state]': 'active',
             'enrollment[notify]': False,
         },
