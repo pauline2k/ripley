@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading" class="pt-3 px-6">
-    <MaintenanceNotice class="mb-3" course-action-verb="site is updated" />
+    <MaintenanceNotice v-if="canvasSite.canEdit" class="mb-3" course-action-verb="site is updated" />
     <div v-if="feedFetched && !displayError">
       <Header1 class="mb-2 mt-0" :text="`${canvasSite.name}, ${canvasSite.term.name}`" />
       <div class="align-center d-flex h2-container justify-space-between">
