@@ -62,16 +62,18 @@
           </td>
           <td :id="`${id}-${section.id}-course`" class="td-course-code text-no-wrap">
             <label v-if="mode === 'createCourseForm'" :for="`template-canvas-manage-sections-checkbox-${section.id}`">
-              {{ section.courseCode }}
+              <span class="sr-only">Course code </span>{{ section.courseCode }}
             </label>
-            <span v-if="mode !== 'createCourseForm'">{{ section.courseCode }}</span>
+            <span v-if="mode !== 'createCourseForm'">
+              <span class="sr-only">Course code </span>{{ section.courseCode }}
+            </span>
           </td>
           <td :id="`${id}-${section.id}-name`" class="td-section-name">
             <label
               v-if="mode === 'createCourseForm'"
               :for="`template-canvas-manage-sections-checkbox-${section.id}`"
             >
-              {{ section.name }}
+              <span class="sr-only">Section name </span>{{ section.name }}
             </label>
             <span v-if="mode !== 'createCourseForm'">{{ section.name }}</span>
             <span v-if="mode === 'currentStaging' && section.nameDiscrepancy && section.stagedState !== 'update'" class="sr-only">
@@ -79,39 +81,57 @@
               Use the "Update" button to rename your bCourses section name to match SIS.
             </span>
           </td>
-          <td :id="`${id}-${section.id}-id`" class="td-section-id">{{ section.id }}</td>
+          <td :id="`${id}-${section.id}-id`" class="td-section-id">
+            <span class="sr-only">Section ID </span>{{ section.id }}
+          </td>
           <td :id="`${id}-${section.id}-schedule`" :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
-            <div v-if="filterRecurring(section, 'schedule').length">
-              <div
+            <span class="sr-only">Schedule, </span>
+            <template v-if="filterRecurring(section, 'schedule').length">
+              <span
                 v-for="(schedule, index) in uniqBy(filterRecurring(section, 'schedule'), 'schedule')"
                 :key="index"
+                class="d-block"
               >
-                {{ schedule.schedule }}
-              </div>
-            </div>
-            <span v-if="!filterRecurring(section, 'schedule').length">&mdash;</span>
+                <span aria-hidden="true">{{ schedule.schedule }}</span>
+                <span class="sr-only">{{ describeSchedule(schedule) }}</span>
+              </span>
+            </template>
+            <template v-else>
+              <span aria-hidden="true">&mdash;</span>
+              <span class="sr-only">blank</span>
+            </template>
           </td>
           <td :id="`${id}-${section.id}-location`" :class="{'td-meeting-location': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
-            <div v-if="filterRecurring(section, 'buildingName').length">
-              <div
+            <span class="sr-only">Location, </span>
+            <template v-if="filterRecurring(section, 'buildingName').length">
+              <span
                 v-for="(schedule, index) in filterRecurring(section, 'buildingName')"
                 :key="index"
+                class="d-block"
               >
                 {{ schedule.buildingName }} {{ schedule.roomNumber }}
-              </div>
-            </div>
-            <span v-if="!filterRecurring(section, 'buildingName').length">&mdash;</span>
+              </span>
+            </template>
+            <template v-else>
+              <span aria-hidden="true">&mdash;</span>
+              <span class="sr-only">blank</span>
+            </template>
           </td>
           <td :id="`${id}-${section.id}-instructors`" class="td-instructors">
-            <div v-if="filter(section.instructors, 'name').length">
-              <div
+            <span class="sr-only">Instructors, </span>
+            <template v-if="filter(section.instructors, 'name').length">
+              <span
                 v-for="instructor in section.instructors"
                 :key="instructor.uid"
+                class="d-block"
               >
-                {{ instructor.name }}
-              </div>
-            </div>
-            <span v-if="!filter(section.instructors, 'name').length">&mdash;</span>
+                {{ instructor.name }} <span class="sr-only">,</span>
+              </span>
+            </template>
+            <template v-else>
+              <span aria-hidden="true">&mdash;</span>
+              <span class="sr-only">blank</span>
+            </template>
           </td>
           <td v-if="!['createCourseForm', 'preview'].includes(mode)" :id="`${id}-${section.id}-actions`" class="td-actions">
             <!-- Current Staging Actions -->
@@ -273,7 +293,9 @@ import {uniqBy} from 'lodash'
 import Context from '@/mixins/Context'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {each, filter, find, get, includes, map, size} from 'lodash'
-import {putFocusNextTick} from '@/utils'
+import {oxfordJoin, putFocusNextTick} from '@/utils'
+
+const _meetingDaysPattern = /([A-Z]{2})/g
 
 export default {
   name: 'CourseSectionsTable',
@@ -376,6 +398,21 @@ export default {
     this.eventHub.on('sections-table-updated', this.updateSectionDisplay)
   },
   methods: {
+    describeSchedule(schedule) {
+      const meetingDaysMap = {
+        'SU': 'Sundays',
+        'MO': 'Mondays',
+        'TU': 'Tuesdays',
+        'WE': 'Wednesdays',
+        'TH': 'Thursdays',
+        'FR': 'Fridays',
+        'SA': 'Saturdays'
+      }
+      const meetingDays = map(schedule.meetingDays.match(_meetingDaysPattern), abbr => meetingDaysMap[abbr])
+      const startTime = this.$moment(schedule.meetingStartTime, 'HH:mm').format('LT')
+      const endTime = this.$moment(schedule.meetingEndTime, 'HH:mm').format('LT')
+      return `${oxfordJoin(meetingDays)}, ${startTime} to ${endTime}`
+    },
     getNextFocusTarget(section, sectionIndex, totalStagedCount, action) {
       // Allow focus to toggle between Update and Undo Update buttons on the same row.
       if (action === 'update') {

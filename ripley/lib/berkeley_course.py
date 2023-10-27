@@ -99,6 +99,9 @@ def section_to_api_json(section_rows):
                 meeting_schedule = ' '.join([_meeting_days(row), _meeting_time(row)])
                 recurring = {
                     'buildingName': None,
+                    'meetingDays': row['meeting_days'],
+                    'meetingEndTime': row['meeting_end_time'],
+                    'meetingStartTime': row['meeting_start_time'],
                     'roomNumber': None,
                     'schedule': meeting_schedule,
                 }
