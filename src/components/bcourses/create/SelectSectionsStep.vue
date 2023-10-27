@@ -100,7 +100,7 @@
                     class="mb-1 mt-4"
                     mode="createCourseForm"
                     :sections="course.sections"
-                    table-caption="Official sections in this course. Use the checkboxes in the Action column to select sections, or use the 'Select All' button above."
+                    :table-caption="courseSectionsTableCaption(course)"
                     table-clazz="border-0"
                     :update-selected="updateSelected"
                   />
@@ -210,6 +210,13 @@ export default {
   methods: {
     cancel() {
       this.$router.push({path: '/manage_sites'})
+    },
+    courseSectionsTableCaption(course) {
+      let caption = 'Official sections in this course. Use the checkboxes in the Action column to select sections'
+      if (size(course.sections) > 1) {
+        caption += ', or use the "Select All" button above.'
+      }
+      return caption
     },
     findIndex,
     onCloseHelp() {

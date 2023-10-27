@@ -424,11 +424,17 @@ class TestCanvasSiteProvisionSections:
             assert sections[1]['schedules']['recurring'] == [
                 {
                     'buildingName': 'Acheron LV',
+                    'meetingDays': 'TUTH',
+                    'meetingEndTime': '13:30',
+                    'meetingStartTime': '09:00',
                     'roomNumber': '426',
                     'schedule': 'TuTh 9:00A-1:30P',
                 },
                 {
                     'buildingName': None,
+                    'meetingDays': 'TUTH',
+                    'meetingEndTime': '13:30',
+                    'meetingStartTime': '09:00',
                     'roomNumber': None,
                     'schedule': 'TuTh 9:00A-1:30P',
                 },
@@ -448,6 +454,9 @@ class TestCanvasSiteProvisionSections:
             assert sections[2]['schedules']['recurring'] == [
                 {
                     'buildingName': 'Sevastopol Station',
+                    'meetingDays': 'TU',
+                    'meetingEndTime': '15:00',
+                    'meetingStartTime': '14:00',
                     'roomNumber': None,
                     'schedule': 'Tu 2:00P-3:00P',
                 },
