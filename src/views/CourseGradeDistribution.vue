@@ -2,6 +2,12 @@
   <div class="pa-5">
     <div v-if="!isLoading">
       <Header1 text="Grade Distribution" />
+      <v-alert
+        v-if="errorMessage"
+        role="alert"
+        :text="errorMessage"
+        type="warning"
+      />
       <div v-if="get(gradeDistribution, 'demographics')" class="container mb-4">
         <DemographicsChart
           :change-series-color="changeSeriesColor"
@@ -114,7 +120,9 @@ export default {
       data => {
         this.gradeDistribution = data
         this.loadPrimarySeries()
-      }
+      },
+      error => this.showError(error)
+    ).catch(error => this.showError(error)
     ).finally(() => this.$ready())
   },
   methods: {
@@ -167,6 +175,9 @@ export default {
         })
         this.chartDefaults.xAxis.categories.push(item.grade)
       })
+    },
+    showError(errorMessage) {
+      this.errorMessage = errorMessage
     }
   }
 }

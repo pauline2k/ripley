@@ -3,7 +3,7 @@ import utils from '@/api/api-utils'
 import {each} from 'lodash'
 
 export function getGradeDistribution(canvasSiteId: number) {
-  return utils.get(`/api/canvas_site/${canvasSiteId}/grade_distribution`, true)
+  return utils.get(`/api/canvas_site/${canvasSiteId}/grade_distribution`)
 }
 
 export function getCanvasSite(canvasSiteId: number, includeUsers?: boolean, redirectOnError?: boolean) {
