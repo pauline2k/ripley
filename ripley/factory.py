@@ -28,7 +28,7 @@ import os
 from flask import Flask
 from ripley import cache, db
 from ripley.configs import load_configs
-from ripley.externals.redis import get_redis_conn
+from ripley.externals.redis import get_redis_conn, get_url
 from ripley.jobs.background_job_manager import BackgroundJobManager
 from ripley.logger import initialize_logger
 from ripley.routes import register_routes
@@ -44,7 +44,7 @@ def create_app(routes=True, jobs=True):
     app = Flask(__name__.split('.')[0])
     load_configs(app)
     initialize_logger(app)
-    cache.init_app(app)
+    cache.init_app(app, config={'CACHE_REDIS_URL': get_url(app)})
     cache.clear()
     db.init_app(app)
     _initialize_queue(app)

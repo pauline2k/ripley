@@ -47,15 +47,6 @@ class MessageLaunch(FlaskMessageLaunch):
             app.logger.warn(f'Deployment ID validation failed; skipping. {e} deployment_id={deployment_id}')
         return self
 
-    def validate_nonce(self):
-        # Temporary(?) workaround for "Invalid nonce" error from pylti1p3.
-        try:
-            super().validate_nonce()
-        except LtiException as e:
-            nonce = self._get_jwt_body().get('nonce')
-            app.logger.warn(f'Nonce validation failed; skipping. {e} nonce={nonce}')
-        return self
-
 
 @app.route('/api/lti/config/add_user.json')
 def config_add_user():
