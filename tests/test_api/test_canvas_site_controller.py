@@ -796,7 +796,7 @@ class TestGradeDistributions:
             _api_get_grade_distributions(client, canvas_site_id, expected_status_code=401)
 
     def test_admin_no_grades(self, client, app, fake_auth):
-        """Allows admin, returns no grades if not present."""
+        """Allows admin, throws 404 if grades if not present."""
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': ['get_admins'],
@@ -805,11 +805,7 @@ class TestGradeDistributions:
             }, m)
             canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
-            response = _api_get_grade_distributions(client, canvas_site_id)
-            assert response['canvasSite']['courseCode'] == 'ANTHRO 189-LEC-001'
-            assert response['officialSections'][0]['sisId'] == 'SEC:2023-B-32936'
-            assert response['demographics'] == []
-            assert response['enrollments'] == {}
+            _api_get_grade_distributions(client, canvas_site_id, expected_status_code=404)
 
     def test_admin_grades(self, client, app, fake_auth):
         """Allows admin, returns grades if present."""
@@ -834,6 +830,18 @@ class TestGradeDistributions:
                 'totalCount': 16,
                 'totalPercentage': 17.6,
             }
+
+    def test_ta(self, client, app, fake_auth):
+        """Denies TA."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542'],
+                'user': ['profile_50000'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=ta_uid)
+            _api_get_grade_distributions(client, canvas_site_id, expected_status_code=401)
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""

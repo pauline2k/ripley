@@ -205,12 +205,23 @@ def get_edo_enrollment_updates(since_timestamp):
     return safe_execute_rds(sql, **params)
 
 
-def get_grades_with_demographics(term_id, section_ids):
+def get_grades_with_demographics(term_id, section_ids, instructor_uid):
     params = {
         'section_ids': section_ids,
         'term_id': term_id,
     }
-    sql = """SELECT enr.sis_term_id, enr.sis_section_id, enr.grade, spi.transfer, spi.terms_in_attendance,
+    exclude_other_instructors_sections = ''
+    if instructor_uid:
+        params['instructor_uid'] = instructor_uid
+        exclude_other_instructors_sections = """AND NOT EXISTS (
+            SELECT * FROM sis_data.edo_sections sec
+            WHERE sec.instructor_uid <> %(instructor_uid)s
+            AND sec.sis_term_id = enr.sis_term_id
+            AND sec.sis_section_id = enr.sis_section_id
+        )
+        """
+
+    sql = f"""SELECT enr.sis_term_id, enr.sis_section_id, enr.grade, spi.transfer, spi.terms_in_attendance,
             d.gender, d.minority, array_agg(e.ethnicity) AS ethnicities, v.visa_type
         FROM sis_data.edo_enrollments enr
         JOIN student.student_profile_index spi ON enr.ldap_uid = spi.uid
@@ -218,8 +229,8 @@ def get_grades_with_demographics(term_id, section_ids):
         LEFT JOIN student.ethnicities e on spi.sid = e.sid
         LEFT JOIN student.visas v on spi.sid = v.sid AND visa_status = 'G'
         WHERE enr.sis_term_id = %(term_id)s AND enr.sis_section_id = ANY(%(section_ids)s)
-        GROUP BY enr.sis_term_id, enr.sis_section_id, enr.ldap_uid, enr.grade, spi.sid, spi.transfer, spi.terms_in_attendance,
-            d.sid, d.gender, d.minority, v.visa_status, v.visa_type"""
+        {exclude_other_instructors_sections} GROUP BY enr.sis_term_id, enr.sis_section_id, enr.ldap_uid, enr.grade,
+            spi.sid, spi.transfer, spi.terms_in_attendance, d.sid, d.gender, d.minority, v.visa_status, v.visa_type"""
     return safe_execute_rds(sql, **params)
 
 

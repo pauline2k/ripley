@@ -181,7 +181,7 @@ def edit_sections(canvas_site_id):
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/grade_distribution')
-@canvas_role_required('TeacherEnrollment', 'Lead TA')
+@canvas_role_required('TeacherEnrollment')
 def get_grade_distribution(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     canvas_sections = canvas.get_course_sections(canvas_site_id)
@@ -193,7 +193,10 @@ def get_grade_distribution(canvas_site_id):
     if sis_sections:
         term_id = sis_sections[0]['termId']
         section_ids = [s['id'] for s in sis_sections]
-        demographics = get_grade_distribution_with_demographics(term_id, section_ids)
+        instructor_uid = None if current_user.is_admin else current_user.uid
+        demographics = get_grade_distribution_with_demographics(term_id, section_ids, instructor_uid)
+        if demographics is False:
+            raise ResourceNotFoundError('This course does not meet the requirements necessary to generate a Grade Distribution.')
         distribution['demographics'] = demographics
         grades = {d['grade']: {
             'classSize': d['classSize'],

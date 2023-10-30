@@ -30,7 +30,7 @@ from ripley.merged.grade_distributions import get_grade_distribution_with_demogr
 class TestGradeDistributions:
 
     def test_demographic_distribution(self):
-        d = get_grade_distribution_with_demographics('2228', ['99999'])
+        d = get_grade_distribution_with_demographics('2228', ['99999'], '30000')
         assert d == [
             {
                 'classSize': 91,

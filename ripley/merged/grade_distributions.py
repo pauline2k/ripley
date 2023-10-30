@@ -63,12 +63,16 @@ EMPTY_DISTRIBUTION = {
 }
 
 
-def get_grade_distribution_with_demographics(term_id, section_ids):  # noqa
+def get_grade_distribution_with_demographics(term_id, section_ids, instructor_uid):  # noqa
     distribution = {}
     class_size = 0
     totals = deepcopy(EMPTY_DISTRIBUTION)
 
-    for row in get_grades_with_demographics(term_id, section_ids):
+    student_grades = get_grades_with_demographics(term_id, section_ids, instructor_uid)
+    if len(student_grades) < int(app.config['NEWT_MINIMUM_CLASS_SIZE']):
+        return False
+
+    for row in student_grades:
         if not row['grade']:
             continue
         if row['grade'] not in distribution:
