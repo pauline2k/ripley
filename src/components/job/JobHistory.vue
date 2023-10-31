@@ -11,7 +11,7 @@
                 size="large"
               />
             </div>
-            <div>History</div>
+            <div>Job History</div>
           </div>
         </h2>
         <v-spacer />
@@ -33,7 +33,7 @@
         item-value="name"
         :items="jobHistory"
         density="compact"
-        items-per-page="50"
+        items-per-page="10"
         :search="search"
       >
         <template #no-data>

@@ -1,44 +1,41 @@
 <template>
-  <v-container
-    v-if="!isLoading"
-    class="background-splash h-100"
-    fill-height
-    fluid
-    :style="{backgroundImage: `url(${muthur})`}"
-  >
-    <Header1 id="page-title" class="sr-only" text="Welcome" />
-    <v-row align="center" class="mt-8" justify="center">
-      <v-col>
-        <v-card class="mx-auto" width="480">
-          <div class="ma-5">
-            <div>
-              <h2 class="mb-0">Tools</h2>
-              <StandaloneToolsList :tools="adminTools" />
-            </div>
-            <div class="mt-1">
-              <h2 class="mb-0">Embedded Tools</h2>
-              <div v-if="!currentUser.canvasSiteId" class="ml-3 my-1">
-                <v-alert
-                  density="compact"
-                  role="alert"
-                  type="info"
-                >
-                  If you enter a Canvas site ID (see top of page) then the following links will become available.
-                </v-alert>
-              </div>
-              <StandaloneToolsList :tools="embeddedTools" />
-            </div>
-          </div>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-card class="pl-2 elevation-0">
+    <v-card-title>
+      <div class="align-center d-flex mb-3 mt-6">
+        <div class="mr-2">
+          <v-icon
+            color="primary"
+            :icon="mdiStackOverflow"
+            size="large"
+          />
+        </div>
+        <div>
+          <h2>LTI Portfolio</h2>
+        </div>
+      </div>
+    </v-card-title>
+    <v-card-text>
+      <h2 class="mb-0">Account Tools</h2>
+      <StandaloneToolsList :tools="adminTools" />
+      <div class="mt-1">
+        <h2 class="mb-0">Canvas Site Tools</h2>
+        <div v-if="!currentUser.canvasSiteId" class="ml-3 mt-3">
+          <v-alert
+            density="compact"
+            role="alert"
+            type="info"
+          >
+            If you enter a Canvas site ID (see top of page) then the following links will become available.
+          </v-alert>
+        </div>
+        <StandaloneToolsList :tools="embeddedTools" />
+      </div>
+    </v-card-text>
+  </v-card>
 </template>
 
 <script setup>
-import Header1 from '@/components/utils/Header1.vue'
-import muthur from '@/assets/images/muthur.png'
-import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
+import {mdiStackOverflow} from '@mdi/js'
 </script>
 
 <script>
@@ -53,9 +50,11 @@ import {
   mdiWeb
 } from '@mdi/js'
 import {sortBy} from 'lodash'
+import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
 
 export default {
-  name: 'Welcome',
+  name: 'ToolPortfolio',
+  components: {StandaloneToolsList},
   mixins: [Context],
   data: () => ({
     adminTools: [],
