@@ -50,13 +50,13 @@ export default {
   },
   mixins: [Context],
   props: {
-    changeSeriesColor: {
-      required: true,
-      type: Function
-    },
     chartDefaults: {
       required: true,
       type: Object
+    },
+    colors: {
+      required: true,
+      type: Array
     },
     gradeDistribution: {
       required: true,
@@ -95,6 +95,8 @@ export default {
   }),
   created() {
     this.chartSettings = cloneDeep(this.chartDefaults)
+    this.chartSettings.chart.type = 'line'
+    this.chartSettings.series[0].marker = this.getSeriesMarker(this.chartSettings.series[0])
     this.collectDemographicOptions()
   },
   methods: {
@@ -115,13 +117,24 @@ export default {
         })
       })
     },
+    getSeriesMarker(series) {
+      return {
+        'fillColor': 'white',
+        'lineColor': series.color,
+        'lineWidth': 3,
+        'radius': 5,
+        'symbol': 'circle'
+      }
+    },
     onSelectDemographic() {
       if (this.selectedDemographic) {
         const group = get(this.selectedDemographic, 'group')
         const option = get(this.selectedDemographic, 'option')
         const optionLabel = option === 'true' ? '' : `&mdash; ${option}`
         const secondarySeries = {
+          color: this.colors.secondary,
           data: [],
+          marker: this.getSeriesMarker(this.colors.secondary),
           name: `${this.demographicOptions[group].label} ${optionLabel}`
         }
         each(this.gradeDistribution, item => {
@@ -137,7 +150,6 @@ export default {
       } else if (this.chartSettings.series.length > 1) {
         this.chartSettings.series.pop()
       }
-      this.changeSeriesColor(this.chartSettings)
     },
     size
   }

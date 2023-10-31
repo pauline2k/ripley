@@ -54,9 +54,34 @@ export default {
   }),
   created() {
     this.chartSettings = cloneDeep(this.chartDefaults)
+    this.chartSettings.chart.type = 'column'
+    this.chartSettings.plotOptions.series.dataLabels = {
+      enabled: true
+    }
+    each(this.chartSettings.series[0].data, item => {
+      item.dataLabels = this.getDataLabel(item.percentage, this.chartSettings.series[0].color)
+    })
     this.courses = keys(this.gradeDistribution)
   },
   methods: {
+    getDataLabel(yVal, color) {
+      if (this.chartSettings.series.length === 1) {
+        const displayAboveColumn = yVal < 2
+        return {
+          color: displayAboveColumn ? color : 'white',
+          enabled: true,
+          format: '{y}%',
+          style: {
+            textOutline: 'none'
+          },
+          y: displayAboveColumn ? 2 : 22
+        }
+      } else {
+        return {
+          enabled: false
+        }
+      }
+    },
     onSelectCourse() {
       if (this.selectedCourse) {
         const gradesWithoutPriorEnroll = {
@@ -95,6 +120,9 @@ export default {
         this.chartSettings.series[0].type = 'column'
       }
       this.changeSeriesColor(this.chartSettings)
+      each(this.chartSettings.series[0].data, item => {
+        item.dataLabels = this.getDataLabel(item.y, this.chartSettings.series[0].color)
+      })
     }
   }
 }

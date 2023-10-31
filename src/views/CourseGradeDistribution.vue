@@ -10,8 +10,8 @@
       />
       <div v-if="get(gradeDistribution, 'demographics')" class="container mb-4">
         <DemographicsChart
-          :change-series-color="changeSeriesColor"
           :chart-defaults="chartDefaults"
+          :colors="colors"
           :grade-distribution="gradeDistribution.demographics"
         />
       </div>
@@ -46,7 +46,6 @@ export default {
     chartDefaults: {
       chart: {
         backgroundColor: 'transparent',
-        type: 'column'
       },
       legend: {
         align: 'right',
@@ -59,13 +58,10 @@ export default {
       plotOptions: {
         series: {
           dataLabels: {
-            enabled: true,
-            format: '{y}%',
-            style: {
-              textOutline: 'none'
-            }
+            enabled: false
           },
-          groupPadding: .1
+          groupPadding: .1,
+          lineWidth: 3
         }
       },
       series: [
@@ -107,6 +103,7 @@ export default {
         }
       }
     },
+    errorMessage: undefined,
     gradeDistribution: undefined,
     colors: {
       default: '#8BBDDA',
@@ -135,8 +132,6 @@ export default {
       chartSettings.colors[0] = defaultSeriesColor
       each(defaultSeries.data, item => {
         item.color = defaultSeriesColor
-        item.dataLabels = this.getDataLabel(item.y, defaultSeriesColor)
-        item.dataLabels.enabled = !primarySeries
       })
       if (primarySeries) {
         const primarySeriesColor = secondarySeries ? this.colors.primary : this.colors.secondary
@@ -153,15 +148,6 @@ export default {
       }
     },
     get,
-    getDataLabel(yVal, color) {
-      const displayAboveColumn = yVal < 2
-      return {
-        color: displayAboveColumn ? color : 'white',
-        enabled: true,
-        format: '{y}%',
-        y: displayAboveColumn ? 2 : 22
-      }
-    },
     loadPrimarySeries() {
       this.chartDefaults.colors = [this.colors.default, this.colors.secondary]
       this.chartDefaults.series[0].name = 'Fall 2023'
@@ -170,7 +156,6 @@ export default {
         this.chartDefaults.series[0].data.push({
           color: this.colors.default,
           custom: {count: item.count},
-          dataLabels: this.getDataLabel(item.percentage, this.colors.default),
           y: item.percentage
         })
         this.chartDefaults.xAxis.categories.push(item.grade)
