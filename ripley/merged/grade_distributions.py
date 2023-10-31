@@ -31,25 +31,12 @@ from ripley.externals.data_loch import get_grades_with_demographics, get_grades_
 from ripley.lib.util import to_percentage
 
 
-COLLAPSE_ETHNICITIES = {
-    'Chinese / Chinese-American': 'Asian / Asian American',
-    'East Indian / Pakistani': 'Asian / Asian American',
-    'Filipino / Filipino-American': 'Asian / Asian American',
-    'Japanese / Japanese American': 'Asian / Asian American',
-    'Korean / Korean-American': 'Asian / Asian American',
-    'Mexican / Mexican-American / Chicano': 'Hispanic / Latinx',
-    'Other Asian': 'Asian / Asian American',
-    'Other Spanish-American / Latino': 'Hispanic / Latinx',
-    'Puerto Rican': 'Hispanic / Latinx',
-    'Thai': 'Asian / Asian American',
-    'Vietnamese': 'Asian / Asian American',
-}
-
-
 EMPTY_DISTRIBUTION = {
-    'ethnicities': {},
     'genders': {},
-    'termsInAttendance': {},
+    'internationalStatus': {
+        'true': 0,
+        'false': 0,
+    },
     'transferStatus': {
         'true': 0,
         'false': 0,
@@ -58,7 +45,6 @@ EMPTY_DISTRIBUTION = {
         'true': 0,
         'false': 0,
     },
-    'visaTypes': {},
     'count': 0,
 }
 
@@ -90,6 +76,7 @@ def get_grade_distribution_with_demographics(term_id, section_ids, instructor_ui
 
         _count_boolean_value('transfer', 'transferStatus')
         _count_boolean_value('minority', 'underrepresentedMinorityStatus')
+        _count_boolean_value('visa_type', 'internationalStatus')
 
         def _count_string_value(value, distribution_key):
             value = str(value) if value else 'none'
@@ -101,13 +88,7 @@ def get_grade_distribution_with_demographics(term_id, section_ids, instructor_ui
             distribution[row['grade']][distribution_key][value] += 1
             totals[distribution_key][value] += 1
 
-        _count_string_value(row['gender'], 'genders')
-        _count_string_value(row['terms_in_attendance'], 'termsInAttendance')
-        _count_string_value(row['visa_type'], 'visaTypes')
-
-        collapsed_ethnicities = set(COLLAPSE_ETHNICITIES.get(e) or e for e in row['ethnicities'])
-        for ethnicity in collapsed_ethnicities:
-            _count_string_value(ethnicity, 'ethnicities')
+        _count_string_value(_simplify_gender(row['gender']), 'genders')
 
     sorted_distribution = []
     for grade in sorted(distribution.keys(), key=_grade_ordering_index):
@@ -174,3 +155,12 @@ def _grade_ordering_index(grade):
         return GRADE_ORDERING.index(grade)
     except ValueError:
         return len(GRADE_ORDERING)
+
+
+def _simplify_gender(gender):
+    if gender == 'Female':
+        return 'female'
+    elif gender == 'Male':
+        return 'male'
+    else:
+        return 'other'

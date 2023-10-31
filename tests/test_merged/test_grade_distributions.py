@@ -34,46 +34,28 @@ class TestGradeDistributions:
         assert d == [
             {
                 'classSize': 91,
-                'ethnicities': {
-                    'Asian / Asian American': {
-                        'count': 6,
-                        'percentage': 54.5,
-                    },
-                    'Hispanic / Latinx': {
-                        'count': 10,
-                        'percentage': 18.2,
-                    },
-                    'Not Specified': {
-                        'count': 1,
-                        'percentage': 50.0,
-                    },
-                },
                 'genders': {
-                    'Male': {
+                    'male': {
                         'count': 5,
                         'percentage': 22.7,
                     },
-                    'Female': {
+                    'female': {
                         'count': 11,
                         'percentage': 16.2,
                     },
                 },
                 'grade': 'A+',
-                'percentage': 17.6,
-                'termsInAttendance': {
-                    '8': {
+                'internationalStatus': {
+                    'true': {
                         'count': 2,
-                        'percentage': 20.0,
+                        'percentage': 25.0,
                     },
-                    '5': {
-                        'count': 7,
-                        'percentage': 19.4,
-                    },
-                    '3': {
-                        'count': 7,
-                        'percentage': 20.6,
+                    'false': {
+                        'count': 14,
+                        'percentage': 16.9,
                     },
                 },
+                'percentage': 17.6,
                 'transferStatus': {
                     'true': {
                         'count': 0,
@@ -94,76 +76,36 @@ class TestGradeDistributions:
                         'percentage': 16.7,
                     },
                 },
-                'visaTypes': {
-                    'none': {
-                        'count': 14,
-                        'percentage': 16.9,
-                    },
-                    'J1': {
-                        'count': 1,
-                        'percentage': 100.0,
-                    },
-                    'PR': {
-                        'count': 1,
-                        'percentage': 16.7,
-                    },
-                },
                 'count': 16,
             },
             {
                 'classSize': 91,
-                'ethnicities': {
-                    'Hispanic / Latinx': {
-                        'count': 32,
-                        'percentage': 58.2,
-                    },
-                    'Asian / Asian American': {
-                        'count': 3,
-                        'percentage': 27.3,
-                    },
-                    'White': {
-                        'count': 17,
-                        'percentage': 70.8,
-                    },
-                },
                 'genders': {
-                    'Female': {
+                    'female': {
                         'count': 43,
                         'percentage': 63.2,
                     },
-                    'Male': {
+                    'male': {
                         'count': 8,
                         'percentage': 36.4,
                     },
-                    'Genderqueer/Gender Non-Conform': {
+                    'other': {
                         'count': 1,
                         'percentage': 100.0,
                     },
                 },
                 'grade': 'A',
-                'percentage': 57.1,
-                'termsInAttendance': {
-                    '8': {
-                        'count': 2,
-                        'percentage': 20.0,
+                'internationalStatus': {
+                    'true': {
+                        'count': 5,
+                        'percentage': 62.5,
                     },
-                    '7': {
-                        'count': 7,
-                        'percentage': 70.0,
-                    },
-                    '5': {
-                        'count': 21,
-                        'percentage': 58.3,
-                    },
-                    '3': {
-                        'count': 21,
-                        'percentage': 61.8,
-                    },
-                    '6': {
-                        'count': 1,
-                        'percentage': 100.0,
+                    'false': {
+                        'count': 47,
+                        'percentage': 56.6,
                     },
                 },
+                'percentage': 57.1,
                 'transferStatus': {
                     'true': {
                         'count': 3,
@@ -184,60 +126,32 @@ class TestGradeDistributions:
                         'percentage': 55.6,
                     },
                 },
-                'visaTypes': {
-                    'none': {
-                        'count': 47,
-                        'percentage': 56.6,
-                    },
-                    'PR': {
-                        'count': 5,
-                        'percentage': 83.3,
-                    },
-                },
                 'count': 52,
             },
             {
                 'classSize': 91,
-                'ethnicities': {
-                    'Hispanic / Latinx': {
-                        'count': 6,
-                        'percentage': 10.9,
-                    },
-                    'White': {
-                        'count': 1,
-                        'percentage': 4.2,
-                    },
-                    'Not Specified': {
-                        'count': 1,
-                        'percentage': 50.0,
-                    },
-                },
                 'genders': {
-                    'Female': {
+                    'female': {
                         'count': 5,
                         'percentage': 7.4,
                     },
-                    'Male': {
+                    'male': {
                         'count': 3,
                         'percentage': 13.6,
                     },
                 },
                 'grade': 'A-',
-                'percentage': 8.8,
-                'termsInAttendance': {
-                    '8': {
-                        'count': 1,
-                        'percentage': 10.0,
+                'internationalStatus': {
+                    'true': {
+                        'count': 0,
+                        'percentage': 0.0,
                     },
-                    '5': {
-                        'count': 4,
-                        'percentage': 11.1,
-                    },
-                    '3': {
-                        'count': 3,
-                        'percentage': 8.8,
+                    'false': {
+                        'count': 8,
+                        'percentage': 9.6,
                     },
                 },
+                'percentage': 8.8,
                 'transferStatus': {
                     'true': {
                         'count': 0,
@@ -258,48 +172,32 @@ class TestGradeDistributions:
                         'percentage': 5.6,
                     },
                 },
-                'visaTypes': {
-                    'none': {
-                        'count': 8,
-                        'percentage': 9.6,
-                    },
-                },
                 'count': 8,
             },
             {
                 'classSize': 91,
-                'ethnicities': {
-                    'Hispanic / Latinx': {
-                        'count': 4,
-                        'percentage': 7.3,
-                    },
-                    'Asian / Asian American': {
-                        'count': 1,
-                        'percentage': 9.1,
-                    },
-                },
                 'genders': {
-                    'Female': {
+                    'female': {
                         'count': 4,
                         'percentage': 5.9,
                     },
-                    'Male': {
+                    'male': {
                         'count': 1,
                         'percentage': 4.5,
                     },
                 },
                 'grade': 'B+',
-                'percentage': 5.5,
-                'termsInAttendance': {
-                    '5': {
-                        'count': 3,
-                        'percentage': 8.3,
+                'internationalStatus': {
+                    'true': {
+                        'count': 0,
+                        'percentage': 0.0,
                     },
-                    '3': {
-                        'count': 2,
-                        'percentage': 5.9,
+                    'false': {
+                        'count': 5,
+                        'percentage': 6.0,
                     },
                 },
+                'percentage': 5.5,
                 'transferStatus': {
                     'true': {
                         'count': 0,
@@ -320,36 +218,28 @@ class TestGradeDistributions:
                         'percentage': 2.8,
                     },
                 },
-                'visaTypes': {
-                    'none': {
-                        'count': 5,
-                        'percentage': 6.0,
-                    },
-                },
                 'count': 5,
             },
             {
                 'classSize': 91,
-                'ethnicities': {
-                    'Hispanic / Latinx': {
-                        'count': 1,
-                        'percentage': 1.8,
-                    },
-                },
                 'genders': {
-                    'Male': {
+                    'male': {
                         'count': 1,
                         'percentage': 4.5,
                     },
                 },
                 'grade': 'C+',
-                'percentage': 1.1,
-                'termsInAttendance': {
-                    '8': {
+                'internationalStatus': {
+                    'true': {
+                        'count': 0,
+                        'percentage': 0.0,
+                    },
+                    'false': {
                         'count': 1,
-                        'percentage': 10.0,
+                        'percentage': 1.2,
                     },
                 },
+                'percentage': 1.1,
                 'transferStatus': {
                     'true': {
                         'count': 1,
@@ -370,36 +260,28 @@ class TestGradeDistributions:
                         'percentage': 0.0,
                     },
                 },
-                'visaTypes': {
-                    'none': {
-                        'count': 1,
-                        'percentage': 1.2,
-                    },
-                },
                 'count': 1,
             },
             {
                 'classSize': 91,
-                'ethnicities': {
-                    'White': {
-                        'count': 1,
-                        'percentage': 4.2,
-                    },
-                },
                 'genders': {
-                    'Male': {
+                    'male': {
                         'count': 1,
                         'percentage': 4.5,
                     },
                 },
                 'grade': 'F',
-                'percentage': 1.1,
-                'termsInAttendance': {
-                    '8': {
+                'internationalStatus': {
+                    'true': {
                         'count': 1,
-                        'percentage': 10.0,
+                        'percentage': 12.5,
+                    },
+                    'false': {
+                        'count': 0,
+                        'percentage': 0.0,
                     },
                 },
+                'percentage': 1.1,
                 'transferStatus': {
                     'true': {
                         'count': 0,
@@ -420,60 +302,32 @@ class TestGradeDistributions:
                         'percentage': 2.8,
                     },
                 },
-                'visaTypes': {
-                    'OT': {
-                        'count': 1,
-                        'percentage': 100.0,
-                    },
-                },
                 'count': 1,
             },
             {
                 'classSize': 91,
-                'ethnicities': {
-                    'White': {
-                        'count': 5,
-                        'percentage': 20.8,
-                    },
-                    'Hispanic / Latinx': {
-                        'count': 2,
-                        'percentage': 3.6,
-                    },
-                    'Asian / Asian American': {
-                        'count': 1,
-                        'percentage': 9.1,
-                    },
-                },
                 'genders': {
-                    'Male': {
+                    'male': {
                         'count': 3,
                         'percentage': 13.6,
                     },
-                    'Female': {
+                    'female': {
                         'count': 5,
                         'percentage': 7.4,
                     },
                 },
                 'grade': 'P',
-                'percentage': 8.8,
-                'termsInAttendance': {
-                    '8': {
-                        'count': 3,
-                        'percentage': 30.0,
+                'internationalStatus': {
+                    'true': {
+                        'count': 0,
+                        'percentage': 0.0,
                     },
-                    '7': {
-                        'count': 3,
-                        'percentage': 30.0,
-                    },
-                    '5': {
-                        'count': 1,
-                        'percentage': 2.8,
-                    },
-                    '3': {
-                        'count': 1,
-                        'percentage': 2.9,
+                    'false': {
+                        'count': 8,
+                        'percentage': 9.6,
                     },
                 },
+                'percentage': 8.8,
                 'transferStatus': {
                     'true': {
                         'count': 1,
@@ -492,12 +346,6 @@ class TestGradeDistributions:
                     'false': {
                         'count': 6,
                         'percentage': 16.7,
-                    },
-                },
-                'visaTypes': {
-                    'none': {
-                        'count': 8,
-                        'percentage': 9.6,
                     },
                 },
                 'count': 8,

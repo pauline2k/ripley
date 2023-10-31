@@ -820,7 +820,7 @@ class TestGradeDistributions:
             response = _api_get_grade_distributions(client, canvas_site_id)
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
             assert response['officialSections'][0]['sisId'] == 'SEC:2022-D-99999'
-            assert response['demographics'][0]['genders'] == {'Male': {'count': 5, 'percentage': 22.7}, 'Female': {'count': 11, 'percentage': 16.2}}
+            assert response['demographics'][0]['genders'] == {'male': {'count': 5, 'percentage': 22.7}, 'female': {'count': 11, 'percentage': 16.2}}
             assert response['enrollments']['ANTHRO 197'][0] == {
                 'grade': 'A+',
                 'noPriorEnrollCount': 14,
@@ -856,7 +856,7 @@ class TestGradeDistributions:
             response = _api_get_grade_distributions(client, canvas_site_id)
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
             assert response['officialSections'][0]['sisId'] == 'SEC:2022-D-99999'
-            assert response['demographics'][0]['genders'] == {'Male': {'count': 5, 'percentage': 22.7}, 'Female': {'count': 11, 'percentage': 16.2}}
+            assert response['demographics'][0]['genders'] == {'male': {'count': 5, 'percentage': 22.7}, 'female': {'count': 11, 'percentage': 16.2}}
             assert response['enrollments']['ANTHRO 197'][0] == {
                 'grade': 'A+',
                 'noPriorEnrollCount': 14,
