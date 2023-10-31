@@ -4,15 +4,21 @@
     v-model="enabled"
     :aria-label="`Job ${job.name} is ${enabled ? 'enabled' : 'disabled'}`"
     color="success"
+    density="compact"
+    hide-details
+    :label="enabled ? 'Enabled' : 'Disabled'"
     @change="onChange(job, !enabled)"
-  >
-  </v-switch>
+  />
 </template>
 
-  <script>
+<script>
 export default {
   name: 'DisableJobToggle',
   props: {
+    isRunning: {
+      required: true,
+      type: Boolean
+    },
     job: {
       required: true,
       type: Object
@@ -29,4 +35,4 @@ export default {
     this.enabled = !this.job.disabled
   }
 }
-  </script>
+</script>

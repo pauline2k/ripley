@@ -9,7 +9,6 @@ const CourseGradeExport = () => import('./views/CourseGradeExport.vue')
 const CreateCourseSite = () => import('./views/CreateCourseSite.vue')
 const CreateProjectSite = () => import('./views/CreateProjectSite.vue')
 const Error = () => import('./views/Error.vue')
-const Jobs = () => import('./views/Jobs.vue')
 const Login = () => import('./views/Login.vue')
 const MailingListCreate = () => import('./views/MailingListCreate.vue')
 const MailingListSelectCourse = () => import('./views/MailingListSelectCourse.vue')
@@ -21,6 +20,8 @@ const Roster = () => import('./views/Roster.vue')
 const SendWelcomeEmail = () => import('./views/SendWelcomeEmail.vue')
 const UserProvision = () => import('./views/UserProvision.vue')
 const Welcome = () => import('@/views/Welcome.vue')
+const WelcomeAdmin = () => import('@/views/WelcomeAdmin.vue')
+
 import {capitalize} from 'lodash'
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 import {useContextStore} from '@/stores/context'
@@ -31,7 +32,7 @@ const routes:RouteRecordRaw[] = [
   {
     beforeEnter: (to: any, from: any, next: any) => {
       const currentUser = useContextStore().currentUser
-      currentUser.isAuthenticated ? next({path: '/welcome'}) : next()
+      currentUser.isAuthenticated ? next({path: currentUser.isAdmin ? '/admin' : '/welcome'}) : next()
     },
     children: [
       {
@@ -143,24 +144,26 @@ const routes:RouteRecordRaw[] = [
         path: '/provision_user'
       },
       {
+        beforeEnter: (to: any, from: any, next: any) => {
+          useContextStore().currentUser.isAdmin ? next({path: '/admin'}) : next()
+        },
         component: Welcome,
         name: 'Welcome',
         meta: {
           isHome: true
         },
         path: '/welcome'
-      }
-    ]
-  },
-  {
-    beforeEnter: auth.requiresAdmin,
-    component: BaseStandalone,
-    path: '/',
-    children: [
+      },
       {
-        path: '/jobs',
-        component: Jobs,
-        name: 'MU-TH-UR 6000'
+        beforeEnter: (to: any, from: any, next: any) => {
+          useContextStore().currentUser.isAdmin ? next() : next({path: '/welcome'})
+        },
+        component: WelcomeAdmin,
+        name: 'Admin',
+        meta: {
+          isHome: true
+        },
+        path: '/admin'
       }
     ]
   },
