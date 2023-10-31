@@ -1,7 +1,7 @@
 <template>
   <v-container
     v-if="!isLoading"
-    class="h-100"
+    class="h-100 pt-1 px-6"
     fill-height
     fluid
     :style="{backgroundImage: `url(${deepSpace})`, backgroundRepeat: 'repeat'}"
@@ -180,7 +180,9 @@
         </v-dialog>
       </v-col>
       <v-col>
-        <ToolPortfolio />
+        <div class="pb-1">
+          <ToolPortfolio :v-card-class="`pl-2 elevation-0`" />
+        </div>
         <JobHistory
           class="mt-6"
           :job-history="jobHistory"

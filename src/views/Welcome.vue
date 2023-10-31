@@ -9,27 +9,7 @@
     <Header1 id="page-title" class="sr-only" text="Welcome" />
     <v-row align="center" class="mt-8" justify="center">
       <v-col>
-        <v-card class="mx-auto" width="480">
-          <div class="ma-5">
-            <div>
-              <h2 class="mb-0">Tools</h2>
-              <StandaloneToolsList :tools="adminTools" />
-            </div>
-            <div class="mt-1">
-              <h2 class="mb-0">Embedded Tools</h2>
-              <div v-if="!currentUser.canvasSiteId" class="ml-3 my-1">
-                <v-alert
-                  density="compact"
-                  role="alert"
-                  type="info"
-                >
-                  If you enter a Canvas site ID (see top of page) then the following links will become available.
-                </v-alert>
-              </div>
-              <StandaloneToolsList :tools="embeddedTools" />
-            </div>
-          </div>
-        </v-card>
+        <ToolPortfolio :v-card-class="`mx-auto`" :width="480" />
       </v-col>
     </v-row>
   </v-container>
@@ -38,7 +18,7 @@
 <script setup>
 import Header1 from '@/components/utils/Header1.vue'
 import muthur from '@/assets/images/muthur.png'
-import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
+import ToolPortfolio from '@/components/standalone/ToolPortfolio.vue'
 </script>
 
 <script>

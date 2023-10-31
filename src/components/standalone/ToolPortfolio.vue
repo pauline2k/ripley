@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pl-2 elevation-0">
+  <v-card class="pb-2 pl-8" :class="vCardClass" :width="width">
     <v-card-title>
       <div class="align-center d-flex mb-3 mt-6">
         <div class="mr-2">
@@ -56,6 +56,18 @@ export default {
   name: 'ToolPortfolio',
   components: {StandaloneToolsList},
   mixins: [Context],
+  props: {
+    vCardClass: {
+      default: undefined,
+      required: false,
+      type: String
+    },
+    width: {
+      default: undefined,
+      required: false,
+      type: Number
+    }
+  },
   data: () => ({
     adminTools: [],
     embeddedTools: []

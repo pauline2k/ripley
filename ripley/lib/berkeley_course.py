@@ -71,6 +71,7 @@ def section_to_api_json(section_rows):
                 'role': row['instructor_role_code'],
                 'uid': row['instructor_uid'],
             })
+        instructors = sorted(instructors, key=lambda i: i['name'])
 
         meeting_location = row['meeting_location']
         if row['meeting_days']:
