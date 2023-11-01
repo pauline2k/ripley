@@ -42,7 +42,7 @@
                   id="ripley-with-cat-img"
                   alt="Ripley with cat"
                   aria-label="Ripley with cat"
-                  class="float-right"
+                  class="float-right rounded-lg"
                   :src="ripleyWithCat"
                   width="160"
                 />

@@ -43,5 +43,6 @@ def send_system_error_email(message, subject=None):
                 'name': app.config['EMAIL_RIPLEY_OPERATIONS_LABEL'],
             },
             subject_line=f'Alert: {_scrub(subject)}',
+            tolerate_failure_to_send=True,
         )
     app.logger.error(f'Alert: {message}')
