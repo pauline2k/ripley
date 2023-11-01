@@ -46,6 +46,7 @@ class BConnected:
             recipient,
             subject_line,
             template_type=None,
+            tolerate_failure_to_send=False,
     ):
         if not message or not subject_line or not recipient:
             app.logger.error(
@@ -96,8 +97,13 @@ class BConnected:
             # Disconnect
             smtp.quit()
 
-        # Send emails
-        _send()
+        try:
+            _send()
+        except Exception as e:
+            app.logger.error(f'Failed to send email to recipient {recipient}. Email subject: {subject_line}')
+            app.logger.exception(e)
+            if not tolerate_failure_to_send:
+                raise e
         return True
 
     def ping(self):

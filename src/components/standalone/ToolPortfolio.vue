@@ -1,5 +1,5 @@
 <template>
-  <v-card class="pb-2 pl-8" :class="vCardClass" :width="width">
+  <v-card class="pb-2 px-8" :class="vCardClass" :width="width">
     <v-card-title>
       <div class="align-center d-flex mb-3 mt-6">
         <div class="mr-2">
@@ -17,9 +17,9 @@
     <v-card-text>
       <h2 class="mb-0">Account Tools</h2>
       <StandaloneToolsList :tools="adminTools" />
-      <div class="mt-1">
+      <div class="mt-3">
         <h2 class="mb-0">Canvas Site Tools</h2>
-        <div v-if="!currentUser.canvasSiteId" class="ml-3 mt-3">
+        <div v-if="!currentUser.canvasSiteId" class="mt-3">
           <v-alert
             density="compact"
             role="alert"
