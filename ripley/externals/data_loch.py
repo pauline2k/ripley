@@ -221,8 +221,8 @@ def get_grades_with_demographics(term_id, section_ids, instructor_uid):
         )
         """
 
-    sql = f"""SELECT enr.sis_term_id, enr.sis_section_id, enr.grade, spi.transfer, spi.terms_in_attendance,
-            d.gender, d.minority, array_agg(e.ethnicity) AS ethnicities, v.visa_type
+    sql = f"""SELECT enr.sis_term_id, enr.sis_section_id, enr.grade, spi.transfer,
+            d.gender, d.minority, v.visa_type
         FROM sis_data.edo_enrollments enr
         JOIN student.student_profile_index spi ON enr.ldap_uid = spi.uid
         LEFT JOIN student.demographics d ON spi.sid = d.sid

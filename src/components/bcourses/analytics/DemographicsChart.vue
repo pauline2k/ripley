@@ -9,29 +9,14 @@
       @change="onSelectDemographic"
     >
       <option :value="null">Select Demographic</option>
-      <template v-for="(group, key) in demographicOptions">
-        <template v-if="size(group.options) === 1">
-          <option
-            :id="`grade-distribution-demographics-option-${key}-0`"
-            :key="`${key}-0`"
-            class="border-bottom"
-            :value="{'group': key, 'option': group.options[0]}"
-          >
-            {{ group.label }}
-          </option>
-        </template>
-        <template v-else>
-          <optgroup :key="key" :label="group.label">
-            <option
-              v-for="(option, index) in group.options.sort()"
-              :id="`grade-distribution-demographics-option-${key}-${index}`"
-              :key="`${key}-${index}`"
-              :value="{'group': key, 'option': option}"
-            >
-              {{ option }}
-            </option>
-          </optgroup>
-        </template>
+      <template v-for="(group, key) in demographicOptions" :key="key">
+        <option
+          :id="`grade-distribution-demographics-option-${key}`"
+          :disabled="!size(group.options)"
+          :value="{'group': key, 'option': get(group.options, 0)}"
+        >
+          {{ group.label }}
+        </option>
       </template>
     </select>
     <highcharts :options="chartSettings"></highcharts>
@@ -41,7 +26,7 @@
 <script>
 import Context from '@/mixins/Context'
 import {Chart} from 'highcharts-vue'
-import {cloneDeep, each, get, includes, keys, size, union} from 'lodash'
+import {cloneDeep, each, get, size} from 'lodash'
 
 export default {
   name: 'DemographicsChart',
@@ -56,7 +41,7 @@ export default {
     },
     colors: {
       required: true,
-      type: Array
+      type: Object
     },
     gradeDistribution: {
       required: true,
@@ -66,28 +51,28 @@ export default {
   data: () => ({
     chartSettings: {},
     demographicOptions: {
-      transferStatus: {
-        label: 'Transfer Student',
+      'genders.female': {
+        label: 'Female',
+        options: []
+      },
+      'genders.male': {
+        label: 'Male',
+        options: []
+      },
+      'genders.other': {
+        label: 'Other Gender',
         options: []
       },
       underrepresentedMinorityStatus: {
         label: 'Underrepresented Minority',
         options: []
       },
-      genders: {
-        label: 'Gender',
+      internationalStatus: {
+        label: 'International Students',
         options: []
       },
-      ethnicities: {
-        label: 'Ethnicity',
-        options: []
-      },
-      termsInAttendance: {
-        label: 'Terms in Attendance',
-        options: []
-      },
-      visaTypes: {
-        label: 'VISA Type',
+      transferStatus: {
+        label: 'Transfer Students',
         options: []
       },
     },
@@ -101,22 +86,23 @@ export default {
   },
   methods: {
     collectDemographicOptions() {
-      const translate = (category, values) => {
-        if (includes(['transferStatus', 'underrepresentedMinorityStatus'], category)) {
-          return ['true']
-        }
-        return values
-      }
       each(this.gradeDistribution, item => {
         each(item, (values, category) => {
-          if (category in this.demographicOptions) {
-            let options = this.demographicOptions[category]['options']
-            options = union(options, translate(category, keys(values)))
-            this.demographicOptions[category]['options'] = options
+          let option = get(this.demographicOptions, category)
+          if (option && !size(option['options'])) {
+            option['options'] = ['true']
+          } else if (category === 'genders') {
+            each(values, (vals, subcategory) => {
+              option = get(this.demographicOptions, `${category}.${subcategory}`)
+              if (option && !size(option['options'])) {
+                option['options'] = ['true']
+              }
+            })
           }
         })
       })
     },
+    get,
     getSeriesMarker(series) {
       return {
         'fillColor': 'white',
@@ -130,20 +116,20 @@ export default {
       if (this.selectedDemographic) {
         const group = get(this.selectedDemographic, 'group')
         const option = get(this.selectedDemographic, 'option')
-        const optionLabel = option === 'true' ? '' : `&mdash; ${option}`
         const secondarySeries = {
           color: this.colors.secondary,
           data: [],
           marker: this.getSeriesMarker(this.colors.secondary),
-          name: `${this.demographicOptions[group].label} ${optionLabel}`
+          name: get(this.demographicOptions, group)['label']
         }
         each(this.gradeDistribution, item => {
+          const value = get(item, `${group}`) || get(item, `${group}.${option}`)
           secondarySeries.data.push({
-            custom: {count: get(item[group][option], 'count', 0)},
+            custom: {count: get(value, 'count', 0)},
             dataLabels: {
               enabled: false
             },
-            y: get(item[group][option], 'percentage', 0)
+            y: get(value, 'percentage', 0)
           })
         })
         this.chartSettings.series[1] = secondarySeries
