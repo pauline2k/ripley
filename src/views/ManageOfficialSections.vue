@@ -2,7 +2,7 @@
   <div v-if="!isLoading" class="pt-3 px-6">
     <MaintenanceNotice v-if="canvasSite.canEdit" class="mb-3" course-action-verb="site is updated" />
     <div v-if="feedFetched && !displayError">
-      <Header1 class="mb-2 mt-0" :text="`${canvasSite.name}, ${canvasSite.term.name}`" />
+      <Header1 class="mb-1 mt-0" :text="canvasSite.name" />
       <div class="align-center d-flex h2-container justify-space-between">
         <div class="pr-2">
           <h2>Official Sections</h2>
@@ -35,7 +35,7 @@
           </v-alert>
           <CourseSectionsTable
             id="template-sections-table-preview"
-            class="mb-1 mt-4"
+            class="my-3"
             mode="preview"
             :row-class-logic="rowClassLogic"
             :row-display-logic="rowDisplayLogic"
@@ -45,7 +45,7 @@
         </div>
         <div v-if="currentWorkflowStep === 'staging'">
           <h3 class="sr-only">Managing Sections</h3>
-          <div class="float-right py-3">
+          <div class="float-right pb-5">
             <v-btn
               id="official-sections-save-btn"
               aria-label="Apply pending modifications to this course site"

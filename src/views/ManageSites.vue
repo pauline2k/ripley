@@ -118,16 +118,19 @@
         </li>
       </ul>
     </v-radio-group>
-    <div class="w-100">
+    <div class="pr-8">
       <v-btn
         id="go-next-btn"
-        class="float-right"
+        class="float-right mt-1"
         color="primary"
         :disabled="isButtonDisabled || isProcessing"
         size="large"
         @click="goNext"
       >
-        Next
+        <span v-if="isProcessing">
+          <SpinnerWithinButton /> Next
+        </span>
+        <span v-if="!isProcessing">Next</span>
       </v-btn>
     </div>
   </div>
@@ -136,6 +139,7 @@
 <script setup>
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {getTermName} from '@/utils'
 </script>
 

@@ -20,9 +20,9 @@
         </template>
       </v-checkbox>
     </div>
-    <table :id="id" :class="tableClazz">
+    <table :id="id" class="border-0 border-b-md border-t-md">
       <caption class="sr-only">{{ tableCaption }}</caption>
-      <thead>
+      <thead class="bg-grey-lighten-4">
         <tr>
           <th
             v-if="mode === 'createCourseForm'"
@@ -345,11 +345,6 @@ export default {
       required: false,
       type: String
     },
-    tableClazz: {
-      default: undefined,
-      required: false,
-      type: String
-    },
     unstageAction: {
       default: () => {},
       required: false,
@@ -500,6 +495,10 @@ export default {
 <style scoped lang="scss">
 td, th {
   padding: 10px;
+}
+th {
+  font-size: 14px;
+  font-weight: bolder;
 }
 .border-top-zero {
   border-top: 0;

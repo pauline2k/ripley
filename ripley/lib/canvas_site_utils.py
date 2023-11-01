@@ -186,15 +186,13 @@ def get_official_sections(canvas_site_id):
     if len(sis_sections) != len(section_ids):
         app.logger.warning(f'Canvas site ID {canvas_site_id} has {len(section_ids)} sections, but SIS has {len(sis_sections)} sections.')
 
-    def _section(section_id, rows):
-        canvas_section = canvas_sections_by_id[section_id]
-        return {
-            **canvas_section,
-            **section_to_api_json(rows),
-        }
     official_sections = []
     for section_id, rows in groupby(sis_sections, lambda s: s['section_id']):
-        official_sections.append(_section(section_id, list(rows)))
+        canvas_section = canvas_sections_by_id[section_id]
+        official_sections.append({
+            **canvas_section,
+            **section_to_api_json(list(rows)),
+        })
     return official_sections, section_ids, sis_sections
 
 
