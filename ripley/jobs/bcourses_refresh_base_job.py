@@ -95,11 +95,19 @@ class BcoursesRefreshBaseJob(BaseJob):
             self.email_deletions = []
 
             with self.get_canvas_user_report(timestamp, users_by_uid) as user_report:
-                whitelisted_uids = [user.uid for user in UserAuth.get_canvas_whitelist()]
-                for row in csv.DictReader(user_report):
-                    new_row = self.process_user(row, users_by_uid, whitelisted_uids)
-                    if new_row and _csv_data_changed(row, new_row):
-                        csv_set.users.writerow(new_row)
+                if user_report:
+                    whitelisted_uids = [user.uid for user in UserAuth.get_canvas_whitelist()]
+                    for row in csv.DictReader(user_report):
+                        new_row = self.process_user(row, users_by_uid, whitelisted_uids)
+                        if new_row and _csv_data_changed(row, new_row):
+                            csv_set.users.writerow(new_row)
+                else:
+                    app.logger.warning(f"""
+                        Empty user_report returned by get_canvas_user_report where
+                          timestamp: {timestamp}
+                          user_report: {user_report}
+                          users_by_uid: {users_by_uid}
+                    """)
 
             if self.job_flags.enrollments:
                 self.process_enrollments(csv_set)
@@ -219,8 +227,12 @@ class BcoursesRefreshBaseJob(BaseJob):
         else:
             canvas_users_file = tempfile.NamedTemporaryFile()
             canvas.get_csv_report('users', download_path=canvas_users_file.name)
-            upload_dated_csv(canvas_users_file.name, 'user-provision-report', 'canvas_provisioning_reports', timestamp)
-
+            upload_dated_csv(
+                folder='canvas_provisioning_reports',
+                local_name=canvas_users_file.name,
+                remote_name='user-provision-report',
+                timestamp=timestamp,
+            )
             # If the job flag is not incremental, then we haven't yet called directly to LDAP for any users missing from
             # the data loch snapshot, and need a preliminary loop through the users report to flag any UIDs that
             # might be missing.
