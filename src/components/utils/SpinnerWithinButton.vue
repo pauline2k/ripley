@@ -3,7 +3,7 @@
     class="mr-2"
     :color="color"
     indeterminate
-    size="x-small"
+    :size="size"
     width="3"
   />
 </template>
@@ -15,6 +15,11 @@ export default {
     color: {
       default: 'white',
       type: String,
+      required: false
+    },
+    size: {
+      default: 'x-small',
+      type: [Number, String],
       required: false
     }
   }
