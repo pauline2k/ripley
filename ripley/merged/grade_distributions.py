@@ -28,10 +28,11 @@ from itertools import groupby
 
 from flask import current_app as app
 from ripley.externals.data_loch import get_grades_with_demographics, get_grades_with_enrollments
+from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.util import to_percentage
 
 
-EMPTY_DISTRIBUTION = {
+EMPTY_DEMOGRAPHIC_DISTRIBUTION = {
     'genders': {},
     'internationalStatus': {
         'true': 0,
@@ -46,33 +47,34 @@ EMPTY_DISTRIBUTION = {
         'false': 0,
     },
     'count': 0,
+    'totalGpa': 0,
 }
 
 
 def get_grade_distribution_with_demographics(term_id, section_ids, instructor_uid):  # noqa
-    distribution = {}
-    class_size = 0
-    totals = deepcopy(EMPTY_DISTRIBUTION)
-
+    gpa_distribution = {}
+    gpa_totals = {}
+    grade_distribution = {
+        'count': 0,
+    }
     student_grades = get_grades_with_demographics(term_id, section_ids, instructor_uid)
     if len(student_grades) < int(app.config['NEWT_MINIMUM_CLASS_SIZE']):
-        return False
+        return False, False
 
     for row in student_grades:
-        if not row['grade']:
-            continue
-        if row['grade'] not in distribution:
-            distribution[row['grade']] = deepcopy(EMPTY_DISTRIBUTION)
-        distribution[row['grade']]['count'] += 1
-        class_size += 1
+        if row['term_id'] not in gpa_distribution:
+            gpa_distribution[row['term_id']] = deepcopy(EMPTY_DEMOGRAPHIC_DISTRIBUTION)
+            gpa_totals[row['term_id']] = deepcopy(EMPTY_DEMOGRAPHIC_DISTRIBUTION)
+        gpa_distribution[row['term_id']]['count'] += 1
+        gpa_distribution[row['term_id']]['totalGpa'] += row['gpa']
 
         def _count_boolean_value(column, distribution_key):
             if row[column]:
-                distribution[row['grade']][distribution_key]['true'] += 1
-                totals[distribution_key]['true'] += 1
+                gpa_distribution[row['term_id']][distribution_key]['true'] += row['gpa']
+                gpa_totals[row['term_id']][distribution_key]['true'] += 1
             else:
-                distribution[row['grade']][distribution_key]['false'] += 1
-                totals[distribution_key]['false'] += 1
+                gpa_distribution[row['term_id']][distribution_key]['false'] += row['gpa']
+                gpa_totals[row['term_id']][distribution_key]['false'] += 1
 
         _count_boolean_value('transfer', 'transferStatus')
         _count_boolean_value('minority', 'underrepresentedMinorityStatus')
@@ -80,35 +82,53 @@ def get_grade_distribution_with_demographics(term_id, section_ids, instructor_ui
 
         def _count_string_value(value, distribution_key):
             value = str(value) if value else 'none'
-            if value not in distribution[row['grade']][distribution_key]:
-                distribution[row['grade']][distribution_key][value] = 0
-            if value not in totals[distribution_key]:
-                totals[distribution_key][value] = 0
-                totals[distribution_key][value] = 0
-            distribution[row['grade']][distribution_key][value] += 1
-            totals[distribution_key][value] += 1
+            if value not in gpa_distribution[row['term_id']][distribution_key]:
+                gpa_distribution[row['term_id']][distribution_key][value] = 0
+            if value not in gpa_totals[row['term_id']][distribution_key]:
+                gpa_totals[row['term_id']][distribution_key][value] = 0
+            gpa_distribution[row['term_id']][distribution_key][value] += row['gpa']
+            gpa_totals[row['term_id']][distribution_key][value] += 1
 
         _count_string_value(_simplify_gender(row['gender']), 'genders')
 
-    sorted_distribution = []
-    for grade in sorted(distribution.keys(), key=_grade_ordering_index):
-        for distribution_key, values in distribution[grade].items():
-            if distribution_key == 'count':
+        if row['grade'] not in grade_distribution:
+            grade_distribution[row['grade']] = {'count': 0}
+        grade_distribution[row['grade']]['count'] += 1
+        grade_distribution['count'] += 1
+
+    sorted_grade_distribution = []
+    for grade in sorted(grade_distribution.keys(), key=_grade_ordering_index):
+        if grade in GRADE_ORDERING:
+            grade_distribution[grade].update({
+                'classSize': grade_distribution['count'],
+                'grade': grade,
+                'percentage': to_percentage(grade_distribution[grade]['count'], grade_distribution['count']),
+            })
+            sorted_grade_distribution.append(grade_distribution[grade])
+
+    sorted_gpa_distribution = []
+    for term_id in sorted(gpa_distribution.keys()):
+        for distribution_key, values in gpa_distribution[term_id].items():
+            if distribution_key in ['count', 'totalGpa']:
                 continue
-            for distribution_value, count in values.items():
-                distribution[grade][distribution_key][distribution_value] = {
-                    'count': count,
-                    'percentage': to_percentage(count, totals[distribution_key][distribution_value]),
+            for distribution_value, total_gpa in values.items():
+                student_count = gpa_totals[term_id][distribution_key][distribution_value]
+                gpa_distribution[term_id][distribution_key][distribution_value] = {
+                    'count': student_count,
+                    'averageGpa': (total_gpa / student_count) if student_count > 0 else 0,
                 }
-        distribution[grade].update({'classSize': class_size})
-        distribution[grade].update({'grade': grade})
-        distribution[grade].update({'percentage': to_percentage(distribution[grade]['count'], class_size)})
-        sorted_distribution.append(distribution[grade])
+        term_student_count = gpa_distribution[term_id]['count']
+        term_total_gpa = gpa_distribution[term_id].pop('totalGpa', 0)
+        sorted_gpa_distribution.append({
+            'averageGpa': (term_total_gpa / term_student_count) if term_student_count > 0 else 0,
+            **gpa_distribution[term_id],
+            'termId': term_id,
+            'termName': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
+        })
+    return sorted_gpa_distribution, sorted_grade_distribution
 
-    return sorted_distribution
 
-
-def get_grade_distribution_with_enrollments(term_id, section_ids, grades):
+def get_grade_distribution_with_enrollments(term_id, section_ids):
     grades_by_course_name = {}
     for course_name, rows in groupby(get_grades_with_enrollments(term_id, section_ids), key=lambda x: x['sis_course_name']):
         grades_by_course_name[course_name] = [r for r in rows if r['grade']]
@@ -117,30 +137,39 @@ def get_grade_distribution_with_enrollments(term_id, section_ids, grades):
     courses_by_popularity = courses_by_popularity[0:app.config['GRADE_DISTRIBUTION_MAX_DISTINCT_COURSES']]
 
     distribution = {}
+    totals = {
+        'count': 0,
+    }
     for course_name, course_rows in courses_by_popularity:
         distribution[course_name] = {'count': 0}
         for r in course_rows:
             if r['grade'] not in distribution[course_name]:
-                distribution[course_name][r['grade']] = 1
-            else:
-                distribution[course_name][r['grade']] += 1
+                distribution[course_name][r['grade']] = 0
+            distribution[course_name][r['grade']] += 1
             distribution[course_name]['count'] += 1
+            if r['grade'] not in totals:
+                totals[r['grade']] = 0
+            totals[r['grade']] += 1
+            totals['count'] += 1
+    class_size = sum(totals[grade] for grade in totals.keys() if grade != 'count')
 
     for course_name, course_distribution in distribution.items():
         total_prior_enroll_count = course_distribution['count']
         sorted_distribution = []
-        for grade in grades.keys():
+        for grade in totals.keys():
+            if grade == 'count':
+                continue
             grade_prior_enroll_count = course_distribution.get(grade, 0)
-            grade_no_prior_enroll_count = grades[grade]['count'] - grade_prior_enroll_count
-            total_no_prior_enroll_count = grades[grade]['classSize'] - total_prior_enroll_count
+            grade_no_prior_enroll_count = totals[grade] - grade_prior_enroll_count
+            total_no_prior_enroll_count = class_size - total_prior_enroll_count
             sorted_distribution.append({
                 'grade': grade,
                 'noPriorEnrollCount': grade_no_prior_enroll_count,
                 'noPriorEnrollPercentage': to_percentage(grade_no_prior_enroll_count, total_no_prior_enroll_count),
                 'priorEnrollCount': grade_prior_enroll_count,
                 'priorEnrollPercentage': to_percentage(grade_prior_enroll_count, total_prior_enroll_count),
-                'totalCount': grades[grade]['count'],
-                'totalPercentage': grades[grade]['percentage'],
+                'totalCount': totals[grade],
+                'totalPercentage': to_percentage(totals[grade], class_size),
             })
         distribution[course_name] = sorted_distribution
 

@@ -81,8 +81,19 @@ export default {
   created() {
     this.chartSettings = cloneDeep(this.chartDefaults)
     this.chartSettings.chart.type = 'line'
-    this.chartSettings.series[0].marker = this.getSeriesMarker(this.chartSettings.series[0])
+    this.chartSettings.title = {
+      align: 'left',
+      text: 'Overall Class Grade Average by Semester'
+    }
+    this.chartSettings.yAxis.labels = {
+      format: '{value:.1f}',
+      step: 1
+    }
+    this.chartSettings.yAxis.max = 4
+    this.chartSettings.yAxis.min = 0
+    this.chartSettings.yAxis.tickInterval = 1
     this.collectDemographicOptions()
+    this.loadPrimarySeries()
   },
   methods: {
     collectDemographicOptions() {
@@ -112,6 +123,20 @@ export default {
         'symbol': 'circle'
       }
     },
+    loadPrimarySeries() {
+      this.chartSettings.colors = [this.colors.default, this.colors.secondary]
+      this.chartSettings.series[0].color = this.colors.default
+      this.chartSettings.series[0].marker = this.getSeriesMarker(this.chartSettings.series[0])
+      this.chartSettings.series[0].name = 'Overall Class Grades'
+      each(this.gradeDistribution, item => {
+        this.chartSettings.series[0].data.push({
+          color: this.colors.default,
+          custom: {count: item.count},
+          y: item.averageGpa
+        })
+        this.chartSettings.xAxis.categories.push(item.termName)
+      })
+    },
     onSelectDemographic() {
       if (this.selectedDemographic) {
         const group = get(this.selectedDemographic, 'group')
@@ -129,7 +154,7 @@ export default {
             dataLabels: {
               enabled: false
             },
-            y: get(value, 'percentage', 0)
+            y: get(value, 'averageGpa', 0)
           })
         })
         this.chartSettings.series[1] = secondarySeries

@@ -207,30 +207,37 @@ def get_edo_enrollment_updates(since_timestamp):
 
 def get_grades_with_demographics(term_id, section_ids, instructor_uid):
     params = {
+        'instructor_uid': instructor_uid,
         'section_ids': section_ids,
         'term_id': term_id,
     }
-    exclude_other_instructors_sections = ''
+    exclude_other_instructors_sections = ''  # noqa
     if instructor_uid:
-        params['instructor_uid'] = instructor_uid
-        exclude_other_instructors_sections = """AND NOT EXISTS (
-            SELECT * FROM sis_data.edo_sections sec
-            WHERE sec.instructor_uid <> %(instructor_uid)s
-            AND sec.sis_term_id = enr.sis_term_id
-            AND sec.sis_section_id = enr.sis_section_id
+        exclude_other_instructors_sections = """AND sec.instructor_uid = c.instructor_uid
+            AND NOT EXISTS (
+                SELECT * FROM sis_data.edo_sections sec
+                WHERE sec.instructor_uid <> %(instructor_uid)s
+                AND sec.sis_term_id = enr.sis_term_id
+                AND sec.sis_section_id = enr.sis_section_id
+            )
+            """  # noqa
+    sql = f"""WITH course AS (
+            SELECT *
+            FROM sis_data.edo_sections sec
+            WHERE sec.sis_term_id = %(term_id)s
+            AND sec.sis_section_id = ANY(%(section_ids)s)
         )
-        """
-
-    sql = f"""SELECT enr.sis_term_id, enr.sis_section_id, enr.grade, spi.transfer,
+        SELECT enr.sis_term_id AS term_id, enr.sis_section_id, enr.grade, spi.gpa, spi.transfer,
             d.gender, d.minority, v.visa_type
         FROM sis_data.edo_enrollments enr
+        JOIN sis_data.edo_sections sec on enr.sis_term_id = sec.sis_term_id and enr.sis_section_id = sec.sis_section_id
+        JOIN course c ON sec.sis_course_name = c.sis_course_name AND sec.instructor_uid = c.instructor_uid
         JOIN student.student_profile_index spi ON enr.ldap_uid = spi.uid
         LEFT JOIN student.demographics d ON spi.sid = d.sid
-        LEFT JOIN student.ethnicities e on spi.sid = e.sid
         LEFT JOIN student.visas v on spi.sid = v.sid AND visa_status = 'G'
-        WHERE enr.sis_term_id = %(term_id)s AND enr.sis_section_id = ANY(%(section_ids)s)
-        {exclude_other_instructors_sections} GROUP BY enr.sis_term_id, enr.sis_section_id, enr.ldap_uid, enr.grade,
-            spi.sid, spi.transfer, spi.terms_in_attendance, d.sid, d.gender, d.minority, v.visa_status, v.visa_type"""
+        WHERE enr.sis_term_id <= %(term_id)s
+        AND spi.gpa IS NOT NULL
+        {exclude_other_instructors_sections} ORDER BY enr.sis_term_id, spi.gpa"""
     return safe_execute_rds(sql, **params)
 
 
