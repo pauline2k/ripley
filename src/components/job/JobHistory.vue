@@ -42,7 +42,13 @@
           </div>
         </template>
         <template #item.jobKey="{item}">
-          <div class="py-2 font-size-15 text-grey-darken-2">
+          <div
+            class="font-size-15 py-2"
+            :class="{
+              'text-grey-darken-2': item.finishedAt,
+              'font-weight-bold text-grey-darken-1': !item.finishedAt
+            }"
+          >
             {{ item.jobKey }}
           </div>
         </template>
@@ -53,18 +59,24 @@
               :color="item.failed ? 'error' : 'success'"
               :icon="item.failed ? mdiAlert : mdiCheckCircle"
             />
-            <v-progress-circular
-              v-if="!item.finishedAt"
-              :indeterminate="true"
-              rotate="5"
-              size="24"
-              width="4"
-              color="orange"
-            />
+            <div v-if="!item.finishedAt">
+              <v-progress-circular
+                :indeterminate="true"
+                rotate="5"
+                size="18"
+                width="4"
+                color="orange"
+              />
+            </div>
           </div>
         </template>
         <template #item.startedAt="{item}">
-          <div class="py-2">
+          <div
+            class="py-2"
+            :class="{
+              'font-weight-bold text-grey-darken-1': !item.finishedAt
+            }"
+          >
             {{ $moment(item.startedAt).format(dateFormat) }}
           </div>
         </template>

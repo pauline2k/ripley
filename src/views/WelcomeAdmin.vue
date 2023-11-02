@@ -1,7 +1,7 @@
 <template>
   <v-container
     v-if="!isLoading"
-    class="h-100 pt-1 px-6"
+    class="h-100 mb-2 pt-1 px-6"
     fill-height
     fluid
     :style="{backgroundImage: `url(${deepSpace})`, backgroundRepeat: 'repeat'}"
@@ -11,7 +11,45 @@
         <Header1 id="page-title" text="Welcome" />
       </v-col>
     </v-row>
-    <v-row align="start" justify="center">
+    <v-row v-if="showLatestJobAlert" class="pt-3" no-gutters>
+      <v-col>
+        <v-alert
+          v-model="showLatestJobAlert"
+          closable
+          color="white"
+          density="compact"
+          role="alert"
+          rounded
+          variant="outlined"
+        >
+          <template #title>
+            <div class="align-center d-flex">
+              <div class="mr-2">
+                <SpinnerWithinButton
+                  v-if="latestJob.isRunning"
+                  class="mb-1"
+                  color="green"
+                  :size="20"
+                />
+                <v-icon
+                  v-if="!latestJob.isRunning"
+                  :color="latestJob.iconColor"
+                  :icon="latestJob.icon"
+                />
+              </div>
+              <div>
+                {{ latestJob.description }}
+              </div>
+            </div>
+          </template>
+        </v-alert>
+      </v-col>
+    </v-row>
+    <v-row
+      align="start"
+      :class="{'mt-1': showLatestJobAlert}"
+      justify="center"
+    >
       <v-col>
         <v-card v-if="jobSchedule">
           <v-card-title>
@@ -199,14 +237,16 @@ import DisableJobToggle from '@/components/job/DisableJobToggle'
 import Header1 from '@/components/utils/Header1.vue'
 import JobHistory from '@/components/job/JobHistory'
 import ripleyWithCat from '@/assets/images/ripley-with-cat.png'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import ToolPortfolio from '@/components/standalone/ToolPortfolio.vue'
 import {mdiDesktopClassic, mdiPlay, mdiPlaylistEdit} from '@mdi/js'
 </script>
 
 <script>
 import Context from '@/mixins/Context'
-import {cloneDeep, find, get} from 'lodash'
+import {cloneDeep, each, filter, find, get, isNil} from 'lodash'
 import {getJobHistory, getJobSchedule, setJobDisabled, startJob, updateJobSchedule} from '@/api/job'
+import {mdiMessageAlert, mdiStar} from '@mdi/js'
 
 export default {
   name: 'Welcome',
@@ -226,8 +266,35 @@ export default {
     jobHistory: undefined,
     jobSchedule: undefined,
     refresher: undefined,
-    refreshing: false
+    refreshing: false,
+    showLatestJobAlert: undefined
   }),
+  computed: {
+    latestJob() {
+      let description
+      let icon
+      let iconColor
+      const runningJobs = filter(this.jobHistory, ['finishedAt', null]) || []
+      if (runningJobs.length) {
+        description = ''
+        each(runningJobs, job => {
+          description += `${job.jobKey} started ${this.$moment(job.startedAt).fromNow()}. `
+        })
+      } else {
+        const job = this.jobHistory[0]
+        const finishedAt = this.$moment(job.finishedAt).fromNow()
+        description = `${job.jobKey} ${job.failed ? 'failed' : 'finished'} ${finishedAt}.`
+        icon = job.failed ? mdiMessageAlert : mdiStar
+        iconColor = job.failed ? 'error' : 'green'
+      }
+      return {
+        description,
+        icon,
+        iconColor,
+        isRunning: runningJobs.length
+      }
+    }
+  },
   created() {
     getJobSchedule().then(data => {
       this.jobSchedule = data
@@ -248,6 +315,10 @@ export default {
       this.refreshing = true
       return getJobHistory().then(data => {
         this.jobHistory = data
+        if (isNil(this.showLatestJobAlert) && this.jobHistory.length > 1) {
+          // Set this flag only once: when jobHistory is non-empty. The flag is set to false when user closes the alert.
+          this.showLatestJobAlert = true
+        }
         this.refreshing = false
         if (!quietly) {
           this.alertScreenReader('Job History refreshed')
