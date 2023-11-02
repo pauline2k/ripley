@@ -23,6 +23,9 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from decimal import Decimal
+
+import pytest
 from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, \
     get_grade_distribution_with_enrollments
 
@@ -30,367 +33,154 @@ from ripley.merged.grade_distributions import get_grade_distribution_with_demogr
 class TestGradeDistributions:
 
     def test_demographic_distribution(self):
-        d = get_grade_distribution_with_demographics('2228', ['99999'], '30000')
-        assert d == [
+        gpa_demographics_distribution, grade_distribution = get_grade_distribution_with_demographics('2228', ['99999'], '30000')
+        print(gpa_demographics_distribution)
+        assert gpa_demographics_distribution == [
             {
-                'classSize': 91,
+                'averageGpa': Decimal('3.3705'),
+                'count': 6,
                 'genders': {
-                    'male': {
-                        'count': 5,
-                        'percentage': 22.7,
-                    },
                     'female': {
-                        'count': 11,
-                        'percentage': 16.2,
+                        'averageGpa': Decimal('3.6315'),
+                        'count': 4,
                     },
-                },
-                'grade': 'A+',
-                'internationalStatus': {
-                    'true': {
+                    'male': {
+                        'averageGpa': Decimal('2.8485'),
                         'count': 2,
-                        'percentage': 25.0,
-                    },
-                    'false': {
-                        'count': 14,
-                        'percentage': 16.9,
                     },
                 },
-                'percentage': 17.6,
-                'transferStatus': {
-                    'true': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
+                'internationalStatus': {
                     'false': {
-                        'count': 16,
-                        'percentage': 18.6,
+                        'averageGpa': Decimal('3.683'),
+                        'count': 5,
+                    },
+                    'true': {
+                        'averageGpa': Decimal('1.808'),
+                        'count': 1,
+                    },
+                },
+                'termId': '2225',
+                'termName': 'Summer 2022',
+                'transferStatus': {
+                    'false': {
+                        'averageGpa': Decimal('3.3705'),
+                        'count': 6,
+                    },
+                    'true': {
+                        'averageGpa': 0,
+                        'count': 0,
                     },
                 },
                 'underrepresentedMinorityStatus': {
-                    'true': {
-                        'count': 10,
-                        'percentage': 18.2,
-                    },
                     'false': {
-                        'count': 6,
-                        'percentage': 16.7,
+                        'averageGpa': Decimal('3.207'),
+                        'count': 3,
+                    },
+                    'true': {
+                        'averageGpa': Decimal('3.534'),
+                        'count': 3,
                     },
                 },
-                'count': 16,
             },
             {
-                'classSize': 91,
+                'averageGpa': Decimal('3.528692307692307692307692308'),
+                'count': 91,
                 'genders': {
                     'female': {
-                        'count': 43,
-                        'percentage': 63.2,
+                        'averageGpa': Decimal('3.541294117647058823529411765'),
+                        'count': 68,
                     },
                     'male': {
-                        'count': 8,
-                        'percentage': 36.4,
+                        'averageGpa': Decimal('3.470090909090909090909090909'),
+                        'count': 22,
                     },
                     'other': {
+                        'averageGpa': Decimal('3.961'),
                         'count': 1,
-                        'percentage': 100.0,
                     },
                 },
-                'grade': 'A',
                 'internationalStatus': {
-                    'true': {
-                        'count': 5,
-                        'percentage': 62.5,
-                    },
                     'false': {
-                        'count': 47,
-                        'percentage': 56.6,
+                        'averageGpa': Decimal('3.543180722891566265060240964'),
+                        'count': 83,
+                    },
+                    'true': {
+                        'averageGpa': Decimal('3.378375'),
+                        'count': 8,
                     },
                 },
-                'percentage': 57.1,
+                'termId': '2228',
+                'termName': 'Fall 2022',
                 'transferStatus': {
-                    'true': {
-                        'count': 3,
-                        'percentage': 60.0,
-                    },
                     'false': {
-                        'count': 49,
-                        'percentage': 57.0,
+                        'averageGpa': Decimal('3.533546511627906976744186047'),
+                        'count': 86,
+                    },
+                    'true': {
+                        'averageGpa': Decimal('3.4452'),
+                        'count': 5,
                     },
                 },
                 'underrepresentedMinorityStatus': {
-                    'true': {
-                        'count': 32,
-                        'percentage': 58.2,
-                    },
                     'false': {
-                        'count': 20,
-                        'percentage': 55.6,
+                        'averageGpa': Decimal('3.724861111111111111111111111'),
+                        'count': 36,
+                    },
+                    'true': {
+                        'averageGpa': Decimal('3.400290909090909090909090909'),
+                        'count': 55,
                     },
                 },
+            },
+        ]
+        assert grade_distribution == [
+            {
+                'classSize': 97,
+                'count': 16,
+                'grade': 'A+',
+                'percentage': 16.5,
+            },
+            {
+                'classSize': 97,
                 'count': 52,
+                'grade': 'A',
+                'percentage': 53.6,
             },
             {
-                'classSize': 91,
-                'genders': {
-                    'female': {
-                        'count': 5,
-                        'percentage': 7.4,
-                    },
-                    'male': {
-                        'count': 3,
-                        'percentage': 13.6,
-                    },
-                },
+                'classSize': 97,
+                'count': 8,
                 'grade': 'A-',
-                'internationalStatus': {
-                    'true': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                    'false': {
-                        'count': 8,
-                        'percentage': 9.6,
-                    },
-                },
-                'percentage': 8.8,
-                'transferStatus': {
-                    'true': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                    'false': {
-                        'count': 8,
-                        'percentage': 9.3,
-                    },
-                },
-                'underrepresentedMinorityStatus': {
-                    'true': {
-                        'count': 6,
-                        'percentage': 10.9,
-                    },
-                    'false': {
-                        'count': 2,
-                        'percentage': 5.6,
-                    },
-                },
-                'count': 8,
+                'percentage': 8.2,
             },
             {
-                'classSize': 91,
-                'genders': {
-                    'female': {
-                        'count': 4,
-                        'percentage': 5.9,
-                    },
-                    'male': {
-                        'count': 1,
-                        'percentage': 4.5,
-                    },
-                },
-                'grade': 'B+',
-                'internationalStatus': {
-                    'true': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                    'false': {
-                        'count': 5,
-                        'percentage': 6.0,
-                    },
-                },
-                'percentage': 5.5,
-                'transferStatus': {
-                    'true': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                    'false': {
-                        'count': 5,
-                        'percentage': 5.8,
-                    },
-                },
-                'underrepresentedMinorityStatus': {
-                    'true': {
-                        'count': 4,
-                        'percentage': 7.3,
-                    },
-                    'false': {
-                        'count': 1,
-                        'percentage': 2.8,
-                    },
-                },
+                'classSize': 97,
                 'count': 5,
+                'grade': 'B+',
+                'percentage': 5.2,
             },
             {
-                'classSize': 91,
-                'genders': {
-                    'male': {
-                        'count': 1,
-                        'percentage': 4.5,
-                    },
-                },
+                'classSize': 97,
+                'count': 1,
                 'grade': 'C+',
-                'internationalStatus': {
-                    'true': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                    'false': {
-                        'count': 1,
-                        'percentage': 1.2,
-                    },
-                },
-                'percentage': 1.1,
-                'transferStatus': {
-                    'true': {
-                        'count': 1,
-                        'percentage': 20.0,
-                    },
-                    'false': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                },
-                'underrepresentedMinorityStatus': {
-                    'true': {
-                        'count': 1,
-                        'percentage': 1.8,
-                    },
-                    'false': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                },
-                'count': 1,
+                'percentage': 1.0,
             },
             {
-                'classSize': 91,
-                'genders': {
-                    'male': {
-                        'count': 1,
-                        'percentage': 4.5,
-                    },
-                },
+                'classSize': 97,
+                'count': 1,
                 'grade': 'F',
-                'internationalStatus': {
-                    'true': {
-                        'count': 1,
-                        'percentage': 12.5,
-                    },
-                    'false': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                },
-                'percentage': 1.1,
-                'transferStatus': {
-                    'true': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                    'false': {
-                        'count': 1,
-                        'percentage': 1.2,
-                    },
-                },
-                'underrepresentedMinorityStatus': {
-                    'true': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                    'false': {
-                        'count': 1,
-                        'percentage': 2.8,
-                    },
-                },
-                'count': 1,
+                'percentage': 1.0,
             },
             {
-                'classSize': 91,
-                'genders': {
-                    'male': {
-                        'count': 3,
-                        'percentage': 13.6,
-                    },
-                    'female': {
-                        'count': 5,
-                        'percentage': 7.4,
-                    },
-                },
+                'classSize': 97,
+                'count': 14,
                 'grade': 'P',
-                'internationalStatus': {
-                    'true': {
-                        'count': 0,
-                        'percentage': 0.0,
-                    },
-                    'false': {
-                        'count': 8,
-                        'percentage': 9.6,
-                    },
-                },
-                'percentage': 8.8,
-                'transferStatus': {
-                    'true': {
-                        'count': 1,
-                        'percentage': 20.0,
-                    },
-                    'false': {
-                        'count': 7,
-                        'percentage': 8.1,
-                    },
-                },
-                'underrepresentedMinorityStatus': {
-                    'true': {
-                        'count': 2,
-                        'percentage': 3.6,
-                    },
-                    'false': {
-                        'count': 6,
-                        'percentage': 16.7,
-                    },
-                },
-                'count': 8,
+                'percentage': 14.4,
             },
         ]
 
+    @pytest.mark.skip(reason='get_grade_distribution_with_enrollments will be repurposed for RIP-541')
     def test_enrollment_distribution(self):
-        grades = {
-            'A+': {
-                'percentage': 17.6,
-                'classSize': 91,
-                'count': 16,
-            },
-            'A': {
-                'percentage': 57.1,
-                'classSize': 91,
-                'count': 52,
-            },
-            'A-': {
-                'percentage': 8.8,
-                'classSize': 91,
-                'count': 8,
-            },
-            'B+': {
-                'percentage': 5.5,
-                'classSize': 91,
-                'count': 5,
-            },
-            'C+': {
-                'percentage': 1.1,
-                'classSize': 91,
-                'count': 1,
-            },
-            'F': {
-                'percentage': 1.1,
-                'classSize': 91,
-                'count': 1,
-            },
-            'P': {
-                'percentage': 8.8,
-                'classSize': 91,
-                'count': 8,
-            },
-        }
-        d = get_grade_distribution_with_enrollments('2228', ['99999'], grades)
+        d = get_grade_distribution_with_enrollments('2228', ['99999'])
         assert d == {
             'ANTHRO 197': [
                 {

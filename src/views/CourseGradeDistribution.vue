@@ -19,6 +19,7 @@
         <PriorEnrollmentChart
           :change-series-color="changeSeriesColor"
           :chart-defaults="chartDefaults"
+          :course="gradeDistribution.canvasSite"
           :grade-distribution="gradeDistribution.enrollments"
         />
       </div>
@@ -88,14 +89,12 @@ export default {
         useHTML: true
       },
       xAxis: {
-        categories: []
+        categories: [],
+        tickWidth: 1
       },
       yAxis: {
         endOnTick: false,
         gridLineWidth: 0,
-        labels: {
-          format: '{value}%'
-        },
         lineWidth: 1,
         tickWidth: 1,
         title: {
@@ -113,10 +112,10 @@ export default {
   }),
   created() {
     this.loadingStart()
+    this.chartDefaults.series[0].color = this.colors.default
     getGradeDistribution(this.currentUser.canvasSiteId).then(
       data => {
         this.gradeDistribution = data
-        this.loadPrimarySeries()
       },
       error => this.showError(error)
     ).catch(error => this.showError(error)
@@ -148,19 +147,6 @@ export default {
       }
     },
     get,
-    loadPrimarySeries() {
-      this.chartDefaults.colors = [this.colors.default, this.colors.secondary]
-      this.chartDefaults.series[0].name = 'Fall 2023'
-      this.chartDefaults.series[0].color = this.colors.default
-      each(this.gradeDistribution.demographics, item => {
-        this.chartDefaults.series[0].data.push({
-          color: this.colors.default,
-          custom: {count: item.count},
-          y: item.percentage
-        })
-        this.chartDefaults.xAxis.categories.push(item.grade)
-      })
-    },
     showError(errorMessage) {
       this.errorMessage = errorMessage
     }

@@ -36,8 +36,7 @@ from ripley.lib.canvas_site_utils import canvas_section_to_api_json, canvas_site
     update_canvas_sections
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
-from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, \
-    get_grade_distribution_with_enrollments
+from ripley.merged.grade_distributions import get_grade_distribution_with_demographics
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
 ROLES_CAN_EDIT_OFFICIAL_SECTIONS = ['Lead TA', 'TeacherEnrollment']
@@ -194,16 +193,11 @@ def get_grade_distribution(canvas_site_id):
         term_id = sis_sections[0]['termId']
         section_ids = [s['id'] for s in sis_sections]
         instructor_uid = None if current_user.is_admin else current_user.uid
-        demographics = get_grade_distribution_with_demographics(term_id, section_ids, instructor_uid)
-        if demographics is False:
+        gpa_demographics_distribution, grade_distribution = get_grade_distribution_with_demographics(term_id, section_ids, instructor_uid)
+        if gpa_demographics_distribution is False:
             raise ResourceNotFoundError('This course does not meet the requirements necessary to generate a Grade Distribution.')
-        distribution['demographics'] = demographics
-        grades = {d['grade']: {
-            'classSize': d['classSize'],
-            'count': d['count'],
-            'percentage': d['percentage'],
-        } for d in demographics}
-        distribution['enrollments'] = get_grade_distribution_with_enrollments(term_id, section_ids, grades)
+        distribution['demographics'] = gpa_demographics_distribution
+        distribution['enrollments'] = grade_distribution
     else:
         distribution['demographics'] = []
         distribution['enrollments'] = {}

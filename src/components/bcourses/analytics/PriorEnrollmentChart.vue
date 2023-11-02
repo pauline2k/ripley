@@ -6,6 +6,7 @@
       id="grade-distribution-enrollment-select"
       v-model="selectedCourse"
       class="my-4"
+      :disabled="true"
       @change="onSelectCourse"
     >
       <option :value="null">Select Prior Enrollment</option>
@@ -42,6 +43,10 @@ export default {
       required: true,
       type: Object
     },
+    course: {
+      required: true,
+      type: Object
+    },
     gradeDistribution: {
       required: true,
       type: Object
@@ -61,7 +66,15 @@ export default {
     each(this.chartSettings.series[0].data, item => {
       item.dataLabels = this.getDataLabel(item.percentage, this.chartSettings.series[0].color)
     })
+    this.chartSettings.title = {
+      align: 'left',
+      text: `Overall Class Grade Distribution&mdash;${this.course.term.name}`
+    }
+    this.chartSettings.yAxis.labels = {
+      format: '{value}%'
+    }
     this.courses = keys(this.gradeDistribution)
+    this.loadPrimarySeries()
   },
   methods: {
     getDataLabel(yVal, color) {
@@ -81,6 +94,22 @@ export default {
           enabled: false
         }
       }
+    },
+    loadPrimarySeries() {
+      const color = this.chartSettings.series[0].color
+      this.chartSettings.series[0].name = `${this.course.term.name} ${this.course.courseCode}`
+      each(this.chartSettings.series[0].data, item => {
+        item.dataLabels = this.getDataLabel(item.y, color)
+      })
+      each(this.gradeDistribution, item => {
+        this.chartSettings.series[0].data.push({
+          color: color,
+          custom: {count: item.count},
+          dataLabels: this.getDataLabel(item.y, color),
+          y: item.percentage
+        })
+        this.chartSettings.xAxis.categories.push(item.grade)
+      })
     },
     onSelectCourse() {
       if (this.selectedCourse) {
