@@ -1,7 +1,7 @@
 <template>
   <v-list density="compact" :lines="false">
     <template v-for="(tool, index) in tools" :key="index">
-      <v-list-item>
+      <v-list-item :class="{'pl-0': !config.devAuthEnabled}">
         <template #prepend>
           <v-icon :icon="tool.icon" />
         </template>
@@ -24,8 +24,11 @@
 </template>
 
 <script>
+import Context from '@/mixins/Context.vue'
+
 export default {
   name: 'StandaloneToolsList',
+  mixins: [Context],
   props: {
     tools: {
       type: Array,

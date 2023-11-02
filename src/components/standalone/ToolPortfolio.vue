@@ -1,8 +1,11 @@
 <template>
   <v-card class="pb-2 px-8" :class="vCardClass" :width="width">
     <v-card-title>
-      <div class="align-center d-flex mb-3 mt-6">
-        <div class="mr-2">
+      <div
+        class="align-end d-flex mt-6"
+        :class="{'mb-2': config.devAuthEnabled}"
+      >
+        <div class="mb-1 mr-2">
           <v-icon
             color="primary"
             :icon="mdiStackOverflow"
@@ -10,14 +13,14 @@
           />
         </div>
         <div>
-          <h2>LTI Portfolio</h2>
+          <h2>{{ config.devAuthEnabled ? 'LTI Portfolio' : 'Tools' }}</h2>
         </div>
       </div>
     </v-card-title>
-    <v-card-text>
-      <h2 class="mb-0">Account Tools</h2>
+    <v-card-text :class="{'ml-2': !config.devAuthEnabled}">
+      <h2 v-if="config.devAuthEnabled" class="mb-0">Account Tools</h2>
       <StandaloneToolsList :tools="adminTools" />
-      <div class="mt-3">
+      <div v-if="config.devAuthEnabled" class="mt-3">
         <h2 class="mb-0">Canvas Site Tools</h2>
         <div v-if="!currentUser.canvasSiteId" class="mt-3">
           <v-alert
