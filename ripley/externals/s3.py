@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from datetime import timedelta
 
 import boto3
-from botocore.exceptions import ClientError, ConnectionError
+from botocore.exceptions import ClientError, ConnectionError as BotoConnectionError
 from flask import current_app as app
 from ripley.lib.util import utc_now
 import smart_open
@@ -63,7 +63,7 @@ def get_keys_with_prefix(prefix, bucket=None):
         for page in page_iterator:
             if 'Contents' in page:
                 objects += [o.get('Key') for o in page['Contents']]
-    except (ClientError, ConnectionError, ValueError) as e:
+    except (ClientError, BotoConnectionError, ValueError) as e:
         app.logger.error(f'Error listing S3 keys with prefix: bucket={bucket}, prefix={prefix}, error={e}')
         return None
     return objects
@@ -79,7 +79,7 @@ def get_object_text(key):
             app.logger.error(f'Failed to get S3 object contents: bucket={bucket}, key={key})')
             return None
         return contents.read().decode('utf-8')
-    except (ClientError, ConnectionError, ValueError) as e:
+    except (ClientError, BotoConnectionError, ValueError) as e:
         app.logger.error(f'Error retrieving S3 object text: bucket={bucket}, key={key}, error={e}')
         return None
 

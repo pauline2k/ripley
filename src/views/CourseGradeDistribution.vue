@@ -90,12 +90,32 @@ export default {
       },
       xAxis: {
         categories: [],
+        labels: {
+          autoRotationLimit: 0,
+          overflow: 'allow',
+          style: {
+            color: '#999',
+            fontSize: 15
+          }
+        },
+        lineColor: '#CCC',
+        lineWidth: 2,
+        tickColor: '#CCC',
+        tickmarkPlacement: 'on',
         tickWidth: 1
       },
       yAxis: {
         endOnTick: false,
         gridLineWidth: 0,
+        labels: {
+          style: {
+            color: '#999',
+            fontSize: 16
+          }
+        },
+        lineColor: '#999',
         lineWidth: 1,
+        tickColor: '#CCC',
         tickWidth: 1,
         title: {
           enabled: false
