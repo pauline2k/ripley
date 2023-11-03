@@ -111,17 +111,12 @@ const routes:RouteRecordRaw[] = [
       {
         component: MailingListCreate,
         name: 'Create Mailing List',
-        path: '/mailing_list/create'
+        path: '/mailing_list/create/:canvasSiteId?'
       },
       {
         component: MailingListSelectCourse,
         name: 'Select Course Site',
         path: '/mailing_list/select_course'
-      },
-      {
-        component: MailingListCreate,
-        name: 'Create Mailing List',
-        path: '/mailing_list/create/:canvasSiteId'
       },
       {
         component: MailingListUpdate,

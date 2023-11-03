@@ -175,9 +175,9 @@ export default {
   },
   mounted() {
     this.init()
-    this.canvasSiteId = toInt(get(this.$route, 'params.canvasSiteId'))
-    this.isAdminToolMode = !!this.canvasSiteId
-    this.canvasSiteId = this.canvasSiteId || this.currentUser.canvasSiteId
+    const canvasSiteIdFromRoute = toInt(get(this.$route, 'params.canvasSiteId'))
+    this.isAdminToolMode = !!canvasSiteIdFromRoute
+    this.canvasSiteId = canvasSiteIdFromRoute || this.currentUser.canvasSiteId
     getMailingList(this.canvasSiteId).then(
       data => {
         this.setMailingList(data)
