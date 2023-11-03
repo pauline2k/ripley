@@ -227,7 +227,7 @@ def get_grades_with_demographics(term_id, section_ids, instructor_uid):
             WHERE sec.sis_term_id = %(term_id)s
             AND sec.sis_section_id = ANY(%(section_ids)s)
         )
-        SELECT enr.sis_term_id AS term_id, enr.sis_section_id, enr.grade, spi.gpa, spi.transfer,
+        SELECT enr.sis_term_id AS term_id, sec.sis_course_name, enr.sis_section_id, enr.grade, spi.gpa, spi.transfer,
             d.gender, d.minority, v.visa_type
         FROM sis_data.edo_enrollments enr
         JOIN sis_data.edo_sections sec on enr.sis_term_id = sec.sis_term_id and enr.sis_section_id = sec.sis_section_id

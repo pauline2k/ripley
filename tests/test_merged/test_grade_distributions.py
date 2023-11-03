@@ -34,11 +34,11 @@ class TestGradeDistributions:
 
     def test_demographic_distribution(self):
         gpa_demographics_distribution, grade_distribution = get_grade_distribution_with_demographics('2228', ['99999'], '30000')
-        print(gpa_demographics_distribution)
         assert gpa_demographics_distribution == [
             {
                 'averageGpa': Decimal('3.3705'),
                 'count': 6,
+                'courseName': 'ASTRON 218',
                 'genders': {
                     'female': {
                         'averageGpa': Decimal('3.6315'),
@@ -85,6 +85,7 @@ class TestGradeDistributions:
             {
                 'averageGpa': Decimal('3.528692307692307692307692308'),
                 'count': 91,
+                'courseName': 'ASTRON 218',
                 'genders': {
                     'female': {
                         'averageGpa': Decimal('3.541294117647058823529411765'),

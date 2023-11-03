@@ -26,7 +26,7 @@
 <script>
 import Context from '@/mixins/Context'
 import {Chart} from 'highcharts-vue'
-import {cloneDeep, each, get, size} from 'lodash'
+import {cloneDeep, each, get, replace, round, size} from 'lodash'
 
 export default {
   name: 'DemographicsChart',
@@ -85,10 +85,18 @@ export default {
       align: 'left',
       text: 'Overall Class Grade Average by Semester'
     }
-    this.chartSettings.yAxis.labels = {
-      format: '{value:.1f}',
-      step: 1
+    this.chartSettings.tooltip.formatter = function () {
+      const header = `<div id="grade-dist-demo-tooltip-term" class="font-weight-bold font-size-15">${this.x}</div>
+          <div id="grade-dist-demo-tooltip-course" class="font-size-13 text-grey-darken-1">${this.point.custom.courseName}</div>
+          <hr aria-hidden="true" class="mt-1 grade-dist-demo-tooltip-hr" />`
+      return (this.points || []).reduce((tooltipText, point, index) => {
+        return`${tooltipText}<div id="grade-dist-demo-tooltip-series-${index}" class="font-size-13 mt-1">
+          <span aria-hidden="true" style="color:${point.color}">\u25AC</span>
+          ${point.series.name} Grades: <span class="font-weight-bold">${point.y}</span>
+        </div>`
+      }, header)
     }
+    this.chartSettings.yAxis.labels.format = '{value:.1f}'
     this.chartSettings.yAxis.max = 4
     this.chartSettings.yAxis.min = 0
     this.chartSettings.yAxis.tickInterval = 1
@@ -127,14 +135,14 @@ export default {
       this.chartSettings.colors = [this.colors.default, this.colors.secondary]
       this.chartSettings.series[0].color = this.colors.default
       this.chartSettings.series[0].marker = this.getSeriesMarker(this.chartSettings.series[0])
-      this.chartSettings.series[0].name = 'Overall Class Grades'
+      this.chartSettings.series[0].name = 'Overall Class'
       each(this.gradeDistribution, item => {
         this.chartSettings.series[0].data.push({
           color: this.colors.default,
-          custom: {count: item.count},
-          y: item.averageGpa
+          custom: {courseName: item.courseName},
+          y: round(item.averageGpa, 1)
         })
-        this.chartSettings.xAxis.categories.push(item.termName)
+        this.chartSettings.xAxis.categories.push(this.shortTermName(item.termName))
       })
     },
     onSelectDemographic() {
@@ -154,7 +162,7 @@ export default {
             dataLabels: {
               enabled: false
             },
-            y: get(value, 'averageGpa', 0)
+            y: round(get(value, 'averageGpa', 0), 1)
           })
         })
         this.chartSettings.series[1] = secondarySeries
@@ -162,7 +170,20 @@ export default {
         this.chartSettings.series.pop()
       }
     },
+    shortTermName(termName) {
+      return replace(termName, /[\d]{4}/g, year => {
+        return `'${year.substring(2, 4)}`
+      })
+    },
     size
   }
 }
 </script>
+
+<style lang="scss">
+.grade-dist-demo-tooltip-hr {
+  border-color: $color-grey-disabled !important;
+  border-width: 0 0 2px 0;
+  color: $color-grey-disabled !important;
+}
+</style>

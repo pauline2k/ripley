@@ -67,6 +67,7 @@ def get_grade_distribution_with_demographics(term_id, section_ids, instructor_ui
             gpa_totals[row['term_id']] = deepcopy(EMPTY_DEMOGRAPHIC_DISTRIBUTION)
         gpa_distribution[row['term_id']]['count'] += 1
         gpa_distribution[row['term_id']]['totalGpa'] += row['gpa']
+        gpa_distribution[row['term_id']]['courseName'] = row['sis_course_name']
 
         def _count_boolean_value(column, distribution_key):
             if row[column]:
@@ -109,7 +110,7 @@ def get_grade_distribution_with_demographics(term_id, section_ids, instructor_ui
     sorted_gpa_distribution = []
     for term_id in sorted(gpa_distribution.keys()):
         for distribution_key, values in gpa_distribution[term_id].items():
-            if distribution_key in ['count', 'totalGpa']:
+            if distribution_key in ['count', 'courseName', 'totalGpa']:
                 continue
             for distribution_value, total_gpa in values.items():
                 student_count = gpa_totals[term_id][distribution_key][distribution_value]
