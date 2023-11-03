@@ -52,8 +52,11 @@ export default {
         align: 'right',
         enabled: true,
         floating: true,
-        labelFormat: '{name} Grades',
+        labelFormat: '{name}',
         layout: 'vertical',
+        squareSymbol: false,
+        symbolHeight: 3,
+        symbolRadius: 0,
         verticalAlign: 'top'
       },
       plotOptions: {
@@ -67,6 +70,7 @@ export default {
       },
       series: [
         {
+          legendSymbol: 'rectangle',
           data: []
         }
       ],

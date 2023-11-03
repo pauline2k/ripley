@@ -20,8 +20,68 @@
       </template>
     </select>
     <highcharts :options="chartSettings"></highcharts>
+    <v-row class="d-flex justify-center">
+      <v-btn
+        id="grade-distribution-demographics-show-btn"
+        aria-controls="page-help-notice"
+        :aria-expanded="showTable"
+        aria-haspopup="true"
+        class="font-weight-medium text-no-wrap my-2"
+        color="primary"
+        :prepend-icon="showTable ? mdiArrowUpCircle : mdiArrowDownCircle"
+        size="large"
+        variant="text"
+        @click="showTable = !showTable"
+      >
+        {{ showTable ? 'Hide' : 'Show' }} Data Table
+      </v-btn>
+    </v-row>
+    <v-row class="d-flex justify-center">
+      <v-expand-transition>
+        <v-card v-show="showTable" class="pb-2" width="700">
+          <table id="grade-distribution-demo-table" class="border-0 border-t">
+            <caption class="font-weight-bold font-size-16 py-3">Class Grade Average by Semester</caption>
+            <thead class="bg-grey-lighten-4">
+              <tr>
+                <th class="font-weight-bold pl-4 py-2" scope="col">Semester</th>
+                <th class="font-weight-bold py-2" scope="col">Overall Class Grades</th>
+                <th
+                  v-if="size(chartSettings.series) > 1"
+                  class="font-weight-bold py-2"
+                  scope="col"
+                >
+                  {{ chartSettings.series[1].name }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(term, index) in chartSettings.xAxis.categories"
+                :id="`grade-distribution-demo-table-row-${index}`"
+                :key="index"
+                class="grade-distro-demo-table-row"
+              >
+                <td :id="`grade-distro-demo-table-row-${index}-col-0`" class="pl-4 py-1">{{ gradeDistribution[index].termName }}</td>
+                <td :id="`grade-distro-demo-table-row-${index}-col-1`" class="py-1">{{ chartSettings.series[0]['data'][index].y }}</td>
+                <td
+                  v-if="size(chartSettings.series) > 1"
+                  :id="`grade-distro-demo-table-row-${index}-col-2`"
+                  class="py-1"
+                >
+                  {{ chartSettings.series[1]['data'][index].y }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </v-card>
+      </v-expand-transition>
+    </v-row>
   </div>
 </template>
+
+<script setup>
+import {mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'
@@ -76,13 +136,17 @@ export default {
         options: []
       },
     },
-    selectedDemographic: null
+    selectedDemographic: null,
+    showTable: false
   }),
   created() {
     this.chartSettings = cloneDeep(this.chartDefaults)
     this.chartSettings.chart.type = 'line'
     this.chartSettings.title = {
       align: 'left',
+      style: {
+        color: '#474747'
+      },
       text: 'Overall Class Grade Average by Semester'
     }
     this.chartSettings.tooltip.formatter = function () {
@@ -92,7 +156,7 @@ export default {
       return (this.points || []).reduce((tooltipText, point, index) => {
         return`${tooltipText}<div id="grade-dist-demo-tooltip-series-${index}" class="font-size-13 mt-1">
           <span aria-hidden="true" style="color:${point.color}">\u25AC</span>
-          ${point.series.name} Grades: <span class="font-weight-bold">${point.y}</span>
+          ${point.series.name}: <span class="font-weight-bold">${point.y}</span>
         </div>`
       }, header)
     }
@@ -135,7 +199,7 @@ export default {
       this.chartSettings.colors = [this.colors.default, this.colors.secondary]
       this.chartSettings.series[0].color = this.colors.default
       this.chartSettings.series[0].marker = this.getSeriesMarker(this.chartSettings.series[0])
-      this.chartSettings.series[0].name = 'Overall Class'
+      this.chartSettings.series[0].name = 'Overall Class Grades'
       each(this.gradeDistribution, item => {
         this.chartSettings.series[0].data.push({
           color: this.colors.default,
@@ -152,8 +216,9 @@ export default {
         const secondarySeries = {
           color: this.colors.secondary,
           data: [],
+          legendSymbol: 'rectangle',
           marker: this.getSeriesMarker(this.colors.secondary),
-          name: get(this.demographicOptions, group)['label']
+          name: `${get(this.demographicOptions, group)['label']} Grades`
         }
         each(this.gradeDistribution, item => {
           const value = get(item, `${group}`) || get(item, `${group}.${option}`)
@@ -180,10 +245,24 @@ export default {
 }
 </script>
 
+<style lang="scss" scoped>
+table {
+  caption {
+    color: $color-body-black !important;
+  }
+  tbody tr:hover {
+    background-color: $color-table-cell-bg-grey;
+  }
+}
+</style>
+
 <style lang="scss">
 .grade-dist-demo-tooltip-hr {
-  border-color: $color-grey-disabled !important;
+  border-color: $color-grey !important;
   border-width: 0 0 2px 0;
-  color: $color-grey-disabled !important;
+  color: $color-grey !important;
+}
+.highcharts-legend .highcharts-point {
+  y: 12;
 }
 </style>
