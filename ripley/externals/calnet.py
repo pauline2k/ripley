@@ -24,7 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from bonsai import LDAPClient
-from bonsai.errors import ConnectionError, LDAPError
+from bonsai.errors import ConnectionError as BonsaiConnectionError, LDAPError
 from bonsai.pool import ThreadedConnectionPool
 
 
@@ -106,7 +106,7 @@ class Client:
                         if attributes:
                             all_attributes.append(attributes)
                     return all_attributes
-                except (ConnectionError, LDAPError) as e:
+                except (BonsaiConnectionError, LDAPError) as e:
                     conn.close()
                     # If we've been through all idle connections in the pool and are still getting errors, something is more deeply wrong.
                     if attempt == idle_count:
