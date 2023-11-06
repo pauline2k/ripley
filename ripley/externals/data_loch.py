@@ -352,6 +352,20 @@ def get_undergraduate_term(term_id):
     return safe_execute_rds(sql)
 
 
+def find_course_by_name(search_string):
+    params = {
+        'search_string': f'{search_string.strip().upper()}%',
+    }
+    sql = """SELECT DISTINCT sis_course_name
+        FROM sis_data.edo_sections
+        WHERE sis_course_name LIKE %(search_string)s
+        ORDER BY sis_course_name
+        LIMIT 20"""
+    print(sql)
+    print(params)
+    return safe_execute_rds(sql, **params)
+
+
 def find_people_by_email(search_string):
     params = {
         'email': f'%{search_string.strip().lower()}%',

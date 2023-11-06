@@ -31,12 +31,10 @@ from ripley.externals import canvas, data_loch
 from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_course import sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
-from ripley.lib.canvas_site_utils import canvas_section_to_api_json, canvas_site_to_api_json, \
-    create_canvas_project_site, get_official_sections, get_teaching_terms, provision_course_site, \
-    update_canvas_sections
+from ripley.lib.canvas_site_utils import canvas_site_to_api_json, create_canvas_project_site, \
+    get_official_sections, get_teaching_terms, provision_course_site, update_canvas_sections
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
-from ripley.merged.grade_distributions import get_grade_distribution_with_demographics
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
 ROLES_CAN_EDIT_OFFICIAL_SECTIONS = ['Lead TA', 'TeacherEnrollment']
@@ -177,31 +175,6 @@ def edit_sections(canvas_site_id):
         )
     else:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}.')
-
-
-@app.route('/api/canvas_site/<canvas_site_id>/grade_distribution')
-@canvas_role_required('TeacherEnrollment')
-def get_grade_distribution(canvas_site_id):
-    course = canvas.get_course(canvas_site_id)
-    canvas_sections = canvas.get_course_sections(canvas_site_id)
-    sis_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
-    distribution = {
-        'canvasSite': canvas_site_to_api_json(course),
-        'officialSections': sis_sections,
-    }
-    if sis_sections:
-        term_id = sis_sections[0]['termId']
-        section_ids = [s['id'] for s in sis_sections]
-        instructor_uid = None if current_user.is_admin else current_user.uid
-        gpa_demographics_distribution, grade_distribution = get_grade_distribution_with_demographics(term_id, section_ids, instructor_uid)
-        if gpa_demographics_distribution is False:
-            raise ResourceNotFoundError('This course does not meet the requirements necessary to generate a Grade Distribution.')
-        distribution['demographics'] = gpa_demographics_distribution
-        distribution['enrollments'] = grade_distribution
-    else:
-        distribution['demographics'] = []
-        distribution['enrollments'] = {}
-    return tolerant_jsonify(distribution)
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/official_sections')

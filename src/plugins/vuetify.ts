@@ -4,6 +4,7 @@ import {createVuetify} from 'vuetify'
 import {VAlert} from 'vuetify/components/VAlert'
 import {VAppBar, VAppBarTitle} from 'vuetify/components/VAppBar'
 import {VApp} from 'vuetify/components/VApp'
+import {VAutocomplete} from 'vuetify/components/VAutocomplete'
 import {VBtn} from 'vuetify/components/VBtn'
 import {VBtnToggle} from 'vuetify/components/VBtnToggle'
 import {VCard, VCardActions, VCardSubtitle, VCardText, VCardTitle} from 'vuetify/components/VCard'
@@ -40,6 +41,7 @@ export default createVuetify({
     VApp,
     VAppBar,
     VAppBarTitle,
+    VAutocomplete,
     VBtn,
     VBtnToggle,
     VCard,

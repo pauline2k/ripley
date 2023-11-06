@@ -2,23 +2,22 @@
   <div class="pa-5">
     <h2 id="grade-distribution-enrollment-header">Grade Distribution by Prior Enrollment</h2>
     <div>Lorem ipsum</div>
-    <select
-      id="grade-distribution-enrollment-select"
+    <v-autocomplete
+      id="grade-distribution-enrollment-course-search"
       v-model="selectedCourse"
-      class="my-4"
-      :disabled="true"
-      @change="onSelectCourse"
-    >
-      <option :value="null">Select Prior Enrollment</option>
-      <option
-        v-for="(option, index) in courses"
-        :id="`grade-distribution-enrollment-option-${index}`"
-        :key="index"
-        :value="option"
-      >
-        {{ option }}
-      </option>
-    </select>
+      auto-select-first
+      dense
+      :error="!suppressValidation && !isEmpty(courseSearchErrors)"
+      :error-messages="!suppressValidation ? courseSearchErrors : []"
+      :hide-no-data="isSearching || !courseSearchText"
+      :items="courseSuggestions"
+      :loading="isSearching ? 'primary' : false"
+      :search="courseSearchText"
+      variant="outlined"
+      @change="suppressValidation = false"
+      @update:model-value="onSelectCourse"
+      @update:search="debouncedSearch"
+    />
     <highcharts :options="chartSettings"></highcharts>
   </div>
 </template>
@@ -26,7 +25,8 @@
 <script>
 import Context from '@/mixins/Context'
 import {Chart} from 'highcharts-vue'
-import {cloneDeep, each, get, keys} from 'lodash'
+import {cloneDeep, debounce, each, get, isEmpty, keys} from 'lodash'
+import {searchCourses} from '@/api/grade-distribution'
 
 export default {
   name: 'PriorEnrollmentChart',
@@ -35,11 +35,11 @@ export default {
   },
   mixins: [Context],
   props: {
-    changeSeriesColor: {
-      required: true,
-      type: Function
-    },
     chartDefaults: {
+      required: true,
+      type: Object
+    },
+    colors: {
       required: true,
       type: Object
     },
@@ -55,7 +55,13 @@ export default {
   data: () => ({
     chartSettings: {},
     courses: [],
-    selectedCourse: null
+    courseSearchText: undefined,
+    courseSuggestions: [],
+    debouncedSearch: undefined,
+    courseSearchErrors: [],
+    isSearching: false,
+    selectedCourse: null,
+    suppressValidation: true
   }),
   created() {
     this.chartSettings = cloneDeep(this.chartDefaults)
@@ -75,6 +81,7 @@ export default {
     }
     this.courses = keys(this.gradeDistribution)
     this.loadPrimarySeries()
+    this.debouncedSearch = debounce(this.search, 300)
   },
   methods: {
     getDataLabel(yVal, color) {
@@ -95,6 +102,7 @@ export default {
         }
       }
     },
+    isEmpty,
     loadPrimarySeries() {
       const color = this.chartSettings.series[0].color
       this.chartSettings.series[0].name = `${this.course.term.name} ${this.course.courseCode}`
@@ -114,10 +122,12 @@ export default {
     onSelectCourse() {
       if (this.selectedCourse) {
         const gradesWithoutPriorEnroll = {
+          color: this.colors.secondary,
           data: [],
           name: `Have not taken ${this.selectedCourse}`
         }
         const gradesWithPriorEnroll = {
+          color: this.colors.primary,
           data: [],
           name: `Have taken ${this.selectedCourse}`
         }
@@ -141,17 +151,27 @@ export default {
             y: get(item, 'priorEnrollPercentage', 0)
           })
         })
-        this.chartSettings.series[0].type = 'spline'
         this.chartSettings.series[1] = gradesWithoutPriorEnroll
         this.chartSettings.series[2] = gradesWithPriorEnroll
       } else if (this.chartSettings.series.length > 1) {
         this.chartSettings.series.splice(1, 2)
         this.chartSettings.series[0].type = 'column'
       }
-      this.changeSeriesColor(this.chartSettings)
       each(this.chartSettings.series[0].data, item => {
         item.dataLabels = this.getDataLabel(item.y, this.chartSettings.series[0].color)
       })
+    },
+    search(text) {
+      this.courseSearchText = text
+      if (this.courseSearchText) {
+        this.isSearching = true
+        searchCourses(this.courseSearchText).then(response => {
+          this.courseSuggestions = response.results
+          this.isSearching = false
+        })
+      } else {
+        this.courseSuggestions = []
+      }
     }
   }
 }
