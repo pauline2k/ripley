@@ -6,7 +6,7 @@
       id="grade-distribution-enrollment-course-search"
       v-model="selectedCourse"
       auto-select-first
-      dense
+      density="compact"
       :error="!suppressValidation && !isEmpty(courseSearchErrors)"
       :error-messages="!suppressValidation ? courseSearchErrors : []"
       :hide-no-data="isSearching || !courseSearchText"
@@ -25,8 +25,8 @@
 <script>
 import Context from '@/mixins/Context'
 import {Chart} from 'highcharts-vue'
-import {cloneDeep, debounce, each, get, isEmpty, keys} from 'lodash'
-import {searchCourses} from '@/api/grade-distribution'
+import {cloneDeep, debounce, each, get, isEmpty, keys, max} from 'lodash'
+import {getPriorEnrollmentGradeDistribution, searchCourses} from '@/api/grade-distribution'
 
 export default {
   name: 'PriorEnrollmentChart',
@@ -54,13 +54,14 @@ export default {
   },
   data: () => ({
     chartSettings: {},
-    courses: [],
     courseSearchText: undefined,
     courseSuggestions: [],
     debouncedSearch: undefined,
     courseSearchErrors: [],
     isSearching: false,
-    selectedCourse: null,
+    priorEnrollmentGradeDistribution: [],
+    selectedCourse: undefined,
+    selectedTerm: undefined,
     suppressValidation: true
   }),
   created() {
@@ -79,7 +80,6 @@ export default {
     this.chartSettings.yAxis.labels = {
       format: '{value}%'
     }
-    this.courses = keys(this.gradeDistribution)
     this.loadPrimarySeries()
     this.debouncedSearch = debounce(this.search, 300)
   },
@@ -119,47 +119,54 @@ export default {
         this.chartSettings.xAxis.categories.push(item.grade)
       })
     },
-    onSelectCourse() {
-      if (this.selectedCourse) {
-        const gradesWithoutPriorEnroll = {
-          color: this.colors.secondary,
-          data: [],
-          name: `Have not taken ${this.selectedCourse}`
-        }
-        const gradesWithPriorEnroll = {
-          color: this.colors.primary,
-          data: [],
-          name: `Have taken ${this.selectedCourse}`
-        }
-        each(this.gradeDistribution[this.selectedCourse], item => {
-          gradesWithoutPriorEnroll.data.push({
-            custom: {
-              count: get(item, 'noPriorEnrollCount', 0)
-            },
-            dataLabels: {
-              enabled: false
-            },
-            y: get(item, 'noPriorEnrollPercentage', 0)
-          })
-          gradesWithPriorEnroll.data.push({
-            custom: {
-              count: get(item, 'priorEnrollCount', 0)
-            },
-            dataLabels: {
-              enabled: false
-            },
-            y: get(item, 'priorEnrollPercentage', 0)
-          })
-        })
-        this.chartSettings.series[1] = gradesWithoutPriorEnroll
-        this.chartSettings.series[2] = gradesWithPriorEnroll
-      } else if (this.chartSettings.series.length > 1) {
-        this.chartSettings.series.splice(1, 2)
-        this.chartSettings.series[0].type = 'column'
+    loadPriorEnrollments() {
+      const gradesWithoutPriorEnroll = {
+        color: this.colors.secondary,
+        data: [],
+        name: `Have not taken ${this.selectedCourse}`
       }
+      const gradesWithPriorEnroll = {
+        color: this.colors.primary,
+        data: [],
+        name: `Have taken ${this.selectedCourse}`
+      }
+      each(this.priorEnrollmentGradeDistribution[this.selectedTerm], item => {
+        console.log(item)
+        gradesWithoutPriorEnroll.data.push({
+          custom: {
+            count: get(item, 'noPriorEnrollCount', 0)
+          },
+          dataLabels: {
+            enabled: false
+          },
+          y: get(item, 'noPriorEnrollPercentage', 0)
+        })
+        gradesWithPriorEnroll.data.push({
+          custom: {
+            count: get(item, 'priorEnrollCount', 0)
+          },
+          dataLabels: {
+            enabled: false
+          },
+          y: get(item, 'priorEnrollPercentage', 0)
+        })
+      })
+      this.chartSettings.series[1] = gradesWithoutPriorEnroll
+      this.chartSettings.series[2] = gradesWithPriorEnroll
       each(this.chartSettings.series[0].data, item => {
         item.dataLabels = this.getDataLabel(item.y, this.chartSettings.series[0].color)
       })
+    },
+    onSelectCourse() {
+      if (this.selectedCourse) {
+        getPriorEnrollmentGradeDistribution(this.currentUser.canvasSiteId, this.selectedCourse).then(response => {
+          this.priorEnrollmentGradeDistribution = response
+          this.selectedTerm = max(keys(response))
+          this.loadPriorEnrollments()
+        })
+      } else if (this.chartSettings.series.length > 1) {
+        this.chartSettings.series.splice(1, 2)
+      }
     },
     search(text) {
       this.courseSearchText = text

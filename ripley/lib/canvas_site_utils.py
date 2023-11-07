@@ -255,6 +255,21 @@ def hide_big_blue_button(canvas_site_id):
     app.logger.debug(f"The 'BigBlueButton' tab was {'hidden' if big_blue_button_found else 'NOT found'}.")
 
 
+def parse_canvas_sis_course_id(sis_course_id):
+    course_name, berkeley_term = None, None
+    if sis_course_id:
+        m = re.fullmatch(
+            r'^(CRS:|COURSE:)?(?P<dept_name>\w+)[-:](?P<course_number>\w+)[-:](?P<term_year>\d{4})-(?P<term_code>[A-D]).*$',
+            sis_course_id,
+        )
+        if not m:
+            m = re.fullmatch(r'^(CRS:|COURSE:)?(?P<term_year>\d{4})-(?P<term_code>[A-D])-(?P<dept_name>\w+)-(?P<course_number>\w+).*$', sis_course_id)
+        if m:
+            course_name = f"{m['dept_name']} {m['course_number']}"
+            berkeley_term = BerkeleyTerm(m['term_year'], m['term_code'])
+    return course_name, berkeley_term
+
+
 def parse_canvas_sis_section_id(sis_section_id):
     section_id, berkeley_term = None, None
     if sis_section_id:

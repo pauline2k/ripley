@@ -149,6 +149,111 @@ def _api_get_grade_distributions(client, canvas_site_id, expected_status_code=20
     return response.json
 
 
+class TestGetPriorEnrollmentGradeDistribution:
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        _api_get_prior_enrollment_grade_distribution(client, '8876542', expected_status_code=401)
+
+    def test_no_canvas_account(self, client, fake_auth):
+        """Denies user with no Canvas account."""
+        canvas_site_id = '8876542'
+        fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+        _api_get_prior_enrollment_grade_distribution(client, canvas_site_id, expected_status_code=401)
+
+    def test_not_enrolled(self, client, app, fake_auth):
+        """Denies user with no course enrollment."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}'], 'user': ['profile_20000']}, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=not_enrolled_uid)
+            _api_get_prior_enrollment_grade_distribution(client, canvas_site_id, expected_status_code=401)
+
+    def test_student(self, client, app, fake_auth):
+        """Denies student."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'course': [f'get_by_id_{canvas_site_id}'],
+                'user': ['profile_40000'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=student_uid)
+            _api_get_prior_enrollment_grade_distribution(client, canvas_site_id, expected_status_code=401)
+
+    def test_admin(self, client, app, fake_auth):
+        """Allows admin."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}'],
+                'user': ['profile_10000'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            response = _api_get_prior_enrollment_grade_distribution(client, canvas_site_id)
+            assert response['2225']
+            assert response['2228'] == [
+                {
+                    'grade': 'B',
+                    'noPriorEnrollCount': 0,
+                    'noPriorEnrollPercentage': 0.0,
+                    'priorEnrollCount': 1,
+                    'priorEnrollPercentage': 100.0,
+                    'termName': 'Fall 2022',
+                    'totalCount': 1,
+                    'totalPercentage': 7.1,
+                },
+            ]
+
+    def test_ta(self, client, app, fake_auth):
+        """Denies TA."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}'],
+                'user': ['profile_50000'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=ta_uid)
+            _api_get_prior_enrollment_grade_distribution(client, canvas_site_id, expected_status_code=401)
+
+    def test_teacher(self, client, app, fake_auth):
+        """Allows teacher."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [
+                    f'get_by_id_{canvas_site_id}',
+                    f'get_enrollments_{canvas_site_id}_4567890',
+                    f'get_sections_{canvas_site_id}',
+                ],
+                'user': ['profile_30000'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            response = _api_get_prior_enrollment_grade_distribution(client, canvas_site_id)
+            # Teacher sees only the prior enrolled sections that they taught.
+            assert '2225' not in response
+            assert response['2228'] == [
+                {
+                    'grade': 'B',
+                    'noPriorEnrollCount': 0,
+                    'noPriorEnrollPercentage': 0,
+                    'priorEnrollCount': 1,
+                    'priorEnrollPercentage': 100.0,
+                    'termName': 'Fall 2022',
+                    'totalCount': 1,
+                    'totalPercentage': 100.0,
+                },
+            ]
+
+
+def _api_get_prior_enrollment_grade_distribution(client, canvas_site_id, course_name='ANTHRO 197', expected_status_code=200):
+    response = client.get(f'/api/grade_distribution/{canvas_site_id}/enrollment?prior={course_name}')
+    assert response.status_code == expected_status_code
+    return response.json
+
+
 class TestSearchCourses:
 
     def test_anonymous(self, client):

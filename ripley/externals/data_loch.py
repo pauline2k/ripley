@@ -260,20 +260,35 @@ def get_basic_profile_and_grades_per_enrollments(term_id, section_ids):
     return safe_execute_rds(sql, **params)
 
 
-def get_grades_with_enrollments(term_id, section_ids):
+def get_grades_with_enrollments(term_id, course_name, instructor_uid, prior_course_name):
     params = {
-        'section_ids': section_ids,
+        'course_name': course_name,
+        'prior_course_name': prior_course_name,
         'term_id': term_id,
     }
-    sql = """SELECT DISTINCT enr1.grade, enr2.ldap_uid, sec.sis_course_name
+    if instructor_uid:
+        params['instructor_uid'] = instructor_uid
+    sql = f"""WITH past_sections AS (
+            SELECT *
+            FROM sis_data.edo_sections
+            WHERE sis_term_id <= %(term_id)s
+            {'AND instructor_uid = %(instructor_uid)s' if instructor_uid else ''}
+            AND sis_course_name = %(course_name)s
+            ORDER BY sis_term_id DESC
+        )
+        SELECT DISTINCT enr1.sis_term_id, enr1.grade, enr2.ldap_uid, enr2.sis_term_id
         FROM sis_data.edo_enrollments enr1
+        JOIN sis_data.edo_sections sec1
+            ON enr1.sis_term_id = sec1.sis_term_id AND enr1.sis_section_id = sec1.sis_section_id
+            AND enr1.grade IS NOT NULL AND enr1.grade != ''
         JOIN sis_data.edo_enrollments enr2
             ON enr1.ldap_uid = enr2.ldap_uid
-            AND enr1.sis_term_id = %(term_id)s AND enr1.sis_section_id = ANY(%(section_ids)s)
-            AND enr2.sis_term_id < %(term_id)s AND enr2.grade IS NOT NULL AND enr2.grade != ''
-        JOIN sis_data.edo_sections sec
-            ON enr2.sis_term_id = sec.sis_term_id AND enr2.sis_section_id = sec.sis_section_id
-        ORDER BY sis_course_name"""
+            AND enr2.sis_term_id < enr1.sis_term_id
+        JOIN sis_data.edo_sections sec2
+            ON enr2.sis_term_id = sec2.sis_term_id AND enr2.sis_section_id = sec2.sis_section_id
+            AND sec2.sis_course_name = %(prior_course_name)s
+            {'AND sec2.instructor_uid = %(instructor_uid)s' if instructor_uid else ''}
+        ORDER BY enr1.sis_term_id DESC, enr1.grade"""
     return safe_execute_rds(sql, **params)
 
 
@@ -361,8 +376,6 @@ def find_course_by_name(search_string):
         WHERE sis_course_name LIKE %(search_string)s
         ORDER BY sis_course_name
         LIMIT 20"""
-    print(sql)
-    print(params)
     return safe_execute_rds(sql, **params)
 
 
