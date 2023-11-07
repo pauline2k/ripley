@@ -17,8 +17,8 @@
       </div>
       <div v-if="get(gradeDistribution, 'enrollments')" class="container mb-4">
         <PriorEnrollmentChart
-          :change-series-color="changeSeriesColor"
           :chart-defaults="chartDefaults"
+          :colors="colors"
           :course="gradeDistribution.canvasSite"
           :grade-distribution="gradeDistribution.enrollments"
         />
@@ -30,10 +30,10 @@
 <script>
 import Context from '@/mixins/Context'
 import DemographicsChart from '@/components/bcourses/analytics/DemographicsChart'
-import Header1 from '@/components/utils/Header1.vue'
+import Header1 from '@/components/utils/Header1'
 import PriorEnrollmentChart from '@/components/bcourses/analytics/PriorEnrollmentChart'
 import {each, get} from 'lodash'
-import {getGradeDistribution} from '@/api/canvas-site'
+import {getGradeDistribution} from '@/api/grade-distribution'
 
 export default {
   name: 'CourseGradeDistribution',
