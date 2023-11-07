@@ -129,51 +129,47 @@ def get_grade_distribution_with_demographics(term_id, section_ids, instructor_ui
     return sorted_gpa_distribution, sorted_grade_distribution
 
 
-def get_grade_distribution_with_enrollments(term_id, section_ids):
-    grades_by_course_name = {}
-    for course_name, rows in groupby(get_grades_with_enrollments(term_id, section_ids), key=lambda x: x['sis_course_name']):
-        grades_by_course_name[course_name] = [r for r in rows if r['grade']]
-
-    courses_by_popularity = sorted(grades_by_course_name.items(), key=lambda r: len(r[1]), reverse=True)
-    courses_by_popularity = courses_by_popularity[0:app.config['GRADE_DISTRIBUTION_MAX_DISTINCT_COURSES']]
-
+def get_grade_distribution_with_prior_enrollments(term_id, course_name, instructor_uid, prior_course_name):
     distribution = {}
     totals = {
         'count': 0,
     }
-    for course_name, course_rows in courses_by_popularity:
-        distribution[course_name] = {'count': 0}
-        for r in course_rows:
-            if r['grade'] not in distribution[course_name]:
-                distribution[course_name][r['grade']] = 0
-            distribution[course_name][r['grade']] += 1
-            distribution[course_name]['count'] += 1
+    for term_id, rows in groupby(
+        get_grades_with_enrollments(term_id, course_name, instructor_uid, prior_course_name),
+        key=lambda x: x['sis_term_id'],
+    ):
+        if term_id not in distribution:
+            distribution[term_id] = {'count': 0}
+        for r in rows:
+            if r['grade'] not in distribution[term_id]:
+                distribution[term_id][r['grade']] = 0
+            distribution[term_id][r['grade']] += 1
+            distribution[term_id]['count'] += 1
             if r['grade'] not in totals:
                 totals[r['grade']] = 0
             totals[r['grade']] += 1
             totals['count'] += 1
     class_size = sum(totals[grade] for grade in totals.keys() if grade != 'count')
 
-    for course_name, course_distribution in distribution.items():
+    for term_id, course_distribution in distribution.items():
         total_prior_enroll_count = course_distribution['count']
         sorted_distribution = []
-        for grade in totals.keys():
-            if grade == 'count':
-                continue
-            grade_prior_enroll_count = course_distribution.get(grade, 0)
-            grade_no_prior_enroll_count = totals[grade] - grade_prior_enroll_count
-            total_no_prior_enroll_count = class_size - total_prior_enroll_count
-            sorted_distribution.append({
-                'grade': grade,
-                'noPriorEnrollCount': grade_no_prior_enroll_count,
-                'noPriorEnrollPercentage': to_percentage(grade_no_prior_enroll_count, total_no_prior_enroll_count),
-                'priorEnrollCount': grade_prior_enroll_count,
-                'priorEnrollPercentage': to_percentage(grade_prior_enroll_count, total_prior_enroll_count),
-                'totalCount': totals[grade],
-                'totalPercentage': to_percentage(totals[grade], class_size),
-            })
-        distribution[course_name] = sorted_distribution
-
+        for grade in sorted(course_distribution.keys(), key=_grade_ordering_index):
+            if grade in GRADE_ORDERING:
+                grade_prior_enroll_count = course_distribution.get(grade, 0)
+                grade_no_prior_enroll_count = totals[grade] - grade_prior_enroll_count
+                total_no_prior_enroll_count = class_size - total_prior_enroll_count
+                sorted_distribution.append({
+                    'grade': grade,
+                    'noPriorEnrollCount': grade_no_prior_enroll_count,
+                    'noPriorEnrollPercentage': to_percentage(grade_no_prior_enroll_count, total_no_prior_enroll_count),
+                    'priorEnrollCount': grade_prior_enroll_count,
+                    'priorEnrollPercentage': to_percentage(grade_prior_enroll_count, total_prior_enroll_count),
+                    'termName': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
+                    'totalCount': totals[grade],
+                    'totalPercentage': to_percentage(totals[grade], class_size),
+                })
+        distribution[term_id] = sorted_distribution
     return distribution
 
 

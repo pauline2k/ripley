@@ -29,9 +29,11 @@ from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import canvas_role_required
 from ripley.externals import canvas
 from ripley.externals.data_loch import find_course_by_name
-from ripley.lib.canvas_site_utils import canvas_section_to_api_json, canvas_site_to_api_json
+from ripley.lib.canvas_site_utils import canvas_section_to_api_json, canvas_site_to_api_json, \
+    parse_canvas_sis_course_id
 from ripley.lib.http import tolerant_jsonify
-from ripley.merged.grade_distributions import get_grade_distribution_with_demographics
+from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, \
+    get_grade_distribution_with_prior_enrollments
 
 
 @app.route('/api/grade_distribution/<canvas_site_id>')
@@ -57,6 +59,21 @@ def get_grade_distribution(canvas_site_id):
         distribution['demographics'] = []
         distribution['enrollments'] = {}
     return tolerant_jsonify(distribution)
+
+
+@app.route('/api/grade_distribution/<canvas_site_id>/enrollment')
+@canvas_role_required('TeacherEnrollment')
+def get_prior_enrollment_grade_distribution(canvas_site_id):
+    prior_course_name = request.args.get('prior')
+    course = canvas.get_course(canvas_site_id)
+    course_name, term = parse_canvas_sis_course_id(course.sis_course_id)
+    grade_distribution = get_grade_distribution_with_prior_enrollments(
+        term_id=term.to_sis_term_id(),
+        course_name=course_name,
+        instructor_uid=None if current_user.is_admin else current_user.uid,
+        prior_course_name=prior_course_name,
+    )
+    return tolerant_jsonify(grade_distribution)
 
 
 @app.route('/api/grade_distribution/search_courses')

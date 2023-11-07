@@ -23,10 +23,23 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from ripley.lib.canvas_site_utils import parse_canvas_sis_section_id, uid_from_canvas_login_id
+from ripley.lib.canvas_site_utils import parse_canvas_sis_course_id, parse_canvas_sis_section_id, uid_from_canvas_login_id
 
 
 class TestCanvasUtils:
+
+    def test_parse_canvas_sis_course_id(self):
+        assert parse_canvas_sis_course_id(None) == (None, None)
+        assert parse_canvas_sis_course_id('666') == (None, None)
+        assert parse_canvas_sis_course_id('PROJ:b1e88aab7c22cb7b') == (None, None)
+        assert parse_canvas_sis_course_id('CRS:XMBA-290T-2016-D')[0] == 'XMBA 290T'
+        assert parse_canvas_sis_course_id('CRS:XMBA-290T-2016-D')[1].to_sis_term_id() == '2168'
+        assert parse_canvas_sis_course_id('2012-D-JOURN-C103')[0] == 'JOURN C103'
+        assert parse_canvas_sis_course_id('2012-D-JOURN-C103')[1].to_sis_term_id() == '2128'
+        assert parse_canvas_sis_course_id('COURSE:HISTART:R1B:2013-C')[0] == 'HISTART R1B'
+        assert parse_canvas_sis_course_id('COURSE:HISTART:R1B:2013-C')[1].to_sis_term_id() == '2135'
+        assert parse_canvas_sis_course_id('PUB_POL-190-2014-B-A1C1D309')[0] == 'PUB_POL 190'
+        assert parse_canvas_sis_course_id('PUB_POL-190-2014-B-A1C1D309')[1].to_sis_term_id() == '2142'
 
     def test_parse_login_id_inactive(self):
         assert uid_from_canvas_login_id('666') == {'uid': '666', 'inactivePrefix': False}
