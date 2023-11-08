@@ -64,8 +64,7 @@ export default {
           dataLabels: {
             enabled: false
           },
-          groupPadding: .1,
-          lineWidth: 3
+          groupPadding: .1
         }
       },
       series: [
@@ -130,7 +129,7 @@ export default {
     gradeDistribution: undefined,
     colors: {
       default: '#8BBDDA',
-      primary: '#CCCCCC',
+      primary: '#C5E1F2',
       secondary: '#DAB38B'
     }
   }),
