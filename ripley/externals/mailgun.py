@@ -78,8 +78,11 @@ def _get_recipient_fields(members):
     to = []
     recipient_variables = {}
     for member in members:
-        to.append(member.email_address)
-        recipient_variables[member.email_address] = {}
+        if app.config['MAILING_LISTS_TEST_MODE'] and member.email_address.endswith('berkeley.edu'):
+            app.logger.warning(f'Mailing list test mode activated; skipping suspiciously real-looking address {member.email_address}')
+        else:
+            to.append(member.email_address)
+            recipient_variables[member.email_address] = {}
     return {
         'to': to,
         'recipient-variables': json.dumps(recipient_variables),
