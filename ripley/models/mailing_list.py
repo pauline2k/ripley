@@ -350,12 +350,11 @@ def _can_send(canvas_site_user):
 
 
 def _get_preferred_email(canvas_user_email, loch_user_email):
-    preferred_email_source = app.config['MAILING_LISTS_PREFERRED_EMAIL_SOURCE']
     preferred_email = None
-    if preferred_email_source == 'DATA_LOCH':
-        preferred_email = loch_user_email or canvas_user_email
-    elif preferred_email_source == 'CANVAS':
+    if app.config['MAILING_LISTS_TEST_MODE']:
         preferred_email = canvas_user_email or loch_user_email
+    else:
+        preferred_email = loch_user_email or canvas_user_email
     return preferred_email.lower() if preferred_email else None
 
 
