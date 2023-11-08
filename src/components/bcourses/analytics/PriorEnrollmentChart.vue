@@ -59,7 +59,7 @@ export default {
     debouncedSearch: undefined,
     courseSearchErrors: [],
     isSearching: false,
-    priorEnrollmentGradeDistribution: [],
+    priorEnrollmentGradeDistribution: {},
     selectedCourse: undefined,
     selectedTerm: undefined,
     suppressValidation: true
@@ -67,8 +67,14 @@ export default {
   created() {
     this.chartSettings = cloneDeep(this.chartDefaults)
     this.chartSettings.chart.type = 'column'
+    this.chartSettings.plotOptions.series.lineWidth = 0
     this.chartSettings.plotOptions.series.dataLabels = {
       enabled: true
+    }
+    this.chartSettings.plotOptions.series.states = {
+      hover: {
+        lineWidthPlus: 0
+      }
     }
     each(this.chartSettings.series[0].data, item => {
       item.dataLabels = this.getDataLabel(item.percentage, this.chartSettings.series[0].color)
@@ -120,18 +126,26 @@ export default {
       })
     },
     loadPriorEnrollments() {
+      const marker = {
+        enabled: true,
+        lineWidth: 0,
+        radius: 5,
+      }
       const gradesWithoutPriorEnroll = {
         color: this.colors.secondary,
         data: [],
-        name: `Have not taken ${this.selectedCourse}`
+        marker: {...marker, symbol: 'diamond'},
+        name: `Have not taken ${this.selectedCourse}`,
+        type: 'line'
       }
       const gradesWithPriorEnroll = {
-        color: this.colors.primary,
+        color: this.colors.default,
         data: [],
-        name: `Have taken ${this.selectedCourse}`
+        marker: {...marker, symbol: 'circle'},
+        name: `Have taken ${this.selectedCourse}`,
+        type: 'line'
       }
       each(this.priorEnrollmentGradeDistribution[this.selectedTerm], item => {
-        console.log(item)
         gradesWithoutPriorEnroll.data.push({
           custom: {
             count: get(item, 'noPriorEnrollCount', 0)
@@ -153,8 +167,10 @@ export default {
       })
       this.chartSettings.series[1] = gradesWithoutPriorEnroll
       this.chartSettings.series[2] = gradesWithPriorEnroll
+      this.chartSettings.series[0].color = this.colors.primary
       each(this.chartSettings.series[0].data, item => {
-        item.dataLabels = this.getDataLabel(item.y, this.chartSettings.series[0].color)
+        item.color = this.colors.primary
+        item.dataLabels = this.getDataLabel(item.y, this.colors.primary)
       })
     },
     onSelectCourse() {

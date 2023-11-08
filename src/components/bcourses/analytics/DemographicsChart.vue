@@ -142,6 +142,7 @@ export default {
   created() {
     this.chartSettings = cloneDeep(this.chartDefaults)
     this.chartSettings.chart.type = 'line'
+    this.chartSettings.plotOptions.series.lineWidth = 3
     this.chartSettings.title = {
       align: 'left',
       style: {
