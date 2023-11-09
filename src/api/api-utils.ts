@@ -4,13 +4,17 @@ import {get} from 'lodash'
 import {useContextStore} from '@/stores/context'
 
 const $_errorHandler = (error: any, redirectOnError?: boolean) => {
-  const status = get(error, 'response.status')
-  const message = $_getErrorMessage(error, status)
-  console.log(`\n${error}\n${message}\n`)
-  if (redirectOnError) {
-    useContextStore().setApplicationState(status, message)
+  if (axios.isCancel(error)) {
+    return Promise.reject('Operation Canceled')
+  } else {
+    const status = get(error, 'response.status')
+    const message = $_getErrorMessage(error, status)
+    console.log(`\n${error}\n${message}\n`)
+    if (redirectOnError) {
+      useContextStore().setApplicationState(status, message)
+    }
+    return Promise.reject(message)
   }
-  return Promise.reject(message)
 }
 
 const $_getErrorMessage = (error: any, status: number) => {
@@ -23,6 +27,14 @@ export default {
   apiBaseUrl: () => import.meta.env.VITE_APP_API_BASE_URL,
   get: (path: string, redirectOnError?: boolean) => {
     return axios.get(`${import.meta.env.VITE_APP_API_BASE_URL}${path}`).then(
+      data => data,
+      error => $_errorHandler(error, redirectOnError)
+    )
+  },
+  getWithAbort: (path: string, abortController: AbortController, redirectOnError?: boolean) => {
+    return axios.get(`${import.meta.env.VITE_APP_API_BASE_URL}${path}`, {
+      signal: abortController.signal
+    }).then(
       data => data,
       error => $_errorHandler(error, redirectOnError)
     )

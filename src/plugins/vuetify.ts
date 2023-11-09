@@ -22,6 +22,7 @@ import {VMain} from 'vuetify/components/VMain'
 import {VMenu} from 'vuetify/components/VMenu'
 import {VProgressCircular} from 'vuetify/components/VProgressCircular'
 import {VProgressLinear} from 'vuetify/components/VProgressLinear'
+import {VOverlay} from 'vuetify/components/VOverlay'
 import {VRadio} from 'vuetify/components/VRadio'
 import {VRadioGroup} from 'vuetify/components/VRadioGroup'
 import {VSnackbar} from 'vuetify/components/VSnackbar'
@@ -70,6 +71,7 @@ export default createVuetify({
     VListItemTitle,
     VMain,
     VMenu,
+    VOverlay,
     VProgressCircular,
     VProgressLinear,
     VRadio,

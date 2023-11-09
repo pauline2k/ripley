@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-5">
+  <div class="grade-distribution-demographics pa-5">
     <h2 id="grade-distribution-demographics-header">Grade Distribution by Demographics</h2>
     <div>Lorem ipsum</div>
     <select
@@ -142,21 +142,17 @@ export default {
   created() {
     this.chartSettings = cloneDeep(this.chartDefaults)
     this.chartSettings.chart.type = 'line'
+    this.chartSettings.legend.squareSymbol = false
+    this.chartSettings.legend.symbolHeight = 3
     this.chartSettings.plotOptions.series.lineWidth = 3
-    this.chartSettings.title = {
-      align: 'left',
-      style: {
-        color: '#474747'
-      },
-      text: 'Overall Class Grade Average by Semester'
-    }
+    this.chartSettings.title.text = 'Overall Class Grade Average by Semester'
     this.chartSettings.tooltip.formatter = function () {
       const header = `<div id="grade-dist-demo-tooltip-term" class="font-weight-bold font-size-15">${this.x}</div>
           <div id="grade-dist-demo-tooltip-course" class="font-size-13 text-grey-darken-1">${this.point.custom.courseName}</div>
-          <hr aria-hidden="true" class="mt-1 grade-dist-demo-tooltip-hr" />`
+          <hr aria-hidden="true" class="mt-1 grade-dist-tooltip-hr" />`
       return (this.points || []).reduce((tooltipText, point, index) => {
         return`${tooltipText}<div id="grade-dist-demo-tooltip-series-${index}" class="font-size-13 mt-1">
-          <span aria-hidden="true" style="color:${point.color}">\u25AC</span>
+          <span aria-hidden="true" class="font-size-16" style="color:${point.color}">\u25AC</span>
           ${point.series.name}: <span class="font-weight-bold">${point.y}</span>
         </div>`
       }, header)
@@ -199,6 +195,7 @@ export default {
     loadPrimarySeries() {
       this.chartSettings.colors = [this.colors.default, this.colors.secondary]
       this.chartSettings.series[0].color = this.colors.default
+      this.chartSettings.series[0].legendSymbol = 'rectangle'
       this.chartSettings.series[0].marker = this.getSeriesMarker(this.chartSettings.series[0])
       this.chartSettings.series[0].name = 'Overall Class Grades'
       each(this.gradeDistribution, item => {
@@ -257,13 +254,9 @@ table {
 }
 </style>
 
+<!-- eslint-disable-next-line vue-scoped-css/enforce-style-type  -->
 <style lang="scss">
-.grade-dist-demo-tooltip-hr {
-  border-color: $color-grey !important;
-  border-width: 0 0 2px 0;
-  color: $color-grey !important;
-}
-.highcharts-legend .highcharts-point {
+.grade-distribution-demographics .highcharts-legend .highcharts-point {
   y: 12;
 }
 </style>

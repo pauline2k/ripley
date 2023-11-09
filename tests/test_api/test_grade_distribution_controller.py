@@ -102,6 +102,7 @@ class TestGetGradeDistribution:
             assert response['enrollments'][0] == {
                 'classSize': 97,
                 'count': 16,
+                'courseName': 'ASTRON 218',
                 'grade': 'A+',
                 'percentage': 16.5,
             }
@@ -138,6 +139,7 @@ class TestGetGradeDistribution:
             assert response['enrollments'][0] == {
                 'classSize': 97,
                 'count': 16,
+                'courseName': 'ASTRON 218',
                 'grade': 'A+',
                 'percentage': 16.5,
             }
@@ -194,6 +196,7 @@ class TestGetPriorEnrollmentGradeDistribution:
             assert response['2225']
             assert response['2228'] == [
                 {
+                    'courseName': 'ANTHRO 197',
                     'grade': 'B',
                     'noPriorEnrollCount': 0,
                     'noPriorEnrollPercentage': 0.0,
@@ -236,6 +239,7 @@ class TestGetPriorEnrollmentGradeDistribution:
             assert '2225' not in response
             assert response['2228'] == [
                 {
+                    'courseName': 'ANTHRO 197',
                     'grade': 'B',
                     'noPriorEnrollCount': 0,
                     'noPriorEnrollPercentage': 0,

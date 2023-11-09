@@ -1,5 +1,5 @@
 <template>
-  <div class="pa-5">
+  <div class="grade-distribution pa-5">
     <div v-if="!isLoading">
       <Header1 text="Grade Distribution" />
       <v-alert
@@ -8,21 +8,21 @@
         :text="errorMessage"
         type="warning"
       />
-      <div v-if="get(gradeDistribution, 'demographics')" class="container mb-4">
+      <v-card v-if="get(gradeDistribution, 'demographics')" class="container mb-4">
         <DemographicsChart
           :chart-defaults="chartDefaults"
           :colors="colors"
           :grade-distribution="gradeDistribution.demographics"
         />
-      </div>
-      <div v-if="get(gradeDistribution, 'enrollments')" class="container mb-4">
+      </v-card>
+      <v-card v-if="get(gradeDistribution, 'enrollments')" class="container mb-4">
         <PriorEnrollmentChart
           :chart-defaults="chartDefaults"
           :colors="colors"
           :course="gradeDistribution.canvasSite"
           :grade-distribution="gradeDistribution.enrollments"
         />
-      </div>
+      </v-card>
     </div>
   </div>
 </template>
@@ -52,12 +52,15 @@ export default {
         align: 'right',
         enabled: true,
         floating: true,
+        itemStyle: {
+          fontSize: '1em'
+        },
         labelFormat: '{name}',
         layout: 'vertical',
-        squareSymbol: false,
-        symbolHeight: 3,
+        symbolPadding: 10,
         symbolRadius: 0,
-        verticalAlign: 'top'
+        verticalAlign: 'top',
+        y: 30
       },
       plotOptions: {
         series: {
@@ -69,24 +72,17 @@ export default {
       },
       series: [
         {
-          legendSymbol: 'rectangle',
           data: []
         }
       ],
-      title: false,
-      tooltip: {
-        formatter: function () {
-          const header = `<div class="chart-tooltip-key">${this.x} Grade</div>`
-          return (this.points || []).reduce((tooltipText, point, index) => {
-            return `${tooltipText}${index === 1 ? '<hr class="my-2"/>' : ''}
-              <div class="chart-tooltip-series">
-                <div class="chart-tooltip-name"><span style="color:${point.color}">\u25CF</span>${point.series.name}</div>
-                <div class="chart-tooltip-value">Ratio of Class: <span class="font-weight-bold">${point.y}%</span></div>
-                <div class="chart-tooltip-value">Student Count: <span class="font-weight-bold">${point.point.custom.count}</span></div>
-              </div>`
-          }, header)
-
+      title: {
+        align: 'left',
+        margin: 45,
+        style: {
+          color: '#474747'
         },
+      },
+      tooltip: {
         shared: true,
         stickOnContact: true,
         useHTML: true
@@ -177,32 +173,11 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
-/* eslint-disable vue-scoped-css/no-unused-selector */
-.chart-tooltip-key {
-  font-size: 15px;
-  font-weight: bold;
-  padding: 0 4px
+<!-- eslint-disable-next-line vue-scoped-css/enforce-style-type  -->
+<style lang="scss">
+.grade-distribution hr {
+  border-color: $color-nobel !important;
+  border-style: solid none none !important;
+  color: $color-nobel !important;
 }
-.chart-tooltip-name {
-  align-items: center;
-  color: $color-grey-disabled;
-  display: flex;
-  font-size: 13px;
-  font-weight: bold;
-  height: 10px;
-  margin: 4px 0;
-  text-transform: uppercase !important;
-  span {
-    font-size: 24px;
-    padding-right: 2px;
-  }
-}
-.chart-tooltip-series {
-  padding: 2px 4px 4px;
-}
-.chart-tooltip-value {
-  font-size: 14px;
-}
-/* eslint-enable vue-scoped-css/no-unused-selector */
 </style>
