@@ -137,42 +137,49 @@ class TestGradeDistributions:
             {
                 'classSize': 97,
                 'count': 16,
+                'courseName': 'ASTRON 218',
                 'grade': 'A+',
                 'percentage': 16.5,
             },
             {
                 'classSize': 97,
                 'count': 52,
+                'courseName': 'ASTRON 218',
                 'grade': 'A',
                 'percentage': 53.6,
             },
             {
                 'classSize': 97,
                 'count': 8,
+                'courseName': 'ASTRON 218',
                 'grade': 'A-',
                 'percentage': 8.2,
             },
             {
                 'classSize': 97,
                 'count': 5,
+                'courseName': 'ASTRON 218',
                 'grade': 'B+',
                 'percentage': 5.2,
             },
             {
                 'classSize': 97,
                 'count': 1,
+                'courseName': 'ASTRON 218',
                 'grade': 'C+',
                 'percentage': 1.0,
             },
             {
                 'classSize': 97,
                 'count': 1,
+                'courseName': 'ASTRON 218',
                 'grade': 'F',
                 'percentage': 1.0,
             },
             {
                 'classSize': 97,
                 'count': 14,
+                'courseName': 'ASTRON 218',
                 'grade': 'P',
                 'percentage': 14.4,
             },
@@ -188,6 +195,7 @@ class TestGradeDistributions:
         assert d == {
             '2225': [
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'A+',
                     'noPriorEnrollCount': 1,
                     'noPriorEnrollPercentage': 16.7,
@@ -198,6 +206,7 @@ class TestGradeDistributions:
                     'totalPercentage': 16.7,
                 },
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'A',
                     'noPriorEnrollCount': 1,
                     'noPriorEnrollPercentage': 16.7,
@@ -208,6 +217,7 @@ class TestGradeDistributions:
                     'totalPercentage': 16.7,
                 },
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'A-',
                     'noPriorEnrollCount': 1,
                     'noPriorEnrollPercentage': 16.7,
@@ -218,6 +228,7 @@ class TestGradeDistributions:
                     'totalPercentage': 16.7,
                 },
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'B+',
                     'noPriorEnrollCount': 2,
                     'noPriorEnrollPercentage': 33.3,
@@ -228,6 +239,7 @@ class TestGradeDistributions:
                     'totalPercentage': 16.7,
                 },
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'B',
                     'noPriorEnrollCount': 1,
                     'noPriorEnrollPercentage': 16.7,
@@ -238,6 +250,7 @@ class TestGradeDistributions:
                     'totalPercentage': 16.7,
                 },
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'F',
                     'noPriorEnrollCount': 0,
                     'noPriorEnrollPercentage': 0.0,
@@ -248,6 +261,7 @@ class TestGradeDistributions:
                     'totalPercentage': 5.6,
                 },
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'P',
                     'noPriorEnrollCount': 0,
                     'noPriorEnrollPercentage': 0.0,
@@ -260,6 +274,7 @@ class TestGradeDistributions:
             ],
             '2228': [
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'A+',
                     'noPriorEnrollCount': 2,
                     'noPriorEnrollPercentage': 16.7,
@@ -270,6 +285,7 @@ class TestGradeDistributions:
                     'totalPercentage': 16.7,
                 },
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'A',
                     'noPriorEnrollCount': 2,
                     'noPriorEnrollPercentage': 16.7,
@@ -280,6 +296,7 @@ class TestGradeDistributions:
                     'totalPercentage': 16.7,
                 },
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'A-',
                     'noPriorEnrollCount': 2,
                     'noPriorEnrollPercentage': 16.7,
@@ -290,6 +307,7 @@ class TestGradeDistributions:
                     'totalPercentage': 16.7,
                 },
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'B+',
                     'noPriorEnrollCount': 1,
                     'noPriorEnrollPercentage': 8.3,
@@ -300,6 +318,7 @@ class TestGradeDistributions:
                     'totalPercentage': 16.7,
                 },
                 {
+                    'courseName': 'ASTRON 218',
                     'grade': 'B',
                     'noPriorEnrollCount': 2,
                     'noPriorEnrollPercentage': 16.7,

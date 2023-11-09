@@ -8,6 +8,6 @@ export function getPriorEnrollmentGradeDistribution(canvasSiteId: number, course
   return utils.get(`/api/grade_distribution/${canvasSiteId}/enrollment?prior=${courseName}`)
 }
 
-export function searchCourses(searchText: string) {
-  return utils.get(`/api/grade_distribution/search_courses?searchText=${searchText}`)
+export function searchCourses(searchText: string, abortController: AbortController) {
+  return utils.getWithAbort(`/api/grade_distribution/search_courses?searchText=${searchText}`, abortController)
 }

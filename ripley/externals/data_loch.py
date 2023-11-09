@@ -276,7 +276,7 @@ def get_grades_with_enrollments(term_id, course_name, instructor_uid, prior_cour
             AND sis_course_name = %(course_name)s
             ORDER BY sis_term_id DESC
         )
-        SELECT DISTINCT enr1.sis_term_id, enr1.grade, enr2.ldap_uid, enr2.sis_term_id
+        SELECT DISTINCT enr1.sis_term_id, enr1.grade, sec1.sis_course_name, enr2.ldap_uid, enr2.sis_term_id
         FROM sis_data.edo_enrollments enr1
         JOIN sis_data.edo_sections sec1
             ON enr1.sis_term_id = sec1.sis_term_id AND enr1.sis_section_id = sec1.sis_section_id

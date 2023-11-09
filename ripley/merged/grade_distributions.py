@@ -93,7 +93,10 @@ def get_grade_distribution_with_demographics(term_id, section_ids, instructor_ui
         _count_string_value(_simplify_gender(row['gender']), 'genders')
 
         if row['grade'] not in grade_distribution:
-            grade_distribution[row['grade']] = {'count': 0}
+            grade_distribution[row['grade']] = {
+                'count': 0,
+                'courseName': row['sis_course_name'],
+            }
         grade_distribution[row['grade']]['count'] += 1
         grade_distribution['count'] += 1
 
@@ -160,6 +163,7 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, instruct
                 grade_no_prior_enroll_count = totals[grade] - grade_prior_enroll_count
                 total_no_prior_enroll_count = class_size - total_prior_enroll_count
                 sorted_distribution.append({
+                    'courseName': prior_course_name,
                     'grade': grade,
                     'noPriorEnrollCount': grade_no_prior_enroll_count,
                     'noPriorEnrollPercentage': to_percentage(grade_no_prior_enroll_count, total_no_prior_enroll_count),
