@@ -79,6 +79,14 @@ class MailingListMembers(Base):
         return query.all()
 
     @classmethod
+    def get_mailing_list_member_by_address(cls, mailing_list_id, address, include_deleted=False):
+        if include_deleted:
+            query = cls.query.filter_by(mailing_list_id=mailing_list_id, email_address=address)
+        else:
+            query = cls.query.filter_by(deleted_at=None, mailing_list_id=mailing_list_id, email_address=address)
+        return query.first()
+
+    @classmethod
     def update(cls, can_send, deleted_at, first_name, last_name, mailing_list_member_id):
         member = cls.query.filter_by(id=mailing_list_member_id).first()
         if member:

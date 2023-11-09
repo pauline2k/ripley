@@ -23,13 +23,20 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from email.utils import formataddr, parseaddr
 import hashlib
 import hmac
+import re
 from time import time
 
-from flask import cache, current_app as app, request
-from ripley.api.errors import UnauthorizedRequestError
+from flask import current_app as app, request
+from ripley import cache
+from ripley.api.errors import BadRequestError, UnauthorizedRequestError
+from ripley.externals import mailgun
 from ripley.lib.http import tolerant_jsonify
+from ripley.lib.mailing_list_utils import send_message_to_list
+from ripley.models.mailing_list import MailingList
+from ripley.models.mailing_list_members import MailingListMembers
 
 
 @app.route('/api/mailing_lists/message', methods=['POST'])
@@ -49,8 +56,8 @@ def relay():
             'html': params.get('body-html'),
             'plain': params.get('body-plain'),
         },
-        'sender': params.get('sender'),
-        'recipient': params.get('recipient'),
+        'sender': parseaddr(params.get('sender')),
+        'recipient': parseaddr(params.get('recipient')),
         # TODO handle attachments
     }
     success = _relay_to_list(message_attrs)
@@ -58,7 +65,38 @@ def relay():
 
 
 def _relay_to_list(message_attrs):
-    # TODO
+    if not message_attrs['sender'][1] or not message_attrs['recipient'][1]:
+        raise BadRequestError('Unparseable email address')
+    list_name = message_attrs['recipient'][1].split('@')[0]
+    # Remove any suffix used to route to a specific Ripley environment.
+    list_name = re.sub(r'-rip-[a-z\-]{2,8}$', '', 'list_name')
+
+    mailing_list = MailingList.find_by_name(list_name)
+    if not mailing_list:
+        app.logger.warning(f'Bouncing message to nonexistent mailing list:\n{message_attrs}')
+        _bounce(message_attrs, f"""The following message could not be delivered because the mailing list {message_attrs['recipient'][1]}
+            was not found in our system. Please check the spelling, including underscores and dashes, against the list name that appears in
+            your bCourses site.""")
+        return False
+
+    member = MailingListMembers.get_mailing_list_member_by_address(message_attrs['sender'][1])
+    if not member:
+        app.logger.warning(f'Bouncing message from non-member to mailing list:\n{message_attrs}')
+        _bounce(message_attrs, f"""The following message could not be delivered because the mailing list {message_attrs['recipient'][1]}
+            did not recognize the email address {message_attrs['sender'][1]}. This could be because you are attempting to send from
+            an email address other than your campus email.""")
+        return False
+    if not member.can_send:
+        app.logger.warning(f'Bouncing message from read-only member to mailing list:\n{message_attrs}')
+        _bounce(message_attrs, f"""The following message could not be delivered because the email address {message_attrs['sender'][1]}
+            is not authorized to send messages to the list {message_attrs['sender'][1]}.""")
+        return False
+
+    if not send_message_to_list(mailing_list, member, message_attrs):
+        app.logger.warning(f'Bouncing undelivered message to mailing list:\n{message_attrs}')
+        _bounce(message_attrs, 'The following message could not be delivered at this time. Please try resending later.')
+        return False
+
     return True
 
 
@@ -75,6 +113,18 @@ def _authenticate_message(params):
         return True
 
 
+def _bounce(message_attrs, reason):
+    message_text = (
+        f"{' '.join(reason.split())}\n\n-------------\nFrom: {message_attrs['from']}\nTo: #{message_attrs['to']}\n"
+        f"Subject: #{message_attrs['subject']}\n\n#{message_attrs['body']['plain']}")
+    payload = {
+        'from': 'bCourses Mailing Lists <no-reply@bcourses-mail.berkeley.edu>',
+        'subject': 'Undeliverable mail',
+        'text': message_text,
+    }
+    return mailgun.send_payload_to_address(payload, formataddr(message_attrs['sender']))
+
+
 # Verify Mailgun signature per https://documentation.mailgun.com/en/latest/user_manual.html#webhooks
 def _verify_signature(timestamp, token, signature):
     hmac_digest = hmac.new(key=app.config['MAILGUN_API_KEY'].encode(),
@@ -85,4 +135,4 @@ def _verify_signature(timestamp, token, signature):
 
 # Timestamp must be reasonably close to the current time.
 def _verify_timestamp(timestamp):
-    return (int(time()) - int(timestamp)).abs <= app.config['MAILING_LISTS_TIMESTAMP_TOLERANCE']
+    return abs(int(time()) - int(timestamp)) <= app.config['MAILING_LISTS_TIMESTAMP_TOLERANCE']

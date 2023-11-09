@@ -33,6 +33,11 @@ from ripley.lib.util import utc_now
 from ripley.models.mailing_list_members import MailingListMembers
 
 
+def send_message_to_list(mailing_list, sender, message_attrs):
+    # TODO
+    return True
+
+
 def send_welcome_emails(mailing_list):
     payload = {
         'from': 'bCourses Mailing Lists <no-reply@bcourses-mail.berkeley.edu>',

@@ -49,6 +49,7 @@ def register_routes(app):
     import ripley.api.job_controller
     import ripley.api.lti_controller
     import ripley.api.mailing_lists_controller
+    import ripley.api.mailing_lists_message_controller
     import ripley.api.status_controller
     import ripley.api.user_controller
 
