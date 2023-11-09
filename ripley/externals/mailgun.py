@@ -55,6 +55,18 @@ def send_message(mailing_list, member, subject, sender, body_html, body_plain, m
     return True
 
 
+def send_payload_to_address(payload, address):
+    response = authorized_request(
+        f"{app.config['MAILGUN_BASE_URL']}/{app.config['MAILGUN_DOMAIN']}/messages",
+        method='post',
+        data={**payload, **{'to': address}},
+    )
+    if not response or not response.content or 'Queued' not in str(response.content):
+        return False
+    else:
+        return True
+
+
 def send_payload_to_recipients(payload, recipients):
     recipient_fields = _get_recipient_fields(recipients)
     response = authorized_request(

@@ -81,6 +81,10 @@ class MailingList(Base):
         return cls.query.filter_by(id=mailing_list_id).first()
 
     @classmethod
+    def find_by_name(cls, mailing_list_name):
+        return cls.query.filter_by(list_name=mailing_list_name).first()
+
+    @classmethod
     def get_suggested_name(cls, canvas_site):
         def scrub(s):
             return '-'.join([word for word in re.split('[^a-z0-9]+', unidecode(s.strip().lower())) if word])[0:45]
