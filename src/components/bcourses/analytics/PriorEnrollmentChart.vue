@@ -3,50 +3,68 @@
     <div class="pl-3">
       <h2 id="grade-distribution-enrollment-header">Grade Distribution by Prior Enrollment</h2>
       <div>Lorem ipsum</div>
-      <div class="grade-dist-enroll-course-search d-flex align-center my-4 pt-2">
-        <v-autocomplete
-          id="grade-distribution-enrollment-course-search"
-          v-model="selectedCourse"
-          auto-select-first
-          bg-color="white"
-          class="text-upper mr-2"
-          density="compact"
-          :disabled="isLoadingPriorEnrollments"
-          :error="!suppressValidation && !isEmpty(courseSearchErrors)"
-          :error-messages="!suppressValidation ? courseSearchErrors : []"
-          hide-details
-          hide-no-data
-          :items="courseSuggestions"
-          label="Search Classes..."
-          :loading="isSearching ? 'primary' : false"
-          :menu-icon="null"
-          :search="courseSearchText"
-          variant="outlined"
-          @blur="selectedCourse = toUpper(courseSearchText)"
-          @change="suppressValidation = false"
-          @update:search="text => courseSearchText = text"
-        >
-          <template #item="{props, item}">
-            <v-list-item
-              v-bind="props"
-              class="py-0 my-0"
-              density="compact"
-              height="unset"
-              min-height="30"
-              :title="item.raw"
-              :value="item.raw"
-            ></v-list-item>
-          </template>
-        </v-autocomplete>
-        <v-btn
-          id="grade-distribution-enroll-add-class-btn"
-          class="font-size-13"
-          color="primary"
-          :disabled="!selectedCourse || isLoadingPriorEnrollments"
-          @click="onClickAddCourse"
-        >
-          Add Class
-        </v-btn>
+      <div class="d-flex justify-space-between my-4 pt-2">
+        <div class="grade-dist-enroll-course-search d-flex align-center">
+          <v-autocomplete
+            id="grade-distribution-enrollment-course-search"
+            v-model="selectedCourse"
+            auto-select-first
+            bg-color="white"
+            class="text-upper mr-2"
+            density="compact"
+            :disabled="isLoadingPriorEnrollments"
+            :error="!suppressValidation && !isEmpty(courseSearchErrors)"
+            :error-messages="!suppressValidation ? courseSearchErrors : []"
+            hide-details
+            hide-no-data
+            :items="courseSuggestions"
+            label="Search Classes..."
+            :loading="isSearching ? 'primary' : false"
+            :menu-icon="null"
+            :search="courseSearchText"
+            variant="outlined"
+            @blur="selectedCourse = toUpper(courseSearchText)"
+            @change="suppressValidation = false"
+            @update:search="text => courseSearchText = text"
+          >
+            <template #item="{props, item}">
+              <v-list-item
+                v-bind="props"
+                class="py-0 my-0"
+                density="compact"
+                height="unset"
+                min-height="30"
+                :title="item.raw"
+                :value="item.raw"
+              ></v-list-item>
+            </template>
+          </v-autocomplete>
+          <v-btn
+            id="grade-distribution-enroll-add-class-btn"
+            class="font-size-13"
+            color="primary"
+            :disabled="!selectedCourse || isLoadingPriorEnrollments"
+            @click="onClickAddCourse"
+          >
+            Add Class
+          </v-btn>
+        </div>
+        <div class="position-relative">
+          <select
+            v-if="size(terms)"
+            :value="get(selectedTerm, 'id')"
+            class="position-absolute grade-dist-enroll-term-select"
+            @change="onSelectTerm"
+          >
+            <option
+              v-for="(term, index) in terms"
+              :key="index"
+              :value="term.id"
+            >
+              {{ term.name }}
+            </option>
+          </select>
+        </div>
       </div>
       <hr aria-hidden="true" class="mb-3" />
     </div>
@@ -54,6 +72,7 @@
       v-model="isLoadingPriorEnrollments"
       class="align-center justify-center"
       contained
+      persistent
     >
       <PageLoadProgress v-if="isLoadingPriorEnrollments" color="primary" />
     </v-overlay>
@@ -64,7 +83,7 @@
 <script>
 import Context from '@/mixins/Context'
 import {Chart} from 'highcharts-vue'
-import {cloneDeep, debounce, each, get, isEmpty, keys, max, size, toUpper} from 'lodash'
+import {cloneDeep, debounce, each, find, get, includes, isEmpty, size, toUpper} from 'lodash'
 import {getPriorEnrollmentGradeDistribution, searchCourses} from '@/api/grade-distribution'
 import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
 
@@ -91,6 +110,10 @@ export default {
     gradeDistribution: {
       required: true,
       type: Object
+    },
+    terms: {
+      required: true,
+      type: Array
     }
   },
   data: () => ({
@@ -120,19 +143,15 @@ export default {
     this.chartSettings = cloneDeep(this.chartDefaults)
     this.chartSettings.chart.type = 'column'
     this.chartSettings.legend.labelFormat = '{name} grades'
+    this.chartSettings.legend.symbolHeight = 12
     this.chartSettings.plotOptions.series.lineWidth = 0
-    this.chartSettings.plotOptions.series.dataLabels = {
-      enabled: true
-    }
     this.chartSettings.plotOptions.series.states = {
       hover: {
         lineWidthPlus: 0
       }
     }
-    each(this.chartSettings.series[0].data, item => {
-      item.dataLabels = this.getDataLabel(item.percentage, this.chartSettings.series[0].color)
-    })
-    this.chartSettings.title.text = `Overall Class Grade Distribution&mdash;${this.course.term.name}`
+    this.selectedTerm = get(this.terms, 0)
+    this.chartSettings.title.widthAdjust = -200
     this.chartSettings.tooltip.distance = 24
     this.chartSettings.tooltip.formatter = function () {
       const header = `<div id="grade-dist-enroll-tooltip-grade" class="font-weight-bold font-size-15">${this.x} Grade</div>
@@ -154,10 +173,12 @@ export default {
       }, header)
     }
     this.chartSettings.yAxis.labels.format = '{value}%'
-    this.loadPrimarySeries()
     this.debouncedSearch = debounce(this.search, 300)
+    this.loadPrimarySeries(this.colors.primary)
+    this.setChartTitle()
   },
   methods: {
+    get,
     getDataLabel(yVal, color) {
       if (this.chartSettings.series.length === 1) {
         const displayAboveColumn = yVal < 2
@@ -177,22 +198,29 @@ export default {
       }
     },
     isEmpty,
-    loadPrimarySeries() {
-      const color = this.chartSettings.series[0].color
-      const courseName = this.gradeDistribution[0].courseName
-      this.chartSettings.series[0].name = `${this.course.term.name} ${courseName}`
-      each(this.gradeDistribution, item => {
+    loadPrimarySeries(color, showLabels=true) {
+      const courseName = this.gradeDistribution[this.selectedTerm.id][0].courseName
+      this.chartSettings.series[0] = {
+        color: color,
+        name: `${this.selectedTerm.name} ${courseName}`,
+        data: []
+      }
+      this.chartSettings.xAxis.categories = []
+      each(this.gradeDistribution[this.selectedTerm.id], item => {
         this.chartSettings.series[0].data.push({
           color: color,
           custom: {
             courseName: item.courseName,
             symbol: '\u25A0'
           },
-          dataLabels: this.getDataLabel(item.y, color),
+          dataLabels: showLabels ? this.getDataLabel(item.y, color) : {enabled: false},
           y: item.percentage
         })
         this.chartSettings.xAxis.categories.push(item.grade)
       })
+      this.chartSettings.plotOptions.series.dataLabels = {
+        enabled: showLabels
+      }
     },
     loadPriorEnrollments() {
       const marker = {
@@ -200,7 +228,7 @@ export default {
         lineWidth: 0
       }
       const gradesWithoutPriorEnroll = {
-        color: this.colors.default,
+        color: this.colors.primary,
         data: [],
         marker: {...marker, radius: 6, symbol: 'diamond'},
         name: `Have not taken ${this.selectedCourse}`,
@@ -213,36 +241,28 @@ export default {
         name: `Have taken ${this.selectedCourse}`,
         type: 'line'
       }
-      each(this.priorEnrollmentGradeDistribution[this.selectedTerm], item => {
-        gradesWithoutPriorEnroll.data.push({
-          custom: {
-            courseName: item.courseName,
-            symbol: '\u25C6'
-          },
-          dataLabels: {
-            enabled: false
-          },
-          y: get(item, 'noPriorEnrollPercentage', 0)
-        })
-        gradesWithPriorEnroll.data.push({
-          custom: {
-            courseName: item.courseName,
-            symbol: '\u25CF'
-          },
-          dataLabels: {
-            enabled: false
-          },
-          y: get(item, 'priorEnrollPercentage', 0)
-        })
+      each(this.priorEnrollmentGradeDistribution[this.selectedTerm.id], item => {
+        if (includes(this.chartSettings.xAxis.categories, item.grade )) {
+          gradesWithoutPriorEnroll.data.push({
+            custom: {
+              courseName: item.courseName,
+              symbol: '\u25C6'
+            },
+            dataLabels: {enabled: false},
+            y: get(item, 'noPriorEnrollPercentage', 0)
+          })
+          gradesWithPriorEnroll.data.push({
+            custom: {
+              courseName: item.courseName,
+              symbol: '\u25CF'
+            },
+            dataLabels: {enabled: false},
+            y: get(item, 'priorEnrollPercentage', 0)
+          })
+        }
       })
       this.chartSettings.series[1] = gradesWithoutPriorEnroll
       this.chartSettings.series[2] = gradesWithPriorEnroll
-      this.chartSettings.series[0].color = this.colors.primary
-      each(this.chartSettings.series[0].data, item => {
-        item.color = this.colors.primary
-        item.dataLabels = this.getDataLabel(item.y, this.colors.primary)
-      })
-      this.chartSettings.title.text =`Relation of ${this.gradeDistribution[0].courseName} Students Who Have and Have Not Taken ${this.selectedCourse}&mdash;${this.course.term.name}`
     },
     onClickAddCourse() {
       if (this.selectedCourse) {
@@ -250,11 +270,25 @@ export default {
         getPriorEnrollmentGradeDistribution(this.currentUser.canvasSiteId, this.selectedCourse).then(response => {
           this.courseSearchText = null
           this.priorEnrollmentGradeDistribution = response
-          this.selectedTerm = max(keys(response))
-          this.loadPriorEnrollments()
+          this.refresh()
           this.isLoadingPriorEnrollments = false
         })
       }
+    },
+    onSelectTerm(e) {
+      const termId = e.target.value
+      this.selectedTerm = find(this.terms, {'id': termId})
+      this.refresh()
+    },
+    refresh() {
+      if (get(this.priorEnrollmentGradeDistribution, this.selectedTerm.id)) {
+        this.loadPrimarySeries(this.colors.tertiary, false)
+        this.loadPriorEnrollments()
+      } else {
+        this.chartSettings.series = []
+        this.loadPrimarySeries(this.colors.primary)
+      }
+      this.setChartTitle()
     },
     search() {
       this.isSearching = true
@@ -268,6 +302,14 @@ export default {
       }).catch(() => {
         this.$nextTick(() => this.isSearching = false)
       })
+    },
+    setChartTitle() {
+      if (size(this.chartSettings.series) === 3) {
+        const courseName = this.gradeDistribution[this.selectedTerm.id][0].courseName
+        this.chartSettings.title.text = `Relation of ${courseName} Students Who Have and Have Not Taken ${this.selectedCourse}&mdash;${this.selectedTerm.name}`
+      } else {
+        this.chartSettings.title.text = `Overall Class Grade Distribution&mdash;${this.selectedTerm.name}`
+      }
     },
     size,
     toUpper
@@ -293,5 +335,10 @@ export default {
 <style lang="scss" scoped>
 .grade-dist-enroll-course-search {
   width: 400px;
+}
+.grade-dist-enroll-term-select {
+  right: 0;
+  top: 75px;
+  z-index: 100;
 }
 </style>

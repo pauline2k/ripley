@@ -8,19 +8,20 @@
         :text="errorMessage"
         type="warning"
       />
-      <v-card v-if="get(gradeDistribution, 'demographics')" class="container mb-4">
+      <v-card v-if="get(gradeDistribution, 'demographics')" class="container mb-4" elevation="0">
         <DemographicsChart
           :chart-defaults="chartDefaults"
           :colors="colors"
           :grade-distribution="gradeDistribution.demographics"
         />
       </v-card>
-      <v-card v-if="get(gradeDistribution, 'enrollments')" class="container mb-4">
+      <v-card v-if="get(gradeDistribution, 'enrollments')" class="container mb-4" elevation="0">
         <PriorEnrollmentChart
           :chart-defaults="chartDefaults"
           :colors="colors"
           :course="gradeDistribution.canvasSite"
           :grade-distribution="gradeDistribution.enrollments"
+          :terms="orderBy(gradeDistribution.terms, ['id'], ['desc'])"
         />
       </v-card>
     </div>
@@ -32,7 +33,7 @@ import Context from '@/mixins/Context'
 import DemographicsChart from '@/components/bcourses/analytics/DemographicsChart'
 import Header1 from '@/components/utils/Header1'
 import PriorEnrollmentChart from '@/components/bcourses/analytics/PriorEnrollmentChart'
-import {each, get} from 'lodash'
+import {get, orderBy} from 'lodash'
 import {getGradeDistribution} from '@/api/grade-distribution'
 
 export default {
@@ -121,17 +122,17 @@ export default {
         }
       }
     },
-    errorMessage: undefined,
-    gradeDistribution: undefined,
     colors: {
-      default: '#8BBDDA',
-      primary: '#C5E1F2',
-      secondary: '#DAB38B'
-    }
+      primary: '#8BBDDA',
+      secondary: '#DAB38B',
+      tertiary: '#C5E1F2'
+    },
+    errorMessage: undefined,
+    gradeDistribution: undefined
   }),
   created() {
     this.loadingStart()
-    this.chartDefaults.series[0].color = this.colors.default
+    this.chartDefaults.series[0].color = this.colors.primary
     getGradeDistribution(this.currentUser.canvasSiteId).then(
       data => {
         this.gradeDistribution = data
@@ -141,31 +142,8 @@ export default {
     ).finally(() => this.$ready())
   },
   methods: {
-    changeSeriesColor(chartSettings) {
-      const defaultSeries = chartSettings.series[0]
-      const primarySeries = get(chartSettings.series, 1)
-      const secondarySeries = get(chartSettings.series, 2)
-      const defaultSeriesColor = (primarySeries && !secondarySeries) ? this.colors.primary : this.colors.default
-      defaultSeries.color = defaultSeriesColor
-      chartSettings.colors[0] = defaultSeriesColor
-      each(defaultSeries.data, item => {
-        item.color = defaultSeriesColor
-      })
-      if (primarySeries) {
-        const primarySeriesColor = secondarySeries ? this.colors.primary : this.colors.secondary
-        primarySeries.color = primarySeriesColor
-        each(get(primarySeries, 'data', []), item => {
-          item.color = primarySeriesColor
-        })
-      }
-      if (secondarySeries) {
-        secondarySeries.color = this.colors.secondary
-        each(get(secondarySeries, 'data', []), item => {
-          item.color = this.colors.secondary
-        })
-      }
-    },
     get,
+    orderBy,
     showError(errorMessage) {
       this.errorMessage = errorMessage
     }

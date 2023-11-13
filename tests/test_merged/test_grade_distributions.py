@@ -25,14 +25,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from decimal import Decimal
 
-from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, \
-    get_grade_distribution_with_prior_enrollments
+from ripley.merged.grade_distributions import get_grade_distribution_with_prior_enrollments, get_grade_distributions
 
 
 class TestGradeDistributions:
 
     def test_demographic_distribution(self):
-        gpa_demographics_distribution, grade_distribution = get_grade_distribution_with_demographics('2228', ['99999'], '30000')
+        gpa_demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'], '30000')
         assert gpa_demographics_distribution == [
             {
                 'averageGpa': Decimal('3.3705'),
@@ -133,57 +132,68 @@ class TestGradeDistributions:
                 },
             },
         ]
-        assert grade_distribution == [
-            {
-                'classSize': 97,
-                'count': 16,
-                'courseName': 'ASTRON 218',
-                'grade': 'A+',
-                'percentage': 16.5,
-            },
-            {
-                'classSize': 97,
-                'count': 52,
-                'courseName': 'ASTRON 218',
-                'grade': 'A',
-                'percentage': 53.6,
-            },
-            {
-                'classSize': 97,
-                'count': 8,
-                'courseName': 'ASTRON 218',
-                'grade': 'A-',
-                'percentage': 8.2,
-            },
-            {
-                'classSize': 97,
-                'count': 5,
-                'courseName': 'ASTRON 218',
-                'grade': 'B+',
-                'percentage': 5.2,
-            },
-            {
-                'classSize': 97,
-                'count': 1,
-                'courseName': 'ASTRON 218',
-                'grade': 'C+',
-                'percentage': 1.0,
-            },
-            {
-                'classSize': 97,
-                'count': 1,
-                'courseName': 'ASTRON 218',
-                'grade': 'F',
-                'percentage': 1.0,
-            },
-            {
-                'classSize': 97,
-                'count': 14,
-                'courseName': 'ASTRON 218',
-                'grade': 'P',
-                'percentage': 14.4,
-            },
-        ]
+        assert grade_distribution == {
+            '2225': [
+                {
+                    'count': 6,
+                    'courseName': 'ASTRON 218',
+                    'classSize': 6,
+                    'grade': 'P',
+                    'percentage': 100.0,
+                },
+            ],
+            '2228': [
+                {
+                    'classSize': 91,
+                    'count': 16,
+                    'courseName': 'ASTRON 218',
+                    'grade': 'A+',
+                    'percentage': 17.6,
+                },
+                {
+                    'classSize': 91,
+                    'count': 52,
+                    'courseName': 'ASTRON 218',
+                    'grade': 'A',
+                    'percentage': 57.1,
+                },
+                {
+                    'classSize': 91,
+                    'count': 8,
+                    'courseName': 'ASTRON 218',
+                    'grade': 'A-',
+                    'percentage': 8.8,
+                },
+                {
+                    'classSize': 91,
+                    'count': 5,
+                    'courseName': 'ASTRON 218',
+                    'grade': 'B+',
+                    'percentage': 5.5,
+                },
+                {
+                    'classSize': 91,
+                    'count': 1,
+                    'courseName': 'ASTRON 218',
+                    'grade': 'C+',
+                    'percentage': 1.1,
+                },
+                {
+                    'classSize': 91,
+                    'count': 1,
+                    'courseName': 'ASTRON 218',
+                    'grade': 'F',
+                    'percentage': 1.1,
+                },
+                {
+                    'classSize': 91,
+                    'count': 8,
+                    'courseName': 'ASTRON 218',
+                    'grade': 'P',
+                    'percentage': 8.8,
+                },
+            ],
+        }
 
     def test_enrollment_distribution(self):
         d = get_grade_distribution_with_prior_enrollments(

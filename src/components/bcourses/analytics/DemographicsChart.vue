@@ -193,14 +193,14 @@ export default {
       }
     },
     loadPrimarySeries() {
-      this.chartSettings.colors = [this.colors.default, this.colors.secondary]
-      this.chartSettings.series[0].color = this.colors.default
+      this.chartSettings.colors = [this.colors.primary, this.colors.secondary]
+      this.chartSettings.series[0].color = this.colors.primary
       this.chartSettings.series[0].legendSymbol = 'rectangle'
       this.chartSettings.series[0].marker = this.getSeriesMarker(this.chartSettings.series[0])
       this.chartSettings.series[0].name = 'Overall Class Grades'
       each(this.gradeDistribution, item => {
         this.chartSettings.series[0].data.push({
-          color: this.colors.default,
+          color: this.colors.primary,
           custom: {courseName: item.courseName},
           y: round(item.averageGpa, 1)
         })
