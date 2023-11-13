@@ -98,17 +98,16 @@ class MailingListMembers(Base):
             std_commit()
         return member
 
-
-def to_api_json(self):
-    return {
-        'id': self.id,
-        'canSend': self.can_send,
-        'createdAt': self.created_at,
-        'deletedAt': self.deleted_at,
-        'emailAddress': self.email_address,
-        'firstName': self.first_name,
-        'lastName': self.last_name,
-        'mailingListId': self.mailing_list_id,
-        'updatedAt': self.updated_at,
-        'welcomedAt': self.welcomed_at,
-    }
+    def to_api_json(self):
+        return {
+            'id': self.id,
+            'canSend': self.can_send,
+            'createdAt': self.created_at,
+            'deletedAt': self.deleted_at,
+            'emailAddress': self.email_address,
+            'firstName': self.first_name,
+            'lastName': self.last_name,
+            'mailingListId': self.mailing_list_id,
+            'updatedAt': self.updated_at,
+            'welcomedAt': self.welcomed_at,
+        }

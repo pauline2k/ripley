@@ -23,6 +23,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from email.utils import formataddr
 from html.parser import HTMLParser
 from io import StringIO
 import re
@@ -34,7 +35,25 @@ from ripley.models.mailing_list_members import MailingListMembers
 
 
 def send_message_to_list(mailing_list, sender, message_attrs):
-    # TODO
+    payload = {
+        'subject': message_attrs['subject'],
+        'h:Reply-To': message_attrs['from'],
+        'html': message_attrs['body']['html'],
+        'text': message_attrs['body']['plain'],
+    }
+    if message_attrs['id']:
+        payload['Message-Id'] = message_attrs['id']
+    if not (payload['html'] and payload['html'].strip()) and not (payload['text'] and payload['text'].strip()):
+        payload['text'] = ' '
+
+    payload['from'] = _set_from(sender, mailing_list)
+
+    members = MailingListMembers.get_mailing_list_members(mailing_list.id)
+    # Mailgun limits batch sending to 1000 members at a time.
+    for i in range(0, len(members), 1000):
+        recipients = members[i:i + 1000]
+        if not mailgun.send_payload_to_recipients(payload, recipients):
+            return False
     return True
 
 
@@ -63,6 +82,15 @@ def send_welcome_emails(mailing_list):
         results['successes'] += [r.email_address for r in recipients]
 
     return results
+
+
+def _set_from(member, mailing_list):
+    # To keep spam filters happy, the 'From:' address must have the same domain as the mailing list. However, we
+    # can set the display name to match the original sender.
+    display_name = ' '.join([member.first_name, member.last_name])
+    if mailing_list.canvas_site_name:
+        display_name = f'{display_name} ({mailing_list.canvas_site_name})'
+    return formataddr((display_name, '<no-reply@bcourses-mail.berkeley.edu>'))
 
 
 class TagStripper(HTMLParser):

@@ -23,10 +23,19 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from contextlib import contextmanager
 import hashlib
 import hmac
 import json
 from time import time
+from urllib.parse import parse_qs
+
+from flask import current_app as app
+import requests_mock
+from ripley import std_commit
+from ripley.externals import canvas
+from ripley.models.mailing_list import MailingList
+from tests.util import register_canvas_uris
 
 
 class TestRelayMailingListMessage:
@@ -40,8 +49,21 @@ class TestRelayMailingListMessage:
         _api_submit_message(client, attrs, expected_status_code=401)
 
     def test_nonexistent_list(self, client):
-        response = _api_submit_message(client, _default_message_attrs())
-        assert response['success'] is False
+        with _mailing_list_fixture('was not found in our system'):
+            attrs = {**_default_message_attrs(), **{'recipient': 'not-a-list@bcourses-mail.berkeley.edu'}}
+            response = _api_submit_message(client, attrs)
+            assert response['success'] is False
+
+    def test_not_member(self, client):
+        with _mailing_list_fixture('did not recognize the email address'):
+            attrs = {**_default_message_attrs(), **{'sender': 'ellen.ripley@berkeley.edu'}}
+            response = _api_submit_message(client, attrs)
+            assert response['success'] is False
+
+    def test_success(self, client):
+        with _mailing_list_fixture('Instructional content goes here'):
+            response = _api_submit_message(client, _default_message_attrs())
+            assert response['success'] is True
 
 
 def _api_submit_message(client, message_attrs, expected_status_code=200):
@@ -52,6 +74,40 @@ def _api_submit_message(client, message_attrs, expected_status_code=200):
     )
     assert response.status_code == expected_status_code
     return response.json
+
+
+@contextmanager
+def _mailing_list_fixture(expected_body_message):
+    with requests_mock.Mocker() as m:
+        admin_uid = '10000'
+        canvas_site_id = '1234567'
+        register_canvas_uris(app, {
+            'account': ['get_admins'],
+            'course': [f'get_by_id_{canvas_site_id}', f'search_users_{canvas_site_id}'],
+            'user': [f'profile_{admin_uid}'],
+        }, m)
+
+        def _match_request_text(request):
+            text = parse_qs(request.body).get('text')
+            return expected_body_message in ((text and text[0]) or '')
+
+        m.register_uri(
+            'POST',
+            'https://fake-o-mailgun.example.com/v3/bcourses-mail.berkeley.edu/messages',
+            status_code=200,
+            headers={},
+            additional_matcher=_match_request_text,
+            json={'message': 'Queued. Awaiting processing.'},
+        )
+        canvas_site = canvas.get_course('1234567')
+        mailing_list = MailingList.create(canvas_site)
+        MailingList.populate(mailing_list=mailing_list)
+        std_commit(allow_test_environment=True)
+
+        yield
+
+        MailingList.delete(mailing_list.id)
+        std_commit(allow_test_environment=True)
 
 
 def _default_message_attrs(timestamp=None):
@@ -68,13 +124,13 @@ def _default_message_attrs(timestamp=None):
     return {
         'Content-Type': 'multipart/alternative; boundary=\"5807d6e3_532051b0_a911\"',
         'Date': 'Thu, 9 Nov 2023 13:26:11 -0700',
-        'From': 'Pauline Kerschen <kerschen@berkeley.edu>',
+        'From': 'Ash 🤖 <synthetic.ash@berkeley.edu>',
         'Message-Id': '<DLOAsW7ZwDP1yvQOabwgZ1AvXNGoGpJgRoV4HoVq9tjQKyD1f1w@mail.gmail.com>',
         'Mime-Version': '1.0',
-        'Return-Path': '<kerschen@berkeley.edu>',
+        'Return-Path': '<synthetic.ash@berkeley.edu>',
         'Subject': 'A message of teaching and learning',
-        'To': 'design_analysis_of_nuclear_reactors-sp24@bcourses-lists.berkeley.edu',
-        'X-Envelope-From': '<kerschen@berkeley.edu>',
+        'To': 'astron-218-stellar-dynamics-and-galactic-stru-sp23@bcourses-lists.berkeley.edu',
+        'X-Envelope-From': '<synthetic.ash@berkeley.edu>',
         'X-Mailgun-Incoming': 'Yes',
         'body-html': (
             '<html><head><style>body{font-family:Helvetica,Arial;font-size:13px}</style></head><body style=\"word-wrap: break-word;'
@@ -84,32 +140,32 @@ def _default_message_attrs(timestamp=None):
             '<br>Pauline Kerschen<br>DevOps, Application Development</div><div style=\"font-family:helvetica,arial;font-size:13px\">'
             'Research, Teaching and Learning, UC Berkeley</div></div></body></html>'),
         'body-plain': (
-            'Instructional content goes here.\r\n\r\n\r\nPauline Kerschen\r\nDevOps, Application Development\r\nResearch, Teaching '
+            'Instructional content goes here.\r\n\r\n Ash 🤖\r\nDevOps, Application Development\r\nResearch, Teaching '
             'and Learning, UC Berkeley'),
-        'from': 'Pauline Kerschen <kerschen@berkeley.edu>',
+        'from': 'Ash 🤖 <synthetic.ash@berkeley.edu>',
         'message-headers': [
             ['X-Mailgun-Incoming', 'Yes'],
-            ['X-Envelope-From', '<kerschen@berkeley.edu>'],
-            ['Return-Path', '<kerschen@berkeley.edu>'],
+            ['X-Envelope-From', '<synthetic.ash@berkeley.edu>'],
+            ['Return-Path', '<synthetic.ash@berkeley.edu>'],
             ['Date', 'Thu, 9 Nov 2023 13:26:11 -0700'],
-            ['From', 'Pauline Kerschen <kerschen@berkeley.edu>'],
-            ['To', 'design_analysis_of_nuclear_reactors-sp24@bcourses-lists.berkeley.edu'],
+            ['From', 'Ash 🤖 <synthetic.ash@berkeley.edu>'],
+            ['To', 'astron-218-stellar-dynamics-and-galactic-stru-sp23@bcourses-lists.berkeley.edu'],
             ['Message-Id', '<DLOAsW7ZwDP1yvQOabwgZ1AvXNGoGpJgRoV4HoVq9tjQKyD1f1w@mail.gmail.com>'],
             ['Subject', 'A message of teaching and learning'],
             ['Mime-Version', '1.0'],
             ['Content-Type', 'multipart/alternative; boundary=\"5807d6e3_532051b0_a911\"'],
         ],
-        'recipient': 'design_analysis_of_nuclear_reactors-sp24@bcourses-lists.berkeley.edu',
-        'sender': 'kerschen@berkeley.edu',
+        'recipient': 'astron-218-stellar-dynamics-and-galactic-stru-sp23@bcourses-lists.berkeley.edu',
+        'sender': 'synthetic.ash@berkeley.edu',
         'signature': signature,
         'stripped-html': (
             '<html><head><style>body{font-family:Helvetica,Arial;font-size:13px}</style></head><body style=\"word-wrap: break-word;'
             ' -webkit-nbsp-mode: space; -webkit-line-break: after-white-space;\"><div id=\"bloop_customfont\" style=\"font-family:Helvetica,Arial;'
             'font-size:13px; color: rgba(0,0,0,1.0); margin: 0px; line-height: auto;\">Instructional content goes here.</div><br>'
             '<div class=\"bloop_sign\" id=\"bloop_sign_1476908730674413824\"><div style=\"font-family:helvetica,arial;font-size:13px\">'
-            '<br>Pauline Kerschen<br>DevOps, Application Development</div><div style=\"font-family:helvetica,arial;font-size:13px\">'
+            '<br>Ash 🤖<br>DevOps, Application Development</div><div style=\"font-family:helvetica,arial;font-size:13px\">'
             'Research, Teaching and Learning, UC Berkeley</div></div></body></html>'),
-        'stripped-signature': 'Pauline Kerschen\r\nDevOps, Application Development\r\nResearch, Teaching and Learning, UC Berkeley',
+        'stripped-signature': 'Ash 🤖\r\nDevOps, Application Development\r\nResearch, Teaching and Learning, UC Berkeley',
         'stripped-text': 'Instructional content goes here.\r\n\r\n',
         'subject': 'A message of teaching and learning',
         'timestamp': timestamp,
