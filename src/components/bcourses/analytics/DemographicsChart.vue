@@ -44,7 +44,7 @@
             <thead class="bg-grey-lighten-4">
               <tr>
                 <th class="font-weight-bold pl-4 py-2" scope="col">Semester</th>
-                <th class="font-weight-bold py-2" scope="col">Overall Class Grades</th>
+                <th class="font-weight-bold py-2" scope="col">Overall Class Grade Average</th>
                 <th
                   v-if="size(chartSettings.series) > 1"
                   class="font-weight-bold py-2"
@@ -59,7 +59,6 @@
                 v-for="(term, index) in chartSettings.xAxis.categories"
                 :id="`grade-distribution-demo-table-row-${index}`"
                 :key="index"
-                class="grade-distro-demo-table-row"
               >
                 <td :id="`grade-distro-demo-table-row-${index}-col-0`" class="pl-4 py-1">{{ gradeDistribution[index].termName }}</td>
                 <td :id="`grade-distro-demo-table-row-${index}-col-1`" class="py-1">{{ chartSettings.series[0]['data'][index].y }}</td>
@@ -242,17 +241,6 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-table {
-  caption {
-    color: $color-body-black !important;
-  }
-  tbody tr:hover {
-    background-color: $color-table-cell-bg-grey;
-  }
-}
-</style>
 
 <!-- eslint-disable-next-line vue-scoped-css/enforce-style-type  -->
 <style lang="scss">

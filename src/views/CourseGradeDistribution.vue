@@ -153,9 +153,19 @@ export default {
 
 <!-- eslint-disable-next-line vue-scoped-css/enforce-style-type  -->
 <style lang="scss">
-.grade-distribution hr {
-  border-color: $color-nobel !important;
-  border-style: solid none none !important;
-  color: $color-nobel !important;
+.grade-distribution {
+  hr {
+    border-color: $color-nobel !important;
+    border-style: solid none none !important;
+    color: $color-nobel !important;
+  }
+  table {
+    caption {
+      color: $color-body-black !important;
+    }
+    tbody tr:hover {
+      background-color: $color-table-cell-bg-grey;
+    }
+  }
 }
 </style>

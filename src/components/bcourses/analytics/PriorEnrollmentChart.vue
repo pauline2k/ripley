@@ -77,8 +77,67 @@
       <PageLoadProgress v-if="isLoadingPriorEnrollments" color="primary" />
     </v-overlay>
     <highcharts :options="chartSettings"></highcharts>
+    <v-row v-if="selectedTerm" class="d-flex justify-center">
+      <v-btn
+        id="grade-distribution-enrollments-show-btn"
+        aria-controls="page-help-notice"
+        :aria-expanded="showTable"
+        aria-haspopup="true"
+        class="font-weight-medium text-no-wrap my-2"
+        color="primary"
+        :prepend-icon="showTable ? mdiArrowUpCircle : mdiArrowDownCircle"
+        size="large"
+        variant="text"
+        @click="showTable = !showTable"
+      >
+        {{ showTable ? 'Hide' : 'Show' }} Data Table
+      </v-btn>
+    </v-row>
+    <v-row v-if="selectedTerm" class="d-flex justify-center">
+      <v-expand-transition>
+        <v-card v-show="showTable" class="pb-2" width="700">
+          <table id="grade-distribution-enroll-table" class="border-0 border-t">
+            <caption class="font-weight-bold font-size-16 py-3" v-html="chartSettings.title.text"></caption>
+            <thead class="bg-grey-lighten-4">
+              <tr>
+                <th class="font-weight-bold pl-4 py-2" scope="col">Grade</th>
+                <th
+                  v-for="(series, index) in chartSettings.series"
+                  :key="index"
+                  class="font-weight-bold py-2"
+                  scope="col"
+                >
+                  {{ series.name }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(grade, gradeIndex) in chartSettings.xAxis.categories"
+                :id="`grade-distribution-enroll-table-row-${gradeIndex}`"
+                :key="gradeIndex"
+              >
+                <td :id="`grade-distro-enroll-table-row-${gradeIndex}-col-0`" class="pl-4 py-1">{{ grade }}</td>
+                <td
+                  v-for="(series, index) in chartSettings.series"
+                  :id="`grade-distro-enroll-table-row-${gradeIndex}-col-${index + 1}`"
+                  :key="index"
+                  class="py-1"
+                >
+                  {{ series['data'][gradeIndex].y }}%
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </v-card>
+      </v-expand-transition>
+    </v-row>
   </div>
 </template>
+
+<script setup>
+import {mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'
@@ -128,6 +187,7 @@ export default {
     priorEnrollmentGradeDistribution: {},
     selectedCourse: undefined,
     selectedTerm: undefined,
+    showTable: false,
     suppressValidation: true
   }),
   watch: {
