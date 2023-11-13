@@ -29,11 +29,11 @@ from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import canvas_role_required
 from ripley.externals import canvas
 from ripley.externals.data_loch import find_course_by_name
+from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_site_utils import canvas_section_to_api_json, canvas_site_to_api_json, \
     parse_canvas_sis_course_id
 from ripley.lib.http import tolerant_jsonify
-from ripley.merged.grade_distributions import get_grade_distribution_with_demographics, \
-    get_grade_distribution_with_prior_enrollments
+from ripley.merged.grade_distributions import get_grade_distribution_with_prior_enrollments, get_grade_distributions
 
 
 @app.route('/api/grade_distribution/<canvas_site_id>')
@@ -50,11 +50,17 @@ def get_grade_distribution(canvas_site_id):
         term_id = sis_sections[0]['termId']
         section_ids = [s['id'] for s in sis_sections]
         instructor_uid = None if current_user.is_admin else current_user.uid
-        gpa_demographics_distribution, grade_distribution = get_grade_distribution_with_demographics(term_id, section_ids, instructor_uid)
-        if gpa_demographics_distribution is False:
+        gpa_term_distribution_by_demographic, grade_distribution_by_term = get_grade_distributions(term_id, section_ids, instructor_uid)
+        if gpa_term_distribution_by_demographic is False:
             raise ResourceNotFoundError('This course does not meet the requirements necessary to generate a Grade Distribution.')
-        distribution['demographics'] = gpa_demographics_distribution
-        distribution['enrollments'] = grade_distribution
+        distribution['demographics'] = gpa_term_distribution_by_demographic
+        distribution['enrollments'] = grade_distribution_by_term
+        distribution['terms'] = [
+            {
+                'id': term_id,
+                'name': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
+            } for term_id in grade_distribution_by_term.keys()
+        ]
     else:
         distribution['demographics'] = []
         distribution['enrollments'] = {}

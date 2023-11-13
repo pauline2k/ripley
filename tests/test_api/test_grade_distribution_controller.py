@@ -99,13 +99,23 @@ class TestGetGradeDistribution:
                 'female': {'averageGpa': 3.6315, 'count': 4},
                 'male': {'averageGpa': 2.8485, 'count': 2},
             }
-            assert response['enrollments'][0] == {
-                'classSize': 97,
-                'count': 16,
+            assert response['enrollments']['2225'][0] == {
+                'classSize': 6,
+                'count': 6,
                 'courseName': 'ASTRON 218',
-                'grade': 'A+',
-                'percentage': 16.5,
+                'grade': 'P',
+                'percentage': 100.0,
             }
+            assert response['terms'] == [
+                {
+                    'id': '2225',
+                    'name': 'Summer 2022',
+                },
+                {
+                    'id': '2228',
+                    'name': 'Fall 2022',
+                },
+            ]
 
     def test_ta(self, client, app, fake_auth):
         """Denies TA."""
@@ -136,13 +146,23 @@ class TestGetGradeDistribution:
                 'female': {'averageGpa': 3.6315, 'count': 4},
                 'male': {'averageGpa': 2.8485, 'count': 2},
             }
-            assert response['enrollments'][0] == {
-                'classSize': 97,
+            assert response['enrollments']['2228'][0] == {
+                'classSize': 91,
                 'count': 16,
                 'courseName': 'ASTRON 218',
                 'grade': 'A+',
-                'percentage': 16.5,
+                'percentage': 17.6,
             }
+            assert response['terms'] == [
+                {
+                    'id': '2225',
+                    'name': 'Summer 2022',
+                },
+                {
+                    'id': '2228',
+                    'name': 'Fall 2022',
+                },
+            ]
 
 
 def _api_get_grade_distributions(client, canvas_site_id, expected_status_code=200):
