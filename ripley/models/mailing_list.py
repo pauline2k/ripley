@@ -101,11 +101,11 @@ class MailingList(Base):
 
     @classmethod
     def create(
-            cls,
-            canvas_site,
-            list_name=None,
-            welcome_email_body=None,
-            welcome_email_subject=None,
+        cls,
+        canvas_site,
+        list_name=None,
+        welcome_email_body=None,
+        welcome_email_subject=None,
     ):
         canvas_site_id = canvas_site.id
         list_name = (list_name or MailingList.get_suggested_name(canvas_site)).strip()

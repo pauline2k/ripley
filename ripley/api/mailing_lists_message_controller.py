@@ -69,7 +69,7 @@ def _relay_to_list(message_attrs):
         raise BadRequestError('Unparseable email address')
     list_name = message_attrs['recipient'][1].split('@')[0]
     # Remove any suffix used to route to a specific Ripley environment.
-    list_name = re.sub(r'-rip-[a-z\-]{2,8}$', '', 'list_name')
+    list_name = re.sub(r'-rip-[a-z\-]{2,8}$', '', list_name)
 
     mailing_list = MailingList.find_by_name(list_name)
     if not mailing_list:
@@ -79,7 +79,7 @@ def _relay_to_list(message_attrs):
             your bCourses site.""")
         return False
 
-    member = MailingListMembers.get_mailing_list_member_by_address(message_attrs['sender'][1])
+    member = MailingListMembers.get_mailing_list_member_by_address(mailing_list.id, message_attrs['sender'][1])
     if not member:
         app.logger.warning(f'Bouncing message from non-member to mailing list:\n{message_attrs}')
         _bounce(message_attrs, f"""The following message could not be delivered because the mailing list {message_attrs['recipient'][1]}
