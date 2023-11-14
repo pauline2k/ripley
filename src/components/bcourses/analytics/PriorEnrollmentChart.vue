@@ -12,7 +12,7 @@
             bg-color="white"
             class="text-upper mr-2"
             density="compact"
-            :disabled="isLoadingPriorEnrollments"
+            :disabled="isLoadingPriorEnrollments || isEmpty(get(gradeDistribution, get(selectedTerm, 'id')))"
             :error="!suppressValidation && !isEmpty(courseSearchErrors)"
             :error-messages="!suppressValidation ? courseSearchErrors : []"
             hide-details
@@ -43,7 +43,7 @@
             id="grade-distribution-enroll-add-class-btn"
             class="font-size-13"
             color="primary"
-            :disabled="!selectedCourse || isLoadingPriorEnrollments"
+            :disabled="!selectedCourse || isLoadingPriorEnrollments || isEmpty(get(gradeDistribution, get(selectedTerm, 'id')))"
             @click="onClickAddCourse"
           >
             Add Class
@@ -54,6 +54,7 @@
             v-if="size(terms)"
             :value="get(selectedTerm, 'id')"
             class="position-absolute grade-dist-enroll-term-select"
+            :disabled="isEmpty(get(gradeDistribution, get(selectedTerm, 'id')))"
             @change="onSelectTerm"
           >
             <option
@@ -85,6 +86,7 @@
         aria-haspopup="true"
         class="font-weight-medium text-no-wrap my-2"
         color="primary"
+        :disabled="isEmpty(get(gradeDistribution, get(selectedTerm, 'id')))"
         :prepend-icon="showTable ? mdiArrowUpCircle : mdiArrowDownCircle"
         size="large"
         variant="text"
@@ -124,7 +126,7 @@
                   :key="index"
                   class="py-1"
                 >
-                  {{ series['data'][gradeIndex].y }}%
+                  {{ get(series, `data.${gradeIndex}.y`, 0) }}%
                 </td>
               </tr>
             </tbody>
@@ -162,9 +164,9 @@ export default {
       required: true,
       type: Object
     },
-    course: {
+    courseName: {
       required: true,
-      type: Object
+      type: String
     },
     gradeDistribution: {
       required: true,
@@ -200,8 +202,10 @@ export default {
     }
   },
   created() {
+    this.selectedTerm = get(this.terms, 0)
     this.chartSettings = cloneDeep(this.chartDefaults)
     this.chartSettings.chart.type = 'column'
+    this.chartSettings.legend.enabled = !isEmpty(this.gradeDistribution[this.selectedTerm.id])
     this.chartSettings.legend.labelFormat = '{name} grades'
     this.chartSettings.legend.symbolHeight = 12
     this.chartSettings.plotOptions.series.lineWidth = 0
@@ -210,7 +214,6 @@ export default {
         lineWidthPlus: 0
       }
     }
-    this.selectedTerm = get(this.terms, 0)
     this.chartSettings.title.widthAdjust = -200
     this.chartSettings.tooltip.distance = 24
     this.chartSettings.tooltip.formatter = function () {
@@ -259,10 +262,9 @@ export default {
     },
     isEmpty,
     loadPrimarySeries(color, showLabels=true) {
-      const courseName = this.gradeDistribution[this.selectedTerm.id][0].courseName
       this.chartSettings.series[0] = {
         color: color,
-        name: `${this.selectedTerm.name} ${courseName}`,
+        name: `${this.selectedTerm.name} ${this.courseName}`,
         data: []
       }
       this.chartSettings.xAxis.categories = []

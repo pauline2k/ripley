@@ -157,8 +157,8 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, instruct
         for r in rows:
             if r['grade'] not in distribution[term_id]:
                 distribution[term_id][r['grade']] = 0
-            distribution[term_id][r['grade']] += 1
-            distribution[term_id]['count'] += 1
+            distribution[term_id][r['grade']] += r['has_prior_enrollment']
+            distribution[term_id]['count'] += r['has_prior_enrollment']
             if r['grade'] not in totals:
                 totals[r['grade']] = 0
             totals[r['grade']] += 1
@@ -167,12 +167,12 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, instruct
 
     for term_id, course_distribution in distribution.items():
         total_prior_enroll_count = course_distribution['count']
+        total_no_prior_enroll_count = class_size - total_prior_enroll_count
         sorted_distribution = []
         for grade in sorted(course_distribution.keys(), key=_grade_ordering_index):
             if grade in GRADE_ORDERING:
                 grade_prior_enroll_count = course_distribution.get(grade, 0)
                 grade_no_prior_enroll_count = totals[grade] - grade_prior_enroll_count
-                total_no_prior_enroll_count = class_size - total_prior_enroll_count
                 sorted_distribution.append({
                     'courseName': prior_course_name,
                     'grade': grade,
