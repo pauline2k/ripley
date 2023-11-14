@@ -38,7 +38,7 @@
           </div>
         </v-card-title>
         <v-card-text>
-          <div :id="`student-id-${student.studentId}`">
+          <div :id="`student-id-${student.studentId}`" class="display-none-when-print">
             <span class="sr-only">Student ID: </span>
             {{ student.studentId }}
           </div>
