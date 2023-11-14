@@ -19,7 +19,7 @@
         <PriorEnrollmentChart
           :chart-defaults="chartDefaults"
           :colors="colors"
-          :course="gradeDistribution.canvasSite"
+          :course-name="gradeDistribution.courseName"
           :grade-distribution="gradeDistribution.enrollments"
           :terms="orderBy(gradeDistribution.terms, ['id'], ['desc'])"
         />
@@ -49,6 +49,9 @@ export default {
       chart: {
         backgroundColor: 'transparent',
       },
+      lang: {
+        noData: 'No data available until final grades are returned.'
+      },
       legend: {
         align: 'right',
         enabled: true,
@@ -62,6 +65,12 @@ export default {
         symbolRadius: 0,
         verticalAlign: 'top',
         y: 30
+      },
+      noData: {
+        style: {
+          fontSize: '18px',
+          color: '#999'
+        }
       },
       plotOptions: {
         series: {

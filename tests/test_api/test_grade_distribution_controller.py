@@ -94,7 +94,6 @@ class TestGetGradeDistribution:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_get_grade_distributions(client, canvas_site_id)
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
-            assert response['officialSections'][0]['sisId'] == 'SEC:2022-D-99999'
             assert response['demographics'][0]['genders'] == {
                 'female': {'averageGpa': 3.6315, 'count': 4},
                 'male': {'averageGpa': 2.8485, 'count': 2},
@@ -141,7 +140,6 @@ class TestGetGradeDistribution:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
             response = _api_get_grade_distributions(client, canvas_site_id)
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
-            assert response['officialSections'][0]['sisId'] == 'SEC:2022-D-99999'
             assert response['demographics'][0]['genders'] == {
                 'female': {'averageGpa': 3.6315, 'count': 4},
                 'male': {'averageGpa': 2.8485, 'count': 2},
@@ -205,7 +203,7 @@ class TestGetPriorEnrollmentGradeDistribution:
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
         with requests_mock.Mocker() as m:
-            canvas_site_id = '8876542'
+            canvas_site_id = '1234567'
             register_canvas_uris(app, {
                 'account': ['get_admins'],
                 'course': [f'get_by_id_{canvas_site_id}'],
@@ -213,18 +211,95 @@ class TestGetPriorEnrollmentGradeDistribution:
             }, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_get_prior_enrollment_grade_distribution(client, canvas_site_id)
-            assert response['2225']
+            assert len(response.keys()) == 1
             assert response['2228'] == [
                 {
                     'courseName': 'ANTHRO 197',
+                    'grade': 'A+',
+                    'noPriorEnrollCount': 14,
+                    'noPriorEnrollPercentage': 16.9,
+                    'priorEnrollCount': 2,
+                    'priorEnrollPercentage': 22.2,
+                    'termName': 'Fall 2022',
+                    'totalCount': 16,
+                    'totalPercentage': 17.4,
+                },
+                {
+                    'courseName': 'ANTHRO 197',
+                    'grade': 'A',
+                    'noPriorEnrollCount': 50,
+                    'noPriorEnrollPercentage': 60.2,
+                    'priorEnrollCount': 2,
+                    'priorEnrollPercentage': 22.2,
+                    'termName': 'Fall 2022',
+                    'totalCount': 52,
+                    'totalPercentage': 56.5,
+                },
+                {
+                    'courseName': 'ANTHRO 197',
+                    'grade': 'A-',
+                    'noPriorEnrollCount': 8,
+                    'noPriorEnrollPercentage': 9.6,
+                    'priorEnrollCount': 0,
+                    'priorEnrollPercentage': 0.0,
+                    'termName': 'Fall 2022',
+                    'totalCount': 8,
+                    'totalPercentage': 8.7,
+                },
+                {
+                    'courseName': 'ANTHRO 197',
+                    'grade': 'B+',
+                    'noPriorEnrollCount': 5,
+                    'noPriorEnrollPercentage': 6.0,
+                    'priorEnrollCount': 0,
+                    'priorEnrollPercentage': 0.0,
+                    'termName': 'Fall 2022',
+                    'totalCount': 5,
+                    'totalPercentage': 5.4,
+                },
+                {
+                    'courseName': 'ANTHRO 197',
                     'grade': 'B',
+                    'noPriorEnrollCount': 1,
+                    'noPriorEnrollPercentage': 1.2,
+                    'priorEnrollCount': 0,
+                    'priorEnrollPercentage': 0.0,
+                    'termName': 'Fall 2022',
+                    'totalCount': 1,
+                    'totalPercentage': 1.1,
+                },
+                {
+                    'courseName': 'ANTHRO 197',
+                    'grade': 'C+',
+                    'noPriorEnrollCount': 1,
+                    'noPriorEnrollPercentage': 1.2,
+                    'priorEnrollCount': 0,
+                    'priorEnrollPercentage': 0.0,
+                    'termName': 'Fall 2022',
+                    'totalCount': 1,
+                    'totalPercentage': 1.1,
+                },
+                {
+                    'courseName': 'ANTHRO 197',
+                    'grade': 'F',
                     'noPriorEnrollCount': 0,
                     'noPriorEnrollPercentage': 0.0,
                     'priorEnrollCount': 1,
-                    'priorEnrollPercentage': 100.0,
+                    'priorEnrollPercentage': 11.1,
                     'termName': 'Fall 2022',
                     'totalCount': 1,
-                    'totalPercentage': 7.1,
+                    'totalPercentage': 1.1,
+                },
+                {
+                    'courseName': 'ANTHRO 197',
+                    'grade': 'P',
+                    'noPriorEnrollCount': 4,
+                    'noPriorEnrollPercentage': 4.8,
+                    'priorEnrollCount': 4,
+                    'priorEnrollPercentage': 44.4,
+                    'termName': 'Fall 2022',
+                    'totalCount': 8,
+                    'totalPercentage': 8.7,
                 },
             ]
 
@@ -243,33 +318,20 @@ class TestGetPriorEnrollmentGradeDistribution:
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
         with requests_mock.Mocker() as m:
-            canvas_site_id = '8876542'
+            canvas_site_id = '1234567'
             register_canvas_uris(app, {
                 'account': ['get_admins'],
                 'course': [
                     f'get_by_id_{canvas_site_id}',
-                    f'get_enrollments_{canvas_site_id}_4567890',
+                    f'get_user_{canvas_site_id}_4567890',
                     f'get_sections_{canvas_site_id}',
                 ],
                 'user': ['profile_30000'],
             }, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
             response = _api_get_prior_enrollment_grade_distribution(client, canvas_site_id)
-            # Teacher sees only the prior enrolled sections that they taught.
-            assert '2225' not in response
-            assert response['2228'] == [
-                {
-                    'courseName': 'ANTHRO 197',
-                    'grade': 'B',
-                    'noPriorEnrollCount': 0,
-                    'noPriorEnrollPercentage': 0,
-                    'priorEnrollCount': 1,
-                    'priorEnrollPercentage': 100.0,
-                    'termName': 'Fall 2022',
-                    'totalCount': 1,
-                    'totalPercentage': 100.0,
-                },
-            ]
+            # Teacher sees only the prior enrolled course breakdown for sections they taught.
+            assert response == {}
 
 
 def _api_get_prior_enrollment_grade_distribution(client, canvas_site_id, course_name='ANTHRO 197', expected_status_code=200):

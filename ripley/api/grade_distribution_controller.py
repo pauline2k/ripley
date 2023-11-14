@@ -40,27 +40,32 @@ from ripley.merged.grade_distributions import get_grade_distribution_with_prior_
 @canvas_role_required('TeacherEnrollment')
 def get_grade_distribution(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
+    course_name, term = parse_canvas_sis_course_id(course.sis_course_id)
     canvas_sections = canvas.get_course_sections(canvas_site_id)
     sis_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
     distribution = {
         'canvasSite': canvas_site_to_api_json(course),
-        'officialSections': sis_sections,
+        'courseName': course_name,
     }
     if sis_sections:
-        term_id = sis_sections[0]['termId']
+        term_id = term.to_sis_term_id()
         section_ids = [s['id'] for s in sis_sections]
         instructor_uid = None if current_user.is_admin else current_user.uid
         gpa_term_distribution_by_demographic, grade_distribution_by_term = get_grade_distributions(term_id, section_ids, instructor_uid)
         if gpa_term_distribution_by_demographic is False:
             raise ResourceNotFoundError('This course does not meet the requirements necessary to generate a Grade Distribution.')
-        distribution['demographics'] = gpa_term_distribution_by_demographic
-        distribution['enrollments'] = grade_distribution_by_term
-        distribution['terms'] = [
-            {
-                'id': term_id,
-                'name': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
-            } for term_id in grade_distribution_by_term.keys()
-        ]
+        if term_id in grade_distribution_by_term.keys():
+            distribution['demographics'] = gpa_term_distribution_by_demographic
+            distribution['enrollments'] = grade_distribution_by_term
+            distribution['terms'] = [
+                {
+                    'id': term_id,
+                    'name': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
+                } for term_id in grade_distribution_by_term.keys()
+            ]
+        else:
+            distribution['demographics'] = []
+            distribution['enrollments'] = {}
     else:
         distribution['demographics'] = []
         distribution['enrollments'] = {}
