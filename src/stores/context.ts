@@ -5,8 +5,6 @@ import {nextTick} from 'vue'
 import {putFocusNextTick} from '@/utils'
 import router from '@/router'
 
-
-
 const $_getDefaultApplicationState = () => ({
   message: undefined,
   stacktrace: undefined,
@@ -18,9 +16,10 @@ export const useContextStore = defineStore('context', {
     applicationState: $_getDefaultApplicationState(),
     config: undefined,
     currentUser: {
+      canAccessStandaloneView: undefined,
       canvasSiteId: undefined,
-      isAdmin: false,
-      isAuthenticated: false
+      isAdmin: undefined,
+      isAuthenticated: undefined
     },
     eventHub: mitt(),
     isLoading: false,

@@ -136,8 +136,9 @@ def _dev_auth_login(canvas_site_id, password, uid):
     user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
     user = User(user_id)
     if not user.is_active:
-        msg = f'Sorry, {uid} is not authorized to use this tool.'
-        return tolerant_jsonify({'message': msg}, 403)
+        return tolerant_jsonify({'message': f'Sorry, UID {uid} failed to authenticate.'}, 403)
+    if not user.can_access_standalone_view:
+        return tolerant_jsonify({'message': f'Sorry, UID {uid} is not authorized to use Ripley in standalone mode.'}, 403)
     if start_login_session(user):
         return tolerant_jsonify(current_user.to_api_json())
     else:

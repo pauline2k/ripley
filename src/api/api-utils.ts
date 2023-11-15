@@ -8,19 +8,13 @@ const $_errorHandler = (error: any, redirectOnError?: boolean) => {
     return Promise.reject('Operation Canceled')
   } else {
     const status = get(error, 'response.status')
-    const message = $_getErrorMessage(error, status)
+    const message = get(error, 'response.data.error') || get(error, 'response.data.message') || get(error, 'message') || 'Unauthorized'
     console.log(`\n${error}\n${message}\n`)
     if (redirectOnError) {
       useContextStore().setApplicationState(status, message)
     }
     return Promise.reject(message)
   }
-}
-
-const $_getErrorMessage = (error: any, status: number) => {
-  return useContextStore().currentUser.isAuthenticated && (!status || status >= 400)
-    ? get(error, 'response.data.error') || get(error, 'response.data.message') || get(error, 'message')
-    : 'Unauthorized request'
 }
 
 export default {

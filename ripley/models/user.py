@@ -67,6 +67,10 @@ class User(UserMixin):
             return f'UID {self.uid}, canvas_user_id {self.canvas_user_id}, canvas_site_id {self.canvas_site_id}'
 
     @property
+    def can_access_standalone_view(self):
+        return self.user.get('canAccessStandaloneView')
+
+    @property
     def can_create_canvas_course_site(self):
         return self.is_admin or self.is_canvas_admin or self.is_current_campus_instructor()
 
@@ -212,6 +216,7 @@ class User(UserMixin):
                     is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
         api_json = {
             **{
+                'canAccessStandaloneView': is_admin or (is_active and app.config['ALLOW_STANDALONE_FOR_NON_ADMINS']),
                 'canvasMasqueradingUserId': self.__canvas_masquerading_user_id,
                 'canvasSiteId': self.__canvas_site_id,
                 'emailAddress': email_address,

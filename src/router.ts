@@ -26,7 +26,8 @@ import {capitalize} from 'lodash'
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
 import {useContextStore} from '@/stores/context'
 
-const BaseView = () => import(window.parent.frames.length ? '@/layouts/lti/BaseLTI.vue' : '@/layouts/standalone/BaseStandalone.vue')
+const isInIframe = window.parent.frames.length
+const BaseView = () => import(isInIframe ? '@/layouts/lti/BaseLTI.vue' : '@/layouts/standalone/BaseStandalone.vue')
 
 const routes:RouteRecordRaw[] = [
   {
@@ -151,7 +152,12 @@ const routes:RouteRecordRaw[] = [
       },
       {
         beforeEnter: (to: any, from: any, next: any) => {
-          useContextStore().currentUser.isAdmin ? next() : next({path: '/welcome'})
+          const context = useContextStore()
+          if (context.currentUser.isAdmin) {
+            next()
+          } else {
+            next('/welcome')
+          }
         },
         component: WelcomeAdmin,
         name: 'Admin',
@@ -168,10 +174,9 @@ const routes:RouteRecordRaw[] = [
     children: [
       {
         component: Error,
-        path: '/error'
-      },
-      {
-        component: Error,
+        meta: {
+          is404: true
+        },
         path: '/:pathMatch(.*)'
       }
     ]
@@ -183,8 +188,23 @@ const router = createRouter({
   routes,
 })
 
+router.beforeResolve(async to => {
+  const context = useContextStore()
+  context.loadingStart(to)
+  if (to.query.error) {
+    context.setApplicationState(500, to.query.error)
+  } else {
+    const currentUser = context.currentUser
+    if (currentUser.isAuthenticated) {
+      const unauthorized = !isInIframe && !currentUser.canAccessStandaloneView
+      if (unauthorized) {
+        context.setApplicationState(403, 'Unauthorized')
+      }
+    }
+  }
+})
+
 router.afterEach((to: any) => {
-  useContextStore().loadingStart(to)
   useContextStore().resetApplicationState()
   const title = capitalize(to.name) || 'bCourses'
   document.title = `${title} | UC Berkeley`

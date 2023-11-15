@@ -26,6 +26,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import logging
 import os
 
+ALLOW_STANDALONE_FOR_NON_ADMINS = False
+
 # Ripley-specific AWS credentials.
 AWS_APP_ROLE_ARN = 'aws:arn::<account>:role/<app_ripley_role>'
 AWS_PROFILE = None
