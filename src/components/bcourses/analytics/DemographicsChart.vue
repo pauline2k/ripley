@@ -45,12 +45,20 @@
               <tr>
                 <th class="font-weight-bold pl-4 py-2" scope="col">Semester</th>
                 <th class="font-weight-bold py-2" scope="col">Overall Class Grade Average</th>
+                <th class="font-weight-bold py-2" scope="col">Overall Class Count</th>
                 <th
                   v-if="size(chartSettings.series) > 1"
                   class="font-weight-bold py-2"
                   scope="col"
                 >
-                  {{ chartSettings.series[1].name }}
+                  Average {{ chartSettings.series[1].name }}
+                </th>
+                <th
+                  v-if="size(chartSettings.series) > 1"
+                  class="font-weight-bold py-2"
+                  scope="col"
+                >
+                  Count of {{ chartSettings.series[1].name }}
                 </th>
               </tr>
             </thead>
@@ -60,14 +68,28 @@
                 :id="`grade-distribution-demo-table-row-${index}`"
                 :key="index"
               >
-                <td :id="`grade-distro-demo-table-row-${index}-col-0`" class="pl-4 py-1">{{ gradeDistribution[index].termName }}</td>
-                <td :id="`grade-distro-demo-table-row-${index}-col-1`" class="py-1">{{ chartSettings.series[0]['data'][index].y }}</td>
+                <td
+                  :id="`grade-distro-demo-table-row-${index}-term`"
+                  class="text-no-wrap pl-4 py-1"
+                  scope="row"
+                >
+                  {{ gradeDistribution[index].termName }}
+                </td>
+                <td :id="`grade-distro-demo-table-row-${index}-grade-0`" class="py-1">{{ chartSettings.series[0]['data'][index].y }}</td>
+                <td :id="`grade-distro-demo-table-row-${index}-count-0`" class="py-1">{{ chartSettings.series[0]['data'][index].custom.count }}</td>
                 <td
                   v-if="size(chartSettings.series) > 1"
-                  :id="`grade-distro-demo-table-row-${index}-col-2`"
+                  :id="`grade-distro-demo-table-row-${index}-grade-1`"
                   class="py-1"
                 >
                   {{ chartSettings.series[1]['data'][index].y }}
+                </td>
+                <td
+                  v-if="size(chartSettings.series) > 1"
+                  :id="`grade-distro-demo-table-row-${index}-count-1`"
+                  class="py-1"
+                >
+                  {{ chartSettings.series[1]['data'][index].custom.count }}
                 </td>
               </tr>
             </tbody>
@@ -101,6 +123,10 @@ export default {
     colors: {
       required: true,
       type: Object
+    },
+    courseName: {
+      required: true,
+      type: String
     },
     gradeDistribution: {
       required: true,
@@ -145,9 +171,10 @@ export default {
     this.chartSettings.legend.symbolHeight = 3
     this.chartSettings.plotOptions.series.lineWidth = 3
     this.chartSettings.title.text = 'Overall Class Grade Average by Semester'
+    const courseName = this.courseName
     this.chartSettings.tooltip.formatter = function () {
       const header = `<div id="grade-dist-demo-tooltip-term" class="font-weight-bold font-size-15">${this.x}</div>
-          <div id="grade-dist-demo-tooltip-course" class="font-size-13 text-grey-darken-1">${this.point.custom.courseName}</div>
+          <div id="grade-dist-demo-tooltip-course" class="font-size-13 text-grey-darken-1">${courseName}</div>
           <hr aria-hidden="true" class="mt-1 grade-dist-tooltip-hr" />`
       return (this.points || []).reduce((tooltipText, point, index) => {
         return`${tooltipText}<div id="grade-dist-demo-tooltip-series-${index}" class="font-size-13 mt-1">
@@ -200,7 +227,7 @@ export default {
       each(this.gradeDistribution, item => {
         this.chartSettings.series[0].data.push({
           color: this.colors.primary,
-          custom: {courseName: item.courseName},
+          custom: {count: item.count},
           y: round(item.averageGpa, 1)
         })
         this.chartSettings.xAxis.categories.push(this.shortTermName(item.termName))

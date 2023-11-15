@@ -206,6 +206,11 @@ table {
     padding-left: 14px;
     vertical-align: top;
   }
+  tfoot tr td, tfoot tr th {
+    border-top: solid 1px $color-container-grey-border;
+    padding: 6px 10px 6px 14px;
+    text-align: start;
+  }
   thead tr th {
     background-color: transparent;
     color: $color-body-black;
