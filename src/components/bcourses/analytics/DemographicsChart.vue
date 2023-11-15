@@ -228,7 +228,7 @@ export default {
         this.chartSettings.series[0].data.push({
           color: this.colors.primary,
           custom: {count: item.count},
-          y: round(item.averageGpa, 1)
+          y: round(item.averageGradePoints, 1)
         })
         this.chartSettings.xAxis.categories.push(this.shortTermName(item.termName))
       })
@@ -251,7 +251,7 @@ export default {
             dataLabels: {
               enabled: false
             },
-            y: round(get(value, 'averageGpa', 0), 1)
+            y: round(get(value, 'averageGradePoints', 0), 1)
           })
         })
         this.chartSettings.series[1] = secondarySeries

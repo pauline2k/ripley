@@ -23,8 +23,6 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from decimal import Decimal
-
 from ripley.merged.grade_distributions import get_grade_distribution_with_prior_enrollments, get_grade_distributions
 
 
@@ -34,26 +32,26 @@ class TestGradeDistributions:
         gpa_demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'], '30000')
         assert gpa_demographics_distribution == [
             {
-                'averageGpa': Decimal('3.3705'),
+                'averageGradePoints': 1.1666666666666667,
                 'count': 6,
                 'courseName': 'ASTRON 218',
                 'genders': {
                     'female': {
-                        'averageGpa': Decimal('3.6315'),
+                        'averageGradePoints': 1.75,
                         'count': 4,
                     },
                     'male': {
-                        'averageGpa': Decimal('2.8485'),
+                        'averageGradePoints': 0.0,
                         'count': 2,
                     },
                 },
                 'internationalStatus': {
                     'false': {
-                        'averageGpa': Decimal('3.683'),
+                        'averageGradePoints': 1.4,
                         'count': 5,
                     },
                     'true': {
-                        'averageGpa': Decimal('1.808'),
+                        'averageGradePoints': 0.0,
                         'count': 1,
                     },
                 },
@@ -61,50 +59,50 @@ class TestGradeDistributions:
                 'termName': 'Summer 2022',
                 'transferStatus': {
                     'false': {
-                        'averageGpa': Decimal('3.3705'),
+                        'averageGradePoints': 1.1666666666666667,
                         'count': 6,
                     },
                     'true': {
-                        'averageGpa': 0,
+                        'averageGradePoints': 0,
                         'count': 0,
                     },
                 },
                 'underrepresentedMinorityStatus': {
                     'false': {
-                        'averageGpa': Decimal('3.207'),
+                        'averageGradePoints': 0.0,
                         'count': 3,
                     },
                     'true': {
-                        'averageGpa': Decimal('3.534'),
+                        'averageGradePoints': 2.3333333333333335,
                         'count': 3,
                     },
                 },
             },
             {
-                'averageGpa': Decimal('3.528692307692307692307692308'),
+                'averageGradePoints': 3.5274725274725274,
                 'count': 91,
                 'courseName': 'ASTRON 218',
                 'genders': {
                     'female': {
-                        'averageGpa': Decimal('3.541294117647058823529411765'),
+                        'averageGradePoints': 3.6470588235294117,
                         'count': 68,
                     },
                     'male': {
-                        'averageGpa': Decimal('3.470090909090909090909090909'),
+                        'averageGradePoints': 3.1363636363636362,
                         'count': 22,
                     },
                     'other': {
-                        'averageGpa': Decimal('3.961'),
+                        'averageGradePoints': 4.0,
                         'count': 1,
                     },
                 },
                 'internationalStatus': {
                     'false': {
-                        'averageGpa': Decimal('3.543180722891566265060240964'),
+                        'averageGradePoints': 3.5301204819277108,
                         'count': 83,
                     },
                     'true': {
-                        'averageGpa': Decimal('3.378375'),
+                        'averageGradePoints': 3.5,
                         'count': 8,
                     },
                 },
@@ -112,21 +110,21 @@ class TestGradeDistributions:
                 'termName': 'Fall 2022',
                 'transferStatus': {
                     'false': {
-                        'averageGpa': Decimal('3.533546511627906976744186047'),
+                        'averageGradePoints': 3.5697674418604652,
                         'count': 86,
                     },
                     'true': {
-                        'averageGpa': Decimal('3.4452'),
+                        'averageGradePoints': 2.8,
                         'count': 5,
                     },
                 },
                 'underrepresentedMinorityStatus': {
                     'false': {
-                        'averageGpa': Decimal('3.724861111111111111111111111'),
+                        'averageGradePoints': 3.1944444444444446,
                         'count': 36,
                     },
                     'true': {
-                        'averageGpa': Decimal('3.400290909090909090909090909'),
+                        'averageGradePoints': 3.7454545454545456,
                         'count': 55,
                     },
                 },
@@ -135,11 +133,32 @@ class TestGradeDistributions:
         assert grade_distribution == {
             '2225': [
                 {
-                    'count': 6,
+                    'count': 1,
+                    'courseName': 'ASTRON 218',
+                    'classSize': 6,
+                    'grade': 'A-',
+                    'percentage': 16.7,
+                },
+                {
+                    'count': 1,
+                    'courseName': 'ASTRON 218',
+                    'classSize': 6,
+                    'grade': 'C',
+                    'percentage': 16.7,
+                },
+                {
+                    'count': 1,
+                    'courseName': 'ASTRON 218',
+                    'classSize': 6,
+                    'grade': 'D',
+                    'percentage': 16.7,
+                },
+                {
+                    'count': 3,
                     'courseName': 'ASTRON 218',
                     'classSize': 6,
                     'grade': 'P',
-                    'percentage': 100.0,
+                    'percentage': 50.0,
                 },
             ],
             '2228': [

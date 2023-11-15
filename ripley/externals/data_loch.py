@@ -229,7 +229,7 @@ def get_grades_with_demographics(term_id, section_ids, instructor_uid):
             AND sec.sis_section_id = ANY(%(section_ids)s)
         )
         SELECT DISTINCT enr.sis_term_id AS term_id, sec.sis_course_name, enr.sis_section_id, enr.ldap_uid, enr.grade,
-            spi.gpa, spi.transfer, d.gender, d.minority, v.visa_type
+            spi.transfer, d.gender, d.minority, v.visa_type
         FROM sis_data.edo_enrollments enr
         JOIN sis_data.edo_sections sec on enr.sis_term_id = sec.sis_term_id and enr.sis_section_id = sec.sis_section_id
         JOIN course c ON sec.sis_course_name = c.sis_course_name
@@ -240,7 +240,7 @@ def get_grades_with_demographics(term_id, section_ids, instructor_uid):
         WHERE enr.sis_term_id <= %(term_id)s
         AND enr.sis_term_id >= %(earliest_term_id)s
         AND enr.grade IS NOT NULL AND enr.grade != ''
-        {exclude_other_instructors_sections} ORDER BY enr.sis_term_id, spi.gpa"""
+        {exclude_other_instructors_sections} ORDER BY enr.sis_term_id, enr.grade"""
     return safe_execute_rds(sql, **params)
 
 
