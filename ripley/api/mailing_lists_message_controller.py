@@ -26,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from email.utils import formataddr, parseaddr
 import hashlib
 import hmac
+import json
 import re
 from time import time
 
@@ -58,7 +59,7 @@ def relay():
         },
         'sender': parseaddr(params.get('sender')),
         'recipient': parseaddr(params.get('recipient')),
-        # TODO handle attachments
+        'attachments': _extract_attachments(params),
     }
     success = _relay_to_list(message_attrs)
     return tolerant_jsonify({'success': success})
@@ -98,6 +99,31 @@ def _relay_to_list(message_attrs):
         return False
 
     return True
+
+
+def _extract_attachments(params):
+    attachments = {}
+    if params.get('attachment-count'):
+        attachments['count'] = int(params['attachment-count'])
+        attachments['data'] = {}
+
+    if params.get('content-id-map'):
+        content_map = None
+        try:
+            content_map = json.loads(params['content-id-map'])
+        except ValueError:
+            app.logger.warning(f"Failed to parse content-id-map param {params['content-id-map']}")
+        if content_map:
+            attachments['cid_map'] = {}
+            for cid, attachment_name in content_map.items():
+                stripped_cid = cid.replace('<', '').replace('>', '')
+                attachments['cid_map'][stripped_cid] = attachment_name
+
+    for key, value in params.items():
+        if re.match(r'^attachment-\d+$', key):
+            attachments['data'][key] = value
+
+    return attachments
 
 
 def _authenticate_message(params):
