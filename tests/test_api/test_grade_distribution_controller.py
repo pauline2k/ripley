@@ -214,6 +214,7 @@ class TestGetPriorEnrollmentGradeDistribution:
             assert len(response.keys()) == 1
             assert response['2228'] == [
                 {
+                    'classSize': 92,
                     'courseName': 'ANTHRO 197',
                     'grade': 'A+',
                     'noPriorEnrollCount': 14,
@@ -225,6 +226,7 @@ class TestGetPriorEnrollmentGradeDistribution:
                     'totalPercentage': 17.4,
                 },
                 {
+                    'classSize': 92,
                     'courseName': 'ANTHRO 197',
                     'grade': 'A',
                     'noPriorEnrollCount': 50,
@@ -236,6 +238,7 @@ class TestGetPriorEnrollmentGradeDistribution:
                     'totalPercentage': 56.5,
                 },
                 {
+                    'classSize': 92,
                     'courseName': 'ANTHRO 197',
                     'grade': 'A-',
                     'noPriorEnrollCount': 8,
@@ -247,6 +250,7 @@ class TestGetPriorEnrollmentGradeDistribution:
                     'totalPercentage': 8.7,
                 },
                 {
+                    'classSize': 92,
                     'courseName': 'ANTHRO 197',
                     'grade': 'B+',
                     'noPriorEnrollCount': 5,
@@ -258,6 +262,7 @@ class TestGetPriorEnrollmentGradeDistribution:
                     'totalPercentage': 5.4,
                 },
                 {
+                    'classSize': 92,
                     'courseName': 'ANTHRO 197',
                     'grade': 'B',
                     'noPriorEnrollCount': 1,
@@ -269,6 +274,7 @@ class TestGetPriorEnrollmentGradeDistribution:
                     'totalPercentage': 1.1,
                 },
                 {
+                    'classSize': 92,
                     'courseName': 'ANTHRO 197',
                     'grade': 'C+',
                     'noPriorEnrollCount': 1,
@@ -280,6 +286,7 @@ class TestGetPriorEnrollmentGradeDistribution:
                     'totalPercentage': 1.1,
                 },
                 {
+                    'classSize': 92,
                     'courseName': 'ANTHRO 197',
                     'grade': 'F',
                     'noPriorEnrollCount': 0,
@@ -291,6 +298,7 @@ class TestGetPriorEnrollmentGradeDistribution:
                     'totalPercentage': 1.1,
                 },
                 {
+                    'classSize': 92,
                     'courseName': 'ANTHRO 197',
                     'grade': 'P',
                     'noPriorEnrollCount': 4,

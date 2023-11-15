@@ -205,6 +205,7 @@ class TestGradeDistributions:
         assert d == {
             '2232': [
                 {
+                    'classSize': 7,
                     'courseName': 'ASTRON 218',
                     'grade': 'A+',
                     'noPriorEnrollCount': 0,
@@ -216,6 +217,7 @@ class TestGradeDistributions:
                     'totalPercentage': 14.3,
                 },
                 {
+                    'classSize': 7,
                     'courseName': 'ASTRON 218',
                     'grade': 'A',
                     'noPriorEnrollCount': 1,
@@ -227,6 +229,7 @@ class TestGradeDistributions:
                     'totalPercentage': 28.6,
                 },
                 {
+                    'classSize': 7,
                     'courseName': 'ASTRON 218',
                     'grade': 'A-',
                     'noPriorEnrollCount': 0,
@@ -238,6 +241,7 @@ class TestGradeDistributions:
                     'totalPercentage': 14.3,
                 },
                 {
+                    'classSize': 7,
                     'courseName': 'ASTRON 218',
                     'grade': 'B+',
                     'noPriorEnrollCount': 0,
@@ -249,6 +253,7 @@ class TestGradeDistributions:
                     'totalPercentage': 28.6,
                 },
                 {
+                    'classSize': 7,
                     'courseName': 'ASTRON 218',
                     'grade': 'B',
                     'noPriorEnrollCount': 0,

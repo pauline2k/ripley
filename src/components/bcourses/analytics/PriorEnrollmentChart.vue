@@ -3,7 +3,8 @@
     <div class="pl-3">
       <h2 id="grade-distribution-enrollment-header">Grade Distribution by Prior Enrollment</h2>
       <div>Lorem ipsum</div>
-      <div class="d-flex justify-space-between my-4 pt-2">
+      <div>Class size: {{ classSize }}</div>
+      <div class="d-flex justify-space-between my-4">
         <div class="grade-dist-enroll-course-search d-flex align-center">
           <v-autocomplete
             id="grade-distribution-enrollment-course-search"
@@ -103,14 +104,15 @@
             <thead class="bg-grey-lighten-4">
               <tr>
                 <th class="font-weight-bold pl-4 py-2" scope="col">Grade</th>
-                <th
-                  v-for="(series, index) in chartSettings.series"
-                  :key="index"
-                  class="font-weight-bold py-2"
-                  scope="col"
-                >
-                  {{ series.name }}
-                </th>
+                <template v-for="(series, index) in chartSettings.series" :key="index">
+                  <th
+                    class="font-weight-bold py-2"
+                    colspan="2"
+                    scope="col"
+                  >
+                    {{ series.name }}
+                  </th>
+                </template>
               </tr>
             </thead>
             <tbody>
@@ -119,17 +121,48 @@
                 :id="`grade-distribution-enroll-table-row-${gradeIndex}`"
                 :key="gradeIndex"
               >
-                <td :id="`grade-distro-enroll-table-row-${gradeIndex}-col-0`" class="pl-4 py-1">{{ grade }}</td>
                 <td
-                  v-for="(series, index) in chartSettings.series"
-                  :id="`grade-distro-enroll-table-row-${gradeIndex}-col-${index + 1}`"
-                  :key="index"
-                  class="py-1"
+                  :id="`grade-distro-enroll-table-row-${gradeIndex}-grade`"
+                  class="pl-4 py-1"
+                  scope="row"
                 >
-                  {{ get(series, `data.${gradeIndex}.y`, 0) }}%
+                  {{ grade }}
                 </td>
+                <template v-for="(series, index) in chartSettings.series" :key="index">
+                  <td
+                    :id="`grade-distro-enroll-table-row-${gradeIndex}-ratio-${index}`"
+                    class="py-1"
+                  >
+                    {{ get(series, `data.${gradeIndex}.y`, 0) }}%
+                  </td>
+                  <td
+                    :id="`grade-distro-enroll-table-row-${gradeIndex}-count-${index}`"
+                    class="py-1"
+                  >
+                    {{ get(series, `data.${gradeIndex}.custom.count`, 0) }}
+                  </td>
+                </template>
               </tr>
             </tbody>
+            <tfoot>
+              <tr id="grade-distribution-enroll-table-row-totals">
+                <th class="pl-4 py-1" scope="row">Totals</th>
+                <template v-for="(series, index) in chartSettings.series" :key="index">
+                  <td
+                    :id="`grade-distro-enroll-table-row-totals-ratio-${index}`"
+                    class="font-weight-medium py-1"
+                  >
+                    {{ round(sumBy(series.data, 'y')) }}%
+                  </td>
+                  <td
+                    :id="`grade-distro-enroll-table-row-totals-count-${index}`"
+                    class="font-weight-medium py-1"
+                  >
+                    {{ sumBy(series.data, 'custom.count') }}
+                  </td>
+                </template>
+              </tr>
+            </tfoot>
           </table>
         </v-card>
       </v-expand-transition>
@@ -144,7 +177,7 @@ import {mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
 <script>
 import Context from '@/mixins/Context'
 import {Chart} from 'highcharts-vue'
-import {cloneDeep, debounce, each, find, get, includes, isEmpty, size, toUpper} from 'lodash'
+import {cloneDeep, debounce, each, find, get, includes, isEmpty, round, size, sumBy, toUpper} from 'lodash'
 import {getPriorEnrollmentGradeDistribution, searchCourses} from '@/api/grade-distribution'
 import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
 
@@ -192,6 +225,11 @@ export default {
     showTable: false,
     suppressValidation: true
   }),
+  computed: {
+    classSize() {
+      return get(this.gradeDistribution, `${this.selectedTerm.id}.0.classSize`)
+    }
+  },
   watch: {
     courseSearchText(newVal, oldVal) {
       if (newVal) {
@@ -216,9 +254,10 @@ export default {
     }
     this.chartSettings.title.widthAdjust = -200
     this.chartSettings.tooltip.distance = 24
+    const courseName = this.courseName
     this.chartSettings.tooltip.formatter = function () {
       const header = `<div id="grade-dist-enroll-tooltip-grade" class="font-weight-bold font-size-15">${this.x} Grade</div>
-          <div id="grade-dist-enroll-tooltip-course" class="font-size-13 text-grey-darken-1">${this.point.custom.courseName}</div>
+          <div id="grade-dist-enroll-tooltip-course" class="font-size-13 text-grey-darken-1">${courseName}</div>
           <div class="font-size-13 mb-2">
             Ratio of class: <span id="grade-dist-enroll-tooltip-series-0-value" class="font-weight-bold">${this.point.y}%</span>
           </div>
@@ -272,7 +311,7 @@ export default {
         this.chartSettings.series[0].data.push({
           color: color,
           custom: {
-            courseName: item.courseName,
+            count: item.count,
             symbol: '\u25A0'
           },
           dataLabels: showLabels ? this.getDataLabel(item.y, color) : {enabled: false},
@@ -307,7 +346,7 @@ export default {
         if (includes(this.chartSettings.xAxis.categories, item.grade )) {
           gradesWithoutPriorEnroll.data.push({
             custom: {
-              courseName: item.courseName,
+              count: get(item, 'noPriorEnrollCount', 0),
               symbol: '\u25C6'
             },
             dataLabels: {enabled: false},
@@ -315,7 +354,7 @@ export default {
           })
           gradesWithPriorEnroll.data.push({
             custom: {
-              courseName: item.courseName,
+              count: get(item, 'priorEnrollCount', 0),
               symbol: '\u25CF'
             },
             dataLabels: {enabled: false},
@@ -352,6 +391,7 @@ export default {
       }
       this.setChartTitle()
     },
+    round,
     search() {
       this.isSearching = true
       if (this.pendingCourseSearch) {
@@ -367,13 +407,13 @@ export default {
     },
     setChartTitle() {
       if (size(this.chartSettings.series) === 3) {
-        const courseName = this.gradeDistribution[this.selectedTerm.id][0].courseName
-        this.chartSettings.title.text = `Relation of ${courseName} Students Who Have and Have Not Taken ${this.selectedCourse}&mdash;${this.selectedTerm.name}`
+        this.chartSettings.title.text = `Relation of ${this.courseName} Students Who Have and Have Not Taken ${this.selectedCourse}&mdash;${this.selectedTerm.name}`
       } else {
         this.chartSettings.title.text = `Overall Class Grade Distribution&mdash;${this.selectedTerm.name}`
       }
     },
     size,
+    sumBy,
     toUpper
   }
 }
@@ -402,5 +442,10 @@ export default {
   right: 0;
   top: 75px;
   z-index: 100;
+}
+table {
+  thead tr th[colspan="2"] {
+    border-left: solid 1px $color-container-grey-border;
+  }
 }
 </style>

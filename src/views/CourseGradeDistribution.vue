@@ -12,6 +12,7 @@
         <DemographicsChart
           :chart-defaults="chartDefaults"
           :colors="colors"
+          :course-name="gradeDistribution.courseName"
           :grade-distribution="gradeDistribution.demographics"
         />
       </v-card>
