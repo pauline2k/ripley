@@ -47,13 +47,13 @@ EMPTY_DEMOGRAPHIC_DISTRIBUTION = {
         'false': 0,
     },
     'count': 0,
-    'totalGpa': 0,
+    'totalGradePoints': 0,
 }
 
 
 def get_grade_distributions(term_id, section_ids, instructor_uid):  # noqa
-    gpa_distribution = {}
-    gpa_totals = {}
+    demographics_distribution = {}
+    grade_totals = {}
     grade_distribution_by_term = {}
     student_grades = get_grades_with_demographics(term_id, section_ids, instructor_uid)
     if len(student_grades) < int(app.config['NEWT_MINIMUM_CLASS_SIZE']):
@@ -61,21 +61,23 @@ def get_grade_distributions(term_id, section_ids, instructor_uid):  # noqa
 
     for row in student_grades:
         term_id = row['term_id']
-        if row['gpa']:
-            if term_id not in gpa_distribution:
-                gpa_distribution[term_id] = deepcopy(EMPTY_DEMOGRAPHIC_DISTRIBUTION)
-                gpa_totals[term_id] = deepcopy(EMPTY_DEMOGRAPHIC_DISTRIBUTION)
-            gpa_distribution[term_id]['count'] += 1
-            gpa_distribution[term_id]['totalGpa'] += row['gpa']
-            gpa_distribution[term_id]['courseName'] = row['sis_course_name']
+        grade = row['grade']
+        if grade:
+            grade_points = GRADE_POINTS.get(grade, 0)
+            if term_id not in demographics_distribution:
+                demographics_distribution[term_id] = deepcopy(EMPTY_DEMOGRAPHIC_DISTRIBUTION)
+                grade_totals[term_id] = deepcopy(EMPTY_DEMOGRAPHIC_DISTRIBUTION)
+            demographics_distribution[term_id]['count'] += 1
+            demographics_distribution[term_id]['totalGradePoints'] += grade_points
+            demographics_distribution[term_id]['courseName'] = row['sis_course_name']
 
             def _count_boolean_value(column, distribution_key):
                 if row[column]:
-                    gpa_distribution[term_id][distribution_key]['true'] += row['gpa']
-                    gpa_totals[term_id][distribution_key]['true'] += 1
+                    demographics_distribution[term_id][distribution_key]['true'] += grade_points
+                    grade_totals[term_id][distribution_key]['true'] += 1
                 else:
-                    gpa_distribution[term_id][distribution_key]['false'] += row['gpa']
-                    gpa_totals[term_id][distribution_key]['false'] += 1
+                    demographics_distribution[term_id][distribution_key]['false'] += grade_points
+                    grade_totals[term_id][distribution_key]['false'] += 1
 
             _count_boolean_value('transfer', 'transferStatus')
             _count_boolean_value('minority', 'underrepresentedMinorityStatus')
@@ -83,26 +85,25 @@ def get_grade_distributions(term_id, section_ids, instructor_uid):  # noqa
 
             def _count_string_value(value, distribution_key):
                 value = str(value) if value else 'none'
-                if value not in gpa_distribution[term_id][distribution_key]:
-                    gpa_distribution[term_id][distribution_key][value] = 0
-                if value not in gpa_totals[term_id][distribution_key]:
-                    gpa_totals[term_id][distribution_key][value] = 0
-                gpa_distribution[term_id][distribution_key][value] += row['gpa']
-                gpa_totals[term_id][distribution_key][value] += 1
+                if value not in demographics_distribution[term_id][distribution_key]:
+                    demographics_distribution[term_id][distribution_key][value] = 0
+                if value not in grade_totals[term_id][distribution_key]:
+                    grade_totals[term_id][distribution_key][value] = 0
+                demographics_distribution[term_id][distribution_key][value] += grade_points
+                grade_totals[term_id][distribution_key][value] += 1
 
             _count_string_value(_simplify_gender(row['gender']), 'genders')
 
-        if row['grade']:
             if term_id not in grade_distribution_by_term:
                 grade_distribution_by_term[term_id] = {
                     'count': 0,
                 }
-            if row['grade'] not in grade_distribution_by_term[term_id]:
-                grade_distribution_by_term[term_id][row['grade']] = {
+            if grade not in grade_distribution_by_term[term_id]:
+                grade_distribution_by_term[term_id][grade] = {
                     'count': 0,
                     'courseName': row['sis_course_name'],
                 }
-            grade_distribution_by_term[term_id][row['grade']]['count'] += 1
+            grade_distribution_by_term[term_id][grade]['count'] += 1
             grade_distribution_by_term[term_id]['count'] += 1
 
     sorted_grade_distribution_by_term = {}
@@ -121,26 +122,26 @@ def get_grade_distributions(term_id, section_ids, instructor_uid):  # noqa
                 sorted_grade_distribution.append(term_distribution[grade])
         sorted_grade_distribution_by_term[term_id] = sorted_grade_distribution
 
-    sorted_gpa_distribution = []
-    for term_id in sorted(gpa_distribution.keys()):
-        for distribution_key, values in gpa_distribution[term_id].items():
-            if distribution_key in ['count', 'courseName', 'totalGpa']:
+    sorted_demographics_distribution = []
+    for term_id in sorted(demographics_distribution.keys()):
+        for distribution_key, values in demographics_distribution[term_id].items():
+            if distribution_key in ['count', 'courseName', 'totalGradePoints']:
                 continue
-            for distribution_value, total_gpa in values.items():
-                student_count = gpa_totals[term_id][distribution_key][distribution_value]
-                gpa_distribution[term_id][distribution_key][distribution_value] = {
+            for distribution_value, total_grade_points in values.items():
+                student_count = grade_totals[term_id][distribution_key][distribution_value]
+                demographics_distribution[term_id][distribution_key][distribution_value] = {
+                    'averageGradePoints': (total_grade_points / student_count) if student_count > 0 else 0,
                     'count': student_count,
-                    'averageGpa': (total_gpa / student_count) if student_count > 0 else 0,
                 }
-        term_student_count = gpa_distribution[term_id]['count']
-        term_total_gpa = gpa_distribution[term_id].pop('totalGpa', 0)
-        sorted_gpa_distribution.append({
-            'averageGpa': (term_total_gpa / term_student_count) if term_student_count > 0 else 0,
-            **gpa_distribution[term_id],
+        term_student_count = demographics_distribution[term_id]['count']
+        term_total_grade_points = demographics_distribution[term_id].pop('totalGradePoints', 0)
+        sorted_demographics_distribution.append({
+            'averageGradePoints': (term_total_grade_points / term_student_count) if term_student_count > 0 else 0,
+            **demographics_distribution[term_id],
             'termId': term_id,
             'termName': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
         })
-    return sorted_gpa_distribution, sorted_grade_distribution_by_term
+    return sorted_demographics_distribution, sorted_grade_distribution_by_term
 
 
 def get_grade_distribution_with_prior_enrollments(term_id, course_name, instructor_uid, prior_course_name):
@@ -192,6 +193,26 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, instruct
 
 
 GRADE_ORDERING = ('A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'P', 'NP', 'I')
+
+
+GRADE_POINTS = {
+    'A+': 4,
+    'A': 4,
+    'A-': 4,
+    'B+': 3,
+    'B': 3,
+    'B-': 3,
+    'C+': 2,
+    'C': 2,
+    'C-': 2,
+    'D+': 1,
+    'D': 1,
+    'D-': 1,
+    'F': 0,
+    'P': 0,
+    'NP': 0,
+    'I': 0,
+}
 
 
 def _grade_ordering_index(grade):

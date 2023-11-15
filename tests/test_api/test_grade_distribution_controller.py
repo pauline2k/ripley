@@ -95,16 +95,17 @@ class TestGetGradeDistribution:
             response = _api_get_grade_distributions(client, canvas_site_id)
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
             assert response['demographics'][0]['genders'] == {
-                'female': {'averageGpa': 3.6315, 'count': 4},
-                'male': {'averageGpa': 2.8485, 'count': 2},
+                'female': {'averageGradePoints': 1.75, 'count': 4},
+                'male': {'averageGradePoints': 0.0, 'count': 2},
             }
             assert response['enrollments']['2225'][0] == {
-                'classSize': 6,
-                'count': 6,
+                'count': 1,
                 'courseName': 'ASTRON 218',
-                'grade': 'P',
-                'percentage': 100.0,
+                'classSize': 6,
+                'grade': 'A-',
+                'percentage': 16.7,
             }
+
             assert response['terms'] == [
                 {
                     'id': '2225',
@@ -141,8 +142,8 @@ class TestGetGradeDistribution:
             response = _api_get_grade_distributions(client, canvas_site_id)
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
             assert response['demographics'][0]['genders'] == {
-                'female': {'averageGpa': 3.6315, 'count': 4},
-                'male': {'averageGpa': 2.8485, 'count': 2},
+                'female': {'averageGradePoints': 1.75, 'count': 4},
+                'male': {'averageGradePoints': 0.0, 'count': 2},
             }
             assert response['enrollments']['2228'][0] == {
                 'classSize': 91,
