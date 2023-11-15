@@ -24,6 +24,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 # Development environment.
+ALLOW_STANDALONE_FOR_NON_ADMINS = True
+
 DEBUG = True
 
 INDEX_HTML = 'index.html'

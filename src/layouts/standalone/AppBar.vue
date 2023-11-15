@@ -6,7 +6,7 @@
           <BuildSummary />
         </div>
         <div
-          v-if="config.devAuthEnabled && config.isVueAppDebugMode && currentUser.isAuthenticated"
+          v-if="config.devAuthEnabled && config.isVueAppDebugMode && currentUser.canAccessStandaloneView"
           class="align-center d-flex pr-5"
         >
           <div v-if="canvasSiteId" class="pr-2">

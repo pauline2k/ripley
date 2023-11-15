@@ -24,6 +24,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 import os
 
+ALLOW_STANDALONE_FOR_NON_ADMINS = True
+
 AWS_APP_ROLE_ARN = 'arn:aws:iam::123456789012:role/test-role'
 
 # Base directory for the application (one level up from this config file).

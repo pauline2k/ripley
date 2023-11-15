@@ -8,7 +8,7 @@
     fluid
   >
     <v-card
-      class="elevation-1 mx-auto text-center"
+      class="elevation-1 mt-12 mx-auto text-center"
       :max-width="applicationState.stacktrace ? 640 : 480"
       outlined
     >
@@ -22,15 +22,15 @@
       <v-card-title>
         <Header1 :text="header" />
       </v-card-title>
-      <v-card-text>
+      <v-card-text v-if="message || stacktrace">
         <div
           id="error-message"
           aria-live="polite"
           role="alert"
         >
-          {{ applicationState.message }}
-          <div v-if="applicationState.stacktrace" class="py-3">
-            <pre>{{ applicationState.stacktrace }}</pre>
+          <span v-if="message">{{ message }}</span>
+          <div v-if="stacktrace" class="py-3">
+            <pre>{{ stacktrace }}</pre>
           </div>
         </div>
       </v-card-text>
@@ -46,26 +46,41 @@ import AppBar from '@/layouts/standalone/AppBar.vue'
 import Context from '@/mixins/Context'
 import ContactUsPrompt from '@/components/utils/ContactUsPrompt'
 import Header1 from '@/components/utils/Header1.vue'
-import {useContextStore} from '@/stores/context'
+import {get} from 'lodash'
+import {useRoute} from 'vue-router'
 
 export default {
   name: 'Error',
   components: {AppBar, ContactUsPrompt, Header1},
   mixins: [Context],
   data: () => ({
-    header: undefined
+    header: undefined,
+    message: undefined,
+    stacktrace: undefined
   }),
   created() {
-    let url = new URL(window.location.href)
-    const error = url.searchParams.get('error')
-    const isError = !!error || this.$route.path.includes('error')
-    const show404 = !isError && [200, 404].includes(this.applicationState.status)
-    useContextStore().setApplicationState(
-      this.applicationState.status,
-      error || this.applicationState.message
-    )
-    this.header = show404 ? 'Page Not Found' : 'Uh oh, there was a problem.'
+    const params = new URL(window.location.href).searchParams
+    this.header = params.get('h') || this.getDefaultHeader()
+    const body = params.get('m') || this.applicationState.message
+    this.message = this.header === body ? null : body
+    this.stacktrace = this.applicationState.stacktrace
     this.$ready()
+  },
+  methods: {
+    getDefaultHeader() {
+      const status = get(useRoute().meta, 'is404') ? 404 : this.applicationState.status
+      switch(status) {
+      case 403: {
+        return 'Unauthorized'
+      }
+      case 404: {
+        return 'Page Not Found'
+      }
+      default: {
+        return 'Uh oh, there was a problem.'
+      }
+      }
+    }
   }
 }
 </script>

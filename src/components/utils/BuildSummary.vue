@@ -1,11 +1,11 @@
 <template>
   <div class="align-center d-flex">
     <div class="pr-2">
-      <span v-if="$route.meta.isHome">
+      <span v-if="!offerHomeLink">
         <v-icon color="primary" :icon="mdiAlien" size="large" />
       </span>
       <router-link
-        v-if="!$route.meta.isHome"
+        v-if="offerHomeLink"
         id="link-to-home"
         class="text-decoration-none"
         to="/"
@@ -34,6 +34,11 @@
 import {get} from 'lodash'
 import {mdiAlien} from '@mdi/js'
 import {useContextStore} from '@/stores/context'
+import {useRoute} from 'vue-router'
 
-const config = useContextStore().config
+const context = useContextStore()
+const config = context.config
+const currentUser = context.currentUser
+const isHome = get(useRoute().meta, 'isHome')
+const offerHomeLink = currentUser.canAccessStandaloneView && (!isHome || context.applicationState.status !== 200)
 </script>
