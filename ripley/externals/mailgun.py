@@ -69,10 +69,12 @@ def send_payload_to_address(payload, address):
 
 def send_payload_to_recipients(payload, recipients):
     recipient_fields = _get_recipient_fields(recipients)
+    files = payload.pop('attachments', None)
     response = authorized_request(
         f"{app.config['MAILGUN_BASE_URL']}/{app.config['MAILGUN_DOMAIN']}/messages",
         method='post',
         data={**payload, **recipient_fields},
+        files=files,
     )
     if not response or not response.content or 'Queued' not in str(response.content):
         return False

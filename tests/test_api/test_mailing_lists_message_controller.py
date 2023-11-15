@@ -104,10 +104,11 @@ def _mailing_list_fixture(expected_body_message):
         MailingList.populate(mailing_list=mailing_list)
         std_commit(allow_test_environment=True)
 
-        yield
-
-        MailingList.delete(mailing_list.id)
-        std_commit(allow_test_environment=True)
+        try:
+            yield
+        finally:
+            MailingList.delete(mailing_list.id)
+            std_commit(allow_test_environment=True)
 
 
 def _default_message_attrs(timestamp=None):

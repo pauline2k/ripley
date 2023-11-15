@@ -47,6 +47,8 @@ def send_message_to_list(mailing_list, sender, message_attrs):
         payload['text'] = ' '
 
     payload['from'] = _set_from(sender, mailing_list)
+    if message_attrs['attachments'].get('data'):
+        _set_attachments(message_attrs['attachments'], payload)
 
     members = MailingListMembers.get_mailing_list_members(mailing_list.id)
     # Mailgun limits batch sending to 1000 members at a time.
@@ -91,6 +93,31 @@ def _set_from(member, mailing_list):
     if mailing_list.canvas_site_name:
         display_name = f'{display_name} ({mailing_list.canvas_site_name})'
     return formataddr((display_name, '<no-reply@bcourses-mail.berkeley.edu>'))
+
+
+def _set_attachments(attachment_attrs, payload):
+    if attachment_attrs.get('cid_map'):
+        payload['inline'] = []
+        for cid, key in attachment_attrs['cid_map'].items():
+            attachment = attachment_attrs['data'].pop(key, None)
+            original_filename = attachment.get('original_filename')
+            if original_filename:
+                # Mailgun expects inline attachments to be specified by filename, not content-id.
+                for key in ('html', 'plain'):
+                    if payload.get(key):
+                        payload[key] = payload[key].replace(cid, original_filename)
+            payload['inline'].append(_to_file_upload(attachment))
+
+    payload['attachment'] = []
+    for attachment in attachment_attrs['data'].values():
+        payload['attachment'].append(_to_file_upload(attachment))
+
+
+def _to_file_upload(attachment):
+    tempfile = attachment.get('tempfile') or ''
+    content_type = attachment.get('content_type ') or 'application/octet-stream'
+    filename = attachment.get('original_filename') or ''
+    return (filename, tempfile, content_type)
 
 
 class TagStripper(HTMLParser):
