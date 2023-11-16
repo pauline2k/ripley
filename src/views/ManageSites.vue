@@ -76,14 +76,13 @@
                         :label="getTermName(termId)"
                       >
                         <option
-                          v-for="course in courses"
+                          v-for="course in labelCourses(courses)"
                           :id="`canvas-site-${course.canvasSiteId}`"
                           :key="course.canvasSiteId"
                           :aria-label="`${getTermName(termId)} group: ${course.courseCode} ${course.name}`"
                           :value="course.canvasSiteId"
-                        >
-                          {{ course.courseCode }} &mdash; {{ course.name }}
-                        </option>
+                          v-html="course.label"
+                        />
                       </optgroup>
                     </select>
                   </div>
@@ -145,7 +144,7 @@ import {getTermName} from '@/utils'
 
 <script>
 import Context from '@/mixins/Context'
-import {each, get, size, trim} from 'lodash'
+import {each, get, map, size, trim, uniq} from 'lodash'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
 import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 import {getCanvasSite, getManageOfficialSections} from '@/api/canvas-site'
@@ -236,6 +235,14 @@ export default {
           this.isProcessing = false
         }
       }
+    },
+    labelCourses(courses) {
+      const getLabel = (course, enhance) => {
+        const prefix = enhance ? `${course.canvasSiteId}: ` : ''
+        return `${prefix}${course.courseCode} &mdash; ${course.name}`
+      }
+      const enhance = uniq(map(courses, c => getLabel(c))).size !== courses.length
+      return map(courses, c => ({...c, label: getLabel(c, enhance)}))
     },
     size,
     trim

@@ -313,29 +313,6 @@ export default {
         }
       )
     },
-    getStagedSections() {
-      const sections = {
-        addSections: [],
-        deleteSections: [],
-        updateSections: []
-      }
-      let valid = false
-      this.courseSemesterClasses.forEach(classItem => {
-        classItem.sections.forEach(section => {
-          if (section.stagedState === 'add') {
-            sections.addSections.push(section.id)
-            valid = true
-          } else if (section.stagedState === 'delete') {
-            sections.deleteSections.push(section.id)
-            valid = true
-          } else if (section.stagedState === 'update') {
-            sections.updateSections.push(section.id)
-            valid = true
-          }
-        })
-      })
-      return valid ? sections : false
-    },
     loadCourseLists(teachingTerms) {
       const courseSemester = find(teachingTerms, semester => {
         return (toString(semester.termId) === toString(this.canvasSite.term.id))
@@ -384,16 +361,35 @@ export default {
         (listMode === 'currentStaging' && section && !section.isCourseSection && section.stagedState === 'add')
     },
     saveChanges() {
-      const update = this.getStagedSections()
-      if (update) {
+      const sections = {
+        addSections: [],
+        deleteSections: [],
+        updateSections: []
+      }
+      let valid = false
+      this.courseSemesterClasses.forEach(classItem => {
+        classItem.sections.forEach(section => {
+          if (section.stagedState === 'add') {
+            sections.addSections.push(section.id)
+            valid = true
+          } else if (section.stagedState === 'delete') {
+            sections.deleteSections.push(section.id)
+            valid = true
+          } else if (section.stagedState === 'update') {
+            sections.updateSections.push(section.id)
+            valid = true
+          }
+        })
+      })
+      if (valid) {
         this.changeWorkflowStep('processing')
         this.jobStatus = 'sendingRequest'
         this.jobStatusMessage = ''
         updateSiteSections(
           this.canvasSiteId,
-          update.addSections,
-          update.deleteSections,
-          update.updateSections
+          sections.addSections,
+          sections.deleteSections,
+          sections.updateSections
         ).then(
           response => {
             this.backgroundJobId = response.jobId
@@ -416,7 +412,7 @@ export default {
     size,
     stageAdd(section) {
       if (!section.isCourseSection) {
-        set(section, 'stagedState', 'add')
+        section.stagedState = 'add'
         this.alertScreenReader(`Linked ${this.sectionString(section)} to the course site.`)
       } else {
         this.displayError = `Cannot link ${this.sectionString(section)} because it is already linked to the course site.`
@@ -426,7 +422,7 @@ export default {
     stageDelete(section) {
       if (section.isCourseSection) {
         this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
-        set(section, 'stagedState', 'delete')
+        section.stagedState = 'delete'
         this.alertScreenReader(`Unlinked ${this.sectionString(section)} from the course site.`)
       } else {
         this.displayError = `Cannot unlink ${this.sectionString(section)} because it is not linked to the course site.`
@@ -436,7 +432,7 @@ export default {
     stageUpdate(section) {
       if (section.isCourseSection) {
         this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
-        set(section, 'stagedState', 'update')
+        section.stagedState = 'update'
         this.alertScreenReader(`Updated ${this.sectionString(section)}.`)
       } else {
         this.displayError = `Cannot update ${this.sectionString(section)} because it is not linked to the course site.`
