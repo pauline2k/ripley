@@ -8,7 +8,7 @@
         :text="errorMessage"
         type="warning"
       />
-      <v-card v-if="get(gradeDistribution, 'demographics')" class="container mb-4" elevation="0">
+      <v-card v-if="size(get(gradeDistribution, 'demographics'))" class="container mb-4" elevation="0">
         <DemographicsChart
           :chart-defaults="chartDefaults"
           :colors="colors"
@@ -16,7 +16,7 @@
           :grade-distribution="gradeDistribution.demographics"
         />
       </v-card>
-      <v-card v-if="get(gradeDistribution, 'enrollments')" class="container mb-4" elevation="0">
+      <v-card v-if="size(get(gradeDistribution, 'enrollments'))" class="container mb-4" elevation="0">
         <PriorEnrollmentChart
           :chart-defaults="chartDefaults"
           :colors="colors"
@@ -34,7 +34,7 @@ import Context from '@/mixins/Context'
 import DemographicsChart from '@/components/bcourses/analytics/DemographicsChart'
 import Header1 from '@/components/utils/Header1'
 import PriorEnrollmentChart from '@/components/bcourses/analytics/PriorEnrollmentChart'
-import {get, orderBy} from 'lodash'
+import {get, orderBy, size} from 'lodash'
 import {getGradeDistribution} from '@/api/grade-distribution'
 
 export default {
@@ -156,7 +156,8 @@ export default {
     orderBy,
     showError(errorMessage) {
       this.errorMessage = errorMessage
-    }
+    },
+    size
   }
 }
 </script>
