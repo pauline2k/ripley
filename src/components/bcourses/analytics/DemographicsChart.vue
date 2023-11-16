@@ -245,7 +245,7 @@ export default {
           name: `${get(this.demographicOptions, group)['label']} Grades`
         }
         each(this.gradeDistribution, item => {
-          const value = get(item, `${group}`) || get(item, `${group}.${option}`)
+          const value = get(item, `${group}.${option}`) || get(item, `${group}`)
           secondarySeries.data.push({
             custom: {count: get(value, 'count', 0)},
             dataLabels: {

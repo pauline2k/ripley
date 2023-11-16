@@ -24,7 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 import requests_mock
-from tests.util import register_canvas_uris
+from tests.util import override_config, register_canvas_uris
 
 TERM_ID_CURRENT = '2232'
 TERM_ID_NEXT = '2235'
@@ -72,7 +72,7 @@ class TestGetGradeDistribution:
 
     def test_admin_no_grades(self, client, app, fake_auth):
         """Allows admin, throws 404 if grades if not present."""
-        with requests_mock.Mocker() as m:
+        with requests_mock.Mocker() as m, override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
             register_canvas_uris(app, {
                 'account': ['get_admins'],
                 'course': ['get_by_id_8876542', 'get_sections_8876542'],
@@ -84,7 +84,7 @@ class TestGetGradeDistribution:
 
     def test_admin_grades(self, client, app, fake_auth):
         """Allows admin, returns grades if present."""
-        with requests_mock.Mocker() as m:
+        with requests_mock.Mocker() as m, override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
             register_canvas_uris(app, {
                 'account': ['get_admins'],
                 'course': ['get_by_id_1010101', 'get_sections_1010101'],
@@ -94,6 +94,7 @@ class TestGetGradeDistribution:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             response = _api_get_grade_distributions(client, canvas_site_id)
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
+            assert len(response['demographics']) == 2
             assert response['demographics'][0]['genders'] == {
                 'female': {'averageGradePoints': 1.75, 'count': 4},
                 'male': {'averageGradePoints': 0.0, 'count': 2},
@@ -131,7 +132,7 @@ class TestGetGradeDistribution:
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
-        with requests_mock.Mocker() as m:
+        with requests_mock.Mocker() as m, override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
             register_canvas_uris(app, {
                 'account': ['get_admins'],
                 'course': ['get_by_id_1010101', 'get_sections_1010101', 'get_enrollments_8876542_4567890_past'],
@@ -141,6 +142,7 @@ class TestGetGradeDistribution:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
             response = _api_get_grade_distributions(client, canvas_site_id)
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
+            assert len(response['demographics']) == 2
             assert response['demographics'][0]['genders'] == {
                 'female': {'averageGradePoints': 1.75, 'count': 4},
                 'male': {'averageGradePoints': 0.0, 'count': 2},
@@ -203,7 +205,7 @@ class TestGetPriorEnrollmentGradeDistribution:
 
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
-        with requests_mock.Mocker() as m:
+        with requests_mock.Mocker() as m, override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
             canvas_site_id = '1234567'
             register_canvas_uris(app, {
                 'account': ['get_admins'],
@@ -326,7 +328,7 @@ class TestGetPriorEnrollmentGradeDistribution:
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
-        with requests_mock.Mocker() as m:
+        with requests_mock.Mocker() as m, override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
             canvas_site_id = '1234567'
             register_canvas_uris(app, {
                 'account': ['get_admins'],

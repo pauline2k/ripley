@@ -24,264 +24,407 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from ripley.merged.grade_distributions import get_grade_distribution_with_prior_enrollments, get_grade_distributions
+from tests.util import override_config
 
 
 class TestGradeDistributions:
 
-    def test_demographic_distribution(self):
-        gpa_demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'], '30000')
-        assert gpa_demographics_distribution == [
-            {
-                'averageGradePoints': 1.1666666666666667,
-                'count': 6,
-                'courseName': 'ASTRON 218',
-                'genders': {
-                    'female': {
-                        'averageGradePoints': 1.75,
-                        'count': 4,
+    def test_get_grade_distributions(self, app):
+        with override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
+            demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'], '30000')
+            assert demographics_distribution == [
+                {
+                    'averageGradePoints': 1.1666666666666667,
+                    'count': 6,
+                    'courseName': 'ASTRON 218',
+                    'genders': {
+                        'female': {
+                            'averageGradePoints': 1.75,
+                            'count': 4,
+                        },
+                        'male': {
+                            'averageGradePoints': 0.0,
+                            'count': 2,
+                        },
                     },
-                    'male': {
-                        'averageGradePoints': 0.0,
-                        'count': 2,
+                    'internationalStatus': {
+                        'false': {
+                            'averageGradePoints': 1.4,
+                            'count': 5,
+                        },
+                        'true': {
+                            'averageGradePoints': 0.0,
+                            'count': 1,
+                        },
+                    },
+                    'termId': '2225',
+                    'termName': 'Summer 2022',
+                    'transferStatus': {
+                        'false': {
+                            'averageGradePoints': 1.1666666666666667,
+                            'count': 6,
+                        },
+                        'true': {
+                            'averageGradePoints': 0,
+                            'count': 0,
+                        },
+                    },
+                    'underrepresentedMinorityStatus': {
+                        'false': {
+                            'averageGradePoints': 0.0,
+                            'count': 3,
+                        },
+                        'true': {
+                            'averageGradePoints': 2.3333333333333335,
+                            'count': 3,
+                        },
                     },
                 },
-                'internationalStatus': {
-                    'false': {
-                        'averageGradePoints': 1.4,
-                        'count': 5,
+                {
+                    'averageGradePoints': 3.5274725274725274,
+                    'count': 91,
+                    'courseName': 'ASTRON 218',
+                    'genders': {
+                        'female': {
+                            'averageGradePoints': 3.6470588235294117,
+                            'count': 68,
+                        },
+                        'male': {
+                            'averageGradePoints': 3.1363636363636362,
+                            'count': 22,
+                        },
+                        'other': {
+                            'averageGradePoints': 4.0,
+                            'count': 1,
+                        },
                     },
-                    'true': {
-                        'averageGradePoints': 0.0,
+                    'internationalStatus': {
+                        'false': {
+                            'averageGradePoints': 3.5301204819277108,
+                            'count': 83,
+                        },
+                        'true': {
+                            'averageGradePoints': 3.5,
+                            'count': 8,
+                        },
+                    },
+                    'termId': '2228',
+                    'termName': 'Fall 2022',
+                    'transferStatus': {
+                        'false': {
+                            'averageGradePoints': 3.5697674418604652,
+                            'count': 86,
+                        },
+                        'true': {
+                            'averageGradePoints': 2.8,
+                            'count': 5,
+                        },
+                    },
+                    'underrepresentedMinorityStatus': {
+                        'false': {
+                            'averageGradePoints': 3.1944444444444446,
+                            'count': 36,
+                        },
+                        'true': {
+                            'averageGradePoints': 3.7454545454545456,
+                            'count': 55,
+                        },
+                    },
+                },
+            ]
+            assert grade_distribution == {
+                '2225': [
+                    {
                         'count': 1,
+                        'courseName': 'ASTRON 218',
+                        'classSize': 6,
+                        'grade': 'A-',
+                        'percentage': 16.7,
                     },
-                },
-                'termId': '2225',
-                'termName': 'Summer 2022',
-                'transferStatus': {
-                    'false': {
-                        'averageGradePoints': 1.1666666666666667,
-                        'count': 6,
-                    },
-                    'true': {
-                        'averageGradePoints': 0,
-                        'count': 0,
-                    },
-                },
-                'underrepresentedMinorityStatus': {
-                    'false': {
-                        'averageGradePoints': 0.0,
-                        'count': 3,
-                    },
-                    'true': {
-                        'averageGradePoints': 2.3333333333333335,
-                        'count': 3,
-                    },
-                },
-            },
-            {
-                'averageGradePoints': 3.5274725274725274,
-                'count': 91,
-                'courseName': 'ASTRON 218',
-                'genders': {
-                    'female': {
-                        'averageGradePoints': 3.6470588235294117,
-                        'count': 68,
-                    },
-                    'male': {
-                        'averageGradePoints': 3.1363636363636362,
-                        'count': 22,
-                    },
-                    'other': {
-                        'averageGradePoints': 4.0,
+                    {
                         'count': 1,
+                        'courseName': 'ASTRON 218',
+                        'classSize': 6,
+                        'grade': 'C',
+                        'percentage': 16.7,
                     },
-                },
-                'internationalStatus': {
-                    'false': {
-                        'averageGradePoints': 3.5301204819277108,
-                        'count': 83,
+                    {
+                        'count': 1,
+                        'courseName': 'ASTRON 218',
+                        'classSize': 6,
+                        'grade': 'D',
+                        'percentage': 16.7,
                     },
-                    'true': {
-                        'averageGradePoints': 3.5,
+                    {
+                        'count': 3,
+                        'courseName': 'ASTRON 218',
+                        'classSize': 6,
+                        'grade': 'P',
+                        'percentage': 50.0,
+                    },
+                ],
+                '2228': [
+                    {
+                        'classSize': 91,
+                        'count': 16,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'A+',
+                        'percentage': 17.6,
+                    },
+                    {
+                        'classSize': 91,
+                        'count': 52,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'A',
+                        'percentage': 57.1,
+                    },
+                    {
+                        'classSize': 91,
                         'count': 8,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'A-',
+                        'percentage': 8.8,
                     },
-                },
-                'termId': '2228',
-                'termName': 'Fall 2022',
-                'transferStatus': {
-                    'false': {
-                        'averageGradePoints': 3.5697674418604652,
-                        'count': 86,
-                    },
-                    'true': {
-                        'averageGradePoints': 2.8,
+                    {
+                        'classSize': 91,
                         'count': 5,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'B+',
+                        'percentage': 5.5,
                     },
-                },
-                'underrepresentedMinorityStatus': {
-                    'false': {
-                        'averageGradePoints': 3.1944444444444446,
-                        'count': 36,
+                    {
+                        'classSize': 91,
+                        'count': 1,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'C+',
+                        'percentage': 1.1,
                     },
-                    'true': {
-                        'averageGradePoints': 3.7454545454545456,
-                        'count': 55,
+                    {
+                        'classSize': 91,
+                        'count': 1,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'F',
+                        'percentage': 1.1,
                     },
-                },
-            },
-        ]
-        assert grade_distribution == {
-            '2225': [
-                {
-                    'count': 1,
-                    'courseName': 'ASTRON 218',
-                    'classSize': 6,
-                    'grade': 'A-',
-                    'percentage': 16.7,
-                },
-                {
-                    'count': 1,
-                    'courseName': 'ASTRON 218',
-                    'classSize': 6,
-                    'grade': 'C',
-                    'percentage': 16.7,
-                },
-                {
-                    'count': 1,
-                    'courseName': 'ASTRON 218',
-                    'classSize': 6,
-                    'grade': 'D',
-                    'percentage': 16.7,
-                },
-                {
-                    'count': 3,
-                    'courseName': 'ASTRON 218',
-                    'classSize': 6,
-                    'grade': 'P',
-                    'percentage': 50.0,
-                },
-            ],
-            '2228': [
-                {
-                    'classSize': 91,
-                    'count': 16,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'A+',
-                    'percentage': 17.6,
-                },
-                {
-                    'classSize': 91,
-                    'count': 52,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'A',
-                    'percentage': 57.1,
-                },
-                {
-                    'classSize': 91,
-                    'count': 8,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'A-',
-                    'percentage': 8.8,
-                },
-                {
-                    'classSize': 91,
-                    'count': 5,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'B+',
-                    'percentage': 5.5,
-                },
-                {
-                    'classSize': 91,
-                    'count': 1,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'C+',
-                    'percentage': 1.1,
-                },
-                {
-                    'classSize': 91,
-                    'count': 1,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'F',
-                    'percentage': 1.1,
-                },
-                {
-                    'classSize': 91,
-                    'count': 8,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'P',
-                    'percentage': 8.8,
-                },
-            ],
-        }
+                    {
+                        'classSize': 91,
+                        'count': 8,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'P',
+                        'percentage': 8.8,
+                    },
+                ],
+            }
 
-    def test_enrollment_distribution(self):
-        d = get_grade_distribution_with_prior_enrollments(
-            term_id='2232',
-            course_name='ANTHRO 189',
-            instructor_uid=None,
-            prior_course_name='ASTRON 218',
-        )
-        assert d == {
-            '2232': [
+    def test_get_grade_distributions_minimum_threshold(self, app):
+        with override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 1):
+            demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'], '30000')
+            assert demographics_distribution == [
                 {
-                    'classSize': 7,
+                    'averageGradePoints': 3.5274725274725274,
+                    'count': 91,
                     'courseName': 'ASTRON 218',
-                    'grade': 'A+',
-                    'noPriorEnrollCount': 0,
-                    'noPriorEnrollPercentage': 0.0,
-                    'priorEnrollCount': 1,
-                    'priorEnrollPercentage': 16.7,
-                    'termName': 'Spring 2023',
-                    'totalCount': 1,
-                    'totalPercentage': 14.3,
+                    'genders': {
+                        'female': {
+                            'averageGradePoints': 3.6470588235294117,
+                            'count': 68,
+                        },
+                        'male': {
+                            'averageGradePoints': 3.1363636363636362,
+                            'count': 22,
+                        },
+                        'other': {
+                            'averageGradePoints': 4.0,
+                            'count': 1,
+                        },
+                    },
+                    'internationalStatus': {
+                        'false': {
+                            'averageGradePoints': 3.5301204819277108,
+                            'count': 83,
+                        },
+                        'true': {
+                            'averageGradePoints': 3.5,
+                            'count': 8,
+                        },
+                    },
+                    'termId': '2228',
+                    'termName': 'Fall 2022',
+                    'transferStatus': {
+                        'false': {
+                            'averageGradePoints': 3.5697674418604652,
+                            'count': 86,
+                        },
+                        'true': {
+                            'averageGradePoints': 2.8,
+                            'count': 5,
+                        },
+                    },
+                    'underrepresentedMinorityStatus': {
+                        'false': {
+                            'averageGradePoints': 3.1944444444444446,
+                            'count': 36,
+                        },
+                        'true': {
+                            'averageGradePoints': 3.7454545454545456,
+                            'count': 55,
+                        },
+                    },
                 },
-                {
-                    'classSize': 7,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'A',
-                    'noPriorEnrollCount': 1,
-                    'noPriorEnrollPercentage': 100.0,
-                    'priorEnrollCount': 1,
-                    'priorEnrollPercentage': 16.7,
-                    'termName': 'Spring 2023',
-                    'totalCount': 2,
-                    'totalPercentage': 28.6,
-                },
-                {
-                    'classSize': 7,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'A-',
-                    'noPriorEnrollCount': 0,
-                    'noPriorEnrollPercentage': 0.0,
-                    'priorEnrollCount': 1,
-                    'priorEnrollPercentage': 16.7,
-                    'termName': 'Spring 2023',
-                    'totalCount': 1,
-                    'totalPercentage': 14.3,
-                },
-                {
-                    'classSize': 7,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'B+',
-                    'noPriorEnrollCount': 0,
-                    'noPriorEnrollPercentage': 0,
-                    'priorEnrollCount': 2,
-                    'priorEnrollPercentage': 33.3,
-                    'termName': 'Spring 2023',
-                    'totalCount': 2,
-                    'totalPercentage': 28.6,
-                },
-                {
-                    'classSize': 7,
-                    'courseName': 'ASTRON 218',
-                    'grade': 'B',
-                    'noPriorEnrollCount': 0,
-                    'noPriorEnrollPercentage': 0.0,
-                    'priorEnrollCount': 1,
-                    'priorEnrollPercentage': 16.7,
-                    'termName': 'Spring 2023',
-                    'totalCount': 1,
-                    'totalPercentage': 14.3,
-                },
-            ],
-        }
+            ]
+            assert grade_distribution == {
+                '2225': [
+                    {
+                        'count': 1,
+                        'courseName': 'ASTRON 218',
+                        'classSize': 6,
+                        'grade': 'A-',
+                        'percentage': 16.7,
+                    },
+                    {
+                        'count': 1,
+                        'courseName': 'ASTRON 218',
+                        'classSize': 6,
+                        'grade': 'C',
+                        'percentage': 16.7,
+                    },
+                    {
+                        'count': 1,
+                        'courseName': 'ASTRON 218',
+                        'classSize': 6,
+                        'grade': 'D',
+                        'percentage': 16.7,
+                    },
+                    {
+                        'count': 3,
+                        'courseName': 'ASTRON 218',
+                        'classSize': 6,
+                        'grade': 'P',
+                        'percentage': 50.0,
+                    },
+                ],
+                '2228': [
+                    {
+                        'classSize': 91,
+                        'count': 16,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'A+',
+                        'percentage': 17.6,
+                    },
+                    {
+                        'classSize': 91,
+                        'count': 52,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'A',
+                        'percentage': 57.1,
+                    },
+                    {
+                        'classSize': 91,
+                        'count': 8,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'A-',
+                        'percentage': 8.8,
+                    },
+                    {
+                        'classSize': 91,
+                        'count': 5,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'B+',
+                        'percentage': 5.5,
+                    },
+                    {
+                        'classSize': 91,
+                        'count': 1,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'C+',
+                        'percentage': 1.1,
+                    },
+                    {
+                        'classSize': 91,
+                        'count': 1,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'F',
+                        'percentage': 1.1,
+                    },
+                    {
+                        'classSize': 91,
+                        'count': 8,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'P',
+                        'percentage': 8.8,
+                    },
+                ],
+            }
+
+    def test_enrollment_distribution(self, app):
+        with override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 1):
+            d = get_grade_distribution_with_prior_enrollments(
+                term_id='2232',
+                course_name='ANTHRO 189',
+                instructor_uid=None,
+                prior_course_name='ASTRON 218',
+            )
+            assert d == {
+                '2232': [
+                    {
+                        'classSize': 7,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'A+',
+                        'noPriorEnrollCount': 0,
+                        'noPriorEnrollPercentage': 0.0,
+                        'priorEnrollCount': 1,
+                        'priorEnrollPercentage': 16.7,
+                        'termName': 'Spring 2023',
+                        'totalCount': 1,
+                        'totalPercentage': 14.3,
+                    },
+                    {
+                        'classSize': 7,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'A',
+                        'noPriorEnrollCount': 1,
+                        'noPriorEnrollPercentage': 100.0,
+                        'priorEnrollCount': 1,
+                        'priorEnrollPercentage': 16.7,
+                        'termName': 'Spring 2023',
+                        'totalCount': 2,
+                        'totalPercentage': 28.6,
+                    },
+                    {
+                        'classSize': 7,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'A-',
+                        'noPriorEnrollCount': 0,
+                        'noPriorEnrollPercentage': 0.0,
+                        'priorEnrollCount': 1,
+                        'priorEnrollPercentage': 16.7,
+                        'termName': 'Spring 2023',
+                        'totalCount': 1,
+                        'totalPercentage': 14.3,
+                    },
+                    {
+                        'classSize': 7,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'B+',
+                        'noPriorEnrollCount': 0,
+                        'noPriorEnrollPercentage': 0,
+                        'priorEnrollCount': 2,
+                        'priorEnrollPercentage': 33.3,
+                        'termName': 'Spring 2023',
+                        'totalCount': 2,
+                        'totalPercentage': 28.6,
+                    },
+                    {
+                        'classSize': 7,
+                        'courseName': 'ASTRON 218',
+                        'grade': 'B',
+                        'noPriorEnrollCount': 0,
+                        'noPriorEnrollPercentage': 0.0,
+                        'priorEnrollCount': 1,
+                        'priorEnrollPercentage': 16.7,
+                        'termName': 'Spring 2023',
+                        'totalCount': 1,
+                        'totalPercentage': 14.3,
+                    },
+                ],
+            }

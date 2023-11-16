@@ -91,7 +91,7 @@ FIXTURES_PATH = None
 # Enforce dry run mode on all jobs.
 FORCE_DRY_RUN = False
 
-GRADE_DISTRIBUTION_MAX_DISTINCT_COURSES = 20
+GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY = 10
 
 # Minutes of inactivity before session cookie is destroyed
 INACTIVE_SESSION_LIFETIME = 120
