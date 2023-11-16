@@ -31,6 +31,7 @@
 </template>
 
 <script setup>
+import {computed} from 'vue'
 import {get} from 'lodash'
 import {mdiAlien} from '@mdi/js'
 import {useContextStore} from '@/stores/context'
@@ -39,6 +40,8 @@ import {useRoute} from 'vue-router'
 const context = useContextStore()
 const config = context.config
 const currentUser = context.currentUser
-const isHome = get(useRoute().meta, 'isHome')
-const offerHomeLink = currentUser.canAccessStandaloneView && (!isHome || context.applicationState.status !== 200)
+const offerHomeLink = computed(() => {
+  return currentUser.canAccessStandaloneView
+    && (!get(useRoute().meta, 'isHome', false) || context.applicationState.status !== 200)
+})
 </script>

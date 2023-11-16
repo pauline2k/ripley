@@ -36,13 +36,15 @@ export default {
     options: []
   }),
   created() {
-    this.addOption('my-profile', 'My Profile', this.goProfile)
-    if (this.currentUser.isAdmin) {
-      this.addOption('acheron-lv-426', 'Acheron (LV-426)', this.goAcheron)
-    }
-    const canvasSiteId = this.currentUser.canvasSiteId
-    if (canvasSiteId) {
-      this.addOption('current-user-canvas-site', `Canvas Site ${canvasSiteId}`, this.goCanvasSiteSummary)
+    if (this.currentUser.canAccessStandaloneView) {
+      this.addOption('my-profile', 'My Profile', this.goProfile)
+      if (this.currentUser.isAdmin) {
+        this.addOption('acheron-lv-426', 'Acheron (LV-426)', this.goAcheron)
+      }
+      const canvasSiteId = this.currentUser.canvasSiteId
+      if (canvasSiteId) {
+        this.addOption('current-user-canvas-site', `Canvas Site ${canvasSiteId}`, this.goCanvasSiteSummary)
+      }
     }
     this.addOption('log-out', 'Log Out', this.logOut)
   },

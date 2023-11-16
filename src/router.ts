@@ -175,6 +175,13 @@ const routes:RouteRecordRaw[] = [
       {
         component: Error,
         meta: {
+          isError: true
+        },
+        path: '/error'
+      },
+      {
+        component: Error,
+        meta: {
           is404: true
         },
         path: '/:pathMatch(.*)'
@@ -188,20 +195,25 @@ const router = createRouter({
   routes,
 })
 
-router.beforeResolve(async to => {
+router.beforeEach((to, from, next) => {
   const context = useContextStore()
   context.loadingStart(to)
-  if (to.query.error) {
-    context.setApplicationState(500, to.query.error)
-  } else {
-    const currentUser = context.currentUser
-    if (currentUser.isAuthenticated) {
-      const unauthorized = !isInIframe && !currentUser.canAccessStandaloneView
-      if (unauthorized) {
-        context.setApplicationState(403, 'Unauthorized')
+  if (!to.meta.isError && !to.meta.is404) {
+    if (to.query.error) {
+      context.setApplicationState(500, to.query.error)
+      return next({path: '/error'})
+    } else if (!to.meta.isError && !to.meta.is404) {
+      const currentUser = context.currentUser
+      if (currentUser.isAuthenticated) {
+        const unauthorized = !isInIframe && !currentUser.canAccessStandaloneView
+        if (unauthorized) {
+          context.setApplicationState(403, 'Unauthorized')
+          return next({path: '/error'})
+        }
       }
     }
   }
+  next()
 })
 
 router.afterEach((to: any) => {
