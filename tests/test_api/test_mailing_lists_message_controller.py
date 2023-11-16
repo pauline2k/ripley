@@ -26,7 +26,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from contextlib import contextmanager
 import hashlib
 import hmac
-import json
 from time import time
 from urllib.parse import parse_qs
 
@@ -69,8 +68,7 @@ class TestRelayMailingListMessage:
 def _api_submit_message(client, message_attrs, expected_status_code=200):
     response = client.post(
         '/api/mailing_lists/message',
-        data=json.dumps(message_attrs),
-        content_type='application/json',
+        data=message_attrs,
     )
     assert response.status_code == expected_status_code
     return response.json

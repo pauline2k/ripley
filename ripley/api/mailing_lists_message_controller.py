@@ -43,7 +43,7 @@ from ripley.models.mailing_list_members import MailingListMembers
 @app.route('/api/mailing_lists/message', methods=['POST'])
 def relay():
     # See https://documentation.mailgun.com/api-sending.html#retrieving-stored-messages for Mailgun's message parameters.
-    params = request.get_json()
+    params = request.form
     if not _authenticate_message(params):
         raise UnauthorizedRequestError('Could not authenticate mailing list message')
     message_attrs = {
@@ -59,7 +59,7 @@ def relay():
         },
         'sender': parseaddr(params.get('sender')),
         'recipient': parseaddr(params.get('recipient')),
-        'attachments': _extract_attachments(params),
+        'attachments': _extract_attachments(params, request.files),
     }
     success = _relay_to_list(message_attrs)
     return tolerant_jsonify({'success': success})
@@ -101,7 +101,7 @@ def _relay_to_list(message_attrs):
     return True
 
 
-def _extract_attachments(params):
+def _extract_attachments(params, files):
     attachments = {}
     if params.get('attachment-count'):
         attachments['count'] = int(params['attachment-count'])
@@ -119,9 +119,10 @@ def _extract_attachments(params):
                 stripped_cid = cid.replace('<', '').replace('>', '')
                 attachments['cid_map'][stripped_cid] = attachment_name
 
-    for key, value in params.items():
-        if re.match(r'^attachment-\d+$', key):
-            attachments['data'][key] = value
+    if files:
+        for key, value in files.items():
+            if re.match(r'^attachment-\d+$', key):
+                attachments['data'][key] = value
 
     return attachments
 
@@ -134,15 +135,15 @@ def _authenticate_message(params):
     if not signature or not _verify_signature(timestamp, params.get('token'), signature):
         return False
     # Cache signatures to prevent replay attempts.
-    signature_key = "mailing_lists_message/signature/#{params['signature']}"
+    signature_key = f"mailing_lists_message/signature/{params['signature']}"
     if (not cache.get(signature_key)) and cache.set(signature_key, True, timeout=3600):
         return True
 
 
 def _bounce(message_attrs, reason):
     message_text = (
-        f"{' '.join(reason.split())}\n\n-------------\nFrom: {message_attrs['from']}\nTo: #{message_attrs['to']}\n"
-        f"Subject: #{message_attrs['subject']}\n\n#{message_attrs['body']['plain']}")
+        f"{' '.join(reason.split())}\n\n-------------\nFrom: {message_attrs['from']}\nTo: {message_attrs['to']}\n"
+        f"Subject: {message_attrs['subject']}\n\n{message_attrs['body']['plain']}")
     payload = {
         'from': 'bCourses Mailing Lists <no-reply@bcourses-mail.berkeley.edu>',
         'subject': 'Undeliverable mail',
