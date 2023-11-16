@@ -109,8 +109,14 @@ def get_grade_distributions(term_id, section_ids, instructor_uid):  # noqa
     sorted_grade_distribution_by_term = {}
     for term_id, term_distribution in grade_distribution_by_term.items():
         sorted_grade_distribution = []
+        sufficient_data = True
         for grade in sorted(term_distribution.keys(), key=_grade_ordering_index):
+            if not sufficient_data:
+                continue
             if grade in GRADE_ORDERING:
+                if term_distribution[grade]['count'] < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
+                    sufficient_data = False
+                    continue
                 term_distribution[grade].update({
                     'classSize': term_distribution['count'],
                     'grade': grade,
@@ -120,27 +126,33 @@ def get_grade_distributions(term_id, section_ids, instructor_uid):  # noqa
                     ),
                 })
                 sorted_grade_distribution.append(term_distribution[grade])
-        sorted_grade_distribution_by_term[term_id] = sorted_grade_distribution
+        if sufficient_data:
+            sorted_grade_distribution_by_term[term_id] = sorted_grade_distribution
 
     sorted_demographics_distribution = []
     for term_id in sorted(demographics_distribution.keys()):
+        sufficient_data = True
         for distribution_key, values in demographics_distribution[term_id].items():
-            if distribution_key in ['count', 'courseName', 'totalGradePoints']:
+            if distribution_key in ['count', 'courseName', 'totalGradePoints'] or not sufficient_data:
                 continue
             for distribution_value, total_grade_points in values.items():
                 student_count = grade_totals[term_id][distribution_key][distribution_value]
+                if student_count < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
+                    sufficient_data = False
+                    continue
                 demographics_distribution[term_id][distribution_key][distribution_value] = {
                     'averageGradePoints': (total_grade_points / student_count) if student_count > 0 else 0,
                     'count': student_count,
                 }
-        term_student_count = demographics_distribution[term_id]['count']
-        term_total_grade_points = demographics_distribution[term_id].pop('totalGradePoints', 0)
-        sorted_demographics_distribution.append({
-            'averageGradePoints': (term_total_grade_points / term_student_count) if term_student_count > 0 else 0,
-            **demographics_distribution[term_id],
-            'termId': term_id,
-            'termName': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
-        })
+        if sufficient_data:
+            term_student_count = demographics_distribution[term_id]['count']
+            term_total_grade_points = demographics_distribution[term_id].pop('totalGradePoints', 0)
+            sorted_demographics_distribution.append({
+                'averageGradePoints': (term_total_grade_points / term_student_count) if term_student_count > 0 else 0,
+                **demographics_distribution[term_id],
+                'termId': term_id,
+                'termName': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
+            })
     return sorted_demographics_distribution, sorted_grade_distribution_by_term
 
 
@@ -166,16 +178,23 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, instruct
             distribution[term_id]['count'] += r['has_prior_enrollment']
             distribution[term_id]['total'] += 1
 
+    sorted_distributions = {}
     for term_id, term_distribution in distribution.items():
         total_prior_enroll_count = term_distribution['count']
         total_no_prior_enroll_count = term_distribution['total'] - total_prior_enroll_count
         sorted_distribution = []
+        sufficient_data = total_prior_enroll_count > 0 and total_no_prior_enroll_count > 0
         for grade in sorted(term_distribution.keys(), key=_grade_ordering_index):
+            if not sufficient_data:
+                continue
             if grade in GRADE_ORDERING:
                 grade_values = term_distribution.get(grade, {})
                 grade_prior_enroll_count = grade_values.get('count', 0)
                 total_grade_count = grade_values.get('total', 0)
                 grade_no_prior_enroll_count = total_grade_count - grade_prior_enroll_count
+                if total_grade_count < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
+                    sufficient_data = False
+                    continue
                 sorted_distribution.append({
                     'classSize': term_distribution['total'],
                     'courseName': prior_course_name,
@@ -188,8 +207,9 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, instruct
                     'totalCount': total_grade_count,
                     'totalPercentage': to_percentage(total_grade_count, term_distribution['total']),
                 })
-        distribution[term_id] = sorted_distribution
-    return distribution
+        if sufficient_data:
+            sorted_distributions[term_id] = sorted_distribution
+    return sorted_distributions
 
 
 GRADE_ORDERING = ('A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'P', 'NP', 'I')
