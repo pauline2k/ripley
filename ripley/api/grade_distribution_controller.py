@@ -47,15 +47,19 @@ def get_grade_distribution(canvas_site_id):
         'canvasSite': canvas_site_to_api_json(course),
         'courseName': course_name,
     }
+
+    def _handle_error():
+        raise ResourceNotFoundError('This course does not meet the requirements necessary to generate a Grade Distribution.')
+
     if sis_sections:
         term_id = term.to_sis_term_id()
         section_ids = [s['id'] for s in sis_sections]
         instructor_uid = None if current_user.is_admin else current_user.uid
-        gpa_term_distribution_by_demographic, grade_distribution_by_term = get_grade_distributions(term_id, section_ids, instructor_uid)
-        if gpa_term_distribution_by_demographic is False:
-            raise ResourceNotFoundError('This course does not meet the requirements necessary to generate a Grade Distribution.')
+        grade_distribution_by_demographic, grade_distribution_by_term = get_grade_distributions(term_id, section_ids, instructor_uid)
+        if grade_distribution_by_demographic is False:
+            _handle_error()
+        distribution['demographics'] = grade_distribution_by_demographic
         if term_id in grade_distribution_by_term.keys():
-            distribution['demographics'] = gpa_term_distribution_by_demographic
             distribution['enrollments'] = grade_distribution_by_term
             distribution['terms'] = [
                 {
@@ -63,12 +67,8 @@ def get_grade_distribution(canvas_site_id):
                     'name': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
                 } for term_id in grade_distribution_by_term.keys()
             ]
-        else:
-            distribution['demographics'] = []
-            distribution['enrollments'] = {}
     else:
-        distribution['demographics'] = []
-        distribution['enrollments'] = {}
+        _handle_error()
     return tolerant_jsonify(distribution)
 
 

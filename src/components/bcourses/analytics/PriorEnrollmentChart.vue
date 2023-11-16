@@ -227,7 +227,7 @@ export default {
   }),
   computed: {
     classSize() {
-      return get(this.gradeDistribution, `${this.selectedTerm.id}.0.classSize`)
+      return this.selectedTerm ? get(this.gradeDistribution, `${this.selectedTerm.id}.0.classSize`) : 0
     }
   },
   watch: {
@@ -243,7 +243,7 @@ export default {
     this.selectedTerm = get(this.terms, 0)
     this.chartSettings = cloneDeep(this.chartDefaults)
     this.chartSettings.chart.type = 'column'
-    this.chartSettings.legend.enabled = !isEmpty(this.gradeDistribution[this.selectedTerm.id])
+    this.chartSettings.legend.enabled = this.selectedTerm && !isEmpty(get(this.gradeDistribution, this.selectedTerm.id))
     this.chartSettings.legend.labelFormat = '{name} grades'
     this.chartSettings.legend.symbolHeight = 12
     this.chartSettings.plotOptions.series.lineWidth = 0
@@ -303,11 +303,11 @@ export default {
     loadPrimarySeries(color, showLabels=true) {
       this.chartSettings.series[0] = {
         color: color,
-        name: `${this.selectedTerm.name} ${this.courseName}`,
+        name: `${get(this.selectedTerm, 'name')} ${this.courseName}`,
         data: []
       }
       this.chartSettings.xAxis.categories = []
-      each(this.gradeDistribution[this.selectedTerm.id], item => {
+      each(this.gradeDistribution[get(this.selectedTerm, 'id')], item => {
         this.chartSettings.series[0].data.push({
           color: color,
           custom: {
@@ -342,7 +342,7 @@ export default {
         name: `Have taken ${this.selectedCourse}`,
         type: 'line'
       }
-      each(this.priorEnrollmentGradeDistribution[this.selectedTerm.id], item => {
+      each(this.priorEnrollmentGradeDistribution[get(this.selectedTerm, 'id')], item => {
         if (includes(this.chartSettings.xAxis.categories, item.grade )) {
           gradesWithoutPriorEnroll.data.push({
             custom: {
@@ -382,7 +382,7 @@ export default {
       this.refresh()
     },
     refresh() {
-      if (get(this.priorEnrollmentGradeDistribution, this.selectedTerm.id)) {
+      if (get(this.priorEnrollmentGradeDistribution, get(this.selectedTerm, 'id'))) {
         this.loadPrimarySeries(this.colors.tertiary, false)
         this.loadPriorEnrollments()
       } else {
