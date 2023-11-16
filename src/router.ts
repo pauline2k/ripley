@@ -95,11 +95,6 @@ const routes:RouteRecordRaw[] = [
         path: '/roster'
       },
       {
-        component: ManageSites,
-        name: 'Manage bCourses Sites',
-        path: '/manage_sites'
-      },
-      {
         component: CreateCourseSite,
         name: 'Create a Course Site',
         path: '/create_course_site'
@@ -197,23 +192,26 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const context = useContextStore()
+  context.resetApplicationState()
   context.loadingStart(to)
   if (!to.meta.isError && !to.meta.is404) {
     if (to.query.error) {
       context.setApplicationState(500, to.query.error)
-      return next({path: '/error'})
-    } else if (!to.meta.isError && !to.meta.is404) {
+    } else {
       const currentUser = context.currentUser
       if (currentUser.isAuthenticated) {
         const unauthorized = !isInIframe && !currentUser.canAccessStandaloneView
         if (unauthorized) {
           context.setApplicationState(403, 'Unauthorized')
-          return next({path: '/error'})
         }
       }
     }
   }
-  next()
+  if (context.applicationState.status === 200) {
+    next()
+  } else {
+    next({path: '/error'})
+  }
 })
 
 router.afterEach((to: any) => {
