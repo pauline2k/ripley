@@ -116,6 +116,8 @@ def get_grade_distributions(term_id, section_ids, instructor_uid):  # noqa
             if grade in GRADE_ORDERING:
                 if term_distribution[grade]['count'] < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
                     sufficient_data = False
+                    app.logger.debug(f"Term ID {term_id} excluded from {term_distribution[grade]['courseName']} prior enrollment chart: \
+only {term_distribution[grade]['count']} students with {grade}")
                     continue
                 term_distribution[grade].update({
                     'classSize': term_distribution['count'],
@@ -138,6 +140,8 @@ def get_grade_distributions(term_id, section_ids, instructor_uid):  # noqa
             for distribution_value, total_grade_points in values.items():
                 student_count = grade_totals[term_id][distribution_key][distribution_value]
                 if student_count < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
+                    app.logger.debug(f"Term ID {term_id} excluded from {demographics_distribution[term_id]['courseName']} demographics chart: \
+only {student_count} {distribution_key}--{distribution_value} students")
                     sufficient_data = False
                     continue
                 demographics_distribution[term_id][distribution_key][distribution_value] = {
@@ -215,19 +219,20 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, instruct
 GRADE_ORDERING = ('A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'P', 'NP', 'I')
 
 
+# Source: https://registrar.berkeley.edu/faculty-staff/grading/grading-policies-reports/
 GRADE_POINTS = {
     'A+': 4,
     'A': 4,
-    'A-': 4,
-    'B+': 3,
+    'A-': 3.7,
+    'B+': 3.3,
     'B': 3,
-    'B-': 3,
-    'C+': 2,
+    'B-': 2.7,
+    'C+': 2.3,
     'C': 2,
-    'C-': 2,
-    'D+': 1,
+    'C-': 1.7,
+    'D+': 1.3,
     'D': 1,
-    'D-': 1,
+    'D-': .7,
     'F': 0,
     'P': 0,
     'NP': 0,

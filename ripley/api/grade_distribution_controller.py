@@ -56,7 +56,7 @@ def get_grade_distribution(canvas_site_id):
         section_ids = [s['id'] for s in sis_sections]
         instructor_uid = None if current_user.is_admin else current_user.uid
         grade_distribution_by_demographic, grade_distribution_by_term = get_grade_distributions(term_id, section_ids, instructor_uid)
-        if grade_distribution_by_demographic is False:
+        if not grade_distribution_by_demographic:
             _handle_error()
         distribution['demographics'] = grade_distribution_by_demographic
         if term_id in grade_distribution_by_term.keys():
