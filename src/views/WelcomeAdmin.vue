@@ -222,6 +222,7 @@
           <ToolPortfolio :v-card-class="`pl-2 elevation-0`" />
         </div>
         <JobHistory
+          v-if="jobHistory"
           class="mt-6"
           :job-history="jobHistory"
           :refreshing="refreshing"

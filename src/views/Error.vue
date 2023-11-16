@@ -20,23 +20,22 @@
         src="@/assets/images/color-bars.png"
       />
       <v-card-title>
-        <Header1 :text="header" />
+        <Header1 class="mt-8" :text="header" />
       </v-card-title>
-      <v-card-text v-if="message || stacktrace">
+      <v-card-text>
         <div
+          v-if="message || stacktrace"
           id="error-message"
           aria-live="polite"
           role="alert"
         >
           <span v-if="message">{{ message }}</span>
-          <div v-if="stacktrace" class="py-3">
+          <div v-if="stacktrace" class="px-5 py-3 text-left text-sm-caption">
             <pre>{{ stacktrace }}</pre>
           </div>
         </div>
+        <ContactUsPrompt class="mb-5" />
       </v-card-text>
-      <v-card-subtitle class="mb-7">
-        <ContactUsPrompt />
-      </v-card-subtitle>
     </v-card>
   </v-container>
 </template>
