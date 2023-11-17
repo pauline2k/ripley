@@ -109,16 +109,8 @@ def get_grade_distributions(term_id, section_ids, instructor_uid):  # noqa
     sorted_grade_distribution_by_term = {}
     for term_id, term_distribution in grade_distribution_by_term.items():
         sorted_grade_distribution = []
-        sufficient_data = True
         for grade in sorted(term_distribution.keys(), key=_grade_ordering_index):
-            if not sufficient_data:
-                continue
             if grade in GRADE_ORDERING:
-                if term_distribution[grade]['count'] < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
-                    sufficient_data = False
-                    app.logger.debug(f"Term ID {term_id} excluded from {term_distribution[grade]['courseName']} prior enrollment chart: \
-only {term_distribution[grade]['count']} students with {grade}")
-                    continue
                 term_distribution[grade].update({
                     'classSize': term_distribution['count'],
                     'grade': grade,
@@ -128,8 +120,7 @@ only {term_distribution[grade]['count']} students with {grade}")
                     ),
                 })
                 sorted_grade_distribution.append(term_distribution[grade])
-        if sufficient_data:
-            sorted_grade_distribution_by_term[term_id] = sorted_grade_distribution
+        sorted_grade_distribution_by_term[term_id] = sorted_grade_distribution
 
     sorted_demographics_distribution = []
     for term_id in sorted(demographics_distribution.keys()):
@@ -139,7 +130,7 @@ only {term_distribution[grade]['count']} students with {grade}")
                 continue
             for distribution_value, total_grade_points in values.items():
                 student_count = grade_totals[term_id][distribution_key][distribution_value]
-                if student_count < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
+                if student_count > 0 and student_count < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
                     app.logger.debug(f"Term ID {term_id} excluded from {demographics_distribution[term_id]['courseName']} demographics chart: \
 only {student_count} {distribution_key}--{distribution_value} students")
                     sufficient_data = False

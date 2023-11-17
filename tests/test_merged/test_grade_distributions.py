@@ -221,6 +221,53 @@ class TestGradeDistributions:
             demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'], '30000')
             assert demographics_distribution == [
                 {
+                    'averageGradePoints': 1.1166666666666667,
+                    'genders': {
+                        'female': {
+                            'averageGradePoints': 1.675,
+                            'count': 4,
+                        },
+                        'male': {
+                            'averageGradePoints': 0.0,
+                            'count': 2,
+                        },
+                    },
+                    'internationalStatus': {
+                        'true': {
+                            'averageGradePoints': 0.0,
+                            'count': 1,
+                        },
+                        'false': {
+                            'averageGradePoints': 1.34,
+                            'count': 5,
+                        },
+                    },
+                    'transferStatus': {
+                        'true': {
+                            'averageGradePoints': 0,
+                            'count': 0,
+                        },
+                        'false': {
+                            'averageGradePoints': 1.1166666666666667,
+                            'count': 6,
+                        },
+                    },
+                    'underrepresentedMinorityStatus': {
+                        'true': {
+                            'averageGradePoints': 2.2333333333333334,
+                            'count': 3,
+                        },
+                        'false': {
+                            'averageGradePoints': 0.0,
+                            'count': 3,
+                        },
+                    },
+                    'count': 6,
+                    'courseName': 'ASTRON 218',
+                    'termId': '2225',
+                    'termName': 'Summer 2022',
+                },
+                {
                     'averageGradePoints': 3.520879120879121,
                     'count': 91,
                     'courseName': 'ASTRON 218',
