@@ -39,9 +39,7 @@ import {useRoute} from 'vue-router'
 
 const context = useContextStore()
 const config = context.config
-const currentUser = context.currentUser
-const offerHomeLink = computed(() => {
-  return currentUser.canAccessStandaloneView
-    && (!get(useRoute().meta, 'isHome', false) || context.applicationState.status !== 200)
-})
+const route = useRoute()
+const isHome = computed(() => get(route.meta, 'isHome', false))
+const offerHomeLink = computed(() => context.currentUser.canAccessStandaloneView && (!isHome.value || context.applicationState.status !== 200))
 </script>
