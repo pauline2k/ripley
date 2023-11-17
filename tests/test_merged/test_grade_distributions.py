@@ -34,12 +34,12 @@ class TestGradeDistributions:
             demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'], '30000')
             assert demographics_distribution == [
                 {
-                    'averageGradePoints': 1.1666666666666667,
+                    'averageGradePoints': 1.1166666666666667,
                     'count': 6,
                     'courseName': 'ASTRON 218',
                     'genders': {
                         'female': {
-                            'averageGradePoints': 1.75,
+                            'averageGradePoints': 1.675,
                             'count': 4,
                         },
                         'male': {
@@ -49,7 +49,7 @@ class TestGradeDistributions:
                     },
                     'internationalStatus': {
                         'false': {
-                            'averageGradePoints': 1.4,
+                            'averageGradePoints': 1.34,
                             'count': 5,
                         },
                         'true': {
@@ -61,7 +61,7 @@ class TestGradeDistributions:
                     'termName': 'Summer 2022',
                     'transferStatus': {
                         'false': {
-                            'averageGradePoints': 1.1666666666666667,
+                            'averageGradePoints': 1.1166666666666667,
                             'count': 6,
                         },
                         'true': {
@@ -75,22 +75,22 @@ class TestGradeDistributions:
                             'count': 3,
                         },
                         'true': {
-                            'averageGradePoints': 2.3333333333333335,
+                            'averageGradePoints': 2.2333333333333334,
                             'count': 3,
                         },
                     },
                 },
                 {
-                    'averageGradePoints': 3.5274725274725274,
+                    'averageGradePoints': 3.520879120879121,
                     'count': 91,
                     'courseName': 'ASTRON 218',
                     'genders': {
                         'female': {
-                            'averageGradePoints': 3.6470588235294117,
+                            'averageGradePoints': 3.6426470588235293,
                             'count': 68,
                         },
                         'male': {
-                            'averageGradePoints': 3.1363636363636362,
+                            'averageGradePoints': 3.122727272727273,
                             'count': 22,
                         },
                         'other': {
@@ -100,7 +100,7 @@ class TestGradeDistributions:
                     },
                     'internationalStatus': {
                         'false': {
-                            'averageGradePoints': 3.5301204819277108,
+                            'averageGradePoints': 3.52289156626506,
                             'count': 83,
                         },
                         'true': {
@@ -112,21 +112,21 @@ class TestGradeDistributions:
                     'termName': 'Fall 2022',
                     'transferStatus': {
                         'false': {
-                            'averageGradePoints': 3.5697674418604652,
+                            'averageGradePoints': 3.559302325581395,
                             'count': 86,
                         },
                         'true': {
-                            'averageGradePoints': 2.8,
+                            'averageGradePoints': 2.8600000000000003,
                             'count': 5,
                         },
                     },
                     'underrepresentedMinorityStatus': {
                         'false': {
-                            'averageGradePoints': 3.1944444444444446,
+                            'averageGradePoints': 3.1861111111111113,
                             'count': 36,
                         },
                         'true': {
-                            'averageGradePoints': 3.7454545454545456,
+                            'averageGradePoints': 3.7399999999999998,
                             'count': 55,
                         },
                     },
@@ -221,16 +221,16 @@ class TestGradeDistributions:
             demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'], '30000')
             assert demographics_distribution == [
                 {
-                    'averageGradePoints': 3.5274725274725274,
+                    'averageGradePoints': 3.520879120879121,
                     'count': 91,
                     'courseName': 'ASTRON 218',
                     'genders': {
                         'female': {
-                            'averageGradePoints': 3.6470588235294117,
+                            'averageGradePoints': 3.6426470588235293,
                             'count': 68,
                         },
                         'male': {
-                            'averageGradePoints': 3.1363636363636362,
+                            'averageGradePoints': 3.122727272727273,
                             'count': 22,
                         },
                         'other': {
@@ -240,7 +240,7 @@ class TestGradeDistributions:
                     },
                     'internationalStatus': {
                         'false': {
-                            'averageGradePoints': 3.5301204819277108,
+                            'averageGradePoints': 3.52289156626506,
                             'count': 83,
                         },
                         'true': {
@@ -252,21 +252,21 @@ class TestGradeDistributions:
                     'termName': 'Fall 2022',
                     'transferStatus': {
                         'false': {
-                            'averageGradePoints': 3.5697674418604652,
+                            'averageGradePoints': 3.559302325581395,
                             'count': 86,
                         },
                         'true': {
-                            'averageGradePoints': 2.8,
+                            'averageGradePoints': 2.8600000000000003,
                             'count': 5,
                         },
                     },
                     'underrepresentedMinorityStatus': {
                         'false': {
-                            'averageGradePoints': 3.1944444444444446,
+                            'averageGradePoints': 3.1861111111111113,
                             'count': 36,
                         },
                         'true': {
-                            'averageGradePoints': 3.7454545454545456,
+                            'averageGradePoints': 3.7399999999999998,
                             'count': 55,
                         },
                     },
