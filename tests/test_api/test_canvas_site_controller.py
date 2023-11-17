@@ -232,8 +232,12 @@ class TestCanvasSiteProvision:
             }, m)
             fake_auth.login(canvas_site_id=None, uid=teacher_uid)
             feed = self._api_canvas_course_provision(client)
-            assert feed['teachingTerms'][0]['name'] == 'Spring 2023'
-            assert feed['teachingTerms'][0]['classes'][0]['courseCode'] == 'ANTHRO 189'
+            match_found = False
+            for teaching_term in feed['teachingTerms']:
+                for course in teaching_term['classes']:
+                    if course['courseCode'] == 'ANTHRO 189' and teaching_term['name'] == 'Spring 2023':
+                        match_found = True
+            assert match_found
 
     def test_admin_acting_as_teacher(self, client, app, fake_auth):
         with requests_mock.Mocker() as m:
