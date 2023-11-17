@@ -241,7 +241,7 @@ export default {
         const prefix = enhance ? `${course.canvasSiteId}: ` : ''
         return `${prefix}${course.courseCode} &mdash; ${course.name}`
       }
-      const enhance = uniq(map(courses, c => getLabel(c))).size !== courses.length
+      const enhance = uniq(map(courses, c => getLabel(c))).length !== courses.length
       return map(courses, c => ({...c, label: getLabel(c, enhance)}))
     },
     size,

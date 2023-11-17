@@ -232,7 +232,7 @@ export default {
   }),
   computed: {
     allSections() {
-      return flatMap(this.courseSemesterClasses, classItem => classItem.sections)
+      return flatMap(this.courseSemesterClasses, c => c.sections)
     },
     showAlert: {
       get() {
@@ -294,24 +294,22 @@ export default {
       this.currentWorkflowStep = step
     },
     fetchFeed() {
-      return getCourseSections(this.canvasSiteId).then(
-        data => {
-          if (data.canvasSite) {
-            this.canvasSite = data.canvasSite
-            if (data.teachingTerms) {
-              this.loadCourseLists(data.teachingTerms)
-            }
-            this.isAdmin = data.is_admin
-            this.adminActingAs = data.adminActingAs
-            this.adminTerms = data.adminTerms
-            this.isCourseCreator = this.usersClassCount > 0
-            this.feedFetched = true
-            this.changeWorkflowStep('preview')
-          } else {
-            this.displayError = 'Failed to retrieve section data.'
+      return getCourseSections(this.canvasSiteId).then(data => {
+        if (data.canvasSite) {
+          this.canvasSite = data.canvasSite
+          if (data.teachingTerms) {
+            this.loadCourseLists(data.teachingTerms)
           }
+          this.isAdmin = data.is_admin
+          this.adminActingAs = data.adminActingAs
+          this.adminTerms = data.adminTerms
+          this.isCourseCreator = this.usersClassCount > 0
+          this.feedFetched = true
+          this.changeWorkflowStep('preview')
+        } else {
+          this.displayError = 'Failed to retrieve section data.'
         }
-      )
+      })
     },
     loadCourseLists(teachingTerms) {
       const courseSemester = find(teachingTerms, semester => {

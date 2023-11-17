@@ -198,15 +198,10 @@ def get_official_sections(canvas_site_id):
 
 def get_teaching_terms(current_user=None, section_ids=None, sections=None, term_id=None, uid=None):
     berkeley_terms = BerkeleyTerm.get_current_terms()
-    if term_id:
-        canvas_terms = [term_id]
-    else:
-        canvas_terms = [term.sis_term_id for term in canvas.get_terms() if term.sis_term_id]
+    canvas_terms = [term_id] if term_id else [t.sis_term_id for t in canvas.get_terms() if t.sis_term_id]
     terms = []
     for key, term in berkeley_terms.items():
-        if term.to_canvas_sis_term_id() not in canvas_terms:
-            continue
-        if key != 'future' or term.season == 'D':
+        if term.to_canvas_sis_term_id() in canvas_terms and (key != 'future' or term.season == 'D'):
             terms.append(term)
 
     instructor_uid = None
@@ -215,30 +210,32 @@ def get_teaching_terms(current_user=None, section_ids=None, sections=None, term_
     elif current_user and (current_user.is_teaching or current_user.canvas_masquerading_user_id):
         instructor_uid = current_user.uid
 
-    teaching_sections = []
-    if instructor_uid:
-        teaching_sections = data_loch.get_instructing_sections(instructor_uid, [t.to_sis_term_id() for t in terms]) or []
-        teaching_sections = sort_course_sections(teaching_sections)
-
-    if not len(teaching_sections) and sections:
-        teaching_sections = sections
+    term_ids = [t.to_sis_term_id() for t in terms]
+    teaching_sections = data_loch.get_instructing_sections(instructor_uid, term_ids) if instructor_uid else []
+    if sections:
+        for section in sections:
+            section_id = section['section_id']
+            term_id = section['term_id']
+            match = next((s for s in teaching_sections if s['term_id'] == term_id and s['section_id'] == section_id), None)
+            if not match:
+                teaching_sections.append(section)
 
     courses_by_term = _build_courses_by_term(
         instructor_uid=instructor_uid,
         section_ids=section_ids,
-        teaching_sections=teaching_sections,
+        teaching_sections=sort_course_sections(teaching_sections),
     )
-
-    def _term_courses(term_id, courses_by_id):
+    api_json = []
+    for term_id, courses_by_id in courses_by_term.items():
         term = BerkeleyTerm.from_sis_term_id(term_id)
-        return {
+        api_json.append({
             'classes': list(courses_by_id.values()),
             'name': term.to_english(),
             'slug': term.to_slug(),
             'termId': term_id,
             'termYear': term.year,
-        }
-    return [_term_courses(term_id, courses_by_id) for term_id, courses_by_id in courses_by_term.items()]
+        })
+    return api_json
 
 
 def hide_big_blue_button(canvas_site_id):
