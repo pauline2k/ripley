@@ -71,7 +71,7 @@ class BConnected:
             if app.config['RIPLEY_ENV'] == 'test':
                 write_email_to_log(message=message, recipient=recipient, subject_line=subject_line)
             else:
-                from_address = f"{app.config['EMAIL_RIPLEY_SUPPORT_LABEL']} <{app.config['EMAIL_RIPLEY_SUPPORT']}>"
+                from_address = f"{app.config['EMAIL_RIPLEY_OPERATIONS_LABEL']} <{app.config['EMAIL_RIPLEY_SUPPORT']}>"
 
                 for email_address in self.get_email_addresses(user=recipient):
                     msg = MIMEMultipart('alternative')
@@ -125,7 +125,7 @@ def write_email_to_log(message, recipient, subject_line):
     app.logger.info(f"""
 
         To: {recipient['name']} <{recipient['email']}>
-        From: {app.config['EMAIL_RIPLEY_SUPPORT_LABEL']} <{app.config['EMAIL_RIPLEY_SUPPORT']}>
+        From: {app.config['EMAIL_RIPLEY_OPERATIONS_LABEL']} <{app.config['EMAIL_RIPLEY_SUPPORT']}>
         Subject: {subject_line}
 
         Message:
