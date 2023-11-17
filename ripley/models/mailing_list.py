@@ -118,6 +118,7 @@ class MailingList(Base):
         if cls.query.filter_by(list_name=list_name).first():
             raise ValueError(f'The name {list_name} is used by another bCourses site and is not available.')
 
+        mailing_list.canvas_site_name = canvas_site.name
         mailing_list.list_name = list_name
         mailing_list.term_id = int(term_id) if term_id and term_id.isnumeric() else None
         mailing_list.welcome_email_body = welcome_email_body
