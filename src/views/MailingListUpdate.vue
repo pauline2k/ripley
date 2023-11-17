@@ -77,9 +77,9 @@
           <v-container class="py-3" fluid>
             <v-row no-gutters>
               <v-col cols="2">
-                <div class="float-right font-weight-medium pr-3">
-                  Name:
-                </div>
+                <label for="mailing-list-course-site-name" class="float-right font-weight-medium pr-3">
+                  Name
+                </label>
               </v-col>
               <v-col>
                 <div>
@@ -97,22 +97,26 @@
             </v-row>
             <v-row class="pt-1" no-gutters>
               <v-col cols="2">
-                <div class="float-right font-weight-medium pr-3">
-                  ID:
-                </div>
+                <label for="mailing-list-course-site-id" class="float-right font-weight-medium pr-3">
+                  Canvas Site ID
+                </label>
               </v-col>
               <v-col>
-                {{ canvasSite.canvasSiteId }}
+                <div id="mailing-list-course-site-id">
+                  {{ canvasSite.canvasSiteId }}
+                </div>
               </v-col>
             </v-row>
             <v-row class="pt-1" no-gutters>
               <v-col cols="2">
-                <div class="float-right font-weight-medium pr-3">
-                  Description:
-                </div>
+                <label for="mailing-list-course-site-code" class="float-right font-weight-medium pr-3">
+                  Description
+                </label>
               </v-col>
               <v-col>
-                {{ canvasSite.codeAndTerm }}
+                <div id="mailing-list-course-site-code">
+                  {{ canvasSite.codeAndTerm }}
+                </div>
               </v-col>
             </v-row>
           </v-container>
@@ -121,9 +125,9 @@
           <v-container class="py-3" fluid>
             <v-row no-gutters>
               <v-col cols="2">
-                <div class="float-right font-weight-medium pr-3">
-                  Name:
-                </div>
+                <label for="mailing-list-name" class="float-right font-weight-medium pr-3">
+                  Name
+                </label>
               </v-col>
               <v-col>
                 <div id="mailing-list-name">
@@ -133,19 +137,19 @@
             </v-row>
             <v-row class="pt-1" no-gutters>
               <v-col cols="2">
-                <div class="float-right font-weight-medium pr-3">
-                  Member count:
-                </div>
+                <label for="mailing-list-member-count" class="float-right font-weight-medium pr-3">
+                  Member count
+                </label>
               </v-col>
               <v-col>
-                <div id="mailing-list-member-count">{{ pluralize('member', mailingList.membersCount) }}</div>
+                <div id="mailing-list-member-count">{{ mailingList.membersCount }}</div>
               </v-col>
             </v-row>
             <v-row class="pt-1" no-gutters>
               <v-col cols="2">
-                <div class="float-right font-weight-medium pr-3">
-                  Last updated:
-                </div>
+                <label for="mailing-list-membership-last-updated" class="float-right font-weight-medium pr-3">
+                  Last updated
+                </label>
               </v-col>
               <v-col>
                 <div id="mailing-list-membership-last-updated">

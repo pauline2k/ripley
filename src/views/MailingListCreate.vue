@@ -72,7 +72,7 @@
                 <v-col class="pb-0" cols="8">
                   <div class="d-flex pt-1 text-subtitle-1">
                     <div class="float-right mailing-list-name-input">
-                      <label for="mailing-list-name-input">Name:</label>
+                      <label for="mailing-list-name-input">Name</label>
                     </div>
                     <div class="w-100">
                       <div>
