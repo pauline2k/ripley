@@ -95,7 +95,6 @@ const context = useContextStore()
 }
 a {
   color: $color-primary-text;
-  text-decoration: none;
   &:hover {
     cursor: pointer;
   }
