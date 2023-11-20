@@ -139,6 +139,7 @@
             <select
               id="course-sections"
               v-model="selectedSection"
+              aria-label="Select Section"
               class="w-50"
             >
               <option :value="null">Choose...</option>
