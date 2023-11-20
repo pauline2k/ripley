@@ -41,9 +41,7 @@
                 id="canvas-course-settings-href"
                 :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`"
                 target="_top"
-              >
-                Course Settings
-              </a>
+              >Course Settings</a>
             </span>
             <span v-if="noGradingStandardEnabled">
               Set a grading scheme in
@@ -51,9 +49,7 @@
                 id="canvas-course-settings-href"
                 :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`"
                 target="_top"
-              >
-                Course Settings
-              </a>
+              >Course Settings</a>
               and return once completed.
             </span>
             <div class="pt-1">
