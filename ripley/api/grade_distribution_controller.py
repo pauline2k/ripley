@@ -24,7 +24,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from flask import current_app as app, request
-from flask_login import current_user
 from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import canvas_role_required
 from ripley.externals import canvas
@@ -54,8 +53,7 @@ def get_grade_distribution(canvas_site_id):
     if sis_sections:
         term_id = term.to_sis_term_id()
         section_ids = [s['id'] for s in sis_sections]
-        instructor_uid = None if current_user.is_admin else current_user.uid
-        grade_distribution_by_demographic, grade_distribution_by_term = get_grade_distributions(term_id, section_ids, instructor_uid)
+        grade_distribution_by_demographic, grade_distribution_by_term = get_grade_distributions(term_id, section_ids)
         if not grade_distribution_by_demographic:
             _handle_error()
         distribution['demographics'] = grade_distribution_by_demographic
@@ -81,7 +79,6 @@ def get_prior_enrollment_grade_distribution(canvas_site_id):
     grade_distribution = get_grade_distribution_with_prior_enrollments(
         term_id=term.to_sis_term_id(),
         course_name=course_name,
-        instructor_uid=None if current_user.is_admin else current_user.uid,
         prior_course_name=prior_course_name,
     )
     return tolerant_jsonify(grade_distribution)

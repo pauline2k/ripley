@@ -205,24 +205,13 @@ def get_edo_enrollment_updates(since_timestamp):
     return safe_execute_rds(sql, **params)
 
 
-def get_grades_with_demographics(term_id, section_ids, instructor_uid):
+def get_grades_with_demographics(term_id, section_ids):
     params = {
         'earliest_term_id': str(app.config['CANVAS_OLDEST_OFFICIAL_TERM']),
-        'instructor_uid': instructor_uid,
         'section_ids': section_ids,
         'term_id': term_id,
     }
-    exclude_other_instructors_sections = ''  # noqa
-    if instructor_uid:
-        exclude_other_instructors_sections = """AND sec.instructor_uid = c.instructor_uid
-            AND NOT EXISTS (
-                SELECT * FROM sis_data.edo_sections sec
-                WHERE sec.instructor_uid <> %(instructor_uid)s
-                AND sec.sis_term_id = enr.sis_term_id
-                AND sec.sis_section_id = enr.sis_section_id
-            )
-            """  # noqa
-    sql = f"""WITH course AS (
+    sql = """WITH course AS (
             SELECT *
             FROM sis_data.edo_sections sec
             WHERE sec.sis_term_id = %(term_id)s
@@ -233,14 +222,13 @@ def get_grades_with_demographics(term_id, section_ids, instructor_uid):
         FROM sis_data.edo_enrollments enr
         JOIN sis_data.edo_sections sec on enr.sis_term_id = sec.sis_term_id and enr.sis_section_id = sec.sis_section_id
         JOIN course c ON sec.sis_course_name = c.sis_course_name
-            {'AND sec.instructor_uid = c.instructor_uid' if instructor_uid else ''}
         JOIN student.student_profile_index spi ON enr.ldap_uid = spi.uid
         LEFT JOIN student.demographics d ON spi.sid = d.sid
         LEFT JOIN student.visas v on spi.sid = v.sid AND visa_status = 'G'
         WHERE enr.sis_term_id <= %(term_id)s
         AND enr.sis_term_id >= %(earliest_term_id)s
         AND enr.grade IS NOT NULL AND enr.grade != ''
-        {exclude_other_instructors_sections} ORDER BY enr.sis_term_id, enr.grade"""
+        ORDER BY enr.sis_term_id, enr.grade"""
     return safe_execute_rds(sql, **params)
 
 
@@ -263,17 +251,14 @@ def get_basic_profile_and_grades_per_enrollments(term_id, section_ids):
     return safe_execute_rds(sql, **params)
 
 
-def get_grades_with_enrollments(term_id, course_name, instructor_uid, prior_course_name):
+def get_grades_with_enrollments(term_id, course_name, prior_course_name):
     params = {
         'course_name': course_name,
         'earliest_term_id': str(app.config['CANVAS_OLDEST_OFFICIAL_TERM']),
         'prior_course_name': prior_course_name,
         'term_id': term_id,
     }
-    if instructor_uid:
-        params['instructor_uid'] = instructor_uid
-
-    sql = f"""WITH course_grades AS (
+    sql = """WITH course_grades AS (
             SELECT DISTINCT sec.sis_term_id, sec.sis_course_name, sec.sis_section_id, enr.ldap_uid, enr.grade
             FROM sis_data.edo_sections sec
             JOIN sis_data.edo_enrollments enr
@@ -282,7 +267,6 @@ def get_grades_with_enrollments(term_id, course_name, instructor_uid, prior_cour
             WHERE sec.sis_term_id <= %(term_id)s
             AND sec.sis_term_id >= %(earliest_term_id)s
             AND sec.sis_course_name = %(course_name)s
-            {'AND sec.instructor_uid = %(instructor_uid)s' if instructor_uid else ''}
             ORDER BY sec.sis_term_id DESC, sec.sis_section_id
         )
         SELECT course_grades.sis_term_id, course_grades.grade, course_grades.ldap_uid,
@@ -292,7 +276,6 @@ def get_grades_with_enrollments(term_id, course_name, instructor_uid, prior_cour
             ON sec2.sis_term_id < course_grades.sis_term_id
             AND sec2.sis_term_id >= %(earliest_term_id)s
             AND sec2.sis_course_name = %(prior_course_name)s
-            {'AND sec2.instructor_uid = %(instructor_uid)s' if instructor_uid else ''}
         LEFT JOIN sis_data.edo_enrollments enr2
             ON course_grades.ldap_uid = enr2.ldap_uid
             AND enr2.sis_term_id = sec2.sis_term_id AND enr2.sis_section_id = sec2.sis_section_id
