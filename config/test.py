@@ -46,6 +46,7 @@ JOBS_SECONDS_BETWEEN_PENDING_CHECK = 0.5
 LOGGING_LOCATION = 'STDOUT'
 
 LTI_CONFIG_PATH = f'{BASE_DIR}/tests/config/test-lti-config.json'
+LTI_HOST = 'https://ripley-test.berkeley.edu'
 
 NEWT_MINIMUM_CLASS_SIZE = 90
 

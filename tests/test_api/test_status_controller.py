@@ -74,7 +74,6 @@ class TestRqStatusController:
     def test_authorized(self, client, fake_auth, mock_job):
         fake_auth.login(canvas_site_id=None, uid=self.admin_uid)
         response = _api_ping_rq(client)
-        print(response)
         assert response['redis'] is True
         assert response['workers'] == []
         assert response['queue'] == {'name': 'default', 'jobCount': 0}

@@ -39,6 +39,8 @@ from ripley.merged.grade_distributions import get_grade_distribution_with_prior_
 @canvas_role_required('TeacherEnrollment')
 def get_grade_distribution(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
+    if not course:
+        raise ResourceNotFoundError('Course site not found.')
     course_name, term = parse_canvas_sis_course_id(course.sis_course_id)
     canvas_sections = canvas.get_course_sections(canvas_site_id)
     sis_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]

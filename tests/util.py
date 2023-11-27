@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from contextlib import contextmanager
 import json
 import re
-from urllib.parse import quote
+from urllib.parse import quote, urljoin
 
 import boto3
 import moto
@@ -150,7 +150,10 @@ def setup_bcourses_refresh_job(app):
 
 def _register_object(app, requests_mocker, obj_name, obj):
     method = requests_mock.ANY if obj['method'] == 'ANY' else obj['method']
-    base_url = f"{app.config['CANVAS_API_URL']}/api/v1/"
+    base_url = urljoin(
+        app.config['CANVAS_API_URL'],
+        obj.get('apiRouteSet', 'api/v1/'),
+    )
 
     if obj['endpoint'] == 'ANY':
         url = requests_mock.ANY

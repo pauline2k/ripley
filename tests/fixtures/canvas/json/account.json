@@ -137,6 +137,685 @@
         },
         "status_code": 200
     },
+    "get_developer_keys": {
+        "method": "GET",
+        "endpoint": "accounts/1/developer_keys?per_page=100",
+        "data": [
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2023-06-23T20:47:23Z",
+                "user_id": null,
+                "name": "Grade Distribution (LTI 1.3)",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "AEKH26Rn2zdleApZ",
+                "redirect_uri": null,
+                "redirect_uris": "https://ripley-test.berkeley.edu/api/lti/grade_distribution",
+                "access_token_count": 0,
+                "last_used_at": null,
+                "vendor_code": null,
+                "public_jwk": null,
+                "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000281,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000632,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": {
+                    "title": "Grade Distribution (LTI 1.3)",
+                    "extensions": [
+                        {
+                            "platform": "canvas.instructure.com",
+                            "settings": {
+                                "platform": "canvas.instructure.com",
+                                "placements": [
+                                    {
+                                        "text": "Grade Distribution (LTI 1.3)",
+                                        "default": "disabled",
+                                        "enabled": true,
+                                        "placement": "course_navigation",
+                                        "visibility": "admins",
+                                        "message_type": "LtiResourceLinkRequest"
+                                    }
+                                ]
+                            },
+                            "privacy_level": "public"
+                        }
+                    ],
+                    "description": "Grade Distribution (LTI 1.3)",
+                    "custom_fields": {
+                        "canvas_site_id": "$Canvas.course.id",
+                        "canvas_user_id": "$Canvas.user.id",
+                        "canvas_user_login_id": "$Canvas.user.loginId",
+                        "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
+                    },
+                    "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                    "target_link_uri": "https://ripley-test.berkeley.edu/api/lti/grade_distribution",
+                    "oidc_initiation_url": "https://ripley-test.berkeley.edu/api/lti/login"
+                },
+                "is_lti_key": true,
+                "id": 10720000000000632
+            },
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2023-03-30T20:13:53Z",
+                "user_id": null,
+                "name": "Roster Photos",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "w78GRXT18juWUpsL",
+                "redirect_uri": null,
+                "redirect_uris": "https://ripley-test.berkeley.edu/api/lti/roster_photos",
+                "access_token_count": 0,
+                "last_used_at": null,
+                "vendor_code": null,
+                "public_jwk": null,
+                "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000277,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000628,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": {
+                    "title": "Roster Photos",
+                    "extensions": [
+                        {
+                            "platform": "canvas.instructure.com",
+                            "settings": {
+                                "platform": "canvas.instructure.com",
+                                "placements": [
+                                    {
+                                        "text": "Roster Photos",
+                                        "default": null,
+                                        "enabled": true,
+                                        "placement": "course_navigation",
+                                        "visibility": "admins",
+                                        "message_type": "LtiResourceLinkRequest"
+                                    }
+                                ]
+                            },
+                            "privacy_level": "public"
+                        }
+                    ],
+                    "description": "Browse and search official roster photos",
+                    "custom_fields": {
+                        "canvas_site_id": "$Canvas.course.id",
+                        "canvas_user_id": "$Canvas.user.id",
+                        "canvas_user_login_id": "$Canvas.user.loginId",
+                        "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
+                    },
+                    "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                    "target_link_uri": "https://ripley-test.berkeley.edu/api/lti/roster_photos",
+                    "oidc_initiation_url": "https://ripley-test.berkeley.edu/api/lti/login"
+                },
+                "is_lti_key": true,
+                "id": 10720000000000628
+            },
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2023-03-30T20:13:16Z",
+                "user_id": null,
+                "name": "User Provisioning (LTI 1.3)",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "RDDMw76wJ9EpM1VY",
+                "redirect_uri": null,
+                "redirect_uris": "https://ripley-test.berkeley.edu/api/lti/provision_user",
+                "access_token_count": 0,
+                "last_used_at": null,
+                "vendor_code": null,
+                "public_jwk": null,
+                "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000276,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000627,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": {
+                    "title": "User Provisioning (LTI 1.3)",
+                    "extensions": [
+                        {
+                            "platform": "canvas.instructure.com",
+                            "settings": {
+                                "platform": "canvas.instructure.com",
+                                "placements": [
+                                    {
+                                        "text": "User Provisioning (LTI 1.3)",
+                                        "default": null,
+                                        "enabled": true,
+                                        "placement": "account_navigation",
+                                        "visibility": "admins",
+                                        "message_type": "LtiResourceLinkRequest"
+                                    }
+                                ]
+                            },
+                            "privacy_level": "public"
+                        }
+                    ],
+                    "description": "Automated user provisioning",
+                    "custom_fields": {
+                        "canvas_site_id": "$Canvas.course.id",
+                        "canvas_user_id": "$Canvas.user.id",
+                        "canvas_user_login_id": "$Canvas.user.loginId",
+                        "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
+                    },
+                    "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                    "target_link_uri": "https://ripley-test.berkeley.edu/api/lti/provision_user",
+                    "oidc_initiation_url": "https://ripley-test.berkeley.edu/api/lti/login"
+                },
+                "is_lti_key": true,
+                "id": 10720000000000627
+            },
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2023-03-30T20:12:37Z",
+                "user_id": null,
+                "name": "Manage Official Sections (LTI 1.3)",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "8FMXlORzYB8lwyjx",
+                "redirect_uri": null,
+                "redirect_uris": "https://ripley-test.berkeley.edu/api/lti/manage_official_sections",
+                "access_token_count": 0,
+                "last_used_at": null,
+                "vendor_code": null,
+                "public_jwk": {},
+                "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000275,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000626,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": {
+                    "title": "Manage Official Sections (LTI 1.3)",
+                    "scopes": [],
+                    "extensions": [
+                        {
+                            "platform": "canvas.instructure.com",
+                            "settings": {
+                                "platform": "canvas.instructure.com",
+                                "placements": [
+                                    {
+                                        "text": "Manage Official Sections (LTI 1.3)",
+                                        "placement": "course_navigation",
+                                        "message_type": "LtiResourceLinkRequest"
+                                    }
+                                ]
+                            },
+                            "privacy_level": "public"
+                        }
+                    ],
+                    "public_jwk": {},
+                    "description": "Provides management options for official course sections",
+                    "custom_fields": {
+                        "canvas_site_id": "$Canvas.course.id",
+                        "canvas_user_id": "$Canvas.user.id",
+                        "canvas_user_login_id": "$Canvas.user.loginId",
+                        "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
+                    },
+                    "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                    "target_link_uri": "https://ripley-test.berkeley.edu/api/lti/manage_official_sections",
+                    "oidc_initiation_url": "https://ripley-test.berkeley.edu/api/lti/login"
+                },
+                "is_lti_key": true,
+                "id": 10720000000000626
+            },
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2023-03-30T20:11:55Z",
+                "user_id": null,
+                "name": "Manage Sites (LTI 1.3)",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "XBzSkyh0323WLfPs",
+                "redirect_uri": null,
+                "redirect_uris": "https://ripley-test.berkeley.edu/api/lti/manage_sites",
+                "access_token_count": 0,
+                "last_used_at": null,
+                "vendor_code": null,
+                "public_jwk": null,
+                "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000274,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000625,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": {
+                    "title": "Manage Sites (LTI 1.3)",
+                    "extensions": [
+                        {
+                            "platform": "canvas.instructure.com",
+                            "settings": {
+                                "platform": "canvas.instructure.com",
+                                "placements": [
+                                    {
+                                        "text": "Manage Sites (LTI 1.3)",
+                                        "default": null,
+                                        "enabled": true,
+                                        "placement": "user_navigation",
+                                        "visibility": "admins",
+                                        "message_type": "LtiResourceLinkRequest"
+                                    }
+                                ]
+                            },
+                            "privacy_level": "public"
+                        }
+                    ],
+                    "description": "Create or update bCourses sites",
+                    "custom_fields": {
+                        "canvas_site_id": "$Canvas.course.id",
+                        "canvas_user_id": "$Canvas.user.id",
+                        "canvas_user_login_id": "$Canvas.user.loginId",
+                        "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
+                    },
+                    "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                    "target_link_uri": "https://ripley-test.berkeley.edu/api/lti/manage_sites",
+                    "oidc_initiation_url": "https://ripley-test.berkeley.edu/api/lti/login"
+                },
+                "is_lti_key": true,
+                "id": 10720000000000625
+            },
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2023-03-30T20:10:22Z",
+                "user_id": null,
+                "name": "Mailing Lists (LTI 1.3)",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "s6GUe3cIfcFBdDbq",
+                "redirect_uri": null,
+                "redirect_uris": "https://ripley-test.berkeley.edu/api/lti/mailing_lists",
+                "access_token_count": 0,
+                "last_used_at": null,
+                "vendor_code": null,
+                "public_jwk": null,
+                "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000273,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000624,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": {
+                    "title": "Mailing Lists (LTI 1.3)",
+                    "extensions": [
+                        {
+                            "platform": "canvas.instructure.com",
+                            "settings": {
+                                "platform": "canvas.instructure.com",
+                                "placements": [
+                                    {
+                                        "text": "Mailing Lists (LTI 1.3)",
+                                        "default": null,
+                                        "enabled": true,
+                                        "placement": "account_navigation",
+                                        "visibility": "admins",
+                                        "message_type": "LtiResourceLinkRequest"
+                                    }
+                                ]
+                            },
+                            "privacy_level": "public"
+                        }
+                    ],
+                    "description": "Create and manage mailing lists for all course sites",
+                    "custom_fields": {
+                        "canvas_site_id": "$Canvas.course.id",
+                        "canvas_user_id": "$Canvas.user.id",
+                        "canvas_user_login_id": "$Canvas.user.loginId",
+                        "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
+                    },
+                    "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                    "target_link_uri": "https://ripley-test.berkeley.edu/api/lti/mailing_lists",
+                    "oidc_initiation_url": "https://ripley-test.berkeley.edu/api/lti/login"
+                },
+                "is_lti_key": true,
+                "id": 10720000000000624
+            },
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2023-03-30T20:08:37Z",
+                "user_id": null,
+                "name": "Download E-Grades (LTI 1.3)",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "DJ89BDKTucOiXMkZ",
+                "redirect_uri": null,
+                "redirect_uris": "https://ripley-test.berkeley.edu/api/lti/export_grade",
+                "access_token_count": 0,
+                "last_used_at": null,
+                "vendor_code": null,
+                "public_jwk": null,
+                "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000272,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000623,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": {
+                    "title": "Download E-Grades (LTI 1.3)",
+                    "extensions": [
+                        {
+                            "platform": "canvas.instructure.com",
+                            "settings": {
+                                "platform": "canvas.instructure.com",
+                                "placements": [
+                                    {
+                                        "text": "Download E-Grades (LTI 1.3)",
+                                        "default": "disabled",
+                                        "enabled": true,
+                                        "placement": "link_selection",
+                                        "visibility": "admins",
+                                        "message_type": "LtiResourceLinkRequest"
+                                    }
+                                ]
+                            },
+                            "privacy_level": "public"
+                        }
+                    ],
+                    "description": "Exports Course Grades to E-Grades CSV file",
+                    "custom_fields": {
+                        "canvas_site_id": "$Canvas.course.id",
+                        "canvas_user_id": "$Canvas.user.id",
+                        "canvas_user_login_id": "$Canvas.user.loginId",
+                        "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
+                    },
+                    "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                    "target_link_uri": "https://ripley-test.berkeley.edu/api/lti/export_grade",
+                    "oidc_initiation_url": "https://ripley-test.berkeley.edu/api/lti/login"
+                },
+                "is_lti_key": true,
+                "id": 10720000000000623
+            },
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2023-03-30T20:02:11Z",
+                "user_id": null,
+                "name": "Find a Person to Add (LTI 1.3)",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "j0dD7aFNXOwKJT7Q",
+                "redirect_uri": null,
+                "redirect_uris": "https://ripley-test.berkeley.edu/api/lti/add_user",
+                "access_token_count": 0,
+                "last_used_at": null,
+                "vendor_code": null,
+                "public_jwk": {},
+                "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000270,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000621,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": {
+                    "title": "Find a Person to Add (LTI 1.3)",
+                    "scopes": [],
+                    "extensions": [
+                        {
+                            "platform": "canvas.instructure.com",
+                            "settings": {
+                                "platform": "canvas.instructure.com",
+                                "placements": [
+                                    {
+                                        "text": "Find a Person to Add (LTI 1.3)",
+                                        "default": "disabled",
+                                        "enabled": true,
+                                        "placement": "link_selection",
+                                        "visibility": "admins",
+                                        "message_type": "LtiResourceLinkRequest"
+                                    }
+                                ]
+                            },
+                            "privacy_level": "public"
+                        }
+                    ],
+                    "public_jwk": {},
+                    "description": "Search and add users to course sections",
+                    "custom_fields": {
+                        "canvas_site_id": "$Canvas.course.id",
+                        "canvas_user_id": "$Canvas.user.id",
+                        "canvas_user_login_id": "$Canvas.user.loginId",
+                        "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
+                    },
+                    "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                    "target_link_uri": "https://ripley-test.berkeley.edu/api/lti/add_user",
+                    "oidc_initiation_url": "https://ripley-test.berkeley.edu/api/lti/login"
+                },
+                "is_lti_key": true,
+                "id": 10720000000000621
+            },
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2023-03-30T19:57:23Z",
+                "user_id": null,
+                "name": "Mailing List (LTI 1.3)",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "5i6VlrpGZOSAMm7g",
+                "redirect_uri": null,
+                "redirect_uris": "https://ripley-test.berkeley.edu/api/lti/mailing_list",
+                "access_token_count": 0,
+                "last_used_at": null,
+                "vendor_code": null,
+                "public_jwk": null,
+                "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000269,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000620,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": {
+                    "title": "Mailing List (LTI 1.3)",
+                    "extensions": [
+                        {
+                            "platform": "canvas.instructure.com",
+                            "settings": {
+                                "platform": "canvas.instructure.com",
+                                "placements": [
+                                    {
+                                        "text": "Mailing List (LTI 1.3)",
+                                        "default": "disabled",
+                                        "enabled": true,
+                                        "placement": "course_navigation",
+                                        "visibility": "admins",
+                                        "message_type": "LtiResourceLinkRequest"
+                                    }
+                                ]
+                            },
+                            "privacy_level": "public"
+                        }
+                    ],
+                    "description": "Create and manage a mailing list for a course site",
+                    "custom_fields": {
+                        "canvas_site_id": "$Canvas.course.id",
+                        "canvas_user_id": "$Canvas.user.id",
+                        "canvas_user_login_id": "$Canvas.user.loginId",
+                        "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
+                    },
+                    "public_jwk_url": "https://ripley-test.berkeley.edu/api/lti/jwks",
+                    "target_link_uri": "https://ripley-test.berkeley.edu/api/lti/mailing_list",
+                    "oidc_initiation_url": "https://ripley-test.berkeley.edu/api/lti/login"
+                },
+                "is_lti_key": true,
+                "id": 10720000000000620
+            },
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2020-06-02T21:28:05Z",
+                "user_id": null,
+                "name": "Kaltura",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [
+                    "url:GET|/api/v1/courses",
+                    "url:GET|/api/v1/courses/:id"
+                ],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "zJrdHp6JEhlkNQoV",
+                "redirect_uri": "https://fake.berkeley.edu/",
+                "redirect_uris": "https://fake.berkeley.edu/",
+                "access_token_count": 99008,
+                "last_used_at": "2023-11-25T05:59:16Z",
+                "vendor_code": null,
+                "public_jwk": null,
+                "public_jwk_url": null,
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000125,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000483,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": null,
+                "is_lti_key": false,
+                "id": 10720000000000483
+            },
+            {
+                "email": "oski@berkeley.edu",
+                "user_name": null,
+                "created_at": "2019-07-17T23:31:59Z",
+                "user_id": null,
+                "name": "DataHub",
+                "icon_url": null,
+                "workflow_state": "active",
+                "notes": null,
+                "scopes": [
+                    "url:GET|/api/v1/users/:user_id/profile",
+                    "url:GET|/api/v1/courses",
+                    "url:GET|/api/v1/users/self/groups"
+                ],
+                "require_scopes": true,
+                "test_cluster_only": false,
+                "client_credentials_audience": null,
+                "api_key": "s5fFP3SMKqCkJrlq",
+                "redirect_uri": null,
+                "redirect_uris": "https://fake1.berkeley.edu/hub/oauth_callback\nhttps://fake2.berkeley.edu/hub/oauth_callback",
+                "access_token_count": 788096,
+                "last_used_at": "2023-11-25T08:02:00Z",
+                "vendor_code": null,
+                "public_jwk": null,
+                "public_jwk_url": null,
+                "allow_includes": false,
+                "developer_key_account_binding": {
+                    "id": 10720000000000113,
+                    "account_id": 10720000000090242,
+                    "developer_key_id": 10720000000000472,
+                    "workflow_state": "on",
+                    "account_owns_binding": true
+                },
+                "account_name": "UC Berkeley",
+                "visible": true,
+                "tool_configuration": null,
+                "is_lti_key": false,
+                "id": 10720000000000472
+            }
+        ],
+        "status_code": 200
+    },
     "get_external_tools_1": {
         "method": "GET",
         "endpoint": "accounts/1/external_tools",
@@ -245,7 +924,7 @@
                 "id": 40897,
                 "name": "Manage Sites",
                 "updated_at": "2015-09-24T14:15:28Z",
-                "url": "https://cc-dev.example.com/api/lti/manage_sites",
+                "url": "https://ripley.berkeley.edu/api/lti/manage_sites",
                 "privacy_level": "public",
                 "custom_fields": {
                     "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
@@ -253,7 +932,7 @@
                 "workflow_state": "public",
                 "vendor_help_link": null,
                 "user_navigation": {
-                    "url": "https://cc-dev.example.com/api/lti/manage_sites",
+                    "url": "https://ripley.berkeley.edu/api/lti/manage_sites",
                     "text": "Manage Sites",
                     "enabled": "true",
                     "label": "Manage Sites",
@@ -291,7 +970,7 @@
                 "id": 35251,
                 "name": "Find a Person to Add",
                 "updated_at": "2015-09-24T14:15:34Z",
-                "url": "https://cc-dev.example.com/api/lti/add_user",
+                "url": "https://ripley.berkeley.edu/api/lti/add_user",
                 "privacy_level": "public",
                 "custom_fields": {
                     "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
@@ -300,7 +979,7 @@
                 "vendor_help_link": null,
                 "user_navigation": null,
                 "course_navigation": {
-                    "url": "https://cc-dev.example.com/api/lti/add_user",
+                    "url": "https://ripley.berkeley.edu/api/lti/add_user",
                     "text": "Find a Person to Add",
                     "visibility": "admins",
                     "default": "disabled",
@@ -433,7 +1112,7 @@
                 "id": 27784,
                 "name": "User Provisioning",
                 "updated_at": "2015-09-24T14:15:33Z",
-                "url": "https://cc-dev.example.com/api/lti/provision_user",
+                "url": "https://ripley.berkeley.edu/api/lti/provision_user",
                 "privacy_level": "public",
                 "custom_fields": {
                     "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
@@ -443,7 +1122,7 @@
                 "user_navigation": null,
                 "course_navigation": null,
                 "account_navigation": {
-                    "url": "https://cc-dev.example.com/api/lti/provision_user",
+                    "url": "https://ripley.berkeley.edu/api/lti/provision_user",
                     "text": "User Provisioning",
                     "visibility": "admins",
                     "default": "enabled",
@@ -481,7 +1160,7 @@
                 "id": 32692,
                 "name": "Webcasts",
                 "updated_at": "2015-09-24T14:15:35Z",
-                "url": "https://cc-dev.example.com/api/lti/course_mediacasts",
+                "url": "https://ripley.berkeley.edu/api/lti/course_mediacasts",
                 "privacy_level": "public",
                 "custom_fields": {
                     "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
@@ -490,7 +1169,7 @@
                 "vendor_help_link": null,
                 "user_navigation": null,
                 "course_navigation": {
-                    "url": "https://cc-dev.example.com/api/lti/course_mediacasts",
+                    "url": "https://ripley.berkeley.edu/api/lti/course_mediacasts",
                     "text": "Course Captures",
                     "visibility": "public",
                     "default": "disabled",
@@ -708,7 +1387,7 @@
                 "id": 37784,
                 "name": "Download E-Grades",
                 "updated_at": "2015-09-24T14:15:37Z",
-                "url": "https://cc-dev.example.com/api/lti/export_grade",
+                "url": "https://ripley.berkeley.edu/api/lti/export_grade",
                 "privacy_level": "public",
                 "custom_fields": {
                     "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
@@ -717,7 +1396,7 @@
                 "vendor_help_link": null,
                 "user_navigation": null,
                 "course_navigation": {
-                    "url": "https://cc-dev.example.com/api/lti/export_grade",
+                    "url": "https://ripley.berkeley.edu/api/lti/export_grade",
                     "text": "Download E-Grades",
                     "visibility": "admins",
                     "default": "disabled",
@@ -802,7 +1481,7 @@
                 "id": 36940,
                 "name": "Roster Photos",
                 "updated_at": "2015-09-24T14:15:32Z",
-                "url": "https://cc-dev.example.com/api/lti/roster_photos",
+                "url": "https://ripley.berkeley.edu/api/lti/roster_photos",
                 "privacy_level": "public",
                 "custom_fields": {
                     "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
@@ -811,7 +1490,7 @@
                 "vendor_help_link": null,
                 "user_navigation": null,
                 "course_navigation": {
-                    "url": "https://cc-dev.example.com/api/lti/roster_photos",
+                    "url": "https://ripley.berkeley.edu/api/lti/roster_photos",
                     "text": "Roster Photos",
                     "visibility": "admins",
                     "default": "enabled",
@@ -857,7 +1536,7 @@
                 "id": 37784,
                 "name": "Download E-Grades",
                 "updated_at": "2015-09-24T14:15:37Z",
-                "url": "https://cc-dev.example.com/api/lti/export_grade",
+                "url": "https://ripley.berkeley.edu/api/lti/export_grade",
                 "privacy_level": "public",
                 "custom_fields": {
                     "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
@@ -866,7 +1545,7 @@
                 "vendor_help_link": null,
                 "user_navigation": null,
                 "course_navigation": {
-                    "url": "https://cc-dev.example.com/api/lti/export_grade",
+                    "url": "https://ripley.berkeley.edu/api/lti/export_grade",
                     "text": "Download E-Grades",
                     "visibility": "admins",
                     "default": "disabled",
@@ -951,7 +1630,7 @@
                 "id": 36940,
                 "name": "Roster Photos",
                 "updated_at": "2015-09-24T14:15:32Z",
-                "url": "https://cc-dev.example.com/api/lti/roster_photos",
+                "url": "https://ripley.berkeley.edu/api/lti/roster_photos",
                 "privacy_level": "public",
                 "custom_fields": {
                     "canvas_masquerading_user_id": "$Canvas.masqueradingUser.id"
@@ -960,7 +1639,7 @@
                 "vendor_help_link": null,
                 "user_navigation": null,
                 "course_navigation": {
-                    "url": "https://cc-dev.example.com/api/lti/roster_photos",
+                    "url": "https://ripley.berkeley.edu/api/lti/roster_photos",
                     "text": "Roster Photos",
                     "visibility": "admins",
                     "default": "enabled",
