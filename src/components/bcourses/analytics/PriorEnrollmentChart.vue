@@ -4,51 +4,59 @@
       <h2 id="grade-distribution-enrollment-header">Grade Distribution by Prior Enrollment</h2>
       <div>Lorem ipsum</div>
       <div>Class size: {{ classSize }}</div>
-      <div class="d-flex justify-space-between my-4">
-        <div class="grade-dist-enroll-course-search d-flex align-center">
-          <v-autocomplete
-            id="grade-distribution-enrollment-course-search"
-            v-model="selectedCourse"
-            auto-select-first
-            bg-color="white"
-            class="text-upper mr-2"
-            density="compact"
-            :disabled="isLoadingPriorEnrollments || isEmpty(get(gradeDistribution, get(selectedTerm, 'id')))"
-            :error="!suppressValidation && !isEmpty(courseSearchErrors)"
-            :error-messages="!suppressValidation ? courseSearchErrors : []"
-            hide-details
-            hide-no-data
-            :items="courseSuggestions"
-            label="Search Classes..."
-            :loading="isSearching ? 'primary' : false"
-            :menu-icon="null"
-            :search="courseSearchText"
-            variant="outlined"
-            @blur="selectedCourse = toUpper(courseSearchText)"
-            @change="suppressValidation = false"
-            @update:search="text => courseSearchText = text"
+      <div class="d-flex justify-space-between">
+        <div class="d-flex align-center">
+          <div class="grade-dist-enroll-course-search d-flex align-center">
+            <v-autocomplete
+              id="grade-distribution-enrollment-course-search"
+              v-model="selectedCourse"
+              auto-select-first
+              bg-color="white"
+              class="text-upper my-5 mr-2"
+              density="compact"
+              :disabled="isLoadingPriorEnrollments || isEmpty(get(gradeDistribution, get(selectedTerm, 'id')))"
+              :error="!suppressValidation && !isEmpty(courseSearchErrors)"
+              :error-messages="!suppressValidation ? courseSearchErrors : []"
+              hide-details
+              hide-no-data
+              :items="courseSuggestions"
+              label="Search Classes..."
+              :loading="isSearching ? 'primary' : false"
+              :menu-icon="null"
+              :search="courseSearchText"
+              variant="outlined"
+              @blur="selectedCourse = toUpper(courseSearchText)"
+              @change="suppressValidation = false"
+              @update:search="text => courseSearchText = text"
+            >
+              <template #item="{props, item}">
+                <v-list-item
+                  v-bind="props"
+                  class="py-0 my-0"
+                  density="compact"
+                  height="unset"
+                  min-height="30"
+                  :title="item.raw"
+                  :value="item.raw"
+                ></v-list-item>
+              </template>
+            </v-autocomplete>
+            <v-btn
+              id="grade-distribution-enroll-add-class-btn"
+              class="font-size-13"
+              color="primary"
+              :disabled="!selectedCourse || isLoadingPriorEnrollments || isEmpty(get(gradeDistribution, get(selectedTerm, 'id')))"
+              @click="onClickAddCourse"
+            >
+              Add Class
+            </v-btn>
+          </div>
+          <div
+            v-if="selectedCourse && insufficientData"
+            class="alert my-0 mx-4 px-4"
           >
-            <template #item="{props, item}">
-              <v-list-item
-                v-bind="props"
-                class="py-0 my-0"
-                density="compact"
-                height="unset"
-                min-height="30"
-                :title="item.raw"
-                :value="item.raw"
-              ></v-list-item>
-            </template>
-          </v-autocomplete>
-          <v-btn
-            id="grade-distribution-enroll-add-class-btn"
-            class="font-size-13"
-            color="primary"
-            :disabled="!selectedCourse || isLoadingPriorEnrollments || isEmpty(get(gradeDistribution, get(selectedTerm, 'id')))"
-            @click="onClickAddCourse"
-          >
-            Add Class
-          </v-btn>
+            No {{ courseName }} {{ get(selectedTerm, 'name') }} students were previously enrolled in {{ selectedCourse }}.
+          </div>
         </div>
         <div class="position-relative">
           <select
@@ -217,6 +225,7 @@ export default {
     courseSuggestions: [],
     debouncedSearch: undefined,
     courseSearchErrors: [],
+    insufficientData: false,
     isLoadingPriorEnrollments: false,
     isSearching: false,
     priorEnrollmentGradeDistribution: {},
@@ -236,6 +245,11 @@ export default {
         if (newVal !== oldVal) {
           this.debouncedSearch()
         }
+      }
+    },
+    selectedCourse(newVal, oldVal) {
+      if (newVal !== oldVal) {
+        this.insufficientData = false
       }
     }
   },
@@ -371,8 +385,8 @@ export default {
         getPriorEnrollmentGradeDistribution(this.currentUser.canvasSiteId, this.selectedCourse).then(response => {
           this.courseSearchText = null
           this.priorEnrollmentGradeDistribution = response
-          this.refresh()
           this.isLoadingPriorEnrollments = false
+          this.refresh()
         })
       }
     },
@@ -385,9 +399,11 @@ export default {
       if (get(this.priorEnrollmentGradeDistribution, get(this.selectedTerm, 'id'))) {
         this.loadPrimarySeries(this.colors.tertiary, false)
         this.loadPriorEnrollments()
+        this.insufficientData = false
       } else {
         this.chartSettings.series = []
         this.loadPrimarySeries(this.colors.primary)
+        this.insufficientData = isEmpty(this.selectedCourse)
       }
       this.setChartTitle()
     },
@@ -440,7 +456,7 @@ export default {
 }
 .grade-dist-enroll-term-select {
   right: 0;
-  top: 75px;
+  top: 95px;
   z-index: 100;
 }
 table {

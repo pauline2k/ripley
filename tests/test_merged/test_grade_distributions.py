@@ -31,7 +31,7 @@ class TestGradeDistributions:
 
     def test_get_grade_distributions(self, app):
         with override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
-            demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'], '30000')
+            demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'])
             assert demographics_distribution == [
                 {
                     'averageGradePoints': 1.1166666666666667,
@@ -218,7 +218,7 @@ class TestGradeDistributions:
 
     def test_get_grade_distributions_minimum_threshold(self, app):
         with override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 1):
-            demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'], '30000')
+            demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'])
             assert demographics_distribution == [
                 {
                     'averageGradePoints': 1.1166666666666667,
@@ -408,7 +408,6 @@ class TestGradeDistributions:
             d = get_grade_distribution_with_prior_enrollments(
                 term_id='2232',
                 course_name='ANTHRO 189',
-                instructor_uid=None,
                 prior_course_name='ASTRON 218',
             )
             assert d == {
