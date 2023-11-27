@@ -176,6 +176,7 @@
                 <select
                   id="select-pnp-grade-cutoff"
                   v-model="selectedPnpCutoffGrade"
+                  aria-label="Select Lowest Passing Letter Grade"
                   class="grade-export-select-pnp-cutoff"
                   :disabled="enablePnpConversion !== 'true'"
                 >
