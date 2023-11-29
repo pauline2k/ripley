@@ -4,34 +4,47 @@
       You are currently not listed as the instructor of record for any courses, so you cannot create a course site in bCourses.
     </div>
     <div v-if="size(teachingTerms)">
-      <v-tabs
-        v-if="size(teachingTerms) > 1"
-        v-model="selectedTerm"
-        aria-label="Official Sections"
-        selected-class="selected-term-tab"
-      >
-        <v-tab
-          v-for="(term, index) in teachingTerms"
-          :id="`term${index}`"
-          :key="index"
-          aria-controls="official-sections-tabpanel"
-          :aria-selected="term.slug === selectedTerm"
-          class="rounded"
-          :tabindex="term.slug === selectedTerm ? 0 : -1"
-          :value="term.slug"
+      <v-card class="mt-2 pa-5" elevation="3" rounded="lg">
+        <v-tabs
+          v-if="size(teachingTerms) > 1"
+          v-model="selectedTerm"
+          aria-label="Official Sections"
+          class="border-b-sm"
+          color="primary"
+          slider-color="grey-darken-3"
         >
-          {{ term.name }}
-        </v-tab>
-      </v-tabs>
-      <v-card class="pa-3">
+          <v-tab
+            v-for="(term, index) in teachingTerms"
+            :id="`term${index}`"
+            :key="index"
+            aria-controls="official-sections-tabpanel"
+            :aria-selected="term.slug === selectedTerm"
+            :class="{'rounded-ts-lg': index === 0, 'rounded-te-lg': index === 1}"
+            :tabindex="term.slug === selectedTerm ? 0 : -1"
+            :value="term.slug"
+            variant="elevated"
+            width="50%"
+          >
+            <span
+              class="font-size-16"
+              :class="{'text-white': term.slug === selectedTerm, 'text-grey': term.slug !== selectedTerm}"
+            >
+              {{ term.name }}
+            </span>
+          </v-tab>
+        </v-tabs>
         <v-window
           id="official-sections-tabpanel"
           v-model="selectedTerm"
           :aria-labelledby="size(teachingTerms) > 1 ? `term${findIndex(teachingTerms, t => t.slug === selectedTerm)}` : undefined"
+          :class="{'mt-3': size(teachingTerms) > 1}"
           :role="size(teachingTerms) > 1 ? 'tabpanel' : undefined"
         >
           <v-window-item :value="selectedTerm">
-            <h2 id="official-sections-heading">{{ selectedTermName }} Official Sections</h2>
+            <h2 id="official-sections-heading">
+              {{ selectedTermName }}
+              {{ actingAsInstructor ? `sections taught by ${actingAsInstructor.name}` : 'Official Sections' }}
+            </h2>
             <div class="text-subtitle-1 mt-1 mb-3">
               All official sections you select below will be put in ONE, single course site.
             </div>
@@ -110,7 +123,7 @@
             </v-expansion-panels>
           </v-window-item>
         </v-window>
-        <div class="d-flex justify-end mb-2">
+        <div class="d-flex justify-end">
           <v-btn
             id="page-create-course-site-continue"
             aria-label="Continue to next step"
@@ -138,19 +151,25 @@
 <script setup>
 import CourseCodeAndTitle from '@/components/bcourses/create/CourseCodeAndTitle.vue'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
-import {mdiHelpCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
 import OutboundLink from '@/components/utils/OutboundLink'
+import {findIndex} from 'lodash'
+import {mdiHelpCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
 </script>
 
 <script>
 import Context from '@/mixins/Context.vue'
-import {get, find, findIndex, size} from 'lodash'
+import {get, each, find, size} from 'lodash'
 import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'SelectSectionsStep',
   mixins: [Context],
   props: {
+    adminActingAs: {
+      default: undefined,
+      required: false,
+      type: String
+    },
     coursesList: {
       required: true,
       type: Array
@@ -181,6 +200,7 @@ export default {
     }
   },
   data: () => ({
+    actingAsInstructor: undefined,
     linkToSiteOverview: undefined,
     panels: [],
     selectedTerm: undefined
@@ -206,6 +226,7 @@ export default {
     } else if (this.coursesList.length === 1) {
       this.panels = [0]
     }
+    this.actingAsInstructor = this.getActingAsInstructor()
   },
   methods: {
     cancel() {
@@ -218,7 +239,18 @@ export default {
       }
       return caption
     },
-    findIndex,
+    getActingAsInstructor() {
+      let instructor
+      if (this.adminActingAs) {
+        each(this.teachingTerms, t => each(t.classes, c => each(c.sections, s => each(s.instructors, i => {
+          if (i.uid === this.adminActingAs) {
+            instructor = i
+            return false
+          }
+        }))))
+      }
+      return instructor
+    },
     onCloseHelp() {
       this.alertScreenReader('help hidden')
       putFocusNextTick(size(this.coursesList) ? `sections-course-${get(this.coursesList, '0.slug')}-btn` : 'page-create-course-site-cancel')
@@ -228,21 +260,17 @@ export default {
 }
 </script>
 
+<!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
+<style>
+.v-expansion-panel-text__wrapper {
+  padding: 8px 12px 16px !important;
+}
+</style>
+
 <style scoped lang="scss">
 .sections-course-title {
   font-size: 15px !important;
   font-weight: 700 !important;
   line-height: 15px;
-}
-/* eslint-disable-next-line vue-scoped-css/no-unused-selector */
-.selected-term-tab {
-  background-color: $color-primary;
-  color: $color-white !important;
-}
-</style>
-<!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
-<style>
-.v-expansion-panel-text__wrapper {
-  padding: 8px 12px 16px !important;
 }
 </style>

@@ -26,20 +26,17 @@
         />
       </div>
       <div v-if="!isFetching" id="select-and-confirm" class="pt-2">
-        <div
+        <SelectSectionsStep
           v-if="currentWorkflowStep === 'selecting'"
-          id="page-create-course-site-selecting-step"
-        >
-          <SelectSectionsStep
-            :courses-list="coursesList"
-            :current-semester="currentSemester"
-            :selected-sections-list="selectedSectionsList"
-            :show-confirmation="showConfirmation"
-            :switch-semester="switchSemester"
-            :teaching-terms="teachingTerms"
-            :update-selected="updateSelected"
-          />
-        </div>
+          :admin-acting-as="adminActingAs"
+          :courses-list="coursesList"
+          :current-semester="currentSemester"
+          :selected-sections-list="selectedSectionsList"
+          :show-confirmation="showConfirmation"
+          :switch-semester="switchSemester"
+          :teaching-terms="teachingTerms"
+          :update-selected="updateSelected"
+        />
         <div v-if="currentWorkflowStep === 'confirmation'">
           <ConfirmationStep
             :course-site-creation-promise="courseSiteCreationPromise"
@@ -272,6 +269,7 @@ export default {
     },
     switchAdminTerm(semester) {
       if (semester && this.currentAdminTerm !== semester.slug) {
+        this.currentWorkflowStep = null
         this.currentAdminTerm = semester.slug
         this.selectedSectionsList = []
         this.updateSelected()
