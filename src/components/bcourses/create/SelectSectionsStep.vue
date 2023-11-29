@@ -195,9 +195,8 @@ export default {
     }
   },
   watch: {
-    selectedTerm(termSlug) {
-      const term = find(this.teachingTerms, t => t.slug === termSlug)
-      this.switchSemester(term)
+    selectedTerm(slug) {
+      this.switchSemester(slug)
     }
   },
   created() {

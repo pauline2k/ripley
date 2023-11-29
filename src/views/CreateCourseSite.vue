@@ -81,7 +81,7 @@ import Header1 from '@/components/utils/Header1.vue'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
-import {each, get, includes, map, size} from 'lodash'
+import {each, find, get, includes, map, size} from 'lodash'
 import {iframeParentLocation, putFocusNextTick} from '@/utils'
 
 export default {
@@ -278,12 +278,14 @@ export default {
         this.alertScreenReader(`Switched to ${semester.name} for Section ID input`)
       }
     },
-    switchSemester(semester) {
-      this.currentSemester = semester.slug
-      this.coursesList = semester.classes
+    switchSemester(slug) {
+      const term = find(this.adminTerms, t => t.slug === slug)
+      const teachingTerm = find(this.teachingTerms, t => t.slug === slug)
+      this.coursesList = teachingTerm ? teachingTerm.classes : []
+      this.currentSemester = slug
+      this.currentSemesterName = term.name
       this.selectedSectionsList = []
-      this.currentSemesterName = semester.name
-      this.alertScreenReader(`Course sections for ${semester.name} loaded`)
+      this.alertScreenReader(`Course sections for ${term.name} loaded`)
       this.updateSelected()
     },
     trackBackgroundJob() {
@@ -328,7 +330,7 @@ export default {
       this.isAdmin = data.isAdmin
       this.teachingTerms = data.teachingTerms
       if (size(this.teachingTerms) > 0) {
-        this.switchSemester(this.teachingTerms[0])
+        this.switchSemester(this.teachingTerms[0].slug)
       }
       this.fillCourseSites(this.teachingTerms)
       if (this.isAdmin) {
