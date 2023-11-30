@@ -93,12 +93,13 @@
             id="page-create-course-site-section-id-list"
             v-model="sectionIds"
             auto-grow
+            class="w-50"
             clearable
-            density="comfortable"
             :disabled="isFetching"
             hide-details
             placeholder="Paste your list of Section IDs here, separated by commas or spaces"
             rows="2"
+            variant="outlined"
           />
         </div>
         <v-btn
