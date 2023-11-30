@@ -25,8 +25,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 import csv
 import io
+import json
 import os
 from time import sleep
+from urllib.parse import urljoin
 
 from canvasapi import Canvas
 from canvasapi.account import Account
@@ -37,6 +39,7 @@ from canvasapi.sis_import import SisImport
 from canvasapi.tab import Tab
 from canvasapi.user import User
 from flask import current_app as app
+from ripley.lib import http
 
 # By default, we allow up to an hour for Canvas to rouse itself.
 BACKGROUND_STATUS_CHECK_INTERVAL = 20
@@ -48,32 +51,84 @@ def ping_canvas():
     return get_account(app.config['CANVAS_BERKELEY_ACCOUNT_ID']) is not None
 
 
-def create_external_tool(account_id, client_id):
-    account = get_account(account_id, api_call=False)
+def create_developer_key(account_id, tool_settings):
+    data = {
+        'developer_key': {
+            'name': tool_settings['title'],
+            'scopes': [],
+            'redirect_uris': tool_settings['target_link_uri'],
+        },
+        'tool_configuration': {
+            'settings': {
+                **tool_settings,
+            },
+        },
+    }
+    return http.request(
+        url=urljoin(
+            app.config['CANVAS_API_URL'],
+            f'api/lti/accounts/{account_id}/developer_keys/tool_configuration'),
+        method='post',
+        headers={
+            'Authorization': f"Bearer {app.config['CANVAS_ACCESS_TOKEN']}",
+            'Content-Type': 'application/json',
+        },
+        data=json.dumps(data),
+    )
+
+
+def create_external_tool(tool_settings, obj_type, obj_id=None):
+    if obj_type == 'account':
+        obj = get_account(obj_id, api_call=False)
+    elif obj_type == 'course':
+        obj = get_course(obj_id, api_call=False)
+    else:
+        raise ValueError
     tool = None
     try:
-        # Per Instructure documentation, if the client_id is supplied the other parameters will be ignored.
-        # However, canvasapi still requires them.
-        tool = account.create_external_tool(
-            client_id=client_id,
-            name='name',
+        tool = obj.create_external_tool(
+            name=tool_settings['title'],
             privacy_level='public',
             consumer_key=None,
             shared_secret=None,
+            kwargs=tool_settings,
         )
     except Exception as e:
-        app.logger.error(f'Failed to create Canvas external tool (client_id={client_id}, account_id={account_id})')
+        app.logger.error(f"Failed to create Canvas external tool {tool_settings['title']} on account_id={obj_id}")
         app.logger.exception(e)
     return tool
 
 
-def edit_external_tool(tool_id, url, obj_type, obj_id=None):
-    tool = get_external_tool(tool_id, obj_type, obj_id)
+def edit_developer_key(developer_key_id, tool_settings):
+    data = {
+        'developer_key': {
+            'name': tool_settings['title'],
+            'scopes': [],
+            'redirect_uris': tool_settings['target_link_uri'],
+        },
+        'tool_configuration': {
+            'settings': {
+                **tool_settings,
+            },
+        },
+    }
+    return http.request(
+        url=urljoin(app.config['CANVAS_API_URL'], f'api/lti/developer_keys/{developer_key_id}/tool_configuration'),
+        method='put',
+        headers={
+            'Authorization': f"Bearer {app.config['CANVAS_ACCESS_TOKEN']}",
+            'Content-Type': 'application/json',
+        },
+        data=json.dumps(data),
+    )
+
+
+def edit_external_tool(tool, tool_settings):
     tools = None
     try:
-        tools = tool.edit(url=url)
+        tools = tool.edit(**tool_settings)
     except Exception as e:
-        app.logger.error(f'Failed to update Canvas external tool URL (id={tool_id}, url={url}, {obj_type}_id={obj_id})')
+        app.logger.error(f"Failed to update Canvas external tool {tool_settings['title']} (id={tool.id})")
         app.logger.exception(e)
     return tools
 
@@ -190,6 +245,17 @@ def get_csv_report(report_type, download_path=None, term_id=None):
             sleep(BACKGROUND_STATUS_CHECK_INTERVAL)
 
     app.logger.error(f'Failed to retrieve CSV {report_type} report after {MAX_REPORT_RETRIEVAL_ATTEMPTS} attempts')
+
+
+def get_developer_keys():
+    response = http.request(
+        url=urljoin(app.config['CANVAS_API_URL'], f"api/v1/accounts/{app.config['CANVAS_BERKELEY_ACCOUNT_ID']}/developer_keys?per_page=100"),
+        headers={
+            'Authorization': f"Bearer {app.config['CANVAS_ACCESS_TOKEN']}",
+            'Content-Type': 'application/json',
+        },
+    )
+    return response.content
 
 
 def get_external_tool(tool_id, obj_type, obj_id=None):

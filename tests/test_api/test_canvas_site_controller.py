@@ -507,7 +507,6 @@ class TestCreateCourseSite:
     @classmethod
     def _api_get_creation_job_status(cls, client, job_id, expected_status_code=200):
         response = client.get(f'/api/canvas_site/provision/status?jobId={job_id}')
-        print(response.json)
         assert response.status_code == expected_status_code
         return response.json
 

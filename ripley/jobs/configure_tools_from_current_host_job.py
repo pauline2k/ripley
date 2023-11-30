@@ -23,15 +23,21 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from flask import current_app as app
+from ripley.jobs.base_job import BaseJob
+from ripley.lib.canvas_lti import configure_tools_from_current_host
 
-from scriptpath import scriptify
 
+class ConfigureToolsFromCurrentHostJob(BaseJob):
 
-@scriptify.in_app
-def main(app):
-    from ripley.lib.canvas_lti import configure_tools_from_current_host
-    with app.app_context():
+    def _run(self, params={}):
         configure_tools_from_current_host()
+        app.logger.info(f"Configured tools on {app.config['CANVAS_API_URL']} pointing to {app.config['LTI_HOST']}; job complete.")
 
+    @classmethod
+    def description(cls):
+        return 'Install or reconfigure all Canvas external tools provided by the current host.'
 
-main()
+    @classmethod
+    def key(cls):
+        return 'configure_tools_from_current_host'

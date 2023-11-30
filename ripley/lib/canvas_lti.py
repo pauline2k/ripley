@@ -22,8 +22,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+import json
 import re
-from urllib.parse import urljoin
 
 from flask import current_app as app
 from ripley.externals import canvas
@@ -33,7 +33,7 @@ LTI_TOOL_DEFINITIONS = None
 
 
 def configure_tools_from_current_host():
-    current_host = app.config['LTI_HOST']
+    developer_keys = {str(key['id']): key for key in json.loads(canvas.get_developer_keys())}
     main_account_tools = canvas.get_external_tools(obj_type='account', obj_id=app.config['CANVAS_BERKELEY_ACCOUNT_ID'])
     course_account_tools = canvas.get_external_tools(obj_type='account', obj_id=app.config['CANVAS_COURSES_ACCOUNT_ID'])
     admin_account_tools = canvas.get_external_tools(obj_type='account', obj_id=app.config['CANVAS_ADMIN_TOOLS_ACCOUNT_ID'])
@@ -43,27 +43,28 @@ def configure_tools_from_current_host():
             continue
         host, key = _parse_launch_url(tool.url)
         if host and key:
-            existing_tools[key] = {'host': host, 'id': tool.id, 'name': tool.name}
-    results = {}
-    for key, tool_definition in lti_tool_definitions().items():
-        existing_tool = existing_tools.get(key, None)
-        if existing_tool:
-            log_message = f"Overwriting configuration for {key} (id={existing_tool['id']})"
-            if existing_tool['host'] != current_host:
-                log_message += f", provider from {existing_tool['host']} to {current_host}"
-            if existing_tool['name'] != tool_definition['name']:
-                log_message += f", name from {existing_tool['name']} to {tool_definition['name']}"
-            app.logger.info(log_message)
-            results[key] = canvas.edit_external_tool(
-                tool_id=existing_tool['id'],
-                url=urljoin(current_host, 'api/lti', key),
-                obj_type='account',
-                obj_id=tool_definition['account_id'],
+            existing_tools[key] = {'host': host, 'tool': tool}
+    for tool_id, tool_definition in lti_tool_definitions().items():
+        with app.test_request_context(base_url=app.config['LTI_HOST']):
+            tool_settings = tool_config(
+                title=tool_definition['name'],
+                description=tool_definition['description'],
+                target=f'launch_{tool_id}',
+                placement=tool_definition['placement'],
+                default=tool_definition.get('default'),
             )
-        else:
-            app.logger.info(f"Adding configuration for {key} to account {tool_definition['account_id']}")
-            results[key] = canvas.create_external_tool(account_id=tool_definition['account_id'], client_id=tool_definition['client_id'])
-    return results
+            _update_developer_key(
+                account_id=tool_definition['account_id'],
+                developer_key=developer_keys[tool_definition['client_id']],
+                tool_id=tool_id,
+                tool_settings=tool_settings,
+            )
+            _update_external_tool(
+                account_id=tool_definition['account_id'],
+                external_tool=existing_tools.get(tool_id, None),
+                tool_id=tool_id,
+                tool_settings=tool_settings,
+            )
 
 
 def lti_tool_definitions():
@@ -84,6 +85,14 @@ def lti_tool_definitions():
                 'client_id': '10720000000000623',
                 'description': 'Exports Course Grades to E-Grades CSV file',
                 'placement': 'link_selection',
+                'default': 'disabled',
+            },
+            'grade_distribution': {
+                'name': 'Grade Distribution (LTI 1.3)',
+                'account_id': app.config['CANVAS_COURSES_ACCOUNT_ID'],
+                'client_id': '10720000000000632',
+                'description': 'Grade Distribution (LTI 1.3)',
+                'placement': 'course_navigation',
                 'default': 'disabled',
             },
             'mailing_list': {
@@ -126,8 +135,67 @@ def lti_tool_definitions():
     return LTI_TOOL_DEFINITIONS
 
 
+def tool_config(title, description, target, placement, default='enabled'):
+    return {
+        'title': title,
+        'description': description,
+        'oidc_initiation_url': app.url_for('initiate_login', _external=True),
+        'public_jwk_url': app.url_for('get_jwk_set', _external=True),
+        'target_link_uri': app.url_for(target, _external=True),
+        'extensions': [
+            {
+                'platform': 'canvas.instructure.com',
+                'privacy_level': 'public',
+                'settings': {
+                    'platform': 'canvas.instructure.com',
+                    'placements': [
+                        {
+                            'default': default,
+                            'enabled': True,
+                            'placement': placement,
+                            'message_type': 'LtiResourceLinkRequest',
+                            'text': title,
+                            'visibility': 'admins',
+                        },
+                    ],
+                },
+            },
+        ],
+        'custom_fields': {
+            'canvas_user_id': '$Canvas.user.id',
+            'canvas_site_id': '$Canvas.course.id',
+            'canvas_user_login_id': '$Canvas.user.loginId',
+            'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
+        },
+    }
+
+
 def _parse_launch_url(launch_url):
-    m = re.fullmatch(r'^(?P<host>http[s]?://.+)/api/lti/(?P<key>.+)', launch_url)
+    m = re.fullmatch(r'^(?P<host>http[s]?://ripley.+)/api/lti/(?P<key>.+)', launch_url)
     host = m['host'] if m else None
     key = m['key'] if m else None
     return host, key
+
+
+def _update_developer_key(account_id, developer_key, tool_id, tool_settings):
+    if developer_key:
+        client_id = developer_key['id']
+        app.logger.info(f'Overwriting developer key {tool_id} (id={client_id})')
+        return canvas.edit_developer_key(client_id, tool_settings)
+    else:
+        app.logger.info(f'Creating developer key {tool_id} (id={client_id})')
+        return canvas.create_developer_key(account_id, client_id, tool_settings)
+
+
+def _update_external_tool(account_id, external_tool, tool_id, tool_settings):
+    if external_tool:
+        log_message = f"Overwriting external tool {tool_id} (id={external_tool['tool'].id})"
+        if external_tool['host'] != app.config['LTI_HOST']:
+            log_message += f", provider from {external_tool['host']} to {app.config['LTI_HOST']}"
+        if external_tool['tool'].name != tool_settings['title']:
+            log_message += f", name from {external_tool['tool'].name} to {tool_settings['title']}"
+        app.logger.info(log_message)
+        return canvas.edit_external_tool(external_tool['tool'], tool_settings)
+    else:
+        app.logger.info(f'Installing external tool {tool_id} to account {account_id}')
+        return canvas.create_external_tool(tool_settings, 'account', account_id)

@@ -30,7 +30,7 @@ from pylti1p3.tool_config import ToolConfJsonFile
 from ripley import cache
 from ripley.api.errors import BadRequestError, InternalServerError
 from ripley.api.util import start_login_session
-from ripley.lib.canvas_lti import lti_tool_definitions
+from ripley.lib.canvas_lti import lti_tool_definitions, tool_config
 from ripley.lib.http import redirect_unauthorized, tolerant_jsonify
 from ripley.models.user import User
 
@@ -51,7 +51,7 @@ class MessageLaunch(FlaskMessageLaunch):
 @app.route('/api/lti/config/add_user.json')
 def config_add_user():
     tool_definition = lti_tool_definitions()['add_user']
-    return _tool_config(
+    return tool_config(
         title=tool_definition['name'],
         description=tool_definition['description'],
         target='launch_add_user',
@@ -63,7 +63,7 @@ def config_add_user():
 @app.route('/api/lti/config/manage_sites.json')
 def config_manage_sites():
     tool_definition = lti_tool_definitions()['manage_sites']
-    return _tool_config(
+    return tool_config(
         title=tool_definition['name'],
         description=tool_definition['description'],
         target='launch_manage_sites',
@@ -74,7 +74,7 @@ def config_manage_sites():
 @app.route('/api/lti/config/export_grade.json')
 def config_export_grade():
     tool_definition = lti_tool_definitions()['export_grade']
-    return _tool_config(
+    return tool_config(
         title=tool_definition['name'],
         description=tool_definition['description'],
         target='launch_export_grade',
@@ -85,7 +85,7 @@ def config_export_grade():
 
 @app.route('/api/lti/config/grade_distribution.json')
 def config_grade_distribution():
-    return _tool_config(
+    return tool_config(
         title='Grade Distribution (LTI 1.3)',
         description='',
         target='launch_grade_distribution',
@@ -97,7 +97,7 @@ def config_grade_distribution():
 @app.route('/api/lti/config/mailing_list.json')
 def config_mailing_list():
     tool_definition = lti_tool_definitions()['mailing_list']
-    return _tool_config(
+    return tool_config(
         title=tool_definition['name'],
         description=tool_definition['description'],
         target='launch_mailing_list',
@@ -109,7 +109,7 @@ def config_mailing_list():
 @app.route('/api/lti/config/mailing_lists.json')
 def config_mailing_lists():
     tool_definition = lti_tool_definitions()['mailing_lists']
-    return _tool_config(
+    return tool_config(
         title=tool_definition['name'],
         description=tool_definition['description'],
         target='launch_mailing_lists',
@@ -120,7 +120,7 @@ def config_mailing_lists():
 @app.route('/api/lti/config/provision_user.json')
 def config_provision_user():
     tool_definition = lti_tool_definitions()['provision_user']
-    return _tool_config(
+    return tool_config(
         title=tool_definition['name'],
         description=tool_definition['description'],
         target='launch_provision_user',
@@ -131,7 +131,7 @@ def config_provision_user():
 @app.route('/api/lti/config/roster_photos.json')
 def config_roster_photos():
     tool_definition = lti_tool_definitions()['roster_photos']
-    return _tool_config(
+    return tool_config(
         title=tool_definition['name'],
         description=tool_definition['description'],
         target='launch_roster_photos',
@@ -246,38 +246,3 @@ def _launch_tool(target_uri):
     except Exception as e:
         app.logger.error(f'Failure to launch: {e.__class__.__name__}: {e}')
         raise InternalServerError({'message': str(e)})
-
-
-def _tool_config(title, description, target, placement, default='enabled'):
-    return {
-        'title': title,
-        'description': description,
-        'oidc_initiation_url': app.url_for('initiate_login', _external=True),
-        'public_jwk_url': app.url_for('get_jwk_set', _external=True),
-        'target_link_uri': app.url_for(target, _external=True),
-        'extensions': [
-            {
-                'platform': 'canvas.instructure.com',
-                'privacy_level': 'public',
-                'settings': {
-                    'platform': 'canvas.instructure.com',
-                    'placements': [
-                        {
-                            'default': default,
-                            'enabled': True,
-                            'placement': placement,
-                            'message_type': 'LtiResourceLinkRequest',
-                            'text': title,
-                            'visibility': 'admins',
-                        },
-                    ],
-                },
-            },
-        ],
-        'custom_fields': {
-            'canvas_user_id': '$Canvas.user.id',
-            'canvas_site_id': '$Canvas.course.id',
-            'canvas_user_login_id': '$Canvas.user.loginId',
-            'canvas_masquerading_user_id': '$Canvas.masqueradingUser.id',
-        },
-    }
