@@ -318,7 +318,7 @@ class MailingList(Base):
                             app.logger.debug(f'Adding user {preferred_email}')
                             success = MailingListMembers.create(
                                 can_send=user['canSend'],
-                                email_address=user['emailAddress'],
+                                email_address=preferred_email,
                                 first_name=user['firstName'],
                                 last_name=user['lastName'],
                                 mailing_list_id=mailing_list.id,
@@ -355,7 +355,6 @@ def _can_send(canvas_site_user):
 
 
 def _get_preferred_email(canvas_user_email, loch_user_email):
-    preferred_email = None
     if app.config['MAILING_LISTS_TEST_MODE']:
         preferred_email = canvas_user_email or loch_user_email
     else:

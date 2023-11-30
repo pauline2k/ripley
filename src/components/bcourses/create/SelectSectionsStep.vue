@@ -9,7 +9,7 @@
           v-if="size(teachingTerms) > 1"
           v-model="selectedTerm"
           aria-label="Official Sections"
-          class="border-b-sm"
+          class="tabs-border"
           color="primary"
           slider-color="grey-darken-3"
         >
@@ -27,7 +27,7 @@
           >
             <span
               class="font-size-16"
-              :class="{'text-white': term.slug === selectedTerm, 'text-grey': term.slug !== selectedTerm}"
+              :class="{'text-white': term.slug === selectedTerm, 'text-primary': term.slug !== selectedTerm}"
             >
               {{ term.name }}
             </span>
@@ -272,5 +272,11 @@ export default {
   font-size: 15px !important;
   font-weight: 700 !important;
   line-height: 15px;
+}
+.tabs-border {
+  -moz-border-radius: 0;
+  -webkit-border-radius: 8px 8px 0 0;
+  border: 1px solid $color-container-grey-border;
+  border-radius: 8px 8px 0 0;
 }
 </style>

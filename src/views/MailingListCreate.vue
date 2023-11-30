@@ -31,7 +31,7 @@
       <Header1 text="Create Mailing List" />
     </div>
     <div v-if="!error && !currentUser.isStudent" class="mt-2">
-      <v-card id="mailing-list-details" elevation="1">
+      <v-card id="mailing-list-details" elevation="2">
         <v-card-text>
           <div v-if="!isAdminToolMode" class="mb-1">
             bCourses Mailing Lists allow Teachers, TAs, Lead TAs and Readers to send email to everyone in a bCourses site
@@ -41,7 +41,7 @@
             send messages through Mailing Lists.
           </div>
           <div>
-            <v-container class="mb-2 pb-1 pl-0 pt-2" fluid>
+            <v-container class="px-2 py-1" fluid>
               <v-row v-if="isAdminToolMode" no-gutters>
                 <v-col cols="auto" class="me-auto">
                   <div v-if="canvasSite.url">

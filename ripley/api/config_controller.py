@@ -34,7 +34,11 @@ from ripley.lib.util import get_eb_environment
 PUBLIC_CONFIGS = [
     'CANVAS_API_URL',
     'DEV_AUTH_ENABLED',
+    'EMAIL_REDIRECT_WHEN_TESTING',
+    'EMAIL_RIPLEY_OPERATIONS',
     'EMAIL_RIPLEY_SUPPORT',
+    'EMAIL_TEST_MODE',
+    'MAILING_LISTS_TEST_MODE',
     'RIPLEY_ENV',
     'TIMEZONE',
 ]
