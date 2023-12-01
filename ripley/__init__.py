@@ -54,7 +54,8 @@ def std_commit(allow_test_environment=False):
     try:
         db.session.commit()
         successful_commit = True
-    except SQLAlchemyError:
+    except SQLAlchemyError as e:
+        app.logger.exception(e)
         db.session.rollback()
         raise
     finally:
