@@ -30,7 +30,6 @@ import time
 from ripley.externals import rds
 from ripley.jobs.base_job import BaseJob
 from ripley.jobs.bcourses_refresh_base_job import BcoursesRefreshBaseJob
-from ripley.jobs.errors import BackgroundJobError
 from ripley.models.job import Job
 from ripley.models.job_history import JobHistory
 import schedule
@@ -96,13 +95,16 @@ class BackgroundJobManager:
 
         if all_jobs:
             for job_config in all_jobs:
-                self._load_job(
-                    app=app,
-                    job_key=job_config.key,
-                    schedule_type=job_config.job_schedule_type,
-                    schedule_value=job_config.job_schedule_value,
-                )
-
+                try:
+                    self._load_job(
+                        app=app,
+                        job_key=job_config.key,
+                        schedule_type=job_config.job_schedule_type,
+                        schedule_value=job_config.job_schedule_value,
+                    )
+                except Exception as e:
+                    app.logger.error(f'Failed to schedule job {job_config.key}: {job_config.job_schedule_type}={job_config.job_schedule_value}')
+                    app.logger.exception(e)
             self.continuous_thread = JobRunnerThread(daemon=True)
             self.continuous_thread.start()
         else:
@@ -130,7 +132,7 @@ class BackgroundJobManager:
         if job_class:
             task_runner = job_class(app.app_context)
         else:
-            raise BackgroundJobError(f'Failed to find job with key {job_key}')
+            raise ValueError(f'Failed to find job with key {job_key}')
 
         if schedule_type == 'minutes':
             schedule.every(int(schedule_value)).minutes.do(task_runner.run)
@@ -140,7 +142,7 @@ class BackgroundJobManager:
             for daily_value in schedule_value.split(','):
                 schedule.every().day.at(daily_value).do(task_runner.run)
         else:
-            raise BackgroundJobError(f'Unrecognized schedule type: {schedule_type}')
+            raise ValueError(f'Unrecognized schedule type: {schedule_type}')
 
 
 class _Monitor:
