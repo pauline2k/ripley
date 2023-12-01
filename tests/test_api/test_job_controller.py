@@ -251,12 +251,23 @@ class TestUpdateSchedule:
         }
         _api_update_schedule(client, params, expected_status_code=400)
 
-    def test_invalid_schedule(self, client, fake_auth, mock_job):
+    def test_invalid_schedule_type(self, client, fake_auth, mock_job):
+        mock_job.disabled = True
         fake_auth.login(canvas_site_id=None, uid=admin_uid)
         params = {
             'jobId': mock_job.id,
             'type': 'eons',
-            'value': 'abc',
+            'value': '03:00',
+        }
+        _api_update_schedule(client, params, expected_status_code=400)
+
+    def test_invalid_schedule_value(self, client, fake_auth, mock_job):
+        mock_job.disabled = True
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
+        params = {
+            'jobId': mock_job.id,
+            'type': 'day_at',
+            'value': '03:00,abc',
         }
         _api_update_schedule(client, params, expected_status_code=400)
 

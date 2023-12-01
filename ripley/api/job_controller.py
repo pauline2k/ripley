@@ -106,6 +106,13 @@ def update_schedule():
 
     if not job_id or not schedule_type or not schedule_value:
         raise BadRequestError('Required parameters are missing.')
+    if schedule_type not in ('minutes', 'seconds', 'day_at'):
+        raise BadRequestError(f'Unrecognized schedule type {schedule_type}.')
+    if schedule_type == 'day_at':
+        for sv in schedule_value.split(','):
+            if not re.match(r'\d{2}:\d{2}', sv):
+                raise BadRequestError(f'Could not parse daily schedule value {sv}.')
+
     job = Job.get_job(job_id=job_id)
     if not job.disabled or JobHistory.is_job_running(job_key=job.key):
         raise BadRequestError('You cannot edit job schedule if job is either enabled or running.')
