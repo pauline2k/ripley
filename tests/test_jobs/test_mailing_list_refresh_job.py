@@ -45,4 +45,15 @@ class TestMailingListRefreshJob:
             impacted_canvas_site_ids = MailingListRefreshJob(app)._run()
             assert impacted_canvas_site_ids == [1234567, 775390]
             assert mailing_list.populated_at is not None
-            assert len(MailingListMembers.query.filter_by(mailing_list_id=mailing_list.id).all()) == 1
+            all_members = MailingListMembers.query.filter_by(mailing_list_id=mailing_list.id).all()
+            assert len(all_members) == 1
+            # Finally, delete the mailing list member and have the job reinstate them.
+            mailing_list_member = all_members[0]
+            MailingListMembers.delete(mailing_list_member_id=mailing_list_member.id)
+            MailingListRefreshJob(app)._run()
+            # Verify the restoration
+            updated_members = MailingListMembers.query.filter_by(mailing_list_id=mailing_list.id).all()
+            assert len(updated_members) == 1
+            updated_member = updated_members[0]
+            assert updated_member.mailing_list_id == mailing_list_member.mailing_list_id
+            assert updated_member.email_address == mailing_list_member.email_address
