@@ -42,6 +42,12 @@ class MailingListMembers(Base):
     # Parent mailing list
     mailing_list = db.relationship('MailingList', back_populates='mailing_list_members')
 
+    __table_args__ = (db.UniqueConstraint(
+        'email_address',
+        'mailing_list_id',
+        name='canvas_site_mailing_list_members_unique_constraint',
+    ),)
+
     def __init__(self, can_send, email_address, mailing_list_id, first_name=None, last_name=None):
         self.can_send = can_send
         self.email_address = email_address
@@ -51,15 +57,24 @@ class MailingListMembers(Base):
 
     @classmethod
     def create(cls, can_send, email_address, first_name, last_name, mailing_list_id):
-        mailing_list_member = cls(
-            can_send=can_send,
-            email_address=email_address,
-            first_name=first_name,
-            last_name=last_name,
-            mailing_list_id=mailing_list_id,
-        )
-        db.session.add(mailing_list_member)
-        std_commit()
+        mailing_list_member = cls.query.filter_by(email_address=email_address, mailing_list_id=mailing_list_id).first()
+        if mailing_list_member:
+            if mailing_list_member.deleted_at:
+                mailing_list_member.deleted_at = None
+                db.session.add(mailing_list_member)
+                std_commit()
+            else:
+                raise ValueError(f'A non-deleted member with email {email_address} already exists for mailing_list_id {mailing_list_id}')
+        else:
+            mailing_list_member = cls(
+                can_send=can_send,
+                email_address=email_address,
+                first_name=first_name,
+                last_name=last_name,
+                mailing_list_id=mailing_list_id,
+            )
+            db.session.add(mailing_list_member)
+            std_commit()
         return mailing_list_member
 
     @classmethod
