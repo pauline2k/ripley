@@ -277,8 +277,8 @@ export default {
       }
     },
     switchSemester(slug) {
-      const term = find(this.adminTerms, t => t.slug === slug)
       const teachingTerm = find(this.teachingTerms, t => t.slug === slug)
+      const term = teachingTerm || find(this.adminTerms, t => t.slug === slug)
       this.coursesList = teachingTerm ? teachingTerm.classes : []
       this.currentSemester = slug
       this.currentSemesterName = term.name
@@ -327,6 +327,9 @@ export default {
     updateMetadata(data) {
       this.isAdmin = data.isAdmin
       this.teachingTerms = data.teachingTerms
+      if (size(this.teachingTerms) > 0) {
+        this.switchSemester(this.teachingTerms[0].slug)
+      }
       this.fillCourseSites(this.teachingTerms)
       if (this.isAdmin) {
         this.adminActingAs = data.adminActingAs
