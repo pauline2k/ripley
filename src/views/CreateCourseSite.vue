@@ -327,13 +327,13 @@ export default {
     updateMetadata(data) {
       this.isAdmin = data.isAdmin
       this.teachingTerms = data.teachingTerms
-      if (size(this.teachingTerms) > 0) {
-        this.switchSemester(this.teachingTerms[0].slug)
-      }
       this.fillCourseSites(this.teachingTerms)
       if (this.isAdmin) {
         this.adminActingAs = data.adminActingAs
         this.adminTerms = data.adminTerms
+        if (size(this.teachingTerms) > 0 && this.adminTerms.length) {
+          this.switchSemester(this.teachingTerms[0].slug)
+        }
         if (size(this.adminTerms) > 0 && !this.currentAdminTerm) {
           this.switchAdminTerm(this.adminTerms[0])
         }
