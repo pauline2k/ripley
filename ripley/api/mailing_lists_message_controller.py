@@ -90,7 +90,7 @@ def _relay_to_list(message_attrs):
     if not member.can_send:
         app.logger.warning(f'Bouncing message from read-only member to mailing list:\n{message_attrs}')
         _bounce(message_attrs, f"""The following message could not be delivered because the email address {message_attrs['sender'][1]}
-            is not authorized to send messages to the list {message_attrs['sender'][1]}.""")
+            is not authorized to send messages to the list {message_attrs['recipient'][1]}.""")
         return False
 
     if not send_message_to_list(mailing_list, member, message_attrs):
