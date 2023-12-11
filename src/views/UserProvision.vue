@@ -9,7 +9,7 @@
     >
       <v-row no-gutters>
         <label for="page-user-provision-uid-list" class="user-provision-uid-label mb-2 mt-3">
-          Type or paste a list of U&ZeroWidthSpace;I&ZeroWidthSpace;D<span class="sr-only">'</span>s separated by spaces, commas, or line breaks
+          Type or paste a list of <span aria-hidden="true">UIDs</span><span class="sr-only">U I Deez</span> separated by spaces, commas, or line breaks
         </label>
         <textarea
           id="page-user-provision-uid-list"
@@ -38,8 +38,8 @@
               The following items in your list are not numeric: {{ invalidValues.join(', ') }}
             </div>
             <div v-if="validationErrors.isExceedingLimit">
-              Maximum U&ZeroWidthSpace;I&ZeroWidthSpace;D<span class="sr-only">'</span>s: 200.
-              {{ listLength }} U&ZeroWidthSpace;I&ZeroWidthSpace;D<span class="sr-only">'</span>s found in list.
+              Maximum: 200 <span aria-hidden="true">UIDs</span><span class="sr-only">U I Deez</span>.
+              {{ listLength }} <span aria-hidden="true">UIDs</span><span class="sr-only">U I Deez</span> found in list.
             </div>
           </div>
           <div
@@ -57,10 +57,12 @@
               <v-icon class="icon-green mr-2" :icon="mdiCheckCircle" />
               <div>
                 <strong>
-                  Success: the following <span v-if="size(importedUids) > 1">
-                    {{ size(importedUids) }}
-                  </span> U&ZeroWidthSpace;I&ZeroWidthSpace;D<span v-if="size(importedUids) > 1"><span class="sr-only">'</span>s
-                  </span> <template v-if="size(importedUids) > 1">were</template><template v-else>was</template> imported into bCourses.
+                  Success: the following <template v-if="size(importedUids) > 1">
+                    {{ size(importedUids) }} <span aria-hidden="true">UIDs</span><span class="sr-only">U I Deez</span> were
+                  </template>
+                  <template v-else>
+                    UID was
+                  </template> imported into bCourses.
                 </strong>
                 <ul id="imported-uids-list" class="ml-3">
                   <li v-for="(uid, index) in importedUids" :key="index">{{ uid }}</li>
