@@ -298,7 +298,7 @@ export default {
             if (!(includes(['started', 'queued'], this.jobStatus)) || get(response, 'jobData.courseSiteUrl')) {
               clearInterval(this.exportTimer)
               if (get(response, 'jobData.courseSiteUrl')) {
-                this.alertScreenReader('Done. Loading new course site now.')
+                this.alertScreenReader('Done. Loading new course site.')
                 if (this.$isInIframe) {
                   iframeParentLocation(response.jobData.courseSiteUrl)
                 } else {
