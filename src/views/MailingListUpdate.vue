@@ -30,6 +30,7 @@
         >
           <v-expansion-panel-title
             :id="`mailing-list-alert-${index}`"
+            :aria-controls="`mailing-list-alert-panel-${index}`"
             :color="alert.type === 'warning' ? 'error' : 'success'"
           >
             <span v-if="size(alert.emailAddresses)">
@@ -47,25 +48,20 @@
               />
             </template>
           </v-expansion-panel-title>
-          <v-expansion-panel-text>
-            <v-list class="py-0" density="compact">
-              <v-list-item
+          <v-expansion-panel-text :id="`mailing-list-alert-panel-${index}`">
+            <ul id="mailing-list-members" class="pt-2">
+              <li
                 v-for="emailAddress in alert.emailAddresses"
                 :key="emailAddress"
-                class="py-0"
-                density="compact"
-                rounded
               >
-                <template #prepend>
-                  <v-icon
-                    class="mr-4"
-                    :color="alert.type === 'errors' ? 'red' : 'primary'"
-                    :icon="mdiAccount"
-                  />
-                </template>
-                <v-list-item-subtitle>{{ emailAddress }}</v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
+                <v-icon
+                  class="mr-6"
+                  :color="alert.type === 'errors' ? 'red' : 'primary'"
+                  :icon="mdiAccount"
+                />
+                {{ emailAddress }}
+              </li>
+            </ul>
           </v-expansion-panel-text>
         </v-expansion-panel>
       </v-expansion-panels>
@@ -305,7 +301,6 @@ export default {
   font-size: 16px;
   font-weight: 700;
 }
-
 .toggle-show-hide {
   color: lightblue;
   text-decoration: none;
@@ -321,5 +316,14 @@ button:hover, :focus, :focus-visible {
   .toggle-show-hide {
     text-decoration: underline;
   }
+}
+li {
+  height: 30px;
+  padding-inline: 16px;
+}
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 </style>
