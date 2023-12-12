@@ -51,11 +51,11 @@ EMPTY_DEMOGRAPHIC_DISTRIBUTION = {
 }
 
 
-def get_grade_distributions(term_id, section_ids):  # noqa
+def get_grade_distributions(course_term_id, section_ids):  # noqa
     demographics_distribution = {}
     grade_totals = {}
     grade_distribution_by_term = {}
-    student_grades = get_grades_with_demographics(term_id, section_ids)
+    student_grades = get_grades_with_demographics(course_term_id, section_ids)
     if len(student_grades) < int(app.config['NEWT_MINIMUM_CLASS_SIZE']):
         return False, False
 

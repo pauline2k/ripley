@@ -58,7 +58,10 @@
             v-if="selectedCourse && insufficientData"
             class="alert my-0 mx-4 px-4"
           >
-            No {{ courseName }} {{ get(selectedTerm, 'name') }} students were previously enrolled in {{ selectedCourse }}.
+            <div class="d-flex">
+              <v-icon class="canvas-notice-icon mr-2" :icon="mdiAlert" />
+              No {{ courseName }} {{ get(selectedTerm, 'name') }} students were previously enrolled in {{ selectedCourse }}.
+            </div>
           </div>
         </div>
         <div class="position-relative">
@@ -182,7 +185,7 @@
 </template>
 
 <script setup>
-import {mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
+import {mdiAlert, mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
 </script>
 
 <script>
@@ -274,7 +277,10 @@ export default {
     const courseName = this.courseName
     this.chartSettings.tooltip.formatter = function () {
       const header = `<div id="grade-dist-enroll-tooltip-grade" class="font-weight-bold font-size-15">${this.x} Grade</div>
-          <div id="grade-dist-enroll-tooltip-course" class="font-size-13 text-grey-darken-1">${courseName}</div>
+          <div id="grade-dist-enroll-tooltip-course" class="font-size-13 text-grey-darken-1">
+            <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${this.color}">\u25A0</span>
+            ${courseName}
+          </div>
           <div class="font-size-13 mb-2">
             Ratio of class: <span id="grade-dist-enroll-tooltip-series-0-value" class="font-weight-bold">${this.point.y}%</span>
           </div>
@@ -282,7 +288,7 @@ export default {
       return (this.points.slice(1) || []).reduce((tooltipText, plot, index) => {
         return`${tooltipText}<div id="grade-dist-enroll-tooltip-series-${index + 1}" class="font-size-13 pb-2">
           <div class="text-grey-darken-1 text-uppercase">
-            <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${plot.color}">${plot.point.custom.symbol}</span>
+            <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${plot.color}">\u25A0</span>
             ${plot.series.name}
           </div
           <div>
@@ -323,13 +329,16 @@ export default {
         name: `${get(this.selectedTerm, 'name')} ${this.courseName}`,
         data: []
       }
+      if (!showLabels) {
+        this.chartSettings.series[0].pointPadding = -0.2
+        this.chartSettings.series[0].pointPlacement = 0.2
+      }
       this.chartSettings.xAxis.categories = []
       each(this.gradeDistribution[get(this.selectedTerm, 'id')], item => {
         this.chartSettings.series[0].data.push({
           color: color,
           custom: {
-            count: item.count,
-            symbol: '\u25A0'
+            count: item.count
           },
           dataLabels: showLabels ? this.getDataLabel(item.y, color) : {enabled: false},
           y: item.percentage
@@ -341,46 +350,26 @@ export default {
       }
     },
     loadPriorEnrollments() {
-      const marker = {
-        enabled: true,
-        lineWidth: 0
-      }
-      const gradesWithoutPriorEnroll = {
-        color: this.colors.primary,
-        data: [],
-        marker: {...marker, radius: 6, symbol: 'diamond'},
-        name: `Have not taken ${this.selectedCourse}`,
-        type: 'line'
-      }
       const gradesWithPriorEnroll = {
         color: this.colors.secondary,
         data: [],
-        marker: {...marker, radius: 5, symbol: 'circle'},
         name: `Have taken ${this.selectedCourse}`,
-        type: 'line'
+        pointPadding: 0.2,
+        pointPlacement: 0.2,
+        type: 'column'
       }
       each(this.priorEnrollmentGradeDistribution[get(this.selectedTerm, 'id')], item => {
         if (includes(this.chartSettings.xAxis.categories, item.grade )) {
-          gradesWithoutPriorEnroll.data.push({
-            custom: {
-              count: get(item, 'noPriorEnrollCount', 0),
-              symbol: '\u25C6'
-            },
-            dataLabels: {enabled: false},
-            y: get(item, 'noPriorEnrollPercentage', 0)
-          })
           gradesWithPriorEnroll.data.push({
             custom: {
-              count: get(item, 'priorEnrollCount', 0),
-              symbol: '\u25CF'
+              count: get(item, 'priorEnrollCount', 0)
             },
             dataLabels: {enabled: false},
             y: get(item, 'priorEnrollPercentage', 0)
           })
         }
       })
-      this.chartSettings.series[1] = gradesWithoutPriorEnroll
-      this.chartSettings.series[2] = gradesWithPriorEnroll
+      this.chartSettings.series[1] = gradesWithPriorEnroll
     },
     onClickAddCourse() {
       if (this.selectedCourse) {
@@ -400,13 +389,13 @@ export default {
     },
     refresh() {
       if (get(this.priorEnrollmentGradeDistribution, get(this.selectedTerm, 'id'))) {
-        this.loadPrimarySeries(this.colors.tertiary, false)
+        this.loadPrimarySeries(this.colors.primary, false)
         this.loadPriorEnrollments()
         this.insufficientData = false
       } else {
         this.chartSettings.series = []
         this.loadPrimarySeries(this.colors.primary)
-        this.insufficientData = isEmpty(this.selectedCourse)
+        this.insufficientData = true
       }
       this.setChartTitle()
     },
@@ -425,8 +414,8 @@ export default {
       })
     },
     setChartTitle() {
-      if (size(this.chartSettings.series) === 3) {
-        this.chartSettings.title.text = `Relation of ${this.courseName} Students Who Have and Have Not Taken ${this.selectedCourse}&mdash;${this.selectedTerm.name}`
+      if (size(this.chartSettings.series) > 1) {
+        this.chartSettings.title.text = `Relation of ${this.courseName} Students Who Have Taken ${this.selectedCourse}&mdash;${this.selectedTerm.name} to Overall Class`
       } else {
         this.chartSettings.title.text = `Overall Class Grade Distribution&mdash;${this.selectedTerm.name}`
       }

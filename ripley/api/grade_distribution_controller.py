@@ -58,15 +58,18 @@ def get_grade_distribution(canvas_site_id):
         grade_distribution_by_demographic, grade_distribution_by_term = get_grade_distributions(term_id, section_ids)
         if not grade_distribution_by_demographic:
             _handle_error()
-        distribution['demographics'] = grade_distribution_by_demographic
+        distribution['terms'] = [
+            {
+                'id': term_id,
+                'name': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
+            } for term_id in grade_distribution_by_term.keys()
+        ]
         if term_id in grade_distribution_by_term.keys():
+            distribution['demographics'] = grade_distribution_by_demographic
             distribution['enrollments'] = grade_distribution_by_term
-            distribution['terms'] = [
-                {
-                    'id': term_id,
-                    'name': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
-                } for term_id in grade_distribution_by_term.keys()
-            ]
+        else:
+            distribution['demographics'] = []
+            distribution['enrollments'] = []
     else:
         _handle_error()
     return tolerant_jsonify(distribution)
