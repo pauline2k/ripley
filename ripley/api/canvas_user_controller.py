@@ -28,7 +28,8 @@ from flask_login import current_user
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import admin_required, canvas_role_required
 from ripley.externals import canvas
-from ripley.lib.canvas_user_utils import add_user_to_course_section, canvas_user_profile_to_api_json
+from ripley.lib.canvas_user_utils import add_user_to_course_section, canvas_user_profile_to_api_json, \
+    enroll_user_with_role
 from ripley.lib.http import tolerant_jsonify
 
 
@@ -48,18 +49,26 @@ def get_add_user_options(canvas_site_id):
 @app.route('/api/canvas_user/<canvas_site_id>/users', methods=['POST'])
 @canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
 def canvas_site_add_user(canvas_site_id):
-    course = canvas.get_course(canvas_site_id)
-    if not course:
+    canvas_site = canvas.get_course(canvas_site_id)
+    if not canvas_site:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}.')
     params = request.get_json()
     course_section_id = params.get('sectionId')
     role_label = params.get('role')
     uid = params.get('uid')
-    all_roles = canvas.get_roles(course.account_id)
+    all_roles = canvas.get_roles(canvas_site.account_id)
     role = next((r for r in all_roles if r.label == role_label), None)
     if not role:
         raise BadRequestError(f'Unknown role: {role_label}.')
-    enrollment = add_user_to_course_section(uid, role, course_section_id)
+    if course_section_id:
+        enrollment = add_user_to_course_section(uid, role, course_section_id)
+    else:
+        enrollment = enroll_user_with_role(
+            account_id=app.config['CANVAS_PROJECTS_ACCOUNT_ID'],
+            canvas_site=canvas_site,
+            role_label=role.label,
+            uid=uid,
+        )
     if enrollment:
         role_given = next((r for r in all_roles if r.id == enrollment.role_id), None)
         return tolerant_jsonify({

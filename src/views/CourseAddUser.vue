@@ -12,15 +12,16 @@
       role="alert"
       tabindex="-1"
     >
-      <div v-if="errorStatus" class="alert alert-error font-weight-medium">
-        <div class="d-flex align-center">
-          <v-icon class="canvas-notice-icon mr-2" :icon="mdiAlert" />
+      <div v-if="errorStatus" class="alert alert-error align-center d-flex font-weight-medium">
+        <div class="pr-2">
+          <v-icon class="canvas-notice-icon" :icon="mdiAlert" />
+        </div>
+        <div>
           {{ errorStatus }}
         </div>
-        <div class="alert-close-button-container d-flex ml-4">
+        <div class="alert-close-button-container ml-auto">
           <button
             id="hide-search-error-button"
-            class="align-self-center"
             @click="hideAlert('errorStatus')"
           >
             <v-icon :icon="mdiCloseCircle" />
@@ -69,8 +70,13 @@
         id="success-message"
         class="alert alert-success font-weight-medium"
       >
-        <span>{{ userAdded.fullName }} was added to the &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course as a
-          <span aria-hidden="true">{{ userAdded.role }}.</span>
+        <span v-if="userAdded.sectionName">
+          {{ userAdded.fullName }} was added to the &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course
+          as a <span aria-hidden="true">{{ userAdded.role }}.</span>
+          <span class="sr-only">{{ srFriendlyRole(userAdded.role) }}.</span>
+        </span>
+        <span v-if="!userAdded.sectionName">
+          {{ userAdded.fullName }} was added to the Canvas site as a <span aria-hidden="true">{{ userAdded.role }}.</span>
           <span class="sr-only">{{ srFriendlyRole(userAdded.role) }}.</span>
         </span>
         <div class="alert-close-button-container d-flex ml-4">
@@ -196,55 +202,59 @@
           </table>
           <v-row no-gutters>
             <v-col>
-              <v-row no-gutters class="my-2">
-                <v-col
-                  cols="2"
-                  offset-sm="2"
-                  offset-md="4"
-                  class="d-flex align-center justify-end pr-3"
-                >
-                  <label aria-hidden="true" for="user-role"><strong>Role</strong></label>
-                </v-col>
-                <v-col cols="10" sm="8" md="6">
-                  <select
-                    id="user-role"
-                    v-model="selectedRole"
-                    aria-label="Role"
-                    :disabled="isAddingUser"
-                  >
-                    <option
-                      v-for="role in grantingRoles"
-                      :key="role"
-                      :aria-label="srFriendlyRole(role)"
-                      :value="role"
+              <div class="pt-6 px-6">
+                <div class="align-center d-flex">
+                  <div :class="{'role-select-label': sections.length, 'pr-2': !sections.length}">
+                    <label
+                      aria-hidden="true"
+                      class="text-subtitle-1"
+                      for="user-role"
                     >
-                      <span aria-hidden="true">{{ role }}</span>
-                    </option>
-                  </select>
-                </v-col>
-              </v-row>
-              <v-row no-gutters class="mb-2">
-                <v-col
-                  cols="2"
-                  offset-sm="2"
-                  offset-md="4"
-                  class="d-flex align-center justify-end pr-3"
-                >
-                  <label aria-hidden="true" for="course-section"><strong>Section</strong></label>
-                </v-col>
-                <v-col cols="10" sm="8" md="6">
-                  <select
-                    id="course-section"
-                    v-model="selectedSection"
-                    aria-label="Section"
-                    :disabled="isAddingUser"
-                  >
-                    <option v-for="section in courseSections" :key="section.name" :value="section">
-                      {{ section.name }}
-                    </option>
-                  </select>
-                </v-col>
-              </v-row>
+                      Role
+                    </label>
+                  </div>
+                  <div class="ml-1">
+                    <select
+                      id="user-role"
+                      v-model="selectedRole"
+                      aria-label="Role"
+                      :disabled="isAddingUser"
+                    >
+                      <option
+                        v-for="role in grantingRoles"
+                        :key="role"
+                        :aria-label="srFriendlyRole(role)"
+                        :value="role"
+                      >
+                        <span aria-hidden="true">{{ role }}</span>
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div v-if="sections.length" class="align-center d-flex pt-3">
+                  <div class="role-select-label">
+                    <label
+                      aria-hidden="true"
+                      class="text-subtitle-1"
+                      for="course-section"
+                    >
+                      Section
+                    </label>
+                  </div>
+                  <div class="ml-1">
+                    <select
+                      id="course-section"
+                      v-model="sectionSelected"
+                      aria-label="Section"
+                      :disabled="isAddingUser"
+                    >
+                      <option v-for="section in sections" :key="section.name" :value="section">
+                        {{ section.name }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </v-col>
           </v-row>
           <v-row no-gutters>
@@ -268,7 +278,7 @@
                   :disabled="isAddingUser"
                   @click="startOver"
                 >
-                  Start Over
+                  Reset
                 </v-btn>
               </div>
             </v-col>
@@ -301,22 +311,22 @@ export default {
   mixins: [Context],
   data: () => ({
     additionSuccessMessage: false,
-    courseSections: [],
-    errorStatus: null,
+    errorStatus: undefined,
     grantingRoles: [],
     isAddingUser: false,
     isSearching: false,
-    noUserSelectedAlert: null,
-    searchAlert: null,
-    searchText: null,
+    noUserSelectedAlert: undefined,
+    searchAlert: undefined,
+    searchText: undefined,
     searchType: 'name',
-    searchTypeNotice: null,
-    selectedRole: null,
-    selectedSection: null,
-    selectedUser: null,
-    showAlerts: null,
-    showSearchForm: null,
-    showUsersArea: null,
+    searchTypeNotice: undefined,
+    sections: [],
+    sectionSelected: undefined,
+    selectedRole: undefined,
+    selectedUser: undefined,
+    showAlerts: undefined,
+    showSearchForm: undefined,
+    showUsersArea: undefined,
     userAdded: {},
     userSearchResultsCount: 0,
     userSearchResults: [],
@@ -328,11 +338,11 @@ export default {
   },
   created() {
     getAddUserOptions(this.currentUser.canvasSiteId).then(
-      response => {
-        this.grantingRoles = response.grantingRoles
-        this.selectedRole = response.grantingRoles[0]
-        this.courseSections = response.courseSections
-        this.selectedSection = response.courseSections[0]
+      data => {
+        this.grantingRoles = data.grantingRoles
+        this.selectedRole = data.grantingRoles[0]
+        this.sections = data.courseSections || []
+        this.sectionSelected = this.sections.length ? this.sections[0] : null
         this.showSearchForm = true
       },
       this.showUnauthorized
@@ -350,7 +360,7 @@ export default {
       this.searchType = 'name'
       this.searchTypeNotice = ''
       this.selectedRole = this.grantingRoles[0]
-      this.selectedSection = this.courseSections[0]
+      this.sectionSelected = this.sections.length ? this.sections[0] : null
     },
     resetImportState() {
       this.userAdded = false
@@ -403,11 +413,11 @@ export default {
         let searchTimer = setInterval(() => {
           this.alertScreenReader('Still searching.')
         }, 7000)
-        searchUsers(this.searchText, this.searchType).then(response => {
-          this.userSearchResults = response.users
-          if (response.users && response.users.length) {
-            this.userSearchResultsCount = response.users[0].resultCount
-            this.selectedUser = response.users[0]
+        searchUsers(this.searchText, this.searchType).then(data => {
+          this.userSearchResults = data.users
+          if (data.users && data.users.length) {
+            this.userSearchResultsCount = data.users[0].resultCount
+            this.selectedUser = data.users[0]
           } else {
             this.userSearchResultsCount = 0
             let noResultsAlert = 'Your search did not match anyone with a CalNet ID.'
@@ -434,39 +444,56 @@ export default {
       let addUserTimer = setInterval(() => {
         this.alertScreenReader('Still processing.')
       }, 7000)
-      addUser(this.currentUser.canvasSiteId, this.selectedUser.uid, this.selectedSection.id, this.selectedRole).then(response => {
-        this.userAdded = {
-          ...response.userAdded,
-          fullName: this.selectedUserFullName,
-          role: response.role,
-          sectionName: get(find(this.courseSections, {'id': response.sectionId}), 'name', this.selectedSection.name)
+      const sectionId = this.sectionSelected ? this.sectionSelected.id : null
+      addUser(
+        this.currentUser.canvasSiteId,
+        this.selectedUser.uid,
+        sectionId,
+        this.selectedRole
+      ).then(
+        data => {
+          const sectionName = this.sectionSelected ? get(find(this.sections, {'id': data.sectionId}), 'name', this.sectionSelected.name) : null
+          this.userAdded = {
+            ...data.userAdded,
+            fullName: this.selectedUserFullName,
+            role: data.role,
+            sectionName
+          }
+          this.alertScreenReader('success', 'assertive')
+          this.resetSearchState()
+          this.resetForm()
+          this.additionSuccessMessage = true
+          putFocusNextTick('hide-search-success-button')
+        },
+        error => {
+          this.alertScreenReader('Error', 'assertive')
+          this.errorStatus = error || 'Request to add person failed'
+          this.showUsersArea = true
+          putFocusNextTick('add-user-btn')
         }
-        this.alertScreenReader('success', 'assertive')
-        this.resetSearchState()
-        this.resetForm()
-        this.additionSuccessMessage = true
-        putFocusNextTick('hide-search-success-button')
-      }, () => {
-        this.alertScreenReader('Error', 'assertive')
-        this.errorStatus = 'Request to add person failed'
-        this.showUsersArea = true
-        putFocusNextTick('add-user-btn')
-      }).catch(() => {
-        this.errorStatus = 'Request to add person failed'
-        this.showUsersArea = true
-        putFocusNextTick('add-user-btn')
-      }).finally(() => {
-        clearInterval(addUserTimer)
-        this.isAddingUser = false
-        this.showSearchForm = true
-        iframeScrollToTop()
-      })
+      ).catch(
+        error => {
+          this.errorStatus = error || 'Request to add person failed'
+          this.showUsersArea = true
+          putFocusNextTick('add-user-btn')
+        }
+      ).finally(
+        () => {
+          clearInterval(addUserTimer)
+          this.isAddingUser = false
+          this.showSearchForm = true
+          iframeScrollToTop()
+        }
+      )
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
+.role-select-label {
+  width: 64px;
+}
 .search-text-field {
   width: 600px;
 }
