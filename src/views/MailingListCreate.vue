@@ -88,10 +88,10 @@
                           variant="outlined"
                           @keydown.enter="create"
                         />
-                        <div class="has-invalid-characters">
-                          <div v-if="hasInvalidCharacters" class="d-flex text-red">
+                        <div aria-live="polite" class="validation-messages">
+                          <div v-if="hasInvalidCharacters" class="d-flex">
                             <div class="pr-1 text-no-wrap">
-                              Only lowercase alphanumeric, underscore and hyphen characters allowed.
+                              <span class="sr-only">Error: </span>Only lowercase alphanumeric, underscore and hyphen characters allowed.
                             </div>
                           </div>
                         </div>
@@ -148,7 +148,7 @@ import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {createMailingList, getMailingList, getSuggestedMailingListName} from '@/api/mailing-list'
-import {get, trim} from 'lodash'
+import {get, size, trim} from 'lodash'
 import {getCanvasSite} from '@/api/canvas-site'
 import {nextTick} from 'vue'
 import {toInt} from '@/utils'
@@ -169,7 +169,7 @@ export default {
   computed: {
     hasInvalidCharacters() {
       const name = trim(this.mailingListName)
-      const isValid = name.length && name.match(this.validNameRegex).length === name.length && name[0].match(/[a-z]/)
+      const isValid = name.length && size(name.match(this.validNameRegex)) === name.length && name[0].match(/[a-z]/)
       return !isValid
     }
   },
@@ -248,9 +248,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.has-invalid-characters {
-  min-height: 28px;
-}
 .mailing-list-name-input {
   padding: 10px 8px 0 0;
 }
