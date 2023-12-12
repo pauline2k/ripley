@@ -20,7 +20,7 @@
         :text="errorMessage"
         type="warning"
       />
-      <v-card v-if="size(get(gradeDistribution, 'demographics'))" class="container mb-4" elevation="0">
+      <v-card class="container mb-4" elevation="0">
         <DemographicsChart
           :chart-defaults="chartDefaults"
           :colors="colors"
@@ -28,7 +28,7 @@
           :grade-distribution="gradeDistribution.demographics"
         />
       </v-card>
-      <v-card v-if="size(get(gradeDistribution, 'enrollments'))" class="container mb-4" elevation="0">
+      <v-card class="container mb-4" elevation="0">
         <PriorEnrollmentChart
           :chart-defaults="chartDefaults"
           :colors="colors"
@@ -61,6 +61,7 @@ export default {
     chartDefaults: {
       chart: {
         backgroundColor: 'transparent',
+        marginTop: 75
       },
       lang: {
         noData: 'No data available until final grades are returned.'
@@ -87,6 +88,7 @@ export default {
       },
       plotOptions: {
         series: {
+          borderWidth: 0,
           dataLabels: {
             enabled: false
           },

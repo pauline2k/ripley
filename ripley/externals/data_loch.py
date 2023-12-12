@@ -227,7 +227,7 @@ def get_grades_with_demographics(term_id, section_ids):
         LEFT JOIN student.visas v on spi.sid = v.sid AND visa_status = 'G'
         WHERE enr.sis_term_id <= %(term_id)s
         AND enr.sis_term_id >= %(earliest_term_id)s
-        AND enr.grade IS NOT NULL AND enr.grade != ''
+        AND enr.grade IS NOT NULL AND enr.grade != '' AND enr.grade != 'W'
         ORDER BY enr.sis_term_id, enr.grade"""
     return safe_execute_rds(sql, **params)
 

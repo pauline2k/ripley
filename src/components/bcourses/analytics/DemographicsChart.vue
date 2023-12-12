@@ -9,6 +9,7 @@
       id="grade-distribution-demographics-select"
       v-model="selectedDemographic"
       class="my-4"
+      :disabled="!size(gradeDistribution)"
       @change="onSelectDemographic"
     >
       <option :value="null">Select Demographic</option>
@@ -32,6 +33,7 @@
         aria-haspopup="true"
         class="font-weight-medium text-no-wrap my-2"
         color="primary"
+        :disabled="!size(gradeDistribution)"
         :prepend-icon="showTable ? mdiArrowUpCircle : mdiArrowDownCircle"
         size="large"
         variant="text"
@@ -224,6 +226,7 @@ export default {
     },
     loadPrimarySeries() {
       this.chartSettings.colors = [this.colors.primary, this.colors.secondary]
+      this.chartSettings.legend.enabled = size(this.gradeDistribution)
       this.chartSettings.series[0].color = this.colors.primary
       this.chartSettings.series[0].legendSymbol = 'rectangle'
       this.chartSettings.series[0].marker = this.getSeriesMarker(this.chartSettings.series[0])
