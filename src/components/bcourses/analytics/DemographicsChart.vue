@@ -1,7 +1,10 @@
 <template>
   <div class="grade-distribution-demographics pa-5">
-    <h2 id="grade-distribution-demographics-header">Grade Distribution by Demographics</h2>
-    <div>Lorem ipsum</div>
+    <h2 id="grade-distribution-demographics-header">Grade Point Average by Demographics</h2>
+    <div>
+      The grade point average (GPA) chart displays the available GPA at the end of the current
+      and previous semesters. Select a demographic to compare trending GPA results.
+    </div>
     <select
       id="grade-distribution-demographics-select"
       v-model="selectedDemographic"
@@ -19,6 +22,7 @@
         </option>
       </template>
     </select>
+    <hr aria-hidden="true" class="mb-3" />
     <highcharts :options="chartSettings"></highcharts>
     <v-row class="d-flex justify-center">
       <v-btn
