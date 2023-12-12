@@ -1,7 +1,19 @@
 <template>
   <div class="grade-distribution pa-5">
     <div v-if="!isLoading">
-      <Header1 text="Grade Distribution" />
+      <Header1 text="Grade Distribution" class="mb-0" />
+      <div v-if="gradeDistribution" class="course-header mb-1">
+        {{ gradeDistribution.courseName }} &mdash; {{ gradeDistribution.canvasSite.term.name }}
+      </div>
+      <div class="pilot-notice">
+        NOTE: THIS IS AN IN-PROGRESS PILOT PROJECT
+      </div>
+      <p class="mb-5">
+        The Grade Distribution dashboard is an informational tool to assist instructors in assessing student performance
+        based on existing bCourses class grades and historical trends. Only you can view this information developed
+        specifically for your class. Feel free to contact <a href="mailto:tbd-newt@berkeley.edu">tbd-newt@berkeley.edu</a>
+        if you have questions or suggestions for additional methods of displaying grade reporting.
+      </p>
       <v-alert
         v-if="errorMessage"
         role="alert"
@@ -165,10 +177,23 @@ export default {
 <!-- eslint-disable-next-line vue-scoped-css/enforce-style-type  -->
 <style lang="scss">
 .grade-distribution {
+  .course-header {
+    color: $color-nobel;
+    font-size: 17px;
+    font-weight: 400;
+  }
+  .pilot-notice {
+    color: $color-harley-davidson-orange;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  h2 {
+    font-weight: 500;
+  }
   hr {
-    border-color: $color-nobel !important;
-    border-style: solid none none !important;
-    color: $color-nobel !important;
+    border-color: $color-grey !important;
+    border-style: solid none solid none !important;
+    color: $color-grey !important;
   }
   table {
     caption {

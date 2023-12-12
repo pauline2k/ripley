@@ -1,9 +1,12 @@
 <template>
   <div class="pa-5">
     <div class="pl-3">
-      <h2 id="grade-distribution-enrollment-header">Grade Distribution by Prior Enrollment</h2>
-      <div>Lorem ipsum</div>
-      <div>Class size: {{ classSize }}</div>
+      <h2 id="grade-distribution-enrollment-header">Grade Distribution by Prior Class Enrollment</h2>
+      <div>
+        The distribution chart displays available grades at the end of the current and previous semesters.
+        Search prerequisite courses to compare side-by-side final grade results of students taking this course and
+        those who have taken selected previous course enrollments.
+      </div>
       <div class="d-flex justify-space-between">
         <div class="d-flex align-center">
           <div class="grade-dist-enroll-course-search d-flex align-center">

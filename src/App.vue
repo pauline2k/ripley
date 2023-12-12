@@ -114,7 +114,7 @@ form {
     -moz-appearance: none;
     -webkit-appearance: none;
     background: $color-white;
-    border: 1px solid $color-very-light-grey;
+    border: 1px solid $color-grey;
     border-radius: 3px !important;
     box-shadow: inset 0 1px 2px $color-whisper;
     font-size: 14px;
@@ -135,7 +135,7 @@ form {
     -moz-appearance: none;
     -webkit-appearance: none;
     background: $color-white;
-    border: 1px solid $color-very-light-grey;
+    border: 1px solid $color-grey;
     border-radius: 0;
     font-family: $body-font-family;
     font-size: 14px;
