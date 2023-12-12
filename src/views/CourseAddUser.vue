@@ -1,184 +1,153 @@
 <template>
-  <div v-if="!isLoading" class="page-course-add-user">
+  <div v-if="!isLoading" class="pb-5 px-5">
+    <Header1 class="mb-0" text="Find a Person to Add" />
+    <div class="my-2">
+      <NeedHelpFindingSomeone v-if="showSearchForm" />
+    </div>
     <MaintenanceNotice course-action-verb="person is added" />
-    <Header1 text="Find a Person to Add" />
-    <div>
-      <v-row
-        v-if="showAlerts"
-        id="alerts-container"
-        aria-live="polite"
-        role="alert"
-        tabindex="-1"
-      >
-        <v-col md="12">
-          <div v-if="errorStatus" class="alert alert-error page-course-add-user-alert">
-            <div class="d-flex align-center">
-              <v-icon class="canvas-notice-icon mr-2" :icon="mdiAlert" />
-              {{ errorStatus }}
-            </div>
-            <div class="alert-close-button-container d-flex ml-4">
-              <button
-                id="hide-search-error-button"
-                class="align-self-center"
-                @click="hideAlert('errorStatus')"
-              >
-                <v-icon :icon="mdiCloseCircle" />
-                <span class="sr-only">Hide Alert</span>
-              </button>
-            </div>
-          </div>
-          <div v-if="noUserSelectedAlert" class="alert alert-error page-course-add-user-alert">
-            Please select a person from the search results.
-            <div class="alert-close-button-container d-flex ml-4">
-              <button
-                id="hide-select-user-alert-button"
-                class="align-self-center"
-                @click="hideAlert('noUserSelectedAlert')"
-              >
-                <v-icon :icon="mdiCloseCircle" />
-                <span class="sr-only">Hide Alert</span>
-              </button>
-            </div>
-          </div>
-          <div v-if="searchAlert" class="alert alert-error page-course-add-user-alert">
-            {{ searchAlert }}
-            {{ searchTypeNotice }}
-            Please try again.
-            <div class="alert-close-button-container d-flex ml-4">
-              <button
-                id="hide-search-alert-button"
-                class="align-self-center"
-                @click="hideAlert('searchAlert')"
-              >
-                <v-icon :icon="mdiCloseCircle" />
-                <span class="sr-only">Hide Alert</span>
-              </button>
-            </div>
-          </div>
-          <div v-if="userSearchResultsCount > userSearchResults.length" class="alert alert-info page-course-add-user-alert">
-            Your search returned {{ userSearchResultsCount }} results, but only the first
-            {{ userSearchResults.length }} are shown.
-            Please refine your search to limit the number of results.
-          </div>
-          <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="sr-only">
-            {{ pluralize('search result', userSearchResultsCount) }} loaded.
-          </div>
-          <div
-            v-if="additionSuccessMessage"
-            id="success-message"
-            class="alert alert-success page-course-add-user-alert"
+    <div
+      v-if="showAlerts"
+      id="alerts-container"
+      aria-live="polite"
+      role="alert"
+      tabindex="-1"
+    >
+      <div v-if="errorStatus" class="alert alert-error font-weight-medium">
+        <div class="d-flex align-center">
+          <v-icon class="canvas-notice-icon mr-2" :icon="mdiAlert" />
+          {{ errorStatus }}
+        </div>
+        <div class="alert-close-button-container d-flex ml-4">
+          <button
+            id="hide-search-error-button"
+            class="align-self-center"
+            @click="hideAlert('errorStatus')"
           >
-            <span>{{ userAdded.fullName }} was added to the &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course as a
-              <span aria-hidden="true">{{ userAdded.role }}.</span>
-              <span class="sr-only">{{ srFriendlyRole(userAdded.role) }}.</span>
-            </span>
-            <div class="alert-close-button-container d-flex ml-4">
-              <button
-                id="hide-search-success-button"
-                class="align-self-center"
-                @click="hideAlert('additionSuccessMessage')"
-              >
-                <v-icon :icon="mdiCloseCircle" />
-                <span class="sr-only">Hide Alert</span>
-              </button>
-            </div>
-          </div>
-        </v-col>
-      </v-row>
+            <v-icon :icon="mdiCloseCircle" />
+            <span class="sr-only">Hide Alert</span>
+          </button>
+        </div>
+      </div>
+      <div v-if="noUserSelectedAlert" class="alert alert-error font-weight-medium">
+        Please select a person from the search results.
+        <div class="alert-close-button-container d-flex ml-4">
+          <button
+            id="hide-select-user-alert-button"
+            class="align-self-center"
+            @click="hideAlert('noUserSelectedAlert')"
+          >
+            <v-icon :icon="mdiCloseCircle" />
+            <span class="sr-only">Hide Alert</span>
+          </button>
+        </div>
+      </div>
+      <div v-if="searchAlert" class="alert alert-error font-weight-medium">
+        {{ searchAlert }}
+        {{ searchTypeNotice }}
+        Please try again.
+        <div class="alert-close-button-container d-flex ml-4">
+          <button
+            id="hide-search-alert-button"
+            class="align-self-center"
+            @click="hideAlert('searchAlert')"
+          >
+            <v-icon :icon="mdiCloseCircle" />
+            <span class="sr-only">Hide Alert</span>
+          </button>
+        </div>
+      </div>
+      <div v-if="userSearchResultsCount > userSearchResults.length" class="alert alert-info font-weight-medium">
+        Your search returned {{ userSearchResultsCount }} results, but only the first
+        {{ userSearchResults.length }} are shown.
+        Please refine your search to limit the number of results.
+      </div>
+      <div v-if="userSearchResultsCount && (userSearchResultsCount === userSearchResults.length)" class="sr-only">
+        {{ pluralize('search result', userSearchResultsCount) }} loaded.
+      </div>
+      <div
+        v-if="additionSuccessMessage"
+        id="success-message"
+        class="alert alert-success font-weight-medium"
+      >
+        <span>{{ userAdded.fullName }} was added to the &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course as a
+          <span aria-hidden="true">{{ userAdded.role }}.</span>
+          <span class="sr-only">{{ srFriendlyRole(userAdded.role) }}.</span>
+        </span>
+        <div class="alert-close-button-container d-flex ml-4">
+          <button
+            id="hide-search-success-button"
+            class="align-self-center"
+            @click="hideAlert('additionSuccessMessage')"
+          >
+            <v-icon :icon="mdiCloseCircle" />
+            <span class="sr-only">Hide Alert</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <v-container fluid>
       <v-row v-if="showSearchForm" no-gutters>
         <v-col>
-          <form @submit.prevent="submitSearch">
-            <v-row class="horizontal-form" no-gutters>
-              <v-col cols="12" sm="6" class="d-flex align-center my-1 pr-sm-3">
-                <label :aria-hidden="true" class="text-no-wrap mt-0 pr-3">Search By</label>
-                <select
-                  id="search-type"
-                  v-model="searchType"
-                  aria-label="Search by"
-                  class="d-flex align-center mb-0"
-                  :disabled="isSearching || isAddingUser"
-                  @change="updateSearchTextType"
-                >
-                  <option value="name">Last Name, First Name</option>
-                  <option value="email">Email</option>
-                  <option value="uid" aria-label="CalNet U I D">CalNet UID</option>
-                </select>
-              </v-col>
-              <v-col cols="12" sm="4" class="d-flex align-center my-1 pr-sm-3">
-                <input
-                  id="search-text"
-                  v-model="searchText"
-                  :aria-label="`enter search terms, search by ${searchType === 'uid' ? 'CalNet U I D' : searchType}`"
-                  class="mb-0"
-                  :disabled="isSearching || isAddingUser"
-                  :type="searchTextType"
-                >
-              </v-col>
-              <v-col cols="12" sm="2" class="column-align-center d-flex align-center my-1">
-                <v-btn
-                  id="add-user-submit-search-btn"
-                  color="primary"
-                  type="submit"
-                  :disabled="!searchText || isSearching || isAddingUser"
-                  class="w-100"
-                  aria-label="Submit search"
-                >
-                  <span v-if="!isSearching">Go</span>
-                  <span v-if="isSearching">
-                    <SpinnerWithinButton /> Searching...
-                  </span>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </form>
-        </v-col>
-      </v-row>
-      <v-row v-if="showSearchForm" no-gutters>
-        <v-col md="12">
-          <div class="shrink icon-blue">
-            <v-btn
-              id="add-user-help-btn"
-              aria-controls="page-help-notice"
-              :aria-expanded="`${toggle.displayHelp}`"
-              aria-haspopup="true"
-              class="font-weight-regular text-no-wrap my-2"
-              :prepend-icon="mdiHelpCircle"
-              variant="text"
-              @click="toggle.displayHelp = !toggle.displayHelp"
-            >
-              Need help finding someone?
-            </v-btn>
-          </div>
-          <v-expand-transition>
-            <v-card
-              v-show="toggle.displayHelp"
-              id="page-help-notice"
-              class="user-search-notice rounded-0 mx-8 mb-4"
-              elevation="0"
-            >
-              <!-- Note: This help text content is also maintained in the canvas-customization.js script -->
-              <dl class="user-search-notice-description-list">
-                <dt class="user-search-notice-description-term">UC Berkeley Faculty, Staff and Students</dt>
-                <dd class="user-search-notice-description">
-                  UC Berkeley faculty, staff and students <em>(regular and concurrent enrollment)</em> can be found in the
-                  <OutboundLink href="http://directory.berkeley.edu/">CalNet Directory</OutboundLink>
-                  and be added to your site using their CalNet UID or official email address.
-                </dd>
-                <dt class="user-search-notice-description-term">Guests</dt>
-                <dd class="user-search-notice-description">
-                  Peers from other institutions or guests from the community must be sponsored with a
-                  <OutboundLink href="https://idc.berkeley.edu/guests/">CalNet Guest Account.</OutboundLink>
-                  Do NOT request a CalNet Guest Account for concurrent enrollment students.
-                </dd>
-                <dt class="user-search-notice-description-term">More Information</dt>
-                <dd class="user-search-notice-description">
-                  Go to this
-                  <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010842">bCourses help page</OutboundLink>
-                  for more information about adding people to bCourses sites.
-                </dd>
-              </dl>
-            </v-card>
-          </v-expand-transition>
+          <v-row justify="center" no-gutters>
+            <v-col cols="12">
+              <label for="search-type" class="text-subtitle-1">Search By</label>
+              <v-radio-group
+                id="search-type"
+                v-model="searchType"
+                color="primary"
+                density="compact"
+                :disabled="isSearching || isAddingUser"
+                hide-details
+              >
+                <v-radio id="radio-btn-name" value="name">
+                  <template #label>
+                    <div class="pl-1 text-black text-body-2">Last Name, First Name</div>
+                  </template>
+                </v-radio>
+                <v-radio id="radio-btn-email" value="email">
+                  <template #label>
+                    <div class="pl-1 text-black text-body-2">Email</div>
+                  </template>
+                </v-radio>
+                <v-radio id="radio-btn-uid" value="uid">
+                  <template #label>
+                    <div class="pl-1 text-black text-body-2">CalNet UID</div>
+                  </template>
+                </v-radio>
+              </v-radio-group>
+              <div class="align-center d-flex py-3">
+                <div class="pr-3">
+                  <v-text-field
+                    id="search-text"
+                    v-model="searchText"
+                    :aria-label="`enter search terms, search by ${searchType === 'uid' ? 'CalNet U I D' : searchType}`"
+                    class="search-text-field"
+                    density="comfortable"
+                    :disabled="isSearching || isAddingUser"
+                    hide-details
+                    :placeholder="searchType === 'name' ? 'Last name, first name' : (searchType === 'uid' ? 'UID' : 'Email')"
+                    variant="outlined"
+                    @keydown.enter="submitSearch"
+                  />
+                </div>
+                <div>
+                  <v-btn
+                    id="add-user-submit-search-btn"
+                    aria-label="Submit search"
+                    color="primary"
+                    :disabled="!searchText || isSearching || isAddingUser"
+                    size="large"
+                    @click="submitSearch"
+                  >
+                    <span v-if="!isSearching">Search</span>
+                    <span v-if="isSearching">
+                      <SpinnerWithinButton /> Searching...
+                    </span>
+                  </v-btn>
+                </div>
+              </div>
+            </v-col>
+          </v-row>
         </v-col>
       </v-row>
       <v-row v-if="showUsersArea" no-gutters>
@@ -306,28 +275,29 @@
           </v-row>
         </v-col>
       </v-row>
-    </div>
+    </v-container>
   </div>
 </template>
 
 <script setup>
-import {mdiAlert, mdiCloseCircle, mdiHelpCircle} from '@mdi/js'
+import {mdiAlert, mdiCloseCircle} from '@mdi/js'
+import {pluralize} from '@/utils'
 </script>
 
 <script>
 import Context from '@/mixins/Context'
-import Header1 from '@/components/utils/Header1.vue'
+import Header1 from '@/components/utils/Header1'
 import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
-import OutboundLink from '@/components/utils/OutboundLink'
-import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
+import NeedHelpFindingSomeone from '@/components/utils/NeedHelpFindingSomeone'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {addUser, getAddUserOptions} from '@/api/canvas-user'
-import {iframeScrollToTop, pluralize, putFocusNextTick} from '@/utils'
+import {iframeScrollToTop, putFocusNextTick} from '@/utils'
 import {find, get, replace, trim} from 'lodash'
 import {searchUsers} from '@/api/user'
 
 export default {
   name: 'CourseAddUser',
-  components: {Header1, MaintenanceNotice, OutboundLink, SpinnerWithinButton},
+  components: {Header1, MaintenanceNotice, NeedHelpFindingSomeone, SpinnerWithinButton},
   mixins: [Context],
   data: () => ({
     additionSuccessMessage: false,
@@ -339,7 +309,6 @@ export default {
     noUserSelectedAlert: null,
     searchAlert: null,
     searchText: null,
-    searchTextType: 'text',
     searchType: 'name',
     searchTypeNotice: null,
     selectedRole: null,
@@ -348,9 +317,6 @@ export default {
     showAlerts: null,
     showSearchForm: null,
     showUsersArea: null,
-    toggle: {
-      displayHelp: false
-    },
     userAdded: {},
     userSearchResultsCount: 0,
     userSearchResults: [],
@@ -379,9 +345,7 @@ export default {
       this.alertScreenReader('Alert hidden')
       putFocusNextTick('page-title')
     },
-    pluralize,
     resetForm() {
-      this.searchTextType = 'text'
       this.searchText = ''
       this.searchType = 'name'
       this.searchTypeNotice = ''
@@ -497,40 +461,13 @@ export default {
         this.showSearchForm = true
         iframeScrollToTop()
       })
-    },
-    updateSearchTextType() {
-      this.searchTextType = (this.searchType === 'uid') ? 'number' : 'text'
     }
   }
 }
 </script>
 
 <style scoped lang="scss">
-.page-course-add-user {
-  background: $color-white;
-  padding: 10px;
-  .page-course-add-user-alert {
-    display: flex;
-    font-weight: 500;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .user-search-notice {
-    border: 1px solid #d0d0d0;
-    padding: 15px;
-    .user-search-notice-description-list {
-      margin-bottom: 0;
-    }
-    .user-search-notice-description-term {
-      font-weight: bold;
-      margin: 5px 0;
-    }
-    .user-search-notice-description {
-      margin-left: 15px;
-    }
-  }
-  .column-align-center {
-    text-align: center;
-  }
+.search-text-field {
+  width: 600px;
 }
 </style>
