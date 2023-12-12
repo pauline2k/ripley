@@ -72,12 +72,13 @@ def csv_row_for_campus_user(user):
 def enroll_user_with_role(account_id, canvas_site, role_label, uid):
     assigned = False
     all_role_labels = []
+    enrollment = None
     role_label = role_label.lower()
     for role in get_roles(account_id):
         all_role_labels.append(role.label)
         if role_label.lower() == role.label.lower():
             sis_user_profile = canvas.get_canvas_user_profile_by_uid(uid=uid)
-            canvas_site.enroll_user(
+            enrollment = canvas_site.enroll_user(
                 user=sis_user_profile['id'],
                 **{
                     'enrollment[role_id]': role.id,
@@ -93,6 +94,7 @@ def enroll_user_with_role(account_id, canvas_site, role_label, uid):
             UID {uid} was NOT assigned role '{role_label}' within Canvas site {canvas_site.id}.
             Available roles are {all_role_labels}.
         """)
+    return enrollment
 
 
 def import_users(uids):
