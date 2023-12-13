@@ -193,7 +193,6 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const context = useContextStore()
   context.resetApplicationState()
-  context.loadingStart(to)
   if (!to.meta.isError && !to.meta.is404) {
     if (to.query.error) {
       context.setApplicationState(500, to.query.error)
@@ -214,10 +213,15 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-router.afterEach((to: any) => {
-  useContextStore().resetApplicationState()
-  const title = capitalize(to.name) || 'bCourses'
-  document.title = `${title} | UC Berkeley`
+router.afterEach((to: any, from: any) => {
+  const samePageLink = to.name === from.name && to.hash
+  if (!samePageLink) {
+    const context = useContextStore()
+    context.resetApplicationState()
+    context.loadingStart(to)
+    const title = capitalize(to.name) || 'bCourses'
+    document.title = `${title} | UC Berkeley`
+  }
 })
 
 export default router
