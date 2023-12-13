@@ -1779,6 +1779,22 @@
                     "name": "UC Berkeley",
                     "workflow_state": "active"
                 }
+            },
+            {
+                "id": 568,
+                "role": "StudentEnrollment",
+                "label": "Student",
+                "last_updated_at": "2023-09-02T18:11:38Z",
+                "base_role_type": "StudentEnrollment",
+                "workflow_state": "active",
+                "created_at": "2020-09-09T17:04:57-07:00",
+                "permissions": {},
+                "is_account_role": "true",
+                "account": {
+                    "id": 90242,
+                    "name": "UC Berkeley",
+                    "workflow_state": "active"
+                }
             }
         ]
     },

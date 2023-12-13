@@ -121,6 +121,36 @@
         },
         "status_code": 200
     },
+    "get_enrollments_3030303_4567890": {
+        "method": "GET",
+        "endpoint": "courses/3030303/users/4567890?include=enrollments",
+        "data": {
+            "id": 4567890,
+            "name": "Ash 🤖",
+            "short_name": "Ash 🤖",
+            "sortable_name": "🤖, Ash",
+            "integration_id": null,
+            "login_id": "30000",
+            "sis_user_id": "300300000",
+            "enrollments": [
+                {
+                    "id": 101,
+                    "user_id": 4567890,
+                    "course_id": 3030303,
+                    "course_section_id": 10000,
+                    "type": "TeacherEnrollment",
+                    "enrollment_state": "active",
+                    "role": "TeacherEnrollment",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "300300000",
+                    "sis_course_id": "CRS:ANTHRO-189-2023-B",
+                    "sis_section_id": "2023-B-32936",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/3030303/users/4567890"
+                }
+            ]
+        },
+        "status_code": 200
+    },
     "get_enrollments_8876542_4567890": {
         "method": "GET",
         "endpoint": "courses/8876542/users/4567890?include=enrollments",
@@ -478,6 +508,11 @@
             "nonxlist_course_id": null
           }
         ]
+    },
+    "get_sections_3030303": {
+        "method": "GET",
+        "endpoint": "courses/3030303/sections",
+        "data": []
     },
     "get_sections_8876542": {
         "method": "GET",
@@ -1565,6 +1600,23 @@
             "enrollment_state": "active",
             "role": "TeacherEnrollment",
             "last_activity_at": "2023-03-02T06:04:43Z",
+            "sis_user_id": "300300000",
+            "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
+        },
+        "status_code": 200
+    },
+    "post_course_enrollments_8876542": {
+        "method": "POST",
+        "endpoint": "courses/8876542/enrollments",
+        "data": {
+            "user_id": 4567890,
+            "course_id": 8876542,
+            "course_section_id": null,
+            "type": "TeacherEnrollment",
+            "enrollment_state": "active",
+            "role": "TeacherEnrollment",
+            "last_activity_at": "2023-03-02T06:04:43Z",
+            "role_id": 12345,
             "sis_user_id": "300300000",
             "html_url": "https://ucberkeley.beta.instructure.com/courses/1234567/users/4567890"
         },
