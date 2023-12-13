@@ -329,10 +329,6 @@ export default {
         name: `${get(this.selectedTerm, 'name')} ${this.courseName}`,
         data: []
       }
-      if (!showLabels) {
-        this.chartSettings.series[0].pointPadding = -0.2
-        this.chartSettings.series[0].pointPlacement = 0.2
-      }
       this.chartSettings.xAxis.categories = []
       each(this.gradeDistribution[get(this.selectedTerm, 'id')], item => {
         this.chartSettings.series[0].data.push({
@@ -354,8 +350,6 @@ export default {
         color: this.colors.secondary,
         data: [],
         name: `Have taken ${this.selectedCourse}`,
-        pointPadding: 0.2,
-        pointPlacement: 0.2,
         type: 'column'
       }
       each(this.priorEnrollmentGradeDistribution[get(this.selectedTerm, 'id')], item => {
