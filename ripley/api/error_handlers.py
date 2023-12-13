@@ -29,30 +29,41 @@ from ripley.lib.http import tolerant_jsonify
 
 @app.errorhandler(ripley.api.errors.BadRequestError)
 def handle_bad_request(error):
-    return error.to_json(), 400
+    return _to_api_json(error), 400
 
 
 @app.errorhandler(ripley.api.errors.UnauthorizedRequestError)
 def handle_unauthorized(error):
-    return error.to_json(), 401
+    return _to_api_json(error), 401
 
 
 @app.errorhandler(ripley.api.errors.ForbiddenRequestError)
 def handle_forbidden(error):
-    return error.to_json(), 403
+    return _to_api_json(error), 403
 
 
 @app.errorhandler(ripley.api.errors.ResourceNotFoundError)
 def handle_resource_not_found(error):
-    return error.to_json(), 404
+    return _to_api_json(error), 404
 
 
 @app.errorhandler(ripley.api.errors.InternalServerError)
 def handle_internal_server_error(error):
-    return error.to_json(), 500
+    return _to_api_json(error), 500
 
 
 @app.errorhandler(Exception)
 def handle_unexpected_error(error):
     app.logger.exception(error)
     return tolerant_jsonify({'message': 'An unexpected server error occurred.'}), 500
+
+
+def _to_api_json(error):
+    if app.config['TESTING'] and hasattr(error, 'message') and error.message:
+        app.logger.error(f"""
+            ----------------------------------------------------------------
+
+            {error.message}
+
+            ----------------------------------------------------------------""")
+    return error.to_json()

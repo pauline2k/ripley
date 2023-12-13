@@ -1,7 +1,7 @@
 import utils from '@/api/api-utils'
 
 export function addUser(canvasSiteId: number, uid: string, sectionId: string, role: string) {
-  return utils.post(`/api/canvas_user/${canvasSiteId}/users`, {uid, sectionId, role}, false)
+  return utils.post(`/api/canvas_user/${canvasSiteId}/add_user`, {uid, sectionId, role}, false)
 }
 
 export function getSections(canvasSiteId: number) {

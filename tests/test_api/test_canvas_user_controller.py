@@ -26,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import json
 
 import requests_mock
+from tests.test_api.api_test_utils import create_mock_project_site
 from tests.util import register_canvas_uris
 
 admin_uid = '10000'
@@ -177,10 +178,50 @@ class TestCanvasSiteAddUser:
             results = _api_canvas_site_add_user(client, canvas_site_id, params)
             assert results == params
 
+    def test_canvas_site_without_sections(self, client, app, fake_auth):
+        """Add user to Canvas site with zero sections."""
+        account_id = app.config['CANVAS_PROJECTS_ACCOUNT_ID']
+        canvas_site_id = '8876542'
+        uid = admin_uid
+        with create_mock_project_site(
+                app=app,
+                authorized_uid=uid,
+                canvas_site_id=canvas_site_id,
+                client=client,
+                fake_auth=fake_auth,
+        ) as project_site:
+            assert project_site
+            with requests_mock.Mocker() as m:
+                register_canvas_uris(app, {
+                    'account': [
+                        'get_admins',
+                        'get_by_id',
+                        'get_by_id_129407',
+                        'get_roles_1',
+                        f'get_roles_{account_id}',
+                        'get_terms',
+                    ],
+                    'course': [
+                        f'get_by_id_{canvas_site_id}',
+                        f'get_enrollments_{canvas_site_id}_4567890',
+                        f'get_sections_{canvas_site_id}',
+                        'get_tabs_8876542',
+                        'post_course_enrollments_8876542',
+                    ],
+                    'user': [f'profile_{student_uid}'],
+                }, m)
+                params = {
+                    'role': 'Student',
+                    'sectionId': None,
+                    'uid': student_uid,
+                }
+                results = _api_canvas_site_add_user(client, canvas_site_id, params)
+                assert results == params
+
 
 def _api_canvas_site_add_user(client, canvas_site_id, params=None, expected_status_code=200):
     response = client.post(
-        f'/api/canvas_user/{canvas_site_id}/users',
+        f'/api/canvas_user/{canvas_site_id}/add_user',
         data=json.dumps(params or {}),
         content_type='application/json',
     )
