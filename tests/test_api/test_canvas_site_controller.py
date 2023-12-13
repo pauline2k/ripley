@@ -26,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import json
 
 import requests_mock
+from tests.test_api.api_test_utils import api_create_project_site, create_mock_project_site
 from tests.util import register_canvas_uris
 
 TERM_ID_CURRENT = '2232'
@@ -559,19 +560,9 @@ class TestCreateCourseSite:
 
 class TestCreateProjectSite:
 
-    @classmethod
-    def _api_create_project_site(cls, client, name, expected_status_code=200, failed_assertion_message=None):
-        response = client.post(
-            '/api/canvas_site/project_site/create',
-            data=json.dumps({'name': name}),
-            content_type='application/json',
-        )
-        assert response.status_code == expected_status_code
-        return response.json
-
     def test_anonymous(self, client):
         """Denies anonymous user."""
-        self._api_create_project_site(client, 'Sorry Charlie', expected_status_code=401)
+        api_create_project_site(client, 'Sorry Charlie', expected_status_code=401)
 
     def test_unauthorized_users(self, client, app, fake_auth):
         """Denies Reader."""
@@ -593,48 +584,28 @@ class TestCreateProjectSite:
                     'user': [f'profile_{unauthorized_uid}'] if has_canvas_account else [],
                 }, m)
                 fake_auth.login(canvas_site_id=canvas_site_id, uid=unauthorized_uid)
-                self._api_create_project_site(
+                api_create_project_site(
                     client,
                     'Sorry Charlie',
                     expected_status_code=401,
                     failed_assertion_message=f'Do not allow {user_description} (UID: {unauthorized_uid}) to create project site.',
                 )
 
-    def test_authorized_users(self, client, app, fake_auth):
+    def test_authorized_users(self, app, client, fake_auth):
         """Allows faculty."""
-        with requests_mock.Mocker() as m:
-            account_id = '129407'
-            canvas_site_id = '8876542'
-            project_site_id = '3030303'
-            for unauthorized_uid, user_description in {
-                faculty_uid: 'Faculty',
-                admin_uid: 'Admin user',
-            }.items():
-                register_canvas_uris(app, {
-                    'account': [
-                        'get_admins',
-                        f'get_by_id_{account_id}',
-                        f'get_roles_{account_id}',
-                        f'get_courses_{account_id}',
-                    ],
-                    'course': [
-                        f'get_by_id_{canvas_site_id}',
-                        f'get_by_id_{project_site_id}',
-                        f'get_content_migrations_{project_site_id}',
-                        'get_enrollments_8876542_4567890',
-                        f'get_sections_{canvas_site_id}',
-                        f'get_tabs_{project_site_id}',
-                        'post_course_enrollments_3030303',
-                    ],
-                    'user': [f'profile_{unauthorized_uid}'],
-                }, m)
-                fake_auth.login(canvas_site_id=canvas_site_id, uid=unauthorized_uid)
-                api_json = self._api_create_project_site(
-                    client,
-                    'My project site',
-                    failed_assertion_message=f'{user_description} (UID: {unauthorized_uid}) should have power to create a project site.',
-                )
-                assert api_json
+        canvas_site_id = '8876542'
+        for authorized_uid, user_description in {
+            faculty_uid: 'Faculty',
+            admin_uid: 'Admin user',
+        }.items():
+            with create_mock_project_site(
+                    app=app,
+                    authorized_uid=authorized_uid,
+                    canvas_site_id=canvas_site_id,
+                    client=client,
+                    fake_auth=fake_auth,
+            ) as project_site:
+                assert project_site
 
 
 class TestGetRoster:
