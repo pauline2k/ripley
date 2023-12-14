@@ -32,7 +32,8 @@ from ripley.externals.redis import enqueue, get_job
 from ripley.lib.berkeley_course import sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_site_utils import canvas_site_to_api_json, create_canvas_project_site, \
-    get_official_sections, get_teaching_terms, provision_course_site, update_canvas_sections
+    get_official_sections, get_teaching_terms, update_canvas_sections
+from ripley.lib.course_site_provisioner import provision_course_site
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
