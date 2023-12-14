@@ -24,114 +24,103 @@
       >
         {{ success }}
       </v-alert>
-      <v-container v-if="!error" class="pb-0" fluid>
-        <v-row align="center" class="display-none-when-print" no-gutters>
+      <v-container v-if="!error" class="roster-heading pb-2" fluid>
+        <v-row class="display-none-when-print" no-gutters>
           <v-col
             class="pr-2 pt-1 roster-column-when-print"
-            :lg="size(roster.sections) ? 6 : 8"
-            :md="size(roster.sections) ? 4 : 6"
-            :sm="size(roster.sections) ? 3 : 6"
+            md="8"
+            sm="12"
           >
-            <label for="roster-search" class="sr-only">Input automatically searches upon text entry</label>
-            <v-text-field
-              id="roster-search"
-              v-model="search"
-              aria-label="Search people by name or S I D"
-              density="compact"
-              hide-details
-              placeholder="Search People"
-              type="search"
-              variant="outlined"
-            />
-          </v-col>
-          <v-col
-            v-if="size(roster.sections)"
-            class="pr-2 pt-1 z-index-100"
-            lg="1"
-            md="1"
-            sm="1"
-          >
-            <select
-              id="section-select"
-              v-model="selectedSectionId"
-              aria-label="Search specific section (defaults to all sections)"
-              @change="onSelectSection"
-            >
-              <option :value="null">All Sections</option>
-              <option
-                v-for="(section, index) in roster.sections"
-                :key="index"
-                :value="section.id"
+            <div class="d-flex mb-1">
+              <label for="roster-search" class="sr-only">Input automatically searches upon text entry</label>
+              <v-text-field
+                id="roster-search"
+                v-model="search"
+                aria-label="Search people by name or S I D"
+                class="roster-search-input mr-2"
+                density="compact"
+                hide-details
+                placeholder="Search People"
+                type="search"
+                variant="outlined"
+              />
+              <select
+                v-if="size(roster.sections)"
+                id="section-select"
+                v-model="selectedSectionId"
+                aria-label="Filter by specific section. Defaults to all sections."
+                class="flex-fill"
+                @change="onSelectSection"
               >
-                {{ section.name }}
-              </option>
-            </select>
-          </v-col>
-          <v-col class="pt-1" xs="12">
-            <div class="d-flex flex-nowrap float-right">
-              <div class="pr-2">
-                <v-btn
-                  id="download-csv"
-                  :disabled="isDownloading || !students.length"
-                  variant="outlined"
-                  @click="downloadCsv"
+                <option :value="null">All Sections</option>
+                <option
+                  v-for="(section, index) in roster.sections"
+                  :key="index"
+                  :value="section.id"
                 >
-                  <v-icon class="pr-2" :icon="mdiDownload" size="large" />
-                  Export<span class="sr-only"> CSV file</span>
-                </v-btn>
-              </div>
-              <div>
-                <v-tooltip
-                  v-model="showPrintButtonTooltip"
-                  :attach="true"
-                  :eager="false"
-                  location="top"
-                  :open-on-focus="true"
-                  :text="printButtonTooltip"
-                >
-                  <template #activator="{props}">
-                    <v-btn
-                      id="print-roster"
-                      color="primary"
-                      :disabled="disablePrintButton"
-                      v-bind="props"
-                      @click="printRoster"
-                    >
-                      <v-icon class="pr-2 text-white" :icon="mdiPrinter" size="large" />
-                      Print<span class="sr-only"> roster of students</span>
-                    </v-btn>
-                  </template>
-                </v-tooltip>
-              </div>
+                  {{ section.name }}
+                </option>
+              </select>
             </div>
-          </v-col>
-        </v-row>
-        <v-row
-          class="display-none-when-print"
-          justify="center"
-          no-gutters
-        >
-          <v-col align-self="center">
             <div
               aria-live="polite"
-              class="display-none-when-print text-subtitle-2"
+              class="position-absolute pt-3 display-none-when-print text-subtitle-2"
               role="alert"
             >
               {{ pluralize('student', students.length, {0: 'No', 1: 'One'}) }} found
             </div>
           </v-col>
-          <v-col>
-            <div class="float-right">
+          <v-col
+            class="pt-1 pr-2"
+            md="4"
+            sm="12"
+          >
+            <div class="d-flex flex-column justify-center align-end">
+              <div class="d-flex flex-nowrap">
+                <div class="pr-2">
+                  <v-btn
+                    id="download-csv"
+                    :disabled="isDownloading || !students.length"
+                    variant="outlined"
+                    @click="downloadCsv"
+                  >
+                    <v-icon class="pr-2" :icon="mdiDownload" size="large" />
+                    Export<span class="sr-only"> CSV file</span>
+                  </v-btn>
+                </div>
+                <div>
+                  <v-tooltip
+                    v-model="showPrintButtonTooltip"
+                    :attach="true"
+                    :eager="false"
+                    location="top"
+                    :open-on-focus="true"
+                    :text="printButtonTooltip"
+                  >
+                    <template #activator="{props}">
+                      <v-btn
+                        id="print-roster"
+                        color="primary"
+                        :disabled="disablePrintButton"
+                        v-bind="props"
+                        @click="printRoster"
+                      >
+                        <v-icon class="pr-2 text-white" :icon="mdiPrinter" size="large" />
+                        Print<span class="sr-only"> roster of students</span>
+                      </v-btn>
+                    </template>
+                  </v-tooltip>
+                </div>
+              </div>
               <v-checkbox
                 v-model="showOnePhotoPerPage"
+                class="flex-grow-0"
                 density="comfortable"
                 hide-details
                 label="Print one student per page"
               />
             </div>
           </v-col>
-        </v-row>
-        <v-row v-if="students.length" no-gutters>
         </v-row>
       </v-container>
       <RosterPhotos
@@ -254,8 +243,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.roster-heading {
+  min-width: 395px;
+}
+.roster-search-input {
+  min-width: 142px;
+}
 select {
-  height: 44px;
+  height: 40px;
 }
 .z-index-100 {
   z-index: 100;
