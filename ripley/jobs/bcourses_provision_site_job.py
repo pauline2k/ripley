@@ -56,7 +56,7 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
         return 'bcourses_provision_site'
 
     def _run(self, params={}):
-        # Unlike its sibling bCourses jobs, this job is triggered from LTI tools and should ignore any global dry run setting.
+        # Unlike sibling jobs, this job is triggered from LTI tools and should ignore any global dry run setting.
         self.dry_run = False
 
         this_sync = utc_now()
@@ -96,9 +96,10 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
         CanvasSynchronization.update(enrollments=this_sync, instructors=this_sync)
         app.logger.info(f'bCourses site provisioning job (mode={self.__class__.__name__}) complete.')
 
-    def _remove_section_enrollments(self, sis_term_id, canvas_site_id, sis_course_id, deleted_section_ids, csv_set):
+    @classmethod
+    def _remove_section_enrollments(cls, sis_term_id, canvas_site_id, sis_course_id, deleted_section_ids, csv_set):
         enrollment_csv = csv_set.enrollment_terms[sis_term_id]
-        canvas_sections = canvas.get_course_sections(canvas_site_id)
+        canvas_sections = canvas.get_course_sections(canvas_site_id) or []
         for section in canvas_sections:
             section_id, berkeley_term = parse_canvas_sis_section_id(section.sis_section_id)
             if section_id and str(section_id) in deleted_section_ids:

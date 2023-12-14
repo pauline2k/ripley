@@ -516,8 +516,8 @@ class TestCreateCourseSite:
         self._api_create_course_site(client, expected_status_code=401)
         self._api_get_creation_job_status(client, '1234', expected_status_code=401)
 
-    def test_unauthorized_users(self, client, app, fake_auth):
-        """Denies Reader."""
+    def test_unauthorized(self, client, app, fake_auth):
+        """Reader is unauthorized."""
         with requests_mock.Mocker() as m:
             account_id = '129407'
             canvas_site_id = '8876542'
@@ -537,25 +537,58 @@ class TestCreateCourseSite:
                 self._api_create_course_site(client, expected_status_code=401)
                 self._api_get_creation_job_status(client, '1234', expected_status_code=401)
 
-    def test_create_course_site_teacher(self, client, app, fake_auth):
-        """Allows teacher."""
+    def test_authorized(self, client, app, fake_auth):
+        """Teacher is authorized."""
+        canvas_site_id = '8876542'
+        uid = teacher_uid
         with requests_mock.Mocker() as m:
-            canvas_site_id = '8876542'
-            register_canvas_uris(app, {
-                'account': ['get_admins'],
-                'course': [f'get_by_id_{canvas_site_id}'],
-                'user': [f'profile_{teacher_uid}'],
-            }, m)
-            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            fixtures = {
+                'account': [
+                    'create_sis_import',
+                    'get_admins',
+                    'get_by_id',
+                    'get_roles_129047',
+                    'get_sub_account_anthro',
+                ],
+                'course': [
+                    f'get_by_id_{canvas_site_id}',
+                    'get_course_ANTHRO_189',
+                    'get_course_ANTHRO_189_not_found',
+                    'get_course_settings_1523731',
+                    'get_tabs_1523731',
+                ],
+                'section': [
+                    'get_section_32936',
+                    'get_section_32937',
+                    'post_enrollments_32936',
+                ],
+                'sis_import': [
+                    'get_by_id',
+                ],
+                'user': [
+                    f'profile_{uid}',
+                ],
+            }
+            register_canvas_uris(app, fixtures, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+            # API call
             api_json = self._api_create_course_site(
                 client,
-                params={'sectionIds': [10000]},
+                params={
+                    'sectionIds': ['32936', '32937'],
+                    'siteAbbreviation': 'LV-426',
+                    'siteName': 'The Acheron moon',
+                    'termSlug': 'spring-2023',
+                    'uid': uid,
+                },
             )
-            assert api_json['jobId']
+            job_id = api_json['jobId']
+            assert job_id
             assert api_json['jobStatus'] == 'sendingRequest'
-
-            api_json = self._api_get_creation_job_status(client, api_json['jobId'])
-            assert api_json['jobStatus']
+            # Expect finished job in the first status check.
+            api_json = self._api_get_creation_job_status(client, job_id)
+            assert api_json['jobStatus'] == 'finished'
+            assert '1523731' in api_json['jobData']['courseSiteUrl']
 
 
 class TestCreateProjectSite:

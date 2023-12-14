@@ -1,4 +1,33 @@
 {
+    "get_section_32936": {
+        "method": "GET",
+        "endpoint": "sections/sis_section_id:SEC:2023-B-32936",
+        "status_code": 404
+    },
+    "get_section_32936_provisioned": {
+        "method": "GET",
+        "endpoint": "sections/sis_section_id:SEC:2023-B-32936",
+        "data": {
+            "id": 1523732,
+            "course_id": 1523731,
+            "name": "ANTHRO 189 DIS 001",
+            "start_at": null,
+            "end_at": null,
+            "created_at": "2023-07-28T23:49:18Z",
+            "restrict_enrollments_to_section_dates": false,
+            "nonxlist_course_id": null,
+            "sis_section_id": "SEC:2023-D-32936",
+            "sis_course_id": "CRS:ANTHRO-189-2023-B",
+            "integration_id": null,
+            "sis_import_id": 7169092
+        },
+        "status_code": 200
+    },
+    "get_section_32937": {
+        "method": "GET",
+        "endpoint": "sections/sis_section_id:SEC:2023-B-32937",
+        "status_code": 404
+    },
     "get_enrollments_10000": {
         "method": "GET",
         "endpoint": "sections/10000/enrollments?per_page=100",
@@ -157,6 +186,44 @@
                 "final_grade": "F"
             },
             "id": 19986606,
+            "last_activity_at": "2023-02-01T21:29:50Z",
+            "limit_privileges_to_course_section": false,
+            "role": "StudentEnrollment",
+            "role_id": 6309,
+            "root_account_id": 1,
+            "sis_import_id": "10000001",
+            "sis_section_id": "SEC:2023-B-32936",
+            "sis_user_id": "30010000",
+            "type": "StudentEnrollment",
+            "updated_at": "2023-01-31T00:09:55Z",
+            "user_id": 2345678,
+            "user": {
+                "id": 2345678,
+                "name": "Ellen Ripley",
+                "short_name": "Ellen Ripley",
+                "sortable_name": "Ripley, Ellen",
+                "sis_user_id": "30010000",
+                "login_id": "10000"
+            }
+        },
+        "status_code": 200
+    },
+    "post_enrollments_32936": {
+        "method": "POST",
+        "endpoint": "sections/sis_section_id:SEC:2023-B-32936/enrollments",
+        "data": {
+            "id": 19986607,
+            "associated_user_id": null,
+            "course_id": 1523731,
+            "course_section_id": 32936,
+            "created_at": "2013-08-22T21:27:20Z",
+            "enrollment_state": "active",
+            "grades": {
+                "current_score": null,
+                "final_score": 0.0,
+                "current_grade": null,
+                "final_grade": "F"
+            },
             "last_activity_at": "2023-02-01T21:29:50Z",
             "limit_privileges_to_course_section": false,
             "role": "StudentEnrollment",
