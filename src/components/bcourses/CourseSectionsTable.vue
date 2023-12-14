@@ -257,13 +257,15 @@
                     size="medium"
                   />
                 </div>
-                <div>
+                <div :id="`${id}-${section.id}-warnings-list-label`">
                   The following bCourses sites include this section.
                 </div>
               </div>
               <div class="ml-6 pt-1">
-                <ul v-for="(canvasSite, index) in section.canvasSites" :key="index" class="sites-container">
-                  <li><OutboundLink :id="`${id}-${section.id}-warning-link`" :href="`${config.canvasApiUrl}/courses/${canvasSite.canvasSiteId}`">{{ canvasSite.name }}</OutboundLink></li>
+                <ul :aria-labelledby="`${id}-${section.id}-warnings-list-label`" class="sites-container">
+                  <li v-for="(canvasSite, index) in section.canvasSites" :key="index">
+                    <OutboundLink :id="`${id}-${section.id}-warning-link`" :href="`${config.canvasApiUrl}/courses/${canvasSite.canvasSiteId}`">{{ canvasSite.name }}</OutboundLink>
+                  </li>
                 </ul>
               </div>
             </div>
