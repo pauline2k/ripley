@@ -44,7 +44,7 @@
             <v-container class="px-2 py-1" fluid>
               <v-row v-if="isAdminToolMode" no-gutters>
                 <v-col cols="auto" class="me-auto">
-                  <div v-if="canvasSite.url">
+                  <div v-if="get(canvasSite, 'url')">
                     <OutboundLink
                       id="course-site-href"
                       class="d-flex align-center mb-2"
@@ -55,7 +55,7 @@
                       <v-icon :icon="mdiOpenInNew" size="small" />
                     </OutboundLink>
                   </div>
-                  <div v-if="!canvasSite.url">
+                  <div v-if="get(canvasSite, 'url')">
                     <h2>{{ canvasSite.name }}</h2>
                   </div>
                 </v-col>
@@ -63,8 +63,8 @@
               <v-row v-if="isAdminToolMode" no-gutters>
                 <v-col>
                   <div class="mb-4 w-auto">
-                    <div v-if="canvasSite.term" class="text-subtitle-1">{{ canvasSite.term.name }}</div>
-                    <div>Site ID {{ canvasSite.canvasSiteId }}</div>
+                    <div v-if="get(canvasSite, 'term')" class="text-subtitle-1">{{ canvasSite.term.name }}</div>
+                    <div>Site ID {{ get(canvasSite, 'canvasSiteId') }}</div>
                   </div>
                 </v-col>
               </v-row>
@@ -79,6 +79,7 @@
                         <v-text-field
                           id="mailing-list-name-input"
                           v-model="mailingListName"
+                          :aria-invalid="hasInvalidCharacters"
                           aria-required="true"
                           density="comfortable"
                           :disabled="isCreating"
@@ -86,10 +87,12 @@
                           maxlength="50"
                           required
                           variant="outlined"
+                          @focus="hasInvalidCharacters = false; debouncedValidateName()"
+                          @update:modelValue="hasInvalidCharacters = false; debouncedValidateName()"
                           @keydown.enter="create"
                         />
-                        <div aria-live="polite" class="validation-messages">
-                          <div v-if="hasInvalidCharacters" class="d-flex">
+                        <div aria-live="assertive" class="validation-messages">
+                          <div v-if="mailingListName && hasInvalidCharacters" class="d-flex">
                             <div class="pr-1 text-no-wrap">
                               <span class="sr-only">Error: </span>Only lowercase alphanumeric, underscore and hyphen characters allowed.
                             </div>
@@ -148,7 +151,7 @@ import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {createMailingList, getMailingList, getSuggestedMailingListName} from '@/api/mailing-list'
-import {get, size, trim} from 'lodash'
+import {debounce, get, size, trim} from 'lodash'
 import {getCanvasSite} from '@/api/canvas-site'
 import {nextTick} from 'vue'
 import {toInt} from '@/utils'
@@ -159,19 +162,17 @@ export default {
   mixins: [Context, MailingList],
   data: () => ({
     canvasSiteId: undefined,
+    debouncedValidateName: undefined,
     error: undefined,
+    hasInvalidCharacters: false,
     isAdminToolMode: undefined,
     isCreating: false,
     mailingListName: undefined,
     success: undefined,
     validNameRegex: /[a-z0-9_-]/g
   }),
-  computed: {
-    hasInvalidCharacters() {
-      const name = trim(this.mailingListName)
-      const isValid = name.length && size(name.match(this.validNameRegex)) === name.length && name[0].match(/[a-z]/)
-      return !isValid
-    }
+  created() {
+    this.debouncedValidateName = debounce(this.validateName, 200)
   },
   mounted() {
     this.init()
@@ -242,7 +243,12 @@ export default {
       const path = this.isAdminToolMode ? '/mailing_list/update' : '/mailing_list/send_welcome_email'
       this.$router.push({path})
     },
-    trim
+    trim,
+    validateName() {
+      const name = trim(this.mailingListName)
+      const isValid = name.length && size(name.match(this.validNameRegex)) === name.length && name[0].match(/[a-z]/)
+      this.hasInvalidCharacters = !isValid
+    }
   }
 }
 </script>
