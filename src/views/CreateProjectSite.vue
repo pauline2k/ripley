@@ -29,7 +29,6 @@
       <div class="d-flex justify-end">
         <v-btn
           id="create-project-site-button"
-          aria-controls="page-reader-alert"
           class="mr-1"
           color="primary"
           type="submit"
