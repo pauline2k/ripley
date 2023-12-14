@@ -81,7 +81,7 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         if not sis_import:
             raise InternalServerError(f'Course sections SIS import failed (sis_course_id={sis_course_id}).')
 
-    course = canvas.get_course(course_id=sis_course_id, use_sis_id=True)
+    course = _get_canvas_course(sis_course_id)
     if not course:
         raise InternalServerError(f'Canvas course lookup failed (sis_course_id={sis_course_id}).')
 
@@ -172,6 +172,17 @@ def _enroll_user_in_canvas_section(canvas_sis_section_id, canvas_user_profile, r
             'enrollment[notify]': False,
         },
     )
+
+
+def _get_canvas_course(sis_course_id):
+    if app.config['TESTING']:
+        # NOTE: Course site provisioning invokes Canvas get-course API twice. The first call should return a 404. Next,
+        # we provision the Canvas course site. Then, invoke Canvas get-course API a second time and expect a course
+        # object. Our unit tests (pytest) use request mocker, and we are unable to mock different responses for the same
+        # Canvas API URI. Thus, the following hack: our unit tests can mock the second API call by mocking URI that
+        # contains the custom 'sis_course_id' below.
+        sis_course_id = f'{sis_course_id}_provisioned'
+    return canvas.get_course(course_id=sis_course_id, use_sis_id=True)
 
 
 def _get_canvas_user_profile(course, uid):

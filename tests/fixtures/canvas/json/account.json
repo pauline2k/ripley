@@ -94,6 +94,21 @@
         },
         "status_code": 200
     },
+    "get_sub_account_anthro": {
+        "method": "GET",
+        "endpoint": "accounts/sis_account_id:ACCT:ANTHRO",
+        "data": {
+            "id": 129047,
+            "name": "ANTHRO",
+            "workflow_state": "active",
+            "parent_account_id": 129410,
+            "root_account_id": 90242,
+            "default_time_zone": "America/Los_Angeles",
+            "sis_account_id": "ACCT:ANTHRO",
+            "sis_import_id": 6407226
+        },
+        "status_code": 200
+    },
     "get_admins": {
         "method": "GET",
         "endpoint": "accounts/1/admins",

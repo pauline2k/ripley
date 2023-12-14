@@ -89,7 +89,7 @@ def read_s3_csv(app, s3, key, get_latest=False):
 
 def register_canvas_uris(app, requirements, requests_mocker):
     """
-    Given a list of required fixtures and an requests_mocker object, register each fixture as a uri with the mocker.
+    Given a list of required fixtures and a requests_mocker object, register each fixture as URI with the mocker.
 
     This is the same strategy used by the canvasapi module in its internal tests.
     """
@@ -107,12 +107,12 @@ def register_canvas_uris(app, requirements, requests_mocker):
         for obj_name in objects:
             if obj_name == '*':
                 for obj_key, obj in data.items():
-                    _register_object(app, requests_mocker, obj_key, obj)
+                    _register_object(app, requests_mocker, obj)
             else:
                 obj = data.get(obj_name)
                 if obj is None:
                     raise ValueError(f'{obj_name.__repr__()} does not exist in {fixture}.json')
-                _register_object(app, requests_mocker, obj_name, obj)
+                _register_object(app, requests_mocker, obj)
 
 
 @contextmanager
@@ -148,7 +148,7 @@ def setup_bcourses_refresh_job(app):
             yield (s3, m)
 
 
-def _register_object(app, requests_mocker, obj_name, obj):
+def _register_object(app, requests_mocker, obj):
     method = requests_mock.ANY if obj['method'] == 'ANY' else obj['method']
     base_url = urljoin(
         app.config['CANVAS_API_URL'],
