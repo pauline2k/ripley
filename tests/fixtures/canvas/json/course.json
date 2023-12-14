@@ -114,6 +114,7 @@
         "data": {
             "id": 1523731,
             "course_code": "ANTHRO 189",
+            "default_view": "feed",
             "name": "Our Dogs, Ourselves: Encounters between the Human and the Non-Human",
             "sis_course_id": "CRS:ANTHRO-189-2023-B",
             "account_id": 1,
@@ -584,7 +585,7 @@
         "status_code": 200
     },
     "get_course_settings_1523731": {
-        "method": "GET",
+        "method": "PUT",
         "endpoint": "courses/1523731/settings",
         "data": {
             "allow_final_grade_override": false,
@@ -678,7 +679,18 @@
     "get_tabs_1523731": {
         "method": "GET",
         "endpoint": "courses/1523731/tabs",
-        "data": []
+        "data": [
+            {
+              "id": "home",
+              "html_url": "/courses/1523731",
+              "full_url": "https://canvas.example.com/courses/1523731",
+              "position": 1,
+              "visibility": "public",
+              "label": "Home",
+              "type": "internal"
+            }
+        ],
+        "status_code": 200
     },
     "get_tabs_3030303": {
         "method": "GET",

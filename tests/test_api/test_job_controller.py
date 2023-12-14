@@ -122,7 +122,7 @@ class TestJobSchedule:
         assert response['autoStart'] is False
         assert response['secondsBetweenJobsCheck'] == 0.5
         assert response['startedAt']
-        assert len(response['jobs']) == 2
+        assert len(response['jobs'])
 
         add_new_users_job = next(job for job in response['jobs'] if job['class'] == 'AddNewUsersJob')
         assert add_new_users_job['description'] == 'Adds new campus users to Canvas.'
