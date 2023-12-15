@@ -155,7 +155,6 @@
               <v-btn
                 v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject"
                 id="btn-cancel-welcome-email-edit"
-                color="secondary"
                 :disabled="isSaving || isToggling"
                 variant="tonal"
                 @click="cancelEditMode"
