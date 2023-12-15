@@ -51,11 +51,11 @@ EMPTY_DEMOGRAPHIC_DISTRIBUTION = {
 }
 
 
-def get_grade_distributions(course_term_id, section_ids):  # noqa
+def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  # noqa
     demographics_distribution = {}
     grade_totals = {}
     grade_distribution_by_term = {}
-    student_grades = get_grades_with_demographics(course_term_id, section_ids)
+    student_grades = get_grades_with_demographics(course_term_id, section_ids, instructor_uid)
     if len(student_grades) < int(app.config['NEWT_MINIMUM_CLASS_SIZE']):
         return False, False
 
@@ -151,10 +151,10 @@ only {student_count} {distribution_key}--{distribution_value} students")
     return sorted_demographics_distribution, sorted_grade_distribution_by_term
 
 
-def get_grade_distribution_with_prior_enrollments(term_id, course_name, prior_course_name):
+def get_grade_distribution_with_prior_enrollments(term_id, course_name, prior_course_name, instructor_uid=None):
     distribution = {}
     for term_id, rows in groupby(
-        get_grades_with_enrollments(term_id, course_name, prior_course_name),
+        get_grades_with_enrollments(term_id, course_name, prior_course_name, instructor_uid),
         key=lambda x: x['sis_term_id'],
     ):
         if term_id not in distribution:
