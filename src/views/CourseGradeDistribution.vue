@@ -11,8 +11,8 @@
       <p class="mb-5">
         The Grade Distribution dashboard is an informational tool to assist instructors in assessing student performance
         based on existing bCourses class grades and historical trends. Only you can view this information developed
-        specifically for your class. Feel free to contact <a href="mailto:tbd-newt@berkeley.edu">tbd-newt@berkeley.edu</a>
-        if you have questions or suggestions for additional methods of displaying grade reporting.
+        specifically for your class. Please use the <a id="newt-feedback-link" :href="config.newtFeedbackFormUrl" target="_blank">feedback form</a>
+        for any questions, feedback, or to suggest additional methods of displaying grade reporting.
       </p>
       <v-alert
         v-if="errorMessage"
