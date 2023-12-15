@@ -121,14 +121,6 @@
         </v-btn>
       </div>
     </div>
-    <div
-      v-if="error"
-      aria-live="polite"
-      class="has-error pl-2 pt-2"
-      role="alert"
-    >
-      {{ error }}
-    </div>
   </div>
 </template>
 
@@ -174,13 +166,16 @@ export default {
       required: true,
       type: Function
     },
+    setWarning: {
+      required: true,
+      type: Function
+    },
     switchAdminTerm: {
       required: true,
       type: Function
     }
   },
   data: () => ({
-    error: undefined,
     sectionIds: '',
     uid: undefined
   }),
@@ -190,7 +185,7 @@ export default {
         return this.adminMode
       },
       set(mode) {
-        this.error = undefined
+        this.setWarning(null)
         this.sectionIds = ''
         this.uid = undefined
         this.setAdminMode(mode)
@@ -218,10 +213,10 @@ export default {
   },
   watch: {
     sectionIds() {
-      this.error = null
+      this.setWarning(null)
     },
     uid() {
-      this.error = null
+      this.setWarning(null)
     }
   },
   methods: {
@@ -233,7 +228,7 @@ export default {
           const sectionIds = split(trimmed, /[,\r\n\t ]+/)
           const notNumeric = partition(sectionIds, sectionId => /^\d+$/.test(trim(sectionId)))[1]
           if (notNumeric.length) {
-            this.error = 'Section IDs must be numeric.'
+            this.setWarning('Section IDs must be numeric.')
             putFocusNextTick('page-create-course-site-section-id-list')
           } else {
             this.setAdminBySectionIds(sectionIds)
@@ -245,7 +240,7 @@ export default {
             this.setAdminActingAs(trimmed)
             this.fetchFeed()
           } else {
-            this.error = 'UID must be numeric.'
+            this.setWarning('UID must be numeric.')
             putFocusNextTick('instructor-uid')
           }
         }
@@ -259,11 +254,6 @@ export default {
 <style scoped lang="scss">
 .instructor-uid-text-field {
   width: 208px;
-}
-.has-error {
-  color: $color-alert-error-foreground;
-  font-size: 14px;
-  font-weight: bolder;
 }
 .term-btn-toggle {
   border-width: 1px;

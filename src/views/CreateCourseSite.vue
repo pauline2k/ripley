@@ -1,13 +1,19 @@
 <template>
   <div class="pb-5 px-5">
-    <Header1 text="Create a Course Site" />
-    <div v-if="displayError" class="mb-2">
-      <CanvasErrors :message="displayError" />
-    </div>
+    <Header1 class="mb-2" text="Create a Course Site" />
+    <v-alert
+      v-if="warning"
+      id="canvas-error-container"
+      class="mb-3"
+      density="compact"
+      role="alert"
+      type="warning"
+    >
+      {{ warning }}
+    </v-alert>
     <div v-if="!isLoading">
-      <div class="pl-3">
+      <div v-if="isAdmin && currentWorkflowStep !== 'processing'" class="pl-3">
         <CreateCourseSiteHeader
-          v-if="isAdmin && currentWorkflowStep !== 'processing'"
           :admin-mode="adminMode"
           :admin-terms="adminTerms"
           :current-admin-term="currentAdminTerm"
@@ -16,10 +22,11 @@
           :set-admin-acting-as="setAdminActingAs"
           :set-admin-by-section-ids="setAdminBySectionIds"
           :set-admin-mode="setAdminMode"
+          :set-warning="w => warning = w"
           :switch-admin-term="switchAdminTerm"
         />
       </div>
-      <div v-if="!isFetching" id="select-and-confirm" class="pt-2">
+      <div v-if="!isFetching" :class="{'pt-2': isAdmin && currentWorkflowStep !== 'processing'}">
         <SelectSectionsStep
           v-if="currentWorkflowStep === 'selecting'"
           :admin-acting-as="adminActingAs"
@@ -64,11 +71,10 @@
 </template>
 
 <script>
-import CanvasErrors from '@/components/bcourses/CanvasErrors'
 import ConfirmationStep from '@/components/bcourses/create/ConfirmationStep'
 import Context from '@/mixins/Context'
 import CreateCourseSiteHeader from '@/components/bcourses/create/CreateCourseSiteHeader'
-import Header1 from '@/components/utils/Header1.vue'
+import Header1 from '@/components/utils/Header1'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
 import {each, find, get, includes, map, size} from 'lodash'
@@ -77,7 +83,6 @@ import {iframeParentLocation, putFocusNextTick} from '@/utils'
 export default {
   name: 'CreateCourseSite',
   components: {
-    CanvasErrors,
     ConfirmationStep,
     CreateCourseSiteHeader,
     Header1,
@@ -98,7 +103,6 @@ export default {
     currentSemester: undefined,
     currentSemesterName: undefined,
     currentWorkflowStep: undefined,
-    displayError: undefined,
     errorConfig: {
       header: undefined,
       supportAction: undefined,
@@ -113,11 +117,15 @@ export default {
     selectedSectionsList: undefined,
     semester: undefined,
     teachingTerms: [],
-    timeoutPromise: undefined
+    timeoutPromise: undefined,
+    warning: undefined
   }),
   created() {
     getCourseProvisioningMetadata().then(data => {
       this.updateMetadata(data)
+      if (!this.teachingTerms.length && !this.currentUser.isAdmin) {
+        this.warning = 'You are not listed as an instructor of any courses in the current or upcoming term.'
+      }
       this.$ready()
     })
   },
@@ -137,7 +145,7 @@ export default {
           this.percentComplete = 0
           this.currentWorkflowStep = null
           this.jobStatus = 'error'
-          this.displayError = message
+          this.warning = message
           putFocusNextTick('page-title')
           reject()
         }
@@ -173,7 +181,7 @@ export default {
       })
     },
     fetchFeed() {
-      this.displayError = null
+      this.warning = null
       this.isFetching = true
       this.currentWorkflowStep = 'selecting'
       this.backgroundJobId = undefined
@@ -194,7 +202,10 @@ export default {
           this.updateMetadata(data)
           this.usersClassCount = this.classCount(data.teachingTerms)
           this.teachingTerms = data.teachingTerms
-          this.fillCourseSites(data.teachingTerms)
+          if (!this.teachingTerms.length && this.adminMode) {
+            this.warning = this.adminActingAs ? `UID ${this.adminActingAs} is not listed as an instructor of any courses in the current or upcoming term.` : 'No matching courses found.'
+          }
+          this.fillCourseSites(this.teachingTerms)
           this.alertScreenReader('Course section loaded successfully')
           if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
             each(this.coursesList, course => {
@@ -205,12 +216,12 @@ export default {
             this.updateSelected()
           }
           if (!this.isAdmin && !this.usersClassCount) {
-            this.displayError = 'Sorry, you are not an admin user and you have no classes.'
+            this.warning = 'Sorry, you are not an admin user and you have no classes.'
           }
         },
         error => {
           this.alertScreenReader('Course section loading failed')
-          this.displayError = error || 'failure'
+          this.warning = error || 'failure'
         }
       ).finally(() => {
         this.isFetching = false
@@ -296,7 +307,7 @@ export default {
               } else {
                 this.alertScreenReader('Error.', 'assertive')
                 this.jobStatus = 'error'
-                this.displayError = 'An error has occurred with your request. Please try again or contact bCourses support.'
+                this.warning = 'An error has occurred with your request. Please try again or contact bCourses support.'
                 putFocusNextTick('page-title')
               }
             }
@@ -306,7 +317,7 @@ export default {
             this.alertScreenReader('Error.', 'assertive')
             this.currentWorkflowStep = null
             this.jobStatus = 'error'
-            this.displayError = 'An error has occurred with your request. Please try again or contact bCourses support.'
+            this.warning = 'An error has occurred with your request. Please try again or contact bCourses support.'
             clearInterval(this.exportTimer)
             putFocusNextTick('page-title')
           }
