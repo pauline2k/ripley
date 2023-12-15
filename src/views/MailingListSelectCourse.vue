@@ -1,9 +1,14 @@
 <template>
-  <div v-if="!isLoading" class="pa-5">
-    <div class="d-flex flex-column-reverse">
-      <div id="mailing-lists-alert" aria-live="polite">
+  <div v-if="!isLoading" class="pb-5 px-5">
+    <div class="pl-3">
+      <Header1 text="Manage Mailing Lists" />
+      <div
+        v-if="error"
+        id="mailing-lists-alert"
+        aria-live="polite"
+        class="pb-3"
+      >
         <v-alert
-          v-if="error"
           class="my-2"
           density="compact"
           role="alert"
@@ -12,9 +17,8 @@
           {{ error }}
         </v-alert>
       </div>
-      <Header1 text="Manage Mailing Lists" />
     </div>
-    <div v-if="currentUser.isAdmin" class="align-center d-flex flex-wrap pa-3">
+    <div v-if="currentUser.isAdmin" class="align-center d-flex flex-wrap px-3">
       <div class="pr-3">
         <v-text-field
           id="page-site-mailing-list-site-id"
@@ -22,6 +26,7 @@
           :aria-describedby="!!trim(canvasSiteId) && !isCanvasSiteIdValid ? 'mailing-list-site-id-messages' : null"
           aria-label="bCourses Course ID"
           aria-required="true"
+          density="comfortable"
           :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
           hide-details
           maxlength="10"
@@ -39,6 +44,7 @@
           id="btn-get-mailing-list"
           color="primary"
           :disabled="isProcessing || !isCanvasSiteIdValid"
+          size="large"
           @click="proceed"
         >
           <span v-if="!isProcessing">Get Mailing List</span>

@@ -4,7 +4,6 @@
     <div class="my-2">
       <NeedHelpFindingSomeone v-if="showSearchForm" />
     </div>
-    <MaintenanceNotice course-action-verb="person is added" />
     <div
       v-if="showAlerts"
       id="alerts-container"
@@ -297,7 +296,6 @@ import {pluralize} from '@/utils'
 <script>
 import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1'
-import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import NeedHelpFindingSomeone from '@/components/utils/NeedHelpFindingSomeone'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {addUser, getAddUserOptions} from '@/api/canvas-user'
@@ -307,7 +305,7 @@ import {searchUsers} from '@/api/user'
 
 export default {
   name: 'CourseAddUser',
-  components: {Header1, MaintenanceNotice, NeedHelpFindingSomeone, SpinnerWithinButton},
+  components: {Header1, NeedHelpFindingSomeone, SpinnerWithinButton},
   mixins: [Context],
   data: () => ({
     additionSuccessMessage: false,

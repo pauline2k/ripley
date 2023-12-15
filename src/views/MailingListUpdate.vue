@@ -1,24 +1,19 @@
 <template>
-  <div v-if="!isLoading" class="pa-3">
-    <div class="d-flex flex-column-reverse">
-      <div id="mailing-lists-alert" aria-live="polite">
-        <v-alert
-          v-if="showCreatedAlert && !hasUpdatedSincePageLoad"
-          id="mailing-list-created-alert"
-          class="my-2"
-          density="compact"
-          role="alert"
-          type="info"
-        >
-          The list "{{ mailingList.name }}@{{ mailingList.domain }}" has been created.
-          To add members, click the "Update Memberships" button below.
-        </v-alert>
-      </div>
-      <Header1 text="Update Mailing List" />
+  <div v-if="!isLoading" class="px-3">
+    <div :class="{'pb-2': !hasUpdatedSincePageLoad}">
+      <Header1 class="mb-2" text="Update Mailing List" />
+      <v-alert
+        v-if="!hasUpdatedSincePageLoad"
+        id="mailing-list-created-alert"
+        density="compact"
+        type="info"
+      >
+        The list "{{ mailingList.name }}@{{ mailingList.domain }}" has been created.
+        To add members, click the "Update Memberships" button below.
+      </v-alert>
     </div>
-    <div aria-live="polite">
+    <div v-if="alerts.length" aria-live="polite" class="mb-4">
       <v-expansion-panels
-        v-if="alerts.length"
         id="mailing-list-update-alert"
         v-model="openPanelIndex"
         color="info"
@@ -67,7 +62,7 @@
       </v-expansion-panels>
     </div>
     <div class="mt-2">
-      <v-card id="mailing-list-details" class="pl-3">
+      <v-card id="mailing-list-details" class="pl-3" elevation="2">
         <v-card-text>
           <h2>Canvas Course Site</h2>
           <v-container class="py-3" fluid>
@@ -213,8 +208,7 @@ export default {
     isUpdating: false,
     messageType: undefined,
     openPanelIndex: [],
-    showAlertDetails: false,
-    showCreatedAlert: true
+    showAlertDetails: false
   }),
   created() {
     if (this.mailingList && this.canvasSite) {
@@ -232,7 +226,6 @@ export default {
       nextTick(this.$router.push({path: '/mailing_list/select_course'}))
     },
     get,
-    pluralize,
     showUpdateSummary() {
       const actions = ['add', 'remove', 'restore', 'update']
       const count = key => {
@@ -267,7 +260,6 @@ export default {
       this.alerts = []
       this.alertScreenReader('Updating mailing list.')
       this.isUpdating = true
-      this.showCreatedAlert = false
       let updateTimer = setInterval(() => {
         this.alertScreenReader('Still processing updates.')
       }, 7000)

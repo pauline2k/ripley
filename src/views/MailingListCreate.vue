@@ -1,142 +1,131 @@
 <template>
-  <div v-if="!isLoading" class="mx-10 my-5">
-    <div class="d-flex flex-column-reverse">
-      <div id="mailing-lists-alert" aria-live="polite">
-        <v-alert
-          v-if="!error && !success"
-          class="my-2"
-          density="compact"
-          role="alert"
-          text="No Mailing List has been created for this site."
-          type="info"
-        />
+  <div v-if="!isLoading" class="px-5 pb-5">
+    <div>
+      <Header1 text="Create Mailing List" />
+      <div id="mailing-lists-alert" aria-live="polite" role="alert">
         <v-alert
           v-if="success"
-          class="my-2"
           :closable="true"
           density="compact"
-          role="alert"
           :text="success"
           type="success"
         />
         <v-alert
           v-if="error"
-          class="my-2"
           density="compact"
-          role="alert"
           :text="error"
           type="warning"
         />
       </div>
-      <Header1 text="Create Mailing List" />
     </div>
-    <div v-if="!error && !currentUser.isStudent" class="mt-2">
-      <v-card id="mailing-list-details" elevation="2">
-        <v-card-text>
-          <div v-if="!isAdminToolMode" class="mb-1">
-            bCourses Mailing Lists allow Teachers, TAs, Lead TAs and Readers to send email to everyone in a bCourses site
-            by giving the site its own email address. Messages sent to this address from the
-            <span class="font-weight-bold">official berkeley.edu email address</span> of a Teacher, TA, Lead TA or Reader
-            will be sent to the official email addresses of all site members. Students and people not in the site cannot
-            send messages through Mailing Lists.
-          </div>
-          <div>
-            <v-container class="px-2 py-1" fluid>
-              <v-row v-if="isAdminToolMode" no-gutters>
-                <v-col cols="auto" class="me-auto">
-                  <div v-if="get(canvasSite, 'url')">
-                    <OutboundLink
-                      id="course-site-href"
-                      class="d-flex align-center mb-2"
-                      :href="canvasSite.url"
-                      title="View course site"
-                    >
-                      <div class="font-size-20 pr-1" level="2" role="heading">{{ canvasSite.name }}</div>
-                      <v-icon :icon="mdiOpenInNew" size="small" />
-                    </OutboundLink>
+    <v-card
+      v-if="!error && !currentUser.isStudent"
+      id="mailing-list-details"
+      class="ma-0 pa-4"
+      elevation="2"
+    >
+      <v-card-text>
+        <div v-if="!isAdminToolMode" class="mb-1">
+          bCourses Mailing Lists allow Teachers, TAs, Lead TAs and Readers to send email to everyone in a bCourses site
+          by giving the site its own email address. Messages sent to this address from the
+          <span class="font-weight-bold">official berkeley.edu email address</span> of a Teacher, TA, Lead TA or Reader
+          will be sent to the official email addresses of all site members. Students and people not in the site cannot
+          send messages through Mailing Lists.
+        </div>
+        <div>
+          <v-container class="pa-0" fluid>
+            <v-row v-if="isAdminToolMode" no-gutters>
+              <v-col cols="auto" class="me-auto">
+                <h2 v-if="get(canvasSite, 'url')">
+                  <OutboundLink
+                    id="course-site-href"
+                    class="align-start d-flex font-size-18"
+                    :href="canvasSite.url"
+                    title="View course site"
+                  >
+                    <div class="pr-2" level="2" role="heading">{{ canvasSite.name }}</div>
+                    <v-icon :icon="mdiOpenInNew" size="small" />
+                  </OutboundLink>
+                </h2>
+                <div v-if="!get(canvasSite, 'url')">
+                  <h2>{{ canvasSite.name }}</h2>
+                </div>
+              </v-col>
+            </v-row>
+            <v-row v-if="isAdminToolMode" no-gutters>
+              <v-col>
+                <div class="mb-4 w-auto">
+                  <div v-if="get(canvasSite, 'term')" class="font-weight-medium text-subtitle-1">{{ canvasSite.term.name }}</div>
+                  <div>Site ID {{ get(canvasSite, 'canvasSiteId') }}</div>
+                </div>
+              </v-col>
+            </v-row>
+            <v-row align="center" no-gutters>
+              <v-col class="pb-0" cols="8">
+                <div class="d-flex pt-1">
+                  <div class="float-right mailing-list-name-input text-subtitle-1">
+                    <label for="mailing-list-name-input">Name</label>
                   </div>
-                  <div v-if="get(canvasSite, 'url')">
-                    <h2>{{ canvasSite.name }}</h2>
-                  </div>
-                </v-col>
-              </v-row>
-              <v-row v-if="isAdminToolMode" no-gutters>
-                <v-col>
-                  <div class="mb-4 w-auto">
-                    <div v-if="get(canvasSite, 'term')" class="text-subtitle-1">{{ canvasSite.term.name }}</div>
-                    <div>Site ID {{ get(canvasSite, 'canvasSiteId') }}</div>
-                  </div>
-                </v-col>
-              </v-row>
-              <v-row align="center" no-gutters>
-                <v-col class="pb-0" cols="8">
-                  <div class="d-flex pt-1 text-subtitle-1">
-                    <div class="float-right mailing-list-name-input">
-                      <label for="mailing-list-name-input">Name</label>
-                    </div>
-                    <div class="w-100">
-                      <div>
-                        <v-text-field
-                          id="mailing-list-name-input"
-                          v-model="mailingListName"
-                          :aria-invalid="hasInvalidCharacters"
-                          aria-required="true"
-                          density="comfortable"
-                          :disabled="isCreating"
-                          hide-details
-                          maxlength="50"
-                          required
-                          variant="outlined"
-                          @focus="hasInvalidCharacters = false; debouncedValidateName()"
-                          @update:modelValue="hasInvalidCharacters = false; debouncedValidateName()"
-                          @keydown.enter="create"
-                        />
-                        <div aria-live="assertive" class="validation-messages">
-                          <div v-if="mailingListName && hasInvalidCharacters" class="d-flex">
-                            <div class="pr-1 text-no-wrap">
-                              <span class="sr-only">Error: </span>Only lowercase alphanumeric, underscore and hyphen characters allowed.
-                            </div>
-                          </div>
+                  <div class="w-100">
+                    <div>
+                      <v-text-field
+                        id="mailing-list-name-input"
+                        v-model="mailingListName"
+                        :aria-invalid="hasInvalidCharacters"
+                        aria-required="true"
+                        density="comfortable"
+                        :disabled="isCreating"
+                        hide-details
+                        maxlength="50"
+                        required
+                        variant="outlined"
+                        @focus="hasInvalidCharacters = false; debouncedValidateName()"
+                        @update:modelValue="hasInvalidCharacters = false; debouncedValidateName()"
+                        @keydown.enter="create"
+                      />
+                      <div v-if="mailingListName && hasInvalidCharacters" aria-live="assertive" class="validation-messages">
+                        <div class="pr-1 text-no-wrap">
+                          <span class="sr-only">Error: </span>Only lowercase alphanumeric, underscore and hyphen characters allowed.
                         </div>
                       </div>
                     </div>
                   </div>
-                </v-col>
-              </v-row>
-              <v-row v-if="currentUser.isTeaching || currentUser.isAdmin" no-gutters>
-                <v-col>
-                  <div class="d-flex float-right">
-                    <div :class="{'mr-2': isAdminToolMode}">
-                      <v-btn
-                        id="btn-create-mailing-list"
-                        color="primary"
-                        :disabled="isCreating || !trim(mailingListName) || hasInvalidCharacters"
-                        @click="create"
-                      >
-                        <span v-if="!isCreating">Create mailing list</span>
-                        <span v-if="isCreating">
-                          <SpinnerWithinButton /> Creating...
-                        </span>
-                      </v-btn>
-                    </div>
-                    <div v-if="isAdminToolMode">
-                      <v-btn
-                        id="btn-cancel"
-                        :disabled="isCreating"
-                        variant="tonal"
-                        @click="cancel"
-                      >
-                        Cancel
-                      </v-btn>
-                    </div>
+                </div>
+              </v-col>
+            </v-row>
+            <v-row v-if="currentUser.isTeaching || currentUser.isAdmin" no-gutters>
+              <v-col>
+                <div class="d-flex float-right mt-8">
+                  <div :class="{'mr-2': isAdminToolMode}">
+                    <v-btn
+                      id="btn-create-mailing-list"
+                      color="primary"
+                      :disabled="isCreating || !trim(mailingListName) || hasInvalidCharacters"
+                      @click="create"
+                    >
+                      <span v-if="!isCreating">Create mailing list</span>
+                      <span v-if="isCreating">
+                        <SpinnerWithinButton /> Creating...
+                      </span>
+                    </v-btn>
                   </div>
-                </v-col>
-              </v-row>
-            </v-container>
-          </div>
-        </v-card-text>
-      </v-card>
-    </div>
+                  <div v-if="isAdminToolMode">
+                    <v-btn
+                      id="btn-cancel"
+                      :disabled="isCreating"
+                      variant="tonal"
+                      @click="cancel"
+                    >
+                      Cancel
+                    </v-btn>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
+          </v-container>
+        </div>
+      </v-card-text>
+    </v-card>
   </div>
 </template>
 
@@ -255,6 +244,6 @@ export default {
 
 <style scoped lang="scss">
 .mailing-list-name-input {
-  padding: 10px 8px 0 0;
+  padding: 10px 12px 0 8px;
 }
 </style>

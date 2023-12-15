@@ -1,6 +1,5 @@
 <template>
   <div v-if="!isLoading" class="pt-3 px-6">
-    <MaintenanceNotice v-if="canvasSite.canEdit" class="mb-3" course-action-verb="site is updated" />
     <div v-if="feedFetched && !displayError">
       <Header1 class="mb-1 mt-0" :text="canvasSite.name" />
       <div class="align-center d-flex h2-container justify-space-between">
@@ -201,7 +200,6 @@
 <script setup>
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import Header1 from '@/components/utils/Header1.vue'
-import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import {mdiAlertCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
 </script>
 
