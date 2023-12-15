@@ -5,11 +5,6 @@
       <CanvasErrors :message="displayError" />
     </div>
     <div v-if="!isLoading">
-      <MaintenanceNotice
-        v-if="showMaintenanceNotice"
-        class="my-2"
-        course-action-verb="site is created"
-      />
       <div class="pl-3">
         <CreateCourseSiteHeader
           v-if="isAdmin && currentWorkflowStep !== 'processing'"
@@ -21,7 +16,6 @@
           :set-admin-acting-as="setAdminActingAs"
           :set-admin-by-section-ids="setAdminBySectionIds"
           :set-admin-mode="setAdminMode"
-          :show-maintenance-notice="showMaintenanceNotice"
           :switch-admin-term="switchAdminTerm"
         />
       </div>
@@ -75,7 +69,6 @@ import ConfirmationStep from '@/components/bcourses/create/ConfirmationStep'
 import Context from '@/mixins/Context'
 import CreateCourseSiteHeader from '@/components/bcourses/create/CreateCourseSiteHeader'
 import Header1 from '@/components/utils/Header1.vue'
-import MaintenanceNotice from '@/components/bcourses/shared/MaintenanceNotice'
 import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
 import {each, find, get, includes, map, size} from 'lodash'
@@ -88,7 +81,6 @@ export default {
     ConfirmationStep,
     CreateCourseSiteHeader,
     Header1,
-    MaintenanceNotice,
     SelectSectionsStep
   },
   mixins: [Context],
@@ -120,7 +112,6 @@ export default {
     percentComplete: undefined,
     selectedSectionsList: undefined,
     semester: undefined,
-    showMaintenanceNotice: true,
     teachingTerms: [],
     timeoutPromise: undefined
   }),
@@ -152,7 +143,6 @@ export default {
         }
         this.currentWorkflowStep = 'processing'
         this.jobStatus = 'sendingRequest'
-        this.showMaintenanceNotice = false
         this.updateSelected()
         const sectionIds = map(this.selectedSectionsList, 'id')
         if (sectionIds.length > 0) {
@@ -189,7 +179,6 @@ export default {
       this.backgroundJobId = undefined
       this.jobStatus = undefined
       this.percentComplete = undefined
-      this.showMaintenanceNotice = true
       this.selectedSectionsList = []
       this.alertScreenReader('Loading courses and sections')
 

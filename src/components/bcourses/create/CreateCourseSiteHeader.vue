@@ -174,10 +174,6 @@ export default {
       required: true,
       type: Function
     },
-    showMaintenanceNotice: {
-      required: true,
-      type: Boolean
-    },
     switchAdminTerm: {
       required: true,
       type: Function
