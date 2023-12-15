@@ -56,7 +56,7 @@
           The Welcome Email tool automatically sends a customizable message by email to all members of your course site,
           even if the site has not yet been published. For more information, visit
           <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900">
-            https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0013900
+            How to Create a Welcome Email with the bCourses Mailing List
           </OutboundLink>.
         </div>
         <div v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject" class="mt-2">
