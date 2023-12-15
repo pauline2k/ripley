@@ -1,8 +1,5 @@
 <template>
   <div>
-    <div v-if="!size(teachingTerms)" role="alert">
-      You are currently not listed as the instructor of record for any courses, so you cannot create a course site in bCourses.
-    </div>
     <div v-if="size(teachingTerms)">
       <v-card class="mt-2 pa-5" elevation="3" rounded="lg">
         <v-tabs
@@ -175,8 +172,9 @@ export default {
       type: Array
     },
     currentSemester: {
-      required: true,
-      type: String
+      default: undefined,
+      required: false,
+      type: String,
     },
     selectedSectionsList: {
       required: true,

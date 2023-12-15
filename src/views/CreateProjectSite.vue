@@ -2,7 +2,13 @@
   <div v-if="!isLoading" class="mx-10 my-5">
     <Header1 text="Create a Project Site" />
     <div v-if="!isLoading">
-      <CanvasErrors v-if="error" :message="error" />
+      <v-alert
+        v-if="error"
+        density="compact"
+        role="alert"
+        :text="error"
+        type="warning"
+      />
       <div class="align-center d-flex justify-center pb-8 pt-4">
         <div class="pr-3">
           <label
@@ -61,7 +67,6 @@
 </template>
 
 <script>
-import CanvasErrors from '@/components/bcourses/CanvasErrors'
 import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1.vue'
 import {createProjectSite} from '@/api/canvas-site'
@@ -70,7 +75,7 @@ import {trim} from 'lodash'
 
 export default {
   name: 'CreateProjectSite',
-  components: {CanvasErrors, Header1},
+  components: {Header1},
   mixins: [Context],
   data: () => ({
     isCreating: undefined,
