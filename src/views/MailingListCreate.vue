@@ -80,7 +80,7 @@
                         required
                         variant="outlined"
                         @focus="hasInvalidCharacters = false; debouncedValidateName()"
-                        @update:modelValue="hasInvalidCharacters = false; debouncedValidateName()"
+                        @update:model-value="hasInvalidCharacters = false; debouncedValidateName()"
                         @keydown.enter="create"
                       />
                       <div v-if="mailingListName && hasInvalidCharacters" aria-live="assertive" class="validation-messages">

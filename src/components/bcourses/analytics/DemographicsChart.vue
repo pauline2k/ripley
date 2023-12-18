@@ -137,6 +137,10 @@ export default {
     gradeDistribution: {
       required: true,
       type: Object
+    },
+    isDemoMode: {
+      required: false,
+      type: Boolean
     }
   },
   data: () => ({
@@ -170,6 +174,11 @@ export default {
     selectedDemographic: null,
     showTable: false
   }),
+  watch: {
+    isDemoMode() {
+      this.setTooltipFormatter()
+    }
+  },
   created() {
     this.chartSettings = cloneDeep(this.chartDefaults)
     this.chartSettings.chart.type = 'line'
@@ -177,23 +186,12 @@ export default {
     this.chartSettings.legend.symbolHeight = 3
     this.chartSettings.plotOptions.series.lineWidth = 3
     this.chartSettings.title.text = 'Overall Class Grade Average by Semester'
-    const courseName = this.courseName
-    this.chartSettings.tooltip.formatter = function () {
-      const header = `<div id="grade-dist-demo-tooltip-term" class="font-weight-bold font-size-15">${this.x}</div>
-          <div id="grade-dist-demo-tooltip-course" class="font-size-13 text-grey-darken-1">${courseName}</div>
-          <hr aria-hidden="true" class="mt-1 grade-dist-tooltip-hr" />`
-      return (this.points || []).reduce((tooltipText, point, index) => {
-        return`${tooltipText}<div id="grade-dist-demo-tooltip-series-${index}" class="font-size-13 mt-1">
-          <span aria-hidden="true" class="font-size-16" style="color:${point.color}">\u25AC</span>
-          ${point.series.name}: <span class="font-weight-bold">${point.y}</span>
-        </div>`
-      }, header)
-    }
     this.chartSettings.yAxis.labels.format = '{value:.1f}'
     this.chartSettings.yAxis.max = 4
     this.chartSettings.yAxis.min = 0
     this.chartSettings.yAxis.tickInterval = 1
     this.collectDemographicOptions()
+    this.setTooltipFormatter()
     this.loadPrimarySeries()
   },
   methods: {
@@ -264,6 +262,21 @@ export default {
         this.chartSettings.series[1] = secondarySeries
       } else if (this.chartSettings.series.length > 1) {
         this.chartSettings.series.pop()
+      }
+    },
+    setTooltipFormatter() {
+      const courseName = this.courseName
+      const isDemoMode = this.isDemoMode
+      this.chartSettings.tooltip.formatter = function () {
+        const header = `<div id="grade-dist-demo-tooltip-term" class="font-weight-bold font-size-15">${this.x}</div>
+            <div id="grade-dist-demo-tooltip-course" class="font-size-13 text-grey-darken-1 ${isDemoMode ? 'demo-mode-blur' : ''}">${courseName}</div>
+            <hr aria-hidden="true" class="mt-1 grade-dist-tooltip-hr" />`
+        return (this.points || []).reduce((tooltipText, point, index) => {
+          return`${tooltipText}<div id="grade-dist-demo-tooltip-series-${index}" class="font-size-13 mt-1">
+            <span aria-hidden="true" class="font-size-16" style="color:${point.color}">\u25AC</span>
+            ${point.series.name}: <span class="font-weight-bold">${point.y}</span>
+          </div>`
+        }, header)
       }
     },
     shortTermName(termName) {

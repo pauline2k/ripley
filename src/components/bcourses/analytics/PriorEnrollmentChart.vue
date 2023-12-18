@@ -60,7 +60,10 @@
           >
             <div class="d-flex">
               <v-icon class="canvas-notice-icon mr-2" :icon="mdiAlert" />
-              No {{ courseName }} {{ get(selectedTerm, 'name') }} students were previously enrolled in {{ selectedCourse }}.
+              <span>
+                No <span :class="{'demo-mode-blur': isDemoMode}">{{ courseName }}</span> {{ get(selectedTerm, 'name') }}
+                students were previously enrolled in {{ selectedCourse }}.
+              </span>
             </div>
           </div>
         </div>
@@ -121,6 +124,7 @@
                 <template v-for="(series, index) in chartSettings.series" :key="index">
                   <th
                     class="font-weight-bold py-2"
+                    :class="{'demo-mode-blur': isDemoMode && index === 0}"
                     colspan="2"
                     scope="col"
                   >
@@ -219,6 +223,10 @@ export default {
       required: true,
       type: Object
     },
+    isDemoMode: {
+      required: false,
+      type: Boolean
+    },
     terms: {
       required: true,
       type: Array
@@ -253,6 +261,10 @@ export default {
         }
       }
     },
+    isDemoMode() {
+      this.setLegendLabel()
+      this.setTooltipFormatter()
+    },
     selectedCourse(newVal, oldVal) {
       if (newVal !== oldVal) {
         this.insufficientData = false
@@ -264,7 +276,8 @@ export default {
     this.chartSettings = cloneDeep(this.chartDefaults)
     this.chartSettings.chart.type = 'column'
     this.chartSettings.legend.enabled = this.selectedTerm && !isEmpty(get(this.gradeDistribution, this.selectedTerm.id))
-    this.chartSettings.legend.labelFormat = '{name} grades'
+    this.chartSettings.legend.useHTML = true
+    this.setLegendLabel()
     this.chartSettings.legend.symbolHeight = 12
     this.chartSettings.plotOptions.series.lineWidth = 0
     this.chartSettings.plotOptions.series.states = {
@@ -274,31 +287,9 @@ export default {
     }
     this.chartSettings.title.widthAdjust = -200
     this.chartSettings.tooltip.distance = 24
-    const courseName = this.courseName
-    this.chartSettings.tooltip.formatter = function () {
-      const header = `<div id="grade-dist-enroll-tooltip-grade" class="font-weight-bold font-size-15">${this.x} Grade</div>
-          <div id="grade-dist-enroll-tooltip-course" class="font-size-13 text-grey-darken-1">
-            <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${this.color}">\u25A0</span>
-            ${courseName}
-          </div>
-          <div class="font-size-13 mb-2">
-            Ratio of class: <span id="grade-dist-enroll-tooltip-series-0-value" class="font-weight-bold">${this.point.y}%</span>
-          </div>
-          <hr aria-hidden="true" class="mb-2 ${size(this.points) <= 1 ? 'd-none' : ''}" />`
-      return (this.points.slice(1) || []).reduce((tooltipText, plot, index) => {
-        return`${tooltipText}<div id="grade-dist-enroll-tooltip-series-${index + 1}" class="font-size-13 pb-2">
-          <div class="text-grey-darken-1 text-uppercase">
-            <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${plot.color}">\u25A0</span>
-            ${plot.series.name}
-          </div
-          <div>
-            Ratio of class: <span id="grade-dist-enroll-tooltip-series-${index + 1}-value" class="font-weight-bold">${plot.y}%</span>
-          </div>
-        </div>`
-      }, header)
-    }
     this.chartSettings.yAxis.labels.format = '{value}%'
     this.debouncedSearch = debounce(this.search, 300)
+    this.setTooltipFormatter()
     this.loadPrimarySeries(this.colors.primary)
     this.setChartTitle()
   },
@@ -409,9 +400,44 @@ export default {
     },
     setChartTitle() {
       if (size(this.chartSettings.series) > 1) {
-        this.chartSettings.title.text = `Relation of ${this.courseName} Students Who Have Taken ${this.selectedCourse}&mdash;${this.selectedTerm.name} to Overall Class`
+        this.chartSettings.title.useHTML = true
+        this.chartSettings.title.text = `Relation of <span ${this.isDemoMode ? 'class="demo-mode-blur"' : ''}>
+            ${this.courseName}
+          </span> Students Who Have Taken ${this.selectedCourse}&mdash;${this.selectedTerm.name} to Overall Class`
       } else {
+        this.chartSettings.title.useHTML = false
         this.chartSettings.title.text = `Overall Class Grade Distribution&mdash;${this.selectedTerm.name}`
+      }
+    },
+    setLegendLabel() {
+      this.chartSettings.legend.labelFormat = `{#if (eq index 0)}<span ${this.isDemoMode ? 'class="demo-mode-blur"' : ''}>{else}<span>{/if}
+          {name}
+        </span> grades`
+    },
+    setTooltipFormatter() {
+      const courseName = this.courseName
+      const isDemoMode = this.isDemoMode
+      this.chartSettings.tooltip.formatter = function () {
+        const header = `<div id="grade-dist-enroll-tooltip-grade" class="font-weight-bold font-size-15">${this.x} Grade</div>
+            <div id="grade-dist-enroll-tooltip-course" class="font-size-13 text-grey-darken-1">
+              <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${this.color}">\u25A0</span>
+              <span ${isDemoMode ? 'class="demo-mode-blur"' : ''}>${courseName}</span>
+            </div>
+            <div class="font-size-13 mb-2">
+              Ratio of class: <span id="grade-dist-enroll-tooltip-series-0-value" class="font-weight-bold">${this.point.y}%</span>
+            </div>
+            <hr aria-hidden="true" class="mb-2 ${size(this.points) <= 1 ? 'd-none' : ''}" />`
+        return (this.points.slice(1) || []).reduce((tooltipText, plot, index) => {
+          return`${tooltipText}<div id="grade-dist-enroll-tooltip-series-${index + 1}" class="font-size-13 pb-2">
+            <div class="text-grey-darken-1 text-uppercase">
+              <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${plot.color}">\u25A0</span>
+              ${plot.series.name}
+            </div
+            <div>
+              Ratio of class: <span id="grade-dist-enroll-tooltip-series-${index + 1}-value" class="font-weight-bold">${plot.y}%</span>
+            </div>
+          </div>`
+        }, header)
       }
     },
     size,
