@@ -1,9 +1,25 @@
 <template>
   <div class="grade-distribution pa-5">
     <div v-if="!isLoading">
-      <Header1 text="Grade Distribution" class="mb-0" />
-      <div v-if="gradeDistribution" class="course-header mb-1">
-        {{ gradeDistribution.courseName }} &mdash; {{ gradeDistribution.canvasSite.term.name }}
+      <div class="d-flex justify-space-between">
+        <Header1 text="Grade Distribution" class="mb-0" />
+        <div>
+          <v-switch
+            v-if="currentUser.isAdmin"
+            v-model="isDemoMode"
+            color="primary"
+            density="comfortable"
+            hide-details
+            label="Demo mode"
+            :ripple="false"
+          ></v-switch>
+        </div>
+      </div>
+      <div
+        v-if="gradeDistribution"
+        class="course-header mb-1"
+      >
+        <span :class="{'demo-mode-blur': isDemoMode}">{{ gradeDistribution.courseName }}</span> &mdash; {{ gradeDistribution.canvasSite.term.name }}
       </div>
       <div class="pilot-notice">
         NOTE: THIS IS AN IN-PROGRESS PILOT PROJECT
@@ -26,6 +42,7 @@
           :colors="colors"
           :course-name="gradeDistribution.courseName"
           :grade-distribution="gradeDistribution.demographics"
+          :is-demo-mode="isDemoMode"
         />
       </v-card>
       <v-card class="container mb-4" elevation="0">
@@ -34,6 +51,7 @@
           :colors="colors"
           :course-name="gradeDistribution.courseName"
           :grade-distribution="gradeDistribution.enrollments"
+          :is-demo-mode="isDemoMode"
           :terms="orderBy(gradeDistribution.terms, ['id'], ['desc'])"
         />
       </v-card>
@@ -152,10 +170,19 @@ export default {
       tertiary: '#C5E1F2'
     },
     errorMessage: undefined,
-    gradeDistribution: undefined
+    gradeDistribution: undefined,
+    isDemoMode: false
   }),
+  watch: {
+    isDemoMode(val) {
+      if (this.currentUser.isAdmin) {
+        localStorage.setItem('isDemoMode', val)
+      }
+    }
+  },
   created() {
     this.loadingStart()
+    this.isDemoMode = this.currentUser.isAdmin && localStorage.getItem('isDemoMode') === 'true'
     this.chartDefaults.series[0].color = this.colors.primary
     getGradeDistribution(this.currentUser.canvasSiteId).then(
       data => {
@@ -183,6 +210,10 @@ export default {
     color: $color-nobel;
     font-size: 17px;
     font-weight: 400;
+  }
+  .demo-mode-blur {
+    color: transparent !important;
+    text-shadow: 0 0 15px rgba(0, 0, 0, 0.7) !important;
   }
   .pilot-notice {
     color: $color-harley-davidson-orange;
