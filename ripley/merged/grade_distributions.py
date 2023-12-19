@@ -32,25 +32,6 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.util import to_percentage
 
 
-EMPTY_DEMOGRAPHIC_DISTRIBUTION = {
-    'genders': {},
-    'internationalStatus': {
-        'true': 0,
-        'false': 0,
-    },
-    'transferStatus': {
-        'true': 0,
-        'false': 0,
-    },
-    'underrepresentedMinorityStatus': {
-        'true': 0,
-        'false': 0,
-    },
-    'count': 0,
-    'totalGradePoints': 0,
-}
-
-
 def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  # noqa
     demographics_distribution = {}
     grade_totals = {}
@@ -63,7 +44,22 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
         term_id = row['term_id']
         grade = row['grade']
         if grade:
-            grade_points = GRADE_POINTS.get(grade, 0)
+            grade_points = GRADE_POINTS.get(grade)
+
+            if term_id not in grade_distribution_by_term:
+                grade_distribution_by_term[term_id] = {
+                    'count': 0,
+                }
+            if grade not in grade_distribution_by_term[term_id]:
+                grade_distribution_by_term[term_id][grade] = {
+                    'count': 0,
+                    'courseName': row['sis_course_name'],
+                }
+            grade_distribution_by_term[term_id][grade]['count'] += 1
+            grade_distribution_by_term[term_id]['count'] += 1
+
+            if grade_points is None:
+                continue
             if term_id not in demographics_distribution:
                 demographics_distribution[term_id] = deepcopy(EMPTY_DEMOGRAPHIC_DISTRIBUTION)
                 grade_totals[term_id] = deepcopy(EMPTY_DEMOGRAPHIC_DISTRIBUTION)
@@ -93,18 +89,6 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
                 grade_totals[term_id][distribution_key][value] += 1
 
             _count_string_value(_simplify_gender(row['gender']), 'genders')
-
-            if term_id not in grade_distribution_by_term:
-                grade_distribution_by_term[term_id] = {
-                    'count': 0,
-                }
-            if grade not in grade_distribution_by_term[term_id]:
-                grade_distribution_by_term[term_id][grade] = {
-                    'count': 0,
-                    'courseName': row['sis_course_name'],
-                }
-            grade_distribution_by_term[term_id][grade]['count'] += 1
-            grade_distribution_by_term[term_id]['count'] += 1
 
     sorted_grade_distribution_by_term = {}
     for term_id, term_distribution in grade_distribution_by_term.items():
@@ -207,6 +191,25 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, prior_co
     return sorted_distributions
 
 
+EMPTY_DEMOGRAPHIC_DISTRIBUTION = {
+    'genders': {},
+    'internationalStatus': {
+        'true': 0,
+        'false': 0,
+    },
+    'transferStatus': {
+        'true': 0,
+        'false': 0,
+    },
+    'underrepresentedMinorityStatus': {
+        'true': 0,
+        'false': 0,
+    },
+    'count': 0,
+    'totalGradePoints': 0,
+}
+
+
 GRADE_ORDERING = ('A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'P', 'NP', 'I')
 
 
@@ -225,8 +228,8 @@ GRADE_POINTS = {
     'D': 1,
     'D-': .7,
     'F': 0,
-    'P': 0,
-    'NP': 0,
+    'P': None,
+    'NP': None,
     'I': 0,
 }
 

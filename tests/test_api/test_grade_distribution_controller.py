@@ -96,8 +96,7 @@ class TestGetGradeDistribution:
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
             assert len(response['demographics']) == 2
             assert response['demographics'][0]['genders'] == {
-                'female': {'averageGradePoints': 1.675, 'count': 4},
-                'male': {'averageGradePoints': 0.0, 'count': 2},
+                'female': {'averageGradePoints': 2.2333333333333334, 'count': 3},
             }
             assert response['enrollments']['2225'][0] == {
                 'count': 1,
@@ -144,8 +143,7 @@ class TestGetGradeDistribution:
             assert response['canvasSite']['courseCode'] == 'ASTRON 218'
             assert len(response['demographics']) == 2
             assert response['demographics'][0]['genders'] == {
-                'female': {'averageGradePoints': 1.675, 'count': 4},
-                'male': {'averageGradePoints': 0.0, 'count': 2},
+                'female': {'averageGradePoints': 2.2333333333333334, 'count': 3},
             }
             assert response['enrollments']['2228'][0] == {
                 'classSize': 91,
