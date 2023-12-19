@@ -96,7 +96,7 @@
     </form>
     <v-alert
       v-if="!currentUser.isAdmin"
-      class="ma-2"
+      class="font-weight-medium ma-2"
       density="compact"
       role="alert"
       type="warning"
