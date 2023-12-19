@@ -15,46 +15,49 @@
           ></v-switch>
         </div>
       </div>
-      <div
-        v-if="gradeDistribution"
-        class="course-header mb-1"
-      >
-        <span :class="{'demo-mode-blur': isDemoMode}">{{ gradeDistribution.courseName }}</span> &mdash; {{ gradeDistribution.canvasSite.term.name }}
-      </div>
-      <div class="pilot-notice">
-        NOTE: THIS IS AN IN-PROGRESS PILOT PROJECT
-      </div>
-      <p class="mb-5">
-        The Grade Distribution dashboard is an informational tool to assist instructors in assessing student performance
-        based on existing bCourses class grades and historical trends. Only you can view this information developed
-        specifically for your class. Please use the <a id="newt-feedback-link" :href="config.newtFeedbackFormUrl" target="_blank">feedback form</a>
-        to ask questions, submit feedback, or suggest additional methods of displaying grade reporting.
-      </p>
       <v-alert
         v-if="errorMessage"
+        class="font-weight-medium my-3"
         role="alert"
         :text="errorMessage"
         type="warning"
       />
-      <v-card class="container mb-4" elevation="0">
-        <DemographicsChart
-          :chart-defaults="chartDefaults"
-          :colors="colors"
-          :course-name="gradeDistribution.courseName"
-          :grade-distribution="gradeDistribution.demographics"
-          :is-demo-mode="isDemoMode"
-        />
-      </v-card>
-      <v-card class="container mb-4" elevation="0">
-        <PriorEnrollmentChart
-          :chart-defaults="chartDefaults"
-          :colors="colors"
-          :course-name="gradeDistribution.courseName"
-          :grade-distribution="gradeDistribution.enrollments"
-          :is-demo-mode="isDemoMode"
-          :terms="orderBy(gradeDistribution.terms, ['id'], ['desc'])"
-        />
-      </v-card>
+      <div v-if="gradeDistribution">
+        <div
+          v-if="gradeDistribution"
+          class="course-header mb-1"
+        >
+          <span :class="{'demo-mode-blur': isDemoMode}">{{ gradeDistribution.courseName }}</span> &mdash; {{ gradeDistribution.canvasSite.term.name }}
+        </div>
+        <div class="pilot-notice">
+          NOTE: THIS IS AN IN-PROGRESS PILOT PROJECT
+        </div>
+        <p class="mb-5">
+          The Grade Distribution dashboard is an informational tool to assist instructors in assessing student performance
+          based on existing bCourses class grades and historical trends. Only you can view this information developed
+          specifically for your class. Please use the <a id="newt-feedback-link" :href="config.newtFeedbackFormUrl" target="_blank">feedback form</a>
+          to ask questions, submit feedback, or suggest additional methods of displaying grade reporting.
+        </p>
+        <v-card class="container mb-4" elevation="0">
+          <DemographicsChart
+            :chart-defaults="chartDefaults"
+            :colors="colors"
+            :course-name="gradeDistribution.courseName"
+            :grade-distribution="gradeDistribution.demographics"
+            :is-demo-mode="isDemoMode"
+          />
+        </v-card>
+        <v-card class="container mb-4" elevation="0">
+          <PriorEnrollmentChart
+            :chart-defaults="chartDefaults"
+            :colors="colors"
+            :course-name="gradeDistribution.courseName"
+            :grade-distribution="gradeDistribution.enrollments"
+            :is-demo-mode="isDemoMode"
+            :terms="orderBy(gradeDistribution.terms, ['id'], ['desc'])"
+          />
+        </v-card>
+      </div>
     </div>
   </div>
 </template>
