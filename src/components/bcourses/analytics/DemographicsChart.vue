@@ -1,9 +1,9 @@
 <template>
   <div class="grade-distribution-demographics pa-5">
-    <h2 id="grade-distribution-demographics-header">Grade Point Average by Demographics</h2>
+    <h2 id="grade-distribution-demographics-header">Grade Average by Demographics</h2>
     <div>
-      The grade point average (GPA) chart displays the available GPA at the end of the current
-      and previous semesters. Select a demographic to compare trending GPA results.
+      The grade average chart displays the class average grade point equivalent at the end of the current
+      and prior semesters. Select a demographic to compare average grade point trends.
     </div>
     <select
       id="grade-distribution-demographics-select"
@@ -50,21 +50,21 @@
             <thead class="bg-grey-lighten-4">
               <tr>
                 <th class="font-weight-bold pl-4 py-2" scope="col">Semester</th>
-                <th class="font-weight-bold py-2" scope="col">Overall Class Grade Average</th>
-                <th class="font-weight-bold py-2" scope="col">Overall Class Count</th>
+                <th class="font-weight-bold py-2" scope="col">Class Grade Average</th>
+                <th class="font-weight-bold py-2" scope="col">Class Grade Count</th>
                 <th
                   v-if="size(chartSettings.series) > 1"
                   class="font-weight-bold py-2"
                   scope="col"
                 >
-                  Average {{ chartSettings.series[1].name }}
+                  {{ selectedDemographicLabel }} Grade Average
                 </th>
                 <th
                   v-if="size(chartSettings.series) > 1"
                   class="font-weight-bold py-2"
                   scope="col"
                 >
-                  Count of {{ chartSettings.series[1].name }}
+                  {{ selectedDemographicLabel }} Grade Count
                 </th>
               </tr>
             </thead>
@@ -174,6 +174,12 @@ export default {
     selectedDemographic: null,
     showTable: false
   }),
+  computed: {
+    selectedDemographicLabel() {
+      const group = get(this.selectedDemographic, 'group')
+      return `${get(this.demographicOptions, group)['label']}`
+    }
+  },
   watch: {
     isDemoMode() {
       this.setTooltipFormatter()
@@ -185,7 +191,7 @@ export default {
     this.chartSettings.legend.squareSymbol = false
     this.chartSettings.legend.symbolHeight = 3
     this.chartSettings.plotOptions.series.lineWidth = 3
-    this.chartSettings.title.text = 'Overall Class Grade Average by Semester'
+    this.chartSettings.title.text = 'Class Grade Average by Semester'
     this.chartSettings.yAxis.labels.format = '{value:.1f}'
     this.chartSettings.yAxis.max = 4
     this.chartSettings.yAxis.min = 0
@@ -247,7 +253,7 @@ export default {
           data: [],
           legendSymbol: 'rectangle',
           marker: this.getSeriesMarker(this.colors.secondary),
-          name: `${get(this.demographicOptions, group)['label']} Grades`
+          name: `${this.selectedDemographicLabel} Grades`
         }
         each(this.gradeDistribution, item => {
           const value = get(item, `${group}.${option}`) || get(item, `${group}`)

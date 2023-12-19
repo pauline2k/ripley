@@ -28,7 +28,7 @@
         The Grade Distribution dashboard is an informational tool to assist instructors in assessing student performance
         based on existing bCourses class grades and historical trends. Only you can view this information developed
         specifically for your class. Please use the <a id="newt-feedback-link" :href="config.newtFeedbackFormUrl" target="_blank">feedback form</a>
-        for any questions, feedback, or to suggest additional methods of displaying grade reporting.
+        to ask questions, submit feedback, or suggest additional methods of displaying grade reporting.
       </p>
       <v-alert
         v-if="errorMessage"
