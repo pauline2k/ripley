@@ -30,7 +30,7 @@
    * @param  {String}     callback.id         The id of the requested custom LTI tool
    */
   var getExternalToolId = function(toolType, toolName, callback) {
-    apiRequest('/api/canvas/external_tools.json', function(externalToolsHash) {
+    apiRequest('/api/canvas/external_tools', function(externalToolsHash) {
       if (externalToolsHash && externalToolsHash[toolType]) {
         return callback(externalToolsHash[toolType][toolName]);
       } else {
