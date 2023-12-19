@@ -3,9 +3,9 @@
     <div class="pl-3">
       <h2 id="grade-distribution-enrollment-header">Grade Distribution by Prior Class Enrollment</h2>
       <div>
-        The distribution chart displays available grades at the end of the current and previous semesters.
-        Search prerequisite courses to compare side-by-side final grade results of students taking this course and
-        those who have taken selected previous course enrollments.
+        The grade distribution chart displays available grades at the end of the current and prior semesters.
+        Search for a prerequisite course to compare side-by-side final grades of all students taking this course and
+        those who have taken the prerequisite.
       </div>
       <div class="d-flex justify-space-between">
         <div class="d-flex align-center">
