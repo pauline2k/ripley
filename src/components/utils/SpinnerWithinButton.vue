@@ -1,6 +1,6 @@
 <template>
   <v-progress-circular
-    class="mr-2"
+    class="margin-right"
     :color="color"
     indeterminate
     :size="size"
@@ -25,3 +25,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.margin-right {
+  margin-right: 4px;
+}
+</style>
