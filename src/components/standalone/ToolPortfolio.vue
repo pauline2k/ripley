@@ -31,29 +31,33 @@
         >
           Enter a Canvas site ID (below) to enable site tools.
         </v-alert>
-        <div v-if="currentUser.canvasSiteId" class="align-center d-flex pt-2">
+        <div v-if="currentUser.canvasSiteId" class="pl-4 pt-2">
           <a
-            :href="`${config.canvasApiUrl}/courses/${canvasSiteId}`"
+            :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}`"
             class="text-subtitle-1"
             target="_blank"
             title="Open course site in new tab"
           >
             <span class="canvas-site-name">{{ currentUser.canvasSiteName }}</span><v-icon class="ml-1" :icon="mdiOpenInNew" size="small" />
           </a>
+          <div>
+            {{ currentUser.canvasSiteCourseCode }}
+          </div>
         </div>
         <StandaloneToolsList :tools="embeddedTools" />
-        <div class="align-center d-flex pt-1">
+        <div class="align-center d-flex pl-4 py-2">
           <div class="pr-2">
             <v-text-field
               id="update-canvas-course-id"
               v-model="canvasSiteId"
               density="compact"
-              :disabled="isUpdatingCanvasSiteId || isLoading"
+              :disabled="isUpdatingCanvasSiteId"
               :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
               hide-details
               maxlength="10"
               style="width: 124px"
               variant="outlined"
+              @update:model-value="() => error = null"
               @keydown.enter="updateCanvasSiteId"
             />
           </div>
@@ -61,15 +65,18 @@
             <v-btn
               id="update-canvas-site-id-btn"
               color="primary"
-              :disabled="isUpdatingCanvasSiteId"
+              :disabled="isUpdatingCanvasSiteId || !trim(canvasSiteId) || !isCanvasSiteIdValid"
               @click="updateCanvasSiteId"
             >
               <span v-if="isUpdatingCanvasSiteId">
-                <SpinnerWithinButton /> Changing...
+                <SpinnerWithinButton /> Updating Canvas Site ID...
               </span>
               <span v-if="!isUpdatingCanvasSiteId">Change Canvas Site ID</span>
             </v-btn>
           </div>
+        </div>
+        <div v-if="error" class="font-weight-medium pl-4 pt-1 text-red">
+          {{ error }}
         </div>
       </div>
     </v-card-text>
@@ -93,7 +100,7 @@ import {
   mdiWeb
 } from '@mdi/js'
 import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
-import {isNil, sortBy, trim} from 'lodash'
+import {sortBy, trim} from 'lodash'
 import {updateUserSession} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
 import {isValidCanvasSiteId} from '@/utils'
@@ -125,14 +132,6 @@ export default {
   computed: {
     isCanvasSiteIdValid() {
       return isValidCanvasSiteId(this.canvasSiteId)
-    },
-    showError: {
-      get() {
-        return !!this.error
-      },
-      set(flag) {
-        this.error = flag ? this.error : undefined
-      }
     }
   },
   created() {
@@ -162,21 +161,20 @@ export default {
     },
     updateCanvasSiteId() {
       const canvasSiteId = trim(this.canvasSiteId) || null
-      const isValid = isNil(canvasSiteId) || Number.isInteger(canvasSiteId) || canvasSiteId.match(/^\d+$/)
-      if (isValid && this.currentUser.isAuthenticated) {
+      if (trim(canvasSiteId) && this.isCanvasSiteIdValid && this.currentUser.isAuthenticated) {
         this.isUpdatingCanvasSiteId = true
         updateUserSession(canvasSiteId).then(
           data => {
             useContextStore().setCurrentUser(data)
             this.canvasSiteId = this.currentUser.canvasSiteId
-            this.isUpdatingCanvasSiteId = false
             this.$router.go()
           },
           error => {
             this.error = error
-            this.$router.push({path: '/'})
           }
-        )
+        ).finally(() => {
+          this.isUpdatingCanvasSiteId = false
+        })
       }
     }
   }
