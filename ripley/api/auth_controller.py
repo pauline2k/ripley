@@ -28,8 +28,9 @@ from urllib.parse import urlencode
 import cas
 from flask import current_app as app, flash, redirect, request, url_for
 from flask_login import current_user, login_required, logout_user
-from ripley.api.errors import ResourceNotFoundError
+from ripley.api.errors import BadRequestError, ResourceNotFoundError
 from ripley.api.util import start_login_session
+from ripley.externals import canvas
 from ripley.lib.http import redirect_unauthorized, tolerant_jsonify
 from ripley.models.user import User
 
@@ -75,20 +76,22 @@ def update_user_session():
         canvas_site_id = params.get('canvasSiteId')
         uid = current_user.uid
         canvas_masquerading_user_id = current_user.canvas_masquerading_user_id
-        logout_user()
-        # Re-authenticate
+        canvas_site = canvas.get_course(course_id=canvas_site_id)
+        if not canvas_site:
+            raise BadRequestError(f'No Canvas site found with ID {canvas_site_id}')
         user_id = User.get_serialized_composite_key(
             canvas_site_id=canvas_site_id,
             uid=uid,
             canvas_masquerading_user_id=canvas_masquerading_user_id,
         )
         user = User(user_id)
-        if start_login_session(user) and (user.is_admin or len(user.canvas_site_user_roles)):
-            # User must be either an admin or a member of the course site.
-            return tolerant_jsonify(user.to_api_json())
-        else:
+        if user.is_authenticated and (user.is_admin or len(user.canvas_site_user_roles)):
             logout_user()
-            return redirect_unauthorized(user)
+            # Re-authenticate
+            if start_login_session(user):
+                return tolerant_jsonify(user.to_api_json())
+        else:
+            raise BadRequestError(f'Sorry, UID {uid} is unauthorized to access Canvas site {canvas_site_id}.')
     else:
         raise ResourceNotFoundError('Unknown path')
 
