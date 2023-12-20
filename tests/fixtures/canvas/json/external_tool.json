@@ -962,5 +962,29 @@
             "not_selectable": false
         },
         "status_code": 200
+    },
+    "get_external_tools_account_1": {
+        "method": "GET",
+        "endpoint": "accounts/1/external_tools",
+        "data": [
+            {
+                "id": 40897,
+                "name": "Manage Sites",
+                "description": "Create or update bCourses sites"
+            }
+        ],
+        "status_code": 200
+    },
+    "get_external_tools_account_129410": {
+        "method": "GET",
+        "endpoint": "accounts/129410/external_tools",
+        "data": [
+            {
+                "id": 90437,
+                "name": "Download E-Grades",
+                "description": "Exports Course Grades to E-Grades CSV file"
+            }
+        ],
+        "status_code": 200
     }
 }

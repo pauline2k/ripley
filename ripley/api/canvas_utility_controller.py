@@ -27,6 +27,8 @@ import re
 from flask import current_app as app, request
 from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError
+from ripley.externals import canvas
+from ripley.externals.redis import cache_dict_object, fetch_cached_dict_object
 from ripley.lib.canvas_user_utils import import_users
 from ripley.lib.http import tolerant_jsonify
 from ripley.models.user import User
@@ -34,7 +36,17 @@ from ripley.models.user import User
 
 @app.route('/api/canvas/external_tools')
 def get_external_tools():
-    return tolerant_jsonify([])
+    cache_key = 'canvas_external_tools'
+    api_json = fetch_cached_dict_object(cache_key)
+    if not api_json:
+        def _get_external_tools(account_id):
+            return {tool.name: tool.id for tool in canvas.get_external_tools('account', account_id)}
+        api_json = {
+            'globalTools': _get_external_tools(app.config['CANVAS_BERKELEY_ACCOUNT_ID']),
+            'officialCourseTools': _get_external_tools(app.config['CANVAS_COURSES_ACCOUNT_ID']),
+        }
+        cache_dict_object(cache_key, api_json, app.config['EXTERNAL_TOOLS_CACHE_EXPIRES_IN_SECONDS'])
+    return tolerant_jsonify(api_json)
 
 
 @app.route('/api/canvas/authorizations')
