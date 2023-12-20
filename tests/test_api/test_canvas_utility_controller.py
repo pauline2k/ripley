@@ -34,6 +34,20 @@ no_canvas_account_uid = '10001'
 teacher_uid = '30000'
 
 
+class TestExternalTools:
+
+    def test_external_tools(self, client, app, fake_auth):
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'external_tool': ['get_external_tools_account_1', 'get_external_tools_account_129410'],
+            }, m)
+            response = client.get('api/canvas/external_tools')
+            assert response.status_code == 200
+            api_json = response.json
+            assert 'Manage Sites' in api_json.get('globalTools', {})
+            assert 'Download E-Grades' in api_json.get('officialCourseTools', {})
+
+
 class TestSiteCreationAuthorization:
 
     def test_ripley_creation(self, client, app):
@@ -44,17 +58,6 @@ class TestSiteCreationAuthorization:
 
     def test_unknown(self, client, app):
         assert _api_can_create_site(app, client, '2122') == {'canCreateSite': False}
-
-
-def _api_can_create_site(app, client, canvas_user_id, expected_status_code=200):
-    with requests_mock.Mocker() as m:
-        register_canvas_uris(app, {
-            'account': ['get_admins', 'get_by_id'],
-            'user': ['*'],
-        }, m)
-        response = client.get(f'api/canvas/can_user_create_site?canvas_user_id={canvas_user_id}')
-        assert response.status_code == expected_status_code
-        return response.json
 
 
 class TestMyAuthorizations:
@@ -76,19 +79,8 @@ class TestMyAuthorizations:
         }
 
 
-def _api_authorizations(app, client, fake_auth, uid, expected_status_code=200):
-    with requests_mock.Mocker() as m:
-        register_canvas_uris(app, {
-            'account': ['get_admins', 'get_by_id'],
-            'user': ['*'],
-        }, m)
-        fake_auth.login(uid=uid, canvas_site_id=None)
-        response = client.get('api/canvas/authorizations')
-        assert response.status_code == expected_status_code
-        return response.json
-
-
 class TestImportUsers:
+
     def test_anonymous(self, client):
         """Denies anonymous user."""
         _api_import_users(client, expected_status_code=401)
@@ -137,6 +129,29 @@ class TestImportUsers:
                 uids='<SCRIPT type="text/javascript">var adr = \'../evil.php?cakemonster=\' + escape(document.cookie);</SCRIPT>',
                 expected_status_code=400,
             )
+
+
+def _api_authorizations(app, client, fake_auth, uid, expected_status_code=200):
+    with requests_mock.Mocker() as m:
+        register_canvas_uris(app, {
+            'account': ['get_admins', 'get_by_id'],
+            'user': ['*'],
+        }, m)
+        fake_auth.login(uid=uid, canvas_site_id=None)
+        response = client.get('api/canvas/authorizations')
+        assert response.status_code == expected_status_code
+        return response.json
+
+
+def _api_can_create_site(app, client, canvas_user_id, expected_status_code=200):
+    with requests_mock.Mocker() as m:
+        register_canvas_uris(app, {
+            'account': ['get_admins', 'get_by_id'],
+            'user': ['*'],
+        }, m)
+        response = client.get(f'api/canvas/can_user_create_site?canvas_user_id={canvas_user_id}')
+        assert response.status_code == expected_status_code
+        return response.json
 
 
 def _api_import_users(client, uids='123,345', expected_status_code=200):
