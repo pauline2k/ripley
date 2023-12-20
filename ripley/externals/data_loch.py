@@ -217,7 +217,7 @@ def get_grades_with_demographics(term_id, section_ids, instructor_uid):
             SELECT *
             FROM sis_data.edo_sections sec
             WHERE sec.sis_term_id = %(term_id)s
-            AND sec.sis_section_id = ANY(%(section_ids)s)
+            AND sec.sis_section_id = ANY(%(section_ids)s) {'AND sec.instructor_uid = %(instructor_uid)s' if instructor_uid else ''}
         )
         SELECT DISTINCT enr.sis_term_id AS term_id, sec.sis_course_name, enr.sis_section_id, enr.ldap_uid, enr.grade,
             spi.transfer, d.gender, d.minority, v.visa_type
