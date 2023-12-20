@@ -31,7 +31,7 @@ import redis
 from ripley import skip_when_pytest
 from ripley.api.errors import InternalServerError
 from rq import Connection, Queue, Worker
-from rq.job import Job, Retry
+from rq.job import Job
 
 
 redis_conn = None
@@ -74,7 +74,6 @@ def enqueue(func, args):
         job = q.enqueue(
             f=func,
             args=args,
-            retry=Retry(max=3),
             ttl=app.config['REDIS_RQ_JOB_TTL'],
         )
         return job
