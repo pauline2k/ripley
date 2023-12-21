@@ -26,7 +26,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import re
 
 from flask import current_app as app
-from ripley.externals.data_loch import get_current_term_index
+from ripley.externals.data_loch import get_current_term
+from ripley.lib.util import local_today
 
 
 class BerkeleyTerm:
@@ -40,20 +41,26 @@ class BerkeleyTerm:
 
     @classmethod
     def get_current_terms(cls):
-        index = get_current_term_index()
+        db_current_term = get_current_term()
         current_term_name = app.config['CANVAS_CURRENT_ENROLLMENT_TERM']
         future_term_name = app.config['CANVAS_FUTURE_ENROLLMENT_TERM']
 
-        if current_term_name == 'auto' and index:
-            current_term_name = index['current_term_name']
-        if future_term_name == 'auto' and index:
-            future_term_name = index['future_term_name']
+        if current_term_name == 'auto' and db_current_term:
+            current_term_name = db_current_term['term_name']
 
         terms = {
             'current': cls.from_term_name(current_term_name),
             'next': cls.from_term_name(current_term_name).next_term(),
         }
-        if future_term_name not in [terms['current'].to_english(), terms['next'].to_english()]:
+
+        # If the future term is being handled automatically, add it if and only if a Spring term is currently
+        # in progress (in which case the upcoming Summer and Fall terms will both be of interest).
+        if future_term_name == 'auto':
+            if current_term_name.startswith('Spring') and db_current_term['term_begins'] <= local_today():
+                terms['future'] = terms['next'].next_term()
+
+        # Otherwise, if we have a hardcoded future term distinct from current or next term, add it in.
+        elif future_term_name not in [terms['current'].to_english(), terms['next'].to_english()]:
             terms['future'] = cls.from_term_name(future_term_name)
 
         return terms

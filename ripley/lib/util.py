@@ -37,6 +37,10 @@ def localize_datetime(dt):
     return dt.astimezone(pytz.timezone(app.config['TIMEZONE']))
 
 
+def local_today():
+    return utc_now().astimezone(default_timezone()).date()
+
+
 def safe_str(value):
     return str(value) if value else None
 

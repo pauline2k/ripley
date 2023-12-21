@@ -30,6 +30,7 @@ from flask import current_app as app
 import psycopg2
 import psycopg2.extras
 from psycopg2.pool import ThreadedConnectionPool
+from ripley.lib import util
 
 COURSE_NAME_REGEX = r'([A-Z]+)\s([A-Z]?)(\d+)([A-Z]?)([A-Z]?)'
 SECTION_COLUMNS = f"""
@@ -95,8 +96,9 @@ def get_users(uids=None):
     return safe_execute_rds(sql)
 
 
-def get_current_term_index():
-    rows = safe_execute_rds('SELECT * FROM terms.current_term_index')
+def get_current_term():
+    params = {'today': util.local_today()}
+    rows = safe_execute_rds('SELECT * FROM terms.term_definitions WHERE term_ends >= %(today)s ORDER BY term_ends LIMIT 1', **params)
     return None if not rows or (len(rows) == 0) else rows[0]
 
 

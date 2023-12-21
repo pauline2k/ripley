@@ -23,37 +23,47 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from datetime import date
 from unittest import mock
 
 from ripley.lib.berkeley_term import BerkeleyTerm
+from tests.util import override_config
 
 
 class TestBerkeleyTerm:
 
-    def test_current_terms_spring(self):
-        current_terms = BerkeleyTerm.get_current_terms()
-        assert current_terms['current'].to_english() == 'Spring 2023'
-        assert current_terms['next'].to_english() == 'Summer 2023'
-        assert current_terms['future'].to_english() == 'Fall 2023'
+    @mock.patch('ripley.lib.util.local_today')
+    def test_current_terms_spring(self, mock_local_today, app):
+        mock_local_today.return_value = date(2023, 3, 15)
+        with override_config(app, 'CANVAS_CURRENT_ENROLLMENT_TERM', 'auto'), override_config(app, 'CANVAS_FUTURE_ENROLLMENT_TERM', 'auto'):
+            current_terms = BerkeleyTerm.get_current_terms()
+            assert current_terms['current'].to_english() == 'Spring 2023'
+            assert current_terms['next'].to_english() == 'Summer 2023'
+            assert current_terms['future'].to_english() == 'Fall 2023'
 
-    @mock.patch('ripley.lib.berkeley_term.get_current_term_index')
-    def test_current_terms_summer(self, mock_current_term_index):
-        mock_current_term_index.return_value = {
-            'current_term_name': 'Summer 2023',
-            'future_term_name': 'Fall 2023',
-        }
-        current_terms = BerkeleyTerm.get_current_terms()
-        assert current_terms['current'].to_english() == 'Summer 2023'
-        assert current_terms['next'].to_english() == 'Fall 2023'
-        assert 'future' not in current_terms
+    @mock.patch('ripley.lib.util.local_today')
+    def test_current_terms_summer(self, mock_local_today, app):
+        mock_local_today.return_value = date(2023, 6, 15)
+        with override_config(app, 'CANVAS_CURRENT_ENROLLMENT_TERM', 'auto'), override_config(app, 'CANVAS_FUTURE_ENROLLMENT_TERM', 'auto'):
+            current_terms = BerkeleyTerm.get_current_terms()
+            assert current_terms['current'].to_english() == 'Summer 2023'
+            assert current_terms['next'].to_english() == 'Fall 2023'
+            assert 'future' not in current_terms
 
-    @mock.patch('ripley.lib.berkeley_term.get_current_term_index')
-    def test_current_terms_fall(self, mock_current_term_index):
-        mock_current_term_index.return_value = {
-            'current_term_name': 'Fall 2023',
-            'future_term_name': 'Spring 2024',
-        }
-        current_terms = BerkeleyTerm.get_current_terms()
-        assert current_terms['current'].to_english() == 'Fall 2023'
-        assert current_terms['next'].to_english() == 'Spring 2024'
-        assert 'future' not in current_terms
+    @mock.patch('ripley.lib.util.local_today')
+    def test_current_terms_fall(self, mock_local_today, app):
+        mock_local_today.return_value = date(2023, 9, 15)
+        with override_config(app, 'CANVAS_CURRENT_ENROLLMENT_TERM', 'auto'), override_config(app, 'CANVAS_FUTURE_ENROLLMENT_TERM', 'auto'):
+            current_terms = BerkeleyTerm.get_current_terms()
+            assert current_terms['current'].to_english() == 'Fall 2023'
+            assert current_terms['next'].to_english() == 'Spring 2024'
+            assert 'future' not in current_terms
+
+    @mock.patch('ripley.lib.util.local_today')
+    def test_current_terms_capricorn_season(self, mock_local_today, app):
+        mock_local_today.return_value = date(2023, 12, 25)
+        with override_config(app, 'CANVAS_CURRENT_ENROLLMENT_TERM', 'auto'), override_config(app, 'CANVAS_FUTURE_ENROLLMENT_TERM', 'auto'):
+            current_terms = BerkeleyTerm.get_current_terms()
+            assert current_terms['current'].to_english() == 'Spring 2024'
+            assert current_terms['next'].to_english() == 'Summer 2024'
+            assert 'future' not in current_terms
