@@ -276,15 +276,15 @@ def get_grades_with_enrollments(term_id, course_name, prior_course_name, instruc
             ORDER BY sec.sis_term_id DESC, sec.sis_section_id
         )
         SELECT course_grades.sis_term_id, course_grades.grade, course_grades.ldap_uid,
-            MAX(CASE WHEN enr2.ldap_uid IS NULL THEN 0 ELSE 1 END) AS has_prior_enrollment
+            MAX(CASE WHEN prior_enr.ldap_uid IS NULL THEN 0 ELSE 1 END) AS has_prior_enrollment
         FROM course_grades
-        JOIN sis_data.edo_sections sec2
-            ON sec2.sis_term_id < course_grades.sis_term_id
-            AND sec2.sis_term_id >= %(earliest_term_id)s
-            AND sec2.sis_course_name = %(prior_course_name)s {'AND sec2.instructor_uid = %(instructor_uid)s' if instructor_uid else ''}
-        LEFT JOIN sis_data.edo_enrollments enr2
-            ON course_grades.ldap_uid = enr2.ldap_uid
-            AND enr2.sis_term_id = sec2.sis_term_id AND enr2.sis_section_id = sec2.sis_section_id
+        JOIN sis_data.edo_sections prior_course
+            ON prior_course.sis_term_id < course_grades.sis_term_id
+            AND prior_course.sis_term_id >= %(earliest_term_id)s
+            AND prior_course.sis_course_name = %(prior_course_name)s
+        LEFT JOIN sis_data.edo_enrollments prior_enr
+            ON course_grades.ldap_uid = prior_enr.ldap_uid
+            AND prior_enr.sis_term_id = prior_course.sis_term_id AND prior_enr.sis_section_id = prior_course.sis_section_id
         GROUP BY course_grades.sis_term_id, course_grades.grade, course_grades.ldap_uid
         ORDER BY course_grades.sis_term_id, course_grades.grade, course_grades.ldap_uid;"""
     return safe_execute_rds(sql, **params)
