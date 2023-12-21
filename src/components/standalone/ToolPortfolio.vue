@@ -18,10 +18,10 @@
       </div>
     </v-card-title>
     <v-card-text :class="{'ml-2': !config.devAuthEnabled}">
-      <h2 v-if="config.devAuthEnabled" class="mb-0">Account Tools</h2>
+      <h3 v-if="config.devAuthEnabled" class="mb-0">Account Tools</h3>
       <StandaloneToolsList :tools="adminTools" />
       <div v-if="config.devAuthEnabled && currentUser.canAccessStandaloneView" class="mt-3">
-        <h2 class="mb-0">Canvas Site Tools</h2>
+        <h3 class="mb-0">Canvas Site Tools</h3>
         <v-alert
           v-if="!currentUser.canvasSiteId"
           class="mt-2"

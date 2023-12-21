@@ -11,7 +11,7 @@
                 size="large"
               />
             </div>
-            <div>Job History</div>
+            <h2>Job History</h2>
           </div>
         </h2>
         <v-spacer />
@@ -42,13 +42,7 @@
           </div>
         </template>
         <template #item.jobKey="{item}">
-          <div
-            class="font-size-15 py-2"
-            :class="{
-              'text-grey-darken-2': item.finishedAt,
-              'font-weight-bold text-grey-darken-1': !item.finishedAt
-            }"
-          >
+          <div class="font-size-15 py-2 text-grey-darken-2">
             {{ item.jobKey }}
           </div>
         </template>
@@ -71,12 +65,7 @@
           </div>
         </template>
         <template #item.startedAt="{item}">
-          <div
-            class="py-2"
-            :class="{
-              'font-weight-bold text-grey-darken-1': !item.finishedAt
-            }"
-          >
+          <div class="py-2">
             {{ $moment(item.startedAt).format(dateFormat) }}
           </div>
         </template>

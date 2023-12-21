@@ -2,6 +2,14 @@
   <div v-if="!isLoading" class="px-5 pb-5">
     <div>
       <Header1 text="Create Mailing List" />
+      <v-alert
+        v-if="!error && !success"
+        class="mb-3"
+        :closable="true"
+        density="compact"
+        text="No Mailing List has been created for this site."
+        type="info"
+      />
       <div id="mailing-lists-alert" aria-live="polite" role="alert">
         <v-alert
           v-if="success"
