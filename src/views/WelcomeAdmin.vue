@@ -245,7 +245,7 @@ import {mdiDesktopClassic, mdiPlay, mdiPlaylistEdit} from '@mdi/js'
 
 <script>
 import Context from '@/mixins/Context'
-import {cloneDeep, each, filter, find, get, isNil} from 'lodash'
+import {cloneDeep, concat, each, filter, find, get, isNil, partition} from 'lodash'
 import {getJobHistory, getJobSchedule, setJobDisabled, startJob, updateJobSchedule} from '@/api/job'
 import {mdiMessageAlert, mdiStar} from '@mdi/js'
 
@@ -315,7 +315,8 @@ export default {
     refresh(quietly) {
       this.refreshing = true
       return getJobHistory().then(data => {
-        this.jobHistory = data
+        const partitions = partition(data, j => j.finishedAt)
+        this.jobHistory = concat(partitions[1], partitions[0])
         if (isNil(this.showLatestJobAlert) && this.jobHistory.length > 1) {
           // Set this flag only once: when jobHistory is non-empty. The flag is set to false when user closes the alert.
           this.showLatestJobAlert = true
