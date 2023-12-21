@@ -31,6 +31,9 @@ AWS_APP_ROLE_ARN = 'arn:aws:iam::123456789012:role/test-role'
 # Base directory for the application (one level up from this config file).
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
+CANVAS_CURRENT_ENROLLMENT_TERM = 'Spring 2023'
+CANVAS_FUTURE_ENROLLMENT_TERM = 'Fall 2023'
+
 DATA_LOCH_BASIC_ATTRIBUTES_TABLE = 'basic_attributes'
 DATA_LOCH_RDS_URI = 'postgresql://ripley:ripley@localhost:5432/ripley_loch_test'
 
