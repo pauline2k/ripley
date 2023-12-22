@@ -26,33 +26,28 @@ from collections import OrderedDict
 import json
 
 from flask import current_app as app
+from flask_login import current_user
 from ripley import __version__ as version
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import get_eb_environment
 
-PUBLIC_CONFIGS = [
-    'CANVAS_API_URL',
-    'DEV_AUTH_ENABLED',
-    'EMAIL_REDIRECT_WHEN_TESTING',
-    'EMAIL_RIPLEY_OPERATIONS',
-    'EMAIL_RIPLEY_SUPPORT',
-    'EMAIL_TEST_MODE',
-    'MAILING_LISTS_TEST_MODE',
-    'NEWT_FEEDBACK_FORM_URL',
-    'RIPLEY_ENV',
-    'TIMEZONE',
-]
-
 
 @app.route('/api/config')
 def app_config():
-    def _to_api_key(key):
-        chunks = key.split('_')
-        return f"{chunks[0].lower()}{''.join(chunk.title() for chunk in chunks[1:])}"
-
+    configs_for_feed = [
+        'CANVAS_API_URL',
+        'DEV_AUTH_ENABLED',
+        'EMAIL_RIPLEY_SUPPORT',
+        'RIPLEY_ENV',
+        'TIMEZONE',
+    ]
+    if current_user.is_authenticated:
+        configs_for_feed = configs_for_feed + [
+            'NEWT_FEEDBACK_FORM_URL',
+        ]
     api_json = {
-        **dict((_to_api_key(key), app.config[key]) for key in PUBLIC_CONFIGS),
+        **dict((_to_camel_case(key), app.config[key]) for key in configs_for_feed),
         **_get_app_version(),
         **_get_current_terms(),
         **{
@@ -74,6 +69,11 @@ def load_json(relative_path):
         return json.load(file)
     except (FileNotFoundError, KeyError, TypeError):
         return None
+
+
+def _to_camel_case(key):
+    chunks = key.split('_')
+    return f"{chunks[0].lower()}{''.join(chunk.title() for chunk in chunks[1:])}"
 
 
 def _get_app_version():
