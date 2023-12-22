@@ -1,7 +1,17 @@
 <template>
   <div v-if="!isLoading" class="pt-3 px-6">
-    <div v-if="feedFetched && !displayError">
+    <div v-if="feedFetched">
       <Header1 class="mb-1 mt-0" :text="canvasSite.name" />
+      <v-alert
+        v-if="error"
+        id="error-alert"
+        class="mb-3"
+        density="compact"
+        role="alert"
+        type="warning"
+      >
+        {{ error }}
+      </v-alert>
       <h2 class="pt-1">Canvas Site</h2>
       <div class="pl-2 pb-4 pt-1">
         <div class="text-subtitle-2">
@@ -18,53 +28,166 @@
           </div>
         </div>
       </div>
-      <div class="align-center d-flex h2-container justify-space-between">
-        <div class="pr-2">
-          <h2>Official Sections</h2>
+      <h2 class="mb-2">Official Sections</h2>
+      <div v-if="currentWorkflowStep === 'preview'">
+        <v-alert
+          id="page-course-official-sections-job-status-notice"
+          v-model="showAlert"
+          class="my-2"
+          closable
+          close-label="Hide notice"
+          density="compact"
+          role="alert"
+          :type="jobStatus !== 'finished' ? 'error' : 'success'"
+          variant="tonal"
+        >
+          <div class="font-size-16">{{ jobStatusMessage }}</div>
+        </v-alert>
+        <CourseSectionsTable
+          id="template-sections-table-preview"
+          mode="preview"
+          :row-class-logic="rowClassLogic"
+          :row-display-logic="rowDisplayLogic"
+          :sections="existingCourseSections"
+          table-caption="Official sections in this course. To edit, use the Edit Sections button above."
+        />
+      </div>
+      <div v-if="currentWorkflowStep === 'staging'">
+        <h3 class="sr-only">Managing Sections</h3>
+        <CourseSectionsTable
+          mode="currentStaging"
+          :row-class-logic="rowClassLogic"
+          :row-display-logic="rowDisplayLogic"
+          :sections="allSections"
+          :stage-delete-action="stageDelete"
+          :stage-update-action="stageUpdate"
+          table-caption="Official sections in this course. Use the buttons in the Actions column to make changes."
+          :unstage-action="unstage"
+        />
+        <div v-if="totalStagedCount > 12" class="py-2">
+          <v-btn
+            id="official-sections-secondary-save-btn"
+            aria-label="Apply pending modifications to this course site"
+            class="mr-1 text-no-wrap"
+            color="primary"
+            :disabled="totalStagedCount === 0"
+            @click="saveChanges"
+          >
+            Save Changes
+          </v-btn>
+          <v-btn
+            id="official-sections-secondary-cancel-btn"
+            aria-label="Cancel section modifications for this course site"
+            class="mx-1"
+            variant="tonal"
+            @click="cancel"
+          >
+            Cancel<span class="sr-only"> edit sections</span>
+          </v-btn>
         </div>
-        <div v-if="canvasSite.canEdit && currentWorkflowStep === 'preview'">
+        <h2 class="mb-2 mt-5">Sections Available to Add</h2>
+        <div>
+          <v-expansion-panels
+            v-if="courseSemesterClasses.length > 0"
+            v-model="availableSectionsPanel"
+            multiple
+          >
+            <v-expansion-panel
+              v-for="(course, index) in courseSemesterClasses"
+              :id="`sections-course-${course.slug}`"
+              :key="index"
+              bg-color="blue-lighten-5"
+              :value="course.slug"
+            >
+              <v-expansion-panel-title :id="`sections-course-${course.slug}-btn`">
+                <template #actions="{ expanded }">
+                  <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
+                </template>
+                <h3
+                  :id="`sections-course-${course.slug}-available-course-header`"
+                  class="sections-course-title"
+                >
+                  {{ course.courseCode }}
+                  <span v-if="course.title">&mdash; {{ course.title }}</span>
+                  <span v-if="size(course.sections)">
+                    ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
+                  </span>
+                </h3>
+              </v-expansion-panel-title>
+              <v-expansion-panel-text>
+                <div v-if="course.sections.length > 1">
+                  <v-btn
+                    :id="`course-${index}-add-all-sections-btn`"
+                    aria-label="Add all sections listed below to the course site"
+                    :color="allSectionsAdded(course) ? '' : 'primary'"
+                    :disabled="allSectionsAdded(course)"
+                    @click="addAllSections(course)"
+                  >
+                    <span v-if="allSectionsAdded(course)">All Added</span>
+                    <span v-else>Add All</span>
+                  </v-btn>
+                </div>
+                <v-row no-gutters>
+                  <v-col md="12">
+                    <CourseSectionsTable
+                      :id="`template-sections-table-availableStaging-${index}`"
+                      class="mb-1 mt-3"
+                      mode="availableStaging"
+                      :row-class-logic="rowClassLogic"
+                      :row-display-logic="rowDisplayLogic"
+                      :sections="course.sections"
+                      :stage-add-action="stageAdd"
+                      :table-caption="availableSectionsTableCaption(course)"
+                      :unstage-action="unstage"
+                    />
+                  </v-col>
+                </v-row>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+          </v-expansion-panels>
+        </div>
+      </div>
+      <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
+        <h3 id="updating-sections-header" class="mt-6 text-no-wrap">
+          Updating Official Sections in Course Site
+        </h3>
+        <div class="py-3">
+          <div v-if="jobStatus === 'sendingRequest'">
+            Sending request...
+          </div>
+          <div v-if="'queued' === jobStatus">
+            Request sent. Awaiting processing...
+          </div>
+          <div v-if="'started' === jobStatus">
+            Request received. Updating sections...
+          </div>
+          <div v-if="'finished' === jobStatus">
+            Finishing up...
+          </div>
+        </div>
+        <v-progress-linear
+          color="primary"
+          height="10"
+          indeterminate
+        />
+      </div>
+      <div v-if="canvasSite.canEdit" class="float-right my-5">
+        <div v-if="currentWorkflowStep === 'preview'">
           <v-btn
             id="official-sections-edit-btn"
-            class="text-no-wrap"
+            class="float-right text-no-wrap"
             color="primary"
             @click="changeWorkflowStep('staging')"
           >
             Edit Sections
           </v-btn>
         </div>
-      </div>
-      <div class="mb-8">
-        <div v-if="currentWorkflowStep === 'preview'">
-          <v-alert
-            id="page-course-official-sections-job-status-notice"
-            v-model="showAlert"
-            class="my-2"
-            closable
-            close-label="Hide notice"
-            density="compact"
-            role="alert"
-            :type="jobStatus !== 'finished' ? 'error' : 'success'"
-            variant="tonal"
-          >
-            <div class="font-size-16">{{ jobStatusMessage }}</div>
-          </v-alert>
-          <CourseSectionsTable
-            id="template-sections-table-preview"
-            class="mb-3 mt-2"
-            mode="preview"
-            :row-class-logic="rowClassLogic"
-            :row-display-logic="rowDisplayLogic"
-            :sections="existingCourseSections"
-            table-caption="Official sections in this course. To edit, use the Edit Sections button above."
-          />
-        </div>
         <div v-if="currentWorkflowStep === 'staging'">
-          <h3 class="sr-only">Managing Sections</h3>
-          <div class="float-right pb-5">
+          <div>
             <v-btn
               id="official-sections-save-btn"
               aria-label="Apply pending modifications to this course site"
-              class="mr-1 text-no-wrap"
+              class="mr-2 text-no-wrap"
               color="primary"
               :disabled="totalStagedCount === 0"
               @click="saveChanges"
@@ -74,140 +197,13 @@
             <v-btn
               id="official-sections-cancel-btn"
               aria-label="Cancel section modifications for this course site"
-              class="mx-1"
               variant="tonal"
               @click="cancel"
             >
               Cancel<span class="sr-only"> edit sections</span>
             </v-btn>
           </div>
-          <CourseSectionsTable
-            class="mb-1"
-            mode="currentStaging"
-            :row-class-logic="rowClassLogic"
-            :row-display-logic="rowDisplayLogic"
-            :sections="allSections"
-            :stage-delete-action="stageDelete"
-            :stage-update-action="stageUpdate"
-            table-caption="Official sections in this course. Use the buttons in the Actions column to make changes."
-            :unstage-action="unstage"
-          />
-          <div v-if="totalStagedCount > 12" class="py-2">
-            <v-btn
-              id="official-sections-secondary-save-btn"
-              aria-label="Apply pending modifications to this course site"
-              class="mr-1 text-no-wrap"
-              color="primary"
-              :disabled="totalStagedCount === 0"
-              @click="saveChanges"
-            >
-              Save Changes
-            </v-btn>
-            <v-btn
-              id="official-sections-secondary-cancel-btn"
-              aria-label="Cancel section modifications for this course site"
-              class="mx-1"
-              variant="tonal"
-              @click="cancel"
-            >
-              Cancel<span class="sr-only"> edit sections</span>
-            </v-btn>
-          </div>
-          <div>
-            <div class="mb-3 mt-8">
-              <h2>Sections Available to Add</h2>
-            </div>
-            <v-expansion-panels
-              v-if="courseSemesterClasses.length > 0"
-              v-model="availableSectionsPanel"
-              multiple
-            >
-              <v-expansion-panel
-                v-for="(course, index) in courseSemesterClasses"
-                :id="`sections-course-${course.slug}`"
-                :key="index"
-                bg-color="blue-lighten-5"
-                :value="course.slug"
-              >
-                <v-expansion-panel-title :id="`sections-course-${course.slug}-btn`">
-                  <template #actions="{ expanded }">
-                    <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
-                  </template>
-                  <h3
-                    :id="`sections-course-${course.slug}-available-course-header`"
-                    class="sections-course-title"
-                  >
-                    {{ course.courseCode }}
-                    <span v-if="course.title">&mdash; {{ course.title }}</span>
-                    <span v-if="size(course.sections)">
-                      ({{ pluralize('section', course.sections.length, {0: 'No', 1: 'One'}) }})
-                    </span>
-                  </h3>
-                </v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <div v-if="course.sections.length > 1">
-                    <v-btn
-                      :id="`course-${index}-add-all-sections-btn`"
-                      aria-label="Add all sections listed below to the course site"
-                      :color="allSectionsAdded(course) ? '' : 'primary'"
-                      :disabled="allSectionsAdded(course)"
-                      @click="addAllSections(course)"
-                    >
-                      <span v-if="allSectionsAdded(course)">All Added</span>
-                      <span v-else>Add All</span>
-                    </v-btn>
-                  </div>
-                  <v-row no-gutters>
-                    <v-col md="12">
-                      <CourseSectionsTable
-                        :id="`template-sections-table-availableStaging-${index}`"
-                        class="mb-1 mt-3"
-                        mode="availableStaging"
-                        :row-class-logic="rowClassLogic"
-                        :row-display-logic="rowDisplayLogic"
-                        :sections="course.sections"
-                        :stage-add-action="stageAdd"
-                        :table-caption="availableSectionsTableCaption(course)"
-                        :unstage-action="unstage"
-                      />
-                    </v-col>
-                  </v-row>
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
-          </div>
         </div>
-        <div v-if="currentWorkflowStep === 'processing'" aria-live="polite">
-          <h3 id="updating-sections-header" class="mt-6 text-no-wrap">
-            Updating Official Sections in Course Site
-          </h3>
-          <div class="py-3">
-            <div v-if="jobStatus === 'sendingRequest'">
-              Sending request...
-            </div>
-            <div v-if="'queued' === jobStatus">
-              Request sent. Awaiting processing...
-            </div>
-            <div v-if="'started' === jobStatus">
-              Request received. Updating sections...
-            </div>
-            <div v-if="'finished' === jobStatus">
-              Finishing up...
-            </div>
-          </div>
-          <v-progress-linear
-            color="primary"
-            height="10"
-            indeterminate
-          />
-        </div>
-      </div>
-    </div>
-    <div v-if="displayError" role="alert">
-      <v-icon :icon="mdiAlertCircleOutline" color="red" />
-      <div>
-        <Header1 class="notice-text-header" text="Error" />
-        <p>{{ displayError }}</p>
       </div>
     </div>
   </div>
@@ -217,7 +213,7 @@
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import Header1 from '@/components/utils/Header1'
 import OutboundLink from '@/components/utils/OutboundLink'
-import {mdiAlertCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
+import {mdiMenuDown, mdiMenuRight} from '@mdi/js'
 </script>
 
 <script>
@@ -237,7 +233,7 @@ export default {
     canvasSiteId: undefined,
     courseSemesterClasses: [],
     currentWorkflowStep: null,
-    displayError: null,
+    error: null,
     existingCourseSections: [],
     feedFetched: false,
     isAdmin: false,
@@ -297,7 +293,6 @@ export default {
     changeWorkflowStep(step) {
       if (step === 'staging') {
         this.alertScreenReader('Edit sections form loaded')
-        putFocusNextTick('official-sections-cancel-btn')
         this.jobStatus = null
         this.jobStatusMessage = ''
       } else if (step === 'preview') {
@@ -322,7 +317,7 @@ export default {
           this.feedFetched = true
           this.changeWorkflowStep('preview')
         } else {
-          this.displayError = 'Failed to retrieve section data.'
+          this.error = 'Failed to retrieve section data.'
         }
       })
     },
@@ -428,7 +423,7 @@ export default {
         section.stagedState = 'add'
         this.alertScreenReader(`Linked ${this.sectionString(section)} to the course site.`)
       } else {
-        this.displayError = `Cannot link ${this.sectionString(section)} because it is already linked to the course site.`
+        this.error = `Cannot link ${this.sectionString(section)} because it is already linked to the course site.`
       }
       return this.totalStagedCount
     },
@@ -438,7 +433,7 @@ export default {
         section.stagedState = 'delete'
         this.alertScreenReader(`Unlinked ${this.sectionString(section)} from the course site.`)
       } else {
-        this.displayError = `Cannot unlink ${this.sectionString(section)} because it is not linked to the course site.`
+        this.error = `Cannot unlink ${this.sectionString(section)} because it is not linked to the course site.`
       }
       return this.totalStagedCount
     },
@@ -448,7 +443,7 @@ export default {
         section.stagedState = 'update'
         this.alertScreenReader(`Updated ${this.sectionString(section)}.`)
       } else {
-        this.displayError = `Cannot update ${this.sectionString(section)} because it is not linked to the course site.`
+        this.error = `Cannot update ${this.sectionString(section)} because it is not linked to the course site.`
       }
     },
     trackSectionUpdateJob() {
@@ -505,9 +500,6 @@ export default {
 </script>
 
 <style scoped lang="scss">
-.h2-container {
-  min-height: 36px;
-}
 .sections-course-title {
   font-size: 18px !important;
   font-weight: 400 !important;

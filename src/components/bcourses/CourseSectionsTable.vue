@@ -31,8 +31,8 @@
           >
             Action
           </th>
-          <th class="td-course-code" scope="col">Course Code</th>
-          <th class="td-section-name" scope="col">Section Name</th>
+          <th class="td-course-code" scope="col">Course</th>
+          <th class="td-section-name" scope="col">Section</th>
           <th class="td-section-id text-no-wrap" scope="col">Section ID</th>
           <th :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}" scope="col">
             Schedule
@@ -242,9 +242,16 @@
                   size="medium"
                 />
               </div>
-              <div>
+              <div class="align-center d-flex">
                 bCourses site
-                <OutboundLink :id="`${id}-${section.id}-warning-link`" :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`">{{ section.canvasSites[0].name }}</OutboundLink>
+                <OutboundLink
+                  :id="`${id}-${section.id}-warning-link`"
+                  class="mx-1"
+                  :hide-icon="true"
+                  :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`"
+                >
+                  {{ section.canvasSites[0].name }}
+                </OutboundLink>
                 includes this section.
               </div>
             </div>
