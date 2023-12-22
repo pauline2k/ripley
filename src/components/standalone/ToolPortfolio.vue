@@ -69,9 +69,16 @@
               @click="updateCanvasSiteId"
             >
               <span v-if="isUpdatingCanvasSiteId">
-                <SpinnerWithinButton /> Updating Canvas Site ID...
+                <SpinnerWithinButton />
+                <span v-if="currentUser.canvasSiteId">Updating</span>
+                <span v-if="!currentUser.canvasSiteId">Setting</span>
+                Canvas Site ID...
               </span>
-              <span v-if="!isUpdatingCanvasSiteId">Change Canvas Site ID</span>
+              <span v-if="!isUpdatingCanvasSiteId">
+                <span v-if="currentUser.canvasSiteId">Change</span>
+                <span v-if="!currentUser.canvasSiteId">Set</span>
+                Canvas Site ID
+              </span>
             </v-btn>
           </div>
         </div>
