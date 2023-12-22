@@ -5,10 +5,21 @@
     target="_blank"
     :title="title"
   >
-    <slot />
-    <span class="sr-only print-hide"> (link opens new browser tab)</span>
+    <div class="align-center d-flex">
+      <div>
+        <slot />
+      </div>
+      <div>
+        <v-icon class="ml-1" :icon="mdiOpenInNew" size="small" />
+        <span class="sr-only print-hide"> (link opens new browser tab)</span>
+      </div>
+    </div>
   </a>
 </template>
+
+<script setup>
+import {mdiOpenInNew} from '@mdi/js'
+</script>
 
 <script>
 export default {
