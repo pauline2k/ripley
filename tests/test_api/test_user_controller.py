@@ -149,6 +149,32 @@ class TestUserProfile:
             assert user_session['SameSite'] == 'None'
 
 
+class TestNostromoCrew:
+    """Nostromo crew API."""
+
+    @classmethod
+    def _api_nostromo_crew(cls, client, expected_status_code=200):
+        response = client.get('/api/user/nostromo_crew')
+        assert response.status_code == expected_status_code
+        return response.json
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        self._api_nostromo_crew(client, expected_status_code=401)
+
+    def test_unauthorized(self, client, fake_auth):
+        """Denies unauthorized user."""
+        for uid in [student_uid, ta_uid, teacher_uid]:
+            fake_auth.login(canvas_site_id=1234567, uid=uid)
+            self._api_nostromo_crew(client, expected_status_code=401)
+
+    def test_authorized(self, client, fake_auth):
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
+        api_json = self._api_nostromo_crew(client)
+        assert len(api_json) > 1
+        assert api_json[0]['uid'] < api_json[1]['uid']
+
+
 class TestSearchUsers:
 
     def test_anonymous(self, client):

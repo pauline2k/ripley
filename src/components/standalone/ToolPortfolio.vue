@@ -40,11 +40,8 @@
           >
             <span class="canvas-site-name">{{ currentUser.canvasSiteName }}</span><v-icon class="ml-1" :icon="mdiOpenInNew" size="small" />
           </a>
-          <div>
-            {{ currentUser.canvasSiteCourseCode }}
-          </div>
         </div>
-        <StandaloneToolsList :tools="embeddedTools" />
+        <StandaloneToolsList class="pt-1" :tools="embeddedTools" />
         <div class="align-center d-flex pl-4 py-2">
           <div class="pr-2">
             <v-text-field

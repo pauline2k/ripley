@@ -72,6 +72,10 @@ class UserAuth(Base):
         return cls.query.filter_by(uid=uid).first()
 
     @classmethod
+    def get_all(cls):
+        return cls.query.order_by(cls.uid).all()
+
+    @classmethod
     def get_canvas_whitelist(cls):
         return cls.query.filter_by(is_canvas_whitelisted=True).all()
 

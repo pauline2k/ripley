@@ -227,6 +227,7 @@
           :job-history="jobHistory"
           :refreshing="refreshing"
         />
+        <NostromoCrew class="mt-6" />
       </v-col>
     </v-row>
   </v-container>
@@ -237,6 +238,7 @@ import deepSpace from '@/assets/images/deep-space-background-tile.png'
 import DisableJobToggle from '@/components/job/DisableJobToggle'
 import Header1 from '@/components/utils/Header1.vue'
 import JobHistory from '@/components/job/JobHistory'
+import NostromoCrew from '@/components/standalone/NostromoCrew'
 import ripleyWithCat from '@/assets/images/ripley-with-cat.png'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import ToolPortfolio from '@/components/standalone/ToolPortfolio.vue'

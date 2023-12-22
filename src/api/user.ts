@@ -4,8 +4,8 @@ export function getUserProfile(uid: number) {
   return utils.post('/api/user/profile', {uid}, true)
 }
 
-export function getMyUserProfile() {
-  return utils.get('/api/user/my_profile')
+export function getNostromoCrew() {
+  return utils.get('/api/user/nostromo_crew')
 }
 
 export function searchUsers(searchText: string, searchType: string) {
