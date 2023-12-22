@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="size(teachingTerms)">
-      <v-card class="mt-2 pa-5" elevation="3" rounded="lg">
+      <v-card class="mt-2" elevation="0">
         <v-tabs
           v-if="size(teachingTerms) > 1"
           v-model="selectedTerm"
@@ -30,115 +30,116 @@
             </span>
           </v-tab>
         </v-tabs>
-        <v-window
-          id="official-sections-tabpanel"
-          v-model="selectedTerm"
-          :aria-labelledby="size(teachingTerms) > 1 ? `term${findIndex(teachingTerms, t => t.slug === selectedTerm)}` : undefined"
-          :class="{'mt-3': size(teachingTerms) > 1}"
-          :role="size(teachingTerms) > 1 ? 'tabpanel' : undefined"
-        >
-          <v-window-item :value="selectedTerm">
-            <h2 id="official-sections-heading">
-              {{ selectedTermName }}
-              {{ actingAsInstructor ? `sections taught by ${actingAsInstructor.name}` : 'Official Sections' }}
-            </h2>
-            <div class="text-subtitle-1 mt-1 mb-3">
-              All official sections you select below will be put in ONE, single course site.
-            </div>
-            <v-alert
-              class="mt-2"
-              closable
-              close-label="Hide help"
-              @click:close="onCloseHelp"
-            >
-              <div class="d-flex">
-                <div class="pr-2">
-                  <v-icon
-                    class="left page-help-notice-icon"
-                    color="grey"
-                    :icon="mdiHelpCircleOutline"
-                  />
-                </div>
-                <div>
-                  <div class="font-weight-medium">
-                    Need help deciding which official sections to select?
-                  </div>
-                  If you have a course with multiple sections, you will need to decide whether you want to:
-                  <div class="mt-1">
-                    1. Create one, single course site which includes official sections for both your primary and secondary sections, or
-                  </div>
-                  <div>
-                    2. Create multiple course sites, perhaps with one for each section, or
-                  </div>
-                  <div>
-                    3. Create separate course sites based on instruction mode.
-                    <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010732#instructionmode">
-                      Learn more about instruction modes in bCourses.
-                    </OutboundLink>
-                  </div>
-                </div>
+        <div class="border pb-5 px-5 pt-3">
+          <v-window
+            id="official-sections-tabpanel"
+            v-model="selectedTerm"
+            :aria-labelledby="size(teachingTerms) > 1 ? `term${findIndex(teachingTerms, t => t.slug === selectedTerm)}` : undefined"
+            :role="size(teachingTerms) > 1 ? 'tabpanel' : undefined"
+          >
+            <v-window-item :value="selectedTerm">
+              <h2 id="official-sections-heading">
+                {{ selectedTermName }}
+                {{ actingAsInstructor ? `sections taught by ${actingAsInstructor.name}` : 'Official Sections' }}
+              </h2>
+              <div class="text-subtitle-1 mt-1 mb-3">
+                All official sections you select below will be put in ONE, single course site.
               </div>
-            </v-alert>
-            <v-expansion-panels
-              v-if="size(coursesList)"
-              v-model="panels"
-              class="my-5"
-              multiple
-            >
-              <v-expansion-panel
-                v-for="course in coursesList"
-                :id="`sections-course-${course.slug}`"
-                :key="course.course_id"
-                :value="course.slug"
-                bg-color="blue-lighten-5"
+              <v-alert
+                class="mt-2"
+                closable
+                close-label="Hide help"
+                @click:close="onCloseHelp"
               >
-                <v-expansion-panel-title :id="`sections-course-${course.slug}-btn`">
-                  <template #actions="{ expanded }">
-                    <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
-                  </template>
-                  <span
-                    :aria-level="teachingTerms.length === 1 ? 3 : 4"
-                    class="sections-course-title"
-                    role="heading"
-                  >
-                    <CourseCodeAndTitle :course="course" />
-                  </span>
-                </v-expansion-panel-title>
-                <v-expansion-panel-text>
-                  <CourseSectionsTable
-                    :id="`template-sections-table-${course.slug}`"
-                    :key="course.slug"
-                    class="mb-1 mt-4"
-                    mode="createCourseForm"
-                    :sections="course.sections"
-                    :table-caption="courseSectionsTableCaption(course)"
-                    table-clazz="border-0"
-                    :update-selected="updateSelected"
-                  />
-                </v-expansion-panel-text>
-              </v-expansion-panel>
-            </v-expansion-panels>
-          </v-window-item>
-        </v-window>
-        <div class="d-flex justify-end">
-          <v-btn
-            id="page-create-course-site-continue"
-            aria-label="Continue to next step"
-            class="mr-1"
-            color="primary"
-            :disabled="!selectedSectionsList.length"
-            @click="showConfirmation"
-          >
-            Next
-          </v-btn>
-          <v-btn
-            id="page-create-course-site-cancel"
-            aria-label="Cancel and return to Site Creation Overview"
-            variant="tonal"
-            @click="cancel"
-          >
-            Cancel
-          </v-btn>
+                <div class="d-flex">
+                  <div class="pr-2">
+                    <v-icon
+                      class="left page-help-notice-icon"
+                      color="grey"
+                      :icon="mdiHelpCircleOutline"
+                    />
+                  </div>
+                  <div>
+                    <div class="font-weight-medium">
+                      Need help deciding which official sections to select?
+                    </div>
+                    If you have a course with multiple sections, you will need to decide whether you want to:
+                    <div class="mt-1">
+                      1. Create one, single course site which includes official sections for both your primary and secondary sections, or
+                    </div>
+                    <div>
+                      2. Create multiple course sites, perhaps with one for each section, or
+                    </div>
+                    <div>
+                      3. Create separate course sites based on instruction mode.
+                      <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010732#instructionmode">
+                        Learn more about instruction modes in bCourses.
+                      </OutboundLink>
+                    </div>
+                  </div>
+                </div>
+              </v-alert>
+              <v-expansion-panels
+                v-if="size(coursesList)"
+                v-model="panels"
+                class="my-5"
+                multiple
+              >
+                <v-expansion-panel
+                  v-for="course in coursesList"
+                  :id="`sections-course-${course.slug}`"
+                  :key="course.course_id"
+                  :value="course.slug"
+                  bg-color="blue-lighten-5"
+                >
+                  <v-expansion-panel-title :id="`sections-course-${course.slug}-btn`">
+                    <template #actions="{ expanded }">
+                      <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
+                    </template>
+                    <span
+                      :aria-level="teachingTerms.length === 1 ? 3 : 4"
+                      class="sections-course-title"
+                      role="heading"
+                    >
+                      <CourseCodeAndTitle :course="course" />
+                    </span>
+                  </v-expansion-panel-title>
+                  <v-expansion-panel-text>
+                    <CourseSectionsTable
+                      :id="`template-sections-table-${course.slug}`"
+                      :key="course.slug"
+                      class="mb-1 mt-4"
+                      mode="createCourseForm"
+                      :sections="course.sections"
+                      :table-caption="courseSectionsTableCaption(course)"
+                      table-clazz="border-0"
+                      :update-selected="updateSelected"
+                    />
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
+            </v-window-item>
+          </v-window>
+          <div class="d-flex justify-end">
+            <v-btn
+              id="page-create-course-site-continue"
+              aria-label="Continue to next step"
+              class="mr-1"
+              color="primary"
+              :disabled="!selectedSectionsList.length"
+              @click="showConfirmation"
+            >
+              Next
+            </v-btn>
+            <v-btn
+              id="page-create-course-site-cancel"
+              aria-label="Cancel and return to Site Creation Overview"
+              variant="tonal"
+              @click="cancel"
+            >
+              Cancel
+            </v-btn>
+          </div>
         </div>
       </v-card>
     </div>

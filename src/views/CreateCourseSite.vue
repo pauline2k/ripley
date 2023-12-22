@@ -42,7 +42,7 @@
           <ConfirmationStep
             :course-site-creation-promise="courseSiteCreationPromise"
             :current-semester-name="currentSemesterName"
-            :go-back="showSelecting"
+            :go-back="onCancelConfirmationStep"
             :selected-sections-list="selectedSectionsList"
           />
         </div>
@@ -263,9 +263,8 @@ export default {
       this.alertScreenReader('Course site details form loaded.')
       this.currentWorkflowStep = 'confirmation'
     },
-    showSelecting() {
+    onCancelConfirmationStep() {
       this.currentWorkflowStep = 'selecting'
-      putFocusNextTick('page-create-course-site-continue')
     },
     switchAdminTerm(semester) {
       if (semester && this.currentAdminTerm !== semester.slug) {

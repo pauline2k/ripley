@@ -5,15 +5,14 @@
     target="_blank"
     :title="title"
   >
-    <div class="align-center d-flex">
-      <div>
-        <slot />
-      </div>
-      <div>
-        <v-icon class="ml-1" :icon="mdiOpenInNew" size="small" />
-        <span class="sr-only print-hide"> (link opens new browser tab)</span>
-      </div>
-    </div>
+    <slot />
+    <v-icon
+      v-if="!hideIcon"
+      class="ml-1"
+      :icon="mdiOpenInNew"
+      size="x-small"
+    />
+    <span class="sr-only print-hide"> (link opens new browser tab)</span>
   </a>
 </template>
 
@@ -25,6 +24,10 @@ import {mdiOpenInNew} from '@mdi/js'
 export default {
   name: 'OutboundLink',
   props: {
+    hideIcon: {
+      type: Boolean,
+      required: false
+    },
     href: {
       type: String,
       required: true
