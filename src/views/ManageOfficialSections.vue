@@ -2,6 +2,22 @@
   <div v-if="!isLoading" class="pt-3 px-6">
     <div v-if="feedFetched && !displayError">
       <Header1 class="mb-1 mt-0" :text="canvasSite.name" />
+      <h2 class="pt-1">Canvas Site</h2>
+      <div class="pl-2 pb-4 pt-1">
+        <div class="text-subtitle-2">
+          <div class="align-center d-flex">
+            <div v-if="get(canvasSite.term, 'name')" class="pr-1">
+              {{ canvasSite.term.name }}
+            </div>
+            <div>
+              {{ canvasSite.courseCode }}
+            </div>
+          </div>
+          <div class="text-no-wrap w-25">
+            <OutboundLink id="link-to-canvas-site" :href="canvasSite.url">{{ canvasSite.url }}</OutboundLink>
+          </div>
+        </div>
+      </div>
       <div class="align-center d-flex h2-container justify-space-between">
         <div class="pr-2">
           <h2>Official Sections</h2>
@@ -34,7 +50,7 @@
           </v-alert>
           <CourseSectionsTable
             id="template-sections-table-preview"
-            class="my-3"
+            class="mb-3 mt-2"
             mode="preview"
             :row-class-logic="rowClassLogic"
             :row-display-logic="rowDisplayLogic"
@@ -199,7 +215,8 @@
 
 <script setup>
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
-import Header1 from '@/components/utils/Header1.vue'
+import Header1 from '@/components/utils/Header1'
+import OutboundLink from '@/components/utils/OutboundLink'
 import {mdiAlertCircleOutline, mdiMenuDown, mdiMenuRight} from '@mdi/js'
 </script>
 

@@ -23,6 +23,7 @@
     </v-card-title>
     <v-card-text>
       <v-data-table
+        density="compact"
         :headers="[
           {title: 'UID', key: 'uid', sortable: false},
           {title: 'Name', key: 'name', sortable: false},
@@ -32,12 +33,16 @@
         ]"
         item-value="name"
         :items="nostromoCrew"
-        density="compact"
         items-per-page="100"
       >
         <template #no-data>
           <div id="message-no-job-history" class="pa-4 text-no-wrap title">
             If we have no admin users then who is seeing this message?!
+          </div>
+        </template>
+        <template #item.uid="{item}">
+          <div class="py-2">
+            {{ item.uid }}
           </div>
         </template>
         <template #item.name="{item}">
@@ -51,19 +56,23 @@
           </div>
         </template>
         <template #item.active="{item}">
-          <v-icon
-            :color="item.active ? 'success' : 'error'"
-            :icon="item.active ? mdiCheckCircle : mdiAlert"
-          />
+          <div class="py-2">
+            <v-icon
+              :color="item.active ? 'success' : 'error'"
+              :icon="item.active ? mdiCheckCircle : mdiAlert"
+            />
+          </div>
         </template>
         <template #item.isSuperuser="{item}">
-          <v-icon
-            :color="item.isSuperuser ? 'success' : 'error'"
-            :icon="item.isSuperuser ? mdiCheckCircle : mdiAlert"
-          />
+          <div class="py-2">
+            <v-icon
+              :color="item.isSuperuser ? 'success' : 'error'"
+              :icon="item.isSuperuser ? mdiCheckCircle : mdiAlert"
+            />
+          </div>
         </template>
         <template #item.isCanvasWhitelisted="{item}">
-          <div class="float-right w-100">
+          <div class="py-2">
             {{ item.isCanvasWhitelisted ? 'Yes' : 'No' }}
           </div>
         </template>
