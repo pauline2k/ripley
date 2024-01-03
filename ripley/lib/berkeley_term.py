@@ -48,9 +48,10 @@ class BerkeleyTerm:
         if current_term_name == 'auto' and db_current_term:
             current_term_name = db_current_term['term_name']
 
+        current_term = cls.from_term_name(current_term_name)
         terms = {
-            'current': cls.from_term_name(current_term_name),
-            'next': cls.from_term_name(current_term_name).next_term(),
+            'current': current_term,
+            'next': current_term.next_term(),
         }
 
         # If the future term is being handled automatically, add it if and only if a Spring term is currently
