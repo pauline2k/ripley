@@ -12,21 +12,18 @@
       >
         {{ error }}
       </v-alert>
-      <h2 class="pt-1">Canvas Site</h2>
-      <div class="pl-2 pb-4 pt-1">
-        <div class="text-subtitle-2">
-          <div class="align-center d-flex">
-            <div v-if="get(canvasSite.term, 'name')" class="pr-1">
-              {{ canvasSite.term.name }}
-            </div>
-            <div>
+      <h2 class="pt-3">Canvas Site</h2>
+      <div class="pl-3 pb-6 pt-1">
+        <OutboundLink id="link-to-canvas-site" :href="canvasSite.url">
+          <span class="text-subtitle-2">
+            <span v-if="get(canvasSite.term, 'name')">
+              {{ canvasSite.term.name }}&nbsp;
+            </span>
+            <span>
               {{ canvasSite.courseCode }}
-            </div>
-          </div>
-          <div class="text-no-wrap w-25">
-            <OutboundLink id="link-to-canvas-site" :href="canvasSite.url">{{ canvasSite.url }}</OutboundLink>
-          </div>
-        </div>
+            </span>
+          </span>
+        </OutboundLink>
       </div>
       <h2 class="mb-2">Official Sections</h2>
       <div v-if="currentWorkflowStep === 'preview'">
