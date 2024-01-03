@@ -85,7 +85,7 @@
    * @param  {Element}    callback.canCreateSite    Whether the current user is allowed to create a new site
    */
   var canUserCreateSite = function(callback) {
-    apiRequest('/api/canvas/user_can_create_site?canvas_user_id=' + window.ENV.current_user_id, function(authResult) {
+    apiRequest('/api/canvas/can_user_create_site?canvas_user_id=' + window.ENV.current_user_id, function(authResult) {
       return callback(authResult.canCreateSite);
     });
   };
