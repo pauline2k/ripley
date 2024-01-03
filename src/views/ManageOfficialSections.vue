@@ -172,11 +172,19 @@
         <div v-if="currentWorkflowStep === 'preview'">
           <v-btn
             id="official-sections-edit-btn"
-            class="float-right text-no-wrap"
+            class="mr-1 text-no-wrap"
             color="primary"
             @click="changeWorkflowStep('staging')"
           >
             Edit Sections
+          </v-btn>
+          <v-btn
+            id="official-sections-cancel"
+            aria-label="Cancel and return to Manage Sites"
+            variant="tonal"
+            @click="exit"
+          >
+            Cancel
           </v-btn>
         </div>
         <div v-if="currentWorkflowStep === 'staging'">
@@ -299,6 +307,9 @@ export default {
         }
       }
       this.currentWorkflowStep = step
+    },
+    exit() {
+      this.$router.push({path: '/manage_sites'})
     },
     fetchFeed() {
       return getCourseSections(this.canvasSiteId).then(data => {

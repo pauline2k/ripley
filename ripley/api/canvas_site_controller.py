@@ -53,7 +53,6 @@ def canvas_site_provision():
         return tolerant_jsonify({
             'adminActingAs': admin_acting_as,
             'adminTerms': _get_admin_terms(),
-            'isAdmin': current_user.is_admin or current_user.is_canvas_admin,
             'teachingTerms': _get_teaching_terms(admin_acting_as, admin_by_ccns, admin_term_slug),
         })
     else:

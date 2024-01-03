@@ -27,17 +27,116 @@
         />
       </div>
       <div v-if="!isFetching" :class="{'pt-2': isAdmin && currentWorkflowStep !== 'processing'}">
-        <SelectSectionsStep
-          v-if="currentWorkflowStep === 'selecting'"
-          :admin-acting-as="adminActingAs"
-          :courses-list="coursesList"
-          :current-semester="currentSemester"
-          :selected-sections-list="selectedSectionsList"
-          :show-confirmation="showConfirmation"
-          :switch-semester="switchSemester"
-          :teaching-terms="teachingTerms"
-          :update-selected="updateSelected"
-        />
+        <div v-if="currentWorkflowStep === 'selecting' && size(teachingTerms)">
+          <v-card class="mt-2" elevation="0">
+            <v-tabs
+              v-if="size(teachingTerms) > 1"
+              v-model="selectedTerm"
+              aria-label="Official Sections"
+              class="tabs-border"
+              color="primary"
+              slider-color="grey-darken-3"
+            >
+              <v-tab
+                v-for="(term, index) in teachingTerms"
+                :id="`term${index}`"
+                :key="index"
+                aria-controls="official-sections-tabpanel"
+                :aria-selected="term.slug === selectedTerm"
+                :class="{'rounded-ts-lg': index === 0, 'rounded-te-lg': index === 1}"
+                :tabindex="term.slug === selectedTerm ? 0 : -1"
+                :value="term.slug"
+                variant="elevated"
+                width="50%"
+              >
+                <span
+                  class="font-size-16"
+                  :class="{'text-white': term.slug === selectedTerm, 'text-primary': term.slug !== selectedTerm}"
+                >
+                  {{ term.name }}
+                </span>
+              </v-tab>
+            </v-tabs>
+            <div class="border pb-5 px-5 pt-3">
+              <v-window
+                id="official-sections-tabpanel"
+                v-model="selectedTerm"
+                :aria-labelledby="size(teachingTerms) > 1 ? `term${findIndex(teachingTerms, t => t.slug === selectedTerm)}` : undefined"
+                :role="size(teachingTerms) > 1 ? 'tabpanel' : undefined"
+              >
+                <v-window-item :value="selectedTerm">
+                  <h2 id="official-sections-heading">
+                    {{ selectedTermName }}
+                    {{ actingAsInstructor ? `sections taught by ${actingAsInstructor.name}` : 'Official Sections' }}
+                  </h2>
+                  <div class="text-subtitle-1 mt-1 mb-3">
+                    All official sections you select below will be put in ONE, single course site.
+                  </div>
+                  <SelectSectionsGuide />
+                  <v-expansion-panels
+                    v-if="size(coursesList)"
+                    v-model="panels"
+                    class="my-5"
+                    multiple
+                  >
+                    <v-expansion-panel
+                      v-for="course in coursesList"
+                      :id="`sections-course-${course.slug}`"
+                      :key="course.course_id"
+                      :value="course.slug"
+                      bg-color="blue-lighten-5"
+                    >
+                      <v-expansion-panel-title :id="`sections-course-${course.slug}-btn`">
+                        <template #actions="{ expanded }">
+                          <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
+                        </template>
+                        <span
+                          :aria-level="teachingTerms.length === 1 ? 3 : 4"
+                          class="sections-course-title"
+                          role="heading"
+                        >
+                          <CourseCodeAndTitle :course="course" />
+                        </span>
+                      </v-expansion-panel-title>
+                      <v-expansion-panel-text>
+                        <CourseSectionsTable
+                          :id="`template-sections-table-${course.slug}`"
+                          :key="course.slug"
+                          class="mb-1 mt-4"
+                          mode="createCourseForm"
+                          :sections="course.sections"
+                          :table-caption="courseSectionsTableCaption(course)"
+                          table-clazz="border-0"
+                          :update-selected="updateSelected"
+                        />
+                      </v-expansion-panel-text>
+                    </v-expansion-panel>
+                  </v-expansion-panels>
+                </v-window-item>
+              </v-window>
+              <div class="d-flex justify-end">
+                <v-btn
+                  id="page-create-course-site-continue"
+                  aria-label="Continue to next step"
+                  class="mr-1"
+                  color="primary"
+                  :disabled="!selectedSectionsList.length"
+                  @click="showConfirmation"
+                >
+                  Next
+                </v-btn>
+                <v-btn
+                  id="page-create-course-site-cancel"
+                  aria-label="Cancel and return to Site Creation Overview"
+                  variant="tonal"
+                  @click="cancel"
+                >
+                  Cancel
+                </v-btn>
+              </div>
+            </div>
+          </v-card>
+        </div>
         <div v-if="currentWorkflowStep === 'confirmation'">
           <ConfirmationStep
             :course-site-creation-promise="courseSiteCreationPromise"
@@ -70,26 +169,28 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import ConfirmationStep from '@/components/bcourses/create/ConfirmationStep'
-import Context from '@/mixins/Context'
+import CourseCodeAndTitle from '@/components/bcourses/create/CourseCodeAndTitle'
+import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import CreateCourseSiteHeader from '@/components/bcourses/create/CreateCourseSiteHeader'
 import Header1 from '@/components/utils/Header1'
-import SelectSectionsStep from '@/components/bcourses/create/SelectSectionsStep'
+import SelectSectionsGuide from '@/components/bcourses/create/SelectSectionsGuide'
+import {findIndex} from 'lodash'
+import {mdiMenuDown, mdiMenuRight} from '@mdi/js'
+</script>
+
+<script>
+import Context from '@/mixins/Context'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
 import {each, find, get, includes, map, size} from 'lodash'
 import {iframeParentLocation, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CreateCourseSite',
-  components: {
-    ConfirmationStep,
-    CreateCourseSiteHeader,
-    Header1,
-    SelectSectionsStep
-  },
   mixins: [Context],
   data: () => ({
+    actingAsInstructor: undefined,
     adminActingAs: undefined,
     adminBySectionIds: undefined,
     adminMode: 'actAs',
@@ -97,7 +198,6 @@ export default {
     backgroundJobId: undefined,
     canvasSite: undefined,
     canvasSiteId: undefined,
-    course: undefined,
     coursesList: [],
     currentAdminTerm: undefined,
     currentSemester: undefined,
@@ -108,28 +208,55 @@ export default {
       supportAction: undefined,
       supportInfo: undefined
     },
-    isAdmin: undefined,
     isFetching: false,
     isTeacher: undefined,
     isUidInputMode: true,
     jobStatus: undefined,
+    linkToSiteOverview: undefined,
+    panels: [],
     percentComplete: undefined,
     selectedSectionsList: undefined,
+    selectedTerm: undefined,
     semester: undefined,
     teachingTerms: [],
     timeoutPromise: undefined,
     warning: undefined
   }),
+  computed: {
+    isAdmin() {
+      return this.currentUser.isAdmin || this.currentUser.isCanvasAdmin
+    },
+    selectedTermName() {
+      const term = find(this.teachingTerms, t => t.slug === this.selectedTerm)
+      return get(term, 'name', '')
+    }
+  },
+  watch: {
+    selectedTerm(slug) {
+      this.switchSemester(slug)
+    }
+  },
   created() {
     getCourseProvisioningMetadata().then(data => {
       this.updateMetadata(data)
       if (!this.teachingTerms.length && !this.currentUser.isAdmin) {
         this.warning = 'You are not listed as an instructor of any courses in the current or upcoming term.'
       }
+      this.selectedTerm = this.currentSemester
+      if (this.selectedSectionsList.length) {
+        this.panels = Array.from({length: this.coursesList.length}, (value, index) => index)
+      } else if (this.coursesList.length === 1) {
+        this.panels = [0]
+      }
+      this.actingAsInstructor = this.getActingAsInstructor()
+
       this.$ready()
     })
   },
   methods: {
+    cancel() {
+      this.$router.push({path: '/manage_sites'})
+    },
     classCount(semesters) {
       let count = 0
       if (size(semesters) > 0) {
@@ -138,6 +265,13 @@ export default {
         })
       }
       return count
+    },
+    courseSectionsTableCaption(course) {
+      let caption = 'Official sections in this course. Use the checkboxes in the Action column to select sections'
+      if (size(course.sections) > 1) {
+        caption += ', or use the "Select All" button above.'
+      }
+      return caption
     },
     courseSiteCreationPromise(siteName, siteAbbreviation) {
       return new Promise((resolve, reject) => {
@@ -246,6 +380,21 @@ export default {
         })
       })
     },
+    getActingAsInstructor() {
+      let instructor
+      if (this.adminActingAs) {
+        each(this.teachingTerms, t => each(t.classes, c => each(c.sections, s => each(s.instructors, i => {
+          if (i.uid === this.adminActingAs) {
+            instructor = i
+            return false
+          }
+        }))))
+      }
+      return instructor
+    },
+    onCancelConfirmationStep() {
+      this.currentWorkflowStep = 'selecting'
+    },
     setAdminActingAs(uid) {
       this.adminActingAs = uid
       this.adminBySectionIds = null
@@ -263,9 +412,7 @@ export default {
       this.alertScreenReader('Course site details form loaded.')
       this.currentWorkflowStep = 'confirmation'
     },
-    onCancelConfirmationStep() {
-      this.currentWorkflowStep = 'selecting'
-    },
+    size,
     switchAdminTerm(semester) {
       if (semester && this.currentAdminTerm !== semester.slug) {
         this.currentWorkflowStep = null
@@ -324,7 +471,6 @@ export default {
       }, 4000)
     },
     updateMetadata(data) {
-      this.isAdmin = data.isAdmin
       this.teachingTerms = data.teachingTerms
       if (size(this.teachingTerms) > 0) {
         this.switchSemester(this.teachingTerms[0].slug)
@@ -357,3 +503,24 @@ export default {
   }
 }
 </script>
+
+<!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
+<style>
+.v-expansion-panel-text__wrapper {
+  padding: 8px 12px 16px !important;
+}
+</style>
+
+<style scoped lang="scss">
+.sections-course-title {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  line-height: 15px;
+}
+.tabs-border {
+  -moz-border-radius: 0;
+  -webkit-border-radius: 8px 8px 0 0;
+  border: 1px solid $color-container-grey-border;
+  border-radius: 8px 8px 0 0;
+}
+</style>
