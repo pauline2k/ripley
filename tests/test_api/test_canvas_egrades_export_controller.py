@@ -247,8 +247,9 @@ class TestOfficialCanvasCourse:
         assert response.status_code == expected_status_code
         return response.json
 
-    def test_unauthorized(self, client, fake_auth):
-        """Denies unauthorized users."""
+    def test_authorized(self, app, client, fake_auth):
+        """Verify access for all."""
+        canvas_site_id = '8876542'
         users = {
             'anonymous': None,
             'no_canvas_account': no_canvas_account_uid,
@@ -257,20 +258,7 @@ class TestOfficialCanvasCourse:
             'student': student_uid,
             'teaching_assistant': ta_uid,
         }
-        for user_type, uid in users.items():
-            canvas_site_id = '8876542'
-            if uid:
-                fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
-            self._api_is_official_canvas_course(
-                canvas_site_id=canvas_site_id,
-                client=client,
-                expected_status_code=401,
-            )
-
-    def test_authorized(self, client, app, fake_auth):
-        """Allows teacher."""
         with requests_mock.Mocker() as m:
-            canvas_site_id = '8876542'
             register_canvas_uris(app, {
                 'account': ['get_admins'],
                 'course': [
@@ -278,12 +266,13 @@ class TestOfficialCanvasCourse:
                     f'get_sections_{canvas_site_id}',
                     'get_enrollments_8876542_4567890',
                 ],
-                'user': [f'profile_{teacher_uid}'],
             }, m)
-            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
-            api_json = self._api_is_official_canvas_course(canvas_site_id=canvas_site_id, client=client)
-            # Verify
-            assert api_json['isOfficialCourse'] is True
+            for user_type, uid in users.items():
+                if uid:
+                    register_canvas_uris(app, {'user': [f'profile_{teacher_uid}']}, m)
+                    fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
+                api_json = self._api_is_official_canvas_course(canvas_site_id=canvas_site_id, client=client)
+                assert api_json['isOfficialCourse'] is True
 
     def test_is_not_official_course(self, app, client, fake_auth):
         """The course is not official based on term."""
