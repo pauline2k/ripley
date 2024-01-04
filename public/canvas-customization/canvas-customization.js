@@ -298,7 +298,7 @@ addMentalHealthResourcesResponsiveLink();
             if (gradesExportLtiId) {
               const linkUrl = `/courses/${courseId}/external_tools/${gradesExportLtiId}`;
               // Add the 'E-Grades' export option
-              waitUntilAvailable('#gradebook-toolbar .gradebook-menus', false, function($gradebookToolbarMenu) {
+              waitUntilAvailable('#gradebook-toolbar-instui-nav', false, function($gradebookToolbarMenu) {
                 $gradebookToolbarMenu.append(`<a id="e-grades-button" class="ui-button" href="${linkUrl}">E-Grades</a>`);
               });
             }
