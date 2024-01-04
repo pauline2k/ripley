@@ -36,6 +36,7 @@ from ripley.models.user import User
 
 @app.route('/api/canvas/external_tools')
 def get_external_tools():
+    # Used by canvas-customization.js
     cache_key = 'canvas_external_tools'
     api_json = fetch_cached_dict_object(cache_key)
     if not api_json:
