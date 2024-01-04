@@ -233,7 +233,9 @@ export default {
   },
   watch: {
     selectedTerm(slug) {
-      this.switchSemester(slug)
+      if (slug) {
+        this.switchSemester(slug)
+      }
     }
   },
   created() {
