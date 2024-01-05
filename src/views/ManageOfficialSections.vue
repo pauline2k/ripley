@@ -12,7 +12,7 @@
       >
         {{ error }}
       </v-alert>
-      <h2 class="pt-3">Canvas Site</h2>
+      <h2 class="pt-3">bCourses Site</h2>
       <div class="pl-3 pb-6 pt-1">
         <OutboundLink id="link-to-canvas-site" :href="canvasSite.url">
           <span class="text-subtitle-2">
