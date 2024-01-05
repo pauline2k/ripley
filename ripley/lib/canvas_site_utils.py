@@ -135,7 +135,7 @@ def extract_berkeley_term_id(canvas_site):
 
 
 def format_term_enrollments_export(term_id):
-    return f"{term_id.replace(':', '-')}-term-enrollments-export"
+    return f"enrollments-{term_id.replace(':', '-')}"
 
 
 def get_canvas_course_id(course_slug):
@@ -321,8 +321,8 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
 
         upload_dated_csv(
             sections_csv.tempfile.name,
-            f"course-provision-{canvas_sis_term_id.replace(':', '-')}-{course.sis_course_id.replace(':', '-')}-sections-sis-import",
-            'canvas_sis_imports',
+            f"course-provision-sections-{course.sis_course_id.replace(':', '-')}",
+            'canvas-sis-imports',
             utc_now().strftime('%F_%H-%M-%S'),
         )
 

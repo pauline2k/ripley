@@ -92,7 +92,7 @@ class ExportTermEnrollmentsJob(BaseJob):
                 if not upload_dated_csv(
                     export_file.name,
                     format_term_enrollments_export(sis_term_id),
-                    'canvas_provisioning_reports',
+                    'canvas-provisioning-reports',
                     this_sync.strftime('%F_%H-%M-%S'),
                 ):
                     raise BackgroundJobError('New users import failed.')

@@ -54,8 +54,8 @@ class TestExportTermEnrollmentsJob:
             with mock_s3_bucket(app):
                 ExportTermEnrollmentsJob(app)._run(params={'sis_term_id': 'TERM:2023-B'})
 
-                csvs = find_last_dated_csvs('canvas_provisioning_reports', ['TERM-2023-B-term-enrollments-export'])
-                provisioning_report = csvs['TERM-2023-B-term-enrollments-export']
+                csvs = find_last_dated_csvs('canvas-provisioning-reports', ['enrollments-TERM-2023-B'])
+                provisioning_report = csvs['enrollments-TERM-2023-B']
                 rows = [r for r in csv.DictReader(stream_object_text(provisioning_report))]
 
                 assert len(rows) >= 1

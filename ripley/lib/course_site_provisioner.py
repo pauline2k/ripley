@@ -72,8 +72,8 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         course_csv.filehandle.close()
         upload_dated_csv(
             course_csv.tempfile.name,
-            f"course-provision-{sis_course_id.replace(':', '-')}-course-sis-import",
-            'canvas_sis_imports',
+            f"course-provision-{sis_course_id.replace(':', '-')}",
+            'canvas-sis-imports',
             utc_now().strftime('%F_%H-%M-%S'),
         )
         app.logger.debug(f'Posting course SIS import (sis_course_id={sis_course_id}).')
@@ -124,8 +124,8 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         sections_csv.filehandle.close()
         upload_dated_csv(
             sections_csv.tempfile.name,
-            f"course-provision-{course.sis_course_id.replace(':', '-')}-sections-sis-import",
-            'canvas_sis_imports',
+            f"course-provision-sections-{course.sis_course_id.replace(':', '-')}",
+            'canvas-sis-imports',
             utc_now().strftime('%F_%H-%M-%S'),
         )
         app.logger.debug(f'Posting course sections SIS import (canvas_site_id={course.id}).')
