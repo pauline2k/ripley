@@ -118,15 +118,17 @@
             </template>
           </td>
           <td :id="`${id}-${section.id}-instructors`" class="td-instructors">
-            <span class="sr-only">Instructors, </span>
+            <div class="sr-only-in-standard-viewport">Instructors:</div>
             <template v-if="filter(section.instructors, 'name').length">
-              <span
-                v-for="instructor in section.instructors"
-                :key="instructor.uid"
-                class="d-block"
-              >
-                {{ instructor.name }} <span class="sr-only">,</span>
-              </span>
+              <div class="instructors">
+                <span
+                  v-for="instructor in section.instructors"
+                  :key="instructor.uid"
+                  class="d-block"
+                >
+                  {{ instructor.name }} <span class="sr-only">,</span>
+                </span>
+              </div>
             </template>
             <template v-else>
               <span aria-hidden="true">&mdash;</span>
@@ -135,7 +137,7 @@
           </td>
           <td v-if="!['createCourseForm', 'preview'].includes(mode)" :id="`${id}-${section.id}-actions`" class="td-actions">
             <!-- Current Staging Actions -->
-            <div v-if="mode === 'currentStaging' && section.isCourseSection" class="d-flex flex-nowrap justify-end">
+            <div v-if="mode === 'currentStaging' && section.isCourseSection" class="d-flex flex-nowrap responsive-justify-end">
               <v-btn
                 v-if="section.nameDiscrepancy && section.stagedState !== 'update'"
                 :id="`section-${section.id}-update-btn`"
@@ -502,8 +504,99 @@ export default {
 </script>
 
 <style scoped lang="scss">
-td, th {
-  padding: 10px;
+@media screen and (min-width: 600px) {
+  .sr-only-in-standard-viewport {
+    display: none;
+  }
+  .td-checkbox {
+    width: 5%;
+  }
+  .td-course-code {
+    min-width: 100px;
+    width: 5%
+  }
+  .td-actions {
+    height: 45px;
+    min-width: 80px;
+    padding-right: 10px;
+    text-align: right !important;
+    width: 10%
+  }
+  .td-section-id {
+    min-width: 70px;
+    width: 10%
+  }
+  .td-instructors {
+    min-width: 183px;
+    width: 15%
+  }
+  .td-section-name {
+    min-width: 115px;
+    width: 15%
+  }
+  .td-meeting-location {
+    min-width: 150px;
+    width: 15%
+  }
+  .td-schedule {
+    min-width: 155px;
+    width: 15%
+  }
+  .td-shrink-to-fit {
+    width: 1%;
+  }
+  .responsive-justify-end {
+    justify-content: flex-end !important;
+  }
+}
+@media screen and (max-width: 600px) {
+  table {
+    border-collapse: collapse;
+  }
+  table thead {
+    border: 0;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+  table tr {
+    border: 0;
+    border-bottom: 1pt solid $color-container-grey-border;
+    display: block;
+    width: 100%;
+  }
+  table td {
+    border: 0;
+    display: block;
+    padding: 3px 0;
+    width: 100%;
+  }
+  table td::before {
+    content: attr(data-label);
+    float: left;
+  }
+  table tr:first-child {
+    padding-top: 12px;
+  }
+  tr td:last-child {
+    padding-bottom: 12px;
+    padding-top: 8px;
+  }
+  .instructors {
+    padding: 0 0 4px 8px;
+  }
+  .sr-only-in-standard-viewport {
+    font-weight: bolder;
+  }
+  .td-actions {
+    margin-left: -4px;
+    margin-bottom: 8px;
+    text-align: left !important;
+  }
 }
 th {
   font-size: 14px;
@@ -541,43 +634,5 @@ th {
 }
 .section-in-use-icon {
   padding: 0 4px 2px 0;
-}
-.td-checkbox {
-  width: 5%;
-}
-.td-course-code {
-  min-width: 100px;
-  width: 5%
-}
-.td-actions {
-  height: 45px;
-  min-width: 80px;
-  padding-right: 10px;
-  text-align: right !important;
-  width: 10%
-}
-.td-section-id {
-  min-width: 70px;
-  width: 10%
-}
-.td-instructors {
-  min-width: 183px;
-  width: 15%
-}
-.td-section-name {
-  min-width: 115px;
-  width: 15%
-}
-.td-meeting-location {
-  min-width: 150px;
-  width: 15%
-}
-.td-schedule {
-  min-width: 155px;
-  width: 15%
-}
-.td-shrink-to-fit {
-  width: 1%;
-  white-space: nowrap;
 }
 </style>
