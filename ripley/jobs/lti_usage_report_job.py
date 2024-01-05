@@ -108,9 +108,9 @@ class LtiUsageReportJob(BaseJob):
                     'Courses Visible': courses_count,
                 })
 
-        summary_report_filename = f"lti_usage_summary-{sis_term_id.replace('TERM:', '')}-{datetime.now().strftime('%F')}.csv"
+        summary_report_filename = f"lti-usage-summary-{sis_term_id.replace('TERM:', '')}-{datetime.now().strftime('%F')}.csv"
         with open(tmpfile.name, mode='rb') as f:
-            return put_binary_data_to_s3(f'lti_usage_reports/{summary_report_filename}', f, 'text/csv')
+            return put_binary_data_to_s3(f'lti-usage-reports/{summary_report_filename}', f, 'text/csv')
 
     def generate_courses_report(self, sis_term_id):
         tmpfile = tempfile.NamedTemporaryFile()
@@ -129,9 +129,9 @@ class LtiUsageReportJob(BaseJob):
                         'Email': teacher and getattr(teacher, 'email', None),
                     })
 
-        courses_report_filename = f"lti_usage_courses-{sis_term_id.replace('TERM:', '')}-{datetime.now().strftime('%F')}.csv"
+        courses_report_filename = f"lti-usage-courses-{sis_term_id.replace('TERM:', '')}-{datetime.now().strftime('%F')}.csv"
         with open(tmpfile.name, mode='rb') as f:
-            return put_binary_data_to_s3(f'lti_usage_reports/{courses_report_filename}', f, 'text/csv')
+            return put_binary_data_to_s3(f'lti-usage-reports/{courses_report_filename}', f, 'text/csv')
 
     def merge_course_occurrence(self, course, tool_url):
         course_id = course['canvas_site_id']

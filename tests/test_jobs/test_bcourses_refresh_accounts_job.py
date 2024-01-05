@@ -35,8 +35,8 @@ class TestBcoursesRefreshAccountsJob:
     def test_no_changes(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
             BcoursesRefreshAccountsJob(app)._run()
-            assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
-            assert_s3_key_not_found(app, s3, 'user-sis-import')
+            assert_s3_key_not_found(app, s3, 'sis-ids')
+            assert_s3_key_not_found(app, s3, 'user-provision')
 
     @mock.patch('ripley.lib.calnet_utils.get_users')
     def test_name_change(self, mock_users, app, campus_users):
@@ -49,9 +49,9 @@ class TestBcoursesRefreshAccountsJob:
 
             BcoursesRefreshAccountsJob(app)._run()
 
-            assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
+            assert_s3_key_not_found(app, s3, 'sis-ids')
 
-            users_imported = read_s3_csv(app, s3, 'user-sis-import')
+            users_imported = read_s3_csv(app, s3, 'user-provision')
             assert len(users_imported) == 2
             assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
             assert users_imported[1] == '30030000,30000,Definitely-not-a-synthetic-Ash,🤖,synthetic.ash@berkeley.edu,active'
@@ -67,9 +67,9 @@ class TestBcoursesRefreshAccountsJob:
 
             BcoursesRefreshAccountsJob(app)._run()
 
-            assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
+            assert_s3_key_not_found(app, s3, 'sis-ids')
 
-            users_imported = read_s3_csv(app, s3, 'user-sis-import')
+            users_imported = read_s3_csv(app, s3, 'user-provision')
             assert len(users_imported) == 2
             assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
             assert users_imported[1] == '30030000,30000,Ash,🤖,definitely.no.robots.here@berkeley.edu,active'
@@ -85,17 +85,17 @@ class TestBcoursesRefreshAccountsJob:
 
             BcoursesRefreshAccountsJob(app)._run()
 
-            sis_id_changes_imported = read_s3_csv(app, s3, 'sis-id-sis-import')
+            sis_id_changes_imported = read_s3_csv(app, s3, 'sis-ids')
             assert len(sis_id_changes_imported) == 2
             assert sis_id_changes_imported[0] == 'old_id,new_id,old_integration_id,new_integration_id,type'
             assert sis_id_changes_imported[1] == '30030000,1337,,,user'
 
-            assert_s3_key_not_found(app, s3, 'user-sis-import')
+            assert_s3_key_not_found(app, s3, 'user-provision')
 
     def test_no_enrollments_in_accounts_job(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
             BcoursesRefreshAccountsJob(app)._run()
-            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
+            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B')
 
     @pytest.fixture(scope='function')
     def campus_users(self, app):

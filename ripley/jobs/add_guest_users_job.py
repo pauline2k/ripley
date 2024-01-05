@@ -75,7 +75,7 @@ class AddGuestUsersJob(BaseJob):
                 raise BackgroundJobError('New users import failed.')
 
         # Archive import file in S3.
-        upload_dated_csv(canvas_import_file.name, 'guest-import', 'canvas_sis_imports', this_sync.strftime('%F_%H-%M-%S'))
+        upload_dated_csv(canvas_import_file.name, 'guest-users', 'canvas-sis-imports', this_sync.strftime('%F_%H-%M-%S'))
         CanvasSynchronization.update(guests=this_sync)
 
         app.logger.info('Users added, job complete.')

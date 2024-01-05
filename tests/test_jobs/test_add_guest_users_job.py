@@ -62,7 +62,7 @@ class TestAddNewUsersJob:
 
             with mock_s3_bucket(app) as s3:
                 AddGuestUsersJob(app)._run()
-                users_imported = read_s3_csv(app, s3, 'guest-import')
+                users_imported = read_s3_csv(app, s3, 'guest-users')
                 assert len(users_imported) == 2
                 assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
                 assert users_imported[1] == 'UID:9999999,9999999,Jonesy,🐈,jonesy@berkeley.edu,active'

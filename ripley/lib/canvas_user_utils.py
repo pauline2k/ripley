@@ -123,8 +123,8 @@ def import_users(uids):
 
         upload_dated_csv(
             users_csv.tempfile.name,
-            'user-provision-sis-import',
-            'canvas_sis_imports',
+            'user-provision',
+            'canvas-sis-imports',
             utc_now().strftime('%F_%H-%M-%S'),
         )
 

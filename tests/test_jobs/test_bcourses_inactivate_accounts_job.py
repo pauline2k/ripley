@@ -35,13 +35,13 @@ class TestBcoursesInactivateAccountsJob:
     def test_no_changes(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
             BcoursesInactivateAccountsJob(app)._run()
-            assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
-            assert_s3_key_not_found(app, s3, 'user-sis-import')
+            assert_s3_key_not_found(app, s3, 'sis-ids')
+            assert_s3_key_not_found(app, s3, 'user-provision')
 
     def test_no_enrollments_in_inactivate_job(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
             BcoursesInactivateAccountsJob(app)._run()
-            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
+            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B')
 
     @mock.patch('ripley.lib.calnet_utils.get_calnet_attributes_for_uids')
     @mock.patch('ripley.lib.calnet_utils.get_users')
@@ -54,12 +54,12 @@ class TestBcoursesInactivateAccountsJob:
 
             BcoursesInactivateAccountsJob(app)._run()
 
-            sis_id_changes_imported = read_s3_csv(app, s3, 'sis-id-sis-import')
+            sis_id_changes_imported = read_s3_csv(app, s3, 'sis-ids')
             assert len(sis_id_changes_imported) == 2
             assert sis_id_changes_imported[0] == 'old_id,new_id,old_integration_id,new_integration_id,type'
             assert sis_id_changes_imported[1] == '30030000,UID:30000,,,user'
 
-            user_changes_imported = read_s3_csv(app, s3, 'user-sis-import')
+            user_changes_imported = read_s3_csv(app, s3, 'user-provision')
             assert len(user_changes_imported) == 2
             assert user_changes_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
             assert user_changes_imported[1] == 'UID:30000,30000,Ash,🤖,,suspended'

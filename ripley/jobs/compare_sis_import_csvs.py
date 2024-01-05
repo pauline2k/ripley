@@ -130,22 +130,22 @@ def _collect_csv_keys(days_ago): # noqa C901
             elif f'enrollments-{term_id}-update' in junction_csvs:
                 junction_csvs[f'enrollments-{term_id}-update'].append(key)
 
-    for key in s3.iterate_monthly_folder('canvas_provisioning_reports'):
+    for key in s3.iterate_monthly_folder('canvas-provisioning-reports'):
         if not _within_daily_window(key, days_ago):
             continue
-        if 'user-provision-report' in key:
+        if 'provisioned-users' in key:
             ripley_csvs['users-initial'].append(key)
         elif 'enrollments-export' in key:
             term_id = _get_term_id(key)
             if term_id:
                 ripley_csvs[f'enrollments-{term_id}-initial'].append(key)
 
-    for key in s3.iterate_monthly_folder('canvas_sis_imports'):
+    for key in s3.iterate_monthly_folder('canvas-sis-imports'):
         if not _within_daily_window(key, days_ago):
             continue
-        if 'user-sis-import' in key:
+        if 'user-provision' in key:
             ripley_csvs['users-update'].append(key)
-        elif 'sis-id-sis-import' in key:
+        elif 'sis-ids' in key:
             ripley_csvs['sis-ids-update'].append(key)
         elif 'enrollments-TERM' in key and 'sis-import' in key:
             term_id = _get_term_id(key)

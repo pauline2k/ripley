@@ -131,7 +131,7 @@ class BcoursesRefreshBaseJob(BaseJob):
     def initialize_enrollment_provisioning_reports(self, sis_term_ids, users_by_uid):
         self.enrollment_provisioning_reports = {}
         export_filenames = {term_id: format_term_enrollments_export(term_id) for term_id in sis_term_ids}
-        last_dated_csvs = find_last_dated_csvs('canvas_provisioning_reports', export_filenames.values())
+        last_dated_csvs = find_last_dated_csvs('canvas-provisioning-reports', export_filenames.values())
         for term_id in sis_term_ids:
             csv_key = last_dated_csvs.get(format_term_enrollments_export(term_id), None)
             if csv_key:
@@ -147,7 +147,7 @@ class BcoursesRefreshBaseJob(BaseJob):
         # recent exports so that we don't repeat changes picked up in a previous incremental job.
         users_by_user_id = {user_id_from_attributes(u): u for u in users_by_uid.values()}
         last_sync_timestamp = CanvasSynchronization.get_latest_term_enrollment_csv_set().strftime('%F_%H-%M-%S')
-        for enrollment_export_csv in find_all_dated_csvs('canvas_sis_imports', 'enrollments-TERM'):
+        for enrollment_export_csv in find_all_dated_csvs('canvas-sis-imports', 'enrollments-TERM'):
             timestamp_match = re.search('\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}', enrollment_export_csv)
             if not timestamp_match or timestamp_match.group(0) < last_sync_timestamp:
                 continue
@@ -204,7 +204,7 @@ class BcoursesRefreshBaseJob(BaseJob):
             return
         last_user_report_timestamp = timestamp_match.group(0)
 
-        for user_import_csv in find_all_dated_csvs('canvas_sis_imports', 'user-sis-import'):
+        for user_import_csv in find_all_dated_csvs('canvas-sis-imports', 'user-provision'):
             timestamp_match = re.search('\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}', user_import_csv)
             if timestamp_match and timestamp_match.group(0) >= last_user_report_timestamp:
                 for row in csv.DictReader(stream_object_text(user_import_csv)):
@@ -212,7 +212,7 @@ class BcoursesRefreshBaseJob(BaseJob):
                     uid = account_data['uid']
                     self.known_users[uid] = str(row['user_id'])
 
-        for sis_id_import_csv in find_all_dated_csvs('canvas_sis_imports', 'sis-id-sis-import'):
+        for sis_id_import_csv in find_all_dated_csvs('canvas-sis-imports', 'sis-ids'):
             timestamp_match = re.search('\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}', user_import_csv)
             if timestamp_match and timestamp_match.group(0) >= last_user_report_timestamp:
                 for row in csv.DictReader(stream_object_text(sis_id_import_csv)):
@@ -221,16 +221,16 @@ class BcoursesRefreshBaseJob(BaseJob):
     @contextmanager
     def get_canvas_user_report(self, timestamp, users_by_uid):
         if self.job_flags.incremental:
-            previous_user_report = find_last_dated_csv('canvas_provisioning_reports', 'user-provision-report')
+            previous_user_report = find_last_dated_csv('canvas-provisioning-reports', 'provisioned-users')
             self.patch_user_updates(previous_user_report)
             yield stream_object_text(previous_user_report)
         else:
             canvas_users_file = tempfile.NamedTemporaryFile()
             canvas.get_csv_report('users', download_path=canvas_users_file.name)
             upload_dated_csv(
-                folder='canvas_provisioning_reports',
+                folder='canvas-provisioning-reports',
                 local_name=canvas_users_file.name,
-                remote_name='user-provision-report',
+                remote_name='provisioned-users',
                 timestamp=timestamp,
             )
             # If the job flag is not incremental, then we haven't yet called directly to LDAP for any users missing from
@@ -390,13 +390,13 @@ class BcoursesRefreshBaseJob(BaseJob):
         try:
             if 'sis_ids' in csv_set._fields and csv_set.sis_ids.count:
                 app.logger.info(f'Will post {csv_set.sis_ids.count} SIS ID changes to Canvas.')
-                upload_dated_csv(csv_set.sis_ids.tempfile.name, 'sis-id-sis-import', 'canvas_sis_imports', timestamp)
+                upload_dated_csv(csv_set.sis_ids.tempfile.name, 'sis-ids', 'canvas-sis-imports', timestamp)
                 _write_csv_to_zip(csv_set.sis_ids)
                 data_to_upload = True
 
             if 'users' in csv_set._fields and csv_set.users.count:
                 app.logger.info(f'Will post {csv_set.users.count} user updates to Canvas.')
-                upload_dated_csv(csv_set.users.tempfile.name, 'user-sis-import', 'canvas_sis_imports', timestamp)
+                upload_dated_csv(csv_set.users.tempfile.name, 'user-provision', 'canvas-sis-imports', timestamp)
                 _write_csv_to_zip(csv_set.users)
                 data_to_upload = True
 
@@ -413,8 +413,8 @@ class BcoursesRefreshBaseJob(BaseJob):
 
                         upload_dated_csv(
                             enrollment_csv.tempfile.name,
-                            f"enrollments-{sis_term_id.replace(':', '-')}-{job_type}-sis-import",
-                            'canvas_sis_imports',
+                            f"enrollments-{sis_term_id.replace(':', '-')}-{job_type}",
+                            'canvas-sis-imports',
                             timestamp,
                         )
 

@@ -42,7 +42,7 @@ class TestRefreshBcoursesIncremental:
     def test_no_previous_export(self, app):
         with self.setup_incremental_refresh_job(app) as s3:
             BcoursesRefreshIncrementalJob(app)._run()
-            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import')
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-incremental')
             assert len(spring_2023_enrollments_imported) == 4
             assert spring_2023_enrollments_imported[0] == 'course_id,user_id,role,section_id,status,associated_user_id'
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30020000,student,SEC:2023-B-32936,active,'
@@ -52,14 +52,14 @@ class TestRefreshBcoursesIncremental:
     def test_incremental_job_does_not_duplicate_full_job(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
             BcoursesRefreshFullJob(app)._run()
-            assert read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full-sis-import')
+            assert read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full')
             BcoursesRefreshIncrementalJob(app)._run()
-            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import')
+            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-incremental')
 
     def test_previous_export_no_change(self, app):
         with self.setup_term_enrollments_export(app) as s3:
             BcoursesRefreshIncrementalJob(app)._run()
-            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import')
+            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-incremental')
 
     @mock.patch('ripley.lib.canvas_site_provisioning.get_edo_enrollment_updates')
     def test_previous_export_student_added(self, mock_edo_enrollment_updates, app, edo_enrollment_updates):
@@ -75,7 +75,7 @@ class TestRefreshBcoursesIncremental:
             mock_edo_enrollment_updates.return_value = edo_enrollment_updates
 
             BcoursesRefreshIncrementalJob(app)._run()
-            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import')
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-incremental')
             assert len(spring_2023_enrollments_imported) == 2
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30060000,student,SEC:2023-B-32936,active,'
 
@@ -83,14 +83,14 @@ class TestRefreshBcoursesIncremental:
     def test_multiple_incremental_jobs_do_not_duplicate(self, mock_edo_enrollment_updates, app, edo_enrollment_updates):
         with self.setup_incremental_refresh_job(app) as s3:
             mock_edo_enrollment_updates.return_value = edo_enrollment_updates
-            assert count_s3_csvs(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import') == 0
+            assert count_s3_csvs(app, s3, 'enrollments-TERM-2023-B-incremental') == 0
             BcoursesRefreshIncrementalJob(app)._run()
-            assert count_s3_csvs(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import') == 1
+            assert count_s3_csvs(app, s3, 'enrollments-TERM-2023-B-incremental') == 1
             # Pause a moment to get a new timestamp.
             sleep(1)
             # No change, no new file.
             BcoursesRefreshIncrementalJob(app)._run()
-            assert count_s3_csvs(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import') == 1
+            assert count_s3_csvs(app, s3, 'enrollments-TERM-2023-B-incremental') == 1
             sleep(1)
             # One new entry, one new file.
             edo_enrollment_updates.append({
@@ -103,8 +103,8 @@ class TestRefreshBcoursesIncremental:
             })
             mock_edo_enrollment_updates.return_value = edo_enrollment_updates
             BcoursesRefreshIncrementalJob(app)._run()
-            assert count_s3_csvs(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import') == 2
-            latest_spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import', get_latest=True)
+            assert count_s3_csvs(app, s3, 'enrollments-TERM-2023-B-incremental') == 2
+            latest_spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-incremental', get_latest=True)
             assert len(latest_spring_2023_enrollments_imported) == 2
             assert latest_spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30060000,student,SEC:2023-B-32936,active,'
 
@@ -117,7 +117,7 @@ class TestRefreshBcoursesIncremental:
             mock_edo_enrollment_updates.return_value = edo_enrollment_updates
 
             BcoursesRefreshIncrementalJob(app)._run()
-            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
+            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-full')
 
     @mock.patch('ripley.lib.canvas_site_provisioning.get_edo_enrollment_updates')
     @mock.patch('ripley.lib.canvas_site_provisioning.get_edo_instructor_updates')
@@ -138,7 +138,7 @@ class TestRefreshBcoursesIncremental:
             mock_edo_instructor_updates.return_value = edo_instructor_updates
 
             BcoursesRefreshIncrementalJob(app)._run()
-            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-incremental-sis-import')
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-incremental')
             assert len(spring_2023_enrollments_imported) == 2
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30020000,Lead TA,SEC:2023-B-32936,active,'
 
@@ -156,8 +156,8 @@ class TestRefreshBcoursesIncremental:
                 f.write(bytes('\n'.join(csv_rows) + '\n', encoding='utf-8'))
             upload_dated_csv(
                 export_file.name,
-                'user-provision-report',
-                'canvas_provisioning_reports',
+                'provisioned-users',
+                'canvas-provisioning-reports',
                 utc_now().strftime('%F_%H-%M-%S'),
             )
             yield s3
@@ -176,8 +176,8 @@ class TestRefreshBcoursesIncremental:
                 f.write(bytes('\n'.join(csv_rows) + '\n', encoding='utf-8'))
             upload_dated_csv(
                 export_file.name,
-                'TERM-2023-B-term-enrollments-export',
-                'canvas_provisioning_reports',
+                'enrollments-TERM-2023-B',
+                'canvas-provisioning-reports',
                 utc_now().strftime('%F_%H-%M-%S'),
             )
             yield s3

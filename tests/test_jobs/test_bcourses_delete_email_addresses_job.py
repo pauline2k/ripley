@@ -35,13 +35,13 @@ class TestBcoursesDeleteEmailAddressesJob:
     def test_no_changes(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
             BcoursesDeleteEmailAddressesJob(app)._run()
-            assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
-            assert_s3_key_not_found(app, s3, 'user-sis-import')
+            assert_s3_key_not_found(app, s3, 'sis-ids')
+            assert_s3_key_not_found(app, s3, 'user-provision')
 
     def test_no_enrollments_in_inactivate_job(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
             BcoursesDeleteEmailAddressesJob(app)._run()
-            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-sis-import')
+            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B')
 
     @mock.patch('ripley.lib.calnet_utils.get_calnet_attributes_for_uids')
     @mock.patch('ripley.lib.calnet_utils.get_users')
@@ -54,8 +54,8 @@ class TestBcoursesDeleteEmailAddressesJob:
 
             BcoursesDeleteEmailAddressesJob(app)._run()
 
-            assert_s3_key_not_found(app, s3, 'sis-id-sis-import')
-            assert_s3_key_not_found(app, s3, 'user-sis-import')
+            assert_s3_key_not_found(app, s3, 'sis-ids')
+            assert_s3_key_not_found(app, s3, 'user-provision')
             assert next(r for r in m.request_history if r.method == 'DELETE' and 'users/4567890/communication_channels' in r.url)
 
     @pytest.fixture(scope='function')
