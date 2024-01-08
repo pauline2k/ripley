@@ -56,7 +56,7 @@ def fetch_cached_dict_object(cache_key):
 
 
 @skip_when_pytest()
-def remove_cached_dict_object(cache_key):
+def delete_cache_key(cache_key):
     get_redis_conn(app)
     redis_conn.delete(cache_key)
 
@@ -77,6 +77,11 @@ def enqueue(func, args):
             ttl=app.config['REDIS_RQ_JOB_TTL'],
         )
         return job
+
+
+def flushdb():
+    get_redis_conn(app)
+    redis_conn.flushdb()
 
 
 def get_job(job_id):

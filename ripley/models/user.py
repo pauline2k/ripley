@@ -28,7 +28,7 @@ from flask import current_app as app
 from flask_login import UserMixin
 from ripley.externals import canvas
 from ripley.externals.data_loch import has_instructor_history
-from ripley.externals.redis import cache_dict_object, fetch_cached_dict_object, remove_cached_dict_object
+from ripley.externals.redis import cache_dict_object, delete_cache_key, fetch_cached_dict_object
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.canvas_user_utils import canvas_user_profile_to_api_json
@@ -138,7 +138,7 @@ class User(UserMixin):
         return self.user.get('isTeaching', None)
 
     def logout(self):
-        remove_cached_dict_object(self._get_cache_key())
+        delete_cache_key(self._get_cache_key())
         self.uid = None
         self.user = self._load_user()
 

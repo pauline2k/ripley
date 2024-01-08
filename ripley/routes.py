@@ -40,6 +40,7 @@ def register_routes(app):
 
     # Register API routes.
     import ripley.api.auth_controller
+    import ripley.api.cache_controller
     import ripley.api.canvas_site_controller
     import ripley.api.canvas_egrades_export_controller
     import ripley.api.canvas_user_controller
