@@ -27,7 +27,7 @@ import re
 
 from flask import current_app as app
 from ripley.externals.data_loch import get_current_term
-from ripley.lib.util import local_today
+from ripley.lib import util
 
 
 class BerkeleyTerm:
@@ -57,7 +57,7 @@ class BerkeleyTerm:
         # If the future term is being handled automatically, add it if and only if a Spring term is currently
         # in progress (in which case the upcoming Summer and Fall terms will both be of interest).
         if future_term_name == 'auto':
-            if current_term_name.startswith('Spring') and db_current_term['term_begins'] <= local_today():
+            if current_term_name.startswith('Spring') and db_current_term['term_begins'] <= util.local_today():
                 terms['future'] = terms['next'].next_term()
 
         # Otherwise, if we have a hardcoded future term distinct from current or next term, add it in.
