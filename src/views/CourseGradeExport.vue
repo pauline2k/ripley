@@ -119,7 +119,7 @@
     </v-container>
 
     <v-container v-if="appState === 'selection'">
-      <v-row no-gutters aria-hidden="true">
+      <v-row no-gutters>
         <v-col>
           <BackToGradebook />
           <Header1
@@ -128,9 +128,6 @@
             text="Export E-Grades"
           />
         </v-col>
-      </v-row>
-      <v-row class="sr-only">
-        <BackToGradebook />
       </v-row>
       <v-row v-if="officialSections.length > 1" no-gutters>
         <v-col md="5">

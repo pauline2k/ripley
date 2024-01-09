@@ -1,6 +1,6 @@
 <template>
   <div class="align-center d-flex">
-    <div class="pr-1">
+    <div aria-hidden="true" class="pr-1">
       <v-icon :icon="mdiChevronLeft" />
     </div>
     <div>
