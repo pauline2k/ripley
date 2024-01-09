@@ -184,7 +184,7 @@
                     name="selectedUser"
                     type="radio"
                     :value="user"
-                    :aria-labelled-by="`user-search-result-row-name-${index} user-search-result-row-ldap-uid-${index}`"
+                    :aria-labelledby="`user-search-result-row-name-${index} user-search-result-row-ldap-uid-${index}`"
                   >
                   <label :id="`user-search-result-row-name-${index}`" :for="`user-search-result-input-${index}`" class="form-input-label-no-align">
                     {{ user.firstName }} {{ user.lastName }}
