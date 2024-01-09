@@ -42,29 +42,30 @@ class TestGetAddUserConfig:
     def test_anonymous(self, client, app):
         """Anonymous user can get the Add User tool config JSON."""
         _api_get_tool_config(
-            client,
             app,
+            client,
             config_uri='add_user.json',
-            target='launch_add_user',
-            expected_title='Find a Person to Add (LTI 1.3)',
+            expected_default='disabled',
             expected_description='Search and add users to course sections',
             expected_placement='link_selection',
-            expected_default='disabled',
+            expected_title='Find a Person to Add (LTI 1.3)',
+            expected_visibility='admins',
+            target='launch_add_user',
         )
 
 
-class TestGetCreateSiteConfig:
+class TestManageSitesConfig:
 
     def test_anonymous(self, client, app):
         """Anonymous user can get the 'Manage Sites' tool config JSON."""
         _api_get_tool_config(
-            client,
             app,
+            client,
             config_uri='manage_sites.json',
-            target='launch_manage_sites',
-            expected_title='Manage Sites (LTI 1.3)',
             expected_description='Create or update bCourses sites',
             expected_placement='user_navigation',
+            expected_title='Manage Sites (LTI 1.3)',
+            target='launch_manage_sites',
         )
 
 
@@ -73,14 +74,15 @@ class TestGetGradeExportConfig:
     def test_anonymous(self, client, app):
         """Anonymous user can get the Download E-Grades tool config JSON."""
         _api_get_tool_config(
-            client,
             app,
+            client,
             config_uri='export_grade.json',
-            target='launch_export_grade',
-            expected_title='Download E-Grades (LTI 1.3)',
+            expected_default='disabled',
             expected_description='Exports Course Grades to E-Grades CSV file',
             expected_placement='link_selection',
-            expected_default='disabled',
+            expected_title='Download E-Grades (LTI 1.3)',
+            expected_visibility='admins',
+            target='launch_export_grade',
         )
 
 
@@ -89,14 +91,15 @@ class TestGetGradeDistributionConfig:
     def test_anonymous(self, client, app):
         """Anonymous user can get the Grade Distribution tool config JSON."""
         _api_get_tool_config(
-            client,
             app,
+            client,
             config_uri='grade_distribution.json',
-            target='launch_grade_distribution',
-            expected_title='Grade Distribution (LTI 1.3)',
+            expected_default='disabled',
             expected_description='',
             expected_placement='course_navigation',
-            expected_default='disabled',
+            expected_title='Grade Distribution (LTI 1.3)',
+            expected_visibility='admins',
+            target='launch_grade_distribution',
         )
 
 
@@ -105,14 +108,15 @@ class TestGetMailingListConfig:
     def test_anonymous(self, client, app):
         """Anonymous user can get the Mailing List tool config JSON."""
         _api_get_tool_config(
-            client,
             app,
+            client,
             config_uri='mailing_list.json',
-            target='launch_mailing_list',
-            expected_title='Mailing List (LTI 1.3)',
+            expected_default='disabled',
             expected_description='Create and manage a mailing list for a course site',
             expected_placement='course_navigation',
-            expected_default='disabled',
+            expected_title='Mailing List (LTI 1.3)',
+            expected_visibility='admins',
+            target='launch_mailing_list',
         )
 
 
@@ -121,13 +125,14 @@ class TestGetMailingListsConfig:
     def test_anonymous(self, client, app):
         """Anonymous user can get the Mailing Lists tool config JSON."""
         _api_get_tool_config(
-            client,
             app,
+            client,
             config_uri='mailing_lists.json',
-            target='launch_mailing_lists',
-            expected_title='Mailing Lists (LTI 1.3)',
             expected_description='Create and manage mailing lists for all course sites',
             expected_placement='account_navigation',
+            expected_title='Mailing Lists (LTI 1.3)',
+            expected_visibility='admins',
+            target='launch_mailing_lists',
         )
 
 
@@ -136,13 +141,14 @@ class TestGetRosterPhotosConfig:
     def test_anonymous(self, client, app):
         """Anonymous user can get the Roster Photos tool config JSON."""
         _api_get_tool_config(
-            client,
             app,
+            client,
             config_uri='roster_photos.json',
-            target='launch_roster_photos',
-            expected_title='Roster Photos',
             expected_description='Browse and search official roster photos',
             expected_placement='course_navigation',
+            expected_title='Roster Photos',
+            expected_visibility='admins',
+            target='launch_roster_photos',
         )
 
 
@@ -151,25 +157,27 @@ class TestGetUserProvisioningConfig:
     def test_anonymous(self, client, app):
         """Anonymous user can get the User Provisioning tool config JSON."""
         _api_get_tool_config(
-            client,
             app,
+            client,
             config_uri='provision_user.json',
-            target='launch_provision_user',
-            expected_title='User Provisioning (LTI 1.3)',
             expected_description='Automated user provisioning',
             expected_placement='account_navigation',
+            expected_title='User Provisioning (LTI 1.3)',
+            expected_visibility='admins',
+            target='launch_provision_user',
         )
 
 
 def _api_get_tool_config(
-    client,
     app,
+    client,
     config_uri,
-    target,
-    expected_title,
     expected_description,
     expected_placement,
+    expected_title,
+    target,
     expected_default='enabled',
+    expected_visibility='public',
 ):
     response = client.get(f'api/lti/config/{config_uri}')
     assert response.status_code == 200
@@ -197,5 +205,5 @@ def _api_get_tool_config(
         'message_type': 'LtiResourceLinkRequest',
         'placement': expected_placement,
         'text': expected_title,
-        'visibility': 'admins',
+        'visibility': expected_visibility,
     }
