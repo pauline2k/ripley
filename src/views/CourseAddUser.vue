@@ -120,13 +120,12 @@
                   </template>
                 </v-radio>
               </v-radio-group>
-              <div class="align-center d-flex py-3">
-                <div class="pr-3">
+              <div class="align-center d-flex flex-wrap pb-3">
+                <div class="pr-3 pt-3 search-text-field">
                   <v-text-field
                     id="search-text"
                     v-model="searchText"
                     :aria-label="`enter search terms, search by ${searchType === 'uid' ? 'CalNet U I D' : searchType}`"
-                    class="search-text-field"
                     density="comfortable"
                     :disabled="isSearching || isAddingUser"
                     hide-details
@@ -135,7 +134,7 @@
                     @keydown.enter="submitSearch"
                   />
                 </div>
-                <div>
+                <div class="pt-3">
                   <v-btn
                     id="add-user-submit-search-btn"
                     aria-label="Submit search"
@@ -258,7 +257,7 @@
           </v-row>
           <v-row no-gutters>
             <v-col md="12">
-              <div class="d-flex justify-end">
+              <div class="d-flex justify-end pt-3">
                 <v-btn
                   id="add-user-btn"
                   class="mx-1"
@@ -493,6 +492,6 @@ export default {
   width: 64px;
 }
 .search-text-field {
-  width: 600px;
+  width: 82%;
 }
 </style>
