@@ -3,6 +3,7 @@
     class="mt-2"
     closable
     close-label="Hide help"
+    color="grey-lighten-4"
     @click:close="onCloseHelp"
   >
     <div class="d-flex">
@@ -41,11 +42,13 @@ import {mdiHelpCircleOutline} from '@mdi/js'
 </script>
 
 <script>
+import Context from '@/mixins/Context'
 import {get, size} from 'lodash'
 import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'SelectSectionsGuide',
+  mixins: [Context],
   methods: {
     onCloseHelp() {
       this.alertScreenReader('help hidden')

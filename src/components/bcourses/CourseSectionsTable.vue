@@ -513,6 +513,7 @@ export default {
   }
   .td-course-code {
     min-width: 100px;
+    vertical-align: middle;
     width: 5%
   }
   .td-actions {
@@ -524,25 +525,31 @@ export default {
   }
   .td-section-id {
     min-width: 70px;
+    vertical-align: middle;
     width: 10%
   }
   .td-instructors {
     min-width: 183px;
+    vertical-align: middle;
     width: 15%
   }
   .td-section-name {
     min-width: 115px;
+    vertical-align: middle;
     width: 15%
   }
   .td-meeting-location {
     min-width: 150px;
+    vertical-align: middle;
     width: 15%
   }
   .td-schedule {
     min-width: 155px;
+    vertical-align: middle;
     width: 15%
   }
   .td-shrink-to-fit {
+    vertical-align: middle;
     width: 1%;
   }
   .responsive-justify-end {
