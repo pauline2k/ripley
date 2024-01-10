@@ -26,7 +26,7 @@ sleep 5
 
 psql "postgresql://${junction_db}" <<EXPORT
 \copy (select mailing_list_id::integer, email_address, can_send, first_name, last_name, created_at, deleted_at, updated_at, welcomed_at FROM canvas_site_mailing_list_members ORDER BY mailing_list_id) TO ${script_dir}/canvas_site_mailing_list_members.csv WITH CSV DELIMITER ','
-\copy (select id, canvas_site_id::integer, canvas_site_name, list_name, members_count, populate_add_errors, populate_remove_errors, populated_at, state, type, welcome_email_active, welcome_email_body, welcome_email_subject, created_at, updated_at, NULL AS term_id FROM canvas_site_mailing_lists ORDER BY id) TO ${script_dir}/canvas_site_mailing_lists.csv WITH CSV DELIMITER ','
+\copy (select id, canvas_site_id::integer, canvas_site_name, list_name, members_count, populate_add_errors, populate_remove_errors, populated_at, state, type, welcome_email_active, welcome_email_body, welcome_email_subject, created_at, updated_at, substring(list_name FROM '^.+-(\w{4})(?:-\d{1})?$') AS list_name_suffix FROM canvas_site_mailing_lists ORDER BY id) TO ${script_dir}/canvas_site_mailing_lists.csv WITH CSV DELIMITER ','
 EXPORT
 
 psql ${ripley_db} <<IMPORT
@@ -40,15 +40,15 @@ CREATE TABLE temp_mailing_lists (
     populate_remove_errors integer,
     populated_at timestamp with time zone,
     state character varying(255),
-    term_id integer,
     type character varying(255),
     welcome_email_active boolean NOT NULL DEFAULT false,
     welcome_email_body text,
     welcome_email_subject text,
     created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone NOT NULL
+    updated_at timestamp with time zone NOT NULL,
+    list_name_suffix character varying(255)
 );
-\copy temp_mailing_lists (id, canvas_site_id, canvas_site_name, list_name, members_count, populate_add_errors, populate_remove_errors, populated_at, state, type, welcome_email_active, welcome_email_body, welcome_email_subject, created_at, updated_at, term_id) FROM ${script_dir}/canvas_site_mailing_lists.csv WITH CSV DELIMITER ','
+\copy temp_mailing_lists (id, canvas_site_id, canvas_site_name, list_name, members_count, populate_add_errors, populate_remove_errors, populated_at, state, type, welcome_email_active, welcome_email_body, welcome_email_subject, created_at, updated_at, list_name_suffix) FROM ${script_dir}/canvas_site_mailing_lists.csv WITH CSV DELIMITER ','
 CREATE TABLE temp_mailing_list_members (
     mailing_list_id integer NOT NULL,
     email_address character varying(255) NOT NULL,
@@ -61,11 +61,32 @@ CREATE TABLE temp_mailing_list_members (
     welcomed_at timestamp WITH time zone
 );
 \copy temp_mailing_list_members (mailing_list_id, email_address, can_send, first_name, last_name, created_at, deleted_at, updated_at, welcomed_at) FROM ${script_dir}/canvas_site_mailing_list_members.csv WITH CSV DELIMITER ','
-WITH mailing_lists AS (
+
+WITH tmp1 AS (
+    SELECT list_name, substring(list_name FROM '^.+-(\w{4})(?:-\d{1})?$') AS list_name_suffix
+    FROM temp_mailing_lists
+),
+tmp2 AS (
+    SELECT list_name,
+      CASE WHEN list_name_suffix = 'list' THEN NULL ELSE '2' || substr(list_name_suffix, 3) END AS shortened_year,
+      CASE WHEN list_name_suffix = 'list' THEN NULL ELSE substr(list_name_suffix, 1, 2) END AS season
+    FROM tmp1
+),
+tmp3 AS (
+    SELECT list_name,
+    shortened_year || (
+      CASE WHEN season = 'fa' THEN '8'
+           WHEN season = 'sp' THEN '2'
+           WHEN season = 'su' THEN '5'
+      ELSE NULL END
+    ) AS term_id
+    FROM tmp2
+),
+mailing_lists AS (
     INSERT INTO canvas_site_mailing_lists (canvas_site_id, canvas_site_name, list_name, members_count, populate_add_errors, populate_remove_errors, populated_at, state, type, welcome_email_active, welcome_email_body, welcome_email_subject, created_at, updated_at, term_id) (
-        SELECT canvas_site_id, canvas_site_name, list_name, members_count, populate_add_errors, populate_remove_errors, populated_at,
-            state, type, welcome_email_active, welcome_email_body, welcome_email_subject, created_at, updated_at, term_id
-        FROM temp_mailing_lists
+        SELECT canvas_site_id, canvas_site_name, t1.list_name, members_count, populate_add_errors, populate_remove_errors, populated_at,
+            state, type, welcome_email_active, welcome_email_body, welcome_email_subject, created_at, updated_at, t3.term_id::integer
+        FROM temp_mailing_lists t1 JOIN tmp3 t3 ON t1.list_name = t3.list_name
     )
     RETURNING id, canvas_site_id
 )
