@@ -189,16 +189,18 @@ class TestSuggestedMailingListName:
             canvas_site_id = '8876542'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}']}, m)
-            suggested_name = self._api_suggested_mailing_list_name(canvas_site_id=canvas_site_id, client=client)
-            assert suggested_name == 'voix-ambigue-d-un-coeur-qui-au-zephyr-prefere-sp23'
+            suggested = self._api_suggested_mailing_list_name(canvas_site_id=canvas_site_id, client=client)
+            assert suggested['name'] == 'voix-ambigue-d-un-coeur-qui-au-zephyr-prefere'
+            assert suggested['suffix'] == 'sp23'
 
     def test_suggested_name_when_default_term(self, app, client, fake_auth):
         with requests_mock.Mocker() as m:
             canvas_site_id = '775390'
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}']}, m)
-            suggested_name = self._api_suggested_mailing_list_name(canvas_site_id=canvas_site_id, client=client)
-            assert suggested_name == 'general-chemistry-list'
+            suggested = self._api_suggested_mailing_list_name(canvas_site_id=canvas_site_id, client=client)
+            assert suggested['name'] == 'general-chemistry'
+            assert suggested['suffix'] == 'list'
 
 
 class TestCreateMailingList:
@@ -233,7 +235,7 @@ class TestCreateMailingList:
         """Allows admin."""
         with requests_mock.Mocker() as m:
             mailing_list_id = None
-            for mailing_list_name in (None, 'I am a custom name.'):
+            for mailing_list_name in (None, 'my-mailing-list'):
                 if mailing_list_id:
                     # Delete previous mailing_list test data.
                     MailingList.delete(mailing_list_id)
@@ -331,11 +333,11 @@ class TestActivateMailingList:
             canvas_site = canvas.get_course(canvas_site_id)
             mailing_list = MailingList.create(
                 canvas_site=canvas_site,
-                list_name='Wonder Twin powers activate!',
                 welcome_email_body='Body',
                 welcome_email_subject='Subject',
             )
             assert mailing_list.welcome_email_active is False
+            assert mailing_list.list_name == 'voix-ambigue-d-un-coeur-qui-au-zephyr-prefere-sp23'
             api_json = _api_activate_mailing_list(
                 activate=True,
                 client=client,
@@ -453,7 +455,7 @@ class TestPopulateMailingList:
             canvas_site = canvas.get_course(canvas_site_id)
             mailing_list = MailingList.create(
                 canvas_site=canvas_site,
-                list_name='Nostromo BBS 6000!',
+                list_name='Nostromo BBS 6000!-list',
                 welcome_email_body='Body',
                 welcome_email_subject='Subject',
             )
@@ -461,6 +463,8 @@ class TestPopulateMailingList:
                 activate=True,
                 client=client,
             )
+            assert api_json
+
             api_json = self._api_populate_mailing_list(client, mailing_list_id=mailing_list.id)
             assert api_json['summary']['welcomeEmails']['total'] == 2
             assert len(api_json['summary']['welcomeEmails']['successes']) == 2
@@ -564,9 +568,11 @@ class TestUpdateWelcomeEmail:
             )
             # Create the mailing list.
             canvas_site = canvas.get_course(canvas_site_id)
+            name, suffix = MailingList.get_suggested_name(canvas_site)
+            list_name = f'{name}-{suffix}'
             mailing_list = MailingList.create(
                 canvas_site=canvas_site,
-                list_name='Gypsy',
+                list_name=list_name,
                 welcome_email_body="So I'm back to the velvet underground",
                 welcome_email_subject='Back to that floor I love',
             )
@@ -579,7 +585,7 @@ class TestUpdateWelcomeEmail:
                 subject=subject,
             )
             assert api_json['id'] == mailing_list.id
-            assert api_json['name'] == 'Gypsy'
+            assert api_json['name'] == list_name
             assert api_json['welcomeEmailBody'] == body
             assert api_json['welcomeEmailSubject'] == subject
 

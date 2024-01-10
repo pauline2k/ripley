@@ -51,8 +51,7 @@
                     :href="canvasSite.url"
                     title="View course site"
                   >
-                    <div class="pr-2" level="2" role="heading">{{ canvasSite.name }}</div>
-                    <v-icon :icon="mdiOpenInNew" size="small" />
+                    {{ canvasSite.name }}
                   </OutboundLink>
                 </h2>
                 <div v-if="!get(canvasSite, 'url')">
@@ -63,42 +62,37 @@
             <v-row v-if="isAdminToolMode" no-gutters>
               <v-col>
                 <div class="mb-4 w-auto">
-                  <div v-if="get(canvasSite, 'term')" class="font-weight-medium text-subtitle-1">{{ canvasSite.term.name }}</div>
-                  <div>Site ID {{ get(canvasSite, 'canvasSiteId') }}</div>
+                  <div v-if="get(canvasSite, 'term')" class="text-subtitle-1">{{ canvasSite.term.name }}</div>
+                  <div>bCourses Site ID {{ get(canvasSite, 'canvasSiteId') }}</div>
                 </div>
               </v-col>
             </v-row>
             <v-row align="center" no-gutters>
-              <v-col class="pb-0" cols="8">
-                <div class="d-flex pt-1">
-                  <div class="float-right mailing-list-name-input text-subtitle-1">
-                    <label for="mailing-list-name-input">Name</label>
-                  </div>
-                  <div class="w-100">
-                    <div>
-                      <v-text-field
-                        id="mailing-list-name-input"
-                        v-model="mailingListName"
-                        :aria-invalid="hasInvalidCharacters"
-                        aria-required="true"
-                        density="comfortable"
-                        :disabled="isCreating"
-                        hide-details
-                        maxlength="50"
-                        required
-                        variant="outlined"
-                        @focus="hasInvalidCharacters = false; debouncedValidateName()"
-                        @update:model-value="hasInvalidCharacters = false; debouncedValidateName()"
-                        @keydown.enter="create"
-                      />
-                      <div v-if="mailingListName && hasInvalidCharacters" aria-live="assertive" class="validation-messages">
-                        <div class="pr-1 text-no-wrap">
-                          <span class="sr-only">Error: </span>Only lowercase alphanumeric, underscore and hyphen characters allowed.
-                        </div>
-                      </div>
-                    </div>
+              <v-col>
+                <label class="sr-only" for="mailing-list-name-input">Mailing list name</label>
+                <v-text-field
+                  id="mailing-list-name-input"
+                  v-model="mailingListName"
+                  :aria-invalid="hasInvalidCharacters"
+                  aria-required="true"
+                  density="comfortable"
+                  :disabled="isCreating"
+                  hide-details
+                  maxlength="50"
+                  required
+                  variant="outlined"
+                  @focus="hasInvalidCharacters = false; debouncedValidateName()"
+                  @update:model-value="hasInvalidCharacters = false; debouncedValidateName()"
+                  @keydown.enter="create"
+                />
+                <div v-if="mailingListName && hasInvalidCharacters" aria-live="assertive" class="validation-messages">
+                  <div class="pr-1 text-no-wrap">
+                    <span class="sr-only">Error: </span>Only lowercase alphanumeric, underscore and hyphen characters allowed.
                   </div>
                 </div>
+              </v-col>
+              <v-col>
+                <div class="text-no-wrap text-subtitle-1">-{{ mailingListSuffix }}@{{ mailgunDomain }}</div>
               </v-col>
             </v-row>
             <v-row v-if="currentUser.isTeaching || currentUser.isAdmin" no-gutters>
@@ -137,10 +131,6 @@
   </div>
 </template>
 
-<script setup>
-import {mdiOpenInNew} from '@mdi/js'
-</script>
-
 <script>
 import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1.vue'
@@ -164,7 +154,9 @@ export default {
     hasInvalidCharacters: false,
     isAdminToolMode: undefined,
     isCreating: false,
+    mailgunDomain: undefined,
     mailingListName: undefined,
+    mailingListSuffix: undefined,
     success: undefined,
     validNameRegex: /[a-z0-9_-]/g
   }),
@@ -185,7 +177,10 @@ export default {
           this.getCanvasSite().then(data => {
             this.setCanvasSite(data)
             getSuggestedMailingListName(this.canvasSiteId).then(data => {
-              this.mailingListName = data
+              this.mailgunDomain = data.mailgunDomain
+              this.mailingListName = data.name
+              const suffix = data.suffix
+              this.mailingListSuffix = suffix
               this.$ready()
             })
           })
@@ -207,10 +202,14 @@ export default {
       if (name && !this.hasInvalidCharacters) {
         this.isCreating = true
         this.alertScreenReader('Creating mailing list.')
-        let createTimer = setInterval(() => {
+        const createTimer = setInterval(() => {
           this.alertScreenReader('Still creating mailing list.')
         }, 7000)
-        createMailingList(this.canvasSiteId, name, !this.isAdminToolMode).then(
+        createMailingList(
+          this.canvasSiteId,
+          `${name}-${this.mailingListSuffix}`,
+          !this.isAdminToolMode
+        ).then(
           data => {
             this.alertScreenReader('Success.', 'assertive')
             this.error = null
@@ -227,6 +226,7 @@ export default {
         })
       }
     },
+    get,
     getCanvasSite() {
       return new Promise(resolve => {
         if (this.canvasSite) {
@@ -249,9 +249,3 @@ export default {
   }
 }
 </script>
-
-<style scoped lang="scss">
-.mailing-list-name-input {
-  padding: 10px 12px 0 8px;
-}
-</style>

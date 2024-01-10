@@ -72,11 +72,11 @@ def create_mailing_lists():
     try:
         params = request.get_json()
         canvas_site_id = params.get('canvasSiteId')
-        list_name = params.get('name')
         populate = params.get('populate') or False
         canvas_site = canvas.get_course(canvas_site_id) if canvas_site_id else None
         if not canvas_site:
             raise ResourceNotFoundError(f'Canvas site {canvas_site_id} not found')
+        list_name = (params.get('name') or '').strip()
         mailing_list = MailingList.create(canvas_site=canvas_site, list_name=list_name)
         if populate:
             mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
@@ -127,7 +127,12 @@ def update_welcome_email():
 def get_suggested_mailing_list_name(canvas_site_id):
     canvas_site = canvas.get_course(canvas_site_id)
     if canvas_site:
-        return tolerant_jsonify(MailingList.get_suggested_name(canvas_site))
+        name, suffix = MailingList.get_suggested_name(canvas_site)
+        return tolerant_jsonify({
+            'mailgunDomain': app.config['MAILGUN_DOMAIN'],
+            'name': name,
+            'suffix': suffix,
+        })
     else:
         raise ResourceNotFoundError(f'Canvas site {canvas_site_id} not found')
 
