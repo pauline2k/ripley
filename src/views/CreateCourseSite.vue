@@ -114,7 +114,7 @@
                   </v-expansion-panels>
                 </v-window-item>
               </v-window>
-              <div class="d-flex justify-end">
+              <div class="d-flex justify-end mt-2">
                 <v-btn
                   id="page-create-course-site-continue"
                   aria-label="Continue to next step"
@@ -244,7 +244,6 @@ export default {
       if (!this.teachingTerms.length && !this.currentUser.isAdmin) {
         this.warning = 'You are not listed as an instructor of any courses in the current or upcoming term.'
       }
-      this.selectedTerm = this.currentSemester
       if (this.selectedSectionsList.length) {
         this.panels = Array.from({length: this.coursesList.length}, (value, index) => index)
       } else if (this.coursesList.length === 1) {
@@ -309,7 +308,7 @@ export default {
               this.trackBackgroundJob()
               resolve()
             },
-            () => onError('Failed to create course provisioning job.')
+            () => onError('Failed to start course provisioning job.')
           )
         } else {
           onError('No section IDs were provided.')
@@ -327,6 +326,7 @@ export default {
       this.alertScreenReader('Loading courses and sections')
 
       const semester = (this.adminMode === 'bySectionId' ? this.currentAdminTerm : this.currentSemester)
+      this.selectedTerm = semester
       getSections(
         this.adminActingAs,
         this.adminBySectionIds,
