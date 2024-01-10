@@ -52,11 +52,12 @@ class MessageLaunch(FlaskMessageLaunch):
 def config_add_user():
     tool_definition = lti_tool_definitions()['add_user']
     return tool_config(
-        title=tool_definition['name'],
-        description=tool_definition['description'],
-        target='launch_add_user',
-        placement=tool_definition['placement'],
         default=tool_definition['default'],
+        description=tool_definition['description'],
+        placement=tool_definition['placement'],
+        target='launch_add_user',
+        title=tool_definition['name'],
+        visibility='admins',
     )
 
 
@@ -64,10 +65,10 @@ def config_add_user():
 def config_manage_sites():
     tool_definition = lti_tool_definitions()['manage_sites']
     return tool_config(
-        title=tool_definition['name'],
         description=tool_definition['description'],
-        target='launch_manage_sites',
         placement=tool_definition['placement'],
+        target='launch_manage_sites',
+        title=tool_definition['name'],
     )
 
 
@@ -75,22 +76,24 @@ def config_manage_sites():
 def config_export_grade():
     tool_definition = lti_tool_definitions()['export_grade']
     return tool_config(
-        title=tool_definition['name'],
-        description=tool_definition['description'],
-        target='launch_export_grade',
-        placement=tool_definition['placement'],
         default=tool_definition['default'],
+        description=tool_definition['description'],
+        placement=tool_definition['placement'],
+        target='launch_export_grade',
+        title=tool_definition['name'],
+        visibility='admins',
     )
 
 
 @app.route('/api/lti/config/grade_distribution.json')
 def config_grade_distribution():
     return tool_config(
-        title='Grade Distribution (LTI 1.3)',
-        description='',
-        target='launch_grade_distribution',
-        placement='course_navigation',
         default='disabled',
+        description='',
+        placement='course_navigation',
+        target='launch_grade_distribution',
+        title='Grade Distribution (LTI 1.3)',
+        visibility='admins',
     )
 
 
@@ -98,11 +101,12 @@ def config_grade_distribution():
 def config_mailing_list():
     tool_definition = lti_tool_definitions()['mailing_list']
     return tool_config(
-        title=tool_definition['name'],
-        description=tool_definition['description'],
-        target='launch_mailing_list',
-        placement=tool_definition['placement'],
         default=tool_definition['default'],
+        description=tool_definition['description'],
+        placement=tool_definition['placement'],
+        target='launch_mailing_list',
+        title=tool_definition['name'],
+        visibility='admins',
     )
 
 
@@ -110,10 +114,11 @@ def config_mailing_list():
 def config_mailing_lists():
     tool_definition = lti_tool_definitions()['mailing_lists']
     return tool_config(
-        title=tool_definition['name'],
         description=tool_definition['description'],
-        target='launch_mailing_lists',
         placement=tool_definition['placement'],
+        target='launch_mailing_lists',
+        title=tool_definition['name'],
+        visibility='admins',
     )
 
 
@@ -121,10 +126,11 @@ def config_mailing_lists():
 def config_provision_user():
     tool_definition = lti_tool_definitions()['provision_user']
     return tool_config(
-        title=tool_definition['name'],
         description=tool_definition['description'],
-        target='launch_provision_user',
         placement=tool_definition['placement'],
+        target='launch_provision_user',
+        title=tool_definition['name'],
+        visibility='admins',
     )
 
 
@@ -132,10 +138,11 @@ def config_provision_user():
 def config_roster_photos():
     tool_definition = lti_tool_definitions()['roster_photos']
     return tool_config(
-        title=tool_definition['name'],
         description=tool_definition['description'],
-        target='launch_roster_photos',
         placement=tool_definition['placement'],
+        target='launch_roster_photos',
+        title=tool_definition['name'],
+        visibility='admins',
     )
 
 

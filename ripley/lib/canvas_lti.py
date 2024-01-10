@@ -47,11 +47,12 @@ def configure_tools_from_current_host():
     for tool_id, tool_definition in lti_tool_definitions().items():
         with app.test_request_context(base_url=app.config['LTI_HOST']):
             tool_settings = tool_config(
-                title=tool_definition['name'],
-                description=tool_definition['description'],
-                target=f'launch_{tool_id}',
-                placement=tool_definition['placement'],
                 default=tool_definition.get('default'),
+                description=tool_definition['description'],
+                placement=tool_definition['placement'],
+                target=f'launch_{tool_id}',
+                title=tool_definition['name'],
+                visibility=tool_definition['visibility'],
             )
             _update_developer_key(
                 account_id=tool_definition['account_id'],
@@ -78,6 +79,7 @@ def lti_tool_definitions():
                 'description': 'Search and add users to course sections',
                 'placement': 'link_selection',
                 'default': 'disabled',
+                'visibility': 'admins',
             },
             'export_grade': {
                 'name': 'Download E-Grades (LTI 1.3)',
@@ -86,6 +88,7 @@ def lti_tool_definitions():
                 'description': 'Exports Course Grades to E-Grades CSV file',
                 'placement': 'link_selection',
                 'default': 'disabled',
+                'visibility': 'admins',
             },
             'grade_distribution': {
                 'name': 'Grade Distribution (LTI 1.3)',
@@ -94,6 +97,7 @@ def lti_tool_definitions():
                 'description': 'Grade Distribution (LTI 1.3)',
                 'placement': 'course_navigation',
                 'default': 'disabled',
+                'visibility': 'admins',
             },
             'mailing_list': {
                 'name': 'Mailing List (LTI 1.3)',
@@ -102,6 +106,7 @@ def lti_tool_definitions():
                 'description': 'Create and manage a mailing list for a course site',
                 'placement': 'course_navigation',
                 'default': 'disabled',
+                'visibility': 'admins',
             },
             'mailing_lists': {
                 'name': 'Mailing Lists (LTI 1.3)',
@@ -109,6 +114,7 @@ def lti_tool_definitions():
                 'client_id': '10720000000000624',
                 'description': 'Create and manage mailing lists for all course sites',
                 'placement': 'account_navigation',
+                'visibility': 'admins',
             },
             'manage_sites': {
                 'name': 'Manage Sites (LTI 1.3)',
@@ -116,6 +122,7 @@ def lti_tool_definitions():
                 'client_id': '10720000000000625',
                 'description': 'Create or update bCourses sites',
                 'placement': 'user_navigation',
+                'visibility': 'public',
             },
             'provision_user': {
                 'name': 'User Provisioning (LTI 1.3)',
@@ -123,6 +130,7 @@ def lti_tool_definitions():
                 'client_id': '10720000000000627',
                 'description': 'Automated user provisioning',
                 'placement': 'account_navigation',
+                'visibility': 'admins',
             },
             'roster_photos': {
                 'name': 'Roster Photos',
@@ -130,12 +138,20 @@ def lti_tool_definitions():
                 'client_id': '10720000000000628',
                 'description': 'Browse and search official roster photos',
                 'placement': 'course_navigation',
+                'visibility': 'admins',
             },
         }
     return LTI_TOOL_DEFINITIONS
 
 
-def tool_config(title, description, target, placement, default='enabled'):
+def tool_config(
+        description,
+        placement,
+        target,
+        title,
+        default='enabled',
+        visibility='public',
+):
     return {
         'title': title,
         'description': description,
@@ -155,7 +171,7 @@ def tool_config(title, description, target, placement, default='enabled'):
                             'placement': placement,
                             'message_type': 'LtiResourceLinkRequest',
                             'text': title,
-                            'visibility': 'admins',
+                            'visibility': visibility,
                         },
                     ],
                 },
