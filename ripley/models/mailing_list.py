@@ -86,18 +86,9 @@ class MailingList(Base):
 
     @classmethod
     def get_suggested_name(cls, canvas_site):
-        def scrub(s):
-            return '-'.join([word for word in re.split('[^a-z0-9]+', unidecode(s.strip().lower())) if word])[0:45]
-        name = scrub(canvas_site.name)
-        name = name if name[-1] == '-' else f'{name}-'
-        sis_term_id = canvas_site.term['sis_term_id']
-        term = BerkeleyTerm.from_canvas_sis_term_id(sis_term_id) if sis_term_id else None
-        if term:
-            name += term.to_abbreviation()
-        else:
-            term_name = canvas_site.term['name']
-            name += scrub(term_name) if term_name and 'default' not in term_name.lower() else 'list'
-        return name
+        name = _normalize_name(canvas_site.name)
+        suffix = _get_mailing_list_name_suffix(canvas_site)
+        return name, suffix
 
     @classmethod
     def create(
@@ -108,18 +99,13 @@ class MailingList(Base):
         welcome_email_subject=None,
     ):
         canvas_site_id = canvas_site.id
-        list_name = (list_name or MailingList.get_suggested_name(canvas_site)).strip()
         mailing_list = cls.query.filter_by(canvas_site_id=canvas_site_id).first()
         if mailing_list:
             raise ValueError(f'List with id {canvas_site_id} already exists')
         mailing_list = cls(canvas_site_id=canvas_site_id)
         term_id = extract_berkeley_term_id(canvas_site)
-
-        if cls.query.filter_by(list_name=list_name).first():
-            raise ValueError(f'The name {list_name} is used by another bCourses site and is not available.')
-
         mailing_list.canvas_site_name = canvas_site.name
-        mailing_list.list_name = list_name
+        mailing_list.list_name = cls._validate_mailing_list_name(list_name, canvas_site)
         mailing_list.term_id = int(term_id) if term_id and term_id.isnumeric() else None
         mailing_list.welcome_email_body = welcome_email_body
         mailing_list.welcome_email_subject = welcome_email_subject
@@ -347,11 +333,35 @@ class MailingList(Base):
         app.logger.info('\n' + f'Mailing list {mailing_list.list_name} update: {summary}' + '\n')
         return mailing_list, summary
 
+    @classmethod
+    def _validate_mailing_list_name(cls, list_name, canvas_site):
+        suggested_name, suffix = MailingList.get_suggested_name(canvas_site)
+        if list_name:
+            if not list_name.endswith(suffix) and not list_name.endswith('list'):
+                raise ValueError(f'Mailing list name {list_name} has an invalid suffix.')
+        else:
+            # Generate list name if it was not provided.
+            list_name = f'{suggested_name}-{suffix}'
+        if cls.query.filter_by(list_name=list_name).first():
+            raise ValueError(f'The name {list_name} is used by another bCourses site and is not available.')
+        return list_name
+
 
 def _can_send(canvas_site_user):
     return has_instructing_role(canvas_site_user) or \
         is_project_maintainer(canvas_site_user) or \
         is_project_owner(canvas_site_user)
+
+
+def _get_mailing_list_name_suffix(canvas_site):
+    sis_term_id = canvas_site.term['sis_term_id']
+    term = BerkeleyTerm.from_canvas_sis_term_id(sis_term_id) if sis_term_id else None
+    if term:
+        suffix = term.to_abbreviation()
+    else:
+        term_name = canvas_site.term['name']
+        suffix = _normalize_name(term_name) if term_name and 'default' not in term_name.lower() else 'list'
+    return suffix
 
 
 def _get_preferred_email(canvas_user_email, loch_user_email):
@@ -360,6 +370,10 @@ def _get_preferred_email(canvas_user_email, loch_user_email):
     else:
         preferred_email = loch_user_email or canvas_user_email
     return preferred_email.lower() if preferred_email else None
+
+
+def _normalize_name(name):
+    return '-'.join([word for word in re.split('[^a-z0-9]+', unidecode(name.strip().lower())) if word])[0:45]
 
 
 def _remove_from_list_safely(item, list_of_items):
