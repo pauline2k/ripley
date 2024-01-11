@@ -86,9 +86,9 @@ class MailingList(Base):
 
     @classmethod
     def get_suggested_name(cls, canvas_site):
-        name = _normalize_name(canvas_site.name)
+        name = (canvas_site.name or '').strip().lower()
         suffix = _get_mailing_list_name_suffix(canvas_site)
-        return name, suffix
+        return _normalize_name(name), suffix
 
     @classmethod
     def create(
@@ -359,8 +359,9 @@ def _get_mailing_list_name_suffix(canvas_site):
     if term:
         suffix = term.to_abbreviation()
     else:
-        term_name = canvas_site.term['name']
-        suffix = _normalize_name(term_name) if term_name and 'default' not in term_name.lower() else 'list'
+        term_name = (canvas_site.term['name'] or '').strip().lower()
+        is_term_associated = term_name and not any(word in term_name for word in ['default', 'project'])
+        suffix = _normalize_name(term_name) if is_term_associated else 'list'
     return suffix
 
 
@@ -373,7 +374,7 @@ def _get_preferred_email(canvas_user_email, loch_user_email):
 
 
 def _normalize_name(name):
-    return '-'.join([word for word in re.split('[^a-z0-9]+', unidecode(name.strip().lower())) if word])[0:45]
+    return '-'.join([word for word in re.split('[^a-z0-9]+', unidecode(name)) if word])[0:45]
 
 
 def _remove_from_list_safely(item, list_of_items):
