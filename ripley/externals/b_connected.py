@@ -29,6 +29,7 @@ from smtplib import SMTP
 
 from flask import current_app as app
 from ripley import skip_when_pytest
+from ripley.api.errors import InternalServerError
 from ripley.lib.util import get_eb_environment
 
 
@@ -40,95 +41,39 @@ class BConnected:
         self.bcop_smtp_server = app.config['BCOP_SMTP_SERVER']
         self.bcop_smtp_username = app.config['BCOP_SMTP_USERNAME']
 
-    def send(
-            self,
-            message,
-            recipient,
-            subject_line,
-            template_type=None,
-            tolerate_failure_to_send=False,
-    ):
-        if not message or not subject_line or not recipient:
-            app.logger.error(
-                'Attempted to send a message without required fields: '
-                f'(recipient={recipient}, subject_line={subject_line}, message={message}')
-            return False
+    @skip_when_pytest()
+    def send_system_error_email(self, message, subject=None):
+        if app.config['SEND_EMAIL_ALERT_ENABLED']:
+            if not message:
+                raise InternalServerError('Sending email requires a message.')
+            if subject is None:
+                subject = f'{message[:50]}...' if len(message) > 50 else message
 
-        eb_env = get_eb_environment()
-        prefix = '' if 'prod' in (eb_env or '') else f"[{eb_env or 'ripley-local'}] "
-        subject_line = f'{prefix}{subject_line}'
+            eb_env = get_eb_environment()
+            prefix = '' if 'prod' in (eb_env or '') else f"[{eb_env or 'ripley-local'}] "
+            subject = f'{prefix}{subject}'
+            from_address = app.config['SEND_EMAIL_ALERT_FROM_ADDRESS']
+            to_address = app.config['SEND_EMAIL_ALERT_TO_ADDRESS']
+            try:
+                smtp = SMTP(self.bcop_smtp_server, port=self.bcop_smtp_port)
+                smtp.starttls()
+                smtp.set_debuglevel(app.logger.level == logging.DEBUG)
+                smtp.login(self.bcop_smtp_username, self.bcop_smtp_password)
 
-        @skip_when_pytest()
-        def _send():
-            smtp = SMTP(self.bcop_smtp_server, port=self.bcop_smtp_port)
-            # TLS encryption
-            smtp.starttls()
-            smtp.set_debuglevel(app.logger.level == logging.DEBUG)
-            smtp.login(self.bcop_smtp_username, self.bcop_smtp_password)
-
-            emails_sent_to = set()
-
-            if app.config['RIPLEY_ENV'] == 'test':
-                write_email_to_log(message=message, recipient=recipient, subject_line=subject_line)
-            else:
-                from_address = f"{app.config['EMAIL_RIPLEY_OPERATIONS_LABEL']} <{app.config['EMAIL_RIPLEY_SUPPORT']}>"
-
-                for email_address in self.get_email_addresses(user=recipient):
-                    msg = MIMEMultipart('alternative')
-                    msg['From'] = from_address
-                    msg['To'] = email_address
-
-                    if app.config['EMAIL_TEST_MODE']:
-                        # Append intended recipient email address to verify when testing.
-                        intended_email = recipient['email']
-                        msg['Subject'] = f'{subject_line} (To: {intended_email})'
-                    else:
-                        msg['Subject'] = subject_line
-
-                    msg.attach(MIMEText(message, 'plain'))
-                    msg.attach(MIMEText(message, 'html'))
-                    # Send
-                    smtp.sendmail(from_addr=from_address, to_addrs=email_address, msg=msg.as_string())
-
-                    emails_sent_to.add(email_address)
-
-            phrase = f"email sent to {', '.join(list(emails_sent_to))}"
-            app.logger.info(f'{template_type.capitalize()} {phrase}' if template_type else f'Alert {phrase}')
-            # Disconnect
-            smtp.quit()
-
-        try:
-            _send()
-        except Exception as e:
-            app.logger.error(f'Failed to send email to recipient {recipient}. Email subject: {subject_line}')
-            app.logger.exception(e)
-            if not tolerate_failure_to_send:
-                raise e
-        return True
+                msg = MIMEMultipart('alternative')
+                msg['From'] = from_address
+                msg['To'] = to_address
+                msg['Subject'] = subject
+                msg.attach(MIMEText(message, 'plain'))
+                msg.attach(MIMEText(message, 'html'))
+                # Send
+                smtp.sendmail(from_addr=from_address, to_addrs=to_address, msg=msg.as_string())
+                # Disconnect
+                smtp.quit()
+            except Exception as e:
+                app.logger.exception(e)
 
     def ping(self):
         with SMTP(self.bcop_smtp_server, port=self.bcop_smtp_port) as smtp:
             smtp.noop()
             return True
-
-    @classmethod
-    def get_email_addresses(cls, user):
-        if app.config['EMAIL_TEST_MODE']:
-            config_value = app.config['EMAIL_REDIRECT_WHEN_TESTING']
-            return config_value if isinstance(config_value, list) else [config_value]
-        else:
-            email = user.get('email')
-            return [email] if email and email.strip() else []
-
-
-def write_email_to_log(message, recipient, subject_line):
-    app.logger.info(f"""
-
-        To: {recipient['name']} <{recipient['email']}>
-        From: {app.config['EMAIL_RIPLEY_OPERATIONS_LABEL']} <{app.config['EMAIL_RIPLEY_SUPPORT']}>
-        Subject: {subject_line}
-
-        Message:
-        {message}
-
-    """)

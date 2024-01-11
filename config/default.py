@@ -78,13 +78,6 @@ DATA_LOCH_S3_PHOTO_PATH = 'photos'
 DEV_AUTH_ENABLED = False
 DEV_AUTH_PASSWORD = 'another secret'
 
-EMAIL_RIPLEY_SUPPORT = 'bcourseshelp@berkeley.edu'
-EMAIL_IF_PING_HAS_ERROR = True
-EMAIL_REDIRECT_WHEN_TESTING = ['__EMAIL_REDIRECT_WHEN_TESTING__at_berkeley.edu']
-EMAIL_RIPLEY_OPERATIONS = ['__EMAIL_RIPLEY_OPERATIONS__at_@berkeley.edu']
-EMAIL_RIPLEY_OPERATIONS_LABEL = 'Ellen Ripley, Warrant Officer of bCourses'
-EMAIL_TEST_MODE = True
-
 EXTERNAL_TOOLS_CACHE_EXPIRES_IN_SECONDS = 1800
 
 # Directory to search for mock fixtures, if running in "test" or "demo" mode.
@@ -150,6 +143,11 @@ REDIS_PORT = '6379'
 REDIS_QUEUE_IS_ASYNC = True
 REDIS_RQ_JOB_TTL = None
 REDIS_USE_FAKE_CLIENT = False
+
+SEND_EMAIL_ALERT_ENABLED = True
+SEND_EMAIL_ALERT_FROM_ADDRESS = 'rtl-ripley@berkeley.edu'
+SEND_EMAIL_ALERT_TO_ADDRESS = 'rtl-ripley-operations@lists.berkeley.edu'
+SEND_EMAIL_ALERT_WHEN_PING_HAS_ERROR = True
 
 # Used to encrypt session cookie.
 SECRET_KEY = 'secret'

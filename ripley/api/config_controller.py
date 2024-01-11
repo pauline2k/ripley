@@ -38,7 +38,6 @@ def app_config():
     configs_for_feed = [
         'CANVAS_API_URL',
         'DEV_AUTH_ENABLED',
-        'EMAIL_RIPLEY_SUPPORT',
         'RIPLEY_ENV',
         'TIMEZONE',
     ]

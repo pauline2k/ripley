@@ -30,4 +30,6 @@ DEBUG = True
 
 INDEX_HTML = 'index.html'
 
+SEND_EMAIL_ALERT_ENABLED = False
+
 VUE_LOCALHOST_BASE_URL = 'http://localhost:8080'

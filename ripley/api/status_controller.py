@@ -37,7 +37,6 @@ from ripley.externals.rds import log_db_error
 from ripley.externals.redis import redis_ping, redis_status
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.http import tolerant_jsonify
-from ripley.merged.emailer import send_system_error_email
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import text
 
@@ -63,8 +62,8 @@ def ping():
         message = f'Error during /api/ping: {subject}'
         app.logger.error(message)
         app.logger.exception(e)
-        if app.config['EMAIL_IF_PING_HAS_ERROR']:
-            send_system_error_email(
+        if app.config['SEND_EMAIL_ALERT_WHEN_PING_HAS_ERROR']:
+            BConnected().send_system_error_email(
                 message=f'{message}\n\n<pre>{traceback.format_exc()}</pre>',
                 subject=message,
             )
@@ -96,8 +95,8 @@ def rq_status():
         message = f'Error during /api/ping/rq: {subject}'
         app.logger.error(message)
         app.logger.exception(e)
-        if app.config['EMAIL_IF_PING_HAS_ERROR']:
-            send_system_error_email(
+        if app.config['SEND_EMAIL_ALERT_WHEN_PING_HAS_ERROR']:
+            BConnected().send_system_error_email(
                 message=f'{message}\n\n<pre>{traceback.format_exc()}</pre>',
                 subject=message,
             )

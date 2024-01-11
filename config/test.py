@@ -58,6 +58,8 @@ MAILGUN_BASE_URL = 'https://fake-o-mailgun.example.com/v3'
 REDIS_USE_FAKE_CLIENT = True
 REDIS_QUEUE_IS_ASYNC = False
 
+SEND_EMAIL_ALERT_ENABLED = False
+
 SQLALCHEMY_DATABASE_URI = 'postgresql://ripley:ripley@localhost:5432/nostromo_test'
 
 TESTING = True
