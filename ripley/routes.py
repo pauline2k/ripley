@@ -82,17 +82,18 @@ def register_routes(app):
 
     @app.errorhandler(Exception)
     def handle_exception(e):
+        from ripley.externals.b_connected import BConnected
+
         subject = str(e)
         if isinstance(e, HTTPException):
             app.logger.warning(f"""\n\n{type(e).__name__} {subject}\n{traceback.format_exc()}\n""")
         else:
             message = f'{e}\n\n<pre>{traceback.format_exc()}</pre>'
             app.logger.warning(message)
-            # # TODO? Notify Ripley Ops teams
-            # send_system_error_email(
-            #     message=message,
-            #     subject=f'{subject[:50]}...' if len(subject) > 50 else subject,
-            # )
+            BConnected().send_system_error_email(
+                message=message,
+                subject=f'{subject[:50]}...' if len(subject) > 50 else subject,
+            )
 
         return {'message': subject}, 400
 

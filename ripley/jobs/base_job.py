@@ -28,9 +28,9 @@ import traceback
 
 from flask import current_app as app
 from ripley import db
+from ripley.externals.b_connected import BConnected
 from ripley.jobs.errors import BackgroundJobError
 from ripley.lib.util import utc_now
-from ripley.merged.emailer import send_system_error_email
 from ripley.models.job import Job
 from ripley.models.job_history import JobHistory
 from sqlalchemy import text
@@ -98,7 +98,7 @@ class BaseJob:
 
                         try:
                             message = f'\n{summary}\n\nJob description: {self.description()}'
-                            send_system_error_email(
+                            BConnected().send_system_error_email(
                                 message=f'{message}\n\nStack trace:\n<pre>{traceback.format_exc()}</pre>',
                                 subject=f'{summary[:100]}...' if len(summary) > 100 else summary,
                             )
