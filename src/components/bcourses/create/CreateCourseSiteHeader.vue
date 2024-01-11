@@ -9,32 +9,31 @@
       :disabled="isFetching"
       hide-details
     >
-      <v-radio id="radio-btn-mode-act-as" value="actAs">
+      <v-radio id="radio-btn-mode-act-as" value="actAs" aria-label="Instructor UID">
         <template #label>
-          <div class="pl-1 text-black text-body-2">Instructor UID</div>
+          <div aria-hidden="true" class="pl-1 text-black text-body-2">Instructor UID</div>
         </template>
       </v-radio>
-      <v-radio id="radio-btn-mode-section-id" value="bySectionId">
+      <v-radio id="radio-btn-mode-section-id" value="bySectionId" aria-label="Section I Deez">
         <template #label>
-          <div class="pl-1 text-black text-body-2">Section IDs</div>
+          <div aria-hidden="true" class="pl-1 text-black text-body-2">Section IDs</div>
         </template>
       </v-radio>
     </v-radio-group>
     <div v-if="adminMode === 'actAs'" class="pt-5">
-      <h3 class="sr-only">Load Sections By Instructor UID</h3>
       <div class="align-center d-flex pb-3">
         <div class="pr-3">
-          <label for="instructor-uid" class="sr-only">Instructor UID</label>
           <v-text-field
             id="instructor-uid"
             v-model="uid"
+            aria-label="Instructor UID"
             class="instructor-uid-text-field"
             density="comfortable"
             :disabled="isFetching"
             :error="isInvalidUID"
             hide-details
+            label="Instructor UID"
             maxlength="16"
-            placeholder="Instructor UID"
             variant="outlined"
             @keydown.enter="submit"
           />

@@ -23,15 +23,15 @@
             <div class="radio-button-container">
               <v-radio
                 :id="option.id"
+                :aria-label="`${option.header}.`"
                 :class="{'text-grey': !option.isAvailable}"
                 :disabled="!option.isAvailable || isProcessing"
                 :value="option"
               />
             </div>
             <div class="list-item-content">
-              <label class="w-100" :for="option.id">
+              <label aria-hidden="true" class="w-100" :for="option.id">
                 <h2 :class="{'text-grey': !option.isAvailable}">{{ option.header }}</h2>
-                <span class="sr-only">.</span>
               </label>
               <div v-if="option.id === 'create-course-site'">
                 <div v-if="option.isAvailable" @click="() => selection = option">
@@ -88,7 +88,6 @@
                   </div>
                 </div>
                 <div v-if="currentUser.isAdmin" class="mt-2 pl-3">
-                  <label class="sr-only" for="canvas-site-id-input">Canvas Site I D:</label>
                   <v-text-field
                     id="canvas-site-id-input"
                     v-model="canvasSiteId"

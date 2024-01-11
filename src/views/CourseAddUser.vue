@@ -104,19 +104,19 @@
                 :disabled="isSearching || isAddingUser"
                 hide-details
               >
-                <v-radio id="radio-btn-name" value="name">
+                <v-radio id="radio-btn-name" aria-label="Last Name, First Name" value="name">
                   <template #label>
-                    <div class="pl-1 text-black text-body-2">Last Name, First Name</div>
+                    <div aria-hidden="true" class="pl-1 text-black text-body-2">Last Name, First Name</div>
                   </template>
                 </v-radio>
-                <v-radio id="radio-btn-email" value="email">
+                <v-radio id="radio-btn-email" aria-label="Email" value="email">
                   <template #label>
-                    <div class="pl-1 text-black text-body-2">Email</div>
+                    <div aria-hidden="true" class="pl-1 text-black text-body-2">Email</div>
                   </template>
                 </v-radio>
-                <v-radio id="radio-btn-uid" value="uid">
+                <v-radio id="radio-btn-uid" aria-label="UID" value="uid">
                   <template #label>
-                    <div class="pl-1 text-black text-body-2">CalNet UID</div>
+                    <div aria-hidden="true" class="pl-1 text-black text-body-2">CalNet UID</div>
                   </template>
                 </v-radio>
               </v-radio-group>
@@ -178,14 +178,19 @@
                   <input
                     :id="`user-search-result-input-${index}`"
                     v-model="selectedUser"
+                    :aria-label="`${user.firstName} ${user.lastName}, Calnet UID ${user.uid}`"
                     class="mr-4"
                     :disabled="isAddingUser"
                     name="selectedUser"
                     type="radio"
                     :value="user"
-                    :aria-labelledby="`user-search-result-row-name-${index} user-search-result-row-ldap-uid-${index}`"
                   >
-                  <label :id="`user-search-result-row-name-${index}`" :for="`user-search-result-input-${index}`" class="form-input-label-no-align">
+                  <label
+                    :id="`user-search-result-row-name-${index}`"
+                    :for="`user-search-result-input-${index}`"
+                    aria-hidden="true"
+                    class="form-input-label-no-align"
+                  >
                     {{ user.firstName }} {{ user.lastName }}
                   </label>
                 </td>
