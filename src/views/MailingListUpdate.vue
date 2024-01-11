@@ -64,7 +64,7 @@
     <div class="mt-2">
       <v-card id="mailing-list-details" class="pl-3" elevation="2">
         <v-card-text>
-          <h2>Canvas Course Site</h2>
+          <h2>bCourses Site</h2>
           <v-container class="py-3" fluid>
             <v-row no-gutters>
               <v-col cols="2">
@@ -80,8 +80,7 @@
                     :href="canvasSite.url"
                     title="View course site"
                   >
-                    <span class="font-size-15 font-weight-medium pr-1">{{ canvasSite.name }}</span>
-                    <v-icon :icon="mdiOpenInNew" size="small" />
+                    <span class="font-size-15 font-weight-medium">{{ canvasSite.name }}</span>
                   </OutboundLink>
                 </div>
               </v-col>
@@ -184,7 +183,7 @@
 </template>
 
 <script setup>
-import {mdiAccount, mdiAlertCircle, mdiCheck, mdiOpenInNew} from '@mdi/js'
+import {mdiAccount, mdiAlertCircle, mdiCheck} from '@mdi/js'
 </script>
 
 <script>
