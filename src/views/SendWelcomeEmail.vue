@@ -59,20 +59,26 @@
             How to Create a Welcome Email with the bCourses Mailing List
           </OutboundLink>.
         </div>
-        <div v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject" class="mt-2">
+        <div class="mt-2">
           <v-alert
             density="compact"
             role="alert"
             :type="isWelcomeEmailActive ? 'success' : 'info'"
           >
-            <span v-if="isWelcomeEmailActive">Welcome email {{ isToggling ? 'is being' : '' }} activated.</span>
-            <span v-if="!isWelcomeEmailActive">Sending welcome emails is paused.</span>
+            <span v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject">
+              <span v-if="isWelcomeEmailActive">Welcome email {{ isToggling ? 'is being' : '' }} activated.</span>
+              <span v-if="!isWelcomeEmailActive">Sending welcome emails is paused.</span>
+            </span>
+            <span v-if="!mailingList.welcomeEmailBody || !mailingList.welcomeEmailSubject">
+              You can activate the welcome email
+              <span class="font-italic">after</span> you enter email subject and message below.
+            </span>
           </v-alert>
           <div class="ml-5 w-25">
             <v-switch
               v-model="isWelcomeEmailActive"
               color="success"
-              :disabled="isSaving || isToggling"
+              :disabled="!mailingList.welcomeEmailBody || !mailingList.welcomeEmailSubject || isSaving || isToggling"
               hide-details
               @change="toggle"
             >
