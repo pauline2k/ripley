@@ -57,7 +57,7 @@ def create_mock_project_site(
         account_id = '129407'
         project_site_id = '3030303'
         with requests_mock.Mocker() as m:
-            register_canvas_uris(app, {
+            fixtures = {
                 'account': [
                     'get_admins',
                     f'get_by_id_{account_id}',
@@ -65,16 +65,20 @@ def create_mock_project_site(
                     f'get_courses_{account_id}',
                 ],
                 'course': [
-                    f'get_by_id_{canvas_site_id}',
                     f'get_by_id_{project_site_id}',
                     f'get_content_migrations_{project_site_id}',
-                    f'get_enrollments_{canvas_site_id}_4567890',
-                    f'get_sections_{canvas_site_id}',
                     f'get_tabs_{project_site_id}',
                     f'post_course_enrollments_{project_site_id}',
                 ],
                 'user': [f'profile_{authorized_uid}'],
-            }, m)
+            }
+            if canvas_site_id:
+                fixtures['course'].extend([
+                    f'get_by_id_{canvas_site_id}',
+                    f'get_enrollments_{canvas_site_id}_4567890',
+                    f'get_sections_{canvas_site_id}',
+                ])
+            register_canvas_uris(app, fixtures, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=authorized_uid)
             api_json = api_create_project_site(
                 client,

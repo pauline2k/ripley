@@ -63,9 +63,13 @@ def to_bool_or_none(arg):
 
 def to_int(s):
     try:
-        return int(s)
+        return None if s is None else int(s)
     except (TypeError, ValueError):
         return None
+
+
+def to_str(obj):
+    return None if obj is None else str(obj)
 
 
 def to_isoformat(value):

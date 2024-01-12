@@ -133,8 +133,13 @@ class TestGetMyMailingList:
         """Allows admin."""
         with requests_mock.Mocker() as m:
             canvas_site_id = 1234567
-            register_canvas_uris(app, {'course': [f'get_by_id_{canvas_site_id}', f'search_users_{canvas_site_id}']}, m)
-            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            uid = admin_uid
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}', f'search_users_{canvas_site_id}'],
+                'user': [f'profile_{uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
             _api_create_mailing_list(
                 canvas_site_id=canvas_site_id,
                 client=client,
@@ -325,11 +330,13 @@ class TestActivateMailingList:
         """Teacher can activate a mailing list."""
         with requests_mock.Mocker() as m:
             canvas_site_id = '8876542'
+            uid = admin_uid
             register_canvas_uris(app, {
+                'account': ['get_admins'],
                 'course': [f'get_by_id_{canvas_site_id}', f'get_sections_{canvas_site_id}', 'get_enrollments_8876542_4567890'],
-                'user': ['profile_30000'],
+                'user': [f'profile_{uid}'],
             }, m)
-            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
             canvas_site = canvas.get_course(canvas_site_id)
             mailing_list = MailingList.create(
                 canvas_site=canvas_site,
