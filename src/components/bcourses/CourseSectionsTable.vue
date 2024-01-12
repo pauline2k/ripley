@@ -52,7 +52,7 @@
             <v-checkbox
               :id="`template-canvas-manage-sections-checkbox-${section.id}`"
               v-model="selected"
-              :aria-label="`${section.selected ? 'Deselect' : 'Select'} ${section.courseCode} ${section.name}`"
+              :aria-label="`${section.courseCode}, ${section.name}`"
               class="ml-2"
               density="compact"
               hide-details
