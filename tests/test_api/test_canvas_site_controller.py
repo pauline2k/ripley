@@ -231,7 +231,7 @@ class TestCanvasSiteProvision:
                 'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
                 'user': ['profile_30000'],
             }, m)
-            fake_auth.login(canvas_site_id=None, uid=teacher_uid)
+            fake_auth.login(canvas_site_id=8876542, uid=teacher_uid)
             feed = self._api_canvas_course_provision(client)
             match_found = False
             for teaching_term in feed['teachingTerms']:
@@ -555,6 +555,7 @@ class TestCreateCourseSite:
                     'get_course_ANTHRO_189',
                     'get_course_ANTHRO_189_not_found',
                     'get_course_settings_1523731',
+                    f'get_enrollments_{canvas_site_id}_4567890',
                     'get_tabs_1523731',
                 ],
                 'section': [
@@ -626,7 +627,6 @@ class TestCreateProjectSite:
 
     def test_authorized_users(self, app, client, fake_auth):
         """Allows faculty."""
-        canvas_site_id = '8876542'
         for authorized_uid, user_description in {
             faculty_uid: 'Faculty',
             admin_uid: 'Admin user',
@@ -634,7 +634,7 @@ class TestCreateProjectSite:
             with create_mock_project_site(
                     app=app,
                     authorized_uid=authorized_uid,
-                    canvas_site_id=canvas_site_id,
+                    canvas_site_id=None,
                     client=client,
                     fake_auth=fake_auth,
             ) as project_site:

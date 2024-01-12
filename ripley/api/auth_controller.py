@@ -138,14 +138,22 @@ def _dev_auth_login(canvas_site_id, password, uid):
         return tolerant_jsonify({'message': 'Invalid credentials'}, 401)
     user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
     user = User(user_id)
-    if not user.is_active:
-        return tolerant_jsonify({'message': f'Sorry, UID {uid} failed to authenticate.'}, 403)
-    if not user.can_access_standalone_view:
-        return tolerant_jsonify({'message': f'Sorry, UID {uid} is not authorized to use Ripley in standalone mode.'}, 403)
-    if start_login_session(user):
-        return tolerant_jsonify(current_user.to_api_json())
+    error = None
+    if not user.is_authenticated:
+        error = f'Sorry, UID {uid} failed to authenticate.'
+    elif not user.can_access_standalone_view:
+        invalid_canvas_site_id = user.canvas_site_id and app.config['ALLOW_STANDALONE_FOR_NON_ADMINS']
+        if invalid_canvas_site_id:
+            error = f'Sorry, you are not authorized to access bCourses site {canvas_site_id}.'
+        else:
+            error = 'Sorry, you are not authorized to use Ripley in standalone mode.'
+    elif not start_login_session(user):
+        error = 'The Flask start_login_session operation failed.'
+
+    if error:
+        return tolerant_jsonify({'message': error}, 403)
     else:
-        return tolerant_jsonify({'message': f'User {user.uid} failed to authenticate.'}, 403)
+        return tolerant_jsonify(current_user.to_api_json())
 
 
 def _get_custom_param(lti_data, key):

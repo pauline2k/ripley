@@ -32,6 +32,7 @@ from ripley.externals.redis import cache_dict_object, delete_cache_key, fetch_ca
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.canvas_user_utils import canvas_user_profile_to_api_json
+from ripley.lib.util import to_int, to_str
 from ripley.models.user_auth import UserAuth
 
 
@@ -39,20 +40,19 @@ class User(UserMixin):
 
     def __init__(self, serialized_composite_key=None, canvas_user_profile=None):
         composite_key = json.loads(serialized_composite_key) if serialized_composite_key else {}
-        self.uid = composite_key.get('uid', None)
-        if self.uid is not None:
-            try:
-                self.uid = str(int(self.uid))
-            except ValueError:
-                self.uid = None
-        canvas_site_id = str(composite_key.get('canvas_site_id', None)).strip()
-        self.__canvas_site_id = int(canvas_site_id) if canvas_site_id and canvas_site_id.isnumeric() else None
-        self.__canvas_masquerading_user_id = composite_key.get('canvas_masquerading_user_id', None)
-        self.user = self._load_user(canvas_user_profile)
+        self.uid = to_str(to_int(composite_key.get('uid')))
+        if self.uid:
+            self.user = self._load_user(
+                canvas_masquerading_user_id=composite_key.get('canvas_masquerading_user_id', None),
+                canvas_site_id=to_int(composite_key.get('canvas_site_id')),
+                canvas_user_profile=canvas_user_profile,
+            )
+        else:
+            self.user = self._load_user()
 
     def __repr__(self):
         return f"""<User
-                    canvas_masquerading_user_id={self.__canvas_masquerading_user_id},
+                    canvas_masquerading_user_id={self.user['canvasMasqueradingUserId']},
                     canvas_site_id={self.user['canvasSiteId']},
                     email_address={self.email_address},
                     is_active={self.is_active},
@@ -63,7 +63,7 @@ class User(UserMixin):
                 """
 
     def __str__(self):
-        if (self.user):
+        if self.user:
             return f'UID {self.uid}, canvas_user_id {self.canvas_user_id}, canvas_site_id {self.canvas_site_id}'
 
     @property
@@ -80,11 +80,11 @@ class User(UserMixin):
 
     @property
     def canvas_masquerading_user_id(self):
-        return self.__canvas_masquerading_user_id
+        return self.user.get('canvasMasqueradingUserId')
 
     @property
     def canvas_site_id(self):
-        return self.__canvas_site_id
+        return self.user.get('canvasSiteId')
 
     @property
     def canvas_site_user_roles(self):
@@ -123,7 +123,7 @@ class User(UserMixin):
 
     @property
     def is_canvas_admin(self):
-        return self.user.get('isCanvasAdmin')
+        return self.user.get('isCanvasAdmin', False)
 
     @property
     def is_faculty(self):
@@ -135,10 +135,12 @@ class User(UserMixin):
 
     @property
     def is_teaching(self):
-        return self.user.get('isTeaching', None)
+        return self.user.get('isTeaching', False)
 
     def logout(self):
-        delete_cache_key(self._get_cache_key())
+        if self.user and self.uid:
+            cache_key = _get_cache_key(canvas_site_id=self.canvas_site_id, uid=self.uid)
+            delete_cache_key(cache_key)
         self.uid = None
         self.user = self._load_user()
 
@@ -171,23 +173,25 @@ class User(UserMixin):
             'canvas_masquerading_user_id': canvas_masquerading_user_id,
         })
 
-    def _load_canvas_user_data(self, user_profile=None):
-        cache_key = self._get_cache_key()
+    def _load_canvas_user_data(self, canvas_site_id, user_profile=None):
+        cache_key = _get_cache_key(canvas_site_id=canvas_site_id, uid=self.uid)
         canvas_user_data = fetch_cached_dict_object(cache_key)
         if not canvas_user_data:
             if not user_profile and self.uid:
-                user_profile = canvas.get_canvas_user_profile_by_uid(self.uid) or canvas.get_canvas_user_profile_by_uid(f'inactive-{self.uid}')
+                user_profile = canvas.get_canvas_user_profile_by_uid(self.uid) or \
+                    canvas.get_canvas_user_profile_by_uid(f'inactive-{self.uid}')
             if user_profile:
                 canvas_user_data = canvas_user_profile_to_api_json(
-                    canvas_site_id=self.__canvas_site_id,
+                    canvas_site_id=canvas_site_id,
                     canvas_user_profile=user_profile,
                     uid=self.uid,
                 )
                 cache_dict_object(cache_key, canvas_user_data, 120)
         return canvas_user_data
 
-    def _load_user(self, canvas_user_profile=None):
+    def _load_user(self, canvas_masquerading_user_id=None, canvas_site_id=None, canvas_user_profile=None):
         calnet_profile = None
+        can_access_standalone_view = False
         canvas_user_data = None
         email_address = None
         is_active = False
@@ -198,27 +202,35 @@ class User(UserMixin):
         # Deduce user metadata.
         if self.uid:
             calnet_profile = get_calnet_user_for_uid(app, self.uid)
-            user_auth = UserAuth.find_by_uid(self.uid)
             if calnet_profile:
                 name = calnet_profile.get('name') or f'UID {self.uid}'
                 email_address = calnet_profile.get('email') or None
                 if not calnet_profile.get('isExpiredPerLdap', True):
+                    user_auth = UserAuth.find_by_uid(self.uid)
                     is_admin = user_auth.is_superuser if user_auth and user_auth.active else False
-                    canvas_user_data = self._load_canvas_user_data(user_profile=canvas_user_profile) or {}
-                    canvas_site_user_roles = canvas_user_data.get('canvasSiteUserRoles') if canvas_user_data else None
-                    is_active = bool(
-                        is_admin
-                        or (canvas_user_data.get('canvasSiteId') and canvas_site_user_roles)
-                        or canvas_user_data.get('canvasUserId'))
+                    canvas_user_data = self._load_canvas_user_data(
+                        canvas_site_id=canvas_site_id,
+                        user_profile=canvas_user_profile,
+                    ) or {}
+                    canvas_site_user_roles = canvas_user_data.get('canvasSiteUserRoles') or []
+                    is_active = is_admin \
+                        or (canvas_user_data.get('canvasSiteId') and canvas_site_user_roles) \
+                        or canvas_user_data.get('canvasUserId')
                     affiliations = calnet_profile.get('affiliations', [])
                     affiliations = set([affiliations] if isinstance(affiliations, str) else affiliations or [])
                     is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
                     is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
+                    can_access_standalone_view = is_active and \
+                        (
+                            is_admin
+                            or is_faculty
+                            or (len(canvas_site_user_roles) and app.config['ALLOW_STANDALONE_FOR_NON_ADMINS'])
+                        )
         api_json = {
             **{
-                'canAccessStandaloneView': is_admin or (is_active and app.config['ALLOW_STANDALONE_FOR_NON_ADMINS']),
-                'canvasMasqueradingUserId': self.__canvas_masquerading_user_id,
-                'canvasSiteId': self.__canvas_site_id,
+                'canAccessStandaloneView': can_access_standalone_view,
+                'canvasMasqueradingUserId': canvas_masquerading_user_id,
+                'canvasSiteId': canvas_site_id,
                 'emailAddress': email_address,
                 'isActive': is_active,
                 'isAdmin': is_admin,
@@ -234,5 +246,9 @@ class User(UserMixin):
         }
         return dict(sorted(api_json.items()))
 
-    def _get_cache_key(self):
-        return f'user_session_{self.uid}_{self.canvas_site_id}' if self.uid else None
+
+def _get_cache_key(canvas_site_id, uid):
+    if uid:
+        return f'user_session_{uid}_{canvas_site_id}' if canvas_site_id else f'user_session_{uid}'
+    else:
+        return None

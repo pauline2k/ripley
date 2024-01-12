@@ -51,7 +51,6 @@ def get_external_tools():
 
 
 @app.route('/api/canvas/authorizations')
-@login_required
 def get_authorizations():
     return tolerant_jsonify({
         'authorizations': {
