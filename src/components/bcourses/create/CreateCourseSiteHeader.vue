@@ -41,7 +41,6 @@
         <div>
           <v-btn
             id="sections-by-uid-button"
-            aria-controls="select-and-confirm"
             aria-label="Load official sections for instructor"
             color="primary"
             :disabled="isFetching || !trim(uid) || isInvalidUID"
@@ -82,15 +81,10 @@
           </v-btn-toggle>
         </div>
         <div class="pb-3">
-          <label
-            for="page-create-course-site-section-id-list"
-            class="sr-only"
-          >
-            Provide Section ID List Separated by Commas or Spaces
-          </label>
           <v-textarea
             id="page-create-course-site-section-id-list"
             v-model="sectionIds"
+            aria-label="Paste your list of Section IDs here, separated by commas or spaces"
             auto-grow
             class="w-50"
             clearable
@@ -103,7 +97,6 @@
         </div>
         <v-btn
           id="sections-by-ids-button"
-          aria-controls="select-and-confirm"
           color="primary"
           :disabled="!trim(sectionIds) || isFetching"
           @click="submit"
