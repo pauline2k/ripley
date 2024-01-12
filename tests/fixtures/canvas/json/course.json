@@ -265,6 +265,36 @@
         },
         "status_code": 200
     },
+    "get_enrollments_8876542_5678901": {
+        "method": "GET",
+        "endpoint": "courses/8876542/users/5678901?include=enrollments",
+        "data": {
+            "id": 5678901,
+            "name": "XO Kane",
+            "short_name": "XO Kane",
+            "sortable_name": "Kane, XO",
+            "integration_id": null,
+            "login_id": "40000",
+            "sis_user_id": "30040000",
+            "enrollments": [
+                {
+                    "id": 103,
+                    "user_id": 5678901,
+                    "course_id": 8876542,
+                    "course_section_id": 10000,
+                    "type": "StudentEnrollment",
+                    "enrollment_state": "active",
+                    "role": "Owner",
+                    "last_activity_at": "2023-03-02T06:04:43Z",
+                    "sis_user_id": "30090000",
+                    "sis_course_id": "CRS:ANTHRO-189-2023-B",
+                    "sis_section_id": "2023-B-32936",
+                    "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/5678901"
+                }
+            ]
+        },
+        "status_code": 200
+    },
     "get_enrollments_8876542_6789012": {
         "method": "GET",
         "endpoint": "courses/8876542/users/6789012?include=enrollments",

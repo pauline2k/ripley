@@ -213,19 +213,18 @@ class User(UserMixin):
                         user_profile=canvas_user_profile,
                     ) or {}
                     canvas_site_user_roles = canvas_user_data.get('canvasSiteUserRoles') or []
-                    is_active = is_admin \
-                        or (canvas_user_data.get('canvasSiteId') and canvas_site_user_roles) \
-                        or canvas_user_data.get('canvasUserId')
+                    is_active = bool(
+                        is_admin or (canvas_user_data.get('canvasSiteId') and canvas_site_user_roles)
+                        or canvas_user_data.get('canvasUserId'),
+                    )
                     affiliations = calnet_profile.get('affiliations', [])
                     affiliations = set([affiliations] if isinstance(affiliations, str) else affiliations or [])
                     is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
                     is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
+                    has_roles = len(canvas_site_user_roles)
+                    allow_standalone_for_non_admins = app.config['ALLOW_STANDALONE_FOR_NON_ADMINS']
                     can_access_standalone_view = is_active and \
-                        (
-                            is_admin
-                            or is_faculty
-                            or (len(canvas_site_user_roles) and app.config['ALLOW_STANDALONE_FOR_NON_ADMINS'])
-                        )
+                        bool(is_admin or ((has_roles or is_faculty) and allow_standalone_for_non_admins))
         api_json = {
             **{
                 'canAccessStandaloneView': can_access_standalone_view,
