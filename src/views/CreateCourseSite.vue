@@ -244,7 +244,7 @@ export default {
       if (!this.teachingTerms.length && !this.currentUser.isAdmin) {
         this.warning = 'You are not listed as an instructor of any courses in the current or upcoming term.'
       }
-      if (this.selectedSectionsList.length) {
+      if (size(this.selectedSectionsList)) {
         this.panels = Array.from({length: this.coursesList.length}, (value, index) => index)
       } else if (this.coursesList.length === 1) {
         this.panels = [0]
@@ -326,7 +326,6 @@ export default {
       this.alertScreenReader('Loading courses and sections')
 
       const semester = (this.adminMode === 'bySectionId' ? this.currentAdminTerm : this.currentSemester)
-      this.selectedTerm = semester
       getSections(
         this.adminActingAs,
         this.adminBySectionIds,
@@ -342,7 +341,7 @@ export default {
             this.warning = this.adminActingAs ? `UID ${this.adminActingAs} is not listed as an instructor of any courses in the current or upcoming term.` : 'No matching courses found.'
           }
           this.fillCourseSites(this.teachingTerms)
-          this.alertScreenReader('Course section loaded successfully')
+          this.alertScreenReader('Course sections have loaded')
           if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
             each(this.coursesList, course => {
               each(course.sections, section => {
@@ -474,14 +473,14 @@ export default {
     updateMetadata(data) {
       this.teachingTerms = data.teachingTerms
       if (size(this.teachingTerms) > 0) {
-        this.switchSemester(this.teachingTerms[0].slug)
+        this.selectedTerm = this.teachingTerms[0].slug
       }
       this.fillCourseSites(this.teachingTerms)
       if (this.isAdmin) {
         this.adminActingAs = data.adminActingAs
         this.adminTerms = data.adminTerms
         if (size(this.teachingTerms) > 0 && this.adminTerms.length) {
-          this.switchSemester(this.teachingTerms[0].slug)
+          this.selectedTerm = this.teachingTerms[0].slug
         }
         if (size(this.adminTerms) > 0 && !this.currentAdminTerm) {
           this.switchAdminTerm(this.adminTerms[0])
