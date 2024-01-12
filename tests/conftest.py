@@ -123,7 +123,7 @@ class FakeAuth(object):
                 'uid': uid,
                 'password': self.app.config['DEV_AUTH_PASSWORD'],
             }
-            self.client.post(
+            return self.client.post(
                 '/api/auth/dev_auth',
                 data=json.dumps(params),
                 content_type='application/json',

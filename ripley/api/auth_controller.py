@@ -31,7 +31,7 @@ from flask_login import current_user, login_required, logout_user
 from ripley.api.errors import BadRequestError, ResourceNotFoundError
 from ripley.api.util import start_login_session
 from ripley.externals import canvas
-from ripley.lib.http import redirect_unauthorized, tolerant_jsonify
+from ripley.lib.http import tolerant_jsonify
 from ripley.models.user import User
 
 
@@ -114,13 +114,11 @@ def cas_login():
     target_url = request.args.get('url')
     uid, attributes, proxy_granting_ticket = _cas_client(target_url).verify_ticket(ticket)
     app.logger.info(f'Logged into CAS as user {uid}')
-    user_id = User.get_serialized_composite_key(canvas_site_id=None, uid=uid)
-    user = User(user_id)
-    if start_login_session(user):
-        flash('Logged in successfully.')
-        return redirect(target_url or '/')
-    else:
-        return redirect_unauthorized(user)
+    return _start_login_session(
+        canvas_site_id=None,
+        redirect_path=target_url or '/',
+        uid=uid,
+    )
 
 
 def _cas_client(target_url=None):
@@ -136,6 +134,15 @@ def _dev_auth_login(canvas_site_id, password, uid):
     if password != app.config['DEV_AUTH_PASSWORD']:
         app.logger.debug(f'UID {uid} failed dev-auth login: bad password.')
         return tolerant_jsonify({'message': 'Invalid credentials'}, 401)
+    return _start_login_session(canvas_site_id=canvas_site_id, uid=uid)
+
+
+def _get_custom_param(lti_data, key):
+    value = lti_data.get('https://purl.imsglobal.org/spec/lti/claim/custom', {}).get(key)
+    return value if value and value.isnumeric() else None
+
+
+def _start_login_session(uid, canvas_site_id=None, redirect_path=None):
     user_id = User.get_serialized_composite_key(canvas_site_id=canvas_site_id, uid=uid)
     user = User(user_id)
     error = None
@@ -149,13 +156,9 @@ def _dev_auth_login(canvas_site_id, password, uid):
             error = 'Sorry, you are not authorized to use Ripley in standalone mode.'
     elif not start_login_session(user):
         error = 'The Flask start_login_session operation failed.'
-
+    # Build the response.
     if error:
         return tolerant_jsonify({'message': error}, 403)
     else:
-        return tolerant_jsonify(current_user.to_api_json())
-
-
-def _get_custom_param(lti_data, key):
-    value = lti_data.get('https://purl.imsglobal.org/spec/lti/claim/custom', {}).get(key)
-    return value if value and value.isnumeric() else None
+        flash('Logged in successfully.')
+        return redirect(redirect_path) if redirect_path else tolerant_jsonify(current_user.to_api_json())
