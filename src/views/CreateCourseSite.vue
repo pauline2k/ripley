@@ -90,13 +90,9 @@
                         <template #actions="{ expanded }">
                           <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
                         </template>
-                        <span
-                          :aria-level="teachingTerms.length === 1 ? 3 : 4"
-                          class="sections-course-title"
-                          role="heading"
-                        >
+                        <h3 :id="`sections-course-title-${course.slug}`" class="sections-course-title">
                           <CourseCodeAndTitle :course="course" />
-                        </span>
+                        </h3>
                       </v-expansion-panel-title>
                       <v-expansion-panel-text>
                         <CourseSectionsTable
