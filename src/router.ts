@@ -24,6 +24,7 @@ const WelcomeAdmin = () => import('@/views/WelcomeAdmin.vue')
 
 import {capitalize} from 'lodash'
 import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
+import {logOut} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
 
 const isInIframe = window.parent.frames.length
@@ -169,9 +170,6 @@ const routes:RouteRecordRaw[] = [
     children: [
       {
         component: Error,
-        meta: {
-          isError: true
-        },
         path: '/error'
       },
       {
@@ -192,24 +190,19 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const context = useContextStore()
+  const currentUser = context.currentUser
   context.resetApplicationState()
-  if (!to.meta.isError && !to.meta.is404) {
-    if (to.query.error) {
-      context.setApplicationState(500, to.query.error)
-    } else {
-      const currentUser = context.currentUser
-      if (currentUser.isAuthenticated) {
-        const unauthorized = !isInIframe && !currentUser.canAccessStandaloneView
-        if (unauthorized) {
-          context.setApplicationState(403, 'Unauthorized')
-        }
-      }
-    }
-  }
-  if (context.applicationState.status === 200) {
-    next()
+  if (currentUser.isAuthenticated && !isInIframe && !currentUser.canAccessStandaloneView) {
+    return logOut().then(data => window.location.href = data.casLogoutUrl)
   } else {
-    next({path: '/error'})
+    if (to.query.error && to.path !== '/error' && !to.meta.is404) {
+      context.setApplicationState(500, to.query.error)
+    }
+    if (context.applicationState.status === 200) {
+      next()
+    } else {
+      next({path: '/error'})
+    }
   }
 })
 
