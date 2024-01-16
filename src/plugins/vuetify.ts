@@ -101,11 +101,11 @@ export default createVuetify({
         colors: {
           alert: '#fef6e6',
           error: '#b94a48',
-          info: '#3a87ad',
+          info: '#367DA1',
           primary: '#377695',
           red: colors.red.darken1,
           secondary: '#eee',
-          success: '#468847'
+          success: '#437F4B'
         }
       }
     }
