@@ -76,6 +76,7 @@
           </v-alert>
           <div class="ml-5 w-25">
             <v-switch
+              id="toggle-welcome-email-active"
               v-model="isWelcomeEmailActive"
               color="success"
               :disabled="!mailingList.welcomeEmailBody || !mailingList.welcomeEmailSubject || isSaving || isToggling"
@@ -97,10 +98,10 @@
           </div>
         </div>
         <div class="container pb-5 pt-3 px-5">
-          <label for="input-subject" class="text-subtitle-1">
-            Subject
-          </label>
-          <div v-if="isEditing">
+          <template v-if="isEditing">
+            <label for="input-subject" class="text-subtitle-1">
+              Subject
+            </label>
             <v-text-field
               id="input-subject"
               v-model="subject"
@@ -113,15 +114,20 @@
               variant="outlined"
               @keydown.enter="saveWelcomeEmail"
             />
-          </div>
-          <div v-if="!isEditing" id="page-site-mailing-list-subject">
-            {{ mailingList.welcomeEmailSubject }}
-          </div>
+          </template>
+          <template v-else>
+            <div class="text-subtitle-1">
+              Subject
+            </div>
+            <div id="page-site-mailing-list-subject">
+              {{ mailingList.welcomeEmailSubject }}
+            </div>
+          </template>
           <div class="mt-3">
-            <label for="input-message" class="text-subtitle-1">
-              Message
-            </label>
-            <div v-if="isEditing">
+            <template v-if="isEditing">
+              <label for="input-message" class="text-subtitle-1">
+                Message
+              </label>
               <ckeditor
                 id="input-message"
                 v-model="body"
@@ -139,10 +145,15 @@
                 :editor="editor"
                 tag-name="textarea"
               />
-            </div>
-            <div v-if="!isEditing" class="pb-3 pt-1">
-              <div id="page-site-mailing-list-body" v-html="mailingList.welcomeEmailBody"></div>
-            </div>
+            </template>
+            <template v-else>
+              <div class="text-subtitle-1">
+                Message
+              </div>
+              <div class="pb-3 pt-1">
+                <div id="page-site-mailing-list-body" v-html="mailingList.welcomeEmailBody"></div>
+              </div>
+            </template>
           </div>
           <div class="mt-3">
             <div v-if="isEditing">
