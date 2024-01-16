@@ -90,7 +90,7 @@
                   size="24"
                   class="ms-2"
                 />
-                <span v-if="!isToggling">
+                <span v-if="!isToggling" class="text-no-wrap">
                   {{ isWelcomeEmailActive ? 'Active' : 'Inactive' }}
                 </span>
               </template>
