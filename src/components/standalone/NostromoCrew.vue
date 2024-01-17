@@ -26,10 +26,7 @@
         density="compact"
         :headers="[
           {title: 'UID', key: 'uid', sortable: false},
-          {title: 'Name', key: 'name', sortable: false},
-          {title: 'Active', key: 'active', align: 'end', sortable: false},
-          {title: 'Admin', key: 'isSuperuser', align: 'end', sortable: false},
-          {title: 'Canvas Whitelist', key: 'isCanvasWhitelisted', align: 'end', sortable: false}
+          {title: 'Name', key: 'name', sortable: false}
         ]"
         item-value="name"
         :items="nostromoCrew"
@@ -55,34 +52,13 @@
             </span>
           </div>
         </template>
-        <template #item.active="{item}">
-          <div class="py-2">
-            <v-icon
-              :color="item.active ? 'success' : 'error'"
-              :icon="item.active ? mdiCheckCircle : mdiAlert"
-            />
-          </div>
-        </template>
-        <template #item.isSuperuser="{item}">
-          <div class="py-2">
-            <v-icon
-              :color="item.isSuperuser ? 'success' : 'error'"
-              :icon="item.isSuperuser ? mdiCheckCircle : mdiAlert"
-            />
-          </div>
-        </template>
-        <template #item.isCanvasWhitelisted="{item}">
-          <div class="py-2">
-            {{ item.isCanvasWhitelisted ? 'Yes' : 'No' }}
-          </div>
-        </template>
       </v-data-table>
     </v-card-text>
   </v-card>
 </template>
 
 <script setup>
-import {mdiAlert, mdiCheckCircle, mdiCardAccountDetails} from '@mdi/js'
+import {mdiCardAccountDetails} from '@mdi/js'
 </script>
 
 <script>

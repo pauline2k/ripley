@@ -157,17 +157,10 @@ ALTER TABLE ONLY jobs
 
 --
 
-CREATE TABLE user_auths (
-    id SERIAL PRIMARY KEY,
-    uid CHARACTER VARYING(255) NOT NULL,
-    is_superuser BOOLEAN DEFAULT FALSE NOT NULL,
-    active BOOLEAN DEFAULT FALSE NOT NULL,
-    is_canvas_whitelisted BOOLEAN DEFAULT FALSE NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL
+CREATE TABLE admin_users (
+    uid CHARACTER VARYING(255) PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL
 );
-
-ALTER TABLE ONLY user_auths ADD CONSTRAINT user_auths_unique_constraint UNIQUE (uid);
 
 --
 

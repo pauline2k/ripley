@@ -48,7 +48,6 @@ from ripley.lib.canvas_user_utils import csv_row_for_campus_user, user_id_from_a
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from ripley.models.canvas_synchronization import CanvasSynchronization
-from ripley.models.user_auth import UserAuth
 
 
 class BcoursesRefreshBaseJob(BaseJob):
@@ -96,9 +95,8 @@ class BcoursesRefreshBaseJob(BaseJob):
 
             with self.get_canvas_user_report(timestamp, users_by_uid) as user_report:
                 if user_report:
-                    whitelisted_uids = [user.uid for user in UserAuth.get_canvas_whitelist()]
                     for row in csv.DictReader(user_report):
-                        new_row = self.process_user(row, users_by_uid, whitelisted_uids)
+                        new_row = self.process_user(row, users_by_uid)
                         if new_row and _csv_data_changed(row, new_row):
                             csv_set.users.writerow(new_row)
                 else:
@@ -252,7 +250,7 @@ class BcoursesRefreshBaseJob(BaseJob):
             with open(canvas_users_file.name, 'r') as f:
                 yield f
 
-    def process_user(self, row, users_by_uid, whitelisted_uids):
+    def process_user(self, row, users_by_uid):
         account_data = uid_from_canvas_login_id(row['login_id'])
         uid = account_data['uid']
 
@@ -278,7 +276,7 @@ class BcoursesRefreshBaseJob(BaseJob):
             return
         # If not an incremental job, a missing user is a candidate for inactivation.
         else:
-            new_row = self.inactivate_user(uid, row, is_inactive, whitelisted_uids)
+            new_row = self.inactivate_user(uid, row, is_inactive)
 
         self.known_users[uid] = str(new_row['user_id'])
 
@@ -298,18 +296,11 @@ class BcoursesRefreshBaseJob(BaseJob):
 
         return new_row
 
-    def inactivate_user(self, uid, user_row, is_inactive, whitelisted_uids):
+    def inactivate_user(self, uid, user_row, is_inactive):
         new_row = {k: user_row[k] for k in ('user_id', 'login_id', 'first_name', 'last_name', 'email', 'status')}
 
-        # Force user reactivation if already inactive and in our whitelist.
-        if uid in whitelisted_uids and is_inactive:
-            app.logger.warning(f'Reactivating account for unknown LDAP UID {uid}.')
-            new_row.update({
-                'login_id': uid,
-                'status': 'active',
-            })
-        # Otherwise, if an inactivation or email deletion job is running, proceed to mark the Canvas user account as inactive.
-        elif self.job_flags.inactivate or self.job_flags.delete_email_addresses:
+        if self.job_flags.inactivate or self.job_flags.delete_email_addresses:
+            # If an inactivation or email deletion job is running, proceed to mark the Canvas user account as inactive.
             if not is_inactive:
                 app.logger.warning(f'Inactivating account for LDAP UID {uid}.')
                 new_row.update({

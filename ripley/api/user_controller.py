@@ -29,8 +29,8 @@ from ripley.api.util import admin_required, canvas_role_required
 from ripley.externals.data_loch import find_people_by_email, find_people_by_name, find_person_by_uid
 from ripley.lib.calnet_utils import get_calnet_attributes_for_uids
 from ripley.lib.http import tolerant_jsonify
+from ripley.models.admin_user import AdminUser
 from ripley.models.user import User
-from ripley.models.user_auth import UserAuth
 
 
 @app.route('/api/user/my_profile')
@@ -41,7 +41,7 @@ def my_profile():
 @app.route('/api/user/nostromo_crew')
 @admin_required
 def get_nostromo_crew():
-    api_json = [user.to_api_json() for user in UserAuth.get_all()]
+    api_json = [user.to_api_json() for user in AdminUser.get_all()]
     uids = [user['uid'] for user in api_json]
     calnet_users_by_uid = {u['ldap_uid']: u for u in get_calnet_attributes_for_uids(app, uids)}
     for user in api_json:

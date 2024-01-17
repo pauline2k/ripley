@@ -33,7 +33,7 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.canvas_user_utils import canvas_user_profile_to_api_json
 from ripley.lib.util import to_int, to_str
-from ripley.models.user_auth import UserAuth
+from ripley.models.admin_user import AdminUser
 
 
 class User(UserMixin):
@@ -206,8 +206,7 @@ class User(UserMixin):
                 name = calnet_profile.get('name') or f'UID {self.uid}'
                 email_address = calnet_profile.get('email') or None
                 if not calnet_profile.get('isExpiredPerLdap', True):
-                    user_auth = UserAuth.find_by_uid(self.uid)
-                    is_admin = user_auth.is_superuser if user_auth and user_auth.active else False
+                    is_admin = AdminUser.is_admin_user(self.uid)
                     canvas_user_data = self._load_canvas_user_data(
                         canvas_site_id=canvas_site_id,
                         user_profile=canvas_user_profile,
