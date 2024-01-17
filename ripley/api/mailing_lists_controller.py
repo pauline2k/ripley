@@ -36,13 +36,13 @@ from ripley.models.mailing_list_members import MailingListMembers
 
 
 @app.route('/api/mailing_list/my')
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader', 'CanvasAdmin')
 def my_mailing_list():
     return _mailing_list(current_user.canvas_site_id)
 
 
 @app.route('/api/mailing_list/<canvas_site_id>')
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader', 'CanvasAdmin')
 def get_mailing_list(canvas_site_id):
     if current_user.is_teaching and str(current_user.canvas_site_id) != canvas_site_id:
         raise UnauthorizedRequestError(f'You are not authorized to use Canvas site {canvas_site_id} in this context')
@@ -50,7 +50,7 @@ def get_mailing_list(canvas_site_id):
 
 
 @app.route('/api/mailing_list/welcome_email/activate')
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader', 'CanvasAdmin')
 def welcome_email_activate():
     mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
     if mailing_list:
@@ -67,7 +67,7 @@ def welcome_email_activate():
 
 
 @app.route('/api/mailing_list/create', methods=['POST'])
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader', 'CanvasAdmin')
 def create_mailing_lists():
     try:
         params = request.get_json()
@@ -86,7 +86,7 @@ def create_mailing_lists():
 
 
 @app.route('/api/mailing_list/welcome_email/deactivate')
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader', 'CanvasAdmin')
 def deactivate_welcome_email():
     mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
     if mailing_list:
@@ -100,7 +100,7 @@ def deactivate_welcome_email():
 
 
 @app.route('/api/mailing_list/welcome_email/update', methods=['POST'])
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader', 'CanvasAdmin')
 def update_welcome_email():
     mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
     if mailing_list:
@@ -123,7 +123,7 @@ def update_welcome_email():
 
 
 @app.route('/api/mailing_list/suggested_name/<canvas_site_id>')
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader', 'CanvasAdmin')
 def get_suggested_mailing_list_name(canvas_site_id):
     canvas_site = canvas.get_course(canvas_site_id)
     if canvas_site:
@@ -138,7 +138,7 @@ def get_suggested_mailing_list_name(canvas_site_id):
 
 
 @app.route('/api/mailing_list/download/welcome_email_log')
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader', 'CanvasAdmin')
 def download_welcome_email_log():
     mailing_list = MailingList.find_by_canvas_site_id(current_user.canvas_site_id)
     if mailing_list:
@@ -162,7 +162,7 @@ def download_welcome_email_log():
 
 
 @app.route('/api/mailing_list/<mailing_list_id>/populate', methods=['POST'])
-@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader')
+@canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader', 'CanvasAdmin')
 def populate_mailing_lists(mailing_list_id):
     mailing_list = MailingList.find_by_id(mailing_list_id)
     if mailing_list:
