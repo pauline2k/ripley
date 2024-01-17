@@ -466,6 +466,7 @@ CREATE TABLE student.student_profile_index
 INSERT INTO student.student_profile_index
 (sid, uid, first_name, last_name, level, gpa, units, transfer, expected_grad_term, terms_in_attendance, email_address, entering_term, academic_career_status)
 VALUES
+('30040000','40000','Thomas','Kane','GR','3.5','120',FALSE,'2252','12','xo.kane@berkeley.edu','2208','active'),
 ('3000000009','1000075','First','Last','20','3.232','53.76',FALSE,'2262','3','oski@berkeley.edu','2228','active'),
 ('3000000003','1000091','First','Last','40','3.872','102.36',TRUE,'2242','7','oski@berkeley.edu','2228','active'),
 ('3000000053','1000016','First','Last','40','3.608','118.12',FALSE,'2242','7','oski@berkeley.edu','2208','active'),

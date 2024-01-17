@@ -27,7 +27,7 @@ import json
 from flask import current_app as app
 from flask_login import UserMixin
 from ripley.externals import canvas
-from ripley.externals.data_loch import has_instructor_history
+from ripley.externals.data_loch import get_student_profile, has_instructor_history
 from ripley.externals.redis import cache_dict_object, delete_cache_key, fetch_cached_dict_object
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
@@ -76,7 +76,7 @@ class User(UserMixin):
 
     @property
     def can_create_canvas_project_site(self):
-        return self.is_admin or self.is_canvas_admin or self.is_faculty or self.is_staff
+        return self.is_admin or self.is_canvas_admin or self.is_faculty or self.is_staff or self.is_graduate_student()
 
     @property
     def canvas_masquerading_user_id(self):
@@ -164,6 +164,10 @@ class User(UserMixin):
     def is_current_campus_instructor(self):
         current_term_ids = [t.to_sis_term_id() for t in BerkeleyTerm.get_current_terms().values()]
         return has_instructor_history(self.uid, current_term_ids)
+
+    def is_graduate_student(self):
+        profile = get_student_profile(self.uid)
+        return bool(profile and profile['level'] == 'GR')
 
     @classmethod
     def get_serialized_composite_key(cls, canvas_site_id, uid, canvas_masquerading_user_id=None):
