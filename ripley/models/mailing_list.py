@@ -291,7 +291,7 @@ class MailingList(Base):
                                     app.logger.debug(f'Updating user {preferred_email} of mailing_list {mailing_list.id}')
                                     success = MailingListMembers.update(
                                         can_send=user['canSend'],
-                                        deleted_at=user['deletedAt'],
+                                        deleted_at=None,
                                         first_name=user['firstName'],
                                         last_name=user['lastName'],
                                         mailing_list_member_id=existing_member.id,

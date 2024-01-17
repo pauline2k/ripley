@@ -41,8 +41,12 @@ class MailingListRefreshJob(BaseJob):
         for mailing_list in MailingList.query.all():
             term_id = mailing_list.term_id
             if not term_id or term_id == previous_term_id or term_id >= current_term_id:
-                MailingList.populate(mailing_list)
-                updated.append(mailing_list)
+                try:
+                    MailingList.populate(mailing_list)
+                    updated.append(mailing_list)
+                except Exception as e:
+                    app.logger.error(f'Failed to refresh popuation of mailing list id {mailing_list.id}')
+                    app.logger.exception(e)
 
         app.logger.info(f'Updated membership for {len(updated)} mailing lists, job complete.')
         # Return list of canvas_site_ids for sake of unit test(s).
