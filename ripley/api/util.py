@@ -51,6 +51,8 @@ def canvas_role_required(*roles):
             authorized = False
             if current_user.is_authenticated and current_user.is_admin:
                 authorized = True
+            elif 'CanvasAdmin' in roles and current_user.is_authenticated and current_user.is_canvas_admin:
+                authorized = True
             elif current_user.is_authenticated and current_user.canvas_user_id:
                 canvas_site_user_roles = []
                 # If canvas_site_id is in API path then use it. Otherwise, use current_user.canvas_site_id.
