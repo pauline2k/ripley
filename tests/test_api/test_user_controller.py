@@ -171,8 +171,9 @@ class TestNostromoCrew:
     def test_authorized(self, client, fake_auth):
         fake_auth.login(canvas_site_id=None, uid=admin_uid)
         api_json = self._api_nostromo_crew(client)
-        assert len(api_json) > 1
-        assert api_json[0]['uid'] < api_json[1]['uid']
+        assert len(api_json) > 0
+        for key in ('createdAt', 'firstName', 'lastName', 'uid'):
+            assert key in api_json[0]
 
 
 class TestSearchUsers:

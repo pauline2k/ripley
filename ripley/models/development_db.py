@@ -28,23 +28,12 @@ import re
 from flask import current_app as app
 from ripley import db, std_commit
 from ripley.factory import background_job_manager
+from ripley.models.admin_user import AdminUser
 from ripley.models.job import Job
-from ripley.models.user_auth import UserAuth
 from sqlalchemy.sql import text
 
 
-_test_users = [
-    {
-        'active': True,
-        'uid': '10000',
-        'is_superuser': True,
-    },
-    {
-        'active': True,
-        'uid': '10001',
-        'is_superuser': False,
-    },
-]
+ADMIN_USER_UIDS = ['10000']
 
 
 def clear():
@@ -62,12 +51,8 @@ def load(create_test_data=True):
 
 
 def _create_users():
-    for test_user in _test_users:
-        user = UserAuth.create(
-            active=test_user['active'],
-            uid=test_user['uid'],
-            is_superuser=test_user['is_superuser'],
-        )
+    for uid in ADMIN_USER_UIDS:
+        user = AdminUser.create(uid=uid)
         db.session.add(user)
     std_commit(allow_test_environment=True)
 

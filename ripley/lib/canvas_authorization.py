@@ -23,7 +23,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 from ripley.externals import canvas
-from ripley.models.user_auth import UserAuth
+from ripley.models.admin_user import AdminUser
 
 
 def can_administrate_canvas(uid):
@@ -46,8 +46,8 @@ def has_instructing_role(canvas_user):
 
 
 def is_account_admin(canvas_user):
-    user_auth = UserAuth.find_by_uid(canvas_user.login_id)
-    return user_auth and user_auth.is_superuser
+    admin_user = AdminUser.is_admin_user(canvas_user.login_id)
+    return admin_user and admin_user.is_superuser
 
 
 def is_course_reader(canvas_user):
