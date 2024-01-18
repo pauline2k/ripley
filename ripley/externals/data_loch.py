@@ -358,6 +358,17 @@ def get_section_instructors(term_id, section_ids):
     return safe_execute_rds(sql, **params)
 
 
+def get_student_profile(uid):
+    params = {
+        'uid': uid,
+    }
+    sql = """SELECT level
+        FROM student.student_profile_index
+        WHERE uid = %(uid)s"""
+    rows = safe_execute_rds(sql, **params)
+    return None if not rows or (len(rows) == 0) else rows[0]
+
+
 def get_undergraduate_term(term_id):
     sql = f"""SELECT * FROM terms.term_definitions
               WHERE term_id = '{term_id}'
