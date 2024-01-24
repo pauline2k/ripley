@@ -172,6 +172,8 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, prior_co
                 total_grade_count = grade_values.get('total', 0)
                 grade_no_prior_enroll_count = total_grade_count - grade_prior_enroll_count
                 if total_grade_count < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
+                    app.logger.debug(f'Term ID {term_id} excluded from {course_name} prior enrollment chart: \
+only {total_grade_count} {grade} students')
                     sufficient_data = False
                     continue
                 sorted_distribution.append({
@@ -230,7 +232,7 @@ GRADE_POINTS = {
     'F': 0,
     'P': None,
     'NP': None,
-    'I': 0,
+    'I': None,
 }
 
 
