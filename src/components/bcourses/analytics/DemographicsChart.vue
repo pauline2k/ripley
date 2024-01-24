@@ -16,7 +16,7 @@
       <template v-for="(group, key) in demographicOptions" :key="key">
         <option
           :id="`grade-distribution-demographics-option-${key}`"
-          :disabled="!size(group.options)"
+          :disabled="!size(group.options) || key === 'genders.other'"
           :value="{'group': key, 'option': get(group.options, 0)}"
         >
           {{ group.label }}
