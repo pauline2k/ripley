@@ -39,7 +39,7 @@ from rq.job import JobStatus
 
 
 @app.route('/api/canvas_site/egrades_export/options')
-@canvas_role_required('TeacherEnrollment')
+@canvas_role_required('TeacherEnrollment', 'CanvasAdmin')
 def egrades_export_options():
     course_settings = canvas.get_course_settings(current_user.canvas_site_id)
     official_sections, section_ids, sections = get_official_sections(current_user.canvas_site_id)
@@ -51,7 +51,7 @@ def egrades_export_options():
 
 
 @app.route('/api/canvas_site/egrades_export/prepare', methods=['POST'])
-@canvas_role_required('TeacherEnrollment')
+@canvas_role_required('TeacherEnrollment', 'CanvasAdmin')
 def egrades_export_prepare():
     params = request.get_json()
     grade_type = params.get('gradeType', None)
@@ -100,7 +100,7 @@ def is_official_canvas_course(canvas_site_id):
 
 
 @app.route('/api/canvas_site/egrades_export/download')
-@canvas_role_required('TeacherEnrollment')
+@canvas_role_required('TeacherEnrollment', 'CanvasAdmin')
 def egrades_download():
     params = request.args
     job_id = params.get('jobId', None)
@@ -125,7 +125,7 @@ def egrades_download():
 
 
 @app.route('/api/canvas_site/egrades_export/status', methods=['POST'])
-@canvas_role_required('TeacherEnrollment')
+@canvas_role_required('TeacherEnrollment', 'CanvasAdmin')
 def canvas_egrades_export_status():
     job_id = request.get_json().get('jobId', None)
     job = get_job(job_id)

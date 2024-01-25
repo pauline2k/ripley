@@ -34,7 +34,7 @@ from ripley.lib.http import tolerant_jsonify
 
 
 @app.route('/api/canvas_user/<canvas_site_id>/options')
-@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
+@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment', 'CanvasAdmin')
 def get_add_user_options(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if not course:
@@ -47,7 +47,7 @@ def get_add_user_options(canvas_site_id):
 
 
 @app.route('/api/canvas_user/<canvas_site_id>/add_user', methods=['POST'])
-@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
+@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment', 'CanvasAdmin')
 def canvas_site_add_user(canvas_site_id):
     canvas_site = canvas.get_course(canvas_site_id)
     if canvas_site:

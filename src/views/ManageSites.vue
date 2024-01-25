@@ -1,7 +1,7 @@
 <template>
   <div v-if="!isLoading" class="pt-3 px-16">
     <Header1 class="mb-1" text="Create or Update bCourses Sites" />
-    <div v-if="!size(coursesByTerm) && !currentUser.isAdmin" class="font-italic font-weight-medium text-red">
+    <div v-if="!size(coursesByTerm) && !isAdmin" class="font-italic font-weight-medium text-red">
       Sorry, we found neither {{ config.terms.current.name }} nor {{ config.terms.next.name }}
       courses in which you are listed as an instructor.
     </div>
@@ -87,7 +87,7 @@
                     </select>
                   </div>
                 </div>
-                <div v-if="currentUser.isAdmin" class="mt-2 pl-3">
+                <div v-if="isAdmin" class="mt-2 pl-3">
                   <v-text-field
                     id="canvas-site-id-input"
                     v-model="canvasSiteId"
@@ -160,6 +160,9 @@ export default {
     selection: undefined
   }),
   computed: {
+    isAdmin() {
+      return this.currentUser.isAdmin || this.currentUser.isCanvasAdmin
+    },
     isButtonDisabled() {
       return !this.selection || (this.selection.id === 'manage-official-sections' && !this.isCanvasSiteIdValid)
     },
@@ -207,7 +210,7 @@ export default {
           {
             header: 'Manage official sections of an existing site',
             id: 'manage-official-sections',
-            isAvailable: this.currentUser.isAdmin || size(this.coursesByTerm),
+            isAvailable: this.isAdmin || size(this.coursesByTerm),
             label: 'Manage Official Sections',
             path: '/manage_sites'
           }

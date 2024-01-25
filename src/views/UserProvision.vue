@@ -2,7 +2,7 @@
   <div v-if="!isLoading" class="page-user-provision">
     <Header1 id="page-title" class="page-user-provision-heading" text="Add Users to bCourses" />
     <form
-      v-if="currentUser.isAdmin"
+      v-if="isAdmin"
       id="user-import-form"
       name="userImportForm"
       @submit.prevent="onSubmit"
@@ -95,7 +95,7 @@
       </v-row>
     </form>
     <v-alert
-      v-if="!currentUser.isAdmin"
+      v-if="!isAdmin"
       class="font-weight-medium ma-2"
       density="compact"
       role="alert"
@@ -134,6 +134,9 @@ export default {
   computed: {
     importButtonDisabled() {
       return this.importProcessing || isEmpty(this.rawUids)
+    },
+    isAdmin() {
+      return this.currentUser.isAdmin || this.currentUser.isCanvasAdmin
     }
   },
   watch: {

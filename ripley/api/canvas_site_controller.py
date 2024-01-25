@@ -38,9 +38,9 @@ from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 
-ROLES_CAN_EDIT_OFFICIAL_SECTIONS = ['Lead TA', 'TeacherEnrollment']
+ROLES_CAN_EDIT_OFFICIAL_SECTIONS = ['Lead TA', 'TeacherEnrollment', 'CanvasAdmin']
 
-ROLES_CAN_VIEW_OFFICIAL_SECTIONS = ['DesignerEnrollment', 'Lead TA', 'TaEnrollment', 'TeacherEnrollment']
+ROLES_CAN_VIEW_OFFICIAL_SECTIONS = ['DesignerEnrollment', 'Lead TA', 'TaEnrollment', 'TeacherEnrollment', 'CanvasAdmin']
 
 
 @app.route('/api/canvas_site/provision')
