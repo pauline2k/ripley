@@ -70,7 +70,7 @@ def get_user_profile():
 
 
 @app.route('/api/user/search')
-@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment')
+@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment', 'CanvasAdmin')
 def search_users():
     search_text = request.args.get('searchText')
     search_type = request.args.get('searchType')

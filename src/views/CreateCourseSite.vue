@@ -237,7 +237,7 @@ export default {
   created() {
     getCourseProvisioningMetadata().then(data => {
       this.updateMetadata(data)
-      if (!this.teachingTerms.length && !this.currentUser.isAdmin) {
+      if (!this.teachingTerms.length && !this.isAdmin) {
         this.warning = 'You are not listed as an instructor of any courses in the current or upcoming term.'
       }
       if (size(this.selectedSectionsList)) {

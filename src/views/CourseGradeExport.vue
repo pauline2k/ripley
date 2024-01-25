@@ -315,7 +315,7 @@ export default {
     clearInterval(this.exportTimer)
   },
   created() {
-    if (this.currentUser.isTeaching || this.currentUser.isAdmin) {
+    if (this.currentUser.isTeaching || this.currentUser.isAdmin || this.currentUser.isCanvasAdmin) {
       this.loadExportOptions().then(() => {
         this.$ready()
       })
