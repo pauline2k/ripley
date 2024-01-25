@@ -88,14 +88,14 @@
                   :id="`grade-distro-demo-table-row-${index}-grade-1`"
                   class="py-1"
                 >
-                  {{ chartSettings.series[1]['data'][index].y }}
+                  {{ chartSettings.series[1]['data'][index].y || 'No data' }}
                 </td>
                 <td
                   v-if="size(chartSettings.series) > 1"
                   :id="`grade-distro-demo-table-row-${index}-count-1`"
                   class="py-1"
                 >
-                  {{ chartSettings.series[1]['data'][index].custom.count }}
+                  {{ chartSettings.series[1]['data'][index].custom.count || 'No data' }}
                 </td>
               </tr>
             </tbody>
@@ -258,8 +258,11 @@ export default {
         }
         each(this.gradeDistribution, item => {
           const value = get(item, `${group}.${option}`) || get(item, `${group}`)
+          const count = get(value, 'count', 0)
           secondarySeries.data.push({
-            custom: {count: get(value, 'count', 0)},
+            custom: {
+              count: count === null ? 'Small sample size' : count
+            },
             dataLabels: {
               enabled: false
             },

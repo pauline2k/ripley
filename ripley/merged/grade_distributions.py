@@ -37,15 +37,12 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
     grade_totals = {}
     grade_distribution_by_term = {}
     student_grades = get_grades_with_demographics(course_term_id, section_ids, instructor_uid)
-    if len(student_grades) < int(app.config['NEWT_MINIMUM_CLASS_SIZE']):
-        return False, False
 
     for row in student_grades:
         term_id = row['term_id']
         grade = row['grade']
         if grade:
             grade_points = GRADE_POINTS.get(grade)
-
             if term_id not in grade_distribution_by_term:
                 grade_distribution_by_term[term_id] = {
                     'count': 0,
@@ -92,6 +89,8 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
 
     sorted_grade_distribution_by_term = {}
     for term_id, term_distribution in grade_distribution_by_term.items():
+        if term_distribution['count'] < int(app.config['NEWT_MINIMUM_CLASS_SIZE']):
+            continue
         sorted_grade_distribution = []
         for grade in sorted(term_distribution.keys(), key=_grade_ordering_index):
             if grade in GRADE_ORDERING:
@@ -108,30 +107,32 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
 
     sorted_demographics_distribution = []
     for term_id in sorted(demographics_distribution.keys()):
-        sufficient_data = True
+        if demographics_distribution[term_id]['count'] < int(app.config['NEWT_MINIMUM_CLASS_SIZE']):
+            app.logger.debug(f"Newt: term ID {term_id} excluded from {demographics_distribution[term_id]['courseName']} demographics chart: \
+enrollment count ({demographics_distribution[term_id]['count']}) falls short of minimum class size")
+            continue
         for distribution_key, values in demographics_distribution[term_id].items():
-            if distribution_key in ['count', 'courseName', 'totalGradePoints'] or not sufficient_data:
+            if distribution_key in ['count', 'courseName', 'totalGradePoints']:
                 continue
             for distribution_value, total_grade_points in values.items():
                 student_count = grade_totals[term_id][distribution_key][distribution_value]
-                if student_count > 0 and student_count < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
-                    app.logger.debug(f"Term ID {term_id} excluded from {demographics_distribution[term_id]['courseName']} demographics chart: \
-only {student_count} {distribution_key}--{distribution_value} students")
-                    sufficient_data = False
-                    continue
+                insufficient_data = False
+                if student_count > 0 and student_count < app.config['NEWT_SMALL_CELL_THRESHOLD']:
+                    app.logger.debug(f"Newt: {demographics_distribution[term_id]['courseName']} term ID {term_id} has only {student_count} \
+{distribution_key}--{distribution_value} students; value obscured in demographics chart")
+                    insufficient_data = True
                 demographics_distribution[term_id][distribution_key][distribution_value] = {
                     'averageGradePoints': (total_grade_points / student_count) if student_count > 0 else 0,
-                    'count': student_count,
+                    'count': None if insufficient_data else student_count,
                 }
-        if sufficient_data:
-            term_student_count = demographics_distribution[term_id]['count']
-            term_total_grade_points = demographics_distribution[term_id].pop('totalGradePoints', 0)
-            sorted_demographics_distribution.append({
-                'averageGradePoints': (term_total_grade_points / term_student_count) if term_student_count > 0 else 0,
-                **demographics_distribution[term_id],
-                'termId': term_id,
-                'termName': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
-            })
+        term_student_count = demographics_distribution[term_id]['count']
+        term_total_grade_points = demographics_distribution[term_id].pop('totalGradePoints', 0)
+        sorted_demographics_distribution.append({
+            'averageGradePoints': (term_total_grade_points / term_student_count) if term_student_count > 0 else 0,
+            **demographics_distribution[term_id],
+            'termId': term_id,
+            'termName': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
+        })
     return sorted_demographics_distribution, sorted_grade_distribution_by_term
 
 
@@ -162,20 +163,12 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, prior_co
         total_prior_enroll_count = term_distribution['count']
         total_no_prior_enroll_count = term_distribution['total'] - total_prior_enroll_count
         sorted_distribution = []
-        sufficient_data = total_prior_enroll_count > 0 and total_no_prior_enroll_count > 0
         for grade in sorted(term_distribution.keys(), key=_grade_ordering_index):
-            if not sufficient_data:
-                continue
             if grade in GRADE_ORDERING:
                 grade_values = term_distribution.get(grade, {})
                 grade_prior_enroll_count = grade_values.get('count', 0)
                 total_grade_count = grade_values.get('total', 0)
                 grade_no_prior_enroll_count = total_grade_count - grade_prior_enroll_count
-                if total_grade_count < app.config['GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY']:
-                    app.logger.debug(f'Term ID {term_id} excluded from {course_name} prior enrollment chart: \
-only {total_grade_count} {grade} students')
-                    sufficient_data = False
-                    continue
                 sorted_distribution.append({
                     'classSize': term_distribution['total'],
                     'courseName': prior_course_name,
@@ -188,8 +181,7 @@ only {total_grade_count} {grade} students')
                     'totalCount': total_grade_count,
                     'totalPercentage': to_percentage(total_grade_count, term_distribution['total']),
                 })
-        if sufficient_data:
-            sorted_distributions[term_id] = sorted_distribution
+        sorted_distributions[term_id] = sorted_distribution
     return sorted_distributions
 
 

@@ -86,8 +86,6 @@ FIXTURES_PATH = None
 # Enforce dry run mode on all jobs.
 FORCE_DRY_RUN = False
 
-GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY = 10
-
 # Minutes of inactivity before session cookie is destroyed
 INACTIVE_SESSION_LIFETIME = 120
 
@@ -130,6 +128,7 @@ MAILING_LISTS_TIMESTAMP_TOLERANCE = 60
 
 NEWT_FEEDBACK_FORM_URL = 'https://forms.fake/xyz'
 NEWT_MINIMUM_CLASS_SIZE = 150
+NEWT_SMALL_CELL_THRESHOLD = 10
 
 # Default is 15 minutes
 PHOTO_SIGNED_URL_EXPIRES_IN_SECONDS = 15 * 60
