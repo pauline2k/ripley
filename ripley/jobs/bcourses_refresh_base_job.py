@@ -369,7 +369,7 @@ class BcoursesRefreshBaseJob(BaseJob):
     def upload_results(self, csv_set, timestamp):  # noqa C901
         # The email deletion job runs an API loop and does not post a SIS import to Canvas.
         if self.job_flags.delete_email_addresses:
-            self.handle_email_deletions()
+            self.handle_email_deletions(timestamp)
             return
 
         z = zipfile.ZipFile(f'canvas-sis-import-{timestamp}.zip', 'w')
@@ -430,16 +430,28 @@ class BcoursesRefreshBaseJob(BaseJob):
         finally:
             os.remove(z.filename)
 
-    def handle_email_deletions(self):
+    def handle_email_deletions(self, timestamp):
         app.logger.warning(f'About to delete email addresses for {len(self.email_deletions)} inactive users: {self.email_deletions}')
-        for canvas_user_id in self.email_deletions:
-            for channel in canvas.get_communication_channels(canvas_user_id):
-                if channel.type == 'email':
-                    if self.dry_run:
-                        app.logger.info(f'Dry run mode, would delete communication channel {channel}.')
-                    else:
-                        app.logger.info(f'Deleting communication channel {channel}.')
-                        channel.delete()
+
+        email_deletions_file = tempfile.NamedTemporaryFile(suffix='.csv')
+        with open(email_deletions_file.name, 'w') as f:
+            email_deletions = csv.DictWriter(f, fieldnames=['canvas_user_id', 'email_address']) # noqa
+            email_deletions.writeheader()
+
+            for canvas_user_id in self.email_deletions:
+                for channel in canvas.get_communication_channels(canvas_user_id):
+                    if channel.type == 'email':
+                        if self.dry_run:
+                            app.logger.info(f'Dry run mode, would delete communication channel {channel}.')
+                        else:
+                            app.logger.info(f'Deleting communication channel {channel}.')
+                            channel.delete()
+                        email_deletions.writerow({
+                            'canvas_user_id': canvas_user_id,
+                            'email_address': channel.address,
+                        })
+
+        upload_dated_csv(email_deletions_file.name, 'email-deletions', 'canvas-sis-imports', timestamp)
 
     @classmethod
     def description(cls):
