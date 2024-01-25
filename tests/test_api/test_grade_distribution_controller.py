@@ -72,7 +72,7 @@ class TestGetGradeDistribution:
 
     def test_admin_no_grades(self, client, app, fake_auth):
         """Allows admin, throws 404 if grades if not present."""
-        with requests_mock.Mocker() as m, override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
+        with requests_mock.Mocker() as m, override_config(app, 'NEWT_SMALL_CELL_THRESHOLD', 0):
             register_canvas_uris(app, {
                 'account': ['get_admins'],
                 'course': ['get_by_id_8876542', 'get_sections_8876542'],
@@ -84,7 +84,9 @@ class TestGetGradeDistribution:
 
     def test_admin_grades(self, client, app, fake_auth):
         """Allows admin, returns grades if present."""
-        with requests_mock.Mocker() as m, override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
+        with requests_mock.Mocker() as m, \
+                override_config(app, 'NEWT_SMALL_CELL_THRESHOLD', 0), \
+                override_config(app, 'NEWT_MINIMUM_CLASS_SIZE', 0):
             register_canvas_uris(app, {
                 'account': ['get_admins'],
                 'course': ['get_by_id_1010101', 'get_sections_1010101'],
@@ -131,7 +133,9 @@ class TestGetGradeDistribution:
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
-        with requests_mock.Mocker() as m, override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
+        with requests_mock.Mocker() as m, \
+                override_config(app, 'NEWT_SMALL_CELL_THRESHOLD', 0), \
+                override_config(app, 'NEWT_MINIMUM_CLASS_SIZE', 0):
             register_canvas_uris(app, {
                 'account': ['get_admins'],
                 'course': ['get_by_id_1010101', 'get_sections_1010101', 'get_enrollments_8876542_4567890_past'],
@@ -203,7 +207,7 @@ class TestGetPriorEnrollmentGradeDistribution:
 
     def test_admin(self, client, app, fake_auth):
         """Allows admin."""
-        with requests_mock.Mocker() as m, override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
+        with requests_mock.Mocker() as m, override_config(app, 'NEWT_SMALL_CELL_THRESHOLD', 0):
             canvas_site_id = '1234567'
             register_canvas_uris(app, {
                 'account': ['get_admins'],
@@ -326,7 +330,7 @@ class TestGetPriorEnrollmentGradeDistribution:
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
-        with requests_mock.Mocker() as m, override_config(app, 'GRADE_DISTRIBUTION_MIN_STUDENTS_PER_CATEGORY', 0):
+        with requests_mock.Mocker() as m, override_config(app, 'NEWT_SMALL_CELL_THRESHOLD', 0):
             canvas_site_id = '1234567'
             register_canvas_uris(app, {
                 'account': ['get_admins'],

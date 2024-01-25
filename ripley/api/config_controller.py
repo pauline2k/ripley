@@ -38,6 +38,8 @@ def app_config():
     configs_for_feed = [
         'CANVAS_API_URL',
         'DEV_AUTH_ENABLED',
+        'NEWT_MINIMUM_CLASS_SIZE',
+        'NEWT_SMALL_CELL_THRESHOLD',
         'RIPLEY_ENV',
         'TIMEZONE',
     ]

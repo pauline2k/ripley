@@ -51,7 +51,8 @@ LOGGING_LOCATION = 'STDOUT'
 LTI_CONFIG_PATH = f'{BASE_DIR}/tests/config/test-lti-config.json'
 LTI_HOST = 'https://ripley-test.berkeley.edu'
 
-NEWT_MINIMUM_CLASS_SIZE = 90
+NEWT_SMALL_CELL_THRESHOLD = 10
+NEWT_MINIMUM_CLASS_SIZE = 50
 
 MAILGUN_BASE_URL = 'https://fake-o-mailgun.example.com/v3'
 
