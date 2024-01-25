@@ -403,8 +403,8 @@ export default {
       if (size(this.chartSettings.series) > 1) {
         this.chartSettings.title.useHTML = true
         this.chartSettings.title.text = `Relation of <span ${this.isDemoMode ? 'class="demo-mode-blur"' : ''}>
-            ${this.courseName}
-          </span> Students Who Have Taken ${this.selectedCourse}&mdash;${this.selectedTerm.name} to Overall Class`
+          ${this.selectedTerm.name} ${this.courseName}
+          </span> Students Who Have Taken ${this.selectedCourse} to Overall Class`
       } else {
         this.chartSettings.title.useHTML = false
         this.chartSettings.title.text = `Overall Class Grade Distribution&mdash;${this.selectedTerm.name}`
