@@ -86,6 +86,8 @@ FIXTURES_PATH = None
 # Enforce dry run mode on all jobs.
 FORCE_DRY_RUN = False
 
+GRADE_DISTRIBUTION_CACHE_EXPIRES_IN_DAYS = 30
+
 # Minutes of inactivity before session cookie is destroyed
 INACTIVE_SESSION_LIFETIME = 120
 

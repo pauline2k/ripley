@@ -61,6 +61,13 @@ def delete_cache_key(cache_key):
     redis_conn.delete(cache_key)
 
 
+@skip_when_pytest()
+def delete_cache_prefix(prefix):
+    get_redis_conn(app)
+    for key in redis_conn.scan_iter(f'{prefix}:*'):
+        redis_conn.delete(key)
+
+
 def enqueue(func, args):
     from ripley.factory import q
     get_redis_conn(app)

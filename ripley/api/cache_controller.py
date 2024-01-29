@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from flask import current_app as app
 from ripley.api.util import admin_required
-from ripley.externals.redis import delete_cache_key, flushdb
+from ripley.externals.redis import delete_cache_key, delete_cache_prefix, flushdb
 from ripley.lib.http import tolerant_jsonify
 
 
@@ -38,6 +38,13 @@ def clear_cache():
 
 @app.route('/api/cache/delete/<key>')
 @admin_required
-def delete_cache(key):
+def delete_key(key):
     delete_cache_key(key)
+    return tolerant_jsonify({'deleted': True})
+
+
+@app.route('/api/cache/delete_prefix/<prefix>')
+@admin_required
+def delete_prefix(prefix):
+    delete_cache_prefix(prefix)
     return tolerant_jsonify({'deleted': True})
