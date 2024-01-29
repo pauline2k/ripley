@@ -29,6 +29,7 @@ from ripley.api.errors import ResourceNotFoundError
 from ripley.api.util import canvas_role_required
 from ripley.externals import canvas
 from ripley.externals.data_loch import find_course_by_name
+from ripley.externals.redis import cache_dict_object, fetch_cached_dict_object
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_site_utils import canvas_section_to_api_json, canvas_site_to_api_json, \
     parse_canvas_sis_course_id
@@ -39,57 +40,70 @@ from ripley.merged.grade_distributions import get_grade_distribution_with_prior_
 @app.route('/api/grade_distribution/<canvas_site_id>')
 @canvas_role_required('TeacherEnrollment')
 def get_grade_distribution(canvas_site_id):
-    course = canvas.get_course(canvas_site_id)
-    if not course:
-        raise ResourceNotFoundError('Course site not found.')
-    course_name, term = parse_canvas_sis_course_id(course.sis_course_id)
-    canvas_sections = canvas.get_course_sections(canvas_site_id)
-    sis_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
-    distribution = {
-        'canvasSite': canvas_site_to_api_json(course),
-        'courseName': course_name,
-    }
+    instructor_uid = None if current_user.is_admin else current_user.uid
+    cache_key = f'grade_distribution/{canvas_site_id}/{instructor_uid}'
 
-    def _handle_error():
-        raise ResourceNotFoundError('This course does not meet the requirements necessary to generate a Grade Distribution.')
+    distribution = fetch_cached_dict_object(cache_key)
+    if not distribution:
+        course = canvas.get_course(canvas_site_id)
+        if not course:
+            raise ResourceNotFoundError('Course site not found.')
+        course_name, term = parse_canvas_sis_course_id(course.sis_course_id)
+        canvas_sections = canvas.get_course_sections(canvas_site_id)
+        sis_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
+        distribution = {
+            'canvasSite': canvas_site_to_api_json(course),
+            'courseName': course_name,
+        }
 
-    if sis_sections:
-        term_id = term.to_sis_term_id()
-        section_ids = [s['id'] for s in sis_sections]
-        instructor_uid = None if current_user.is_admin else current_user.uid
-        grade_distribution_by_demographic, grade_distribution_by_term = get_grade_distributions(term_id, section_ids, instructor_uid)
-        if not grade_distribution_by_demographic:
-            _handle_error()
-        distribution['terms'] = [
-            {
-                'id': term_id,
-                'name': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
-            } for term_id in grade_distribution_by_term.keys()
-        ]
-        if term_id in grade_distribution_by_term.keys():
-            distribution['demographics'] = grade_distribution_by_demographic
-            distribution['enrollments'] = grade_distribution_by_term
+        def _handle_error():
+            raise ResourceNotFoundError('This course does not meet the requirements necessary to generate a Grade Distribution.')
+
+        if sis_sections:
+            term_id = term.to_sis_term_id()
+            section_ids = [s['id'] for s in sis_sections]
+            grade_distribution_by_demographic, grade_distribution_by_term = get_grade_distributions(term_id, section_ids, instructor_uid)
+            if not grade_distribution_by_demographic:
+                _handle_error()
+            distribution['terms'] = [
+                {
+                    'id': term_id,
+                    'name': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
+                } for term_id in grade_distribution_by_term.keys()
+            ]
+            if term_id in grade_distribution_by_term.keys():
+                distribution['demographics'] = grade_distribution_by_demographic
+                distribution['enrollments'] = grade_distribution_by_term
+            else:
+                distribution['demographics'] = []
+                distribution['enrollments'] = []
+            cache_dict_object(cache_key, distribution, app.config['GRADE_DISTRIBUTION_CACHE_EXPIRES_IN_DAYS'] * 86400)
         else:
-            distribution['demographics'] = []
-            distribution['enrollments'] = []
-    else:
-        _handle_error()
+            _handle_error()
+
     return tolerant_jsonify(distribution)
 
 
 @app.route('/api/grade_distribution/<canvas_site_id>/enrollment')
 @canvas_role_required('TeacherEnrollment')
 def get_prior_enrollment_grade_distribution(canvas_site_id):
-    prior_course_name = request.args.get('prior')
-    course = canvas.get_course(canvas_site_id)
-    course_name, term = parse_canvas_sis_course_id(course.sis_course_id)
-    grade_distribution = get_grade_distribution_with_prior_enrollments(
-        term_id=term.to_sis_term_id(),
-        course_name=course_name,
-        prior_course_name=prior_course_name,
-        instructor_uid=None if current_user.is_admin else current_user.uid,
-    )
-    return tolerant_jsonify(grade_distribution)
+    instructor_uid = None if current_user.is_admin else current_user.uid
+    cache_key = f'grade_distribution/{canvas_site_id}/{instructor_uid}/prior_enrollment'
+
+    distribution = fetch_cached_dict_object(cache_key)
+    if not distribution:
+        prior_course_name = request.args.get('prior')
+        course = canvas.get_course(canvas_site_id)
+        course_name, term = parse_canvas_sis_course_id(course.sis_course_id)
+        distribution = get_grade_distribution_with_prior_enrollments(
+            term_id=term.to_sis_term_id(),
+            course_name=course_name,
+            prior_course_name=prior_course_name,
+            instructor_uid=instructor_uid,
+        )
+        cache_dict_object(cache_key, distribution, app.config['GRADE_DISTRIBUTION_CACHE_EXPIRES_IN_DAYS'] * 86400)
+
+    return tolerant_jsonify(distribution)
 
 
 @app.route('/api/grade_distribution/search_courses')
