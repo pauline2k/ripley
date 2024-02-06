@@ -167,7 +167,7 @@ class User(UserMixin):
 
     def is_graduate_student(self):
         profile = get_student_profile(self.uid)
-        return bool(profile and profile['level'] == 'GR')
+        return bool(profile and profile['level'] in ['5', '6', '7', '8', 'GR', 'MAS', 'P1', 'P2', 'P3', 'P4'])
 
     @classmethod
     def get_serialized_composite_key(cls, canvas_site_id, uid, canvas_masquerading_user_id=None):
