@@ -150,7 +150,7 @@ def _get_grantable_roles(account_id):
     all_roles = {r.role: r for r in canvas.get_roles(account_id)}
     grantable_roles = []
 
-    if current_user.is_admin:
+    if current_user.is_admin or current_user.is_canvas_admin:
         grantable_roles = [role for role in all_roles.values() if role.base_role_type.endswith('Enrollment')]
     else:
         grantable_role_types = set()
