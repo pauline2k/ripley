@@ -75,7 +75,7 @@ class LtiUsageReportJob(BaseJob):
             self.tool_url_to_summary[tool_url]['accounts'].append(str(account_id))
 
     def merge_course(self, course):
-        course_id = course['canvas_site_id']
+        course_id = course['canvas_course_id']
         if course['status'] == 'unpublished':
             return
         for tool in canvas.get_external_tools('course', course_id):
@@ -134,7 +134,7 @@ class LtiUsageReportJob(BaseJob):
             return put_binary_data_to_s3(f'lti-usage-reports/{courses_report_filename}', f, 'text/csv')
 
     def merge_course_occurrence(self, course, tool_url):
-        course_id = course['canvas_site_id']
+        course_id = course['canvas_course_id']
         if tool_url in self.tool_url_to_summary:
             self.tool_url_to_summary[tool_url]['nbr_courses_visible'] += 1
             if not COMMONPLACE_APPS.match(tool_url):

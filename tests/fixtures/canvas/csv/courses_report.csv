@@ -1,4 +1,4 @@
-canvas_site_id,course_id,short_name,long_name,canvas_account_id,account_id,canvas_term_id,term_id,status,start_date,end_date
+canvas_course_id,course_id,short_name,long_name,canvas_account_id,account_id,canvas_term_id,term_id,status,start_date,end_date
 1234567,,COM LIT ABC,Some unofficial course,129069,,5487,TERM:2015-D,active,,
 1234568,,TIL MOC,Some unpublished course,129069,,5487,TERM:2015-D,unpublished,,
 8876542,CRS:FOODSERV-10,FOODSERV 10,Mushroom Pizza,129091,ACCT:EWMBA,5487,TERM:2015-D,active,,
