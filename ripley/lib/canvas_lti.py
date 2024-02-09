@@ -73,7 +73,7 @@ def lti_tool_definitions():
     if LTI_TOOL_DEFINITIONS is None:
         LTI_TOOL_DEFINITIONS = {
             'add_user': {
-                'name': 'Find a Person to Add (LTI 1.3)',
+                'name': 'Find a Person to Add',
                 'account_id': app.config['CANVAS_BERKELEY_ACCOUNT_ID'],
                 'client_id': '10720000000000621',
                 'description': 'Search and add users to course sections',
@@ -82,7 +82,7 @@ def lti_tool_definitions():
                 'visibility': 'admins',
             },
             'export_grade': {
-                'name': 'Download E-Grades (LTI 1.3)',
+                'name': 'Download E-Grades',
                 'account_id': app.config['CANVAS_COURSES_ACCOUNT_ID'],
                 'client_id': '10720000000000623',
                 'description': 'Exports Course Grades to E-Grades CSV file',
@@ -100,7 +100,7 @@ def lti_tool_definitions():
                 'visibility': 'admins',
             },
             'mailing_list': {
-                'name': 'Mailing List (LTI 1.3)',
+                'name': 'Mailing List',
                 'account_id': app.config['CANVAS_COURSES_ACCOUNT_ID'],
                 'client_id': '10720000000000620',
                 'description': 'Create and manage a mailing list for a course site',
@@ -109,7 +109,7 @@ def lti_tool_definitions():
                 'visibility': 'admins',
             },
             'mailing_lists': {
-                'name': 'Mailing Lists (LTI 1.3)',
+                'name': 'Mailing Lists',
                 'account_id': app.config['CANVAS_ADMIN_TOOLS_ACCOUNT_ID'],
                 'client_id': '10720000000000624',
                 'description': 'Create and manage mailing lists for all course sites',
@@ -117,7 +117,7 @@ def lti_tool_definitions():
                 'visibility': 'admins',
             },
             'manage_sites': {
-                'name': 'Manage Sites (LTI 1.3)',
+                'name': 'Manage Sites',
                 'account_id': app.config['CANVAS_BERKELEY_ACCOUNT_ID'],
                 'client_id': '10720000000000625',
                 'description': 'Create or update bCourses sites',
@@ -125,7 +125,7 @@ def lti_tool_definitions():
                 'visibility': 'public',
             },
             'provision_user': {
-                'name': 'User Provisioning (LTI 1.3)',
+                'name': 'User Provisioning',
                 'account_id': app.config['CANVAS_BERKELEY_ACCOUNT_ID'],
                 'client_id': '10720000000000627',
                 'description': 'Automated user provisioning',
