@@ -48,7 +48,7 @@ class TestGetAddUserConfig:
             expected_default='disabled',
             expected_description='Search and add users to course sections',
             expected_placement='link_selection',
-            expected_title='Find a Person to Add (LTI 1.3)',
+            expected_title='Find a Person to Add',
             expected_visibility='admins',
             target='launch_add_user',
         )
@@ -64,7 +64,7 @@ class TestManageSitesConfig:
             config_uri='manage_sites.json',
             expected_description='Create or update bCourses sites',
             expected_placement='user_navigation',
-            expected_title='Manage Sites (LTI 1.3)',
+            expected_title='Manage Sites',
             target='launch_manage_sites',
         )
 
@@ -80,7 +80,7 @@ class TestGetGradeExportConfig:
             expected_default='disabled',
             expected_description='Exports Course Grades to E-Grades CSV file',
             expected_placement='link_selection',
-            expected_title='Download E-Grades (LTI 1.3)',
+            expected_title='Download E-Grades',
             expected_visibility='admins',
             target='launch_export_grade',
         )
@@ -114,7 +114,7 @@ class TestGetMailingListConfig:
             expected_default='disabled',
             expected_description='Create and manage a mailing list for a course site',
             expected_placement='course_navigation',
-            expected_title='Mailing List (LTI 1.3)',
+            expected_title='Mailing List',
             expected_visibility='admins',
             target='launch_mailing_list',
         )
@@ -130,7 +130,7 @@ class TestGetMailingListsConfig:
             config_uri='mailing_lists.json',
             expected_description='Create and manage mailing lists for all course sites',
             expected_placement='account_navigation',
-            expected_title='Mailing Lists (LTI 1.3)',
+            expected_title='Mailing Lists',
             expected_visibility='admins',
             target='launch_mailing_lists',
         )
@@ -162,7 +162,7 @@ class TestGetUserProvisioningConfig:
             config_uri='provision_user.json',
             expected_description='Automated user provisioning',
             expected_placement='account_navigation',
-            expected_title='User Provisioning (LTI 1.3)',
+            expected_title='User Provisioning',
             expected_visibility='admins',
             target='launch_provision_user',
         )

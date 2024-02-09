@@ -294,7 +294,7 @@ addMentalHealthResourcesResponsiveLink();
       apiRequest(`/api/canvas_site/egrades_export/${courseId}/is_official_course`, function(officialCourseResponse) {
         if (officialCourseResponse.isOfficialCourse) {
           // Get the id of the E-Grades LTI tool
-          getExternalToolId('officialCourseTools', 'Download E-Grades (LTI 1.3)', function(gradesExportLtiId) {
+          getExternalToolId('officialCourseTools', 'Download E-Grades', function(gradesExportLtiId) {
             if (gradesExportLtiId) {
               const linkUrl = `/courses/${courseId}/external_tools/${gradesExportLtiId}`;
               // Add the 'E-Grades' export option
@@ -410,7 +410,7 @@ addMentalHealthResourcesResponsiveLink();
       if (informational.length > 0) {
         informational.html('Add user by Email Address, Berkeley UID or Student ID. See <a target="_blank" href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010842">How do I add users to my course site?</a> for more information.');
       }
-      getExternalToolId('globalTools', 'Find a Person to Add (LTI 1.3)', function(toolId) {
+      getExternalToolId('globalTools', 'Find a Person to Add', function(toolId) {
         var firstDiv = $('div.addpeople__peoplesearch');
         if (!firstDiv.hasClass(modifiedMarker)) {
           if (labelStyle) {
