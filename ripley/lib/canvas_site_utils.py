@@ -320,10 +320,10 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
         sections_csv.filehandle.close()
 
         upload_dated_csv(
-            sections_csv.tempfile.name,
-            f"course-provision-sections-{course.sis_course_id.replace(':', '-')}",
-            'canvas-sis-imports',
-            utc_now().strftime('%F_%H-%M-%S'),
+            folder='canvas-sis-imports',
+            local_name=sections_csv.tempfile.name,
+            remote_name=f"course-provision-edit-sections-{course.sis_course_id.replace(':', '-')}",
+            timestamp=utc_now().strftime('%F_%H-%M-%S'),
         )
 
         app.logger.debug(f'Posting course sections SIS import (canvas_site_id={course.id}).')

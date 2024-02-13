@@ -50,7 +50,7 @@ class TestBcoursesProvisionSiteJob:
         }
         with setup_bcourses_provision_job(app) as (s3, m):
             BcoursesProvisionSiteJob(app)._run(params)
-            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full')
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B')
             assert len(spring_2023_enrollments_imported) == 4
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30040000,student,SEC:2023-B-32936,active,'
 
@@ -64,7 +64,7 @@ class TestBcoursesProvisionSiteJob:
         }
         with setup_bcourses_provision_job(app) as (s3, m):
             BcoursesProvisionSiteJob(app)._run(params)
-            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-full')
+            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B')
 
     @mock.patch('ripley.lib.canvas_site_provisioning.get_section_enrollments')
     def test_added_section(self, mock_section_enrollments, app, section_enrollments):
@@ -88,7 +88,7 @@ class TestBcoursesProvisionSiteJob:
 
         with setup_bcourses_provision_job(app) as (s3, m):
             BcoursesProvisionSiteJob(app)._run(params)
-            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full')
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B')
             assert len(spring_2023_enrollments_imported) == 7
             new_enrollment = next(e for e in spring_2023_enrollments_imported if '30030000' in e)
             assert new_enrollment == 'CRS:ASTRON-218-2023-B,30030000,student,SEC:2023-B-87654,active,'
@@ -107,7 +107,7 @@ class TestBcoursesProvisionSiteJob:
 
         with setup_bcourses_provision_job(app) as (s3, m):
             BcoursesProvisionSiteJob(app)._run(params)
-            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full')
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B')
             assert len(spring_2023_enrollments_imported) == 9
             deleted_enrollments = [row for row in spring_2023_enrollments_imported if 'SEC:2023-B-32936' in row]
             updated_enrollments = [row for row in spring_2023_enrollments_imported if 'SEC:2023-B-32937' in row]

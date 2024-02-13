@@ -39,7 +39,7 @@ class TestBcoursesRefreshFullJob:
     def test_no_previous_export(self, app):
         with setup_bcourses_refresh_job(app) as (s3, m):
             BcoursesRefreshFullJob(app)._run()
-            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full')
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-refresh-full')
             assert len(spring_2023_enrollments_imported) == 4
             assert spring_2023_enrollments_imported[0] == 'course_id,user_id,role,section_id,status,associated_user_id'
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30040000,student,SEC:2023-B-32936,active,'
@@ -49,7 +49,7 @@ class TestBcoursesRefreshFullJob:
     def test_previous_export_no_change(self, app):
         with self.setup_term_enrollments_export(app) as s3:
             BcoursesRefreshFullJob(app)._run()
-            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-full')
+            assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B-refresh-full')
 
     @mock.patch('ripley.lib.canvas_site_provisioning.get_section_enrollments')
     def test_previous_export_student_added(self, mock_section_enrollments, app, section_enrollments):
@@ -66,7 +66,7 @@ class TestBcoursesRefreshFullJob:
             mock_section_enrollments.return_value = section_enrollments
 
             BcoursesRefreshFullJob(app)._run()
-            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full')
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-refresh-full')
             assert len(spring_2023_enrollments_imported) == 2
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30060000,student,SEC:2023-B-32936,active,'
 
@@ -77,7 +77,7 @@ class TestBcoursesRefreshFullJob:
             mock_section_enrollments.return_value = section_enrollments
 
             BcoursesRefreshFullJob(app)._run()
-            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full')
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-refresh-full')
             assert len(spring_2023_enrollments_imported) == 2
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30020000,student,SEC:2023-B-32936,deleted,'
 
@@ -96,7 +96,7 @@ class TestBcoursesRefreshFullJob:
             mock_section_instructors.return_value = section_instructors
 
             BcoursesRefreshFullJob(app)._run()
-            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-full')
+            spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B-refresh-full')
             assert len(spring_2023_enrollments_imported) == 3
             assert spring_2023_enrollments_imported[1] == 'CRS:ANTHRO-189-2023-B,30020000,Lead TA,SEC:2023-B-32936,active,'
             assert spring_2023_enrollments_imported[2] == 'CRS:ANTHRO-189-2023-B,30020000,student,SEC:2023-B-32936,deleted,'
@@ -114,10 +114,10 @@ class TestBcoursesRefreshFullJob:
             with open(export_file.name, 'wb') as f:
                 f.write(bytes('\n'.join(csv_rows) + '\n', encoding='utf-8'))
             upload_dated_csv(
-                export_file.name,
-                'enrollments-TERM-2023-B',
-                'canvas-provisioning-reports',
-                utc_now().strftime('%F_%H-%M-%S'),
+                folder='canvas-provisioning-reports',
+                local_name=export_file.name,
+                remote_name='enrollments-TERM-2023-B',
+                timestamp=utc_now().strftime('%F_%H-%M-%S'),
             )
             yield s3
 

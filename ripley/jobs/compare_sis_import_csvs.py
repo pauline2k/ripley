@@ -74,7 +74,12 @@ class CompareSisImportCsvs(BaseJob):
                     f.write(header)
                     for line in junction_not_ripley:
                         f.write(line)
-                s3.upload_dated_csv(junction_not_ripley_file.name, f'{csv_key}-junction-not-ripley', 'junction_diffs', timestamp)
+                s3.upload_dated_csv(
+                    folder='junction_diffs',
+                    local_name=junction_not_ripley_file.name,
+                    remote_name=f'{csv_key}-junction-not-ripley',
+                    timestamp=timestamp,
+                )
 
             ripley_not_junction = ripley_lines[csv_key].difference(junction_lines[csv_key])
             app.logger.info(f'{csv_key}: found {len(ripley_not_junction)} lines in Ripley but not Junction')
@@ -84,7 +89,12 @@ class CompareSisImportCsvs(BaseJob):
                     f.write(header)
                     for line in ripley_not_junction:
                         f.write(line)
-                s3.upload_dated_csv(ripley_not_junction_file.name, f'{csv_key}-ripley-not-junction', 'junction_diffs', timestamp)
+                s3.upload_dated_csv(
+                    folder='junction_diffs',
+                    local_name=ripley_not_junction_file.name,
+                    remote_name=f'{csv_key}-ripley-not-junction',
+                    timestamp=timestamp,
+                )
 
     @classmethod
     def description(cls):
