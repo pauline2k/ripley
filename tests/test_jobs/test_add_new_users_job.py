@@ -55,7 +55,7 @@ class TestAddNewUsersJob:
                 provisioning_report = read_s3_csv(app, s3, 'provisioned-users')
                 assert len(provisioning_report) == 4
 
-                users_imported = read_s3_csv(app, s3, 'user-provision')
+                users_imported = read_s3_csv(app, s3, 'user-provision-add-new')
                 assert len(users_imported) == 6
                 assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
                 assert users_imported[1] == 'UID:10000,10000,Ellen,Ripley,ellen.ripley@berkeley.edu,active'

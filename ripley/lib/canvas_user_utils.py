@@ -122,10 +122,10 @@ def import_users(uids):
         users_csv.filehandle.close()
 
         upload_dated_csv(
-            users_csv.tempfile.name,
-            'user-provision',
-            'canvas-sis-imports',
-            utc_now().strftime('%F_%H-%M-%S'),
+            folder='canvas-sis-imports',
+            local_name=users_csv.tempfile.name,
+            remote_name='user-provision',
+            timestamp=utc_now().strftime('%F_%H-%M-%S'),
         )
 
         app.logger.debug('Posting user provisioning SIS import.')

@@ -75,8 +75,18 @@ class AddNewUsersJob(BaseJob):
                     raise BackgroundJobError('New users import failed.')
 
             # Archive export and import files in S3.
-            upload_dated_csv(canvas_export_file.name, 'provisioned-users', 'canvas-provisioning-reports', timestamp)
-            upload_dated_csv(canvas_import_file.name, 'user-provision', 'canvas-sis-imports', timestamp)
+            upload_dated_csv(
+                folder='canvas-provisioning-reports',
+                local_name=canvas_export_file.name,
+                remote_name='provisioned-users-add-new',
+                timestamp=timestamp,
+            )
+            upload_dated_csv(
+                folder='canvas-sis-imports',
+                local_name=canvas_import_file.name,
+                remote_name='user-provision-add-new',
+                timestamp=timestamp,
+            )
             app.logger.info('Users added, job complete.')
 
     @classmethod

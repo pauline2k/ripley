@@ -228,7 +228,7 @@ class BcoursesRefreshBaseJob(BaseJob):
             upload_dated_csv(
                 folder='canvas-provisioning-reports',
                 local_name=canvas_users_file.name,
-                remote_name='provisioned-users',
+                remote_name=f'provisioned-users-{self._csv_key()}',
                 timestamp=timestamp,
             )
             # If the job flag is not incremental, then we haven't yet called directly to LDAP for any users missing from
@@ -381,13 +381,23 @@ class BcoursesRefreshBaseJob(BaseJob):
         try:
             if 'sis_ids' in csv_set._fields and csv_set.sis_ids.count:
                 app.logger.info(f'Will post {csv_set.sis_ids.count} SIS ID changes to Canvas.')
-                upload_dated_csv(csv_set.sis_ids.tempfile.name, 'sis-ids', 'canvas-sis-imports', timestamp)
+                upload_dated_csv(
+                    folder='canvas-sis-imports',
+                    local_name=csv_set.sis_ids.tempfile.name,
+                    remote_name=f'sis-ids-{self._csv_key()}',
+                    timestamp=timestamp,
+                )
                 _write_csv_to_zip(csv_set.sis_ids)
                 data_to_upload = True
 
             if 'users' in csv_set._fields and csv_set.users.count:
                 app.logger.info(f'Will post {csv_set.users.count} user updates to Canvas.')
-                upload_dated_csv(csv_set.users.tempfile.name, 'user-provision', 'canvas-sis-imports', timestamp)
+                upload_dated_csv(
+                    folder='canvas-sis-imports',
+                    local_name=csv_set.users.tempfile.name,
+                    remote_name=f'user-provision-{self._csv_key()}',
+                    timestamp=timestamp,
+                )
                 _write_csv_to_zip(csv_set.users)
                 data_to_upload = True
 
@@ -400,13 +410,11 @@ class BcoursesRefreshBaseJob(BaseJob):
                                 if row['status'] == 'deleted':
                                     deletion_count += 1
 
-                        job_type = 'incremental' if self.job_flags.incremental else 'full'
-
                         upload_dated_csv(
-                            enrollment_csv.tempfile.name,
-                            f"enrollments-{sis_term_id.replace(':', '-')}-{job_type}",
-                            'canvas-sis-imports',
-                            timestamp,
+                            folder='canvas-sis-imports',
+                            local_name=enrollment_csv.tempfile.name,
+                            remote_name=f"enrollments-{sis_term_id.replace(':', '-')}-{self._csv_key()}",
+                            timestamp=timestamp,
                         )
 
                         if deletion_count > app.config['CANVAS_REFRESH_MAX_DELETED_ENROLLMENTS']:
@@ -451,7 +459,15 @@ class BcoursesRefreshBaseJob(BaseJob):
                             'email_address': channel.address,
                         })
 
-        upload_dated_csv(email_deletions_file.name, 'email-deletions', 'canvas-sis-imports', timestamp)
+        upload_dated_csv(
+            folder='canvas-sis-imports',
+            local_name=email_deletions_file.name,
+            remote_name='email-deletions',
+            timestamp=timestamp,
+        )
+
+    def _csv_key(self):
+        return self.key().replace('bcourses_', '').replace('_', '-')
 
     @classmethod
     def description(cls):
