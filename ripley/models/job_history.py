@@ -87,6 +87,11 @@ class JobHistory(db.Model):
         return cls.query.order_by(desc(cls.started_at)).all()
 
     @classmethod
+    def last_successful_job_run(cls):
+        criteria = and_(cls.failed == False, cls.finished_at != None)  # noqa: E711, E712
+        return cls.query.filter(criteria).order_by(desc(cls.finished_at)).limit(1).first()
+
+    @classmethod
     def last_successful_run_of(cls, job_key):
         criteria = and_(cls.job_key == job_key, cls.failed == False, cls.finished_at != None)  # noqa: E711, E712
         return cls.query.filter(criteria).order_by(desc(cls.finished_at)).limit(1).first()
