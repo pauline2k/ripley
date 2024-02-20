@@ -584,7 +584,7 @@ addMentalHealthResourcesResponsiveLink();
   /* SECTIONS HELPER TEXT */
 
   /**
-   * Add an Tool Tip to the Sections page pointing users to the Official Sections tool
+   * Add an Tool Tip to the Sections page pointing users to the Manage Sites tool
    */
   var addSectionsToolTip = function() {
     var sectionsToolTip = [
@@ -593,7 +593,7 @@ addMentalHealthResourcesResponsiveLink();
       '    <i class="icon-arrow-right"></i> <strong>Need Help Adding a Section/Roster?</strong>',
       '  </button>',
       '  <div id="sections-tooltip-content" class="hide" role="region" tabindex="-1">',
-      '    <div>If you are trying to add or remove a SIS-linked roster section to your course, this is done using the Official Sections tool. See this article for instructions on how to <a href="https://berkeley.service-now.com/kb?id=kb_article_view&sysparm_article=KB0010686" target="_blank">add or delete a course roster from your bCourses site<span class="sr-only"> (opens in new tab)</span></a></br>' +
+      '    <div>If you are trying to add or remove a SIS-linked roster section to your course, this is done using the Manage Sites tool. See this article for instructions on how to <a href="https://berkeley.service-now.com/kb?id=kb_article_view&sysparm_article=KB0010686" target="_blank">add or delete a course roster from your bCourses site<span class="sr-only"> (opens in new tab)</span></a></br>' +
       '    Warning: manually creating sections from this page, and/or manually enrolling students will override their SIS enrollment and cause them to remain in the course if they drop.</div>',
       '  </div>',
       '</div>'
