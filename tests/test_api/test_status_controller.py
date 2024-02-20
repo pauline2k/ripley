@@ -23,12 +23,15 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-import pytest
+from datetime import datetime, timedelta
+
 import requests_mock
+from ripley import db, std_commit
+from ripley.jobs.house_keeping_job import HouseKeepingJob
+from ripley.models.job_history import JobHistory
 from tests.util import register_canvas_uris
 
 
-@pytest.mark.skip(reason='Real calls to bConnected make this test too fragile. Need to mock b_connected.ping().')
 class TestStatusController:
     """Status API."""
 
@@ -43,8 +46,7 @@ class TestStatusController:
             assert response.json['canvas'] is True
             assert response.json['data_loch'] is True
             assert response.json['db'] is True
-            assert response.json['rq']['redis'] is True
-            assert response.json['rq']['workers'] is False
+            assert 'rq' in response.json
 
     def test_canvas_error(self, app, client):
         """Reports Canvas API error."""
@@ -56,6 +58,23 @@ class TestStatusController:
             assert response.json['app'] is True
             assert response.json['canvas'] is False
             assert response.json['data_loch'] is True
+
+    def test_stalled_job_alert(self, app, client):
+        """Reports error if jobs are stalled."""
+        # First, clear the job-history.
+        HouseKeepingJob(app)._run()
+        job = JobHistory.job_started(HouseKeepingJob.key())
+        threshold = app.config['JOBS_PING_MAX_MINUTES_SINCE_LAST_SUCCESS']
+        expectations = {
+            threshold + 1: False,
+            threshold - 1: True,
+        }
+        for minutes_since_last_success, expectation in expectations.items():
+            finished_at = datetime.utcnow() - timedelta(hours=0, minutes=minutes_since_last_success)
+            _set_job_finished_at(job.id, finished_at)
+            response = client.get('/api/ping')
+            assert response.status_code == 200
+            assert response.json['job_manager'] is expectation
 
 
 class TestRqStatusController:
@@ -85,3 +104,11 @@ def _api_ping_rq(client, expected_status_code=200):
     response = client.get('/api/ping/rq')
     assert response.status_code == expected_status_code
     return response.json
+
+
+def _set_job_finished_at(job_id, finished_at):
+    row = JobHistory.query.filter_by(id=job_id).first()
+    row.failed = False
+    row.finished_at = finished_at
+    db.session.add(row)
+    std_commit()
