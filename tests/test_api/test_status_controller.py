@@ -23,11 +23,12 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 import requests_mock
 from ripley import db, std_commit
 from ripley.jobs.house_keeping_job import HouseKeepingJob
+from ripley.lib.util import utc_now
 from ripley.models.job_history import JobHistory
 from tests.util import register_canvas_uris
 
@@ -70,7 +71,7 @@ class TestStatusController:
             threshold - 1: True,
         }
         for minutes_since_last_success, expectation in expectations.items():
-            finished_at = datetime.utcnow() - timedelta(hours=0, minutes=minutes_since_last_success)
+            finished_at = utc_now() - timedelta(hours=0, minutes=minutes_since_last_success)
             _set_job_finished_at(job.id, finished_at)
             response = client.get('/api/ping')
             assert response.status_code == 200
