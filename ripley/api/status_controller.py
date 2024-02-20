@@ -22,7 +22,6 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
-from datetime import datetime
 import traceback
 
 from canvasapi.exceptions import CanvasException
@@ -37,6 +36,7 @@ from ripley.externals.rds import log_db_error
 from ripley.externals.redis import redis_ping, redis_status
 from ripley.lib.calnet_utils import get_calnet_user_for_uid
 from ripley.lib.http import tolerant_jsonify
+from ripley.lib.util import utc_now
 from ripley.models.job_history import JobHistory
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import text
@@ -141,7 +141,7 @@ def _job_manager_ping():
     is_acceptable = None
     last_successful = JobHistory.last_successful_job_run()
     if last_successful:
-        diff = datetime.utcnow() - last_successful.finished_at
+        diff = utc_now() - last_successful.finished_at
         minutes = diff.total_seconds() / 60
         is_acceptable = minutes <= app.config['JOBS_PING_MAX_MINUTES_SINCE_LAST_SUCCESS']
     return is_acceptable
