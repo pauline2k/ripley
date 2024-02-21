@@ -372,25 +372,23 @@ addMentalHealthResourcesResponsiveLink();
   /**
    * Customize People tool of React-based Canvas UI
    */
-  var customizeAddPeople = function() {
-    var defaultRadioButtonId = 'peoplesearch_radio_cc_path';
-    var modifiedMarker = 'calcentral-modified';
+  const customizeAddPeople = function() {
+    const defaultRadioButtonId = 'peoplesearch_radio_cc_path';
+    const modifiedMarker = 'face-hugger';
 
-    waitUntilAvailable('[for=' + defaultRadioButtonId + ']:visible:not(.' + modifiedMarker + ')', true, function() {
-      var c = customizations();
+    waitUntilAvailable(`[for=${defaultRadioButtonId}]:visible:not([ripley-marker~=${modifiedMarker}])`, true, function() {
+      const c = customizations();
       customizeAddPeopleTextArea(c[defaultRadioButtonId]);
       // Class names are dynamically generated in Canvas' React-based UI.
-      var labelStyle = '';
+      let labelStyle = '';
       // Modify radio buttons
-      for (var id in c) {
+      for (const id in c) {
         // JSHint demands the following conditional
         if (c.hasOwnProperty(id)) {
-          var e = $('#' + id);
+          const e = $('#' + id);
           if (e.length > 0) {
-            $('[for=' + id + ']').addClass(modifiedMarker);
-
             // For Production as of 2017-12-15
-            var label = $('[for=' + id + '] span:first span:last');
+            let label = $('[for=' + id + '] span:first span:last');
             if (label.length < 1) {
               // For Beta as of 2017-12-15
               label = $('[for=' + id + '] span:last');
@@ -400,6 +398,7 @@ addMentalHealthResourcesResponsiveLink();
           }
         }
       }
+      $(`[for=${defaultRadioButtonId}]`).attr('ripley-marker', modifiedMarker);
 
       // Canvas's rendering is triggered by a click event listener on the document root.
       // To override it across browsers, we must append a click event listener on the same element.
