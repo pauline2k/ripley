@@ -144,7 +144,7 @@ def get_canvas_course_id(course_slug):
     attempts = 0
     existing_site = None
     while attempts < 10:
-        existing_site = canvas.get_course(course_id, use_sis_id=True, log_not_found=False)
+        existing_site = canvas.get_course(course_id, use_sis_id=True, log_not_found=False, include_deleted=True)
         if not existing_site:
             break
         attempts += 1
