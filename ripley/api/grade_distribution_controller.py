@@ -114,10 +114,16 @@ def _validate(canvas_site_id, instructor_uid):
     if not course:
         raise ResourceNotFoundError('Course site not found.')
     course_name, term = parse_canvas_sis_course_id(course.sis_course_id)
+    if not (course_name and term):
+        warning = 'No SIS course found for this course site'
+        app.logger.warning(f'{warning} (id={canvas_site_id}, name={course.name}, sis_course_id={course.sis_course_id}).')
+        raise ResourceNotFoundError(warning)
     canvas_sections = canvas.get_course_sections(canvas_site_id) or []
-    if len(canvas_sections) == 0:
-        raise ResourceNotFoundError('No sections found for this course site.')
     sis_sections = [canvas_section_to_api_json(cs) for cs in canvas_sections if cs.sis_section_id]
+    if len(sis_sections) == 0:
+        warning = 'No official sections found for this course site'
+        app.logger.warning(f'{warning} (id={canvas_site_id}, name={course.name}, sis_course_id={course.sis_course_id}).')
+        raise ResourceNotFoundError(warning)
     section_ids = [s['id'] for s in sis_sections]
     term_id = term.to_sis_term_id()
     if instructor_uid and not len(get_section_instructors(term_id, section_ids, instructor_uid=instructor_uid, roles=['PI'])):
