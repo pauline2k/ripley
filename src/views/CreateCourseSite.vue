@@ -448,6 +448,7 @@ export default {
                 }
               } else {
                 this.alertScreenReader('Error.', 'assertive')
+                this.currentWorkflowStep = null
                 this.jobStatus = 'error'
                 this.warning = 'An error has occurred with your request. Please try again or contact bCourses support.'
                 putFocusNextTick('page-title')
