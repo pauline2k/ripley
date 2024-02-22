@@ -69,45 +69,49 @@
                     {{ selectedTermName }}
                     {{ actingAsInstructor ? `sections taught by ${actingAsInstructor.name}` : 'Official Sections' }}
                   </h2>
-                  <div class="text-subtitle-1 mt-1 mb-3">
-                    All official sections you select below will be put in ONE, single course site.
-                  </div>
-                  <SelectSectionsGuide />
-                  <v-expansion-panels
-                    v-if="size(coursesList)"
-                    v-model="panels"
-                    class="my-5"
-                    multiple
-                  >
-                    <v-expansion-panel
-                      v-for="course in coursesList"
-                      :id="`sections-course-${course.slug}`"
-                      :key="course.course_id"
-                      :value="course.slug"
-                      bg-color="blue-lighten-5"
+                  <div v-if="size(coursesList)">
+                    <div class="text-subtitle-1 mt-1 mb-3">
+                      All official sections you select below will be put in ONE, single course site.
+                    </div>
+                    <SelectSectionsGuide />
+                    <v-expansion-panels
+                      v-model="panels"
+                      class="my-5"
+                      multiple
                     >
-                      <v-expansion-panel-title :id="`sections-course-${course.slug}-btn`">
-                        <template #actions="{ expanded }">
-                          <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
-                        </template>
-                        <h3 :id="`sections-course-title-${course.slug}`" class="sections-course-title">
-                          <CourseCodeAndTitle :course="course" />
-                        </h3>
-                      </v-expansion-panel-title>
-                      <v-expansion-panel-text>
-                        <CourseSectionsTable
-                          :id="`template-sections-table-${course.slug}`"
-                          :key="course.slug"
-                          class="mb-1 mt-4"
-                          mode="createCourseForm"
-                          :sections="course.sections"
-                          :table-caption="courseSectionsTableCaption(course)"
-                          table-clazz="border-0"
-                          :update-selected="updateSelected"
-                        />
-                      </v-expansion-panel-text>
-                    </v-expansion-panel>
-                  </v-expansion-panels>
+                      <v-expansion-panel
+                        v-for="course in coursesList"
+                        :id="`sections-course-${course.slug}`"
+                        :key="course.course_id"
+                        :value="course.slug"
+                        bg-color="blue-lighten-5"
+                      >
+                        <v-expansion-panel-title :id="`sections-course-${course.slug}-btn`">
+                          <template #actions="{ expanded }">
+                            <v-icon :icon="expanded ? mdiMenuDown : mdiMenuRight" />
+                          </template>
+                          <h3 :id="`sections-course-title-${course.slug}`" class="sections-course-title">
+                            <CourseCodeAndTitle :course="course" />
+                          </h3>
+                        </v-expansion-panel-title>
+                        <v-expansion-panel-text>
+                          <CourseSectionsTable
+                            :id="`template-sections-table-${course.slug}`"
+                            :key="course.slug"
+                            class="mb-1 mt-4"
+                            mode="createCourseForm"
+                            :sections="course.sections"
+                            :table-caption="courseSectionsTableCaption(course)"
+                            table-clazz="border-0"
+                            :update-selected="updateSelected"
+                          />
+                        </v-expansion-panel-text>
+                      </v-expansion-panel>
+                    </v-expansion-panels>
+                  </div>
+                  <div v-if="!size(coursesList)" class="text-subtitle-1 mt-1 mb-3">
+                    No matching course sections found.
+                  </div>
                 </v-window-item>
               </v-window>
               <div class="d-flex justify-end mt-2">
@@ -403,6 +407,7 @@ export default {
     setAdminMode(adminMode) {
       this.adminMode = adminMode
       this.currentWorkflowStep = undefined
+      this.coursesList = []
     },
     showConfirmation() {
       this.updateSelected()
