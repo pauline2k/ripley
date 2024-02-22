@@ -167,14 +167,17 @@ def get_communication_channels(canvas_user_id):
         app.logger.exception(e)
 
 
-def get_course(course_id, api_call=True, use_sis_id=False, log_not_found=True):
+def get_course(course_id, api_call=True, use_sis_id=False, log_not_found=True, include_deleted=False):
     c = _get_canvas()
     if api_call is False:
         return Course(c._Canvas__requester, {'id': course_id})
     else:
         course = None
         try:
-            course = c.get_course(course_id, include=['term'], use_sis_id=use_sis_id)
+            include = ['term']
+            if include_deleted:
+                include.append('all_courses')
+            course = c.get_course(course_id, include=include, use_sis_id=use_sis_id)
         except Exception as e:
             if not isinstance(e, ResourceDoesNotExist) or log_not_found:
                 app.logger.error(f'Failed to retrieve Canvas course (id={course_id})')
