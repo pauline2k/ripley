@@ -23,6 +23,11 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+import json
+
+
+admin_uid = '10000'
+
 
 class TestVersion:
     """Application version API."""
@@ -39,14 +44,52 @@ class TestConfigController:
 
     def test_anonymous(self, client):
         """All users, even anonymous, can get configs."""
-        response = client.get('/api/config')
-        assert response.status_code == 200
-        assert 'ripleyEnv' in response.json
-        api_json = response.json
+        api_json = _api_get_config(client)
+        assert 'ripleyEnv' in api_json
         assert api_json['devAuthEnabled'] is False
         assert api_json['ebEnvironment'] == 'ripley-test'
+        assert api_json['hypersleep'] is False
         assert api_json['timezone'] == 'America/Los_Angeles'
 
         api_json_lower_string = str(api_json).lower()
         for keyword in ('password', 'secret'):
             assert keyword not in api_json_lower_string
+
+
+class TestHypersleep:
+
+    def test_hypersleep_anonymous(self, client):
+        """Anonymous users cannot adjust hypersleep mode."""
+        _api_set_hypersleep(client, params={'enabled': True}, expected_status_code=401)
+
+    def test_hypersleep_missing_params(self, client, fake_auth):
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
+        _api_set_hypersleep(client, params={}, expected_status_code=400)
+
+    def test_hypersleep_authorized(self, client, fake_auth):
+        fake_auth.login(canvas_site_id=None, uid=admin_uid)
+        assert _api_get_config(client)['hypersleep'] is False
+
+        api_json = _api_set_hypersleep(client, params={'enabled': True})
+        assert api_json['hypersleep'] is True
+        assert _api_get_config(client)['hypersleep'] is True
+
+        api_json = _api_set_hypersleep(client, params={'enabled': False})
+        assert api_json['hypersleep'] is False
+        assert _api_get_config(client)['hypersleep'] is False
+
+
+def _api_get_config(client, params=None, expected_status_code=200):
+    response = client.get('/api/config')
+    assert response.status_code == expected_status_code
+    return response.json
+
+
+def _api_set_hypersleep(client, params=None, expected_status_code=200):
+    response = client.post(
+        '/api/config/hypersleep',
+        data=json.dumps(params or {}),
+        content_type='application/json',
+    )
+    assert response.status_code == expected_status_code
+    return response.json

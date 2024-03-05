@@ -107,6 +107,17 @@ INSERT INTO canvas_synchronization (id) VALUES (TRUE);
 
 --
 
+-- This table contains one and only one row.
+
+CREATE TABLE configuration (
+    id BOOLEAN PRIMARY KEY DEFAULT TRUE,
+    hypersleep BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT configuration_unique_constraint CHECK (id)
+);
+INSERT INTO configuration (id) VALUES (TRUE);
+
+--
+
 CREATE TABLE job_history (
     id INTEGER NOT NULL,
     job_key VARCHAR(80) NOT NULL,

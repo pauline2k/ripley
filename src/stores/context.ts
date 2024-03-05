@@ -65,6 +65,9 @@ export const useContextStore = defineStore('context', {
     setCurrentUser(user: any) {
       this.currentUser = user
       this.eventHub.emit('current-user-update')
+    },
+    setHypersleep(hypersleep: any) {
+      this.config.hypersleep = hypersleep
     }
   }
 })
