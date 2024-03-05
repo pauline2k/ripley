@@ -2,16 +2,16 @@
   <div class="pb-5 px-5">
     <Header1 class="mb-2" text="Create a Course Site" />
     <v-alert
-      v-if="warning"
+      v-if="error || warning"
       id="canvas-error-container"
       class="mb-3"
       density="compact"
       role="alert"
       type="warning"
     >
-      {{ warning }}
+      {{ error || warning }}
     </v-alert>
-    <div v-if="!isLoading">
+    <div v-if="!isLoading && !error">
       <div v-if="isAdmin && currentWorkflowStep !== 'processing'" class="pl-3">
         <CreateCourseSiteHeader
           :admin-mode="adminMode"
@@ -203,6 +203,7 @@ export default {
     currentSemester: undefined,
     currentSemesterName: undefined,
     currentWorkflowStep: undefined,
+    error: undefined,
     errorConfig: {
       header: undefined,
       supportAction: undefined,
@@ -251,6 +252,9 @@ export default {
       }
       this.actingAsInstructor = this.getActingAsInstructor()
 
+      this.$ready()
+    }, error => {
+      this.error = error
       this.$ready()
     })
   },

@@ -27,7 +27,7 @@ import json
 
 import requests_mock
 from tests.test_api.api_test_utils import api_create_project_site, create_mock_project_site
-from tests.util import override_config, register_canvas_uris
+from tests.util import hypersleep, override_config, register_canvas_uris
 
 TERM_ID_CURRENT = '2232'
 TERM_ID_NEXT = '2235'
@@ -208,6 +208,22 @@ class TestEditOfficialSections:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
             self._api_edit_official_sections(client, canvas_site_id, expected_status_code=400)
 
+    def test_hypersleep(self, client, app, fake_auth):
+        """Disabled during hypersleep."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['create_sis_import', 'get_admins', 'get_by_id', 'get_sis_import'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
+                'user': ['profile_30000'],
+            }, m)
+            canvas_site_id = '8876542'
+            params = {
+                'sectionIdsToAdd': ['12345'],
+            }
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            with hypersleep(app):
+                self._api_edit_official_sections(client, canvas_site_id, params=params, expected_status_code=400)
+
 
 class TestCanvasSiteProvision:
 
@@ -263,6 +279,18 @@ class TestCanvasSiteProvision:
             feed = self._api_canvas_course_provision(client, params={'adminBySectionIds[]': '32936', 'adminTermSlug': 'spring-2023'})
             assert feed['teachingTerms'][0]['name'] == 'Spring 2023'
             assert feed['teachingTerms'][0]['classes'][0]['courseCode'] == 'ANTHRO 189'
+
+    def test_hypersleep(self, client, app, fake_auth):
+        """Disabled during hypersleep."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
+                'user': ['profile_30000'],
+            }, m)
+            fake_auth.login(canvas_site_id=8876542, uid=teacher_uid)
+            with hypersleep(app):
+                self._api_canvas_course_provision(client, expected_status_code=400)
 
 
 class TestCanvasSiteProvisionSections:
@@ -492,6 +520,19 @@ class TestCanvasSiteProvisionSections:
             assert spring_term['classes'][0]
             assert spring_term['classes'][0]['slug'] == 'anthro-189-2023-B'
 
+    def test_hypersleep(self, client, app, fake_auth):
+        """Disabled during hypersleep."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['get_by_id_8876542', 'get_sections_8876542', 'get_enrollments_8876542_4567890'],
+                'user': [f'profile_{admin_uid}'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            with hypersleep(app):
+                self._api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=400)
+
 
 class TestCreateCourseSite:
 
@@ -537,52 +578,52 @@ class TestCreateCourseSite:
                 self._api_create_course_site(client, expected_status_code=401)
                 self._api_get_creation_job_status(client, '1234', expected_status_code=401)
 
+    _canvas_site_id = '8876542'
+
+    _site_creation_fixtures = {
+        'account': [
+            'create_sis_import',
+            'get_admins',
+            'get_by_id',
+            'get_roles_129047',
+            'get_sub_account_anthro',
+        ],
+        'course': [
+            f'get_by_id_{_canvas_site_id}',
+            'get_course_ANTHRO_189',
+            'get_course_ANTHRO_189_not_found',
+            'get_course_settings_1523731',
+            f'get_enrollments_{_canvas_site_id}_4567890',
+            'get_tabs_1523731',
+        ],
+        'section': [
+            'get_section_32936',
+            'get_section_32937',
+            'post_enrollments_32936',
+        ],
+        'sis_import': [
+            'get_by_id',
+        ],
+        'user': [
+            f'profile_{teacher_uid}',
+        ],
+    }
+
+    _site_creation_params = {
+        'sectionIds': ['32936', '32937'],
+        'siteAbbreviation': 'LV-426',
+        'siteName': 'The Acheron moon',
+        'termSlug': 'spring-2023',
+        'uid': teacher_uid,
+    }
+
     def test_authorized(self, client, app, fake_auth):
         """Teacher is authorized."""
-        canvas_site_id = '8876542'
-        uid = teacher_uid
         with requests_mock.Mocker() as m:
-            fixtures = {
-                'account': [
-                    'create_sis_import',
-                    'get_admins',
-                    'get_by_id',
-                    'get_roles_129047',
-                    'get_sub_account_anthro',
-                ],
-                'course': [
-                    f'get_by_id_{canvas_site_id}',
-                    'get_course_ANTHRO_189',
-                    'get_course_ANTHRO_189_not_found',
-                    'get_course_settings_1523731',
-                    f'get_enrollments_{canvas_site_id}_4567890',
-                    'get_tabs_1523731',
-                ],
-                'section': [
-                    'get_section_32936',
-                    'get_section_32937',
-                    'post_enrollments_32936',
-                ],
-                'sis_import': [
-                    'get_by_id',
-                ],
-                'user': [
-                    f'profile_{uid}',
-                ],
-            }
-            register_canvas_uris(app, fixtures, m)
-            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+            register_canvas_uris(app, self._site_creation_fixtures, m)
+            fake_auth.login(canvas_site_id=self._canvas_site_id, uid=teacher_uid)
             # API call
-            api_json = self._api_create_course_site(
-                client,
-                params={
-                    'sectionIds': ['32936', '32937'],
-                    'siteAbbreviation': 'LV-426',
-                    'siteName': 'The Acheron moon',
-                    'termSlug': 'spring-2023',
-                    'uid': uid,
-                },
-            )
+            api_json = self._api_create_course_site(client, params=self._site_creation_params)
             job_id = api_json['jobId']
             assert job_id
             assert api_json['jobStatus'] == 'sendingRequest'
@@ -590,6 +631,14 @@ class TestCreateCourseSite:
             api_json = self._api_get_creation_job_status(client, job_id)
             assert api_json['jobStatus'] == 'finished'
             assert '1523731' in api_json['jobData']['courseSiteUrl']
+
+    def test_hypersleep(self, client, app, fake_auth):
+        """Disabled during hypersleep."""
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, self._site_creation_fixtures, m)
+            fake_auth.login(canvas_site_id=self._canvas_site_id, uid=teacher_uid)
+            with hypersleep(app):
+                self._api_create_course_site(client, params=self._site_creation_params, expected_status_code=400)
 
 
 class TestCreateProjectSite:
@@ -672,6 +721,24 @@ class TestCreateProjectSite:
                 failed_assertion_message=f'UID {authorized_uid} should have power to create a project site.',
             )
             assert project_site
+
+    def test_hypersleep(self, app, client, fake_auth):
+        """Disabled during hypersleep."""
+        with hypersleep(app):
+            for authorized_uid, user_description in {
+                faculty_uid: 'Faculty',
+                admin_uid: 'Admin user',
+            }.items():
+                with create_mock_project_site(
+                        app=app,
+                        authorized_uid=authorized_uid,
+                        canvas_site_id=None,
+                        client=client,
+                        fake_auth=fake_auth,
+                        expected_status_code=400,
+                ) as response:
+                    assert response['message'] ==\
+                        'Site creation and section management are currently offline for maintenance. Please try again later.'
 
 
 class TestGetRoster:

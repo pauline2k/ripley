@@ -1,17 +1,17 @@
 <template>
   <div v-if="!isLoading" class="pt-3 px-6">
+    <Header1 v-if="canvasSite" class="mb-1 mt-0" :text="canvasSite.name" />
+    <v-alert
+      v-if="error"
+      id="error-alert"
+      class="mb-3"
+      density="compact"
+      role="alert"
+      type="warning"
+    >
+      {{ error }}
+    </v-alert>
     <div v-if="feedFetched">
-      <Header1 class="mb-1 mt-0" :text="canvasSite.name" />
-      <v-alert
-        v-if="error"
-        id="error-alert"
-        class="mb-3"
-        density="compact"
-        role="alert"
-        type="warning"
-      >
-        {{ error }}
-      </v-alert>
       <h2 class="pt-3">bCourses Site</h2>
       <div class="pl-3 pb-6 pt-1">
         <OutboundLink id="link-to-canvas-site" :href="canvasSite.url">
@@ -327,6 +327,8 @@ export default {
         } else {
           this.error = 'Failed to retrieve section data.'
         }
+      }, error => {
+        this.error = error
       })
     },
     loadCourseLists(teachingTerms) {

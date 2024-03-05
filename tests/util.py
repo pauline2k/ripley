@@ -31,6 +31,17 @@ from urllib.parse import quote, urljoin
 import boto3
 import moto
 import requests_mock
+from ripley.models.configuration import Configuration
+
+
+@contextmanager
+def hypersleep(app):
+    """Temporarily enable hypersleep."""
+    Configuration.update_hypersleep(True)
+    try:
+        yield
+    finally:
+        Configuration.update_hypersleep(False)
 
 
 @contextmanager

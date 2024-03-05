@@ -52,6 +52,7 @@ def create_mock_project_site(
         canvas_site_id,
         client,
         fake_auth,
+        expected_status_code=200,
 ):
     try:
         account_id = '129407'
@@ -83,6 +84,7 @@ def create_mock_project_site(
             api_json = api_create_project_site(
                 client,
                 'My project site',
+                expected_status_code=expected_status_code,
                 failed_assertion_message=f'UID {authorized_uid} should have power to create a project site.',
             )
             yield api_json

@@ -23,6 +23,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+from functools import wraps
+
 from flask import current_app as app, redirect, request
 from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
@@ -37,14 +39,28 @@ from ripley.lib.course_site_provisioner import provision_course_site
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
+from ripley.models.configuration import Configuration
 
 ROLES_CAN_EDIT_OFFICIAL_SECTIONS = ['Lead TA', 'TeacherEnrollment', 'CanvasAdmin']
 
 ROLES_CAN_VIEW_OFFICIAL_SECTIONS = ['DesignerEnrollment', 'Lead TA', 'TaEnrollment', 'TeacherEnrollment', 'CanvasAdmin']
 
 
+def hypersleep_disabled(func):
+    @wraps(func)
+    def _hypersleep_disabled(*args, **kw):
+        if Configuration.get().hypersleep:
+            app.logger.warning(f'Site creation API call disabled during hypersleep: {request.path}')
+            raise BadRequestError('Site creation and section management are currently offline for maintenance. Please try again later.')
+        else:
+            return func(*args, **kw)
+
+    return _hypersleep_disabled
+
+
 @app.route('/api/canvas_site/provision')
 @login_required
+@hypersleep_disabled
 def canvas_site_provision():
     if current_user.can_create_canvas_course_site:
         admin_acting_as = request.args.get('adminActingAs')
@@ -86,6 +102,7 @@ def get_canvas_site(canvas_site_id):
 
 @app.route('/api/canvas_site/manage_official_sections')
 @login_required
+@hypersleep_disabled
 def manage_official_sections():
     canvas_courses = canvas.get_user_courses(current_user.uid)
     terms = BerkeleyTerm.get_current_terms()
@@ -105,6 +122,7 @@ def manage_official_sections():
 
 @app.route('/api/canvas_site/project_site/create', methods=['POST'])
 @login_required
+@hypersleep_disabled
 def create_project_site():
     if current_user.can_create_canvas_project_site:
         params = request.get_json()
@@ -120,6 +138,7 @@ def create_project_site():
 
 @app.route('/api/canvas_site/provision/create', methods=['POST'])
 @login_required
+@hypersleep_disabled
 def create_course_site():
     if current_user.can_create_canvas_course_site:
         params = request.get_json()
@@ -154,6 +173,7 @@ def create_course_site():
 
 @app.route('/api/canvas_site/<canvas_site_id>/provision/sections', methods=['POST'])
 @canvas_role_required(*ROLES_CAN_EDIT_OFFICIAL_SECTIONS)
+@hypersleep_disabled
 def edit_sections(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
@@ -179,6 +199,7 @@ def edit_sections(canvas_site_id):
 
 @app.route('/api/canvas_site/<canvas_site_id>/official_sections')
 @canvas_role_required(*ROLES_CAN_VIEW_OFFICIAL_SECTIONS)
+@hypersleep_disabled
 def get_official_course_sections(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
