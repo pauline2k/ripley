@@ -44,6 +44,8 @@ ALTER TABLE IF EXISTS ONLY public.canvas_site_mailing_lists
     DROP CONSTRAINT IF EXISTS canvas_site_mailing_lists_name_unique_constraint;
 ALTER TABLE IF EXISTS ONLY public.canvas_synchronization
     DROP CONSTRAINT IF EXISTS canvas_synchronization_unique_constraint;
+ALTER TABLE IF EXISTS ONLY public.configuration
+    DROP CONSTRAINT IF EXISTS configuration_unique_constraint;
 ALTER TABLE IF EXISTS ONLY public.jobs
     DROP CONSTRAINT IF EXISTS jobs_key_unique_constraint;
 ALTER TABLE IF EXISTS ONLY public.jobs
@@ -59,6 +61,7 @@ DROP INDEX IF EXISTS public.canvas_site_mailing_list_members_welcomed_at_idx;
 DROP TABLE IF EXISTS public.canvas_site_mailing_list_members;
 DROP TABLE IF EXISTS public.canvas_site_mailing_lists;
 DROP TABLE IF EXISTS public.canvas_synchronization;
+DROP TABLE IF EXISTS public.configuration;
 DROP TABLE IF EXISTS public.job_history;
 DROP SEQUENCE IF EXISTS job_history_id_seq;
 DROP TABLE IF EXISTS public.jobs;

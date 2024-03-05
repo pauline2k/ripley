@@ -25,12 +25,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from collections import OrderedDict
 import json
 
-from flask import current_app as app
+from flask import current_app as app, request
 from flask_login import current_user
 from ripley import __version__ as version
+from ripley.api.errors import BadRequestError
+from ripley.api.util import admin_required
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import get_eb_environment
+from ripley.models.configuration import Configuration
 
 
 @app.route('/api/config')
@@ -48,7 +51,10 @@ def app_config():
             'NEWT_FEEDBACK_FORM_URL',
         ]
     api_json = {
+        # App configurations set in local .py files.
         **dict((_to_camel_case(key), app.config[key]) for key in configs_for_feed),
+        # Additional app configs from the 'configuration' db table.
+        **Configuration.to_api_json(),
         **_get_app_version(),
         **_get_current_terms(),
         **{
@@ -57,6 +63,17 @@ def app_config():
         },
     }
     return tolerant_jsonify(OrderedDict(sorted(api_json.items())))
+
+
+@app.route('/api/config/hypersleep', methods=['POST'])
+@admin_required
+def update_hypersleep():
+    params = request.get_json()
+    is_hypersleep_enabled = params.get('enabled')
+    if is_hypersleep_enabled is None:
+        raise BadRequestError('Required parameters are missing.')
+    updated = Configuration.update_hypersleep(is_hypersleep_enabled)
+    return tolerant_jsonify({'hypersleep': updated.hypersleep})
 
 
 @app.route('/api/version')
