@@ -5,6 +5,16 @@
       Sorry, we found neither {{ config.terms.current.name }} nor {{ config.terms.next.name }}
       courses in which you are listed as an instructor.
     </div>
+    <v-alert
+      v-if="error"
+      id="error-alert"
+      class="mb-3"
+      density="compact"
+      role="alert"
+      type="warning"
+    >
+      {{ error }}
+    </v-alert>
     <v-radio-group
       v-model="selection"
       class="d-flex"
@@ -220,6 +230,9 @@ export default {
         }
         this.$ready()
       })
+    }, error => {
+      this.error = error
+      this.$ready()
     })
   },
   methods: {
