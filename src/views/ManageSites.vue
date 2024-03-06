@@ -1,10 +1,6 @@
 <template>
   <div v-if="!isLoading" class="pt-3 px-16">
     <Header1 class="mb-1" text="Create or Update bCourses Sites" />
-    <div v-if="!size(coursesByTerm) && !isAdmin" class="font-italic font-weight-medium text-red">
-      Sorry, we found neither {{ config.terms.current.name }} nor {{ config.terms.next.name }}
-      courses in which you are listed as an instructor.
-    </div>
     <v-alert
       v-if="error"
       id="error-alert"
@@ -67,6 +63,10 @@
                 <OutboundLink id="berkeley-collaboration-services-information" href="https://bconnected.berkeley.edu/collaboration-services">other collaboration tools at UC Berkeley</OutboundLink>.
               </div>
               <div v-if="option.id === 'manage-official-sections'" class="pt-2" @click="() => selection = option">
+                <div v-if="!size(coursesByTerm) && !isAdmin" class="font-italic font-weight-medium text-red">
+                  We found no {{ config.terms.current.name }} or {{ config.terms.next.name }}
+                  course sites in which you are listed as an instructor.
+                </div>
                 <div v-if="size(coursesByTerm)" :class="{'text-grey': !option.isAvailable}">
                   <div>
                     Add or remove official section rosters in already-created course sites.
