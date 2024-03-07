@@ -74,6 +74,13 @@ import {mdiCardAccountDetails} from '@mdi/js'
 import Context from '@/mixins/Context'
 import {getNostromoCrew} from '@/api/user'
 import OutboundLink from '@/components/utils/OutboundLink'
+import Alien_Harry_Dean_Stanton1 from '@/assets/images/Alien_Harry_Dean_Stanton1.webp'
+import Alien_Ian_Holm1 from '@/assets/images/Alien_Ian_Holm1.webp'
+import Alien_John_Hurt2 from '@/assets/images/Alien_John_Hurt2.webp'
+import Alien_Sigourney1 from '@/assets/images/Alien_Sigourney1.webp'
+import Alien_Tom_Skerritt1 from '@/assets/images/Alien_Tom_Skerritt1.webp'
+import Alien_Veronica_Cartwright1 from '@/assets/images/Alien_Veronica_Cartwright1.webp'
+import Alien_Yaphet_Kotto1 from '@/assets/images/Alien_Yaphet_Kotto1.webp'
 
 import {sortBy} from 'lodash'
 
@@ -87,15 +94,15 @@ export default {
     getNostromoCrew().then(data => {
       this.nostromoCrew = sortBy(data, ['firstName', 'lastName', 'uid'])
       const images = [
-        'Alien_Harry_Dean_Stanton1.webp',
-        'Alien_Ian_Holm1.webp',
-        'Alien_John_Hurt2.webp',
-        'Alien_Sigourney1.webp',
-        'Alien_Tom_Skerritt1.webp',
-        'Alien_Veronica_Cartwright1.webp',
-        'Alien_Yaphet_Kotto1.webp']
+        Alien_Harry_Dean_Stanton1,
+        Alien_Ian_Holm1,
+        Alien_John_Hurt2,
+        Alien_Sigourney1,
+        Alien_Tom_Skerritt1,
+        Alien_Veronica_Cartwright1,
+        Alien_Yaphet_Kotto1]
       this.nostromoCrew.forEach(item => {
-        item.image = `src/assets/images/${images[this.randomNumberGenerator(0, images.length - 1)]}`
+        item.image = images[this.randomNumberGenerator(0, images.length - 1)]
       })
     })
   },
