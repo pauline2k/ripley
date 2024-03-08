@@ -65,12 +65,8 @@ def get_grade_distribution(canvas_site_id):
                     'name': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
                 } for term_id in grade_distribution_by_term.keys()
             ]
-            if term_id in grade_distribution_by_term.keys():
-                distribution['demographics'] = grade_distribution_by_demographic
-                distribution['enrollments'] = grade_distribution_by_term
-            else:
-                distribution['demographics'] = []
-                distribution['enrollments'] = []
+            distribution['demographics'] = grade_distribution_by_demographic
+            distribution['enrollments'] = grade_distribution_by_term
             cache_dict_object(cache_key, distribution, app.config['GRADE_DISTRIBUTION_CACHE_EXPIRES_IN_DAYS'] * 86400)
         else:
             _handle_error()
