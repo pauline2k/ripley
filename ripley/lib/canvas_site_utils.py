@@ -74,17 +74,15 @@ def canvas_site_to_api_json(canvas_site):
 
 def create_canvas_project_site(name, owner_uid):
     account_id = app.config['CANVAS_PROJECTS_ACCOUNT_ID']
-    sis_course_id = f'PROJ:{secrets.token_hex(8).upper()}'
     project_site = canvas.get_account(account_id, api_call=False).create_course(
         course={
             'course_code': name,
             'name': name,
-            'sis_course_id': sis_course_id,
             'term_id': app.config['CANVAS_PROJECTS_TERM_ID'],
         },
     )
     canvas_site_id = project_site.id
-    app.logger.debug(f"Project site '{name}' ({canvas_site_id}) created with sis_course_id = {sis_course_id}.")
+    app.logger.debug(f"Project site '{name}' ({canvas_site_id}) created.")
     # Fetch all site metadata.
     content_migration = canvas.get_course(course_id=canvas_site_id, api_call=False).create_content_migration(
         migration_type='course_copy_importer',
