@@ -33,9 +33,15 @@ from ripley.lib.util import safe_str
 
 
 def get_basic_attributes(uids=None):
-    # First, call out the CalNet snapshot in the data loch.
     users_by_uid = {}
-    remaining_uids = set(u for u in uids if u) if uids else None
+    if uids is None:
+        remaining_uids = None
+    elif len(uids) == 0:
+        return users_by_uid
+    else:
+        remaining_uids = set(u for u in uids if u)
+
+    # First, call out the CalNet snapshot in the data loch.
     for r in get_users(remaining_uids):
         if remaining_uids:
             remaining_uids.discard(r['ldap_uid'])
