@@ -166,7 +166,11 @@ def stream_object_text(object_key, bucket=None):
 
 def upload_dated_csv(folder, local_name, remote_name, timestamp):
     with open(local_name, mode='rb') as f:
-        return put_binary_data_to_s3(f'{folder}/{timestamp[0:4]}/{timestamp[5:7]}/{remote_name}-{timestamp}.csv', f, 'text/csv')
+        return put_binary_data_to_s3(
+            f'{folder}/{timestamp[0:4]}/{timestamp[5:7]}/{timestamp[7:9]}/{remote_name}-{timestamp}.csv',
+            f,
+            'text/csv',
+        )
 
 
 def _get_s3_client():
