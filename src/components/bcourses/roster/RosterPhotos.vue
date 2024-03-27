@@ -149,7 +149,11 @@ export default {
   *.v-card-roster-photo {
     margin: 0 !important;
   }
+  .photo-list {
+    display: table;
+  }
   .photo-wrapper {
+    float: none;
     width: 200px;
   }
   .photo-wrapper-one-per-page {
