@@ -146,8 +146,8 @@ export default {
   }
   .page-roster-student-name {
     color: $color-off-black;
-    font-size: 18px;
-    overflow: visible;
+    font-size: 14px;
+    line-height: 20px;
     text-overflow: ellipsis;
   }
   *.v-card-roster-photo {
@@ -158,8 +158,8 @@ export default {
   }
   .photo-wrapper {
     float: none;
-    padding: 0 20px;
-    width: 130px;
+    padding: 0;
+    width: 150px;
   }
   .photo-wrapper-one-per-page {
     display: block;
