@@ -75,7 +75,7 @@ export default {
 }
 @media print {
   .photo {
-    height: 147px;
+    height: 130px;
   }
   .photo-one-per-page {
     height: 400px;
