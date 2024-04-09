@@ -1,3 +1,6 @@
+// jscs:disable maximumNumberOfLines
+/* jshint camelcase: false */
+
 (function(window, document, $) {
   'use strict';
 
@@ -10,11 +13,13 @@
    * @param  {Function}   callback            Standard callback function
    * @param  {Object}     callback.response   The API request response
    */
-
-  async function apiRequest(url) {
-    const response = await fetch(url)
-    return response.json()
-  }
+  var apiRequest = function(url, callback) {
+    $.ajax({
+      'dataType': 'json',
+      'url': window.RIPLEY + url,
+      'success': callback
+    });
+  };
 
   /**
    * Get the id for a custom LTI tool that user has access to
@@ -25,9 +30,9 @@
    * @param  {String}     callback.id         The id of the requested custom LTI tool
    */
   var getExternalToolId = function(toolType, toolName, callback) {
-    apiRequest('/api/canvas/external_tools').then(data => {
-      if (data && data[toolType]) {
-        return callback(data[toolType][toolName]);
+    apiRequest('/api/canvas/external_tools', function(externalToolsHash) {
+      if (externalToolsHash && externalToolsHash[toolType]) {
+        return callback(externalToolsHash[toolType][toolName]);
       } else {
         return callback(null);
       }
@@ -57,12 +62,12 @@
   /**
    * Check for the presence of elements in the waiting list on the page
    */
-  const checkElements = function() {
-    elementWaitList = elementWaitList.filter(function(data) {
-      const element= document.querySelector(data.selector)
-      if (element.length > 0) {
-        data.callback(element);
-        return data.repeat ? true : false;
+  var checkElements = function() {
+    elementWaitList = elementWaitList.filter(function(element) {
+      var $element = $(element.selector);
+      if ($element.length > 0) {
+        element.callback($element);
+        return element.repeat ? true : false;
       } else {
         return true;
       }
@@ -79,9 +84,9 @@
    * @param  {Function}   callback                  Standard callback function
    * @param  {Element}    callback.canCreateSite    Whether the current user is allowed to create a new site
    */
-  const canUserCreateSite = function(callback) {
-    apiRequest(`/api/canvas/can_user_create_site?canvas_user_id=${window.ENV.current_user_id}`).then(data => {
-      return callback(data.canCreateSite);
+  var canUserCreateSite = function(callback) {
+    apiRequest('/api/canvas/can_user_create_site?canvas_user_id=' + window.ENV.current_user_id, function(authResult) {
+      return callback(authResult.canCreateSite);
     });
   };
 
@@ -89,7 +94,7 @@
    * Add the 'Manage sites' button that will provide access to the custom LTI tool
    * that allows a user to create a course site and/or a project site
    */
-  const addCreateSiteButton = function() {
+  var addCreateSiteButton = function() {
     // Only add the 'Manage Sites' button from the dashboard or courses page
     if (['/', '/courses'].indexOf(window.location.pathname) !== -1 && window.ENV.current_user_id) {
       // Check if the user is allowed to create a new site
@@ -107,9 +112,7 @@
 
               // Add the 'Manage Sites' button to the Dashboard page
               waitUntilAvailable('#right-side > div:not([class])', false, function($container) {
-                const element = document.getElementById('#start_new_course')
-                element.remove()
-                // $('#start_new_course').remove();
+                $('#start_new_course').remove();
                 $container.prepend($createSiteButton);
               });
 
@@ -288,8 +291,8 @@ addMentalHealthResourcesResponsiveLink();
     if (window.ENV && window.ENV.GRADEBOOK_OPTIONS && window.ENV.GRADEBOOK_OPTIONS.context_id) {
       // Verify that the current course contains official course sections
       const courseId = window.ENV.GRADEBOOK_OPTIONS.context_id;
-      apiRequest(`/api/canvas_site/egrades_export/${courseId}/is_official_course`).then(data => {
-        if (data.isOfficialCourse) {
+      apiRequest(`/api/canvas_site/egrades_export/${courseId}/is_official_course`, function(officialCourseResponse) {
+        if (officialCourseResponse.isOfficialCourse) {
           // Get the id of the E-Grades LTI tool
           getExternalToolId('officialCourseTools', 'Download E-Grades', function(gradesExportLtiId) {
             if (gradesExportLtiId) {
@@ -655,6 +658,19 @@ addMentalHealthResourcesResponsiveLink();
 
   pageNotFound();
 
+  /* WEBCAST */
+
+  /**
+   * Allow full screen for WebCast videos
+   */
+  var enableFullScreen = function() {
+    waitUntilAvailable('#tool_content', false, function($toolContent) {
+      $toolContent.attr('allowfullscreen', '');
+    });
+  };
+
+  enableFullScreen();
+
   /* FOOTER */
 
   /**
@@ -663,11 +679,11 @@ addMentalHealthResourcesResponsiveLink();
   var customizeFooter = function() {
     // Replace the Instructure logo with the Berkeley logo
     var $berkeleyLogo = $('<a>', {
-      class: 'footer-logo',
-      href: 'https://www.berkeley.edu',
-      title: 'University of California, Berkeley',
-      css: {
-        backgroundImage: 'url(' + window.RIPLEY + '/static/canvas/images/ucberkeley_footer.png)'
+      'class': 'footer-logo',
+      'href': 'http://www.berkeley.edu',
+      'title': 'University of California, Berkeley',
+      'css': {
+        'backgroundImage': 'url(' + window.RIPLEY + '/static/canvas/images/ucberkeley_footer.png)'
       }
     });
     $('#footer a.footer-logo').replaceWith($berkeleyLogo);
