@@ -289,6 +289,7 @@ def get_grades_with_enrollments(term_id, course_name, prior_course_name, valid_g
             ON prior_course.sis_term_id < course_grades.sis_term_id
             AND prior_course.sis_term_id >= %(earliest_term_id)s
             AND prior_course.sis_course_name = %(prior_course_name)s
+            AND prior_course.is_primary IS TRUE
         LEFT JOIN sis_data.edo_enrollments prior_enr
             ON course_grades.ldap_uid = prior_enr.ldap_uid
             AND prior_enr.sis_term_id = prior_course.sis_term_id AND prior_enr.sis_section_id = prior_course.sis_section_id
