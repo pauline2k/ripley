@@ -50,7 +50,7 @@ class BConnected:
                 subject = f'{message[:50]}...' if len(message) > 50 else message
 
             eb_env = get_eb_environment()
-            prefix = '' if 'prod' in (eb_env or '') else f"[{eb_env or 'ripley-local'}] "
+            prefix = f"[{eb_env or 'ripley-local'}] "
             subject = f'{prefix}{subject}'
             from_address = app.config['SEND_EMAIL_ALERT_FROM_ADDRESS']
             to_address = app.config['SEND_EMAIL_ALERT_TO_ADDRESS']
