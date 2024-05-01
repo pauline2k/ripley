@@ -2,8 +2,6 @@ import {capitalize, concat, get, head, includes, initial, join, last, noop, star
 import {nextTick} from 'vue'
 import {useContextStore} from '@/stores/context'
 
-const SKIP_REDIRECT_ON_ERROR = ['/api/auth/dev_auth']
-
 export const isInIframe = !!window.parent.frames.length
 
 export function decamelize(str: string, separator=' ') {
@@ -50,7 +48,6 @@ export function iframeScrollToTop() {
 }
 
 export function initializeAxios(app: any, axios: any) {
-  const apiBaseUrl = import.meta.env.VITE_APP_API_BASE_URL
   const params = new URLSearchParams(window.location.search)
   if (params.get('canvasApiDomain')) {
     axios.defaults.headers['Ripley-Canvas-Api-Domain'] = params.get('canvasApiDomain')
@@ -61,17 +58,13 @@ export function initializeAxios(app: any, axios: any) {
     (error: any) => {
       const errorStatus = get(error, 'response.status')
       if (includes([401, 403], errorStatus)) {
-        // Refresh user in case his/her session expired.
-        return axios.get(`${apiBaseUrl}/api/user/my_profile`).then((data: any) => {
-          const currentUser = data
-          useContextStore().setCurrentUser(currentUser)
-          const apiUrl = trim(get(error.config, 'url'))
-          const skipRedirect = currentUser.isAuthenticated || SKIP_REDIRECT_ON_ERROR.some(apiPath => apiUrl.includes(apiPath))
-          if (!skipRedirect) {
-            useContextStore().setApplicationState(errorStatus, 'Your session has expired')
-          }
-          return Promise.reject(error)
-        })
+        const apiUrl = trim(get(error.config, 'url', ''))
+        const isAuthenticated = useContextStore().currentUser.isAuthenticated
+        const isSessionTimeout = !isAuthenticated && !apiUrl.includes('/api/auth/dev_auth')
+        if (isSessionTimeout) {
+          useContextStore().setApplicationState(errorStatus, 'Your session has expired')
+        }
+        return Promise.reject(error)
       } else {
         return Promise.reject(error)
       }
