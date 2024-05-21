@@ -111,12 +111,14 @@
               });
 
               // Add the 'Manage Sites' button to the Dashboard page
-              waitUntilAvailable('#dashboard_header_container', false, function($container) {
+              waitUntilAvailable('#dashboard_header_container', false, function() {
                 const isLegacyDashboardUX = !$('#dashboard_header_container').find('h1').length
                 if (isLegacyDashboardUX) {
                   // TODO: When the legacy UX (per RIP-768) is retired in all environments then delete this code.
                   $('#start_new_course').remove();
-                  $container.prepend($manageSitesButton);
+                  waitUntilAvailable('#right-side > div:not([class])', false, function($container) {
+                    $container.prepend($manageSitesButton);
+                  })
                 } else {
                   // Remove the element enclosing the #start_new_course button.
                   $('#start_new_course').parent().remove();
