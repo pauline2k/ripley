@@ -94,39 +94,50 @@
    * Add the 'Manage sites' button that will provide access to the custom LTI tool
    * that allows a user to create a course site and/or a project site
    */
-  var addCreateSiteButton = function() {
+  const addCreateSiteButton = function() {
     // Only add the 'Manage Sites' button from the dashboard or courses page
-    if (['/', '/courses'].indexOf(window.location.pathname) !== -1 && window.ENV.current_user_id) {
+    const currentUserId = window.ENV.current_user_id;
+    if (['/', '/courses'].indexOf(window.location.pathname) !== -1 && currentUserId) {
       // Check if the user is allowed to create a new site
       canUserCreateSite(function(canCreateSite) {
         if (canCreateSite) {
           // Get the id of the 'Manage Sites' LTI tool
           getExternalToolId('globalTools', 'Manage Sites', function(createSiteId) {
             if (createSiteId) {
-              var linkUrl = '/users/' + window.ENV.current_user_id + '/external_tools/' + createSiteId;
-              var $createSiteButton = $('<a/>', {
-                'href': linkUrl,
-                'text': 'Manage Sites',
-                'class': 'btn btn-primary button-sidebar-wide'
+              const $manageSitesButton = $('<a/>', {
+                href: `/users/${currentUserId}/external_tools/${createSiteId}`,
+                text: 'Manage Sites',
+                class: 'btn btn-primary button-sidebar-wide'
               });
 
               // Add the 'Manage Sites' button to the Dashboard page
               waitUntilAvailable('#right-side > div:not([class])', false, function($container) {
-                $('#start_new_course').remove();
-                $container.prepend($createSiteButton);
+                const isLegacyDashboardUX = !$('#dashboard_header_container').find('h1').length
+                if (isLegacyDashboardUX) {
+                  // TODO: When the legacy UX (per RIP-768) is retired in all environments then delete this code.
+                  $('#start_new_course').remove();
+                  $container.prepend($manageSitesButton);
+                } else {
+                  // Remove the element enclosing the #start_new_course button.
+                  $('#start_new_course').parent().remove();
+                  const $manageSitesContainer = $('<span style="flex-shrink: 0" />')
+                  $manageSitesContainer.append($manageSitesButton)
+                  // Inject the 'Manage Sites' button after the dashboard-options button.
+                  $('#DashboardOptionsMenu_Container').parent().after($manageSitesContainer)
+                }
               });
 
               // Add the 'Manage Sites' button to the Courses page
               waitUntilAvailable('.ic-Action-header', false, function($actionHeader) {
                 $actionHeader.remove();
                 // Add the button to the header
-                var $headerBar = $('.header-bar');
+                const $headerBar = $('.header-bar');
                 $('h2', $headerBar).addClass('pull-left');
-                var $createSiteContainer = $('<div/>', {
-                  'id': 'my-courses-create-site',
-                  'class': 'text-right'
-                }).append($createSiteButton);
-                $headerBar.append($createSiteContainer);
+                const $manageSitesContainer = $('<div/>', {
+                  id: 'my-courses-create-site',
+                  class: 'text-right'
+                }).append($manageSitesButton);
+                $headerBar.append($manageSitesContainer);
               });
             }
           });
