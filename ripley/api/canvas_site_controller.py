@@ -184,7 +184,7 @@ def edit_sections(canvas_site_id):
         all_section_ids = section_ids_to_add + section_ids_to_remove + section_ids_to_update
         if not len(all_section_ids):
             raise BadRequestError('Required parameters are missing.')
-        job = enqueue(func=update_canvas_sections, args=(course, all_section_ids, section_ids_to_remove))
+        job = enqueue(func=update_canvas_sections, args=(course, all_section_ids, section_ids_to_remove, section_ids_to_update))
         if not job:
             raise InternalServerError('Updates cannot be completed at this time.')
         return tolerant_jsonify(

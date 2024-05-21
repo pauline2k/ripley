@@ -293,7 +293,7 @@ def uid_from_canvas_login_id(login_id):
     return result
 
 
-def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
+def update_canvas_sections(course, all_section_ids, section_ids_to_remove, section_ids_to_update):
     canvas_sis_term_id = course.term['sis_term_id']
     term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
     sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=all_section_ids)
@@ -301,11 +301,27 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
         raise ResourceNotFoundError(f'No sections found with IDs {", ".join(all_section_ids)}')
 
     def _section(section):
-        return {
-            'section_id': get_canvas_section_id(
+        canvas_section_id = None
+        # When removing or updating existing sections, ensure that we are matching SIS section id to the section id
+        # already present in the course.
+        if section['section_id'] in (section_ids_to_remove + section_ids_to_update):
+            canvas_section_id_prefix = get_canvas_section_id(
                 sis_section_id=section['section_id'],
                 term_id=section['term_id'],
-            ),
+            )
+            for section in course.get_sections():
+                if section.sis_section_id.startswith(canvas_section_id_prefix):
+                    canvas_section_id = section.sis_section_id
+                    break
+        # When adding new sections, ensure a new unique SIS section id.
+        else:
+            canvas_section_id = get_canvas_section_id(
+                sis_section_id=section['section_id'],
+                term_id=section['term_id'],
+                ensure_unique=True,
+            )
+        return {
+            'section_id': canvas_section_id,
             'course_id': course.sis_course_id,
             'name': f"{section['course_name']} {course_section_name(section)}",
             'status': 'deleted' if section['section_id'] in section_ids_to_remove else 'active',
