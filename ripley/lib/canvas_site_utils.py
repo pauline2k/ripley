@@ -301,11 +301,22 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove):
         raise ResourceNotFoundError(f'No sections found with IDs {", ".join(all_section_ids)}')
 
     def _section(section):
+        canvas_section_id_prefix = get_canvas_section_id(
+            sis_section_id=section['section_id'],
+            term_id=section['term_id'],
+        )
+        canvas_section_id = None
+        # When removing existing sections, ensure that we are matching SIS section id to the section id
+        # already present in the course.
+        if section['section_id'] in section_ids_to_remove:
+            for section in course.get_sections():
+                if section.sis_section_id.startswith(canvas_section_id_prefix):
+                    canvas_section_id = section.sis_section_id
+                    break
+        else:
+            canvas_section_id = canvas_section_id_prefix
         return {
-            'section_id': get_canvas_section_id(
-                sis_section_id=section['section_id'],
-                term_id=section['term_id'],
-            ),
+            'section_id': canvas_section_id,
             'course_id': course.sis_course_id,
             'name': f"{section['course_name']} {course_section_name(section)}",
             'status': 'deleted' if section['section_id'] in section_ids_to_remove else 'active',
