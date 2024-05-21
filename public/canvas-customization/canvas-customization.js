@@ -111,7 +111,7 @@
               });
 
               // Add the 'Manage Sites' button to the Dashboard page
-              waitUntilAvailable('#right-side > div:not([class])', false, function($container) {
+              waitUntilAvailable('#dashboard_header_container', false, function($container) {
                 const isLegacyDashboardUX = !$('#dashboard_header_container').find('h1').length
                 if (isLegacyDashboardUX) {
                   // TODO: When the legacy UX (per RIP-768) is retired in all environments then delete this code.
