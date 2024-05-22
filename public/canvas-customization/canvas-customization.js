@@ -115,10 +115,14 @@
                 const isLegacyDashboardUX = !$('#dashboard_header_container').find('h1').length
                 if (isLegacyDashboardUX) {
                   // TODO: When the legacy UX (per RIP-768) is retired in all environments then delete this code.
-                  $('#start_new_course').remove();
-                  waitUntilAvailable('#right-side > div:not([class])', false, function($container) {
-                    $container.prepend($manageSitesButton);
-                  })
+                  const intervalId = setInterval(() => {
+                    const selector = '#right-side > div:not([class])';
+                    if (document.querySelector(selector)) {
+                      clearInterval(intervalId);
+                      $('#start_new_course').remove();
+                      $(selector).prepend($manageSitesButton)
+                    }
+                  }, 300);
                 } else {
                   // Remove the element enclosing the #start_new_course button.
                   $('#start_new_course').parent().remove();
