@@ -309,9 +309,9 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove, secti
                 sis_section_id=section['section_id'],
                 term_id=section['term_id'],
             )
-            for section in course.get_sections():
-                if section.sis_section_id.startswith(canvas_section_id_prefix):
-                    canvas_section_id = section.sis_section_id
+            for existing_section in course.get_sections():
+                if existing_section.sis_section_id.startswith(canvas_section_id_prefix):
+                    canvas_section_id = existing_section.sis_section_id
                     break
         # When adding new sections, ensure a new unique SIS section id.
         else:
