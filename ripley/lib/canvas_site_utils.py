@@ -202,12 +202,7 @@ def get_teaching_terms(current_user=None, section_ids=None, sections=None, term_
         if term.to_canvas_sis_term_id() in canvas_terms and (key != 'future' or term.season == 'D'):
             terms.append(term)
 
-    instructor_uid = None
-    if uid:
-        instructor_uid = uid
-    elif current_user and (current_user.is_teaching or current_user.canvas_masquerading_user_id):
-        instructor_uid = current_user.uid
-
+    instructor_uid = uid or (current_user.uid if current_user else None)
     term_ids = [t.to_sis_term_id() for t in terms]
     teaching_sections = data_loch.get_instructing_sections(instructor_uid, term_ids) if instructor_uid else []
     if sections:
