@@ -72,6 +72,7 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
                     demographics_distribution[term_id][distribution_key]['false'] += grade_points
                     grade_totals[term_id][distribution_key]['false'] += 1
 
+            _count_boolean_value('athlete', 'athleteStatus')
             _count_boolean_value('transfer', 'transferStatus')
             _count_boolean_value('minority', 'underrepresentedMinorityStatus')
             _count_boolean_value('visa_type', 'internationalStatus')
@@ -187,6 +188,10 @@ def get_grade_distribution_with_prior_enrollments(term_id, course_name, prior_co
 
 EMPTY_DEMOGRAPHIC_DISTRIBUTION = {
     'genders': {},
+    'athleteStatus': {
+        'true': 0,
+        'false': 0,
+    },
     'internationalStatus': {
         'true': 0,
         'false': 0,

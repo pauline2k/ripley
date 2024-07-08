@@ -661,3 +661,18 @@ VALUES
 ('2288','Fall 2028','2028-08-16','2028-12-15'),
 ('2292','Spring 2029','2029-01-09','2029-05-11'),
 ('2295','Summer 2029','2029-05-21','2029-08-10');
+
+DROP SCHEMA IF EXISTS boac_advising_asc cascade;
+
+CREATE SCHEMA boac_advising_asc;
+
+CREATE TABLE boac_advising_asc.students (
+    sid VARCHAR,
+    active BOOLEAN NOT NULL
+);
+
+INSERT INTO boac_advising_asc.students
+(sid, active)
+VALUES
+('3000000012',TRUE),
+('3000000013',TRUE);

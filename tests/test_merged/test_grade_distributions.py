@@ -34,6 +34,16 @@ class TestGradeDistributions:
             demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'])
             assert demographics_distribution == [
                 {
+                    'athleteStatus': {
+                        'false': {
+                            'averageGradePoints': 2.2333333333333334,
+                            'count': 3,
+                        },
+                        'true': {
+                            'averageGradePoints': 0,
+                            'count': 0,
+                        },
+                    },
                     'averageGradePoints': 2.2333333333333334,
                     'count': 3,
                     'courseName': 'ASTRON 218',
@@ -77,6 +87,16 @@ class TestGradeDistributions:
                     },
                 },
                 {
+                    'athleteStatus': {
+                        'false': {
+                            'averageGradePoints': 3.860493827160494,
+                            'count': 81,
+                        },
+                        'true': {
+                            'averageGradePoints': 3.85,
+                            'count': 2,
+                        },
+                    },
                     'averageGradePoints': 3.8602409638554214,
                     'count': 83,
                     'courseName': 'ASTRON 218',
@@ -217,6 +237,16 @@ class TestGradeDistributions:
             demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'])
             assert demographics_distribution == [
                 {
+                    'athleteStatus': {
+                        'true': {
+                            'averageGradePoints': 0,
+                            'count': 0,
+                        },
+                        'false': {
+                            'averageGradePoints': 2.2333333333333334,
+                            'count': None,
+                        },
+                    },
                     'averageGradePoints': 2.2333333333333334,
                     'genders': {
                         'female': {
@@ -260,6 +290,16 @@ class TestGradeDistributions:
                     'termName': 'Summer 2022',
                 },
                 {
+                    'athleteStatus': {
+                        'true': {
+                            'averageGradePoints': 3.85,
+                            'count': None,
+                        },
+                        'false': {
+                            'averageGradePoints': 3.860493827160494,
+                            'count': 81,
+                        },
+                    },
                     'averageGradePoints': 3.8602409638554214,
                     'count': 83,
                     'courseName': 'ASTRON 218',
@@ -400,6 +440,16 @@ class TestGradeDistributions:
             demographics_distribution, grade_distribution = get_grade_distributions('2228', ['99999'])
             assert demographics_distribution == [
                 {
+                    'athleteStatus': {
+                        'true': {
+                            'averageGradePoints': 3.85,
+                            'count': 2,
+                        },
+                        'false': {
+                            'averageGradePoints': 3.860493827160494,
+                            'count': 81,
+                        },
+                    },
                     'averageGradePoints': 3.8602409638554214,
                     'count': 83,
                     'courseName': 'ASTRON 218',

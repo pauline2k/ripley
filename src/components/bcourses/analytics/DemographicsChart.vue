@@ -210,6 +210,10 @@ export default {
         label: 'Transfer Students',
         options: []
       },
+      athleteStatus: {
+        label: 'Student Athletes',
+        options: []
+      },
     },
     selectedDemographic: null,
     showChartDefinitions: false,
