@@ -642,7 +642,7 @@ addMentalHealthResourcesResponsiveLink();
       '</div>'
     ].join('');
 
-    waitUntilAvailable('#Selectable_0-description', false, function($header) {
+    waitUntilAvailable('#assign-to-label', false, function($header) {
       $header.parent().parent().parent().before(religiousHolidaysInfo);
 
       // Toggle icon
