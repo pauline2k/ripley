@@ -49,6 +49,7 @@ class TestConfigController:
         assert api_json['devAuthEnabled'] is False
         assert api_json['ebEnvironment'] == 'ripley-test'
         assert api_json['hypersleep'] is False
+        assert api_json['newtShowOtherGender'] is True
         assert api_json['timezone'] == 'America/Los_Angeles'
 
         api_json_lower_string = str(api_json).lower()
