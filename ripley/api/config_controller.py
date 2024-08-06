@@ -42,6 +42,7 @@ def app_config():
         'CANVAS_API_URL',
         'DEV_AUTH_ENABLED',
         'NEWT_MINIMUM_CLASS_SIZE',
+        'NEWT_SHOW_OTHER_GENDER',
         'NEWT_SMALL_CELL_THRESHOLD',
         'RIPLEY_ENV',
         'TIMEZONE',
