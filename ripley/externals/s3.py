@@ -142,7 +142,7 @@ def stream_folder_zipped(folder_key):
                 for o in page['Contents']:
                     object_key = o.get('Key')
                     s3_url = f's3://{bucket}/{object_key}'
-                    s3_stream = smart_open.open(s3_url, 'rb', transport_params={'session': session})
+                    s3_stream = smart_open.open(s3_url, 'rb', transport_params={'client': session.client('s3')})
                     filename = object_key.replace(f'{folder_key}/', '')
                     z.write_iter(filename, s3_stream)
         return z
@@ -157,7 +157,8 @@ def stream_object_text(object_key, bucket=None):
         bucket = app.config['AWS_S3_BUCKET']
     s3_url = f's3://{bucket}/{object_key}'
     try:
-        return smart_open.open(s3_url, 'r', transport_params={'session': _get_session()})
+        session = _get_session()
+        return smart_open.open(s3_url, 'r', transport_params={'client': session.client('s3')})
     except Exception as e:
         app.logger.error(f'S3 stream operation failed (s3_url={s3_url})')
         app.logger.exception(e)
