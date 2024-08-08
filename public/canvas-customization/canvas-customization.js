@@ -76,7 +76,7 @@
 
   setInterval(checkElements, 200);
 
-  /* MANAGE SITES */
+  /* CREATE & MANAGE SITES */
 
   /**
    * Check whether the current user is allowed to create a new site
@@ -91,26 +91,26 @@
   };
 
   /**
-   * Add the 'Manage sites' button that will provide access to the custom LTI tool
+   * Add the 'Create & Manage sites' button that will provide access to the custom LTI tool
    * that allows a user to create a course site and/or a project site
    */
   const addCreateSiteButton = function() {
-    // Only add the 'Manage Sites' button from the dashboard or courses page
+    // Only add the 'Create & Manage Sites' button from the dashboard or courses page
     const currentUserId = window.ENV.current_user_id;
     if (['/', '/courses'].indexOf(window.location.pathname) !== -1 && currentUserId) {
       // Check if the user is allowed to create a new site
       canUserCreateSite(function(canCreateSite) {
         if (canCreateSite) {
-          // Get the id of the 'Manage Sites' LTI tool
+          // Get the id of the 'Create & Manage Sites' LTI tool
           getExternalToolId('globalTools', 'Manage Sites', function(createSiteId) {
             if (createSiteId) {
               const $manageSitesButton = $('<a/>', {
                 href: `/users/${currentUserId}/external_tools/${createSiteId}`,
-                text: 'Manage Sites',
+                text: 'Create & Manage Sites',
                 class: 'btn btn-primary button-sidebar-wide'
               });
 
-              // Add the 'Manage Sites' button to the Dashboard page
+              // Add the 'Create & Manage Sites' button to the Dashboard page
               waitUntilAvailable('#dashboard_header_container', false, function() {
                 const isLegacyDashboardUX = !$('#dashboard_header_container').find('h1').length
                 if (isLegacyDashboardUX) {
@@ -128,12 +128,12 @@
                   $('#start_new_course').parent().remove();
                   const $manageSitesContainer = $('<span style="flex-shrink: 0" />')
                   $manageSitesContainer.append($manageSitesButton)
-                  // Inject the 'Manage Sites' button after the dashboard-options button.
+                  // Inject the 'Create & Manage Sites' button after the dashboard-options button.
                   $('#DashboardOptionsMenu_Container').parent().after($manageSitesContainer)
                 }
               });
 
-              // Add the 'Manage Sites' button to the Courses page
+              // Add the 'Create & Manage Sites' button to the Courses page
               waitUntilAvailable('.ic-Action-header', false, function($actionHeader) {
                 $actionHeader.remove();
                 // Add the button to the header
@@ -153,17 +153,17 @@
   };
 
   /**
-   * Remove the 'Manage Sites' menu item from the 'User Settings' page
+   * Remove the 'Create & Manage Sites' menu item from the 'User Settings' page
    * if the current user is not allowed to create a new site
    */
   var removeCreateSiteUserNav = function() {
-    // Only attempt to remove the 'Manage Sites' item on the 'User Settings' page
+    // Only attempt to remove the 'Create & Manage Sites' item on the 'User Settings' page
     if (window.location.pathname === '/profile/settings' && window.ENV.current_user_id) {
-      // Remove the 'Manage Sites' item if the current user is not allowed
+      // Remove the 'Create & Manage Sites' item if the current user is not allowed
       // to create a new site
       canUserCreateSite(function(canCreateSite) {
         if (canCreateSite) {
-          waitUntilAvailable('nav ul#section-tabs li.section a:contains("Manage Sites")', false, function($createSiteLink) {
+          waitUntilAvailable('nav ul#section-tabs li.section a:contains("Create & Manage Sites")', false, function($createSiteLink) {
             $createSiteLink.parent().remove();
           });
         }
@@ -600,7 +600,7 @@ addMentalHealthResourcesResponsiveLink();
   /* SECTIONS HELPER TEXT */
 
   /**
-   * Add an Tool Tip to the Sections page pointing users to the Manage Sites tool
+   * Add an Tool Tip to the Sections page pointing users to the Create & Manage Sites tool
    */
   var addSectionsToolTip = function() {
     var sectionsToolTip = [
@@ -609,7 +609,7 @@ addMentalHealthResourcesResponsiveLink();
       '    <i class="icon-arrow-right"></i> <strong>Need Help Adding a Section/Roster?</strong>',
       '  </button>',
       '  <div id="sections-tooltip-content" class="hide" role="region" tabindex="-1">',
-      '    <div>If you are trying to add or remove a SIS-linked roster section to your course, this is done using the Manage Sites tool. See this article for instructions on how to <a href="https://berkeley.service-now.com/kb?id=kb_article_view&sysparm_article=KB0010686" target="_blank">add or delete a course roster from your bCourses site<span class="sr-only"> (opens in new tab)</span></a></br>' +
+      '    <div>If you are trying to add or remove a SIS-linked roster section to your course, this is done using the Create & Manage Sites tool. See this article for instructions on how to <a href="https://berkeley.service-now.com/kb?id=kb_article_view&sysparm_article=KB0010686" target="_blank">add or delete a course roster from your bCourses site<span class="sr-only"> (opens in new tab)</span></a></br>' +
       '    Warning: manually creating sections from this page, and/or manually enrolling students will override their SIS enrollment and cause them to remain in the course if they drop.</div>',
       '  </div>',
       '</div>'
