@@ -46,7 +46,6 @@
     "vite": "^4.5.1",
     "vite-plugin-compression": "^0.5.1",
     "vite-plugin-vuetify": "^1.0.2",
-    "vue-eslint-parser": "^9.3.2",
-    "vue-tsc": "^1.8.25"
+    "vue-eslint-parser": "^9.3.2"
   }
 }
