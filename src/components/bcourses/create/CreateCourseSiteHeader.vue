@@ -19,6 +19,11 @@
           <div aria-hidden="true" class="pl-1 text-black text-body-2">Section IDs</div>
         </template>
       </v-radio>
+      <v-radio id="radio-btn-mode-csv-upload" value="csvUpload" aria-label="CSV Upload">
+        <template #label>
+          <div aria-hidden="true" class="pl-1 text-black text-body-2">CSV Upload</div>
+        </template>
+      </v-radio>
     </v-radio-group>
     <div v-if="adminMode === 'actAs'" class="pt-5">
       <div class="align-center d-flex pb-3">
@@ -113,7 +118,18 @@
         </v-btn>
       </div>
     </div>
-  </div>
+    <div v-if="adminMode === 'csvUpload'" class="py-5">
+      <h3 class="sr-only">Create Multiple Course Sites Using a Formatted CSV file</h3>
+      <div>
+        <a href="">CSV template</a> | <a href="">Instructions for formatting CSV</a>
+      </div>
+      <div>
+        <v-file-input
+          accept="text/csv"
+          label="File input"
+          v-model="courseSiteCsv"
+        ></v-file-input>
+    </div>
 </template>
 
 <script>

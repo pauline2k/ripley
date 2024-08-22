@@ -182,7 +182,7 @@ import {mdiMenuDown, mdiMenuRight} from '@mdi/js'
 
 <script>
 import Context from '@/mixins/Context'
-import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
+import {courseCreate, courseCreateMultiple, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
 import {each, find, get, includes, map, size} from 'lodash'
 import {iframeParentLocation, putFocusNextTick} from '@/utils'
 
