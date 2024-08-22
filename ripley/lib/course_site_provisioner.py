@@ -37,7 +37,7 @@ from ripley.lib.util import utc_now
 from rq.job import get_current_job
 
 
-def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_ids, is_admin_by_ccns):  # noqa C901
+def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_ids, is_admin_by_ccns, set_site_url_metadata=True):  # noqa C901
     term = BerkeleyTerm.from_slug(term_slug)
     if is_admin_by_ccns:
         # Admins can specify semester and CCNs directly, without access checks.
@@ -148,12 +148,14 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
             role_id=role_id,
         )
 
-    # Background enrollment update
-    job = get_current_job()
-    if job:
+    course_site_url = f"{app.config['CANVAS_API_URL']}/courses/{course.id}"
+    if set_site_url_metadata:
         job = get_current_job()
-        job.meta['courseSiteUrl'] = f"{app.config['CANVAS_API_URL']}/courses/{course.id}"
-        job.save_meta()
+        if job:
+            job.meta['courseSiteUrl'] = course_site_url
+            job.save_meta()
+
+    # Background enrollment update
     update_section_enrollments(
         all_sections=canvas_section_payload,
         course=course,
@@ -161,6 +163,27 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
         sis_import=sis_import,
         sis_term_id=sis_term_id,
     )
+
+    return course_site_url
+
+
+def provision_course_site_multiple(sites):
+    results = []
+    for site in sites:
+        course_site_url = provision_course_site(
+            None,
+            site['name'],
+            site['abbreviation'],
+            site['termSlug'],
+            site['sectionIds'],
+            is_admin_by_ccns=True,
+            set_site_url_metadata=False,
+        )
+        results.append({**site, **{'url': course_site_url}})
+    job = get_current_job()
+    if job:
+        job.meta['courseSiteResults'] = results
+        job.save_meta()
 
 
 def _enroll_user_in_canvas_section(canvas_sis_section_id, canvas_user_profile, role_id):

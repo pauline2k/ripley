@@ -20,6 +20,7 @@
           :fetch-feed="fetchFeed"
           :is-fetching="isFetching"
           :set-admin-acting-as="setAdminActingAs"
+          :set-admin-by-csv-upload="setAdminByCsvUpload"
           :set-admin-by-section-ids="setAdminBySectionIds"
           :set-admin-mode="setAdminMode"
           :set-warning="w => warning = w"
@@ -182,7 +183,7 @@ import {mdiMenuDown, mdiMenuRight} from '@mdi/js'
 
 <script>
 import Context from '@/mixins/Context'
-import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
+import {courseCreate, courseCreateMultiple, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
 import {each, find, get, includes, map, size} from 'lodash'
 import {iframeParentLocation, putFocusNextTick} from '@/utils'
 
@@ -192,6 +193,7 @@ export default {
   data: () => ({
     actingAsInstructor: undefined,
     adminActingAs: undefined,
+    adminByCsvUpload: undefined,
     adminBySectionIds: undefined,
     adminMode: 'actAs',
     adminTerms: [],
@@ -332,6 +334,7 @@ export default {
       const semester = (this.adminMode === 'bySectionId' ? this.currentAdminTerm : this.currentSemester)
       getSections(
         this.adminActingAs,
+        this.adminByCsvUpload,
         this.adminBySectionIds,
         this.adminMode,
         semester,
@@ -402,11 +405,18 @@ export default {
     },
     setAdminActingAs(uid) {
       this.adminActingAs = uid
+      this.adminByCsvUpload = null
       this.adminBySectionIds = null
+    },
+    setAdminByCsvUpload(csvUpload) {
+      this.adminByCsvUpload = csvUpload
+      this.adminBySectionIds = null
+      this.adminActingAs = null
     },
     setAdminBySectionIds(sectionIds) {
       this.adminBySectionIds = sectionIds
       this.adminActingAs = null
+      this.adminByCsvUpload = null
     },
     setAdminMode(adminMode) {
       this.adminMode = adminMode
