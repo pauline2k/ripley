@@ -19,6 +19,11 @@
           <div aria-hidden="true" class="pl-1 text-black text-body-2">Section IDs</div>
         </template>
       </v-radio>
+      <v-radio id="radio-btn-mode-csv-upload" value="csvUpload" aria-label="CSV Upload">
+        <template #label>
+          <div aria-hidden="true" class="pl-1 text-black text-body-2">CSV Upload</div>
+        </template>
+      </v-radio>
     </v-radio-group>
     <div v-if="adminMode === 'actAs'" class="pt-5">
       <div class="align-center d-flex pb-3">
@@ -113,6 +118,35 @@
         </v-btn>
       </div>
     </div>
+    <div v-if="adminMode === 'csvUpload'" class="py-5">
+      <h3 class="sr-only">Create Multiple Course Sites Using a Formatted CSV file</h3>
+      <div>
+        <a href="">CSV template</a> | <a href="">Instructions for formatting CSV</a>
+      </div>
+      <div>
+        <v-file-input
+          accept="text/csv"
+          label="File input"
+          v-model="courseSiteCsv"
+        ></v-file-input>
+      </div>
+      <v-btn
+        id="sections-by-csv-button"
+        color="primary"
+        :disabled="!courseSiteCsv || isFetching"
+        @click="submit"
+      >
+        <span v-if="isFetching">
+          <v-progress-circular
+            class="mr-1"
+            indeterminate
+            size="18"
+          />
+          Fetching...
+        </span>
+        <span v-if="!isFetching">Find Matching Sections</span>
+      </v-btn>
+    </div>
   </div>
 </template>
 
@@ -150,6 +184,10 @@ export default {
       required: true,
       type: Function
     },
+    setAdminByCsvUpload: {
+      required: true,
+      type: Function
+    },
     setAdminBySectionIds: {
       required: true,
       type: Function
@@ -168,6 +206,7 @@ export default {
     }
   },
   data: () => ({
+    courseSiteCsv: null,
     sectionIds: '',
     uid: undefined
   }),
@@ -235,6 +274,9 @@ export default {
             this.setWarning('UID must be numeric.')
             putFocusNextTick('instructor-uid')
           }
+        } else if (this.adminMode === 'csvUpload' && this.courseSiteCsv) {
+          this.setAdminByCsvUpload(this.courseSiteCsv)
+          this.fetchFeed()
         }
       }
     },

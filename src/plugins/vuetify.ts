@@ -15,6 +15,7 @@ import {VDialog} from 'vuetify/components/VDialog'
 import {VDivider} from 'vuetify/components/VDivider'
 import {VExpandTransition} from 'vuetify/components/transitions'
 import {VExpansionPanel, VExpansionPanels, VExpansionPanelText, VExpansionPanelTitle} from 'vuetify/components/VExpansionPanel'
+import {VFileInput} from 'vuetify/components/VFileInput'
 import {VIcon} from 'vuetify/components/VIcon'
 import {VImg} from 'vuetify/components/VImg'
 import {VList, VListItem, VListItemAction, VListItemSubtitle, VListItemTitle} from 'vuetify/components/VList'
@@ -62,6 +63,7 @@ export default createVuetify({
     VExpansionPanels,
     VExpansionPanelText,
     VExpansionPanelTitle,
+    VFileInput,
     VIcon,
     VImg,
     VList,

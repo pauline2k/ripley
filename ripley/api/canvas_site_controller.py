@@ -35,7 +35,7 @@ from ripley.lib.berkeley_course import sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_site_utils import canvas_site_to_api_json, create_canvas_project_site, \
     get_official_sections, get_teaching_terms, update_canvas_sections
-from ripley.lib.course_site_provisioner import provision_course_site
+from ripley.lib.course_site_provisioner import provision_course_site, provision_course_site_multiple
 from ripley.lib.http import tolerant_jsonify
 from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
@@ -157,6 +157,32 @@ def create_course_site():
         job = enqueue(
             func=provision_course_site,
             args=(uid, site_name, site_abbreviation, term_slug, section_ids, bool(admin_by_ccns)),
+        )
+        if not job:
+            raise InternalServerError('Updates cannot be completed at this time.')
+        return tolerant_jsonify(
+            {
+                'jobId': job.id,
+                'jobStatus': 'sendingRequest',
+            },
+        )
+    else:
+        app.logger.warning(f'Unauthorized request to {request.path}')
+        return app.login_manager.unauthorized()
+
+
+@app.route('/api/canvas_site/provision/create_multiple', methods=['POST'])
+@login_required
+@hypersleep_disabled
+def create_course_sites_multiple():
+    if current_user.is_admin or current_user.is_canvas_admin:
+        params = request.get_json()
+        course_sites = params.get('courseSites')
+        if not course_sites or not len(course_sites):
+            raise BadRequestError('Required parameters are missing.')
+        job = enqueue(
+            func=provision_course_site_multiple,
+            args=(course_sites),
         )
         if not job:
             raise InternalServerError('Updates cannot be completed at this time.')

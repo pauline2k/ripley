@@ -20,6 +20,7 @@
           :fetch-feed="fetchFeed"
           :is-fetching="isFetching"
           :set-admin-acting-as="setAdminActingAs"
+          :set-admin-by-csv-upload="setAdminByCsvUpload"
           :set-admin-by-section-ids="setAdminBySectionIds"
           :set-admin-mode="setAdminMode"
           :set-warning="w => warning = w"
@@ -182,7 +183,7 @@ import {mdiMenuDown, mdiMenuRight} from '@mdi/js'
 
 <script>
 import Context from '@/mixins/Context'
-import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
+import {courseCreate, courseCreateMultiple, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
 import {each, find, get, includes, map, size} from 'lodash'
 import {iframeParentLocation, putFocusNextTick} from '@/utils'
 
@@ -192,12 +193,14 @@ export default {
   data: () => ({
     actingAsInstructor: undefined,
     adminActingAs: undefined,
+    adminByCsvUpload: undefined,
     adminBySectionIds: undefined,
     adminMode: 'actAs',
     adminTerms: [],
     backgroundJobId: undefined,
     canvasSite: undefined,
     canvasSiteId: undefined,
+    courseSitesMultiple: [],
     coursesList: [],
     currentAdminTerm: undefined,
     currentSemester: undefined,
@@ -290,21 +293,36 @@ export default {
         }
         this.currentWorkflowStep = 'processing'
         this.jobStatus = 'sendingRequest'
-        this.updateSelected()
-        const sectionIds = map(this.selectedSectionsList, 'id')
-        if (sectionIds.length > 0) {
-          const adminActingAs = this.isAdmin && this.adminMode === 'actAs' ? this.adminActingAs : null
-          const adminBySectionIds = this.isAdmin && this.adminMode === 'bySectionId' ? this.adminBySectionIds : null
-          const adminTermSlug = this.isAdmin && this.adminMode === 'bySectionId' ? this.currentAdminTerm : null
-          courseCreate(
-            adminActingAs,
-            adminBySectionIds,
-            adminTermSlug,
-            sectionIds,
-            siteAbbreviation,
-            siteName,
-            this.currentSemester
-          ).then(
+        
+        var creationPromise = null
+        if (this.adminMode === 'csvUpload') {
+          if (this.courseSitesMultiple.length > 0) {
+            creationPromise = courseCreateMultiple(this.courseSitesMultiple)
+          } else {
+            onError('No course site information was provided.')
+          }
+        } else {
+          this.updateSelected()
+          const sectionIds = map(this.selectedSectionsList, 'id')
+          if (sectionIds.length > 0) {
+            const adminActingAs = this.isAdmin && this.adminMode === 'actAs' ? this.adminActingAs : null
+            const adminBySectionIds = this.isAdmin && this.adminMode === 'bySectionId' ? this.adminBySectionIds : null
+            const adminTermSlug = this.isAdmin && this.adminMode === 'bySectionId' ? this.currentAdminTerm : null
+            creationPromise = courseCreate(
+              adminActingAs,
+              adminBySectionIds,
+              adminTermSlug,
+              sectionIds,
+              siteAbbreviation,
+              siteName,
+              this.currentSemester
+            )
+          } else {
+            onError('No section IDs were provided.')
+          }
+        }
+        if (creationPromise) {
+          creationPromise.then(
             data => {
               this.backgroundJobId = data.jobId
               this.jobStatus = data.jobStatus
@@ -313,9 +331,7 @@ export default {
               resolve()
             },
             () => onError('Failed to start course provisioning job.')
-          )
-        } else {
-          onError('No section IDs were provided.')
+          )        
         }
       })
     },
@@ -332,6 +348,7 @@ export default {
       const semester = (this.adminMode === 'bySectionId' ? this.currentAdminTerm : this.currentSemester)
       getSections(
         this.adminActingAs,
+        this.adminByCsvUpload,
         this.adminBySectionIds,
         this.adminMode,
         semester,
@@ -402,11 +419,18 @@ export default {
     },
     setAdminActingAs(uid) {
       this.adminActingAs = uid
+      this.adminByCsvUpload = null
       this.adminBySectionIds = null
+    },
+    setAdminByCsvUpload(csvUpload) {
+      this.adminByCsvUpload = csvUpload
+      this.adminBySectionIds = null
+      this.adminActingAs = null
     },
     setAdminBySectionIds(sectionIds) {
       this.adminBySectionIds = sectionIds
       this.adminActingAs = null
+      this.adminByCsvUpload = null
     },
     setAdminMode(adminMode) {
       this.adminMode = adminMode

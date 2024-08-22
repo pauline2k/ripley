@@ -41,6 +41,10 @@ export function courseCreate(
   })
 }
 
+export function courseCreateMultiple(courseSites: object[]) {
+  return utils.post('/api/canvas_site/provision/create_multiple', {courseSites})
+}
+
 export function createProjectSite(name: string) {
   return utils.post('/api/canvas_site/project_site/create',{name})
 }
