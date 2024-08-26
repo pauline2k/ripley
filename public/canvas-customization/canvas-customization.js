@@ -643,7 +643,7 @@ addMentalHealthResourcesResponsiveLink();
     ].join('');
 
     waitUntilAvailable('#assign-to-label', false, function($header) {
-      $header.parent().parent().parent().before(religiousHolidaysInfo);
+      $header.before(religiousHolidaysInfo);
 
       // Toggle icon
       $('#religious-holidays-tool-tip .element_toggler').on('click', function() {
