@@ -36,15 +36,16 @@
  * Load Blue Integration
  */
 var BLUE_CANVAS_SETUP={
-      connectorUrl:"https://surveys.berkeley.edu/berkeleySurveysblueconnector/",
-      canvasAPI:"https://bcourses.berkeley.edu",
-      domainName:"com.explorance",
-      consumerID:"CWN1RxHsa4vY9b2QgVC7jQ==",
-      defaultLanguage:"en-us"
-    },
+    connectorUrl:"https://surveys.berkeley.edu/berkeleySurveysblueconnector/",
+    canvasAPI:window.location.origin,
+    domainName:"com.explorance",
+    consumerID:"CWN1RxHsa4vY9b2QgVC7jQ==",
+    defaultLanguage:"en-us"
+},
     BlueCanvasJS=document.createElement("script");
 BlueCanvasJS.setAttribute("type","text/javascript");
 BlueCanvasJS.setAttribute("src","https://surveys.berkeley.edu/berkeleySurveysblueconnector//Scripts/Canvas/BlueCanvas.min.js");
+BlueCanvasJS.async=!0;
 document.getElementsByTagName("head")[0].appendChild(BlueCanvasJS);
 
 ////////////////////////////////////////////////////
