@@ -102,7 +102,7 @@
       canUserCreateSite(function(canCreateSite) {
         if (canCreateSite) {
           // Get the id of the 'Create & Manage Sites' LTI tool
-          getExternalToolId('globalTools', 'Manage Sites', function(createSiteId) {
+          getExternalToolId('globalTools', 'Create & Manage Sites', function(createSiteId) {
             if (createSiteId) {
               const $manageSitesButton = $('<a/>', {
                 href: `/users/${currentUserId}/external_tools/${createSiteId}`,
