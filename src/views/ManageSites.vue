@@ -63,9 +63,9 @@
                 <OutboundLink id="berkeley-collaboration-services-information" href="https://bconnected.berkeley.edu/collaboration-services">other collaboration tools at UC Berkeley</OutboundLink>.
               </div>
               <div v-if="option.id === 'manage-official-sections'" class="pt-2" @click="() => selection = option">
-                <div v-if="!size(coursesByTerm) && !isAdmin" class="font-italic font-weight-medium text-red">
-                  We found no {{ config.terms.current.name }} or {{ config.terms.next.name }}
-                  course sites in which you are listed as an instructor.
+                <div v-if="!size(coursesByTerm) && !isAdmin" class="font-italic text-grey">
+                  Please create a {{ config.terms.current.name }} or {{ config.terms.next.name }}
+                  course site in order to use the Manage Official Sections tool.
                 </div>
                 <div v-if="size(coursesByTerm)" :class="{'text-grey': !option.isAvailable}">
                   <div>
