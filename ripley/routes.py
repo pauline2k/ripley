@@ -28,10 +28,10 @@ import traceback
 
 from flask import jsonify, make_response, redirect, request, session
 from flask_login import current_user, LoginManager, user_logged_out
-from werkzeug.exceptions import HTTPException
+from werkzeug.exceptions import HTTPException, NotFound
 
 
-def register_routes(app):
+def register_routes(app):  # noqa C901
     """Register app routes."""
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -85,7 +85,9 @@ def register_routes(app):
         from ripley.externals.b_connected import BConnected
 
         subject = str(e)
-        if isinstance(e, HTTPException):
+        if isinstance(e, NotFound):
+            app.logger.debug(f"""\n\n{type(e).__name__} {subject}\n""")
+        elif isinstance(e, HTTPException):
             app.logger.warning(f"""\n\n{type(e).__name__} {subject}\n{traceback.format_exc()}\n""")
         else:
             message = f'{e}\n\n<pre>{traceback.format_exc()}</pre>'
