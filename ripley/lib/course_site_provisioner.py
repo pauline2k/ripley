@@ -94,7 +94,8 @@ def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_
     course.update_settings(hide_distribution_graphs=True)
 
     # This is currently undocumented. Described at https://community.canvaslms.com/thread/11645.
-    if course.default_view != 'feed':
+    # Department subaccounts with templates should not have the default view changed (RIP-792).
+    if course.default_view != 'feed' and not account.course_template_id:
         course.update(course={'default_view': 'feed'})
 
     # Section definitions
