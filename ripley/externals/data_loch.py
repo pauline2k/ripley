@@ -231,7 +231,7 @@ def get_grades_with_demographics(term_id, section_ids, valid_grades, instructor_
             spi.transfer, a.active AS athlete, d.gender, d.minority, v.visa_type
         FROM sis_data.edo_enrollments enr
         JOIN sis_data.edo_sections sec on enr.sis_term_id = sec.sis_term_id and enr.sis_section_id = sec.sis_section_id
-        JOIN course c ON sec.sis_course_name = c.sis_course_name {'AND sec.instructor_uid = c.instructor_uid' if instructor_uid else ''}
+        JOIN course c ON sec.cs_course_id = c.cs_course_id {'AND sec.instructor_uid = c.instructor_uid' if instructor_uid else ''}
         JOIN student.student_profile_index spi ON enr.ldap_uid = spi.uid
         LEFT JOIN boac_advising_asc.students a ON spi.sid = a.sid AND a.active IS TRUE
         LEFT JOIN student.demographics d ON spi.sid = d.sid
