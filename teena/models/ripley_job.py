@@ -23,40 +23,25 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-import logging
-import os
+from enum import Enum
 
-ADMIN_UID = '123456'
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-BASE_URL = 'https://ripley-qa.ets.berkeley.edu'
-BASE_URL_PROD = 'https://the.prod.url.edu'
+class RipleyJob(object):
 
-BROWSER = 'chrome'
-BROWSER_BINARY_PATH = '/path/to/chrome'
-BROWSER_HEADLESS = False
+    def __init__(self, name, key):
+        self.name = name
+        self.key = key
 
-CANVAS_BASE_URL = 'https://ucberkeley.test.instructure.com'
-CANVAS_QA_ACCOUNT_ID = 123456
 
-COURSE_TEMPLATE_DEPT = 'LAW'
+class RipleyJobs(Enum):
 
-CLICK_SLEEP = 0.5
-
-E_GRADES_SITE_IDS = ['123', '456', '789']
-E_GRADES_STUDENT_COUNT = 10
-
-LOGGING_LOCATION = 'teena.log'
-LOGGING_LEVEL = logging.INFO
-
-NEWT_SITE_IDS = ['123', '456', '789']
-
-TERM_CODE = '2025-B'
-TERM_NAME = 'Spring 2025'
-TERM_SIS_ID = '2252'
-
-TESTING = True
-
-TIMEOUT_SHORT = 20
-TIMEOUT_MEDIUM = 120
-TIMEOUT_LONG = 500
+    ADD_GUEST_USERS = RipleyJob('Add Guest Users', 'add_guest_users')
+    ADD_NEW_USERS = RipleyJob('Add New Users', 'add_new_users')
+    DELETE_EMAIL_ADDRESSES = RipleyJob('Bcourses Delete Email Addresses', 'bcourses_refresh_accounts')
+    EXPORT_TERM_ENROLLMENTS = RipleyJob('Export Term Enrollments', 'export_term_enrollments')
+    HOUSE_KEEPING = RipleyJob('House Keeping', 'house_keeping')
+    REFRESH_ACCOUNTS = RipleyJob('Bcourses Refresh Accounts', 'bcourses_refresh_accounts')
+    REFRESH_FULL = RipleyJob('Bcourses Refresh Full', 'bcourses_refresh_full')
+    REFRESH_INCREMENTAL = RipleyJob('Bcourses Refresh Incremental', 'bcourses_refresh_incremental')
+    REFRESH_MAILING_LIST = RipleyJob('Mailing List Refresh', 'mailing_list_refresh')
+    REPORT_LTI_USAGE = RipleyJob('Lti Usage Report', 'lti_usage_report')

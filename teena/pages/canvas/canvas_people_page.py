@@ -32,7 +32,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait as Wait
 from teena.models.canvas_site_roles import CanvasSiteRoles
-from teena.models.user import User
+from teena.models.person import Person
 from teena.pages.canvas.canvas_settings_page import CanvasSettingsPage
 from teena.test_utils import utils
 
@@ -388,7 +388,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
                     student = next(filter(lambda st: st.uid == uid, students))
                     user = deepcopy(student)
                 else:
-                    user = User({
+                    user = Person({
                         'uid': uid,
                         'canvas_id': canvas_id,
                         'sid': sid,

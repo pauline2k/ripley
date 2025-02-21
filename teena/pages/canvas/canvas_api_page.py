@@ -35,7 +35,7 @@ class CanvasApiPage(Page):
     # Site sections
 
     def get_course_site_sis_section_ids(self, site):
-        self.navigate_to(f"{utils.canvas_base_url()}/api/v1/courses/{site.site_id}/sections?per_page=100")
+        self.navigate_to(f'{utils.canvas_base_url()}/api/v1/courses/{site.site_id}/sections?per_page=100')
         ids = []
         for section in self.parse_json():
             if section['sis_section_id']:
@@ -50,7 +50,7 @@ class CanvasApiPage(Page):
 
     def get_external_tools(self, account, site=None):
         path = f'courses/{site.site_id}' if site else f'accounts/{account}'
-        self.navigate_to(f"{utils.canvas_base_url()}/api/v1/{path}/external_tools?per_page=50")
+        self.navigate_to(f'{utils.canvas_base_url()}/api/v1/{path}/external_tools?per_page=50')
         return self.parse_json()
 
     def get_tool_id(self, tool, site=None):
@@ -75,9 +75,9 @@ class CanvasApiPage(Page):
         parsed = self.get_external_tools(tool.account, site)
         installation = None
         for t in parsed:
-            if t['url'] == f"{utils.ripley_prod_base_url()}/api/lti/{tool.path}":
+            if t['url'] == f'{utils.ripley_prod_base_url()}/api/lti/{tool.path}':
                 pytest.exit(f'{tool.name} is pointed at Production, quitting')
-            elif t['url']  == f"{utils.ripley_base_url()}/api/lti/{tool.path}":
+            elif t['url'] == f'{utils.ripley_base_url()}/api/lti/{tool.path}':
                 installation = t
         if tool.navigation:
             enabled = installation and installation[tool.navigation] and installation[tool.navigation]['enabled']
@@ -91,7 +91,7 @@ class CanvasApiPage(Page):
     # Admin users
 
     def get_admin_canvas_id(self, user, canvas_role):
-        self.navigate_to(f"{utils.canvas_base_url()}/api/v1/accounts/{utils.canvas_root_acct()}/admins?per_page=100")
+        self.navigate_to(f'{utils.canvas_base_url()}/api/v1/accounts/{utils.canvas_root_acct()}/admins?per_page=100')
         parsed = self.parse_json()
         objs = [a for a in parsed if a['role'] == canvas_role and a['user'] and a['user']['id']]
         admin = objs[0]
