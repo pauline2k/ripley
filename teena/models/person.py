@@ -23,7 +23,8 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-class User(object):
+
+class Person(object):
 
     def __init__(self, data):
         self.data = data
@@ -115,3 +116,20 @@ class User(object):
     @username.setter
     def username(self, value):
         self.data['username'] = value
+
+
+class PersonDemographics(object):
+
+    def __init__(self, is_athlete, gender, is_intl, is_minority, is_transfer):
+        self.is_athlete = is_athlete
+        self.gender = gender
+        self.is_intl = is_intl
+        self.is_minority = is_minority
+        self.is_transfer = is_transfer
+
+
+class PersonWithRole(object):
+
+    def __init__(self, user, role_code):
+        self.user = user
+        self.role_code = role_code

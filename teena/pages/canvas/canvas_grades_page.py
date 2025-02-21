@@ -100,7 +100,8 @@ class CanvasGradesPage(CanvasSettingsPage):
 
     @staticmethod
     def assignment_settings_button(assignment):
-        return By.XPATH, f'//a[contains(@href, "/assignments/{assignment.assignment_id}")]/ancestor::div[contains(@class, "Gradebook__ColumnHeaderContent")]//button'
+        assign_xpath = f'//a[contains(@href, "/assignments/{assignment.assignment_id}")]'
+        return By.XPATH, f'{assign_xpath}/ancestor::div[contains(@class, "Gradebook__ColumnHeaderContent")]//button'
 
     def load_gradebook(self, site):
         try:

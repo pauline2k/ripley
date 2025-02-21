@@ -23,40 +23,56 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-import logging
-import os
 
-ADMIN_UID = '123456'
+class Course(object):
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-BASE_URL = 'https://ripley-qa.ets.berkeley.edu'
-BASE_URL_PROD = 'https://the.prod.url.edu'
+    def __init__(self, data):
+        self.data = data
 
-BROWSER = 'chrome'
-BROWSER_BINARY_PATH = '/path/to/chrome'
-BROWSER_HEADLESS = False
+    @property
+    def code(self):
+        return self.data.get('code')
 
-CANVAS_BASE_URL = 'https://ucberkeley.test.instructure.com'
-CANVAS_QA_ACCOUNT_ID = 123456
+    @code.setter
+    def code(self, value):
+        self.data['code'] = value
 
-COURSE_TEMPLATE_DEPT = 'LAW'
+    @property
+    def sections(self):
+        return self.data.get('sections')
 
-CLICK_SLEEP = 0.5
+    @sections.setter
+    def sections(self, value):
+        self.data['sections'] = value
 
-E_GRADES_SITE_IDS = ['123', '456', '789']
-E_GRADES_STUDENT_COUNT = 10
+    @property
+    def sis_id(self):
+        return self.data.get('sis_id')
 
-LOGGING_LOCATION = 'teena.log'
-LOGGING_LEVEL = logging.INFO
+    @sis_id.setter
+    def sis_id(self, value):
+        self.data['sis_id'] = value
 
-NEWT_SITE_IDS = ['123', '456', '789']
+    @property
+    def teachers(self):
+        return self.data.get('teachers')
 
-TERM_CODE = '2025-B'
-TERM_NAME = 'Spring 2025'
-TERM_SIS_ID = '2252'
+    @teachers.setter
+    def teachers(self, value):
+        self.data['teachers'] = value
 
-TESTING = True
+    @property
+    def term(self):
+        return self.data.get('term')
 
-TIMEOUT_SHORT = 20
-TIMEOUT_MEDIUM = 120
-TIMEOUT_LONG = 500
+    @term.setter
+    def term(self, value):
+        self.data['term'] = value
+
+    @property
+    def title(self):
+        return self.data.get('title')
+
+    @title.setter
+    def title(self, value):
+        self.data['title'] = value
