@@ -284,8 +284,9 @@ class Page(object):
         app.logger.info(f'Navigating to {url}')
         self.driver.get(url)
 
-    def when_url_contains(self, string):
-        Wait(self.driver, utils.get_medium_timeout()).until(ec.url_contains(string))
+    def when_url_contains(self, string, timeout=None):
+        wait = timeout or utils.get_medium_timeout()
+        Wait(self.driver, wait).until(ec.url_contains(string))
 
     def reload_page(self):
         self.driver.refresh()
