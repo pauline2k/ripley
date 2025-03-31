@@ -39,9 +39,10 @@ BROWSER_HEADLESS = False
 CANVAS_BASE_URL = 'https://ucberkeley.test.instructure.com'
 CANVAS_QA_ACCOUNT_ID = 123456
 
-COURSE_TEMPLATE_DEPT = 'LAW'
-
 CLICK_SLEEP = 0.5
+
+COURSE_PREFIXES = ['ECON C', 'CHEM 1A', 'LAW']
+COURSE_TEMPLATE_DEPT = 'LAW'
 
 E_GRADES_SITE_IDS = ['123', '456', '789']
 E_GRADES_STUDENT_COUNT = 10
@@ -54,6 +55,15 @@ NEWT_SITE_IDS = ['123', '456', '789']
 TERM_CODE = '2025-B'
 TERM_NAME = 'Spring 2025'
 TERM_SIS_ID = '2252'
+
+TEST_USERS = [
+    {'uid': '123', 'canvas_id': '456', 'email': 'c@a.edu', 'full_name': 'Catherine of Aragon', 'role': 'Teacher'},
+    {'uid': '123', 'canvas_id': '456', 'email': 'a@b.edu', 'full_name': 'Anne Boleyn', 'role': 'Lead TA'},
+    {'uid': '123', 'canvas_id': '456', 'email': 'j@s.edu', 'full_name': 'Jane Seymour', 'role': 'Student'},
+    {'uid': '123', 'canvas_id': '456', 'email': 'a@c.edu', 'full_name': 'Anne of Cleves', 'role': 'Reader'},
+    {'uid': '123', 'canvas_id': '456', 'email': 'c@h.edu', 'full_name': 'Catherine Howard', 'role': 'Owner'},
+    {'uid': '123', 'canvas_id': '456', 'email': 'c@p.edu', 'full_name': 'Catherine Parr', 'role': 'Member'},
+]
 
 TESTING = True
 

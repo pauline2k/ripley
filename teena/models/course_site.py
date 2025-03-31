@@ -71,7 +71,7 @@ class CourseSite(object):
 
     @property
     def manual_members(self):
-        return self.data.get('manual_members')
+        return self.data.get('manual_members') or []
 
     @manual_members.setter
     def manual_members(self, value):
@@ -79,7 +79,7 @@ class CourseSite(object):
 
     @property
     def sections(self):
-        return self.data.get('sections')
+        return self.data.get('sections') or []
 
     @sections.setter
     def sections(self, value):

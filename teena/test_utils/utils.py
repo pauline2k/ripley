@@ -28,6 +28,7 @@ import shutil
 import time
 
 from flask import current_app as app
+from teena.models.term import Term
 
 
 # Driver config
@@ -90,6 +91,128 @@ def canvas_official_courses_acct():
 
 def canvas_qa_acct():
     return app.config['CANVAS_QA_ACCOUNT_ID']
+
+
+def e_grades_site_ids():
+    return app.config['E_GRADES_SITE_IDS']
+
+
+def e_grades_student_count():
+    return app.config['E_GRADES_STUDENT_COUNT']
+
+
+def grade_distribution_site_ids():
+    return app.config['NEWT_SITE_IDS']
+
+
+def course_template_dept():
+    return app.config['COURSE_TEMPLATE_DEPT']
+
+
+def mailing_list_suffix():
+    return '-cc-ets-qa' if '-qa' in ripley_base_url() else '-cc-ets-dev'
+
+
+# Terms
+
+
+def current_term():
+    return Term({
+        'code': app.config['TERM_CODE'],
+        'name': app.config['TERM_NAME'],
+        'sis_id': app.config['TERM_SIS_ID'],
+    })
+
+
+def term_name_to_hyphenated_code(term_name):
+    parts = term_name.split()
+    if parts[0] == 'Spring':
+        sem = 'B'
+    elif parts[0] == 'Summer':
+        sem = 'C'
+    else:
+        sem = 'D'
+    return f'{parts[1]}-{sem}'
+
+
+def term_hyphenated_code_to_name(term_code):
+    parts = term_code.split('-')
+    if parts[1] == 'B':
+        season = 'Spring'
+    elif parts[1] == 'C':
+        season = 'Summer'
+    else:
+        season = 'Fall'
+    return f'{season} {parts[0]}'
+
+
+def term_name_to_sis_code(term_name):
+    parts = term_name.split()
+    year_code = f'{parts[1][0]}{parts[1][2:4]}'
+    if parts[0] == 'Spring':
+        season_code = '2'
+    elif parts[0] == 'Summer':
+        season_code = '5'
+    else:
+        season_code = '8'
+    return f'{year_code}{season_code}'
+
+
+def next_term(this_term):
+    term = Term({
+        'sis_id': next_term_sis_id(this_term),
+        'name': next_term_name(this_term),
+    })
+    term.code = term_name_to_hyphenated_code(term.name)
+    return term
+
+
+def next_term_sis_id(this_term):
+    addend = 3 if int(this_term.sis_id) % 10 in [2, 5] else 4
+    return str(int(this_term.sis_id) + addend)
+
+
+def next_term_name(this_term):
+    parts = this_term.name.split()
+    if parts[0] == 'Spring':
+        return f'Summer {parts[1]}'
+    elif parts[0] == 'Summer':
+        return f'Fall {parts[1]}'
+    else:
+        return f'Spring {int(parts[1]) + 1}'
+
+
+def previous_term(this_term):
+    term = Term({
+        'sis_id': previous_term_sis_id(this_term),
+        'name': previous_term_name(this_term),
+    })
+    term.code = term_name_to_hyphenated_code(term.name)
+    return term
+
+
+def previous_term_sis_id(this_term):
+    this_id = int(this_term.sis_id)
+    return str(this_id - (4 if this_id % 10 == 2 else 3))
+
+
+def previous_term_name(this_term):
+    parts = this_term.name.split()
+    if parts[0] == 'Spring':
+        return f'Fall {int(parts[1] - 1)}'
+    elif parts[0] == 'Summer':
+        return f'Spring {parts[1]}'
+    else:
+        return f'Summer {parts[1]}'
+
+
+def terms_since_code_red():
+    term = previous_term(current_term())
+    terms = [term]
+    while int(term.sis_id) > 2168:
+        term = previous_term(term)
+        terms.append(term)
+    return terms
 
 
 # Users
