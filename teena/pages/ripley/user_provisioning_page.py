@@ -40,7 +40,7 @@ class UserProvisioningPage(RipleyPages):
 
     def load_embedded_tool(self):
         app.logger.info('Loading embedded version of the User Provisioning tool')
-        tool_id = RipleyTools.USER_PROVISIONING.tool_id
+        tool_id = RipleyTools.USER_PROVISIONING.value.tool_id
         self.load_tool_in_canvas(f'/accounts/{utils.canvas_root_acct()}/external_tools/{tool_id}')
 
     def enter_uids_and_submit(self, uids_string):

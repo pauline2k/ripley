@@ -25,7 +25,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import time
 
 from flask import current_app as app
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.support.wait import WebDriverWait as Wait
 from teena.models.ripley_tool import RipleyTools
 from teena.pages.canvas.canvas_assignments_page import CanvasAssignmentsPage
 from teena.pages.canvas.canvas_grades_page import CanvasGradesPage
@@ -44,9 +47,17 @@ class CanvasPage(CanvasAssignmentsPage,
     ACCESS_DENIED_MSG = By.XPATH, '//h1[text()="Access Denied"]'
     UNEXPECTED_ERROR_MSG = By.XPATH, '//h1[contains(text(),"Unexpected Error")]'
     UNAUTHORIZED_MSG = By.XPATH, '//h2[contains(text(),"Unauthorized")]'
+    DASHBOARD_CARDS = By.ID, 'DashboardCard_Container'
+    DASHBOARD_PLANNER = By.ID, 'dashboard-planner'
 
     def load_homepage(self):
         self.navigate_to(utils.canvas_base_url())
+
+    def wait_for_homepage_content(self):
+        Wait(self.driver, utils.get_medium_timeout()).until(ec.any_of(
+            ec.presence_of_element_located(self.DASHBOARD_CARDS),
+            ec.presence_of_element_located(self.DASHBOARD_PLANNER),
+        ))
 
     def log_in(self, cal_net_page, username, password):
         self.load_homepage()
@@ -81,9 +92,9 @@ class CanvasPage(CanvasAssignmentsPage,
 
     # LTI links
 
-    MANAGE_SITES_BTN = By.XPATH, f'//a[text()="{RipleyTools.MANAGE_SITES.name}"]'
-    MANAGE_SITES_SETTINGS_LINK = By.XPATH, f'//div[contains(@class, "profile-tray")]//a[contains(text(), "{RipleyTools.MANAGE_SITES.name}")]'
-    USER_PROV_LINK = By.LINK_TEXT, RipleyTools.USER_PROVISIONING.name
+    MANAGE_SITES_BTN = By.XPATH, f'//a[text()="{RipleyTools.MANAGE_SITES.value.name}"]'
+    MANAGE_SITES_SETTINGS_LINK = By.XPATH, f'//div[contains(@class, "profile-tray")]//a[contains(text(), "{RipleyTools.MANAGE_SITES.value.name}")]'
+    USER_PROV_LINK = By.LINK_TEXT, RipleyTools.USER_PROVISIONING.value.name
 
     def click_manage_sites(self):
         self.hide_canvas_footer_and_popups()
@@ -140,6 +151,13 @@ class CanvasPage(CanvasAssignmentsPage,
     COURSE_TITLE = By.ID, 'course_name'
     COURSE_SITE_SIDEBAR = By.ID, 'section-tabs'
 
+    def is_manage_sites_button_present(self):
+        try:
+            self.when_present(self.MANAGE_SITES_BTN, 10)
+            return True
+        except TimeoutException:
+            return False
+
     def create_site(self, site):
         self.wait_for_page_and_click(self.ADD_NEW_COURSE_BTN)
         self.wait_for_element_and_send_keys(self.COURSE_NAME_INPUT, site.title)
@@ -186,7 +204,7 @@ class CanvasPage(CanvasAssignmentsPage,
                 self.wait_for_element_and_click((By.LINK_TEXT, site.title))
                 self.when_visible(self.PUBLISH_STATUS, utils.get_short_timeout())
                 return self.current_url().split('/')[-1]
-            except TimeoutError:
+            except TimeoutException:
                 if tries == max_tries:
                     raise
                 else:

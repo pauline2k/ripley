@@ -26,6 +26,7 @@ import time
 
 from flask import current_app as app
 import polling2
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from teena.pages.canvas.canvas_settings_page import CanvasSettingsPage
 from teena.test_utils import utils
@@ -51,7 +52,8 @@ class CanvasGradesPage(CanvasSettingsPage):
                 app.logger.info('Clicking gradebook settings')
                 self.wait_for_page_and_click(self.GB_SETTINGS_BTN)
                 self.when_visible(self.GRADE_POSTING_POLICY_TAB, utils.get_short_timeout())
-            except TimeoutError:
+                break
+            except TimeoutException:
                 if tries == max_tries:
                     raise
 
@@ -107,7 +109,7 @@ class CanvasGradesPage(CanvasSettingsPage):
         try:
             self.navigate_to(f'{utils.canvas_base_url()}/courses/{site.site_id}/gradebook')
             self.when_present(self.E_GRADES_EXPORT_LINK, utils.get_short_timeout())
-        except TimeoutError:
+        except TimeoutException:
             if 'Individual View' in self.title():
                 app.logger.info('Individual view is present, switching to gradebook view')
                 self.wait_for_element_and_click(self.INDIV_VIEW_INPUT)
@@ -165,7 +167,8 @@ class CanvasGradesPage(CanvasSettingsPage):
                 polling2.poll(
                     lambda: self.elements(self.GB_STUDENT_LINK)[0].get_dom_attribute('data-student_id') == user.canvas_id,
                     step=2)
-            except TimeoutError:
+                break
+            except TimeoutException:
                 if tries == max_tries:
                     raise
                 else:
@@ -178,7 +181,7 @@ class CanvasGradesPage(CanvasSettingsPage):
             self.when_visible(self.STUDENT_SEARCH_INPUT, utils.get_medium_timeout())
             try:
                 self.when_present(self.GB_TTL, utils.get_short_timeout())
-            except TimeoutError:
+            except TimeoutException:
                 app.logger.info('Timed out waiting for gradebook totals')
             if not self.is_present(self.GB_TTL):
                 self.pull_gradebook_totals_forward()
@@ -191,7 +194,7 @@ class CanvasGradesPage(CanvasSettingsPage):
                 'grade': grade.replace('−', '-'),
                 'un_posted': self.is_present(self.GB_UNPOSTED_MSG),
             }
-        except TimeoutError:
+        except TimeoutException:
             return None
 
     # Final grade override

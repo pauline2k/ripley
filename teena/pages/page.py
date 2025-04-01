@@ -250,7 +250,7 @@ class Page(object):
                 return o
             elif f'secondary-option-{option_str.lower()}' == o.get_dom_attribute('id'):
                 return o
-            elif o.get_dom_attribute('id').endswith(f'-{option_str.lower()}'):
+            elif o.get_dom_attribute('id') and o.get_dom_attribute('id').endswith(f'-{option_str.lower()}'):
                 return o
 
     # PAGE TITLE AND HEADING

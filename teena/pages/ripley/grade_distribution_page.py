@@ -26,6 +26,7 @@ import math
 import time
 
 from flask import current_app as app
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from teena.models.ripley_tool import RipleyTools
 from teena.pages.ripley.ripley_pages import RipleyPages
@@ -44,7 +45,7 @@ class GradeDistributionPage(RipleyPages):
 
     @staticmethod
     def embedded_tool_path(course_site):
-        return f'/courses/{course_site.site_id}/external_tools/{RipleyTools.NEWT.tool_id}'
+        return f'/courses/{course_site.site_id}/external_tools/{RipleyTools.NEWT.value.tool_id}'
 
     def hit_embedded_tool_url(self, course_site):
         self.navigate_to(f'{utils.canvas_base_url()}{self.embedded_tool_path(course_site)}')
@@ -152,7 +153,7 @@ class GradeDistributionPage(RipleyPages):
         xpath = f'//tr[contains(@id, "grade-distribution-demo-table-row")][contains(., "{term.name}")]'
         try:
             self.when_visible((By.XPATH, xpath), 10)
-        except TimeoutError:
+        except TimeoutException:
             pass
         data = {
             'term': term.name,

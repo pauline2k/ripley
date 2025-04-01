@@ -199,7 +199,7 @@ def previous_term_sis_id(this_term):
 def previous_term_name(this_term):
     parts = this_term.name.split()
     if parts[0] == 'Spring':
-        return f'Fall {int(parts[1] - 1)}'
+        return f'Fall {int(parts[1]) - 1}'
     elif parts[0] == 'Summer':
         return f'Spring {parts[1]}'
     else:
@@ -227,6 +227,10 @@ def get_admin_username():
 
 def get_admin_password():
     return os.getenv('PASSWORD')
+
+
+def get_oski_uid():
+    return app.config['OSKI_UID']
 
 
 # Test configs and utils

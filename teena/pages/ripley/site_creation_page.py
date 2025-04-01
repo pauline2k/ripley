@@ -24,6 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from flask import current_app as app
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from teena.models.ripley_tool import RipleyTools
 from teena.pages.ripley.ripley_pages import RipleyPages
@@ -37,7 +38,7 @@ class SiteCreationPage(RipleyPages):
 
     def load_embedded_tool(self, user):
         app.logger.info('Loading embedded version of Create Course Site tool')
-        self.load_tool_in_canvas(f'/users/{user.canvas_id}/external_tools/{RipleyTools.MANAGE_SITES.tool_id}')
+        self.load_tool_in_canvas(f'/users/{user.canvas_id}/external_tools/{RipleyTools.MANAGE_SITES.value.tool_id}')
 
     def wait_for_site_id(self, course_site):
         tries = utils.get_long_timeout()
@@ -46,7 +47,8 @@ class SiteCreationPage(RipleyPages):
                 tries -= 1
                 self.when_url_contains(f'{utils.canvas_base_url()}/courses', 1)
                 self.switch_to_default_content()
-            except TimeoutError:
+                break
+            except TimeoutException:
                 if self.is_present(self.SIS_IMPORT_ERROR):
                     app.logger.info('Site provisioning failed')
                     raise

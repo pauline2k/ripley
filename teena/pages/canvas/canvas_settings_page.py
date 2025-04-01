@@ -26,6 +26,7 @@ import re
 import time
 
 from flask import current_app as app
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
@@ -161,7 +162,7 @@ class CanvasSettingsPage(CanvasApiPage):
         # Sometimes updates require a couple attempts
         try:
             self.update_course_settings()
-        except TimeoutError:
+        except TimeoutException:
             self.update_course_settings()
 
     # SIS imports
@@ -253,7 +254,7 @@ class CanvasSettingsPage(CanvasApiPage):
         self.hide_canvas_footer_and_popups()
 
     def get_ripley_tool_dev_keys(self, tools):
-        self.navigate_to(f'{utils.canvas_base_url()}/accounts/#{utils.canvas_root_acct()}/developer_keys')
+        self.navigate_to(f'{utils.canvas_base_url()}/accounts/{utils.canvas_root_acct()}/developer_keys')
         self.wait_for_page_and_click(self.SHOW_DEV_KEYS_BTN)
         for tool in tools:
             self.when_present(self.dev_key(tool), utils.get_medium_timeout())
@@ -262,6 +263,8 @@ class CanvasSettingsPage(CanvasApiPage):
     def add_ripley_tools(self, tools, site=None):
         installed = []
         for tool in tools:
+            app.logger.info(f'Tool {vars(tool)}')
+            tool.set_account()
             if self.is_tool_installed_and_enabled(tool, site):
                 installed.append(tool)
         to_install = list(set(tools) - set(installed))
@@ -281,7 +284,7 @@ class CanvasSettingsPage(CanvasApiPage):
             try:
                 self.when_present(self.ADD_TOOL_BTN, 3)
                 self.element(self.ADD_TOOL_BTN).click()
-            except TimeoutError:
+            except TimeoutException:
                 app.logger.info('No install confirm button this time')
             if site:
                 self.enable_tool(t, site)
