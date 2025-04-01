@@ -27,6 +27,7 @@ import time
 
 from flask import current_app as app
 import polling2
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.select import Select
@@ -81,7 +82,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
                             user.canvas_id = canvas_id
                             app.logger.info(f'Canvas ID is {user.canvas_id}')
                             break
-                    except TimeoutError:
+                    except TimeoutException:
                         app.logger.info(f'Unable to find Canvas ID for UID {user.uid}')
 
     # Add users (Canvas)
@@ -135,7 +136,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
                 try:
                     self.search_user_by_canvas_id(user)
                     self.when_present(self.user_row(user), 1)
-                except TimeoutError:
+                except TimeoutException:
                     users_missing.append(user)
         app.logger.info(f'Users who need to be added are {[u.uid for u in users_missing]}')
         return users_missing
@@ -164,7 +165,8 @@ class CanvasPeoplePage(CanvasSettingsPage):
                 self.hide_canvas_footer_and_popups()
                 self.wait_for_element_and_click(self.NEXT_BTN)
                 self.wait_for_users(users)
-            except TimeoutError:
+                break
+            except TimeoutException:
                 if tries == max_tries:
                     raise
                 else:
@@ -355,7 +357,8 @@ class CanvasPeoplePage(CanvasSettingsPage):
                             self.elements(self.WAITLIST_ENROLLMENT_ROW)) >= ttl_count,
                         step=utils.get_short_timeout(),
                     )
-                except TimeoutError:
+                    break
+                except TimeoutException:
                     if tries == max_tries:
                         raise
 

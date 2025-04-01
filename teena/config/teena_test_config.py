@@ -52,14 +52,6 @@ class TeenaTestConfig(object):
         self.test_id = f'{calendar.timegm(dt.now().timetuple())}'
 
     @property
-    def admin(self):
-        return self.data.get('admin')
-
-    @admin.setter
-    def admin(self, value):
-        self.data['admin'] = value
-
-    @property
     def canvas_admin(self):
         return self.data.get('canvas_admin')
 
@@ -406,7 +398,7 @@ class TeenaTestConfig(object):
             self.set_real_test_course_users(site)
 
     def configure_single_site(self, canvas_page, canvas_api_page, non_teachers, site=None):
-        canvas_page.add_ripley_tools(RipleyTools.__members__)
+        canvas_page.add_ripley_tools([t.value for t in RipleyTools])
         # Set an existing site id as an environment variable or pass an existing site object or create a new site object
         site_id = os.getenv('SITE') or (site and site.site_id)
         if site_id:

@@ -50,7 +50,7 @@ class EGradesPage(RipleyPages):
 
     @staticmethod
     def embedded_tool_path(course_site):
-        return f'/courses/#{course_site.site_id}/external_tools/{RipleyTools.E_GRADES.tool_id}'
+        return f'/courses/#{course_site.site_id}/external_tools/{RipleyTools.E_GRADES.value.tool_id}'
 
     def hit_embedded_tool_url(self, course_site):
         self.navigate_to(f'{utils.canvas_base_url()}{self.embedded_tool_path(course_site)}')

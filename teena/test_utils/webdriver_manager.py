@@ -47,13 +47,15 @@ class WebDriverManager(object):
             p.set_preference(key='devtools.jsonview.enabled', value=False)
             options = Foptions()
             options.profile = p
-            options.headless = _headless
+            if _headless:
+                options.add_argument('-headless')
             driver = webdriver.Firefox(options=options)
         elif _browser == 'safari':
             driver = webdriver.Safari()
         else:
             options = Coptions()
             options.binary_location = utils.get_browser_chrome_binary_path()
+            options.add_argument('--allow-third-party-cookies')
             if _headless:
                 options.add_argument('--headless=new')
             prefs = {
@@ -76,6 +78,8 @@ class WebDriverManager(object):
         if driver.name == 'chrome':
             log = driver.get_log('browser')
             messages = list(map(lambda mess: mess['message'], log))
+            excluded = ['cloudfront.net', 'prod.ally']
             for message in messages:
-                app.logger.info(f'Possible JS error {message}')
+                if not any(e in message for e in excluded):
+                    app.logger.info(f'Possible JS error {message}')
             return messages

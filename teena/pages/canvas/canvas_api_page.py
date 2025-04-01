@@ -54,6 +54,8 @@ class CanvasApiPage(Page):
         return self.parse_json()
 
     def get_tool_id(self, tool, site=None):
+        if not tool.account:
+            tool.set_account()
         max_tries = utils.get_short_timeout()
         tries = 0
         while tries <= max_tries:
@@ -65,6 +67,7 @@ class CanvasApiPage(Page):
                         tool.tool_id = t['id']
                         app.logger.info(f'{tool.name} tool id is {tool.tool_id}')
                 assert tool.tool_id
+                break
             except AssertionError:
                 if tries == max_tries:
                     raise
@@ -72,6 +75,8 @@ class CanvasApiPage(Page):
                     time.sleep(5)
 
     def is_tool_installed_and_enabled(self, tool, site=None):
+        if not tool.account:
+            tool.set_account()
         parsed = self.get_external_tools(tool.account, site)
         installation = None
         for t in parsed:

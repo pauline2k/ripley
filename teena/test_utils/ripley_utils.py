@@ -617,7 +617,7 @@ def get_project_grad_student():
                     student.student_profile_index.uid,
                     student.student_profile_index.first_name,
                     student.student_profile_index.last_name,
-                    student.student_profile_index.email_address
+                    student.student_profile_index.email_address AS email
                FROM student.student_profile_index
                JOIN sis_data.edo_basic_attributes
                  ON sis_data.edo_basic_attributes.ldap_uid = student.student_profile_index.uid

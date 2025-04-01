@@ -26,7 +26,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from flask import current_app as app
 from selenium.webdriver.common.by import By
 from teena.pages.page import Page
-from teena.test_utils import ripley_utils
 from teena.test_utils import utils
 
 
@@ -56,7 +55,7 @@ class RipleyPages(Page):
 
     def load_tool_in_canvas(self, path):
         self.navigate_to(f'{utils.canvas_base_url()}{path}')
-        self.switch_to_canvas_iframe(ripley_utils.ripley_base_url())
+        self.switch_to_canvas_iframe(utils.ripley_base_url())
 
     AUTH_CHECK_FAILED_MSG = By.XPATH, '//div[contains(text(), "Authorization check failed.")]'
     ERROR_MSG = By.ID, 'error-message'

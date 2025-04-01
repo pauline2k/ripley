@@ -46,7 +46,7 @@ from teena.test_utils.webdriver_manager import WebDriverManager
 
 os.environ['RIPLEY_ENV'] = 'teena'  # noqa
 
-_app = create_app()
+_app = create_app(routes=False, jobs=False)
 
 ctx = _app.app_context()
 ctx.push()

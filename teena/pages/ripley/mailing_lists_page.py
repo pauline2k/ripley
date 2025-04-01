@@ -72,7 +72,7 @@ class MailingListsPage(RipleyPages):
 
     @staticmethod
     def embedded_tool_path():
-        return f'/accounts/{utils.canvas_admin_acct()}/external_tools/{RipleyTools.MAILING_LISTS.tool_id}'
+        return f'/accounts/{utils.canvas_admin_acct()}/external_tools/{RipleyTools.MAILING_LISTS.value.tool_id}'
 
     def hit_embedded_tool_url(self):
         self.navigate_to(f'{utils.canvas_base_url()}{self.embedded_tool_path()}')

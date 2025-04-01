@@ -36,7 +36,7 @@ from teena.test_utils import utils
 
 class RosterPhotosPage(RipleyPages):
 
-    ROSTER_PHOTOS_LINK = By.LINK_TEXT, RipleyTools.ROSTER_PHOTOS.name
+    ROSTER_PHOTOS_LINK = By.LINK_TEXT, RipleyTools.ROSTER_PHOTOS.value.name
 
     SEARCH_INPUT = By.ID, 'roster-search'
     SECTION_SELECT = By.ID, 'section-select'
