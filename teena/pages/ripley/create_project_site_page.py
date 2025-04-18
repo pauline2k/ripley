@@ -41,7 +41,7 @@ class CreateProjectSitePage(CourseSectionsTables, SiteCreationPage):
 
     def enter_site_name(self, name):
         app.logger.info(f'Entering project site name {name}')
-        self.wait_for_element_and_send_keys(self.SITE_NAME_INPUT, name)
+        self.wait_for_element_clear_and_send_keys(self.SITE_NAME_INPUT, name)
 
     def create_project_site(self, name):
         app.logger.info('Creating a project site')

@@ -49,7 +49,7 @@ def get_cs_course_id_from_catalog_id(term, catalog_id_prefix):
                LIMIT 1"""
     app.logger.info(sql)
     results = data_loch.safe_execute_rds(sql)
-    return results[0]['cs_course_id']
+    return results[0]['cs_course_id'] if results else None
 
 
 def get_cs_course_id_from_section_id(term, section_id):
@@ -197,7 +197,7 @@ def _get_test_course_section_data(term, cs_course_id):
             'is_primary': r['is_primary'],
             'label': f"{r['format']} {r['number']} {mode}",
             'location': re.sub(r'\s+', ' ', location),
-            'primary_assoc_ids': r['primary_associated_section_id'],
+            'primary_assoc_id': r['primary_associated_section_id'],
             'schedule': schedule,
             'title': r['title'],
         })
@@ -206,7 +206,7 @@ def _get_test_course_section_data(term, cs_course_id):
 
 def _section_data_to_sections(sections_data, instructors):
     sections = []
-    grouped = groupby(sections_data, key=lambda s: s['section_id'])
+    grouped = [list(result) for key, result in groupby(sections_data, key=lambda s: s['section_id'])]
     for sec_group in grouped:
         teachers = []
         locations = []
@@ -282,7 +282,7 @@ def expected_student_section_data(site, specific_sections=None):
     for section in sections:
         for enroll in section.enrollments:
             student_data.append({
-                'uid': enroll.user.uid,
+                'uid': enroll.student.uid,
                 'role': ('student' if enroll.status == 'E' else 'waitlist student'),
                 'section_id': enroll.section_id,
             })
@@ -445,14 +445,13 @@ def results_to_enrollments(course, results):
         enrollments.append(SectionEnrollment({
             'student': student,
             'grade': r['grade'],
-            'grading_basis': r['grading_basis'],
             'section_id': str(r['sis_section_id']),
             'status': r['status'],
         }))
-    enrollments = list(set(enrollments))
     for section in course.sections:
+        section.enrollments = []
         for enroll in enrollments:
-            if enroll.section_id == section.section_id:
+            if enroll.section_id == str(section.section_id):
                 section.enrollments.append(enroll)
 
 
@@ -523,16 +522,15 @@ def results_to_newt_enrollments(course, results):
             'sid': r['sid'],
         })
         enrollments.append(SectionEnrollment({
-            'user': student,
+            'student': student,
             'grade': r['grade'],
-            'grading_basis': r['grading_basis'],
             'section_id': r['sis_section_id'],
             'status': r['status'],
         }))
-    enrollments = list(set(enrollments))
     for section in course.sections:
+        section.enrollments = []
         for enroll in enrollments:
-            if enroll.section_id == section.section_id:
+            if enroll.section_id == str(section.section_id):
                 section.enrollments.append(enroll)
 
 

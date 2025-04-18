@@ -64,7 +64,7 @@ class CanvasSettingsPage(CanvasApiPage):
 
     def edit_course_name(self, site):
         self.load_course_settings(site)
-        self.wait_for_element_and_send_keys(self.COURSE_NAME_EDIT_INPUT, site.title)
+        self.wait_for_element_clear_and_send_keys(self.COURSE_NAME_EDIT_INPUT, site.title)
         self.wait_for_element_and_click(self.COURSE_DETAILS_UPDATE_BTN)
         self.when_present(self.UPDATE_COURSE_SUCCESS, utils.get_short_timeout())
 
@@ -277,7 +277,7 @@ class CanvasSettingsPage(CanvasApiPage):
             self.wait_for_page_and_click(self.ADD_APP_LINK)
             self.wait_for_select_and_click_option(self.CONFIG_TYPE, 'By Client ID')
             time.sleep(1)
-            self.wait_for_element_and_send_keys(self.CLIENT_ID_INPUT, t.dev_key)
+            self.wait_for_element_clear_and_send_keys(self.CLIENT_ID_INPUT, t.dev_key)
             self.wait_for_element_and_click(self.SUBMIT_BTN)
             self.wait_for_element_and_click(self.INSTALL_BTN)
             # Sometimes a confirm dialog appears

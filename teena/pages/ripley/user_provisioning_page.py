@@ -45,5 +45,5 @@ class UserProvisioningPage(RipleyPages):
 
     def enter_uids_and_submit(self, uids_string):
         app.logger.info(f'Entering string to import: {uids_string}')
-        self.wait_for_element_and_send_keys(self.UID_INPUT, uids_string)
+        self.wait_for_element_clear_and_send_keys(self.UID_INPUT, uids_string)
         self.wait_for_element_and_click(self.IMPORT_BUTTON)

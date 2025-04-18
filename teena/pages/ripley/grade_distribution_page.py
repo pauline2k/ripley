@@ -189,7 +189,7 @@ class GradeDistributionPage(RipleyPages):
 
     def choose_prior_enrollment_course(self, course_code):
         app.logger.info(f'Entering course name {course_code}')
-        self.wait_for_element_and_send_keys(self.PRIOR_ENROLLMENT_COURSE_INPUT, course_code)
+        self.wait_for_element_clear_and_send_keys(self.PRIOR_ENROLLMENT_COURSE_INPUT, course_code)
         self.hit_tab()
         self.wait_for_element_and_click(self.PRIOR_ENROLLMENT_COURSE_ADD_BUTTON)
         self.when_present(self.prior_enrollments_msg(course_code), utils.get_medium_timeout())

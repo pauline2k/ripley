@@ -162,7 +162,7 @@ class CanvasGradesPage(CanvasSettingsPage):
                 self.wait_for_element(self.STUDENT_SEARCH_INPUT, utils.get_medium_timeout())
                 if self.is_present(self.GB_REMOVE_BTN):
                     self.element(self.GB_REMOVE_BTN).click()
-                self.wait_for_element_and_type_chars(self.STUDENT_SEARCH_INPUT, user.full_name)
+                self.wait_for_element_remove_and_type_chars(self.STUDENT_SEARCH_INPUT, user.full_name)
                 self.hit_enter()
                 polling2.poll(
                     lambda: self.elements(self.GB_STUDENT_LINK)[0].get_dom_attribute('data-student_id') == user.canvas_id,
@@ -251,7 +251,7 @@ class CanvasGradesPage(CanvasSettingsPage):
         for i in range(15):
             self.scroll_to_element(self.elements(self.GRID_ROW_CELL)[-1])
         self.wait_for_element_and_click(self.GRADE_OVERRIDE_CELL)
-        self.wait_for_element_and_type_chars(self.GRADE_OVERRIDE_INPUT, grade)
+        self.wait_for_element_remove_and_type_chars(self.GRADE_OVERRIDE_INPUT, grade)
         time.sleep(utils.get_click_sleep())
         self.hit_enter()
         time.sleep(utils.get_click_sleep())

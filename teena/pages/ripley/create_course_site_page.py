@@ -80,7 +80,7 @@ class CreateCourseSitePage(CourseSectionsTables, SiteCreationPage):
             teacher = course_site.course.teachers[0]
             app.logger.info(f'Searching by instructor UID {teacher.uid}')
             self.wait_for_element_and_click(self.SWITCH_TO_INSTRUCTOR)
-            self.wait_for_element_and_send_keys(self.INSTRUCTOR_UID, teacher.uid)
+            self.wait_for_element_clear_and_send_keys(self.INSTRUCTOR_UID, teacher.uid)
             self.wait_for_element_and_click(self.AS_INSTRUCTOR_BUTTON)
             self.choose_term(course_site.course)
 
@@ -91,7 +91,7 @@ class CreateCourseSitePage(CourseSectionsTables, SiteCreationPage):
             time.sleep(1)
             ccn_list = [str(section.section_id) for section in course_site.sections]
             app.logger.info(f'CCN list is {ccn_list}')
-            self.wait_for_element_and_send_keys(self.CCN_LIST, ', '.join(ccn_list))
+            self.wait_for_element_clear_and_send_keys(self.CCN_LIST, ', '.join(ccn_list))
             self.wait_for_element_and_click(self.REVIEW_CCNS_BUTTON)
         else:
             app.logger.info('Searching as the instructor')
@@ -167,10 +167,10 @@ class CreateCourseSitePage(CourseSectionsTables, SiteCreationPage):
         self.when_present(self.SITE_NAME_INPUT, utils.get_short_timeout())
 
     def enter_site_name(self, string):
-        self.wait_for_element_and_send_keys(self.SITE_NAME_INPUT, string)
+        self.wait_for_element_remove_chars_send_keys(self.SITE_NAME_INPUT, string)
 
     def enter_site_abbreviation(self, string):
-        self.wait_for_element_and_send_keys(self.SITE_ABBREVIATION, string)
+        self.wait_for_element_remove_chars_send_keys(self.SITE_ABBREVIATION, string)
 
     def enter_site_titles(self, course):
         site_abbrev = f'QA bCourses Test {utils.get_test_identifier()}'
@@ -190,7 +190,7 @@ class CreateCourseSitePage(CourseSectionsTables, SiteCreationPage):
 
     def provision_course_site(self, course_site):
         self.load_embedded_tool(course_site.course.teachers[0])
-        self.click_create_site()
+        self.click_create_course_site()
         self.search_for_course(course_site)
         self.expand_available_course_sections(course_site.course, course_site.sections[0])
         if course_site.sections == course_site.course.sections:

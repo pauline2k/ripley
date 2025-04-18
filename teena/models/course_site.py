@@ -112,7 +112,7 @@ class CourseSite(object):
     def _sections_student_count_by_enroll_status(self, status):
         sids = []
         for section in self.sections:
-            sids.extend([e.sid for e in section.enrollments if e.status == status])
+            sids.extend([e.student.sid for e in section.enrollments if e.status == status])
         return len(list(set(sids)))
 
     def expected_student_count(self):
@@ -121,6 +121,12 @@ class CourseSite(object):
     # TODO account for students both confirmed and waitlisted
     def expected_wait_list_count(self):
         return self._sections_student_count_by_enroll_status('W')
+
+    def expected_student_sids(self):
+        sids = []
+        for section in self.sections:
+            sids.extend([e.student.sid for e in section.enrollments])
+        return list(set(sids))
 
     def expected_teacher_count(self):
         instructors = []
