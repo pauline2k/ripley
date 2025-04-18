@@ -45,7 +45,7 @@ class CanvasAssignmentsPage(CanvasSettingsPage):
     def create_assignment(self, site, assignment):
         app.logger.info(f'Creating assignment named {assignment.title}')
         self.navigate_to(f'{utils.canvas_base_url()}/courses/{site.site_id}/assignments/new')
-        self.wait_for_element_and_send_keys(self.ASSIGNMENT_NAME_INPUT, assignment.title)
+        self.wait_for_element_clear_and_send_keys(self.ASSIGNMENT_NAME_INPUT, assignment.title)
         self.wait_for_element_and_click(self.ONLINE_URL_CBX)
         self.wait_for_element_and_click(self.ONLINE_UPLOAD_CBX)
         self.scroll_to_bottom()

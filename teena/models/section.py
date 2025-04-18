@@ -55,7 +55,7 @@ class Section(object):
 
     @property
     def enrollments(self):
-        return self.data.get('enrollments') or []
+        return self.data.get('enrollments')
 
     @enrollments.setter
     def enrollments(self, value):

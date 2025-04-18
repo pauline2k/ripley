@@ -30,7 +30,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from teena.models.ripley_tool import RipleyTools
 from teena.pages.ripley.ripley_pages import RipleyPages
-from teena.test_utils import ripley_utils
 from teena.test_utils import utils
 
 
@@ -52,7 +51,7 @@ class RosterPhotosPage(RipleyPages):
 
     @staticmethod
     def embedded_tool_path(course_site):
-        return f'/courses/{course_site.site_id}/external_tools/{RipleyTools.ROSTER_PHOTOS.tool_id}'
+        return f'/courses/{course_site.site_id}/external_tools/{RipleyTools.ROSTER_PHOTOS.value.tool_id}'
 
     def hit_embedded_tool_url(self, course_site):
         self.navigate_to(f'{utils.canvas_base_url()}{self.embedded_tool_path(course_site)}')
@@ -64,11 +63,25 @@ class RosterPhotosPage(RipleyPages):
     def click_roster_photos_link(self):
         app.logger.info('Clicking Roster Photos link')
         self.wait_for_page_and_click(self.ROSTER_PHOTOS_LINK)
-        self.switch_to_canvas_iframe(ripley_utils.ripley_base_url())
+        self.switch_to_canvas_iframe(utils.ripley_base_url())
 
     def wait_for_photos_to_load(self):
         self.when_not_visible(self.WAIT_FOR_LOAD_MSG, utils.get_medium_timeout())
         self.when_present(self.ROSTER_PHOTO, utils.get_short_timeout())
+
+    def wait_for_placeholder_count(self, expected_ct):
+        tries = utils.get_short_timeout()
+        while tries > 0:
+            try:
+                tries -= 1
+                time.sleep(1)
+                assert len(self.elements(self.ROSTER_PHOTO_PLACEHOLDER)) >= expected_ct
+                break
+            except AssertionError:
+                if tries == 0:
+                    app.logger.info(
+                        f'Expected {expected_ct} photos, got {len(self.elements(self.ROSTER_PHOTO_PLACEHOLDER))}')
+                    raise
 
     def section_options(self):
         sel = Select(self.element(self.SECTION_SELECT))
@@ -76,7 +89,7 @@ class RosterPhotosPage(RipleyPages):
 
     def filter_by_string(self, string):
         app.logger.info(f'Filtering roster by {string}')
-        self.wait_for_element_and_send_keys(self.SEARCH_INPUT, string)
+        self.wait_for_element_remove_and_type_chars(self.SEARCH_INPUT, string)
         time.sleep(1)
 
     def filter_by_section(self, section):
@@ -92,7 +105,7 @@ class RosterPhotosPage(RipleyPages):
     def export_roster(self, course_site):
         app.logger.info(f'Downloading roster CSV for course site {course_site.site_id}')
         parsed = self.download_csv(self.EXPORT_ROSTER_LINK)
-        return [r['student_id'] for r in parsed]
+        return [r['Student ID'] for r in parsed]
 
     def all_sids(self):
         return self.els_text_if_exist(self.ROSTER_SID, 'Student ID:')

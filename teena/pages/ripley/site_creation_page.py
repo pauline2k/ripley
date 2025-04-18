@@ -96,5 +96,5 @@ class SiteCreationPage(RipleyPages):
     def enter_site_and_manage(self, course_site):
         app.logger.info(f'Entering site {course_site.site_id} and continuing')
         self.wait_for_element_and_click(self.MANAGE_SECTIONS_LINK)
-        self.wait_for_element_and_send_keys(self.MANAGE_SECTIONS_SITE_INPUT, course_site.site_id)
+        self.wait_for_element_clear_and_send_keys(self.MANAGE_SECTIONS_SITE_INPUT, course_site.site_id)
         self.wait_for_element_and_click(self.GO_NEXT_BUTTON)

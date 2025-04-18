@@ -53,7 +53,7 @@ class CourseSectionsTables(Page):
         return By.XPATH, f'{self.available_course_heading_xpath(course)}{path}'
 
     def available_sections_table_xpath(self, course, section):
-        path = f'/ancestor::button/following-sibling::div//table[contains(., "{section.id}")]'
+        path = f'/ancestor::button/following-sibling::div//table[contains(., "{section.section_id}")]'
         return f'{self.available_course_heading_xpath(course)}{path}'
 
     def available_sections_table(self, course, section):

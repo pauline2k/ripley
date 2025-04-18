@@ -44,15 +44,15 @@ class CalNetPage(Page):
         self.wait_for_title_contains('Authentication Service')
         if username and password:
             app.logger.info(f'{username} is logging in')
-            self.wait_for_element_and_send_keys(self.USERNAME_INPUT, username)
-            self.wait_for_element_and_send_keys(self.PASSWORD_INPUT, password)
+            self.wait_for_element_clear_and_send_keys(self.USERNAME_INPUT, username)
+            self.wait_for_element_clear_and_send_keys(self.PASSWORD_INPUT, password)
             self.wait_for_element_and_click(self.SUBMIT_BUTTON)
         else:
             if self.headless:
                 pytest.exit('Browser is running in headless mode, manual login is not supported')
             else:
                 app.logger.info('Waiting for manual login')
-                self.wait_for_element_and_send_keys(self.USERNAME_INPUT, 'PLEASE LOG IN MANUALLY')
+                self.wait_for_element_clear_and_send_keys(self.USERNAME_INPUT, 'PLEASE LOG IN MANUALLY')
         tries = 0
         max_tries = utils.get_long_timeout()
         while tries <= max_tries:

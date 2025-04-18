@@ -83,7 +83,7 @@ class MailingListsPage(RipleyPages):
 
     def search_for_list(self, search_term):
         app.logger.info(f'Searching for mailing list for course site {search_term}')
-        self.wait_for_element_and_send_keys(self.SITE_ID_INPUT, search_term)
+        self.wait_for_element_clear_and_send_keys(self.SITE_ID_INPUT, search_term)
         self.wait_for_element_and_click(self.GET_LIST_BUTTON)
 
     @staticmethod
@@ -98,7 +98,7 @@ class MailingListsPage(RipleyPages):
 
     def enter_custom_list_name(self, name):
         app.logger.info(f'Entering mailing list name {name}')
-        self.wait_for_element_and_send_keys(self.LIST_NAME_INPUT, name)
+        self.wait_for_element_clear_and_send_keys(self.LIST_NAME_INPUT, name)
         self.wait_for_element_and_click(self.REGISTER_LIST_BUTTON)
 
     def click_update_memberships(self):

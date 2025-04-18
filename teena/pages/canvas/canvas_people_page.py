@@ -61,7 +61,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
         return By.XPATH, f'//td[text()="{user.sis_id}" or text()="UID:{user.uid}"]/preceding-sibling::th/a'
 
     def search_user_by_canvas_id(self, user):
-        self.wait_for_element_and_send_keys(self.USER_SEARCH_INPUT, user.canvas_id)
+        self.wait_for_element_clear_and_send_keys(self.USER_SEARCH_INPUT, user.canvas_id)
         time.sleep(utils.get_click_sleep())
 
     def set_canvas_ids(self, users):
@@ -71,7 +71,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
                 app.logger.info(f'Getting Canvas ID for {user.uid}')
                 for string in [user.email, user.uid]:
                     try:
-                        self.wait_for_element_and_type_chars(self.USER_SEARCH_INPUT, string)
+                        self.wait_for_element_clear_and_send_keys(self.USER_SEARCH_INPUT, string)
                         if string == user.email:
                             loc = self.user_result_link_by_email(user)
                         else:
@@ -152,7 +152,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
                 self.load_users_page(site)
                 self.wait_for_element_and_click(self.ADD_PEOPLE_BTN)
                 self.wait_for_element_and_click(self.ADD_USER_BY_UID_INPUT)
-                self.wait_for_element_and_send_keys(self.USER_LIST_INPUT, ', '.join(uids))
+                self.wait_for_element_clear_and_send_keys(self.USER_LIST_INPUT, ', '.join(uids))
                 self.wait_for_element_and_click(self.USER_ROLE_SELECT)
                 role_opt = next(filter(lambda el: el.text == role, self.elements(self.USER_OPT)))
                 role_opt.click()
@@ -186,7 +186,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
     def add_invalid_uid(self):
         self.wait_for_page_and_click(self.ADD_PEOPLE_BTN)
         self.wait_for_element_and_click(self.ADD_USER_BY_UID_INPUT)
-        self.wait_for_element_and_send_keys(self.USER_LIST_INPUT, '123456')
+        self.wait_for_element_clear_and_send_keys(self.USER_LIST_INPUT, '123456')
         self.wait_for_element_and_click(self.NEXT_BTN)
 
     # Add user (Ripley)
@@ -197,7 +197,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
         app.logger.info('Clicking Find a Person to Add button')
         self.wait_for_element_and_click(self.ADD_PEOPLE_BTN)
         self.wait_for_page_and_click(self.FIND_PERSON_TO_ADD_LINK)
-        # TODO - add Ripley base URL self.switch_to_canvas_iframe()
+        self.switch_to_canvas_iframe(utils.ripley_base_url())
 
     # Remove users
 
@@ -251,14 +251,14 @@ class CanvasPeoplePage(CanvasSettingsPage):
             else:
                 app.logger.info(f'Resetting user {user.uid} email to {user.email}')
                 self.wait_for_element_and_click(self.EDIT_USER_LINK)
-                self.wait_for_element_and_send_keys(self.USER_EMAIL_INPUT, user.email)
+                self.wait_for_element_clear_and_send_keys(self.USER_EMAIL_INPUT, user.email)
                 self.wait_for_element_and_click(self.UPDATE_DETAILS_BTN)
                 self.when_present(self.DEFAULT_EMAIL, utils.get_short_timeout())
             self.when_visible(self.USER_LOGIN, utils.get_short_timeout())
             if 'inactive' in self.element(self.USER_LOGIN).text:
                 app.logger.info(f'Reactivating UID {user.uid}')
                 self.wait_for_element_and_click(self.EDIT_USER_LOGIN_LINK)
-                self.wait_for_element_and_send_keys(self.USER_LOGIN_INPUT, user.uid)
+                self.wait_for_element_clear_and_send_keys(self.USER_LOGIN_INPUT, user.uid)
                 self.wait_for_element_and_click(self.UPDATE_USER_LOGIN_BTN)
                 self.wait_for_text_in_element(self.USER_LOGIN, user.uid)
 

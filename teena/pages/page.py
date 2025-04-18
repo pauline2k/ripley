@@ -103,13 +103,13 @@ class Page(object):
 
     def is_present(self, locator):
         try:
-            app.logger.info(f'Checking existence of element at {locator}')
             self.element(locator).size
             return True
         except (AttributeError, exceptions.NoSuchElementException, exceptions.StaleElementReferenceException):
             return False
 
     def when_present(self, locator, timeout):
+        app.logger.info(f'Awaiting element at {locator}')
         Wait(self.driver, timeout).until(ec.presence_of_element_located(locator))
 
     def when_not_present(self, locator, timeout):
@@ -143,6 +143,13 @@ class Page(object):
             method=ec.presence_of_element_located(locator),
             message=f'Failed wait for presence_of_element_located: {str(locator)}',
         )
+
+    def wait_for_either_element(self, locators, timeout):
+        app.logger.info(f'Waiting for element at either {locators[0]} or {locators[1]}')
+        Wait(self.driver, timeout).until(ec.any_of(
+            ec.presence_of_element_located(locators[0]),
+            ec.presence_of_element_located(locators[1]),
+        ))
 
     def wait_for_text_in_element(self, locator, string):
         tries = 0
@@ -204,13 +211,19 @@ class Page(object):
         self.wait_for_element(locator, utils.get_short_timeout())
         self.click_element(locator)
 
-    def wait_for_element_and_send_keys(self, locator, string):
+    def wait_for_element_clear_and_send_keys(self, locator, string):
+        self.wait_for_element_and_click(locator)
+        self.element(locator).clear()
+        if string:
+            self.element(locator).send_keys(string)
+
+    def wait_for_element_remove_chars_send_keys(self, locator, string):
         self.wait_for_element_and_click(locator)
         self.remove_chars(locator)
         if string:
             self.element(locator).send_keys(string)
 
-    def wait_for_element_and_type_chars(self, locator, string):
+    def wait_for_element_remove_and_type_chars(self, locator, string):
         self.wait_for_element_and_click(locator)
         self.remove_chars(locator)
         self.enter_chars(locator, string)

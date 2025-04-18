@@ -24,13 +24,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 import calendar
 from datetime import datetime as dt
-import os
 
 from flask import current_app as app
 from teena.models.course import Course
 from teena.models.course_site import CourseSite
 from teena.models.person import Person
-from teena.models.ripley_tool import RipleyTools
 from teena.models.term import Term
 from teena.test_utils import ripley_utils
 from teena.test_utils import utils
@@ -58,6 +56,14 @@ class TeenaTestConfig(object):
     @canvas_admin.setter
     def canvas_admin(self, value):
         self.data['canvas_admin'] = value
+
+    @property
+    def course_site(self):
+        return self.data.get('course_site')
+
+    @course_site.setter
+    def course_site(self, value):
+        self.data['course_site'] = value
 
     @property
     def course_sites(self):
@@ -213,7 +219,8 @@ class TeenaTestConfig(object):
         return site
 
     def rosters(self):
-        self.set_real_test_course_users()
+        self.get_single_test_site()
+        self.set_real_test_course_users(self.course_site)
 
     def user_provisioning(self):
         self.set_real_test_course_users()
@@ -254,26 +261,6 @@ class TeenaTestConfig(object):
                 break
         return ta_course
 
-    def get_courses_for_multi_course_site(self, courses):
-        # For testing a course site containing multiple courses
-        primary_sections = []
-        for co in courses:
-            if co.term == self.current_term:
-                for se in co.sections:
-                    if se.is_primary and se.instructors_with_roles:
-                        primary_sections.append(se)
-        primary_sections.sort(key=lambda s: len(s.enrollments))
-        i_with_r = [p.instructor_with_roles for p in primary_sections[0:2]]
-        instructors = [i.user for i in i_with_r]
-        uniq_instructors = list(set(instructors))
-        return Course({
-            'code': primary_sections[0].course,
-            'multi_course': True,
-            'sections': primary_sections[0:2],
-            'teachers': uniq_instructors,
-            'term': self.current_term,
-        })
-
     def get_sis_test_courses(self):
         prefixes = app.config['COURSE_PREFIXES']
         courses = [ripley_utils.get_test_course(self.current_term, p) for p in prefixes]
@@ -283,12 +270,8 @@ class TeenaTestConfig(object):
         ta_course = self.get_course_for_ta_only_site(courses)
         if ta_course:
             courses.append(ta_course)
-        # Create a pseudo course where sections from different real courses will inhabit the same site
-        multi_course = self.get_courses_for_multi_course_site(courses)
-        if multi_course:
-            courses.append(multi_course)
-        for cou in courses:
-            ripley_utils.get_course_enrollment(cou)
+        for course in courses:
+            ripley_utils.get_course_enrollment(course)
         return courses
 
     # COURSE SITES
@@ -300,7 +283,7 @@ class TeenaTestConfig(object):
             primaries = [sec for sec in course.sections if sec.is_primary]
             has_template = utils.course_template_dept() in course.code
             # Workflow in admin tool is by instructor UID or by CCN list
-            workflow = 'uid' if len(primaries) > 1 or not primaries and not course.multi_course else 'ccn'
+            workflow = 'uid' if len(primaries) > 1 or not primaries else 'ccn'
             course_sites.append(CourseSite({
                 'abbreviation': f'{self.test_id} {course.term.name} {course.code}',
                 'course': course,
@@ -325,7 +308,7 @@ class TeenaTestConfig(object):
                 # Ditch sections not associated with the instructor since they shouldn't appear
                 primary_ids = []
                 for s in site.course.sections:
-                    users = [i_and_r.user for i_and_r in s.instructor_with_roles]
+                    users = [i_and_r.user for i_and_r in s.instructors_with_roles]
                     if s.is_primary and site.course.teachers[0] in users:
                         primary_ids.append(s.section_id)
                 for s in site.course.sections:
@@ -334,38 +317,33 @@ class TeenaTestConfig(object):
 
             app.logger.info(f'Course: {site.course.term.name} {site.course.code} workflow {site.create_site_workflow}')
             app.logger.info(f'Instructor: {site.course.teachers[0].uid}')
-            app.logger.info(f'Course sections: {[se.section_id for se in site.course.sections]}')
-            app.logger.info(f'Site sections: {[sect.section_id for sect in site.sections]}')
+            app.logger.info(f'Course sections: {[cs.section_id for cs in site.course.sections]}')
+            app.logger.info(f'Site sections: {[ss.section_id for ss in site.sections]}')
         self.course_sites = course_sites
 
     def get_single_test_site(self, section_ids=None, opts=None):
-        course_site = None
-        if os.getenv('SITE'):
-            course_site = CourseSite({
-                'site_id': str(os.getenv('SITE')),
-            })
-        else:
-            self.get_multiple_test_sites()
-            for site in self.course_sites:
-                sections = site.course.sections
-                primaries = [s for s in sections if s.is_primary]
-                secondaries = [s for s in sections if not s.is_primary]
-                if primaries and secondaries:
-                    if opts and opts['multi_primary']:
-                        if len(primaries) > 1:
-                            course_site = site
-                    else:
-                        if len(primaries) == 1:
-                            course_site = site
-        if course_site:
+        self.get_multiple_test_sites()
+        for site in self.course_sites:
+            sections = site.course.sections
+            primaries = [s for s in sections if s.is_primary]
+            secondaries = [s for s in sections if not s.is_primary]
+            if primaries and secondaries:
+                if opts and opts['multi_primary']:
+                    if len(primaries) > 1:
+                        self.course_site = site
+                        break
+                else:
+                    if len(primaries) == 1:
+                        self.course_site = site
+                        break
+        if self.course_site:
             if section_ids:
-                self.get_existing_site_data(course_site, section_ids)
-            for section in course_site.course.sections:
+                self.get_existing_site_data(self.course_site, section_ids)
+            for section in self.course_site.course.sections:
                 if section.is_primary:
                     section.include_in_site = True
-            course_site.create_site_workflow = 'self'
-            course_site.course.teachers = [ripley_utils.get_primary_instructors(course_site)[0]]
-            return course_site
+            self.course_site.create_site_workflow = 'uid'
+            self.course_site.course.teachers = [ripley_utils.get_primary_instructors(self.course_site)[0]]
         else:
             raise
 
@@ -396,22 +374,6 @@ class TeenaTestConfig(object):
         self.course_sites = [CourseSite({'site_id': site_id}) for site_id in site_ids]
         for site in self.course_sites:
             self.set_real_test_course_users(site)
-
-    def configure_single_site(self, canvas_page, canvas_api_page, non_teachers, site=None):
-        canvas_page.add_ripley_tools([t.value for t in RipleyTools])
-        # Set an existing site id as an environment variable or pass an existing site object or create a new site object
-        site_id = os.getenv('SITE') or (site and site.site_id)
-        if site_id:
-            section_ids = canvas_api_page.get_course_site_sis_section_ids(site_id)
-            if site:
-                self.get_existing_site_data(site, section_ids)
-            else:
-                site = self.get_single_test_site(section_ids, opts={'multi_primary': True})
-        teacher = ripley_utils.get_primary_instructors(site)[0] or site.course.teachers[0]
-        members = non_teachers + [teacher]
-        canvas_page.set_canvas_ids(members)
-        canvas_api_page.get_admin_canvas_id(self.canvas_admin, 'Support Admin')
-        return site, teacher
 
     # USERS
 

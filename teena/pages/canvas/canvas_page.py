@@ -160,8 +160,8 @@ class CanvasPage(CanvasAssignmentsPage,
 
     def create_site(self, site):
         self.wait_for_page_and_click(self.ADD_NEW_COURSE_BTN)
-        self.wait_for_element_and_send_keys(self.COURSE_NAME_INPUT, site.title)
-        self.wait_for_element_and_send_keys(self.REF_CODE_INPUT, site.abbreviation)
+        self.wait_for_element_clear_and_send_keys(self.COURSE_NAME_INPUT, site.title)
+        self.wait_for_element_clear_and_send_keys(self.REF_CODE_INPUT, site.abbreviation)
         self.wait_for_element_and_click(self.CREATE_COURSE_BTN)
         self.when_visible(self.ADD_COURSE_SUCCESS, utils.get_medium_timeout())
 
@@ -189,6 +189,17 @@ class CanvasPage(CanvasAssignmentsPage,
         members_to_add = members or site.manual_members
         self.add_users(site, members_to_add)
 
+    def configure_single_site(self, test):
+        self.add_ripley_tools([t.value for t in RipleyTools])
+        # If testing with an existing course site, find out what's in it
+        if test.course_site.site_id:
+            section_ids = self.get_course_site_sis_section_ids(test.course_site.site_id)
+            test.get_existing_site_data(test.course_site, section_ids)
+        self.set_canvas_ids(test.course_site.manual_members)
+        test.teachers = ripley_utils.get_primary_instructors(test.course_site) or test.course_site.course.teachers
+        self.set_canvas_ids(test.teachers)
+        self.get_admin_canvas_id(test.canvas_admin, 'Support Admin')
+
     SEARCH_COURSE_INPUT = By.XPATH, '//input[@placeholder="Search courses..."]'
     SEARCH_COURSE_BTN = By.XPATH, '//input[@id="course_name"]/following-sibling::button'
 
@@ -200,7 +211,7 @@ class CanvasPage(CanvasAssignmentsPage,
                 tries += 1
                 app.logger.info(f'Searching for {site.title}')
                 self.load_sub_account(sub_account)
-                self.wait_for_element_and_send_keys(self.SEARCH_COURSE_INPUT, site.title)
+                self.wait_for_element_clear_and_send_keys(self.SEARCH_COURSE_INPUT, site.title)
                 self.wait_for_element_and_click((By.LINK_TEXT, site.title))
                 self.when_visible(self.PUBLISH_STATUS, utils.get_short_timeout())
                 return self.current_url().split('/')[-1]
@@ -242,13 +253,13 @@ class CanvasPage(CanvasAssignmentsPage,
         app.logger.info(f'Adding section {section.sis_id}')
         self.load_course_settings(site)
         self.wait_for_element_and_click(self.SECTIONS_TAB)
-        self.wait_for_element_and_send_keys(self.SECTION_NAME, section.sis_id)
+        self.wait_for_element_clear_and_send_keys(self.SECTION_NAME, section.sis_id)
         self.wait_for_element_and_click(self.ADD_SECTION_BTN)
 
         # Add SIS id to section
         self.wait_for_page_and_click((By.LINK_TEXT, section.sis_id))
         self.wait_for_page_and_click(self.EDIT_SECTION_LINK)
-        self.wait_for_element_and_send_keys(self.SECTION_SIS_ID, section.sis_id)
+        self.wait_for_element_clear_and_send_keys(self.SECTION_SIS_ID, section.sis_id)
         self.wait_for_element_and_click(self.UPDATE_SECTION_BTN)
         self.when_not_present(self.UPDATE_SECTION_BTN, utils.get_medium_timeout())
 
