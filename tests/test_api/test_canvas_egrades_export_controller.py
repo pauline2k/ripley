@@ -28,6 +28,7 @@ import requests_mock
 from tests.util import override_config, register_canvas_uris
 
 admin_uid = '10000'
+lead_ta_uid = '80000'
 no_canvas_account_uid = '10001'
 not_enrolled_uid = '20000'
 reader_uid = '60000'
@@ -44,24 +45,31 @@ class TestEgradeExportOptions:
         assert response.status_code == expected_status_code, failed_assertion_message
         return response.json
 
-    def test_unauthorized(self, client, fake_auth):
+    def test_unauthorized(self, app, client, fake_auth):
         """Denies unauthorized users."""
-        users = {
-            'anonymous': None,
-            'no_canvas_account': no_canvas_account_uid,
-            'not_enrolled': not_enrolled_uid,
-            'reader': reader_uid,
-            'student': student_uid,
-            'teaching_assistant': ta_uid,
-        }
-        for user_type, uid in users.items():
-            if uid:
-                fake_auth.login(canvas_site_id='8876542', uid=no_canvas_account_uid)
-            self._api_egrades_export_options(
-                client,
-                expected_status_code=401,
-                failed_assertion_message=f'Unexpected response status for {user_type} user',
-            )
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['*'],
+                'user': ['*'],
+            }, m)
+            users = {
+                'anonymous': None,
+                'no_canvas_account': no_canvas_account_uid,
+                'not_enrolled': not_enrolled_uid,
+                'reader': reader_uid,
+                'student': student_uid,
+                'teaching_assistant': ta_uid,
+            }
+            for user_type, uid in users.items():
+                if uid:
+                    fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+                self._api_egrades_export_options(
+                    client,
+                    expected_status_code=401,
+                    failed_assertion_message=f'Unexpected response status for {user_type} user',
+                )
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -78,6 +86,20 @@ class TestEgradeExportOptions:
                 'user': [f'profile_{teacher_uid}'],
             }, m)
             fake_auth.login(canvas_site_id=canvas_site_id, uid=teacher_uid)
+            api_json = self._api_egrades_export_options(client)
+            # Verify
+            assert api_json['gradingStandardEnabled'] is True
+
+    def test_lead_ta(self, client, app, fake_auth):
+        """Allows lead TA."""
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['*'],
+                'user': ['*'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=lead_ta_uid)
             api_json = self._api_egrades_export_options(client)
             # Verify
             assert api_json['gradingStandardEnabled'] is True
@@ -113,29 +135,36 @@ class TestEgradesExportPrepare:
         assert response.status_code == expected_status_code
         return response.json
 
-    def test_unauthorized(self, client, fake_auth):
+    def test_unauthorized(self, app, client, fake_auth):
         """Denies unauthorized users."""
-        canvas_site_id = '8876542'
-        users = {
-            'anonymous': None,
-            'no_canvas_account': no_canvas_account_uid,
-            'not_enrolled': not_enrolled_uid,
-            'reader': reader_uid,
-            'student': student_uid,
-            'teaching_assistant': ta_uid,
-        }
-        for user_type, uid in users.items():
-            if uid:
-                fake_auth.login(canvas_site_id=canvas_site_id, uid=no_canvas_account_uid)
-            _api_egrades_export_prepare(
-                client=client,
-                expected_status_code=401,
-                failed_assertion_message=f'Unexpected response status for {user_type} user',
-                grade_type='final',
-                pnp_cutoff='ignore',
-                section_id=32936,
-                term_id=2232,
-            )
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['*'],
+                'user': ['*'],
+            }, m)
+            canvas_site_id = '8876542'
+            users = {
+                'anonymous': None,
+                'no_canvas_account': no_canvas_account_uid,
+                'not_enrolled': not_enrolled_uid,
+                'reader': reader_uid,
+                'student': student_uid,
+                'teaching_assistant': ta_uid,
+            }
+            for user_type, uid in users.items():
+                if uid:
+                    fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+                _api_egrades_export_prepare(
+                    client=client,
+                    expected_status_code=401,
+                    failed_assertion_message=f'Unexpected response status for {user_type} user',
+                    grade_type='final',
+                    pnp_cutoff='ignore',
+                    section_id=32936,
+                    term_id=2232,
+                )
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
@@ -184,25 +213,32 @@ class TestEgradesExportDownload:
         assert response.status_code == expected_status_code, failed_assertion_message
         return response
 
-    def test_unauthorized(self, client, fake_auth):
+    def test_unauthorized(self, app, client, fake_auth):
         """Denies unauthorized users."""
-        users = {
-            'anonymous': None,
-            'no_canvas_account': no_canvas_account_uid,
-            'not_enrolled': not_enrolled_uid,
-            'reader': reader_uid,
-            'student': student_uid,
-            'teaching_assistant': ta_uid,
-        }
-        for user_type, uid in users.items():
-            if uid:
-                fake_auth.login(canvas_site_id='8876542', uid=no_canvas_account_uid)
-            self._api_egrades_download(
-                client,
-                expected_status_code=401,
-                failed_assertion_message=f'Unexpected response status for {user_type} user',
-                job_id=2,
-            )
+        with requests_mock.Mocker() as m:
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_terms'],
+                'course': ['*'],
+                'user': ['*'],
+            }, m)
+            users = {
+                'anonymous': None,
+                'no_canvas_account': no_canvas_account_uid,
+                'not_enrolled': not_enrolled_uid,
+                'reader': reader_uid,
+                'student': student_uid,
+                'teaching_assistant': ta_uid,
+            }
+            for user_type, uid in users.items():
+                if uid:
+                    fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+                self._api_egrades_download(
+                    client,
+                    expected_status_code=401,
+                    failed_assertion_message=f'Unexpected response status for {user_type} user',
+                    job_id=2,
+                )
 
     def test_teacher(self, client, app, fake_auth):
         """Allows teacher."""
