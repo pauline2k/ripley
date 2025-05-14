@@ -156,7 +156,8 @@ class TeenaTestConfig(object):
     # TEST SCRIPT CONFIGURATION
 
     def add_user(self):
-        self.set_real_test_course_users()
+        self.get_single_test_site()
+        self.set_real_test_course_users(self.course_site)
 
     def course_site_creation(self):
         self.get_multiple_test_sites()

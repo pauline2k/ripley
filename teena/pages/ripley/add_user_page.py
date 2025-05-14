@@ -25,6 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from flask import current_app as app
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.select import Select
 from teena.models.ripley_tool import RipleyTools
 from teena.pages.ripley.ripley_pages import RipleyPages
 from teena.test_utils import utils
@@ -33,7 +34,7 @@ from teena.test_utils import utils
 class AddUserPage(RipleyPages):
 
     PAGE_HEADING = By.XPATH, '//h1[text()="Find a Person to Add"]'
-    NO_RESULTS_MSG = By.XPATH, '//div[text()="Your search did not match anyone with a CalNet ID.  Please try again. "]'
+    NO_RESULTS_MSG = By.XPATH, '//div[contains(text(), "Your search did not match anyone with a CalNet ID")]'
     TOO_MANY_RESULTS_MSG = By.XPATH, '//div[contains(text(), "Please refine your search to limit the number of results.")]'
     NO_UID_RESULTS_MSG = By.XPATH, '//div[contains(text(), "Your search did not match anyone with a CalNet ID")]'
     SUCCESS_MSG = By.ID, 'success-message'
@@ -70,6 +71,8 @@ class AddUserPage(RipleyPages):
         app.logger.info('Loading embedded version of Find a Person to Add tool')
         self.load_tool_in_canvas(self.embedded_tool_path(course_site))
 
+    # SEARCH
+
     def search(self, text, option):
         app.logger.info(f'Searching for "{text}" by {option}')
         if option == 'Last Name, First Name':
@@ -79,17 +82,44 @@ class AddUserPage(RipleyPages):
         else:
             loc = self.SEARCH_BY_UID
         self.wait_for_element_and_click(loc)
-        self.wait_for_element_clear_and_send_keys(self.SEARCH_TERM, text)
+        self.wait_for_element_remove_chars_send_keys(self.SEARCH_TERM, text)
         self.wait_for_element_and_click(self.SEARCH_BUTTON)
+
+    def wait_for_no_results(self):
+        self.when_present(self.NO_RESULTS_MSG, utils.get_short_timeout())
+
+    def wait_for_too_many_results(self):
+        self.when_present(self.TOO_MANY_RESULTS_MSG, utils.get_short_timeout())
+
+    # Name
 
     def name_results(self):
         return self.els_text_if_exist(self.RESULT_NAME)
 
+    def wait_for_name_results(self):
+        self.when_present(self.RESULT_NAME, utils.get_short_timeout())
+
+    # UID
+
     def uid_results(self):
         return self.els_text_if_exist(self.RESULT_UID)
 
+    def wait_for_uid_results(self):
+        self.when_present(self.RESULT_UID, utils.get_short_timeout())
+
+    def wait_for_uid_result(self, uid):
+        self.wait_for_uid_results()
+        utils.assert_actual_includes_expected(self.uid_results(), uid)
+
+    # Email
+
     def email_results(self):
         return self.els_text_if_exist(self.RESULT_EMAIL)
+
+    def wait_for_email_results(self):
+        self.when_present(self.RESULT_EMAIL, utils.get_short_timeout())
+
+    # ADD USER
 
     @staticmethod
     def user_checkbox(user):
@@ -97,7 +127,9 @@ class AddUserPage(RipleyPages):
 
     def visible_user_role_options(self):
         self.when_visible(self.USER_ROLE, utils.get_short_timeout())
-        return self.els_text_if_exist(self.USER_ROLE)
+        sel = Select(self.element(self.USER_ROLE))
+        opts = sel.options
+        return [opt.get_dom_attribute('value') for opt in opts]
 
     def visible_section_options(self):
         self.when_visible(self.COURSE_SECTION, utils.get_short_timeout())
