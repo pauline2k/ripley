@@ -26,7 +26,6 @@ from copy import deepcopy
 import time
 
 from flask import current_app as app
-import polling2
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
@@ -51,6 +50,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
     ENROLLMENT_ROLES_SELECT = By.NAME, 'enrollment_role_id'
     SECTION_LABEL = By.CLASS_NAME, 'section'
     USER_SEARCH_INPUT = By.XPATH, '//input[@placeholder="Search people..."]'
+    COURSE_USER_SEARCH_INPUT = By.XPATH, '//input[@placeholder="Search people"]'
 
     @staticmethod
     def user_result_link_by_email(user):
@@ -61,7 +61,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
         return By.XPATH, f'//td[text()="{user.sis_id}" or text()="UID:{user.uid}"]/preceding-sibling::th/a'
 
     def search_user_by_canvas_id(self, user):
-        self.wait_for_element_clear_and_send_keys(self.USER_SEARCH_INPUT, user.canvas_id)
+        self.wait_for_element_clear_and_send_keys(self.COURSE_USER_SEARCH_INPUT, user.canvas_id)
         time.sleep(utils.get_click_sleep())
 
     def set_canvas_ids(self, users):
@@ -275,7 +275,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
 
     @staticmethod
     def user_row(user):
-        return By.XPATH, f'//tr[contains(@id, "{user.canvas_id}")]//td[contains(., "{user.role}")]'
+        return By.XPATH, f'//tr[contains(@id, "{user.canvas_id}")]'
 
     def wait_for_users(self, users):
         self.scroll_to_bottom()
@@ -283,8 +283,8 @@ class CanvasPeoplePage(CanvasSettingsPage):
             app.logger.info(f'Waiting for user row with Canvas id {user.canvas_id}')
             self.when_present((By.XPATH, self.user_row_xpath(user)), utils.get_short_timeout())
 
-    def is_roster_user_present(self, user):
-        return self.is_present(self.user_row(user))
+    def wait_for_user(self, user):
+        self.when_present(self.user_row(user), utils.get_short_timeout())
 
     def roster_user_sections(self, user):
         return self.el_text_if_exists((By.XPATH, f'{self.user_row_xpath(user)}/td[5]'))
@@ -306,7 +306,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
         opts = sel.options
         for role in roles:
             opt = next(filter(lambda el: el.text.startswith(role), opts))
-            count = int(opt.split('(')[-1].replace(')', '')) if opt else 0
+            count = int(opt.text.split('(')[-1].replace(')', '')) if opt else 0
             count_per_role.append({
                 'role': role,
                 'count': count,
@@ -333,6 +333,47 @@ class CanvasPeoplePage(CanvasSettingsPage):
                         app.logger.info('Timed out waiting for enrollment import to finish')
                         raise
 
+    def wait_for_site_member_row_count(self, row_el_locators, expected_count):
+        tries = 0
+        max_tries = int(expected_count / 45)
+        while tries <= max_tries:
+            try:
+                tries += 1
+                els = []
+                for loc in row_el_locators:
+                    els.extend(self.elements(loc))
+                count = len(els)
+                if count >= expected_count:
+                    app.logger.info('All expected rows are already present')
+                    break
+                else:
+                    self.scroll_to_bottom()
+                    time.sleep(3)
+                    wait = 0
+                    max_wait = utils.get_short_timeout()
+                    while wait <= max_wait:
+                        try:
+                            wait += 1
+                            time.sleep(1)
+                            updated_els = []
+                            for loc in row_el_locators:
+                                updated_els.extend(self.elements(loc))
+                            assert len(updated_els) > count
+                            break
+                        except AssertionError:
+                            if wait == max_wait:
+                                break
+                    updated_els = []
+                    for loc in row_el_locators:
+                        updated_els.extend(self.elements(loc))
+                    app.logger.info(f'Visible user count is now {len(updated_els)}')
+                    assert len(updated_els) >= expected_count
+                    break
+            except AssertionError:
+                if tries == max_tries:
+                    app.logger.info('Failed to load all expected course users')
+                    raise
+
     def load_all_students(self, site):
         roles = ['Student', 'Waitlist Student']
         counts = self.user_count_per_role(site, roles)
@@ -343,24 +384,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
         if len(self.elements(self.USER_ROW)) >= ttl_count:
             app.logger.info('All users are visible')
         else:
-            tries = 0
-            max_tries = ttl_count / 45
-            while tries <= max_tries:
-                try:
-                    tries += 1
-                    new_count = len(self.elements(self.USER_ROW))
-                    app.logger.info(f'There are now {new_count} user rows')
-                    self.scroll_to_bottom()
-                    polling2.poll(lambda: len(self.elements(self.USER_ROW)) > new_count, step=utils.get_short_timeout())
-                    polling2.poll(
-                        lambda: len(self.elements(self.STUDENT_ENROLLMENT_ROW)) + len(
-                            self.elements(self.WAITLIST_ENROLLMENT_ROW)) >= ttl_count,
-                        step=utils.get_short_timeout(),
-                    )
-                    break
-                except TimeoutException:
-                    if tries == max_tries:
-                        raise
+            self.wait_for_site_member_row_count([self.USER_ROW], ttl_count)
 
     def visible_users_and_sections(self, site, section=None, enrollments=False):
         self.load_all_students(site)

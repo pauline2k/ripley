@@ -270,7 +270,7 @@ class CanvasPage(CanvasAssignmentsPage,
     ACTIVITY_STREAM_RADIO = By.XPATH, '//span[contains(.,"Course Activity Stream")]/ancestor::label'
     CHOOSE_AND_PUBLISH_BTN = By.XPATH, '//span[contains(.,"Choose and Publish")]/ancestor::button'
     PUBLISH_BTN = By.CLASS_NAME, 'btn-publish'
-    PUBLISH_SITE_BTN = By.XPATH, '//ul[@aria-label="course_publish_menu"]//button[contains(., "Publish")]'
+    PUBLISH_SITE_BTN = By.XPATH, '//div[@aria-label="course_publish_menu"]/button[contains(., "Publish")]'
     PUBLISH_STATUS = By.XPATH, '//button[@data-position-target="course_publish_menu"]'
     PUBLISHED_STATUS = By.XPATH, '//button[contains(., "Published")]'
     UNPUBLISHED_STATUS = By.XPATH, '//button[contains(., "Unpublished")]'

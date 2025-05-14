@@ -157,7 +157,7 @@ class Page(object):
         while tries <= retries:
             tries += 1
             try:
-                assert string in self.element(locator).get_dom_attribute('innerText')
+                assert string in self.element(locator).text
                 break
             except AssertionError:
                 if tries == retries:
@@ -192,6 +192,7 @@ class Page(object):
         time.sleep(utils.get_click_sleep())
         WebDriverManager.get_browser_logs(self.driver)
         try:
+            self.hide_canvas_footer_and_popups()
             self.element(locator).click()
         except (exceptions.ElementClickInterceptedException, exceptions.ElementNotInteractableException) as error:
             app.logger.error(f'Failed to click {locator}, using JS instead - {error}')
@@ -342,6 +343,12 @@ class Page(object):
         time.sleep(utils.get_click_sleep())
 
     # WINDOW MGMT
+
+    def maximize_window(self):
+        self.driver.maximize_window()
+
+    def reduce_window(self):
+        self.driver.set_window_size(500, 700)
 
     def accept_alert(self):
         alert = self.driver.switch_to.alert
