@@ -98,6 +98,12 @@ class Page(object):
             els_text.append(text.strip())
         return els_text
 
+    def is_el_enabled(self, locator):
+        return self.element(locator).is_enabled()
+
+    def is_el_selected(self, locator):
+        return self.element(locator).is_selected()
+
     def el_value(self, locator):
         return self.element(locator).get_dom_attribute('value')
 
@@ -364,14 +370,14 @@ class Page(object):
         self.driver.close()
         self.driver.switch_to.window(self.window_handles()[0])
 
-    def is_external_link_valid(self, locator, expected_page_title):
+    def is_external_link_valid(self, locator, expected_page_title, switch_to_canvas_iframe=False):
         self.wait_for_element_and_click(locator)
         time.sleep(1)
         try:
             windows = self.window_handles()
             if len(windows) > 1:
                 self.switch_to_last_window(windows)
-                self.wait_for_title(expected_page_title)
+                self.wait_for_title_contains(expected_page_title)
                 app.logger.info(f'Found new window with title "{expected_page_title}"')
                 return True
             else:
@@ -384,6 +390,8 @@ class Page(object):
         finally:
             if len(self.window_handles()) > 1:
                 self.close_window_and_switch()
+            if switch_to_canvas_iframe:
+                self.switch_to_canvas_iframe()
 
     # CANVAS IFRAMES
 

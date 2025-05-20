@@ -70,6 +70,7 @@ class CreateCourseSitePage(CourseSectionsTables, SiteCreationPage):
             if 'v-btn--active' in self.element(self.term_button(course.term)).get_dom_attribute('class'):
                 app.logger.info(f'Term {course.term.name} is already selected')
             else:
+                app.logger.info(f'Selecting term {course.term.name}')
                 self.wait_for_element_and_click(self.term_button(course.term))
         else:
             app.logger.info('Only one term exists')
@@ -150,7 +151,7 @@ class CreateCourseSitePage(CourseSectionsTables, SiteCreationPage):
 
     SECTION_ID = By.XPATH, '//td[@class="td-section-id"]'
 
-    def all_section_ids(self):
+    def visible_section_ids(self):
         self.when_present(self.SECTION_ID, 3)
         time.sleep(1)
         els = self.elements(self.SECTION_ID)

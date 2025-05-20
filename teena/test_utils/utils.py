@@ -255,6 +255,9 @@ def is_download_dir_empty():
 
 
 def assert_equivalence(actual, expected):
+    if isinstance(actual, list) and isinstance(expected, list):
+        app.logger.info(f'Missing: {[e for e in expected if e not in actual]}')
+        app.logger.info(f'Unexpected: {[a for a in actual if a not in expected]}')
     if actual != expected:
         app.logger.info(f'Expecting {expected}, got {actual}')
     assert actual == expected

@@ -39,12 +39,12 @@ class CanvasAssignmentsPage(CanvasSettingsPage):
     RELIGIOUS_HOLIDAY_BTN = By.XPATH, '//button[contains(., "Religious Holidays Policy")]'
     RELIGIOUS_HOLIDAY_LINK = By.XPATH, '//a[contains(., "Religious Holiday and Religious Creed Policy")]'
 
-    def load_page(self, site):
-        self.navigate_to(f'{utils.canvas_base_url()}/courses/{site.site_id}/assignments')
+    def load_new_assignment_page(self, site):
+        self.navigate_to(f'{utils.canvas_base_url()}/courses/{site.site_id}/assignments/new')
 
     def create_assignment(self, site, assignment):
         app.logger.info(f'Creating assignment named {assignment.title}')
-        self.navigate_to(f'{utils.canvas_base_url()}/courses/{site.site_id}/assignments/new')
+        self.load_new_assignment_page(site)
         self.wait_for_element_clear_and_send_keys(self.ASSIGNMENT_NAME_INPUT, assignment.title)
         self.wait_for_element_and_click(self.ONLINE_URL_CBX)
         self.wait_for_element_and_click(self.ONLINE_UPLOAD_CBX)

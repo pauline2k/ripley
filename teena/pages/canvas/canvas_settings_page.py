@@ -84,6 +84,7 @@ class CanvasSettingsPage(CanvasApiPage):
     def is_grade_distribution_hidden(self, site):
         self.load_course_settings(site)
         self.when_visible(self.HIDE_GRADE_DISTRIB_CBX, utils.get_short_timeout())
+        time.sleep(1)
         return self.element(self.HIDE_GRADE_DISTRIB_CBX).is_selected()
 
     COURSE_ACCOUNT_LINK = By.XPATH, '//span[@id="course_account_id"]/a'
@@ -95,8 +96,8 @@ class CanvasSettingsPage(CanvasApiPage):
             ec.presence_of_element_located(self.COURSE_ACCOUNT_LINK),
             ec.presence_of_element_located(self.COURSE_ACCOUNT_SELECT),
         ))
-        sel = Select(self.element(self.COURSE_ACCOUNT_SELECT))
         if self.is_present(self.COURSE_ACCOUNT_SELECT):
+            sel = Select(self.element(self.COURSE_ACCOUNT_SELECT))
             acct = sel.first_selected_option.text
         else:
             acct = self.element(self.COURSE_ACCOUNT_LINK).text

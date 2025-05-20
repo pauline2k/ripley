@@ -26,14 +26,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class CanvasSiteRoles(object):
 
-    ROLES = ['Designer',
-             'Lead TA',
-             'Maintainer',
-             'Member',
-             'Observer',
-             'Owner',
-             'Reader',
-             'Student',
-             'TA',
-             'Teacher',
-             'Waitlist Student']
+    COURSE_ROLES = [
+        'Designer',
+        'Lead TA',
+        'Observer',
+        'Reader',
+        'Student',
+        'TA',
+        'Teacher',
+        'Waitlist Student',
+    ]
+
+    PROJECT_ROLES = [
+        'Designer',
+        'Lead TA',
+        'Maintainer',
+        'Member',
+        'Observer',
+        'Owner',
+        'Reader',
+        'Student',
+        'TA',
+        'Teacher',
+        'Waitlist Student',
+    ]

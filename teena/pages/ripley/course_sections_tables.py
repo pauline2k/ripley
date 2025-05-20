@@ -73,6 +73,7 @@ class CourseSectionsTables(Page):
             if self.element(btn_loc).get_dom_attribute('aria-expanded') == 'false':
                 app.logger.info(f'Expanding course section set {idx}')
                 self.wait_for_element_and_click(btn_loc)
+                time.sleep(3)
             else:
                 app.logger.info(f'Course section set {idx} is already expanded')
 
@@ -85,7 +86,7 @@ class CourseSectionsTables(Page):
             app.logger.info(f'Expanding available sections table for {course.code}')
             self.wait_for_element_and_click(self.available_sections_form_button(course))
             self.when_visible(self.available_sections_table(course, section), utils.get_short_timeout())
-            time.sleep(2)
+            time.sleep(3)
 
     def collapse_available_sections(self, course, section):
         if self.is_visible(self.available_sections_table(course, section)):
