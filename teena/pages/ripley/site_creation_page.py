@@ -55,7 +55,7 @@ class SiteCreationPage(RipleyPages):
                 elif tries == 0:
                     app.logger.info('Timed out waiting for site provisioning')
                     raise
-        course_site.site_id = self.current_url().replace(f'{utils.canvas_base_url()}/courses', '')
+        course_site.site_id = self.current_url().replace(f'{utils.canvas_base_url()}/courses/', '')
         app.logger.info(f'Site id is {course_site.site_id}')
 
     # Course site

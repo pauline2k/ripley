@@ -48,7 +48,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
     # Search
 
     ENROLLMENT_ROLES_SELECT = By.NAME, 'enrollment_role_id'
-    SECTION_LABEL = By.CLASS_NAME, 'section'
+    SECTION_LABEL = By.XPATH, '//td[@data-testid="section-column-cell"]/div[@class="section"]'
     USER_SEARCH_INPUT = By.XPATH, '//input[@placeholder="Search people..."]'
     COURSE_USER_SEARCH_INPUT = By.XPATH, '//input[@placeholder="Search people"]'
 
@@ -178,7 +178,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
         self.load_users_page(site)
         users_missing = self.get_missing_users(users_to_add)
         self.activate_users_and_reset_email(users_missing)
-        for role in CanvasSiteRoles.ROLES:
+        for role in CanvasSiteRoles.PROJECT_ROLES:
             users_with_role = [u for u in users_missing if u.role == role]
             if users_with_role:
                 self.add_users_of_role(site, users_with_role, role, section)
@@ -297,10 +297,11 @@ class CanvasPeoplePage(CanvasSettingsPage):
         modes = [el.text.split('(')[-1].replace(')', '') for el in self.elements(self.SECTION_LABEL)]
         return list(set(modes))
 
+    # Uses the Roles select on the page to determine how many of each role are present on the page
     def user_count_per_role(self, site, roles=None):
         self.load_users_page(site)
         self.wait_for_element_and_click(self.ENROLLMENT_ROLES_SELECT)
-        roles = roles or CanvasSiteRoles.ROLES
+        roles = roles or CanvasSiteRoles.COURSE_ROLES
         count_per_role = []
         sel = Select(self.element(self.ENROLLMENT_ROLES_SELECT))
         opts = sel.options
@@ -311,8 +312,10 @@ class CanvasPeoplePage(CanvasSettingsPage):
                 'role': role,
                 'count': count,
             })
+        app.logger.info(f'User count per role: {count_per_role}')
         return count_per_role
 
+    # Waits for the role counts on the Roles select to stabilize, suggesting the SIS import is done
     def wait_for_enrollment_import(self, site, roles=None, expected_count_per_role=None):
         current_count = self.user_count_per_role(site, roles)
         if expected_count_per_role and current_count == expected_count_per_role:
@@ -333,6 +336,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
                         app.logger.info('Timed out waiting for enrollment import to finish')
                         raise
 
+    # Attempts to load the full roster of site members, scrolling down to trigger lazy loading
     def wait_for_site_member_row_count(self, row_el_locators, expected_count):
         tries = 0
         max_tries = int(expected_count / 45)
@@ -398,7 +402,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
             for sec in site.sections:
                 students.extend(sec.enrollments)
         primary_roles = ['Teacher', 'TA', 'Student']
-        other_roles = list(set(CanvasSiteRoles.ROLES) - set(primary_roles))
+        other_roles = list(set(CanvasSiteRoles.COURSE_ROLES) - set(primary_roles))
 
         users_with_sections = []
         for row in rows:
@@ -444,3 +448,17 @@ class CanvasPeoplePage(CanvasSettingsPage):
             if data['user'].role in ['student', 'Waitlist Student']:
                 students.append(data['user'])
         return students
+
+    def visible_user_section_data(self, site):
+        users_with_sections = self.visible_users_and_sections(site)
+        user_data = []
+        for us in users_with_sections:
+            data = {
+                'uid': us['user'].uid,
+                'role': (us['user'].role and us['user'].role.lower()),
+                'section_id': us['section'],
+            }
+            if data not in user_data:
+                user_data.append(data)
+        user_data.sort(key=lambda ud: [ud['uid'], ud['section_id']])
+        return user_data

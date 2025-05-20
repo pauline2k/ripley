@@ -39,14 +39,23 @@ from teena.test_utils import utils
 
 
 def get_cs_course_id_from_catalog_id(term, catalog_id_prefix):
-    sql = f"""SELECT cs_course_id
-                FROM sis_data.edo_sections
-               WHERE sis_term_id = '{term.sis_id}'
-                 AND sis_course_name LIKE '{catalog_id_prefix}%'
-                 AND is_primary IS FALSE
-            GROUP BY cs_course_id
-              HAVING COUNT(*) > 1
-               LIMIT 1"""
+    # If testing Law site templates, don't insist on secondary sections
+    if catalog_id_prefix == app.config['COURSE_TEMPLATE_DEPT']:
+        sql = f"""SELECT cs_course_id
+                    FROM sis_data.edo_sections
+                   WHERE sis_term_id = '{term.sis_id}'
+                     AND sis_course_name LIKE '{catalog_id_prefix}%'
+                GROUP BY cs_course_id
+                   LIMIT 1"""
+    else:
+        sql = f"""SELECT cs_course_id
+                    FROM sis_data.edo_sections
+                   WHERE sis_term_id = '{term.sis_id}'
+                     AND sis_course_name LIKE '{catalog_id_prefix}%'
+                     AND is_primary IS FALSE
+                GROUP BY cs_course_id
+                  HAVING COUNT(*) > 1
+                   LIMIT 1"""
     app.logger.info(sql)
     results = data_loch.safe_execute_rds(sql)
     return results[0]['cs_course_id'] if results else None
@@ -66,7 +75,14 @@ def get_course(term, cs_course_id):
     instructors = get_course_instructors(term, cs_course_id)
     sections_data = _get_test_course_section_data(term, cs_course_id)
     sections = _section_data_to_sections(sections_data, instructors)
+
+    # Course can have multiple primaries, each with different instructor(s). Keep only primaries with same instructor(s).
     primary_sections = [sec for sec in sections if sec.is_primary]
+    secondary_sections = [sec for sec in sections if not sec.is_primary]
+    desired_teacher_uids = [role.user.uid for role in primary_sections[0].instructors_with_roles]
+    primary_sections = get_sections_with_given_instructors(primary_sections, desired_teacher_uids)
+    sections = primary_sections + secondary_sections
+
     teachers = []
     for prim in primary_sections:
         for i_r in prim.instructors_with_roles:
@@ -99,6 +115,17 @@ def get_test_course(term, catalog_id_prefix):
     else:
         app.logger.info(f'No test course found matching course code {catalog_id_prefix} in term {term.sis_id}')
         return None
+
+
+def get_sections_with_given_instructors(sections, instructor_uids):
+    matching_sections = []
+    instructor_uids.sort()
+    for sec in sections:
+        sec_uids = [ir.user.uid for ir in sec.instructors_with_roles]
+        sec_uids.sort()
+        if sec_uids == instructor_uids:
+            matching_sections.append(sec)
+    return matching_sections
 
 
 def get_all_instr_courses_per_cs_id(terms, user, cs_course_id):
@@ -330,7 +357,7 @@ def get_course_instructor_roles(course, instructor):
     roles = []
     for section in instr_sections:
         for inst_role in section.instructors_with_roles:
-            if inst_role.uid == instructor.uid:
+            if inst_role.user.uid == instructor.uid:
                 roles.append(inst_role.role_code)
     roles = list(set(roles))
     return roles

@@ -46,7 +46,6 @@ class TeenaTestConfig(object):
         self.data = data or {}
         self.next_term = utils.next_term(self.current_term)
         self.previous_term = utils.previous_term(self.current_term)
-        self.test_cases = []
         self.test_id = f'{calendar.timegm(dt.now().timetuple())}'
 
     @property
@@ -281,28 +280,26 @@ class TeenaTestConfig(object):
         courses = self.get_sis_test_courses()
         course_sites = []
         for course in courses:
-            primaries = [sec for sec in course.sections if sec.is_primary]
             has_template = utils.course_template_dept() in course.code
-            # Workflow in admin tool is by instructor UID or by CCN list
-            workflow = 'uid' if len(primaries) > 1 or not primaries else 'ccn'
+            idx = courses.index(course)
+            if idx == 0:
+                workflow = 'uid'
+            elif idx == 1:
+                workflow = 'ccn'
+            else:
+                workflow = 'masq'
             course_sites.append(CourseSite({
                 'abbreviation': f'{self.test_id} {course.term.name} {course.code}',
                 'course': course,
                 'create_site_workflow': workflow,
                 'has_template': has_template,
                 'sections': course.sections,
+                'term': course.term,
                 'title': f'{self.test_id} {course.term.name} {course.code}',
             }))
 
-        # Switch half of the UID workflows to 'masq', which means masquerade as the instructor via Canvas rather than Ripley
-        instructor_workflow_sites = [site for site in course_sites if site.create_site_workflow == 'uid']
-        for uid_site in instructor_workflow_sites:
-            if instructor_workflow_sites.index(uid_site) % 2 == 0:
-                uid_site.create_site_workflow = 'masq'
-
         for site in course_sites:
-            if site in instructor_workflow_sites and [section for section in site.sections if section.is_primary]:
-
+            if site.create_site_workflow in ['uid', 'masq'] and [section for section in site.sections if section.is_primary]:
                 # Only use a primary section instructor if testing primary sections
                 site.course.teachers = [ripley_utils.get_primary_instructors(site)[0]]
 
@@ -313,10 +310,11 @@ class TeenaTestConfig(object):
                     if s.is_primary and site.course.teachers[0] in users:
                         primary_ids.append(s.section_id)
                 for s in site.course.sections:
-                    if s.section_id not in primary_ids or not list(set(primary_ids) & set(s.primary_assoc_ids)):
+                    if s.section_id not in primary_ids and not list(set(primary_ids) & set(s.primary_assoc_ids)):
                         site.course.sections.remove(s)
 
-            app.logger.info(f'Course: {site.course.term.name} {site.course.code} workflow {site.create_site_workflow}')
+            app.logger.info(f'Course: {site.course.term.name} {site.course.code}')
+            app.logger.info(f'Workflow: {site.create_site_workflow}')
             app.logger.info(f'Instructor: {site.course.teachers[0].uid}')
             app.logger.info(f'Course sections: {[cs.section_id for cs in site.course.sections]}')
             app.logger.info(f'Site sections: {[ss.section_id for ss in site.sections]}')

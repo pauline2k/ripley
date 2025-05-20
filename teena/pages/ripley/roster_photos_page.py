@@ -84,6 +84,7 @@ class RosterPhotosPage(RipleyPages):
                     raise
 
     def section_options(self):
+        self.wait_for_element(self.SECTION_SELECT, utils.get_medium_timeout())
         sel = Select(self.element(self.SECTION_SELECT))
         return [opt.text for opt in sel.options]
 

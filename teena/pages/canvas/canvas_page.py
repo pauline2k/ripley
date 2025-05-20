@@ -99,18 +99,18 @@ class CanvasPage(CanvasAssignmentsPage,
     def click_manage_sites(self):
         self.hide_canvas_footer_and_popups()
         self.wait_for_page_and_click(self.MANAGE_SITES_BTN)
-        self.switch_to_canvas_iframe(ripley_utils.ripley_base_url())
+        self.switch_to_canvas_iframe(utils.ripley_base_url())
 
     def click_manage_sites_settings_link(self):
         self.wait_for_element_and_click(self.PROFILE_LINK)
         time.sleep(1)
         self.wait_for_element_and_click(self.MANAGE_SITES_BTN)
-        self.switch_to_canvas_iframe(ripley_utils.ripley_base_url())
+        self.switch_to_canvas_iframe(utils.ripley_base_url())
 
     def click_user_prov(self):
         app.logger.info('Clicking the link to the User Provisioning tool')
         self.wait_for_page_and_click(self.USER_PROV_LINK)
-        self.switch_to_canvas_iframe(ripley_utils.ripley_base_url())
+        self.switch_to_canvas_iframe(utils.ripley_base_url())
 
     # Customized links
 
@@ -198,6 +198,11 @@ class CanvasPage(CanvasAssignmentsPage,
         self.set_canvas_ids(test.course_site.manual_members)
         test.teachers = ripley_utils.get_primary_instructors(test.course_site) or test.course_site.course.teachers
         self.set_canvas_ids(test.teachers)
+        self.get_admin_canvas_id(test.canvas_admin, 'Support Admin')
+
+    def configure_multiple_sites(self, test):
+        self.add_ripley_tools([t.value for t in RipleyTools])
+        self.set_canvas_ids([test.students[0]])
         self.get_admin_canvas_id(test.canvas_admin, 'Support Admin')
 
     SEARCH_COURSE_INPUT = By.XPATH, '//input[@placeholder="Search courses..."]'
