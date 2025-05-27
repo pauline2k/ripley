@@ -46,6 +46,14 @@ class Section(object):
         self.data['course'] = value
 
     @property
+    def course_title(self):
+        return self.data.get('course_title')
+
+    @course_title.setter
+    def course_title(self, value):
+        self.data['course_title'] = value
+
+    @property
     def cs_course_id(self):
         return self.data.get('cs_course_id')
 

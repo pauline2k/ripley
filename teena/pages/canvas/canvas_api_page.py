@@ -38,13 +38,15 @@ class CanvasApiPage(Page):
         self.navigate_to(f'{utils.canvas_base_url()}/api/v1/courses/{site.site_id}/sections?per_page=100')
         ids = []
         for section in self.parse_json():
-            if section['sis_section_id']:
+            if section.get('sis_section_id'):
                 ids.append(section['sis_section_id'].replace('SEC:', ''))
         return ids
 
     def get_course_site_section_ccns(self, site):
         ids = self.get_course_site_sis_section_ids(site)
-        return [i.split('-')[2] for i in ids]
+        ids = [i.split('-')[2] for i in ids]
+        ids.sort()
+        return ids
 
     # LTI tools
 
