@@ -181,8 +181,7 @@ def get_official_sections(canvas_site_id):
         sis_sections = sort_course_sections(
             data_loch.get_sections(term_id, section_ids) or [],
         )
-    if len(sis_sections) != len(section_ids):
-        app.logger.warning(f'Canvas site ID {canvas_site_id} has {len(section_ids)} sections, but SIS has {len(sis_sections)} sections.')
+        app.logger.info(f'Returned {len(sis_sections)} SIS rows for {len(section_ids)} sections in Canvas site {canvas_site_id}.')
 
     official_sections = []
     for section_id, rows in groupby(sis_sections, lambda s: s['section_id']):
@@ -291,13 +290,28 @@ def uid_from_canvas_login_id(login_id):
 def update_canvas_sections(course, all_section_ids, section_ids_to_remove, section_ids_to_update):
     canvas_sis_term_id = course.term['sis_term_id']
     term = BerkeleyTerm.from_canvas_sis_term_id(canvas_sis_term_id)
-    sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=all_section_ids)
+    sis_sections = data_loch.get_sections(term_id=term.to_sis_term_id(), section_ids=all_section_ids, distinct=True)
     if not (sis_sections and len(sis_sections)):
         raise ResourceNotFoundError(f'No sections found with IDs {", ".join(all_section_ids)}')
 
-    def _section(section):
-        canvas_section_id = None
-        # When removing or updating existing sections, ensure that we are matching SIS section id to the section id
+    section_csv_rows = []
+
+    # sis_sections should come out of the data loch distinct by ID, but we key it into a dictionary to avoid duplication on
+    # unexpected data.
+    sis_sections_by_id = {s['section_id']: s for s in sis_sections}
+    for section in sis_sections_by_id.values():
+
+        def _append_section_csv_row(canvas_section_id):
+            section_csv_rows.append({
+                'section_id': canvas_section_id,
+                'course_id': course.sis_course_id,
+                'name': f"{section['course_name']} {course_section_name(section)}",
+                'status': 'deleted' if section['section_id'] in section_ids_to_remove else 'active',
+                'start_date': None,
+                'end_date': None,
+            })
+
+        # When removing or updating existing sections, ensure that we are matching SIS section id to section(s)
         # already present in the course.
         if section['section_id'] in (section_ids_to_remove + section_ids_to_update):
             canvas_section_id_prefix = get_canvas_section_id(
@@ -306,8 +320,8 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove, secti
             )
             for existing_section in course.get_sections():
                 if existing_section.sis_section_id.startswith(canvas_section_id_prefix):
-                    canvas_section_id = existing_section.sis_section_id
-                    break
+                    _append_section_csv_row(existing_section.sis_section_id)
+
         # When adding new sections, ensure a new unique SIS section id.
         else:
             canvas_section_id = get_canvas_section_id(
@@ -315,17 +329,10 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove, secti
                 term_id=section['term_id'],
                 ensure_unique=True,
             )
-        return {
-            'section_id': canvas_section_id,
-            'course_id': course.sis_course_id,
-            'name': f"{section['course_name']} {course_section_name(section)}",
-            'status': 'deleted' if section['section_id'] in section_ids_to_remove else 'active',
-            'start_date': None,
-            'end_date': None,
-        }
-    sections = [_section(s) for s in sis_sections]
+            _append_section_csv_row(canvas_section_id)
+
     with SisImportCsv.create(fieldnames=['section_id', 'course_id', 'name', 'status', 'start_date', 'end_date']) as sections_csv:
-        sections_csv.writerows(sections)
+        sections_csv.writerows(section_csv_rows)
         sections_csv.filehandle.close()
 
         upload_dated_csv(
@@ -350,7 +357,7 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove, secti
             job.meta['sis_import_id'] = sis_import.id
             job.save_meta()
         update_section_enrollments(
-            all_sections=sections,
+            all_sections=section_csv_rows,
             course=course,
             deleted_section_ids=section_ids_to_remove,
             primary_sections=primary_sections,

@@ -33,6 +33,7 @@ from psycopg2.pool import ThreadedConnectionPool
 from ripley.lib import util
 
 COURSE_NAME_REGEX = r'([A-Z]+)\s([A-Z]?)(\d+)([A-Z]?)([A-Z]?)'
+
 SECTION_COLUMNS = f"""
     ss.sis_term_id AS term_id,
     ss.cs_course_id AS course_id,
@@ -54,6 +55,21 @@ SECTION_COLUMNS = f"""
     ss.instructor_uid,
     ss.instructor_name,
     ss.instructor_role_code,
+    regexp_matches(ss.sis_course_name, '{COURSE_NAME_REGEX}') AS sort_key"""
+
+SECTION_COLUMNS_DISTINCT = f"""
+    DISTINCT
+    ss.sis_term_id AS term_id,
+    ss.cs_course_id AS course_id,
+    ss.dept_name,
+    ss.sis_course_name AS course_name,
+    ss.sis_course_title AS course_title,
+    ss.sis_section_id AS section_id,
+    ss.is_primary,
+    ss.sis_instruction_format AS instruction_format,
+    ss.sis_section_num AS section_number,
+    ss.instruction_mode,
+    ss.session_code,
     regexp_matches(ss.sis_course_name, '{COURSE_NAME_REGEX}') AS sort_key"""
 
 connection_pool = None
@@ -299,12 +315,12 @@ def get_grades_with_enrollments(term_id, course_name, prior_course_name, valid_g
     return safe_execute_rds(sql, **params)
 
 
-def get_sections(term_id, section_ids):
+def get_sections(term_id, section_ids, distinct=False):
     params = {
         'section_ids': section_ids,
         'term_id': term_id,
     }
-    sql = f"""SELECT {SECTION_COLUMNS}
+    sql = f"""SELECT {SECTION_COLUMNS_DISTINCT if distinct else SECTION_COLUMNS}
         FROM sis_data.edo_sections ss
         WHERE sis_section_id = ANY(%(section_ids)s)
         AND sis_term_id = %(term_id)s
