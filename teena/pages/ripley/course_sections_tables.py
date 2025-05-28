@@ -33,11 +33,19 @@ from teena.test_utils import utils
 class CourseSectionsTables(Page):
 
     @staticmethod
+    def available_sections_heading():
+        return By.XPATH, '//h2[text()="Sections Available to Add"]'
+
+    @staticmethod
     def available_course_heading_xpath(course):
         return f'//*[starts-with(text(), "{course.code}")]'
 
+    @staticmethod
+    def available_sections_form_button_xpath(course):
+        return f"//button[starts-with(@id, 'sections-course-{'-'.join(course.code.split()).lower()}-')]"
+
     def available_sections_form_button(self, course):
-        return By.XPATH, f'{self.available_course_heading_xpath(course)}/ancestor::button'
+        return By.XPATH, self.available_sections_form_button_xpath(course)
 
     def available_sections_course_title(self, course):
         path = '/descendant::span[starts-with(text(), "— ") or starts-with(text(), " — ")]'
@@ -80,18 +88,18 @@ class CourseSectionsTables(Page):
     def expand_available_course_sections(self, course, section):
         self.when_present(self.SECTION_PANEL, utils.get_short_timeout())
         self.scroll_to_top()
-        if self.is_visible(self.available_sections_table(course, section)):
+        if self.is_present(self.available_sections_table(course, section)):
             app.logger.info(f'The available sections table is already expanded for {course.code}')
         else:
             app.logger.info(f'Expanding available sections table for {course.code}')
             self.wait_for_element_and_click(self.available_sections_form_button(course))
-            self.when_visible(self.available_sections_table(course, section), utils.get_short_timeout())
+            self.when_present(self.available_sections_table(course, section), utils.get_short_timeout())
             time.sleep(3)
 
     def collapse_available_sections(self, course, section):
-        if self.is_visible(self.available_sections_table(course, section)):
+        if self.is_present(self.available_sections_table(course, section)):
             app.logger.info(f'Collapsing available sections table for {course.code}')
             self.wait_for_element_and_click(self.available_sections_form_button(course))
-            self.when_not_visible(self.available_sections_table(course, section), utils.get_short_timeout())
+            self.when_not_present(self.available_sections_table(course, section), utils.get_short_timeout())
         else:
             app.logger.info(f'The available sections table is already expanded for {course.code}')

@@ -23,6 +23,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+import csv
 import os
 import shutil
 import time
@@ -269,6 +270,18 @@ def assert_actual_includes_expected(actual, expected):
     assert expected in actual
 
 
+def assert_list_items_in_other_list(this_list, other_list):
+    for i in this_list:
+        app.logger.info(f'Checking presence of {i}')
+        assert i in other_list
+
+
+def assert_list_items_not_in_other_list(this_list, other_list):
+    for i in this_list:
+        app.logger.info(f'Checking presence of {i}')
+        assert i not in other_list
+
+
 def assert_existence(actual):
     app.logger.info(f'Expecting {actual} not to be null or empty')
     assert actual
@@ -282,3 +295,11 @@ def assert_non_existence(actual):
 def in_op(arr):
     arr = list(map(lambda i: f"'{i}'", arr))
     return ', '.join(arr)
+
+
+def create_csv(file_name, rows):
+    prepare_download_dir()
+    filepath = os.path.join(default_download_dir(), file_name)
+    with open(filepath, 'w', newline='') as file:
+        csv.writer(file).writerows(rows)
+    return file

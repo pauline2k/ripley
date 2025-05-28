@@ -339,7 +339,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
     # Attempts to load the full roster of site members, scrolling down to trigger lazy loading
     def wait_for_site_member_row_count(self, row_el_locators, expected_count):
         tries = 0
-        max_tries = int(expected_count / 45)
+        max_tries = int(expected_count / 25)
         while tries <= max_tries:
             try:
                 tries += 1

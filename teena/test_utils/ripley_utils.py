@@ -30,7 +30,7 @@ import re
 from flask import current_app as app
 from ripley.externals import data_loch
 from teena.models.course import Course
-from teena.models.person import Person, PersonDemographics, PersonWithRole
+from teena.models.person import Person, PersonWithRole
 from teena.models.section import Section, SectionEnrollment
 from teena.test_utils import utils
 
@@ -71,19 +71,9 @@ def get_cs_course_id_from_section_id(term, section_id):
     return results[0]['cs_course_id']
 
 
-def get_course(term, cs_course_id):
-    instructors = get_course_instructors(term, cs_course_id)
-    sections_data = _get_test_course_section_data(term, cs_course_id)
-    sections = _section_data_to_sections(sections_data, instructors)
-
-    # Course can have multiple primaries, each with different instructor(s). Keep only primaries with same instructor(s).
-    primary_sections = [sec for sec in sections if sec.is_primary]
-    secondary_sections = [sec for sec in sections if not sec.is_primary]
-    desired_teacher_uids = [role.user.uid for role in primary_sections[0].instructors_with_roles]
-    primary_sections = get_sections_with_given_instructors(primary_sections, desired_teacher_uids)
-    sections = primary_sections + secondary_sections
-
+def get_course_from_sections(term, sections):
     teachers = []
+    primary_sections = [sec for sec in sections if sec.is_primary]
     for prim in primary_sections:
         for i_r in prim.instructors_with_roles:
             if i_r.user not in teachers:
@@ -99,14 +89,48 @@ def get_course(term, cs_course_id):
         'sections': sections,
         'teachers': teachers,
         'term': term,
-        'title': sections_data[0]['title'],
+        'title': sections[0].course_title,
     })
 
 
-def get_test_course(term, catalog_id_prefix):
+def get_instructor_term_courses(term, instructor):
+    sql = f"""SELECT sis_section_id,
+                     is_primary
+                FROM sis_data.edo_sections
+               WHERE sis_term_id = '{term.sis_id}'
+                 AND instructor_uid = '{instructor.uid}'"""
+    app.logger.info(sql)
+    results = data_loch.safe_execute_rds(sql)
+    section_ids = [r['sis_section_id'] for r in results]
+
+    primary_section_ids = [r['sis_section_id'] for r in results if r['is_primary']]
+    if primary_section_ids:
+        sql = f"""SELECT sis_section_id,
+                         primary_associated_section_id
+                    FROM sis_data.edo_sections
+                   WHERE sis_term_id = '{term.sis_id}'
+                     AND is_primary IS FALSE
+                     AND primary_associated_section_id IN ({utils.in_op(primary_section_ids)})"""
+        app.logger.info(sql)
+        results = data_loch.safe_execute_rds(sql)
+        section_ids.extend([r['sis_section_id'] for r in results])
+
+    results = _sections_result_from_section_ids(term, section_ids)
+    sections_data = _get_test_course_section_data(results)
+    sections = _section_data_to_sections(sections_data, [instructor])
+
+    course_sections_groups = [list(result) for key, result in groupby(sections, key=lambda s: [s.cs_course_id])]
+    courses = []
+    for group in course_sections_groups:
+        course = get_course_from_sections(term, group)
+        courses.append(course)
+    return courses
+
+
+def get_course_from_catalog_id_prefix(term, catalog_id_prefix):
     cs_id = get_cs_course_id_from_catalog_id(term, catalog_id_prefix)
     if cs_id:
-        course = get_course(term, cs_id)
+        course = _get_course_from_cs_course_id(term, cs_id)
         if course.teachers:
             return course
         else:
@@ -117,35 +141,25 @@ def get_test_course(term, catalog_id_prefix):
         return None
 
 
-def get_sections_with_given_instructors(sections, instructor_uids):
-    matching_sections = []
-    instructor_uids.sort()
-    for sec in sections:
+def _get_course_from_cs_course_id(term, cs_course_id):
+    instructors = get_course_instructors(term, cs_course_id)
+    results = _sections_result_from_cs_course_id(term, cs_course_id)
+    sections_data = _get_test_course_section_data(results)
+    sections = _section_data_to_sections(sections_data, instructors)
+    primary_sections = [sec for sec in sections if sec.is_primary]
+    secondary_sections = [sec for sec in sections if not sec.is_primary]
+
+    # Course can have multiple primaries, each with different instructor(s). Keep only primaries with same instructor(s).
+    desired_teacher_uids = [role.user.uid for role in primary_sections[0].instructors_with_roles]
+    desired_teacher_uids.sort()
+    teacher_primary_sections = []
+    for sec in primary_sections:
         sec_uids = [ir.user.uid for ir in sec.instructors_with_roles]
         sec_uids.sort()
-        if sec_uids == instructor_uids:
-            matching_sections.append(sec)
-    return matching_sections
-
-
-def get_all_instr_courses_per_cs_id(terms, user, cs_course_id):
-    sis_ids = [t.sis_id for t in terms]
-    app.logger.info(f'Checking courses in terms {sis_ids}')
-    sql = f"""SELECT sis_data.edo_sections.sis_term_id
-                FROM sis_data.edo_sections
-               WHERE sis_data.edo_sections.cs_course_id = '{cs_course_id}'
-                 AND sis_data.edo_sections.instructor_uid = '{user.uid}'
-                 AND sis_data.edo_sections.is_primary IS TRUE
-                 AND sis_data.edo_sections.sis_term_id IN ({utils.in_op(sis_ids)})"""
-    app.logger.info(sql)
-    results = data_loch.safe_execute_rds(sql)
-    term_ids = [str(r['sis_term_id'] for r in results)]
-    teaching_terms = [t for t in terms if str(t.sis_id) in term_ids]
-    courses = [get_course(term, cs_course_id) for term in teaching_terms]
-    for course in courses:
-        get_newt_enrollments(course)
-        app.logger.info(f'Instructor UID {user.uid} taught course {cs_course_id} in {course.term.name}')
-    return courses
+        if sec_uids == desired_teacher_uids:
+            teacher_primary_sections.append(sec)
+    sections = teacher_primary_sections + secondary_sections
+    return get_course_from_sections(term, sections)
 
 
 # Sections
@@ -179,13 +193,14 @@ def _translate_schedule_time(time_string):
     if time_string == '00:00' or not time_string:
         return '—'
     else:
-        return f"{datetime.strptime(time_string, '%H:%M').strftime('%l:%M%p')[0:-2]}"
+        return f"{datetime.strptime(time_string, '%H:%M').strftime('%l:%M%p')[:-1]}"
 
 
-def _get_test_course_section_data(term, cs_course_id):
+def _sections_result_from_cs_course_id(term, cs_course_id):
     sql = f"""SELECT sis_section_id AS id,
                      is_primary,
                      primary_associated_section_id,
+                     cs_course_id,
                      sis_course_name AS code,
                      sis_course_title AS title,
                      sis_instruction_format AS format,
@@ -205,19 +220,50 @@ def _get_test_course_section_data(term, cs_course_id):
                      sis_instruction_format DESC,
                      sis_section_num ASC"""
     app.logger.info(sql)
-    results = data_loch.safe_execute_rds(sql)
+    return data_loch.safe_execute_rds(sql)
+
+
+def _sections_result_from_section_ids(term, section_ids):
+    sql = f"""SELECT sis_section_id AS id,
+                     is_primary,
+                     primary_associated_section_id,
+                     cs_course_id,
+                     sis_course_name AS code,
+                     sis_course_title AS title,
+                     sis_instruction_format AS format,
+                     sis_section_num AS number,
+                     instructor_uid,
+                     instructor_role_code,
+                     instruction_mode AS mode,
+                     meeting_location AS location,
+                     meeting_days AS days,
+                     meeting_end_date AS end_date,
+                     meeting_start_time AS start_time,
+                     meeting_end_time AS end_time
+                FROM sis_data.edo_sections
+               WHERE sis_term_id = '{term.sis_id}'
+                 AND sis_section_id IN ({utils.in_op(section_ids)})
+            ORDER BY sis_course_name ASC,
+                     sis_instruction_format DESC,
+                     sis_section_num ASC"""
+    app.logger.info(sql)
+    return data_loch.safe_execute_rds(sql)
+
+
+def _get_test_course_section_data(sections_result):
     sections_data = []
-    for r in results:
+    for r in sections_result:
         mode = _translate_instruction_mode(r['mode'])
         days = _translate_schedule_days(r['days'])
         start = _translate_schedule_time(r['start_time'])
         finish = _translate_schedule_time(r['end_time'])
-        schedule = f'{days} {start.strip()}{finish.strip()}'.strip() if days else '—'
+        schedule = f'{days} {start.strip()}-{finish.strip()}'.strip() if days else '—'
         location = r['location'] or '—'
         sections_data.append({
             'section_id': r['id'],
             'code': r['code'],
-            'cs_course_id': cs_course_id,
+            'course_title': r['title'],
+            'cs_course_id': r['cs_course_id'],
             'instruction_mode': mode,
             'instructor_uid': r['instructor_uid'],
             'instructor_role_code': r['instructor_role_code'],
@@ -226,7 +272,6 @@ def _get_test_course_section_data(term, cs_course_id):
             'location': re.sub(r'\s+', ' ', location),
             'primary_assoc_id': r['primary_associated_section_id'],
             'schedule': schedule,
-            'title': r['title'],
         })
     return sections_data
 
@@ -255,6 +300,8 @@ def _section_data_to_sections(sections_data, instructors):
         sections.append(Section({
             'section_id': sec_group[0]['section_id'],
             'course': sec_group[0]['code'],
+            'course_title': sec_group[0]['course_title'],
+            'cs_course_id': sec_group[0]['cs_course_id'],
             'instruction_mode': sec_group[0]['instruction_mode'],
             'instructors_with_roles': teachers,
             'label': sec_group[0]['label'],
@@ -264,13 +311,6 @@ def _section_data_to_sections(sections_data, instructors):
             'schedules': schedules,
         }))
     return sections
-
-
-def course_instructor_of_role_code(course, role_code):
-    for section in course.sections:
-        for i_r in section.instructors_with_roles:
-            if i_r.role_code == role_code:
-                return i_r
 
 
 def expected_instr_section_data(site, specific_sections=None):
@@ -363,6 +403,13 @@ def get_course_instructor_roles(course, instructor):
     return roles
 
 
+def get_course_instructor_of_role_code(course, role_code):
+    for section in course.sections:
+        for i_r in section.instructors_with_roles:
+            if i_r.role_code == role_code:
+                return i_r
+
+
 def get_primary_instructors(site):
     instructors = []
     for section in site.sections:
@@ -371,39 +418,6 @@ def get_primary_instructors(site):
                 instructors.append(i_r.user)
     app.logger.info(f'Primary instructors: {[vars(i) for i in instructors]}')
     return instructors
-
-
-def get_instructor_term_courses(instructor, term):
-    sql = f"""SELECT DISTINCT cs_course_id
-                FROM sis_data.edo_sections
-               WHERE sis_term_id = '{term.sis_id}'
-                 AND instructor_uid = '{instructor.uid}'"""
-    app.logger.info(sql)
-    results = data_loch.safe_execute_rds(sql)
-    cs_ids = [r['cs_course_id'] for r in results]
-    courses = [get_course(term, cs_id) for cs_id in cs_ids]
-    for course in courses:
-        roles = get_course_instructor_roles(course, instructor)
-        if list(set(roles) & {'PI', 'APRX'}):
-            primary_ids = []
-            secondary_ids = []
-            for section in course.sections:
-                for i_r in section.instructors_with_roles:
-                    if section.is_primary and i_r.user.uid == instructor.uid:
-                        primary_ids.append(section.section_id)
-            for section in course.sections:
-                if list(set(primary_ids) & set(section.primary_assoc_ids)) and not section.is_primary:
-                    secondary_ids.append(section.section_id)
-            for section in course.sections:
-                if section.section_id not in list(set(primary_ids + secondary_ids)):
-                    course.sections.remove(section)
-        else:
-            for section in course.sections:
-                uids = [i_r.user.uid for i_r in section.instructors_with_roles]
-                if instructor.uid not in uids:
-                    course.sections.remove(section)
-        app.logger.info(f'Term course {course.code}, sections {[s.section_id for s in course.sections]}')
-    return courses
 
 
 #   Course enrollment
@@ -480,116 +494,6 @@ def results_to_enrollments(course, results):
         for enroll in enrollments:
             if enroll.section_id == str(section.section_id):
                 section.enrollments.append(enroll)
-
-
-#   NEWT
-
-
-def newt_min_grade_count():
-    return app.config['NEWT_MINIMUM_CLASS_SIZE']
-
-
-def newt_small_cell_suppression():
-    return app.config['NEWT_SMALL_CELL_THRESHOLD']
-
-
-def get_instructor_primaries(sections, instructor):
-    primaries = []
-    for section in sections:
-        if section.is_primary and instructor.uid in [i_r.user.uid for i_r in section.instructors_with_roles]:
-            primaries.append(section)
-    return primaries
-
-
-def get_newt_enrollments(course):
-    sql = f"""SELECT sis_data.edo_enrollments.sis_section_id,
-                     sis_data.edo_enrollments.ldap_uid AS uid,
-                     sis_data.edo_enrollments.grade,
-                     sis_data.edo_basic_attributes.sid,
-                     student.student_profile_index.transfer,
-                     student.demographics.gender,
-                     student.demographics.minority,
-                     student.visas.visa_type,
-                     boac_advising_asc.students.active AS athlete
-                FROM sis_data.edo_enrollments
-           LEFT JOIN sis_data.edo_basic_attributes
-                  ON sis_data.edo_basic_attributes.ldap_uid = sis_data.edo_enrollments.ldap_uid
-                JOIN student.student_profile_index
-                  ON sis_data.edo_enrollments.ldap_uid = student.student_profile_index.uid
-           LEFT JOIN student.demographics
-                  ON student.student_profile_index.sid = student.demographics.sid
-           LEFT JOIN student.visas
-                  ON student.student_profile_index.sid = student.visas.sid
-           LEFT JOIN boac_advising_asc.students
-                  ON student.student_profile_index.sid = boac_advising_asc.students.sid
-               WHERE sis_data.edo_enrollments.sis_term_id = '{course.term.sis_id}'
-                 AND sis_data.edo_enrollments.sis_section_id IN ({utils.in_op(s.section_id for s in course.sections)})
-                 AND sis_data.edo_enrollments.sis_enrollment_status = 'E'
-                 AND sis_data.edo_enrollments.grade NOT IN ('W', '', 'RD')"""
-    app.logger.info(sql)
-    results = data_loch.safe_execute_rds(sql)
-    results_to_newt_enrollments(course, results)
-
-
-def results_to_newt_enrollments(course, results):
-    enrollments = []
-    for r in results:
-        demographics = PersonDemographics(is_athlete=r['athlete'],
-                                          gender=r['gender'],
-                                          is_intl=(True if r['visa_type'] else False),
-                                          is_minority=r['minority'],
-                                          is_transfer=r['transfer'])
-        student = Person({
-            'uid': r['uid'],
-            'demographics': demographics,
-            'email': r['email_address'],
-            'first_name': r['first_name'],
-            'full_name': f"{r['first_name']} {r['last_name']}",
-            'last_name': r['last_name'],
-            'sid': r['sid'],
-        })
-        enrollments.append(SectionEnrollment({
-            'student': student,
-            'grade': r['grade'],
-            'section_id': r['sis_section_id'],
-            'status': r['status'],
-        }))
-    for section in course.sections:
-        section.enrollments = []
-        for enroll in enrollments:
-            if enroll.section_id == str(section.section_id):
-                section.enrollments.append(enroll)
-
-
-def get_newt_prior_enrollment_uids(uids, term, course_code):
-    sql = f"""SELECT DISTINCT sis_data.edo_enrollments.ldap_uid
-                FROM sis_data.edo_enrollments
-                JOIN sis_data.edo_sections
-                  ON sis_data.edo_sections.sis_section_id = sis_data.edo_enrollments.sis_section_id
-                 AND sis_data.edo_sections.sis_term_id = sis_data.edo_enrollments.sis_term_id
-               WHERE sis_data.edo_sections.sis_term_id BETWEEN '2168' AND '{utils.previous_term_sis_id(term)}'
-                 AND sis_data.edo_sections.sis_course_name = '{course_code}'
-                 AND sis_data.edo_sections.is_primary IS TRUE
-                 AND sis_data.edo_enrollments.grade NOT IN ('W', '', 'RD')
-                 AND sis_data.edo_enrollments.ldap_uid IN ({utils.in_op(uids)})"""
-    app.logger.info(sql)
-    results = data_loch.safe_execute_rds(sql)
-    return [r['ldap_uid'] for r in results]
-
-
-def newt_enrollments_per_grade(enrollments):
-    grade_enrollments = []
-    for enroll in enrollments:
-        if enroll.grade in ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'NP', 'P']:
-            grade_enrollments.append(enroll)
-    grouped = groupby(grade_enrollments, key=lambda e: e.grade)
-    grade_groups = []
-    for grp in grouped:
-        grade_groups.append({
-            'grade': grp[0].grade,
-            'uids': [en.user.uid for en in grp],
-        })
-    return grade_groups
 
 
 #   Test users

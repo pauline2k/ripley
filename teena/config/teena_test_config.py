@@ -30,6 +30,7 @@ from teena.models.course import Course
 from teena.models.course_site import CourseSite
 from teena.models.person import Person
 from teena.models.term import Term
+from teena.models.test_case import TeenaTestCase
 from teena.test_utils import ripley_utils
 from teena.test_utils import utils
 
@@ -46,6 +47,7 @@ class TeenaTestConfig(object):
         self.data = data or {}
         self.next_term = utils.next_term(self.current_term)
         self.previous_term = utils.previous_term(self.current_term)
+        self.test_cases = []
         self.test_id = f'{calendar.timegm(dt.now().timetuple())}'
 
     @property
@@ -169,11 +171,6 @@ class TeenaTestConfig(object):
     def e_grades_validation(self):
         self.get_e_grades_test_sites()
 
-    def grade_distribution(self):
-        site_ids = utils.grade_distribution_site_ids()
-        self.course_sites = [CourseSite({'site_id': site_id}) for site_id in site_ids]
-        self.set_real_test_course_users(self.course_sites[-1])
-
     def mailing_lists(self):
         test_users_data = app.config['TEST_USERS']
         test_users = [Person(data) for data in test_users_data]
@@ -211,7 +208,28 @@ class TeenaTestConfig(object):
         ]
 
     def official_sections(self):
-        self.set_real_test_course_users()
+        self.get_single_test_site(opts={'multi_primary': True})
+        self.course_site.sections = [sec for sec in self.course_site.sections if sec.is_primary]
+        for s in self.course_site.course.sections:
+            s.include_in_site = True if s in self.course_site.sections else False
+        self.set_real_test_course_users(self.course_site)
+
+        # Generate test cases for parameterized tests
+        site_course_sec_ids = [scs.section_id for scs in self.course_site.course.sections]
+        site_course_sec_ids.sort()
+        term = self.course_site.term
+        courses = ripley_utils.get_instructor_term_courses(term, self.course_site.course.teachers[0])
+        for course in courses:
+            course_sec_ids = [cs.section_id for cs in course.sections]
+            course_sec_ids.sort()
+            if site_course_sec_ids == course_sec_ids:
+                courses.remove(course)
+        courses.append(self.course_site.course)
+        for course in courses:
+            for section in course.sections:
+                self.test_cases.append(TeenaTestCase(course=course,
+                                                     section=section,
+                                                     test_case_id=f'{term.sis_id} {course.code} {section.section_id}'))
 
     def projects(self):
         site = CourseSite({'title': f'Project {self.test_id}'})
@@ -263,8 +281,8 @@ class TeenaTestConfig(object):
 
     def get_sis_test_courses(self):
         prefixes = app.config['COURSE_PREFIXES']
-        courses = [ripley_utils.get_test_course(self.current_term, p) for p in prefixes]
-        courses.extend([ripley_utils.get_test_course(self.next_term, p) for p in prefixes])
+        courses = [ripley_utils.get_course_from_catalog_id_prefix(self.current_term, p) for p in prefixes]
+        courses.extend([ripley_utils.get_course_from_catalog_id_prefix(self.next_term, p) for p in prefixes])
         courses = [c for c in courses if c]
         # Create a pseudo course where a TA will acquire the Teacher role on a site with only secondary sections
         ta_course = self.get_course_for_ta_only_site(courses)
@@ -343,10 +361,11 @@ class TeenaTestConfig(object):
                     section.include_in_site = True
             self.course_site.create_site_workflow = 'uid'
             self.course_site.course.teachers = [ripley_utils.get_primary_instructors(self.course_site)[0]]
+            self.teachers = self.course_site.course.teachers
         else:
             raise
 
-    def get_existing_site_data(self, site, sis_section_ids, newt=False):
+    def get_existing_site_data(self, site, sis_section_ids):
         term_code = '-'.join(sis_section_ids[0].split('-')[:2])
         term_name = utils.term_hyphenated_code_to_name(term_code)
         term_sis_id = utils.term_name_to_sis_code(term_name)
@@ -358,13 +377,11 @@ class TeenaTestConfig(object):
 
         section_ids = [s_id.split('-')[2] for s_id in sis_section_ids]
         cs_course_id = ripley_utils.get_cs_course_id_from_section_id(site.term, section_ids[0])
-        site.course = ripley_utils.get_course(site.term, cs_course_id)
+        site.course = ripley_utils.get_course_from_sections(site.term, cs_course_id)
         site.sections = [s for s in site.course.sections if s.section_id in section_ids]
 
         if int(site.term.sis_id) < int(self.current_term.sis_id):
             ripley_utils.get_completed_enrollments(site.course)
-        elif newt:
-            ripley_utils.get_newt_enrollments(site.course)
         else:
             ripley_utils.get_course_enrollment(site.course)
 

@@ -22,6 +22,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+import os
 import re
 import time
 
@@ -174,10 +175,11 @@ class CanvasSettingsPage(CanvasApiPage):
 
     def upload_sis_imports(self, files):
         for csv in files:
-            app.logger.info(f'Uploading a SIS import CSV at {csv}')
+            filepath = os.path.join(utils.default_download_dir(), csv.name)
+            app.logger.info(f'Uploading a SIS import CSV at {filepath}')
             self.navigate_to(f'{utils.canvas_base_url()}/accounts/{utils.canvas_root_acct()}/sis_import')
             self.when_present(self.FILE_INPUT, utils.get_short_timeout())
-            self.element(self.FILE_INPUT).send_keys(csv)
+            self.element(self.FILE_INPUT).send_keys(filepath)
             self.wait_for_element_and_click(self.UPLOAD_BTN)
             self.when_present(self.IMPORT_SUCCESS_MSG, utils.get_long_timeout())
 
