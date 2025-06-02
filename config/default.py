@@ -83,6 +83,8 @@ EXTERNAL_TOOLS_CACHE_EXPIRES_IN_SECONDS = 1800
 # Directory to search for mock fixtures, if running in "test" or "demo" mode.
 FIXTURES_PATH = None
 
+FLAG_CSV_SYNC_PRONOUNS = False
+
 # Enforce dry run mode on all jobs.
 FORCE_DRY_RUN = False
 

@@ -59,7 +59,7 @@ def add_user_to_course_section(uid, role, course_section_id):
 
 
 def csv_row_for_campus_user(user):
-    return {
+    row = {
         'user_id': user_id_from_attributes(user),
         'login_id': str(user['ldap_uid']),
         'first_name': user['first_name'],
@@ -67,6 +67,9 @@ def csv_row_for_campus_user(user):
         'email': user['email_address'],
         'status': 'active',
     }
+    if app.config['FLAG_CSV_SYNC_PRONOUNS']:
+        row['pronouns'] = user.get('pronouns')
+    return row
 
 
 def enroll_user_with_role(account_id, canvas_site, role_label, uid):
@@ -115,6 +118,8 @@ def import_users(uids):
                 'roles': roles_from_affiliations(row['affiliations']),
                 'sid': row['sid'],
             }
+            if app.config['FLAG_CSV_SYNC_PRONOUNS']:
+                user['pronouns'] = row['pronouns']
             if person_type != 'A' or any(item for item in ['student', 'staff', 'faculty', 'guest'] if user['roles'][item]):
                 users.append(csv_row_for_campus_user(user))
     with SisImportCsv.create(['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) as users_csv:
@@ -166,6 +171,13 @@ def canvas_user_profile_to_api_json(canvas_user_profile, uid, canvas_site_id=Non
         else:
             raise InternalServerError(f'Invalid canvas_site_id: {canvas_site_id}')
     return api_json
+
+
+def user_import_csv_fields():
+    fieldnames = ['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status'] # noqa
+    if app.config['FLAG_CSV_SYNC_PRONOUNS']:
+        fieldnames.append('pronouns')
+    return fieldnames
 
 
 def user_id_from_attributes(attributes):

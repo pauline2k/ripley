@@ -34,7 +34,7 @@ from ripley.externals.s3 import upload_dated_csv
 from ripley.jobs.base_job import BaseJob
 from ripley.jobs.errors import BackgroundJobError
 from ripley.lib.canvas_site_utils import uid_from_canvas_login_id
-from ripley.lib.canvas_user_utils import csv_row_for_campus_user
+from ripley.lib.canvas_user_utils import csv_row_for_campus_user, user_import_csv_fields
 
 
 class AddNewUsersJob(BaseJob):
@@ -64,7 +64,7 @@ class AddNewUsersJob(BaseJob):
         else:
             app.logger.info(f'Will add {len(new_users_by_uid)} new users.')
             with open(canvas_import_file.name, 'w') as f:
-                canvas_import = csv.DictWriter(f, fieldnames=['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) # noqa
+                canvas_import = csv.DictWriter(f, fieldnames=user_import_csv_fields())
                 canvas_import.writeheader()
                 for user in new_users_by_uid.values():
                     canvas_import.writerow(csv_row_for_campus_user(user))
