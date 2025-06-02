@@ -31,7 +31,7 @@ from ripley.lib.berkeley_course import sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_site_utils import get_canvas_course_id, get_canvas_section_id, get_teaching_terms, \
     hide_big_blue_button, update_section_enrollments
-from ripley.lib.canvas_user_utils import csv_row_for_campus_user
+from ripley.lib.canvas_user_utils import csv_row_for_campus_user, user_import_csv_fields
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from rq.job import get_current_job
@@ -200,7 +200,7 @@ def _get_canvas_user_profile(course, uid):
     if not canvas_user_profile:
         user_result = data_loch.get_users(uids=[uid])
         if user_result:
-            with SisImportCsv.create(['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) as users_csv:
+            with SisImportCsv.create(user_import_csv_fields()) as users_csv:
                 users_csv.writerow(csv_row_for_campus_user(user_result[0]))
                 users_csv.filehandle.close()
                 sis_import = canvas.post_sis_import(attachment=users_csv.tempfile.name)

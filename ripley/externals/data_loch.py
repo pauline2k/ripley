@@ -95,9 +95,10 @@ def cursor_from_pool():
 # Query to identify new users for adding to bCourses, scoped to active users only.
 def get_all_active_users():
     # Beware CLC-7157 (the occasional active user with an 'A' person type).
-    sql = f"""SELECT * FROM sis_data.{_basic_attributes_table()}
-        WHERE (affiliations LIKE '%-TYPE-%' AND affiliations NOT LIKE '%TYPE-SPA%')
-        AND (person_type != 'A' OR affiliations LIKE '%-TYPE-REGISTERED%')"""
+    sql = f"""SELECT a1.*, a2.pronouns FROM sis_data.{_basic_attributes_table()} a1
+        LEFT JOIN sis_data.basic_attributes a2 on a1.ldap_uid = a2.ldap_uid
+        WHERE (a1.affiliations LIKE '%-TYPE-%' AND a1.affiliations NOT LIKE '%TYPE-SPA%')
+        AND (a1.person_type != 'A' OR a1.affiliations LIKE '%-TYPE-REGISTERED%')"""
     return safe_execute_rds(sql)
 
 
@@ -109,9 +110,10 @@ def get_users(uids=None):
     elif len(uids) == 0:
         return []
     else:
-        uids_sql_fragment = "WHERE ldap_uid IN ('" + "', '".join(uids) + "')"
+        uids_sql_fragment = "WHERE a1.ldap_uid IN ('" + "', '".join(uids) + "')"
     sql = f"""
-        SELECT * FROM sis_data.{_basic_attributes_table()}
+        SELECT a1.*, a2.pronouns FROM sis_data.{_basic_attributes_table()} a1
+        LEFT JOIN sis_data.basic_attributes a2 on a1.ldap_uid = a2.ldap_uid
         {uids_sql_fragment}
     """
     return safe_execute_rds(sql)

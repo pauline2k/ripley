@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from moto import mock_s3
 import requests_mock
 from ripley.jobs.add_new_users_job import AddNewUsersJob
-from tests.util import mock_s3_bucket, read_s3_csv, register_canvas_uris
+from tests.util import mock_s3_bucket, override_config, read_s3_csv, register_canvas_uris
 
 
 class TestAddNewUsersJob:
@@ -60,3 +60,15 @@ class TestAddNewUsersJob:
                 assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status'
                 assert users_imported[1] == 'UID:10000,10000,Ellen,Ripley,ellen.ripley@berkeley.edu,active'
                 assert users_imported[2] == 'UID:10001,10001,Dallas,👨‍✈️,dallas@berkeley.edu,active'
+
+            with mock_s3_bucket(app) as s3:
+                with override_config(app, 'FLAG_CSV_SYNC_PRONOUNS', True):
+                    AddNewUsersJob(app)._run()
+                    provisioning_report = read_s3_csv(app, s3, 'provisioned-users')
+                    assert len(provisioning_report) == 4
+
+                    users_imported = read_s3_csv(app, s3, 'user-provision-add-new')
+                    assert len(users_imported) == 6
+                    assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status,pronouns'
+                    assert users_imported[1] == 'UID:10000,10000,Ellen,Ripley,ellen.ripley@berkeley.edu,active,she/her'
+                    assert users_imported[2] == 'UID:10001,10001,Dallas,👨‍✈️,dallas@berkeley.edu,active,he/him'

@@ -45,7 +45,7 @@ from ripley.lib.calnet_utils import get_basic_attributes
 from ripley.lib.canvas_site_provisioning import initialize_recent_updates, process_course_enrollments
 from ripley.lib.canvas_site_utils import api_formatted_course_role, format_term_enrollments_export, \
     parse_canvas_sis_section_id, uid_from_canvas_login_id
-from ripley.lib.canvas_user_utils import csv_row_for_campus_user, user_id_from_attributes
+from ripley.lib.canvas_user_utils import csv_row_for_campus_user, user_id_from_attributes, user_import_csv_fields
 from ripley.lib.sis_import_csv import SisImportCsv
 from ripley.lib.util import utc_now
 from ripley.models.canvas_synchronization import CanvasSynchronization
@@ -300,7 +300,7 @@ class BcoursesRefreshBaseJob(BaseJob):
         return new_row
 
     def inactivate_user(self, uid, user_row, is_inactive):
-        new_row = {k: user_row[k] for k in ('user_id', 'login_id', 'first_name', 'last_name', 'email', 'status')}
+        new_row = {k: user_row[k] for k in user_import_csv_fields()}
 
         if self.job_flags.inactivate or self.job_flags.delete_email_addresses:
             # If an inactivation or email deletion job is running, proceed to mark the Canvas user account as inactive.
@@ -522,7 +522,7 @@ class BcoursesRefreshBaseJob(BaseJob):
 def sis_import_csv_set(sis_term_ids):
     all_csvs = []
 
-    users_csv = SisImportCsv(['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status'])
+    users_csv = SisImportCsv(user_import_csv_fields())
     all_csvs.append(users_csv)
 
     sis_ids_csv = SisImportCsv([
@@ -562,4 +562,5 @@ def _csv_data_changed(row, new_row):
         # Canvas interprets an empty 'email' column as 'Do not change.'
         or (new_row['email'] and row['email'] != new_row['email'])
         or (row['full_name'] != f"{new_row['first_name'] or ''} {new_row['last_name'] or ''}")
-        or (row['status'] != new_row['status']))
+        or (row['status'] != new_row['status'])
+        or ('pronouns' in row and 'pronouns' in new_row and row['pronouns'] != new_row['pronouns']))

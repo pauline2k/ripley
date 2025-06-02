@@ -10,20 +10,21 @@ CREATE TABLE sis_data.basic_attributes
     last_name VARCHAR,
     email_address VARCHAR,
     affiliations VARCHAR,
-    person_type VARCHAR
+    person_type VARCHAR,
+    pronouns VARCHAR
 );
 
 INSERT INTO sis_data.basic_attributes
-(ldap_uid, sid, first_name, last_name, email_address, affiliations, person_type)
+(ldap_uid, sid, first_name, last_name, email_address, affiliations, person_type, pronouns)
 VALUES
-('10000', '30010000', 'Ellen', 'Ripley', 'ellen.ripley@berkeley.edu', 'EMPLOYEE-TYPE-ACADEMIC', 'S'),
-('10001', '30010001', 'Dallas', '👨‍✈️', 'dallas@berkeley.edu', 'EMPLOYEE-TYPE-STAFF', 'S'),
-('20000', '30020000', 'Joan', 'Lambert', 'joan.lambert@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
-('30000', '30030000', 'Ash', '🤖', 'synthetic.ash@berkeley.edu', 'STUDENT-TYPE-NOT REGISTERED', 'S'),
-('40000', '30040000', 'XO', 'Kane', 'xo.kane@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
-('50000', '30050000', 'Dennis', 'Parker', 'dennis.parker@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
-('60000', '30060000', 'Samuel', 'Brett', 'sam.brett@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S'),
-('80000', '30080000', 'Jonesie', 'the Cat', 'jonesie@berkeley.edu', 'EMPLOYEE-TYPE-STAFF', 'S');
+('10000', '30010000', 'Ellen', 'Ripley', 'ellen.ripley@berkeley.edu', 'EMPLOYEE-TYPE-ACADEMIC', 'S', 'she/her'),
+('10001', '30010001', 'Dallas', '👨‍✈️', 'dallas@berkeley.edu', 'EMPLOYEE-TYPE-STAFF', 'S', 'he/him'),
+('20000', '30020000', 'Joan', 'Lambert', 'joan.lambert@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S', 'she/her'),
+('30000', '30030000', 'Ash', '🤖', 'synthetic.ash@berkeley.edu', 'STUDENT-TYPE-NOT REGISTERED', 'S', 'they/them'),
+('40000', '30040000', 'XO', 'Kane', 'xo.kane@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S', 'he/him'),
+('50000', '30050000', 'Dennis', 'Parker', 'dennis.parker@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S', NULL),
+('60000', '30060000', 'Samuel', 'Brett', 'sam.brett@berkeley.edu', 'STUDENT-TYPE-REGISTERED', 'S', NULL),
+('80000', '30080000', 'Jonesie', 'the Cat', 'jonesie@berkeley.edu', 'EMPLOYEE-TYPE-STAFF', 'S', 'meow');
 
 CREATE TABLE sis_data.edo_enrollment_updates
 (
