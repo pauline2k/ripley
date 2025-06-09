@@ -344,7 +344,7 @@ class Page(object):
         time.sleep(0.5)
 
     def mouseover(self, locator, xoffset=None, yoffset=None):
-        self.scroll_to_element(locator)
+        self.scroll_to_element(self.element(locator))
         ActionChains(self.driver).move_to_element_with_offset(self.element(locator), (xoffset or 0), yoffset or 0)
         time.sleep(utils.get_click_sleep())
 
@@ -424,10 +424,10 @@ class Page(object):
         flash_msg_loc = By.XPATH, '//div[contains(@class, "flash-message-container")]'
         if self.is_present(flash_msg_loc):
             self.when_not_present(flash_msg_loc, utils.get_short_timeout())
-        floating_footer_loc = By.ID, 'element_toggler_0'
+        floating_footer_loc = By.ID, 'fixed_bottom'
         if self.is_visible(floating_footer_loc):
             time.sleep(utils.get_click_sleep())
-            self.driver.execute_script('document.getElementById("element_toggler_0").style.display="none";')
+            self.driver.execute_script('document.getElementById("fixed_bottom").style.display="none";')
         new_user_msg_loc = By.XPATH, '//button[contains(., "Don\'t Show Again")]'
         if self.is_present(new_user_msg_loc):
             self.click_element_js(new_user_msg_loc)

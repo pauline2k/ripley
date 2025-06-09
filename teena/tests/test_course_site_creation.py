@@ -160,7 +160,7 @@ class TestCourseSiteCreation:
                                                         expected_count_per_role=[student_count])
 
             # Then verify the user, role, and section data for all members
-            visible_members = self.canvas_page.visible_user_section_data(site)
+            visible_members = self.canvas_page.visible_uids_with_role_and_section_id(site)
             utils.assert_equivalence(visible_members, expected_members)
 
     def test_roster_shows_instruction_mode(self, site):

@@ -166,7 +166,7 @@ class TeenaTestConfig(object):
 
     def e_grades_export(self):
         self.get_e_grades_test_sites()
-        return self.course_sites[0]
+        self.course_site = self.course_sites[0]
 
     def e_grades_validation(self):
         self.get_e_grades_test_sites()
@@ -376,14 +376,13 @@ class TeenaTestConfig(object):
         })
 
         section_ids = [s_id.split('-')[2] for s_id in sis_section_ids]
-        cs_course_id = ripley_utils.get_cs_course_id_from_section_id(site.term, section_ids[0])
-        site.course = ripley_utils.get_course_from_sections(site.term, cs_course_id)
-        site.sections = [s for s in site.course.sections if s.section_id in section_ids]
-
+        sections = ripley_utils.get_sections_from_section_ids(site.term, section_ids)
+        site.course = ripley_utils.get_course_from_sections(site.term, sections)
         if int(site.term.sis_id) < int(self.current_term.sis_id):
             ripley_utils.get_completed_enrollments(site.course)
         else:
             ripley_utils.get_course_enrollment(site.course)
+        site.sections = site.course.sections
 
     def get_e_grades_test_sites(self):
         site_ids = utils.e_grades_site_ids()

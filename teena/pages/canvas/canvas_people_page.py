@@ -22,7 +22,6 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
-from copy import deepcopy
 import time
 
 from flask import current_app as app
@@ -390,73 +389,94 @@ class CanvasPeoplePage(CanvasSettingsPage):
         else:
             self.wait_for_site_member_row_count([self.USER_ROW], ttl_count)
 
-    def visible_users_and_sections(self, site, section=None, enrollments=False):
+    def visible_site_user_data(self, site, sections=None):
+        visible_user_data = []
+        sis_sec_codes = [f'{sec.course} {sec.label}' for sec in sections] if sections else []
         self.load_all_students(site)
-        if section:
-            rows = [r for r in self.elements(self.USER_ROW) if f'{section.course} {section.label}' in r.text]
+        if sections:
+            # Collect data only from given sections
+            rows = []
+            for sec in sections:
+                rows.extend(r for r in self.elements(self.USER_ROW) if f'{sec.course} {sec.label}' in r.text)
         else:
+            # Collect everybody
             rows = self.elements(self.USER_ROW)
-
-        students = []
-        if enrollments:
-            for sec in site.sections:
-                students.extend(sec.enrollments)
-        primary_roles = ['Teacher', 'TA', 'Student']
-        other_roles = list(set(CanvasSiteRoles.COURSE_ROLES) - set(primary_roles))
-
-        users_with_sections = []
         for row in rows:
-            canvas_id = row.get_dom_attribute('id').replace('user_', '')
-            xpath = f'//tr[contains(@id, "user_{canvas_id}")]'
-            uid = self.el_text_if_exists((By.XPATH, f'{xpath}//td[3]'), 'inactive-')
-            sid = self.el_text_if_exists((By.XPATH, f'{xpath}//td[4]'))
-            roles = self.els_text_if_exist((By.XPATH, f'{xpath}//td[6]/div'))
-            section_codes = self.els_text_if_exist((By.XPATH, f'{xpath}//td[5]/div'))
-            if section:
-                section_codes = [s for s in section_codes if f'{section.course} {section.label}' in s]
-            for idx, section_code in enumerate(section_codes):
-                if students:
-                    student = next(filter(lambda st: st.uid == uid, students))
-                    user = deepcopy(student)
-                else:
-                    user = Person({
-                        'uid': uid,
-                        'canvas_id': canvas_id,
-                        'sid': sid,
-                    })
+
+            # User info
+            visible_canvas_id = row.get_dom_attribute('id').replace('user_', '')
+            row_xpath = f'//tr[contains(@id, "user_{visible_canvas_id}")]'
+            visible_uid = self.el_text_if_exists((By.XPATH, f'{row_xpath}//td[3]'), 'inactive-')
+            visible_sid = self.el_text_if_exists((By.XPATH, f'{row_xpath}//td[4]'))
+            visible_user = Person({
+                'uid': visible_uid,
+                'canvas_id': visible_canvas_id,
+                'sid': visible_sid,
+            })
+
+            # User section info
+            visible_section_codes = self.els_text_if_exist((By.XPATH, f'{row_xpath}//td[5]/div'))
+            if sections:
+                # If looking for specific sections, toss out other sections the user is in
+                for sec_code in visible_section_codes:
+                    if sec_code not in sis_sec_codes:
+                        visible_section_codes.remove(sec_code)
+            for idx, section_code in enumerate(visible_section_codes):
                 if site.sections:
                     sec = next(filter(lambda s: f'{s.course} {s.label}' == section_code, site.sections))
                 else:
                     sec = None
-                role = roles[idx].strip()
+
+                # User section role info
+                primary_roles = ['Teacher', 'TA', 'Student']
+                other_roles = list(set(CanvasSiteRoles.COURSE_ROLES) - set(primary_roles))
+                visible_roles = self.els_text_if_exist((By.XPATH, f'{row_xpath}//td[6]/div'))
+                role = visible_roles[idx].strip()
                 if role in primary_roles:
                     role = role.lower()
                 elif role not in other_roles:
                     app.logger.info(f'User in users table has unrecognized role {role}')
                     role = None
-                user.role = role
-                app.logger.info(f'Canvas id {canvas_id}, UID {uid}, role {role}')
-                users_with_sections.append({
-                    'user': user,
-                    'section': sec.section_id,
-                })
-        return users_with_sections
+                visible_user.role = role
 
-    def visible_students(self, site, section=None, enrollments=False):
+                app.logger.info(f'Canvas id {visible_canvas_id}, UID {visible_uid}, role {role}')
+                visible_user_data.append({
+                    'user': visible_user,
+                    'section_id': (sec and sec.section_id),
+                })
+        return visible_user_data
+
+    @staticmethod
+    def match_visible_user_data_to_sis_enrollments(visible_user_data, sis_sections):
+        for user_data in visible_user_data:
+            for section in sis_sections:
+                if section.section_id == user_data['section_id']:
+                    for enrollment in section.enrollments:
+                        if enrollment.student.uid == user_data['user'].uid:
+                            enrollment.student.canvas_id = user_data['user'].canvas_id
+                            enrollment.student.role = user_data['user'].role
+                            user_data['user'] = enrollment.student
+        for user_data in visible_user_data:
+            if not user_data['user'].last_name:
+                visible_user_data.remove(user_data)
+
+    def visible_students(self, site, sections):
         students = []
-        for data in self.visible_users_and_sections(site, section, enrollments):
+        visible_user_data = self.visible_site_user_data(site, sections)
+        self.match_visible_user_data_to_sis_enrollments(visible_user_data, sections)
+        for data in visible_user_data:
             if data['user'].role in ['student', 'Waitlist Student']:
                 students.append(data['user'])
         return students
 
-    def visible_user_section_data(self, site):
-        users_with_sections = self.visible_users_and_sections(site)
+    def visible_uids_with_role_and_section_id(self, site):
+        users_with_sections = self.visible_site_user_data(site)
         user_data = []
-        for us in users_with_sections:
+        for u_w_s in users_with_sections:
             data = {
-                'uid': us['user'].uid,
-                'role': (us['user'].role and us['user'].role.lower()),
-                'section_id': us['section'],
+                'uid': u_w_s['user'].uid,
+                'role': (u_w_s['user'].role and u_w_s['user'].role.lower()),
+                'section_id': u_w_s['section_id'],
             }
             if data not in user_data:
                 user_data.append(data)

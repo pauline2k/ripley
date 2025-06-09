@@ -42,7 +42,6 @@ class CanvasSettingsPage(CanvasApiPage):
     FLASH_MSG = By.CLASS_NAME, 'flashalert-message'
     SAVE_BTN = By.XPATH, '//button[text()="Save"]'
     SAVE_AND_PUBLISH_BTN = By.CLASS_NAME, 'save_and_publish'
-    SET_GRADING_SCHEME_CBX = By.ID, 'course_course_grading_standard_enabled'
     SUBMIT_BTN = By.XPATH, '//button[contains(.,"Submit")]'
     UPDATE_COURSE_BTN = By.XPATH, '//button[contains(.,"Update Course Details")]'
     UPDATE_COURSE_SUCCESS = By.XPATH, '//*[contains(.,"successfully updated")]'
@@ -107,15 +106,18 @@ class CanvasSettingsPage(CanvasApiPage):
     # Grading Schemes
 
     DONE_BTN = By.XPATH, '//button[text()="Done"]'
+    SET_GRADING_SCHEME_CBX = By.ID, 'course_course_grading_standard_enabled'
     GRADING_SCHEME_SELECT = By.XPATH, '//input[@data-testid="grading-schemes-selector-dropdown"]'
     SELECT_ANOTHER_SCHEME_LINK = By.XPATH, '//a[@title="Find an Existing Grading Scheme"]'
-    VIEW_GRADING_SCHEME_LINK = By.LINK_TEXT, 'view grading scheme'
+    VIEW_GRADING_SCHEME_LINK = By.XPATH, '//button[@data-testid="grading-schemes-selector-view-button"]'
 
     def disable_grading_scheme(self, site):
         app.logger.info(f'Ensuring grading scheme is disabled for course ID {site.site_id}')
         self.load_course_settings(site)
         self.scroll_to_bottom()
-        if self.is_present(self.GRADING_SCHEME_SELECT):
+        time.sleep(2)
+        if self.is_present(self.VIEW_GRADING_SCHEME_LINK):
+            app.logger.info('Disabling it')
             self.toggle_grading_scheme()
         else:
             app.logger.info('Grading scheme is already disabled')
@@ -124,9 +126,11 @@ class CanvasSettingsPage(CanvasApiPage):
         app.logger.info(f'Ensuring grading scheme is enabled for course ID {site.site_id}')
         self.load_course_settings(site)
         self.scroll_to_bottom()
-        if self.is_present(self.GRADING_SCHEME_SELECT):
+        time.sleep(2)
+        if self.is_present(self.VIEW_GRADING_SCHEME_LINK):
             app.logger.info('Grading scheme is already enabled')
         else:
+            app.logger.info('Enabling it')
             self.toggle_grading_scheme()
 
     def set_grading_scheme(self, desired_scheme):
@@ -160,7 +164,14 @@ class CanvasSettingsPage(CanvasApiPage):
         self.when_visible(self.UPDATE_COURSE_SUCCESS, utils.get_medium_timeout())
 
     def toggle_grading_scheme(self):
-        self.wait_for_element_and_click(self.SET_GRADING_SCHEME_CBX)
+        # Get rid of the endless layers of elements that might be covering the checkbox
+        self.hide_canvas_footer_and_popups()
+        self.driver.execute_script('document.getElementsByClassName("form-actions-sticky-footer")[0].style.display="none";')
+        time.sleep(1)
+        self.element(self.SET_GRADING_SCHEME_CBX).click()
+        time.sleep(1)
+        # Put the sticky footer back because it contains the update button
+        self.driver.execute_script('document.getElementsByClassName("form-actions-sticky-footer")[0].style.display="";')
         # Sometimes updates require a couple attempts
         try:
             self.update_course_settings()

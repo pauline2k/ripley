@@ -149,6 +149,26 @@ class Section(object):
     def sis_id(self, value):
         self.data['sis_id'] = value
 
+    def enrolled_sids(self):
+        sids = [e.student.sid for e in self.enrollments if e.student.sid]
+        sids.sort()
+        return sids
+
+    def enrolled_last_names(self):
+        names = [e.student.last_name.strip().lower() for e in self.enrollments if e.student.last_name]
+        names.sort()
+        return names
+
+    def enrolled_grades(self):
+        grades = [e.grade for e in self.enrollments if e.grade]
+        grades.sort()
+        return grades
+
+    def enrolled_grading_bases(self):
+        grading_bases = [e.grading_basis for e in self.enrollments if e.grading_basis]
+        grading_bases.sort()
+        return grading_bases
+
 
 class SectionEnrollment(object):
 

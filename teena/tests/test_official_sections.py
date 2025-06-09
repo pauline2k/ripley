@@ -245,7 +245,7 @@ class TestAddSectionsSISImport:
 
     def test_canvas_users(self):
         self.canvas_page.wait_for_enrollment_import(site, roles)
-        visible_users = self.canvas_page.visible_user_section_data(site)
+        visible_users = self.canvas_page.visible_uids_with_role_and_section_id(site)
         utils.assert_list_items_in_other_list(add_delete_instructors, visible_users)
         utils.assert_list_items_in_other_list(add_delete_students, visible_users)
 
@@ -282,7 +282,7 @@ class TestDeleteSectionsSISImport:
 
     def test_canvas_users(self):
         self.canvas_page.wait_for_enrollment_import(site, roles)
-        visible_users = self.canvas_page.visible_user_section_data(site)
+        visible_users = self.canvas_page.visible_uids_with_role_and_section_id(site)
         utils.assert_list_items_not_in_other_list(add_delete_instructors, visible_users)
         utils.assert_list_items_not_in_other_list(add_delete_students, visible_users)
 
