@@ -193,7 +193,7 @@ class CanvasPage(CanvasAssignmentsPage,
         self.add_ripley_tools([t.value for t in RipleyTools])
         # If testing with an existing course site, find out what's in it
         if test.course_site.site_id:
-            section_ids = self.get_course_site_sis_section_ids(test.course_site.site_id)
+            section_ids = self.get_course_site_sis_section_ids(test.course_site)
             test.get_existing_site_data(test.course_site, section_ids)
         self.set_canvas_ids(test.course_site.manual_members)
         test.teachers = ripley_utils.get_primary_instructors(test.course_site) or test.course_site.course.teachers

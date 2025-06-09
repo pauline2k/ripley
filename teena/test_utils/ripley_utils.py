@@ -76,7 +76,7 @@ def get_course_from_sections(term, sections):
     primary_sections = [sec for sec in sections if sec.is_primary]
     for prim in primary_sections:
         for i_r in prim.instructors_with_roles:
-            if i_r.user not in teachers:
+            if i_r.user not in teachers and i_r.role_code == 'PI':
                 teachers.append(i_r.user)
     codes = []
     for sect in sections:
@@ -165,6 +165,12 @@ def _get_course_from_cs_course_id(term, cs_course_id):
 # Sections
 
 
+def get_sections_from_section_ids(term, section_ids):
+    query_result = _sections_result_from_section_ids(term, section_ids)
+    section_data = _get_test_course_section_data(query_result)
+    return _section_data_to_sections(section_data)
+
+
 def _translate_instruction_mode(mode_code):
     if mode_code == 'EF':
         return '(Flexible)'
@@ -224,28 +230,30 @@ def _sections_result_from_cs_course_id(term, cs_course_id):
 
 
 def _sections_result_from_section_ids(term, section_ids):
-    sql = f"""SELECT sis_section_id AS id,
-                     is_primary,
-                     primary_associated_section_id,
-                     cs_course_id,
-                     sis_course_name AS code,
-                     sis_course_title AS title,
-                     sis_instruction_format AS format,
-                     sis_section_num AS number,
-                     instructor_uid,
-                     instructor_role_code,
-                     instruction_mode AS mode,
-                     meeting_location AS location,
-                     meeting_days AS days,
-                     meeting_end_date AS end_date,
-                     meeting_start_time AS start_time,
-                     meeting_end_time AS end_time
+    sql = f"""SELECT sis_data.edo_sections.sis_section_id AS id,
+                     sis_data.edo_sections.is_primary,
+                     sis_data.edo_sections.primary_associated_section_id,
+                     sis_data.edo_sections.cs_course_id,
+                     sis_data.edo_sections.sis_course_name AS code,
+                     sis_data.edo_sections.sis_course_title AS title,
+                     sis_data.edo_sections.sis_instruction_format AS format,
+                     sis_data.edo_sections.sis_section_num AS number,
+                     sis_data.edo_sections.instructor_uid,
+                     sis_data.edo_sections.instructor_role_code,
+                     sis_data.edo_sections.instruction_mode AS mode,
+                     sis_data.edo_sections.instructor_name,
+                     sis_data.edo_basic_attributes.email_address AS instructor_email_address,
+                     sis_data.edo_basic_attributes.sid AS instructor_sid,
+                     sis_data.edo_sections.meeting_location AS location,
+                     sis_data.edo_sections.meeting_days AS days,
+                     sis_data.edo_sections.meeting_end_date AS end_date,
+                     sis_data.edo_sections.meeting_start_time AS start_time,
+                     sis_data.edo_sections.meeting_end_time AS end_time
                 FROM sis_data.edo_sections
-               WHERE sis_term_id = '{term.sis_id}'
-                 AND sis_section_id IN ({utils.in_op(section_ids)})
-            ORDER BY sis_course_name ASC,
-                     sis_instruction_format DESC,
-                     sis_section_num ASC"""
+                JOIN sis_data.edo_basic_attributes
+                  ON sis_data.edo_sections.instructor_uid = sis_data.edo_basic_attributes.ldap_uid
+               WHERE sis_data.edo_sections.sis_term_id = '{term.sis_id}'
+                 AND sis_data.edo_sections.sis_section_id IN ({utils.in_op(section_ids)})"""
     app.logger.info(sql)
     return data_loch.safe_execute_rds(sql)
 
@@ -265,8 +273,11 @@ def _get_test_course_section_data(sections_result):
             'course_title': r['title'],
             'cs_course_id': r['cs_course_id'],
             'instruction_mode': mode,
-            'instructor_uid': r['instructor_uid'],
+            'instructor_email_address': r['instructor_email_address'],
+            'instructor_name': r['instructor_name'],
             'instructor_role_code': r['instructor_role_code'],
+            'instructor_sid': r['instructor_sid'],
+            'instructor_uid': r['instructor_uid'],
             'is_primary': r['is_primary'],
             'label': f"{r['format']} {r['number']} {mode}",
             'location': re.sub(r'\s+', ' ', location),
@@ -276,10 +287,22 @@ def _get_test_course_section_data(sections_result):
     return sections_data
 
 
-def _section_data_to_sections(sections_data, instructors):
+def _section_data_to_sections(sections_data, instructors=None):
+    if not instructors:
+        instructors = []
+        instructor_groups = [list(inst_result) for key, inst_result in groupby(sections_data,
+                                                                               key=lambda i: i['instructor_uid'])]
+        for inst_group in instructor_groups:
+            instructors.append(Person({
+                'email': inst_group[0]['instructor_email_address'],
+                'full_name': inst_group[0]['instructor_name'],
+                'sid': inst_group[0]['instructor_sid'],
+                'uid': inst_group[0]['instructor_uid'],
+            }))
+
     sections = []
-    grouped = [list(result) for key, result in groupby(sections_data, key=lambda s: s['section_id'])]
-    for sec_group in grouped:
+    section_groups = [list(sec_result) for key, sec_result in groupby(sections_data, key=lambda s: s['section_id'])]
+    for sec_group in section_groups:
         teachers = []
         locations = []
         primary_assoc_ids = []

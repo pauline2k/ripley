@@ -26,7 +26,7 @@ import time
 
 from flask import current_app as app
 import polling2
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementNotInteractableException, TimeoutException
 from selenium.webdriver.common.by import By
 from teena.pages.canvas.canvas_settings_page import CanvasSettingsPage
 from teena.test_utils import utils
@@ -57,7 +57,8 @@ class CanvasGradesPage(CanvasSettingsPage):
                 if tries == max_tries:
                     raise
 
-    def are_grades_final(self):
+    def are_grades_final(self, site):
+        self.load_gradebook(site)
         self.click_gradebook_settings()
         self.when_present(self.GB_INCLUDE_UNGRADED, utils.get_short_timeout())
         return self.element(self.GB_INCLUDE_UNGRADED).is_selected()
@@ -131,7 +132,7 @@ class CanvasGradesPage(CanvasSettingsPage):
 
     def pull_gradebook_totals_forward(self):
         app.logger.info('Gradebook totals are not visible, bringing them to the front')
-        self.scroll_to_element(self.TTL_GRADE_COL)
+        self.scroll_to_element(self.element(self.TTL_GRADE_COL))
         self.mouseover(self.TTL_GRADE_OPTS)
         self.click_element_js(self.TTL_GRADE_MENU_LINK)
         self.wait_for_element_and_click(self.TTL_GRADE_COL_MOVE_FRONT)
@@ -154,11 +155,10 @@ class CanvasGradesPage(CanvasSettingsPage):
     def search_for_gradebook_student(self, user):
         # Try to find the user row a few times since stale element reference errors may occur
         tries = 0
-        max_tries = 2
+        max_tries = 4
         while tries <= max_tries:
             try:
                 tries += 1
-                self.wait_for_element(self.STUDENT_SEARCH_INPUT, utils.get_medium_timeout())
                 self.wait_for_element(self.STUDENT_SEARCH_INPUT, utils.get_medium_timeout())
                 if self.is_present(self.GB_REMOVE_BTN):
                     self.element(self.GB_REMOVE_BTN).click()
@@ -166,9 +166,11 @@ class CanvasGradesPage(CanvasSettingsPage):
                 self.hit_enter()
                 polling2.poll(
                     lambda: self.elements(self.GB_STUDENT_LINK)[0].get_dom_attribute('data-student_id') == user.canvas_id,
-                    step=2)
+                    step=2,
+                    timeout=3,
+                )
                 break
-            except TimeoutException:
+            except (ElementNotInteractableException, TimeoutException):
                 if tries == max_tries:
                     raise
                 else:
@@ -245,10 +247,9 @@ class CanvasGradesPage(CanvasSettingsPage):
     def enter_override_grade(self, site, student, grade):
         app.logger.info(f'Entering override grade {grade} for UID {student.uid}')
         self.load_gradebook(site)
-        self.allow_grade_override()
         self.search_for_gradebook_student(student)
         # Navigating to the SlickGrid cell often takes a lot of work
-        for i in range(15):
+        for i in range(30):
             self.scroll_to_element(self.elements(self.GRID_ROW_CELL)[-1])
         self.wait_for_element_and_click(self.GRADE_OVERRIDE_CELL)
         self.wait_for_element_remove_and_type_chars(self.GRADE_OVERRIDE_INPUT, grade)

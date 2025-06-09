@@ -23,10 +23,12 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
+import csv
 import time
 
 from flask import current_app as app
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.select import Select
 from teena.models.ripley_tool import RipleyTools
 from teena.pages.ripley.ripley_pages import RipleyPages
 from teena.test_utils import utils
@@ -50,7 +52,7 @@ class EGradesPage(RipleyPages):
 
     @staticmethod
     def embedded_tool_path(course_site):
-        return f'/courses/#{course_site.site_id}/external_tools/{RipleyTools.E_GRADES.value.tool_id}'
+        return f'/courses/{course_site.site_id}/external_tools/{RipleyTools.E_GRADES.value.tool_id}'
 
     def hit_embedded_tool_url(self, course_site):
         self.navigate_to(f'{utils.canvas_base_url()}{self.embedded_tool_path(course_site)}')
@@ -71,22 +73,24 @@ class EGradesPage(RipleyPages):
             app.logger.info('Setting no P/NP cutoff')
             self.wait_for_element_and_click(self.NO_PNP_CUTOFF_RADIO)
 
+    def section_select_options(self):
+        sel = Select(self.element(self.SECTIONS_SELECT))
+        return [opt.text.strip() for opt in sel.options]
+
     def choose_section(self, section):
         section_name = f'{section.course} {section.label}'
         utils.prepare_download_dir()
         self.wait_for_select_and_click_option(self.SECTIONS_SELECT, section_name)
 
-    def download_current_grades(self, course_site, section, cutoff):
+    def download_current_grades(self, course_site, section, cutoff=None):
         app.logger.info(f'Downloading current grades for {course_site.course.code} {section.label}')
-        file_name = f"egrades-current-{section.section_id}-{course_site.course.term.name.replace(' ', '-')}-*.csv"
-        self.download_grades(course_site, section, file_name, opts={'cutoff': cutoff, 'final': False})
+        return self.download_grades(course_site, section, opts={'cutoff': cutoff, 'final': False})
 
-    def download_final_grades(self, course_site, section, cutoff):
+    def download_final_grades(self, course_site, section, cutoff=None):
         app.logger.info(f'Downloading final grades for {course_site.course.code} {section.label}')
-        file_name = f"egrades-final-{section.section_id}-{course_site.course.term.name.replace(' ', '-')}-*.csv"
-        return self.download_grades(course_site, section, file_name, opts={'cutoff': cutoff, 'final': True})
+        return self.download_grades(course_site, section, opts={'cutoff': cutoff, 'final': True})
 
-    def download_grades(self, course_site, section, file_name, opts):
+    def download_grades(self, course_site, section, opts):
         self.load_embedded_tool(course_site)
         self.click_continue()
         self.set_cutoff(opts['cutoff'])
@@ -94,4 +98,40 @@ class EGradesPage(RipleyPages):
             self.choose_section(section)
         time.sleep(1)
         el = self.DOWNLOAD_FINAL_GRADES_BUTTON if opts['final'] else self.DOWNLOAD_CURRENT_GRADES_BUTTON
-        return self.download_csv(el)
+        file_path = self.download_file(el, 'csv')
+        time.sleep(1)
+        e_grades = []
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for r in reader:
+                e_grades.append({
+                    'sid': r['ID'],
+                    'last_name': r['Name'].split(',')[0].strip().lower(),
+                    'grade': r['Grade'],
+                    'grading_basis': r['Grading Basis'],
+                })
+        return e_grades
+
+    @staticmethod
+    def csv_sids(e_grades):
+        sids = [r['sid'] for r in e_grades]
+        sids.sort()
+        return sids
+
+    @staticmethod
+    def csv_names(e_grades):
+        names = [r['last_name'] for r in e_grades]
+        names.sort()
+        return names
+
+    @staticmethod
+    def csv_grades(e_grades):
+        grades = [r['grade'] for r in e_grades]
+        grades.sort()
+        return grades
+
+    @staticmethod
+    def csv_grading_bases(e_grades):
+        grading_bases = [r['grading_basis'] for r in e_grades]
+        grading_bases.sort()
+        return grading_bases
