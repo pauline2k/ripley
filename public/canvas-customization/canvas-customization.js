@@ -566,32 +566,38 @@ addMentalHealthResourcesResponsiveLink();
         '    <i class="icon-arrow-right"></i> <strong>Instructors: Making Course Materials Accessible (click to expand)</strong>',
         '  </button>',
         '  <div id="alt-media-content" class="hide" role="region" tabindex="-1">',
-        '    <div>Without course instructor assistance, the University cannot meet its mission and responsibility to <a href="http://www.ucop.edu/electronic-accessibility/index.html" target="_blank">make online content accessible to students with disabilities<span class="sr-only"> (link opens in new tab)</span></a>. The <a href="https://policy.ucop.edu/doc/7000611/IMT-1300" target="_blank">University of California Policy IMT-1300<span class="sr-only"> (link opens in new tab)</span></a> defines "accessible" as "the concept that people with disabilities are able to access and use a product or system, including with the help of assistive technologies." The following resources can help you make your course content materials more accessible for all students:</div>',
-        '    <h5>General Accessibility Resources</h5>',
+        '    <div>Without the assistance of course instructors, the University cannot fulfill its mission and ' +
+        'responsibility to make online content accessible to students with disabilities. The <a ' +
+        'href="https://www.ucop.edu/electronic-accessibility/initiative/policy.html" target="blank">University of ' +
+        'California Policy IMT-1300</a> defines "accessible" as "the concept that people with disabilities can access ' +
+        'and use a product or system, including with the help of assistive technologies." The following resources can ' +
+        'help you make your course content materials more accessible for all students:</div>',
+        '    <h5>Digital Accessibility Resources</h5>',
         '    <ul>',
         '      <li><a href="https://bcourses.berkeley.edu/courses/1476601" target="_blank">Accessibility Basics for bCourses (Canvas)<span class="sr-only"> (opens in new tab)</span></a> - bCourses Site</li>',
+        '      <li><a href="https://rtl.berkeley.edu/services-programs/ally-bcourses" target="_blank">Ally in bCourses Service Page<span class="sr-only"> (opens in new tab)</span></a> - Accessibility evaluation and remediation tool for bCourses</li>',
+        '      <ul>',
+        '        <li>Need help with Ally in bCourses? Contact <a href="mailto:allyhelp@berkeley.edu">allyhelp@berkeley.edu</a></li>',
+        '      </ul>',
         '      <li><a href="https://community.canvaslms.com/t5/Instructor-Guide/How-do-I-use-the-Accessibility-Checker-in-the-Rich-Content/ta-p/820" target="_blank">How do I use the Accessibility Checker in the Rich Content Editor as an instructor?<span class="sr-only"> (opens in new tab)</span></a> - Canvas Guide</li>',
         '      <li><a href="https://dsp.berkeley.edu/faculty/resources-faculty/creating-accessible-content" target="_blank">How to improve the accessibility of your online content<span class="sr-only"> (opens in new tab)</span></a> - Disabled Students\' Program</li>',
-        '      <li><a href="https://ets.berkeley.edu/sensusaccess" target="_blank">SensusAccess Conversion<span class="sr-only"> (opens in new tab)</span></a> - Educational Technology Services</li>',
-        '      <li>Need assistive technology help? <a href="mailto:assistive-technology@berkeley.edu" target="_blank">Contact Us</a></li>',
-        '    </ul>',
-        '    <h5>Ally in bCourses Resources</h5>',
-        '    <ul>',
-        '      <li><a href="https://rtl.berkeley.edu/services-programs/ally-bcourses" target="_blank">Ally in bCourses Service Page<span class="sr-only"> (opens in new tab)</span></a></li>',
-        '      <li>Need help with Ally in bCourses? Contact <a href="mailto:allyhelp@berkeley.edu">allyhelp@berkeley.edu</a></li>',
+        '      <li><a href="https://rtl.berkeley.edu/services-programs/sensusaccess" target="_blank">SensusAccess File Conversion<span class="sr-only"> (opens in new tab)</span></a> - Research, Teaching, & Learning</li>',
+        '    <li><a href="https://accesscontent.berkeley.edu/home" target="blank">2024 ADA Title II Update</a></li>',
         '    </ul>',
         '  </div>',
         '</div>'
       ].join('');
 
-      waitUntilAvailable('header.ef-header', false, function($header) {
-        $header.before(altMediaPanel);
+      waitUntilAvailable('[data-testid="files-search-input"]', false, function($searchBar) {
+        const $targetElement = $searchBar.parents().eq(9);
+        $targetElement.before(altMediaPanel);
 
-        // Toggle icon
+        // Add event listener for the toggle button to expand/collapse the content
+        // and change the arrow icon.
         $('#alt-media-container .element_toggler').on('click', function() {
           $(this).find('i[class*="icon-arrow"]').toggleClass('icon-arrow-down icon-arrow-right');
         });
-      });
+    });
     }
   };
 
