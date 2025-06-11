@@ -41,6 +41,7 @@ from teena.pages.ripley.official_sections_page import OfficialSectionsPage
 from teena.pages.ripley.roster_photos_page import RosterPhotosPage
 from teena.pages.ripley.site_creation_page import SiteCreationPage
 from teena.pages.ripley.splash_page import SplashPage
+from teena.pages.ripley.user_provisioning_page import UserProvisioningPage
 from teena.test_utils.webdriver_manager import WebDriverManager
 
 
@@ -79,6 +80,7 @@ def page_objects(request):
     roster_photos_page = RosterPhotosPage(driver, headless)
     site_creation_page = SiteCreationPage(driver, headless)
     splash_page = SplashPage(driver, headless)
+    user_prov_page = UserProvisioningPage(driver, headless)
 
     session = request.node
     try:
@@ -99,6 +101,7 @@ def page_objects(request):
             setattr(cls.obj, 'roster_photos_page', roster_photos_page)
             setattr(cls.obj, 'site_creation_page', site_creation_page)
             setattr(cls.obj, 'splash_page', splash_page)
+            setattr(cls.obj, 'user_prov_page', user_prov_page)
         yield
     finally:
         WebDriverManager.quit_browser(driver)
