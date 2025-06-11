@@ -582,7 +582,7 @@ addMentalHealthResourcesResponsiveLink();
         '      <li><a href="https://community.canvaslms.com/t5/Instructor-Guide/How-do-I-use-the-Accessibility-Checker-in-the-Rich-Content/ta-p/820" target="_blank">How do I use the Accessibility Checker in the Rich Content Editor as an instructor?<span class="sr-only"> (opens in new tab)</span></a> - Canvas Guide</li>',
         '      <li><a href="https://dsp.berkeley.edu/faculty/resources-faculty/creating-accessible-content" target="_blank">How to improve the accessibility of your online content<span class="sr-only"> (opens in new tab)</span></a> - Disabled Students\' Program</li>',
         '      <li><a href="https://rtl.berkeley.edu/services-programs/sensusaccess" target="_blank">SensusAccess File Conversion<span class="sr-only"> (opens in new tab)</span></a> - Research, Teaching, & Learning</li>',
-        '    <li><a href="https://accesscontent.berkeley.edu/home" target="blank">2024 ADA Title II Update</a></li>',
+        '    <li><a href="https://accesscontent.berkeley.edu/ada-title-ii-update-information" target="blank">2024 ADA Title II Update</a></li>',
         '    </ul>',
         '  </div>',
         '</div>'
