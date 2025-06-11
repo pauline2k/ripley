@@ -94,16 +94,12 @@ def canvas_qa_acct():
     return app.config['CANVAS_QA_ACCOUNT_ID']
 
 
-def e_grades_site_ids():
-    return app.config['E_GRADES_SITE_IDS']
+def e_grades_site_id():
+    return app.config['E_GRADES_SITE_ID']
 
 
 def e_grades_student_count():
     return app.config['E_GRADES_STUDENT_COUNT']
-
-
-def grade_distribution_site_ids():
-    return app.config['NEWT_SITE_IDS']
 
 
 def course_template_dept():

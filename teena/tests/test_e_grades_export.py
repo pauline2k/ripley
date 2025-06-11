@@ -32,7 +32,7 @@ from teena.models.section import Section, SectionEnrollment
 from teena.test_utils import utils
 
 test = TeenaTestConfig()
-test.e_grades_export()
+test.e_grades()
 test_enrollment = SectionEnrollment({})
 primary_section = Section({})
 
@@ -43,6 +43,11 @@ class TestSetup:
     def test_get_site_data(self):
         self.canvas_page.log_in(self.cal_net_page, test.admin.username, utils.get_admin_password())
         self.canvas_page.configure_single_site(test)
+        prim = next(filter(lambda s: s.is_primary, test.course_site.sections))
+        primary_section.course = prim.course
+        primary_section.enrollments = prim.enrollments
+        primary_section.label = prim.label
+        primary_section.section_id = prim.section_id
 
     def test_e_grades_export_button_on_gradebook(self):
         self.canvas_page.load_gradebook(test.course_site)
@@ -126,17 +131,6 @@ class TestGradingSchemeEnabledAndNoMutedAssignment:
 
 
 @pytest.mark.usefixtures('page_objects')
-class TestDownloadCSVWithPNPCutoff:
-
-    def test_set_primary_section(self):
-        prim = next(filter(lambda s: s.is_primary, test.course_site.sections))
-        primary_section.course = prim.course
-        primary_section.enrollments = prim.enrollments
-        primary_section.label = prim.label
-        primary_section.section_id = prim.section_id
-
-
-@pytest.mark.usefixtures('page_objects')
 class TestCsvExport:
 
     def test_csv_content(self):
@@ -147,6 +141,10 @@ class TestCsvExport:
         utils.assert_equivalence(self.e_grades_page.csv_names(e_grades), primary_section.enrolled_last_names())
         assert not list(set(self.e_grades_page.csv_grades(e_grades)) - set(expected_grades))
         assert not list(set(self.e_grades_page.csv_grading_bases(e_grades)) - set(expected_grading_bases))
+
+
+@pytest.mark.usefixtures('page_objects')
+class TestDownloadCSVPerSection:
 
     def test_download_current_grades_primary_section(self):
         assert self.e_grades_page.download_current_grades(test.course_site, primary_section, cutoff='C-')
@@ -166,37 +164,18 @@ class TestCsvExport:
 
 
 @pytest.mark.usefixtures('page_objects')
-class TestDownloadCSVWithoutPNPCutoff:
-
-    def test_download_current_grades_primary_section(self):
-        assert self.e_grades_page.download_current_grades(test.course_site, primary_section)
-
-    def test_download_current_grades_secondary_section(self):
-        seconds = [s for s in test.course_site.sections if not s.is_primary]
-        if seconds:
-            assert self.e_grades_page.download_current_grades(test.course_site, seconds[0])
-
-    def test_download_final_grades_primary_section(self):
-        assert self.e_grades_page.download_final_grades(test.course_site, primary_section)
-
-    def test_download_final_grades_secondary_section(self):
-        seconds = [s for s in test.course_site.sections if not s.is_primary]
-        if seconds:
-            assert self.e_grades_page.download_final_grades(test.course_site, seconds[0])
-
-
-@pytest.mark.usefixtures('page_objects')
 class TestFinalGradeOverride:
 
     def test_setup(self):
         # Find a site student enrollment with SID and usable grade for testing grade override
+        self.canvas_page.stop_masquerading()
         self.canvas_page.load_users_page(test.course_site)
-        site_students = self.canvas_page.visible_students(test.course_site, [primary_section])
+        site_enrollments = self.canvas_page.visible_student_enrollments(test.course_site, [primary_section])
         self.canvas_page.load_gradebook(test.course_site)
-        for site_student in site_students:
-            score = self.canvas_page.student_score(site_student)
+        for site_enrollment in site_enrollments:
+            score = self.canvas_page.student_score(site_enrollment.student)
             if score and not score['un_posted']:
-                test_enrollment.student = site_student
+                test_enrollment.student = site_enrollment.student
                 test_enrollment.grade = score['grade']
                 break
 

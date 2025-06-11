@@ -446,28 +446,20 @@ class CanvasPeoplePage(CanvasSettingsPage):
                 })
         return visible_user_data
 
-    @staticmethod
-    def match_visible_user_data_to_sis_enrollments(visible_user_data, sis_sections):
-        for user_data in visible_user_data:
+    def visible_student_enrollments(self, site, sis_sections):
+        visible_enrollments = []
+        visible_site_user_data = self.visible_site_user_data(site, sis_sections)
+        # Match the visible enrollment in Canvas to a SIS enrollment
+        for user_data in visible_site_user_data:
             for section in sis_sections:
                 if section.section_id == user_data['section_id']:
                     for enrollment in section.enrollments:
                         if enrollment.student.uid == user_data['user'].uid:
-                            enrollment.student.canvas_id = user_data['user'].canvas_id
-                            enrollment.student.role = user_data['user'].role
-                            user_data['user'] = enrollment.student
-        for user_data in visible_user_data:
-            if not user_data['user'].last_name:
-                visible_user_data.remove(user_data)
-
-    def visible_students(self, site, sections):
-        students = []
-        visible_user_data = self.visible_site_user_data(site, sections)
-        self.match_visible_user_data_to_sis_enrollments(visible_user_data, sections)
-        for data in visible_user_data:
-            if data['user'].role in ['student', 'Waitlist Student']:
-                students.append(data['user'])
-        return students
+                            if enrollment.student.last_name and user_data['user'].role in ['student', 'Waitlist Student']:
+                                enrollment.student.canvas_id = user_data['user'].canvas_id
+                                enrollment.student.role = user_data['user'].role
+                                visible_enrollments.append(enrollment)
+        return visible_enrollments
 
     def visible_uids_with_role_and_section_id(self, site):
         users_with_sections = self.visible_site_user_data(site)

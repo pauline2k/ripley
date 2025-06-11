@@ -62,6 +62,14 @@ class CourseSite(object):
         self.data['created_date'] = value
 
     @property
+    def are_grades_final(self):
+        return self.data.get('are_grades_final')
+
+    @are_grades_final.setter
+    def are_grades_final(self, value):
+        self.data['are_grades_final'] = value
+
+    @property
     def has_template(self):
         return self.data.get('has_template')
 

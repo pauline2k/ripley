@@ -453,6 +453,7 @@ def get_course_enrollment(course):
                      sis_data.edo_basic_attributes.first_name,
                      sis_data.edo_basic_attributes.last_name,
                      enrollment.grade,
+                     enrollment.grading_basis,
                      enrollment.sis_enrollment_status AS status,
                      sis_data.edo_basic_attributes.email_address
                 FROM sis_data.edo_enrollments enrollment
@@ -478,6 +479,7 @@ def get_completed_enrollments(course):
     sql = f"""SELECT sis_data.edo_enrollments.sis_section_id,
                      sis_data.edo_enrollments.ldap_uid AS uid,
                      sis_data.edo_enrollments.grade,
+                     sis_data.edo_enrollments.grading_basis,
                      sis_data.edo_enrollments.sis_enrollment_status AS status,
                      sis_data.edo_basic_attributes.sid,
                      sis_data.edo_basic_attributes.first_name,
@@ -509,6 +511,7 @@ def results_to_enrollments(course, results):
         enrollments.append(SectionEnrollment({
             'student': student,
             'grade': r['grade'],
+            'grading_basis': r['grading_basis'],
             'section_id': str(r['sis_section_id']),
             'status': r['status'],
         }))
