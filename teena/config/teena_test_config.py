@@ -164,12 +164,9 @@ class TeenaTestConfig(object):
         self.get_multiple_test_sites()
         self.set_real_test_course_users()
 
-    def e_grades_export(self):
-        self.get_e_grades_test_sites()
-        self.course_site = self.course_sites[0]
-
-    def e_grades_validation(self):
-        self.get_e_grades_test_sites()
+    def e_grades(self):
+        self.course_site = CourseSite({'site_id': utils.e_grades_site_id()})
+        self.set_real_test_course_users(self.course_site)
 
     def mailing_lists(self):
         test_users_data = app.config['TEST_USERS']
@@ -383,12 +380,6 @@ class TeenaTestConfig(object):
         else:
             ripley_utils.get_course_enrollment(site.course)
         site.sections = site.course.sections
-
-    def get_e_grades_test_sites(self):
-        site_ids = utils.e_grades_site_ids()
-        self.course_sites = [CourseSite({'site_id': site_id}) for site_id in site_ids]
-        for site in self.course_sites:
-            self.set_real_test_course_users(site)
 
     # USERS
 

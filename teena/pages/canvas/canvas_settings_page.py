@@ -57,6 +57,13 @@ class CanvasSettingsPage(CanvasApiPage):
         self.when_visible(self.FLASH_MSG, utils.get_medium_timeout())
         self.wait_for_text_in_element(self.FLASH_MSG, text)
 
+    def hide_sticky_footer(self):
+        self.driver.execute_script('document.getElementsByClassName("form-actions-sticky-footer")[0].style.display="none";')
+        time.sleep(1)
+
+    def reveal_sticky_footer(self):
+        self.driver.execute_script('document.getElementsByClassName("form-actions-sticky-footer")[0].style.display="";')
+
     COURSE_DETAILS_LINK = By.XPATH, '//a[contains(.,"Course Details")]'
     COURSE_DETAILS_UPDATE_BTN = By.XPATH, '//button[contains(.,"Update Course Details")]'
     COURSE_NAME_EDIT_INPUT = By.ID, 'course_name'
@@ -107,8 +114,7 @@ class CanvasSettingsPage(CanvasApiPage):
 
     DONE_BTN = By.XPATH, '//button[text()="Done"]'
     SET_GRADING_SCHEME_CBX = By.ID, 'course_course_grading_standard_enabled'
-    GRADING_SCHEME_SELECT = By.XPATH, '//input[@data-testid="grading-schemes-selector-dropdown"]'
-    SELECT_ANOTHER_SCHEME_LINK = By.XPATH, '//a[@title="Find an Existing Grading Scheme"]'
+    GRADING_SCHEME_SELECT = By.ID, 'grading-schemes-selector-dropdown'
     VIEW_GRADING_SCHEME_LINK = By.XPATH, '//button[@data-testid="grading-schemes-selector-view-button"]'
 
     def disable_grading_scheme(self, site):
@@ -135,43 +141,33 @@ class CanvasSettingsPage(CanvasApiPage):
 
     def set_grading_scheme(self, desired_scheme):
         self.when_visible(self.GRADING_SCHEME_SELECT, utils.get_short_timeout())
-        schemes = ['Letter Grade Scale', 'Letter Grades with +/-', 'Pass/No Pass', 'Satisfactory/Unsatisfactory']
-        current_scheme = self.element(self.GRADING_SCHEME_SELECT).get_dom_attribute('value').strip()
+        current_scheme = self.el_value(self.GRADING_SCHEME_SELECT).strip()
         app.logger.info(f'Current scheme is {current_scheme}')
         if current_scheme != desired_scheme:
             app.logger.info(f'Setting it to {desired_scheme}')
-            current_opt_idx = schemes.index(current_scheme)
-            new_opt_idx = schemes.index(desired_scheme)
-            self.wait_for_element_and_click(self.GRADING_SCHEME_SELECT)
-            if current_opt_idx:
-                if new_opt_idx > current_opt_idx:
-                    for i in range(new_opt_idx - current_opt_idx):
-                        self.arrow_down()
-                else:
-                    for i in range(current_opt_idx - new_opt_idx):
-                        self.arrow_up()
-            else:
-                for i in range(new_opt_idx + 1):
-                    self.arrow_down()
-            self.hit_enter()
+            self.hide_canvas_footer_and_popups()
+            self.hide_sticky_footer()
+            self.click_element(self.GRADING_SCHEME_SELECT)
+            for i in range(8):
+                self.arrow_down()
+                time.sleep(utils.get_click_sleep())
+                if self.el_value(self.GRADING_SCHEME_SELECT).strip() == desired_scheme:
+                    self.hit_enter()
+                    break
+        self.reveal_sticky_footer()
         self.update_course_settings()
         self.when_visible(self.GRADING_SCHEME_SELECT, utils.get_short_timeout())
-        app.logger.info(
-            f"The grading scheme is now {self.element(self.GRADING_SCHEME_SELECT).get_dom_attribute('value')}")
 
     def update_course_settings(self):
         self.wait_for_element_and_click(self.UPDATE_COURSE_BTN)
         self.when_visible(self.UPDATE_COURSE_SUCCESS, utils.get_medium_timeout())
 
     def toggle_grading_scheme(self):
-        # Get rid of the endless layers of elements that might be covering the checkbox
         self.hide_canvas_footer_and_popups()
-        self.driver.execute_script('document.getElementsByClassName("form-actions-sticky-footer")[0].style.display="none";')
-        time.sleep(1)
+        self.hide_sticky_footer()
         self.element(self.SET_GRADING_SCHEME_CBX).click()
         time.sleep(1)
-        # Put the sticky footer back because it contains the update button
-        self.driver.execute_script('document.getElementsByClassName("form-actions-sticky-footer")[0].style.display="";')
+        self.reveal_sticky_footer()
         # Sometimes updates require a couple attempts
         try:
             self.update_course_settings()

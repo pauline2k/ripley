@@ -109,6 +109,7 @@ class EGradesPage(RipleyPages):
                     'last_name': r['Name'].split(',')[0].strip().lower(),
                     'grade': r['Grade'],
                     'grading_basis': r['Grading Basis'],
+                    'comment': r['Comments'],
                 })
         return e_grades
 
@@ -135,3 +136,57 @@ class EGradesPage(RipleyPages):
         grading_bases = [r['grading_basis'] for r in e_grades]
         grading_bases.sort()
         return grading_bases
+
+    @staticmethod
+    def expected_e_grade(letter_grades, grading_scheme, enrollment, cutoff):
+        if grading_scheme in ['Letter Grade Scale', 'Letter Grades with +/-']:
+            if enrollment.grading_basis == 'GRD':
+                return enrollment.grade
+            else:
+                if cutoff:
+                    passing = letter_grades.index(enrollment.grade) <= letter_grades.index(cutoff)
+                    if enrollment.grading_basis in ['ESU', 'SUS']:
+                        return 'S' if passing else 'U'
+                    else:
+                        return 'P' if passing else 'NP'
+                else:
+                    return enrollment.grade
+        else:
+            return enrollment.grade
+
+    @staticmethod
+    def expected_comment(enrollment):
+        if enrollment.grading_basis in ['CPN', 'DPN', 'EPN', 'PNP']:
+            return 'P/NP grade'
+        elif enrollment.grading_basis in ['ESU', 'SUS']:
+            return 'S/U grade'
+        elif enrollment.grading_basis == 'CNC':
+            return 'C/NC grade'
+        else:
+            return ''
+
+    def expected_e_grades_row(self, letter_grades, grading_scheme, enrollment, cutoff):
+        return {
+            'sid': enrollment.student.sid,
+            'last_name': enrollment.student.last_name.lower(),
+            'grade': self.expected_e_grade(letter_grades, grading_scheme, enrollment, cutoff),
+            'grading_basis': enrollment.grading_basis,
+            'comment': self.expected_comment(enrollment),
+        }
+
+    def expected_e_grades(self, letter_grades, grading_scheme, enrollments, cutoff):
+        e_grades = []
+        for enrollment in enrollments:
+            e_grades.append(self.expected_e_grades_row(letter_grades, grading_scheme, enrollment, cutoff))
+        e_grades.sort(key=lambda e: e['sid'])
+        return e_grades
+
+    @staticmethod
+    def actual_e_grades(e_grades, enrollments):
+        grades = []
+        enrollment_sids = [enrollment.student.sid for enrollment in enrollments]
+        for e_grade in e_grades:
+            if e_grade['sid'] in enrollment_sids:
+                grades.append(e_grade)
+        grades.sort(key=lambda e: e['sid'])
+        return grades
