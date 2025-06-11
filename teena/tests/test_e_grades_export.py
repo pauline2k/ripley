@@ -216,14 +216,18 @@ class TestUserToolAccess:
             self.add_user_page.search(user.uid, 'CalNet UID')
             self.add_user_page.add_user_by_uid(user, primary_section)
 
-    def test_support_admin_has_access(self):
-        self.canvas_page.masquerade_as(test.canvas_admin, test.course_site)
+    @pytest.mark.parametrize(argnames='user',
+                             argvalues=[user for user in [test.canvas_admin, test.lead_ta]],
+                             ids=[user.role for user in [test.canvas_admin, test.lead_ta]],
+                             scope='function')
+    def test_support_admin_has_access(self, user):
+        self.canvas_page.masquerade_as(user, test.course_site)
         self.e_grades_page.load_embedded_tool(test.course_site)
         self.e_grades_page.click_continue()
 
     @pytest.mark.parametrize(argnames='user',
-                             argvalues=[user for user in [test.lead_ta, test.ta, test.reader]],
-                             ids=[user.role for user in [test.lead_ta, test.ta, test.reader]],
+                             argvalues=[user for user in [test.ta, test.reader]],
+                             ids=[user.role for user in [test.ta, test.reader]],
                              scope='function')
     def test_user_with_button_but_no_tool_access(self, user):
         self.canvas_page.masquerade_as(user, test.course_site)
