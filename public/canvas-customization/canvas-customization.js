@@ -563,7 +563,7 @@ addMentalHealthResourcesResponsiveLink();
       var altMediaPanel = [
         '<div id="alt-media-container" class="alert alert-info">',
         '  <button class="btn-link element_toggler" aria-controls="alt-media-content" aria-expanded="false" aria-label="Notice to Instructors for Making Course Materials Accessible">',
-        '    <i class="icon-arrow-right"></i> <strong>Instructors: Making Course Materials Accessible (click to expand)</strong>',
+        '    <i class="icon-arrow-right"></i> <strong>Instructors: Making Course Materials Accessible (click/select to expand)</strong>',
         '  </button>',
         '  <div id="alt-media-content" class="hide" role="region" tabindex="-1">',
         '    <div>Without the assistance of course instructors, the University cannot fulfill its mission and ' +
