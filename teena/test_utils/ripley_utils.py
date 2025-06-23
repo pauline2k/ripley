@@ -131,14 +131,15 @@ def get_course_from_catalog_id_prefix(term, catalog_id_prefix):
     cs_id = get_cs_course_id_from_catalog_id(term, catalog_id_prefix)
     if cs_id:
         course = _get_course_from_cs_course_id(term, cs_id)
-        if course.teachers:
-            return course
+        if course:
+            if course.teachers:
+                return course
+            else:
+                app.logger.info(f'Course code {catalog_id_prefix} in term {term.sis_id} has no teachers')
+                return None
         else:
-            app.logger.info(f'Course code {catalog_id_prefix} in term {term.sis_id} has no teachers')
+            app.logger.info(f'No usable test course found matching course code {catalog_id_prefix} in term {term.sis_id}')
             return None
-    else:
-        app.logger.info(f'No test course found matching course code {catalog_id_prefix} in term {term.sis_id}')
-        return None
 
 
 def _get_course_from_cs_course_id(term, cs_course_id):
@@ -203,28 +204,30 @@ def _translate_schedule_time(time_string):
 
 
 def _sections_result_from_cs_course_id(term, cs_course_id):
-    sql = f"""SELECT sis_section_id AS id,
-                     is_primary,
-                     primary_associated_section_id,
-                     cs_course_id,
-                     sis_course_name AS code,
-                     sis_course_title AS title,
-                     sis_instruction_format AS format,
-                     sis_section_num AS number,
-                     instructor_uid,
-                     instructor_role_code,
-                     instruction_mode AS mode,
-                     meeting_location AS location,
-                     meeting_days AS days,
-                     meeting_end_date AS end_date,
-                     meeting_start_time AS start_time,
-                     meeting_end_time AS end_time
+    sql = f"""SELECT sis_data.edo_sections.sis_section_id AS id,
+                     sis_data.edo_sections.is_primary,
+                     sis_data.edo_sections.primary_associated_section_id,
+                     sis_data.edo_sections.cs_course_id,
+                     sis_data.edo_sections.sis_course_name AS code,
+                     sis_data.edo_sections.sis_course_title AS title,
+                     sis_data.edo_sections.sis_instruction_format AS format,
+                     sis_data.edo_sections.sis_section_num AS number,
+                     sis_data.edo_sections.instructor_uid,
+                     sis_data.edo_sections.instructor_role_code,
+                     sis_data.edo_sections.instruction_mode AS mode,
+                     sis_data.edo_sections.instructor_name,
+                     sis_data.edo_basic_attributes.email_address AS instructor_email_address,
+                     sis_data.edo_basic_attributes.sid AS instructor_sid,
+                     sis_data.edo_sections.meeting_location AS location,
+                     sis_data.edo_sections.meeting_days AS days,
+                     sis_data.edo_sections.meeting_end_date AS end_date,
+                     sis_data.edo_sections.meeting_start_time AS start_time,
+                     sis_data.edo_sections.meeting_end_time AS end_time
                 FROM sis_data.edo_sections
-               WHERE sis_term_id = '{term.sis_id}'
-                 AND cs_course_id = '{cs_course_id}'
-            ORDER BY sis_course_name ASC,
-                     sis_instruction_format DESC,
-                     sis_section_num ASC"""
+           LEFT JOIN sis_data.edo_basic_attributes
+                  ON sis_data.edo_sections.instructor_uid = sis_data.edo_basic_attributes.ldap_uid
+               WHERE sis_data.edo_sections.sis_term_id = '{term.sis_id}'
+                 AND cs_course_id = '{cs_course_id}'"""
     app.logger.info(sql)
     return data_loch.safe_execute_rds(sql)
 
@@ -290,7 +293,12 @@ def _get_test_course_section_data(sections_result):
 def _section_data_to_sections(sections_data, instructors=None):
     if not instructors:
         instructors = []
-        instructor_groups = [list(inst_result) for key, inst_result in groupby(sections_data,
+        instructor_data = []
+        for data in sections_data:
+            if data['instructor_uid']:
+                instructor_data.append(data)
+        sorted_instructors = sorted(instructor_data, key=lambda i: i['instructor_uid'])
+        instructor_groups = [list(inst_result) for key, inst_result in groupby(sorted_instructors,
                                                                                key=lambda i: i['instructor_uid'])]
         for inst_group in instructor_groups:
             instructors.append(Person({
@@ -301,7 +309,8 @@ def _section_data_to_sections(sections_data, instructors=None):
             }))
 
     sections = []
-    section_groups = [list(sec_result) for key, sec_result in groupby(sections_data, key=lambda s: s['section_id'])]
+    sorted_sections = sorted(sections_data, key=lambda ss: ss['section_id'])
+    section_groups = [list(sec_result) for key, sec_result in groupby(sorted_sections, key=lambda s: s['section_id'])]
     for sec_group in section_groups:
         teachers = []
         locations = []

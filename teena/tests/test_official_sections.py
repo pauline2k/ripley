@@ -127,8 +127,8 @@ class TestCurrentSectionsView:
 
 @pytest.mark.usefixtures('page_objects')
 @pytest.mark.parametrize(argnames='tc',
-                         argvalues=[tc for tc in test.test_cases if not tc.section.include_in_site],
-                         ids=[tc.test_case_id for tc in test.test_cases if not tc.section.include_in_site],
+                         argvalues=[tc for tc in test.test_cases if tc.section in add_delete_sections],
+                         ids=[tc.test_case_id for tc in test.test_cases if tc.section in add_delete_sections],
                          scope='class')
 class TestAvailableSectionsView:
 

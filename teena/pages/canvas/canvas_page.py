@@ -94,12 +94,20 @@ class CanvasPage(CanvasAssignmentsPage,
 
     MANAGE_SITES_BTN = By.XPATH, f'//a[text()="{RipleyTools.MANAGE_SITES.value.name}"]'
     MANAGE_SITES_SETTINGS_LINK = By.XPATH, f'//div[contains(@class, "profile-tray")]//a[contains(text(), "{RipleyTools.MANAGE_SITES.value.name}")]'
+    EVENTS_LIST_DIV = By.XPATH, '//div[@data-testid="ToDoSidebar"]'
     USER_PROV_LINK = By.LINK_TEXT, RipleyTools.USER_PROVISIONING.value.name
 
     def click_manage_sites(self):
         self.hide_canvas_footer_and_popups()
-        self.wait_for_page_and_click(self.MANAGE_SITES_BTN)
-        self.switch_to_canvas_iframe(utils.ripley_base_url())
+        try:
+            self.wait_for_element_and_click(self.MANAGE_SITES_BTN)
+            self.switch_to_canvas_iframe(utils.ripley_base_url())
+        except TimeoutException:
+            # Some users don't have the button because they've got a different dashboard configured
+            if not self.is_present(self.EVENTS_LIST_DIV):
+                self.click_manage_sites_settings_link()
+            else:
+                raise
 
     def click_manage_sites_settings_link(self):
         self.wait_for_element_and_click(self.PROFILE_LINK)
