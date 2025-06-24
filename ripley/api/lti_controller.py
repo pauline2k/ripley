@@ -44,7 +44,7 @@ class MessageLaunch(FlaskMessageLaunch):
             super().validate_deployment()
         except LtiException as e:
             deployment_id = self._get_jwt_body().get('https://purl.imsglobal.org/spec/lti/claim/deployment_id')
-            app.logger.warn(f'Deployment ID validation failed; skipping. {e} deployment_id={deployment_id}')
+            app.logger.warning(f'Deployment ID validation failed; skipping. {e} deployment_id={deployment_id}')
         return self
 
 

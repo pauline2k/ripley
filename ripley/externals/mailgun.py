@@ -45,7 +45,7 @@ def send_message(mailing_list, member, subject, sender, body_html, body_plain, m
 
     _set_from(mailing_list, member, payload)
 
-    # TODO handle attachments if any
+    # TODO: handle attachments if any
 
     # Mailgun limits batch sending to 1000 members at a time.
     members = MailingListMembers.get_mailing_list_members(mailing_list_id=mailing_list.id)

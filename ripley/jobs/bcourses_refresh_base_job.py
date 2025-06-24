@@ -143,7 +143,7 @@ class BcoursesRefreshBaseJob(BaseJob):
         if self.job_flags.incremental:
             self.patch_enrollment_provisioning_reports(users_by_uid)
 
-    def patch_enrollment_provisioning_reports(self, users_by_uid):  # noqa C901
+    def patch_enrollment_provisioning_reports(self, users_by_uid):  # noqa: C901
         # Having looped through the enrollment provisioning reports, we also need to loop through our
         # recent exports so that we don't repeat changes picked up in a previous incremental job.
         users_by_user_id = {user_id_from_attributes(u): u for u in users_by_uid.values()}
@@ -369,7 +369,7 @@ class BcoursesRefreshBaseJob(BaseJob):
                                 self.job_flags.incremental,
                             )
 
-    def upload_results(self, csv_set, timestamp):  # noqa C901
+    def upload_results(self, csv_set, timestamp):  # noqa: C901, PLR0912
         # The email deletion job runs an API loop and does not post a SIS import to Canvas.
         if self.job_flags.delete_email_addresses:
             result = self.handle_email_deletions(timestamp)
@@ -464,7 +464,7 @@ class BcoursesRefreshBaseJob(BaseJob):
 
         email_deletions_file = tempfile.NamedTemporaryFile(suffix='.csv')
         with open(email_deletions_file.name, 'w') as f:
-            email_deletions = csv.DictWriter(f, fieldnames=['canvas_user_id', 'email_address', 'result']) # noqa
+            email_deletions = csv.DictWriter(f, fieldnames=['canvas_user_id', 'email_address', 'result'])
             email_deletions.writeheader()
             success_count = 0
             error_count = 0

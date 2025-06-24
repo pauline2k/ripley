@@ -45,7 +45,7 @@ from teena.pages.ripley.user_provisioning_page import UserProvisioningPage
 from teena.test_utils.webdriver_manager import WebDriverManager
 
 
-os.environ['RIPLEY_ENV'] = 'teena'  # noqa
+os.environ['RIPLEY_ENV'] = 'teena'
 
 _app = create_app(routes=False, jobs=False)
 

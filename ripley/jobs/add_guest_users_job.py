@@ -55,7 +55,7 @@ class AddGuestUsersJob(BaseJob):
 
         app.logger.info(f'Will add {len(guests)} new users.')
         with open(canvas_import_file.name, 'w') as f:
-            canvas_import = csv.DictWriter(f, fieldnames=['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) # noqa
+            canvas_import = csv.DictWriter(f, fieldnames=['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status'])
             canvas_import.writeheader()
             for user in guests:
                 canvas_import.writerow({

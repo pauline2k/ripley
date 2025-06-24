@@ -37,7 +37,14 @@ from ripley.lib.util import utc_now
 from rq.job import get_current_job
 
 
-def provision_course_site(uid, site_name, site_abbreviation, term_slug, section_ids, is_admin_by_ccns):  # noqa C901
+def provision_course_site(  # noqa: C901, PLR0915
+        uid,
+        site_name,
+        site_abbreviation,
+        term_slug,
+        section_ids,
+        is_admin_by_ccns,
+):
     term = BerkeleyTerm.from_slug(term_slug)
     if is_admin_by_ccns:
         # Admins can specify semester and CCNs directly, without access checks.

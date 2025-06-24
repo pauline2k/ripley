@@ -43,7 +43,7 @@ def initialize_logger(app, location=None):
     # Capture runtime warnings so that we'll see them.
     logging.captureWarnings(True)
 
-    # TODO? For more detail from the LDAP library, specify BASIC or NETWORK.
+    # TODO: For more detail from the LDAP library, specify BASIC or NETWORK?
     # ldap3_log.set_library_log_detail_level(ldap3_log.ERROR)
 
     # If location is configured as "STDOUT", don't create a new log file.

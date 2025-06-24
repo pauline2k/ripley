@@ -66,19 +66,19 @@ def _initialize_queue(app):
 
 
 def _register_jobs(app):
-    from ripley.jobs.add_guest_users_job import AddGuestUsersJob  # noqa
-    from ripley.jobs.add_new_users_job import AddNewUsersJob  # noqa
-    from ripley.jobs.bcourses_delete_email_addresses_job import BcoursesDeleteEmailAddressesJob  # noqa
-    from ripley.jobs.bcourses_inactivate_accounts_job import BcoursesInactivateAccountsJob  # noqa
-    from ripley.jobs.bcourses_refresh_accounts_job import BcoursesRefreshAccountsJob  # noqa
-    from ripley.jobs.bcourses_refresh_full_job import BcoursesRefreshFullJob  # noqa
-    from ripley.jobs.bcourses_refresh_incremental_job import BcoursesRefreshIncrementalJob  # noqa
-    from ripley.jobs.configure_tools_from_current_host_job import ConfigureToolsFromCurrentHostJob  # noqa
-    from ripley.jobs.export_term_enrollments_job import ExportTermEnrollmentsJob  # noqa
-    from ripley.jobs.house_keeping_job import HouseKeepingJob  # noqa
-    from ripley.jobs.lti_usage_report_job import LtiUsageReportJob  # noqa
-    from ripley.jobs.mailing_list_refresh_job import MailingListRefreshJob  # noqa
-    from ripley.jobs.reconfigure_canvas_test_servers_job import ReconfigureCanvasTestServersJob  # noqa
+    from ripley.jobs.add_guest_users_job import AddGuestUsersJob  # noqa: F401
+    from ripley.jobs.add_new_users_job import AddNewUsersJob  # noqa: F401
+    from ripley.jobs.bcourses_delete_email_addresses_job import BcoursesDeleteEmailAddressesJob  # noqa: F401
+    from ripley.jobs.bcourses_inactivate_accounts_job import BcoursesInactivateAccountsJob  # noqa: F401
+    from ripley.jobs.bcourses_refresh_accounts_job import BcoursesRefreshAccountsJob  # noqa: F401
+    from ripley.jobs.bcourses_refresh_full_job import BcoursesRefreshFullJob  # noqa: F401
+    from ripley.jobs.bcourses_refresh_incremental_job import BcoursesRefreshIncrementalJob  # noqa: F401
+    from ripley.jobs.configure_tools_from_current_host_job import ConfigureToolsFromCurrentHostJob  # noqa: F401
+    from ripley.jobs.export_term_enrollments_job import ExportTermEnrollmentsJob  # noqa: F401
+    from ripley.jobs.house_keeping_job import HouseKeepingJob  # noqa: F401
+    from ripley.jobs.lti_usage_report_job import LtiUsageReportJob  # noqa: F401
+    from ripley.jobs.mailing_list_refresh_job import MailingListRefreshJob  # noqa: F401
+    from ripley.jobs.reconfigure_canvas_test_servers_job import ReconfigureCanvasTestServersJob  # noqa: F401
 
     if app.config['JOBS_AUTO_START'] and (not app.debug or os.environ.get('WERKZEUG_RUN_MAIN') == 'true'):
         background_job_manager.start(app)

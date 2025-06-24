@@ -30,4 +30,4 @@ import sys
 
 # Boilerplate allowing scripts in the /scripts directory to find the ripley module.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from ripley.lib import scriptify # noqa
+from ripley.lib import scriptify # noqa: F401

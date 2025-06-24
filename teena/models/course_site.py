@@ -126,7 +126,7 @@ class CourseSite(object):
     def expected_student_count(self):
         return self._sections_student_count_by_enroll_status('E')
 
-    # TODO account for students both confirmed and waitlisted
+    # TODO: Account for students both confirmed and waitlisted
     def expected_wait_list_count(self):
         return self._sections_student_count_by_enroll_status('W')
 
