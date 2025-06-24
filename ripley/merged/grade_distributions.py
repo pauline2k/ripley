@@ -111,16 +111,16 @@ enrollment count ({demographics_distribution[term_id]['count']}) falls short of 
                 continue
             for distribution_value, grade_points_list in values.items():
                 student_count = len(grade_points_list)
-                insufficient_data = False
-                if student_count > 0 and student_count < app.config['NEWT_SMALL_CELL_THRESHOLD']:
+                if student_count < app.config['NEWT_SMALL_CELL_THRESHOLD']:
                     app.logger.debug(f"Newt: {demographics_distribution[term_id]['courseName']} term ID {term_id} has only {student_count} \
 {distribution_key}--{distribution_value} students; value obscured in demographics chart")
-                    insufficient_data = True
-                demographics_distribution[term_id][distribution_key][distribution_value] = {
-                    'meanGradePoints': round(mean(grade_points_list), 3) if len(grade_points_list) else 0,
-                    'medianGradePoints': round(median(grade_points_list), 3) if len(grade_points_list) else 0,
-                    'count': None if insufficient_data else student_count,
-                }
+                    demographics_distribution[term_id][distribution_key][distribution_value] = None
+                else:
+                    demographics_distribution[term_id][distribution_key][distribution_value] = {
+                        'meanGradePoints': round(mean(grade_points_list), 3) if student_count else 0,
+                        'medianGradePoints': round(median(grade_points_list), 3) if student_count else 0,
+                        'count': student_count,
+                    }
         term_grade_point_list = demographics_distribution[term_id].pop('gradePointList', [])
         sorted_demographics_distribution.append({
             'meanGradePoints': round(mean(term_grade_point_list), 3) if len(term_grade_point_list) else 0,

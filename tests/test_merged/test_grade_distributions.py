@@ -259,60 +259,24 @@ class TestGradeDistributions:
             assert len(demographics_distribution) == 2
             assert demographics_distribution[0] == {
                 'athleteStatus': {
-                    'true': {
-                        'meanGradePoints': 0,
-                        'count': 0,
-                        'medianGradePoints': 0,
-                    },
-                    'false': {
-                        'meanGradePoints': 2.233,
-                        'count': None,
-                        'medianGradePoints': 2,
-                    },
+                    'true': None,
+                    'false': None,
                 },
                 'meanGradePoints': 2.233,
                 'genders': {
-                    'female': {
-                        'meanGradePoints': 2.233,
-                        'count': None,
-                        'medianGradePoints': 2,
-                    },
+                    'female': None,
                 },
                 'internationalStatus': {
-                    'true': {
-                        'meanGradePoints': 0,
-                        'count': 0,
-                        'medianGradePoints': 0,
-                    },
-                    'false': {
-                        'meanGradePoints': 2.233,
-                        'count': None,
-                        'medianGradePoints': 2,
-                    },
+                    'true': None,
+                    'false': None,
                 },
                 'transferStatus': {
-                    'true': {
-                        'meanGradePoints': 0,
-                        'count': 0,
-                        'medianGradePoints': 0,
-                    },
-                    'false': {
-                        'meanGradePoints': 2.233,
-                        'count': None,
-                        'medianGradePoints': 2,
-                    },
+                    'true': None,
+                    'false': None,
                 },
                 'underrepresentedMinorityStatus': {
-                    'true': {
-                        'meanGradePoints': 2.233,
-                        'count': None,
-                        'medianGradePoints': 2,
-                    },
-                    'false': {
-                        'meanGradePoints': 0,
-                        'count': 0,
-                        'medianGradePoints': 0,
-                    },
+                    'true': None,
+                    'false': None,
                 },
                 'count': 3,
                 'courseName': 'ASTRON 218',
@@ -322,11 +286,7 @@ class TestGradeDistributions:
             }
             assert demographics_distribution[1] == {
                 'athleteStatus': {
-                    'true': {
-                        'meanGradePoints': 3.85,
-                        'count': None,
-                        'medianGradePoints': 3.85,
-                    },
+                    'true': None,
                     'false': {
                         'meanGradePoints': 3.86,
                         'count': 81,
@@ -347,11 +307,7 @@ class TestGradeDistributions:
                         'count': 19,
                         'medianGradePoints': 4,
                     },
-                    'other': {
-                        'meanGradePoints': 4.0,
-                        'count': None,
-                        'medianGradePoints': 4,
-                    },
+                    'other': None,
                 },
                 'internationalStatus': {
                     'false': {
@@ -374,11 +330,7 @@ class TestGradeDistributions:
                         'count': 79,
                         'medianGradePoints': 4,
                     },
-                    'true': {
-                        'meanGradePoints': 3.575,
-                        'count': None,
-                        'medianGradePoints': 4,
-                    },
+                    'true': None,
                 },
                 'underrepresentedMinorityStatus': {
                     'false': {
