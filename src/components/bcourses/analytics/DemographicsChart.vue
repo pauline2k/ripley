@@ -27,6 +27,7 @@
               :value="{'group': key, 'option': get(group.options, 0)}"
             >
               {{ group.label }}
+              <span v-if="!key.startsWith('divider') && !size(group.options)"> - No Data Available</span>
             </option>
           </template>
         </select>
@@ -289,10 +290,11 @@ export default {
       each(this.gradeDistribution, item => {
         each(item, (values, category) => {
           let option = get(this.demographicOptions, category)
-          if (option && !size(option['options'])) {
+          if (get(values, 'true') && option && !size(option['options'])) {
             option['options'] = ['true']
           } else if (category === 'genders') {
             each(values, (vals, subcategory) => {
+              if (!vals) return
               option = get(this.demographicOptions, `${category}.${subcategory}`)
               if (option && !size(option['options'])) {
                 option['options'] = ['true']
