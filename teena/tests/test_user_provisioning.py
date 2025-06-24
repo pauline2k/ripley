@@ -77,7 +77,7 @@ class TestUserProvisioning:
 
     def test_more_than_200_uids_rejected(self):
         uids = ' '.join([u.uid for u in test_users])
-        uids = f'{uids} ' * 29
+        uids = f'{uids} ' * 100
         self.user_prov_page.load_embedded_tool()
         self.user_prov_page.enter_uids_and_submit(uids)
         self.user_prov_page.when_visible(self.user_prov_page.MAX_INPUT_MSG, utils.get_short_timeout())

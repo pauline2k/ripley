@@ -124,7 +124,7 @@ class TestFindAPerson:
         assert not self.add_user_page.element(self.add_user_page.SEARCH_BUTTON).is_enabled()
 
     def test_search_by_name(self):
-        self.add_user_page.search('Gudiño Bear', 'Last Name, First Name')
+        self.add_user_page.search('Bear', 'Last Name, First Name')
         self.add_user_page.wait_for_uid_result(utils.get_oski_uid())
 
     def test_search_by_name_no_results(self):
@@ -211,7 +211,7 @@ class TestUserRolesAdminTALeadTA:
         self.canvas_page.masquerade_as(user, test.course_site)
         self.canvas_page.load_users_page(test.course_site)
         self.canvas_page.click_find_person_to_add()
-        self.add_user_page.search('Gudiño Bear', 'Last Name, First Name')
+        self.add_user_page.search('Bear', 'Last Name, First Name')
         if user == test.canvas_admin:
             opts = ['Student', 'Waitlist Student', 'Teacher', 'TA', 'Lead TA', 'Reader', 'Designer', 'Observer']
         elif user == test.lead_ta:

@@ -137,7 +137,7 @@ class TestUserRolePermissions:
         self.canvas_page.masquerade_as(tc)
         self.canvas_page.load_homepage()
         self.canvas_page.wait_for_homepage_content()
-        if self.canvas_page.is_present(self.canvas_page.DASHBOARD_CARDS):
+        if self.canvas_page.is_present(self.canvas_page.EVENTS_LIST_DIV):
             if tc.role in ['Canvas Admin', 'TA', 'Staff']:
                 assert self.canvas_page.is_manage_sites_button_present()
             else:

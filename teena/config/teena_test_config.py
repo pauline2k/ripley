@@ -169,6 +169,7 @@ class TeenaTestConfig(object):
         self.set_real_test_course_users(self.course_site)
 
     def mailing_lists(self):
+        ripley_utils.drop_existing_mailing_lists()
         test_users_data = app.config['TEST_USERS']
         test_users = [Person(data) for data in test_users_data]
         self.canvas_admin = Person({'role': 'Canvas Admin'})
