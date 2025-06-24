@@ -33,7 +33,7 @@ from ripley.lib.util import utc_now
 class CanvasSynchronization(db.Model):
     __tablename__ = 'canvas_synchronization'
 
-    id = db.Column(db.Boolean, nullable=False, primary_key=True)  # noqa: A003
+    id = db.Column(db.Boolean, nullable=False, primary_key=True)
     last_guest_user_sync = db.Column(db.DateTime)
     latest_term_enrollment_csv_set = db.Column(db.DateTime)
     last_enrollment_sync = db.Column(db.DateTime)

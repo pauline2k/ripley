@@ -56,7 +56,7 @@ class BaseJob:
             thread = Thread(target=self.run, kwargs=kwargs, daemon=True)
             thread.start()
 
-    def run(self, force_run=False, concurrent=False, params=None):  # noqa C901
+    def run(self, force_run=False, concurrent=False, params=None):
         with self.app_context():
             job = Job.get_job_by_key(self.key())
             if job:
@@ -64,27 +64,27 @@ class BaseJob:
                 job_runner_id = fetch_job_runner_id()
 
                 if job.disabled and not force_run:
-                    app.logger.warn(f'Job {self.key()} is disabled. It will not run.')
+                    app.logger.warning(f'Job {self.key()} is disabled. It will not run.')
 
                 elif current_instance_id and current_instance_id != job_runner_id:
-                    app.logger.warn(f'Skipping job because current instance {current_instance_id} is not job runner {job_runner_id}')
+                    app.logger.warning(f'Skipping job because current instance {current_instance_id} is not job runner {job_runner_id}')
 
                 elif Configuration.get().hypersleep:
-                    app.logger.warn(f'Hypersleep enabled: skipping job {self.key()}')
+                    app.logger.warning(f'Hypersleep enabled: skipping job {self.key()}')
 
                 else:
                     running_job = JobHistory.get_running_job(job_key=self.key())
                     if running_job:
                         hours_running = (utc_now() - running_job.started_at).total_seconds() / 3600
                         if hours_running >= app.config['JOB_TIMEOUT_HOURS']:
-                            app.logger.warn(f'Older instance of job {self.key()} has timed out.')
+                            app.logger.warning(f'Older instance of job {self.key()} has timed out.')
                             JobHistory.job_finished(
                                 id_=running_job.id,
                                 failed=True,
                                 result=f"Job exceeded timeout of {app.config['JOB_TIMEOUT_HOURS']} hours.",
                             )
                         elif not concurrent:
-                            app.logger.warn(f'Skipping job {self.key()} because an older instance is still running')
+                            app.logger.warning(f'Skipping job {self.key()} because an older instance is still running')
                             return
 
                     app.logger.info(f'Job {self.key()} is starting.')

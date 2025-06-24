@@ -33,7 +33,7 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.util import to_percentage
 
 
-def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  # noqa
+def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  # noqa: C901, PLR0912
     demographics_distribution = {}
     grade_distribution_by_term = {}
     student_grades = get_grades_with_demographics(course_term_id, section_ids, GRADE_ORDERING, instructor_uid)

@@ -41,7 +41,7 @@ from unidecode import unidecode
 class MailingList(Base):
     __tablename__ = 'canvas_site_mailing_lists'
 
-    id = db.Column(db.Integer, nullable=False, primary_key=True)  # noqa: A003
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
     canvas_site_id = db.Column(db.Integer, nullable=False, unique=True)
     canvas_site_name = db.Column(db.String(255))
     list_name = db.Column(db.String(255), unique=True)

@@ -31,7 +31,7 @@ from ripley.models.base import Base
 class MailingListMembers(Base):
     __tablename__ = 'canvas_site_mailing_list_members'
 
-    id = db.Column(db.Integer, nullable=False, primary_key=True)  # noqa: A003
+    id = db.Column(db.Integer, nullable=False, primary_key=True)
     mailing_list_id = db.Column(db.Integer, db.ForeignKey('canvas_site_mailing_lists.id'), nullable=False)
     can_send = db.Column(db.Boolean, nullable=False)
     email_address = db.Column(db.String(255), nullable=False)

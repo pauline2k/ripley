@@ -29,9 +29,9 @@ from ripley import db, std_commit
 class Configuration(db.Model):
     __tablename__ = 'configuration'
 
-    id = db.Column(db.Boolean, nullable=False, primary_key=True)  # noqa: A003
+    id = db.Column(db.Boolean, nullable=False, primary_key=True)
     # Hypersleep is a partial maintenance mode in which users are unable to kick off long-running background jobs.
-    hypersleep = db.Column(db.Boolean, nullable=False)  # noqa: A003
+    hypersleep = db.Column(db.Boolean, nullable=False)
 
     def __repr__(self):
         return f"""<Configuration

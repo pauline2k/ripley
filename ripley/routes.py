@@ -31,7 +31,7 @@ from flask_login import current_user, LoginManager, user_logged_out
 from werkzeug.exceptions import HTTPException, NotFound
 
 
-def register_routes(app):  # noqa C901
+def register_routes(app):  # noqa: C901, PLR0915
     """Register app routes."""
     login_manager = LoginManager()
     login_manager.init_app(app)

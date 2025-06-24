@@ -37,7 +37,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from tests.util import execute_loch_fixture_sql, override_config
 
-os.environ['RIPLEY_ENV'] = 'test'  # noqa
+os.environ['RIPLEY_ENV'] = 'test'
 
 # Because app and db fixtures are only created once per pytest run, individual tests
 # are not able to modify application configuration values before the app is created.
@@ -68,7 +68,7 @@ def cache_session():
     cache.clear()
 
 
-# TODO Perform DB schema creation and deletion outside an app context, enabling test-specific app configurations.
+# TODO: Perform DB schema creation and deletion outside an app context, enabling test-specific app configurations.
 @pytest.fixture(scope='session')
 def db(app):
     """Fixture database object, shared by all tests."""

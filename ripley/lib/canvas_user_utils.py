@@ -158,7 +158,7 @@ def canvas_user_profile_to_api_json(canvas_user_profile, uid, canvas_site_id=Non
         course = canvas.get_course(course_id=canvas_site_id)
         if course:
             api_json.update({
-                # TODO This site-specific data should not be merged into the upstream Canvas user object, but
+                # TODO: This site-specific data should not be merged into the upstream Canvas user object, but
                 # a fix will require reworking our authentication code.
                 'canvasSiteId': canvas_site_id,
                 'canvasSiteName': course.name,
@@ -174,7 +174,7 @@ def canvas_user_profile_to_api_json(canvas_user_profile, uid, canvas_site_id=Non
 
 
 def user_import_csv_fields():
-    fieldnames = ['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status'] # noqa
+    fieldnames = ['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']
     if app.config['FLAG_CSV_SYNC_PRONOUNS']:
         fieldnames.append('pronouns')
     return fieldnames
