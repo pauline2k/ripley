@@ -68,7 +68,7 @@
       <ChartDefinitions id="grade-distribution-demographics-definitions" :is-expanded="showChartDefinitions" :show-demographics="true" />
     </v-row>
     <hr aria-hidden="true" class="mb-3" />
-    <highcharts ref="chart" :options="chartSettings"></highcharts>
+    <Chart ref="chart" :options="chartSettings" />
     <v-row class="d-flex justify-center">
       <v-btn
         id="grade-distribution-demographics-show-btn"
@@ -178,7 +178,7 @@ import {capitalize, cloneDeep, each, get, replace, round, size} from 'lodash'
 export default {
   name: 'DemographicsChart',
   components: {
-    highcharts: Chart,
+    Chart,
     ChartDefinitions
   },
   mixins: [Context],
