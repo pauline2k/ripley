@@ -231,21 +231,22 @@ class CanvasPeoplePage(CanvasSettingsPage):
     # Edit user
 
     EDIT_USER_LINK = By.XPATH, '//a[@class="edit_user_link"]'
-    UPDATE_DETAILS_BTN = By.XPATH, '//button[text()="Update Details"]'
+    UPDATE_DETAILS_BTN = By.XPATH, '//button[contains(., "Update Details")]'
 
     DEFAULT_EMAIL = By.XPATH, '//th[text()="Default Email:"]/following-sibling::td'
-    USER_EMAIL_INPUT = By.ID, 'user_email'
+    USER_EMAIL_INPUT = By.NAME, 'email'
 
-    EDIT_USER_LOGIN_LINK = By.XPATH, '//a[@class="edit_pseudonym_link"]'
+    MORE_USER_DETAILS_LINK = By.CLASS_NAME, 'more_user_information_link'
+    EDIT_USER_LOGIN_LINK = By.CLASS_NAME, 'edit_pseudonym_link'
     USER_LOGIN = By.XPATH, '//b[@class="unique_id"]'
-    USER_LOGIN_INPUT = By.ID, 'pseudonym_unique_id'
-    UPDATE_USER_LOGIN_BTN = By.XPATH, '//button[text()="Update Login"]'
+    USER_LOGIN_INPUT = By.NAME, 'unique_id'
+    UPDATE_USER_LOGIN_BTN = By.XPATH, '//button[contains(., "Update Login")]'
 
     def activate_users_and_reset_email(self, users):
         for user in users:
             self.navigate_to(f'{utils.canvas_base_url()}/users/{user.canvas_id}')
             self.when_present(self.DEFAULT_EMAIL, utils.get_short_timeout())
-            if self.element(self.DEFAULT_EMAIL).text == user.email_address:
+            if self.element(self.DEFAULT_EMAIL).text == user.email:
                 app.logger.info(f'User {user.uid} email already updated')
             else:
                 app.logger.info(f'Resetting user {user.uid} email to {user.email}')
@@ -253,7 +254,9 @@ class CanvasPeoplePage(CanvasSettingsPage):
                 self.wait_for_element_clear_and_send_keys(self.USER_EMAIL_INPUT, user.email)
                 self.wait_for_element_and_click(self.UPDATE_DETAILS_BTN)
                 self.when_present(self.DEFAULT_EMAIL, utils.get_short_timeout())
-            self.when_visible(self.USER_LOGIN, utils.get_short_timeout())
+            if not self.is_present(self.USER_LOGIN):
+                self.wait_for_element_and_click(self.MORE_USER_DETAILS_LINK)
+                self.when_visible(self.USER_LOGIN, utils.get_short_timeout())
             if 'inactive' in self.element(self.USER_LOGIN).text:
                 app.logger.info(f'Reactivating UID {user.uid}')
                 self.wait_for_element_and_click(self.EDIT_USER_LOGIN_LINK)

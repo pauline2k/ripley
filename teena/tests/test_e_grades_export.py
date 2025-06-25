@@ -208,7 +208,7 @@ class TestFinalGradeOverride:
 class TestUserToolAccess:
 
     def test_add_users(self):
-        users_to_add = [test.lead_ta, test.ta, test.designer, test.reader, test.observer, test.students[0],
+        users_to_add = [test.lead_ta, test.ta, test.designer, test.reader, test.observer, test.student,
                         test.wait_list_student]
         self.canvas_page.load_users_page(test.course_site)
         self.canvas_page.click_find_person_to_add()
@@ -237,9 +237,9 @@ class TestUserToolAccess:
         self.e_grades_page.wait_for_unauthorized_msg()
 
     @pytest.mark.parametrize(argnames='user',
-                             argvalues=[user for user in [test.designer, test.observer, test.students[0],
+                             argvalues=[user for user in [test.designer, test.observer, test.student,
                                                           test.wait_list_student]],
-                             ids=[user.role for user in [test.designer, test.observer, test.students[0],
+                             ids=[user.role for user in [test.designer, test.observer, test.student,
                                                          test.wait_list_student]],
                              scope='function')
     def test_user_with_no_tool_access(self, user):

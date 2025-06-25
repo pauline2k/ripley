@@ -34,7 +34,7 @@ test_users = [
     test.manual_teacher,
     test.ta,
     test.designer,
-    test.students[0],
+    test.student,
 ]
 
 

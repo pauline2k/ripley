@@ -152,8 +152,8 @@ class TestUserRoleDesignerOrReader:
 
 @pytest.mark.usefixtures('page_objects')
 @pytest.mark.parametrize(argnames='user',
-                         argvalues=[test.students[0], test.wait_list_student],
-                         ids=[user.role for user in [test.students[0], test.wait_list_student]],
+                         argvalues=[test.student, test.wait_list_student],
+                         ids=[user.role for user in [test.student, test.wait_list_student]],
                          scope='class')
 class TestUserRoleStudents:
 

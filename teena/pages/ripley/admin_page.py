@@ -25,6 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import time
 
 from flask import current_app as app
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from teena.pages.ripley.ripley_pages import RipleyPages
 from teena.test_utils import utils
@@ -37,15 +38,14 @@ class AdminPage(RipleyPages):
         return By.ID, f'run-job-{job.key}'
 
     @staticmethod
-    def job_most_recent_locator(job):
-        return (By.XPATH,
-                f'//h2[contains(., "Job History")]/../../following-sibling::div//tbody/tr[contains(., "{job.key}")][1]')
+    def job_most_recent_xpath(job):
+        return f'//h2[contains(., "Job History")]/../../following-sibling::div//tbody/tr[contains(., "{job.key}")][1]'
 
     def job_success(self, job):
-        return self.is_present((By.XPATH, f'{self.job_most_recent_locator(job)}//i[contains(@class, "success")]'))
+        return By.XPATH, f'{self.job_most_recent_xpath(job)}//i[contains(@class, "success")]'
 
     def job_failure(self, job):
-        return self.is_present((By.XPATH, f'{self.job_most_recent_locator(job)}//i[contains(@class, "error")]'))
+        return By.XPATH, f'{self.job_most_recent_xpath(job)}//i[contains(@class, "error")]'
 
     def run_job(self, job):
         app.logger.info(f'Running {job.name}')
@@ -64,7 +64,7 @@ class AdminPage(RipleyPages):
                 tries -= 1
                 self.when_present(self.job_success(job), 3)
                 break
-            except TimeoutError:
+            except TimeoutException:
                 if tries == 0:
                     app.logger.info('Timed out waiting for job to succeed')
                     raise

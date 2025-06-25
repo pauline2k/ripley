@@ -123,12 +123,12 @@ class TeenaTestConfig(object):
         self.data['staff'] = value
 
     @property
-    def students(self):
-        return self.data.get('students') or []
+    def student(self):
+        return self.data.get('student')
 
-    @students.setter
-    def students(self, value):
-        self.data['students'] = value
+    @student.setter
+    def student(self, value):
+        self.data['student'] = value
 
     @property
     def ta(self):
@@ -172,35 +172,35 @@ class TeenaTestConfig(object):
         ripley_utils.drop_existing_mailing_lists()
         test_users_data = app.config['TEST_USERS']
         test_users = [Person(data) for data in test_users_data]
+        test_users = self.set_fake_test_course_users(test_users)
         self.canvas_admin = Person({'role': 'Canvas Admin'})
         self.course_sites = [
             CourseSite({
                 'abbreviation': f'Admin {self.test_id}',
-                'manual_members': [u for u in test_users if u.role not in ['Owner', 'Maintainer', 'Member']],
+                'manual_members': test_users,
                 'term': self.current_term,
                 'title': f'List 1 {self.test_id}',
             }),
             CourseSite({
                 'abbreviation': f'Admin {self.test_id}',
-                'manual_members': [u for u in test_users if u.role == 'Teacher'],
+                'manual_members': [self.manual_teacher],
                 'term': self.current_term,
                 'title': f'List 2 {self.test_id}',
             }),
             CourseSite({
                 'abbreviation': f'Instructor {self.test_id}',
-                'manual_members': [u for u in test_users if u.role not in ['Owner', 'Maintainer', 'Member']],
+                'manual_members': [self.manual_teacher],
                 'term': self.current_term,
                 'title': f'List 3 {self.test_id}',
             }),
             CourseSite({
                 'abbreviation': f'Old Site {self.test_id}',
-                'manual_members': [u for u in test_users if u.role == 'Teacher'],
+                'manual_members': [self.manual_teacher],
                 'term': utils.previous_term(self.previous_term),
                 'title': f'Old Site {self.test_id}',
             }),
             CourseSite({
                 'abbreviation': f'Project Site {self.test_id}',
-                'manual_members': [u for u in test_users if u.role in ['Owner', 'Maintainer', 'Member']],
                 'title': f'Project Site 5 {self.test_id}',
             }),
         ]
@@ -384,6 +384,29 @@ class TeenaTestConfig(object):
 
     # USERS
 
+    def set_fake_test_course_users(self, users):
+        for user in users:
+            if user.role == 'Teacher':
+                self.manual_teacher = user
+            elif user.role == 'Lead TA':
+                self.lead_ta = user
+            elif user.role == 'TA':
+                self.ta = user
+            elif user.role == 'Designer':
+                self.designer = user
+            elif user.role == 'Reader':
+                self.reader = user
+            elif user.role == 'Observer':
+                self.observer = user
+            elif user.role == 'Student':
+                self.student = user
+            elif user.role == 'Waitlist Student':
+                self.wait_list_student = user
+        members = [self.manual_teacher, self.lead_ta, self.ta, self.designer, self.reader, self.observer,
+                   self.student, self.wait_list_student]
+        members = [m for m in members if m]
+        return members
+
     def set_real_test_course_users(self, course_site=None):
         teachers = ripley_utils.get_users_of_affiliations('EMPLOYEE-TYPE-ACADEMIC', 1)
         self.manual_teacher = teachers[0]
@@ -403,11 +426,10 @@ class TeenaTestConfig(object):
         self.observer = staff[2]
         self.observer.role = 'Observer'
 
-        students = ripley_utils.get_users_of_affiliations('STUDENT-TYPE-REGISTERED', 3)
-        self.students = students[:2]
-        for student in self.students:
-            student.role = 'Student'
-        self.wait_list_student = students[2]
+        students = ripley_utils.get_users_of_affiliations('STUDENT-TYPE-REGISTERED', 2)
+        self.student = students[0]
+        self.student.role = 'Student'
+        self.wait_list_student = students[1]
         self.wait_list_student.role = 'Waitlist Student'
 
         self.canvas_admin = Person({'role': 'Canvas Admin'})
@@ -425,10 +447,10 @@ class TeenaTestConfig(object):
         # Repurpose TA user as a non-teaching grad student for project tests
         self.ta = ripley_utils.get_project_grad_student()
 
-        self.students = ripley_utils.get_users_of_affiliations('STUDENT-TYPE-REGISTERED', 1)
-        self.students[0].role = 'Student'
+        self.student = ripley_utils.get_users_of_affiliations('STUDENT-TYPE-REGISTERED', 1)[0]
+        self.student.role = 'Student'
 
         self.canvas_admin = Person({'role': 'Canvas Admin'})
 
         if course_site:
-            course_site.manual_members = [self.manual_teacher, self.staff, self.ta] + self.students
+            course_site.manual_members = [self.manual_teacher, self.staff, self.ta, self.student]

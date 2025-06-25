@@ -28,11 +28,11 @@ import time
 from flask import current_app as app
 from selenium.webdriver.common.by import By
 from teena.models.ripley_tool import RipleyTools
-from teena.pages.ripley.ripley_pages import RipleyPages
+from teena.pages.ripley.mailing_lists_page import MailingListsPage
 from teena.test_utils import utils
 
 
-class MailingListPage(RipleyPages):
+class MailingListPage(MailingListsPage):
 
     MAILING_LIST_LINK = By.LINK_TEXT, RipleyTools.MAILING_LIST.name
     NO_LIST_MSG = By.XPATH, '//div[text()="No Mailing List has been created for this site."]'
@@ -43,7 +43,7 @@ class MailingListPage(RipleyPages):
 
     @staticmethod
     def embedded_tool_path(course_site):
-        return f'/courses/{course_site.site_id}/external_tools/#{RipleyTools.MAILING_LIST.value.tool_id}'
+        return f'/courses/{course_site.site_id}/external_tools/{RipleyTools.MAILING_LIST.value.tool_id}'
 
     def hit_embedded_tool_url(self, course_site):
         self.navigate_to(f'{utils.canvas_base_url()}{self.embedded_tool_path(course_site)}')
@@ -59,6 +59,10 @@ class MailingListPage(RipleyPages):
     def create_list(self):
         self.click_create_list()
         self.when_present(self.LIST_CREATED_MSG, utils.get_short_timeout())
+
+    def wait_for_list_address(self):
+        self.when_present(self.LIST_ADDRESS, utils.get_short_timeout())
+        return self.el_text_if_exists(self.LIST_ADDRESS)
 
     # WELCOME EMAIL
 

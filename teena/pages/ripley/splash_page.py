@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 from flask import current_app as app
 from selenium.webdriver.common.by import By
 from teena.pages.ripley.ripley_pages import RipleyPages
-from teena.test_utils import ripley_utils
+from teena.test_utils import utils
 
 
 class SplashPage(RipleyPages):
@@ -35,7 +35,7 @@ class SplashPage(RipleyPages):
     JOBS_LINK = By.LINK_TEXT, 'Jobs'
 
     def load_page(self):
-        self.navigate_to(ripley_utils.ripley_base_url())
+        self.navigate_to(utils.ripley_base_url())
 
     def click_jobs_link(self):
         app.logger.info('Clicking Jobs link')

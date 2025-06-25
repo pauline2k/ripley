@@ -24,6 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 import re
+import time
 
 from flask import current_app as app
 from selenium.webdriver.common.by import By
@@ -56,7 +57,7 @@ class MailingListsPage(RipleyPages):
     LIST_SITE_DESC = By.ID, 'mailing-list-course-site-code'
     LIST_ADDRESS = By.ID, 'mailing-list-name'
     LIST_MEMBERSHIP_COUNT = By.ID, 'mailing-list-member-count'
-    LIST_UPDATE_TEIM = By.ID, 'mailing-list-membership-last-updated'
+    LIST_UPDATE_TIME = By.ID, 'mailing-list-membership-last-updated'
 
     # Update membership
     CANCEL_BUTTON = By.ID, 'btn-cancel'
@@ -83,7 +84,7 @@ class MailingListsPage(RipleyPages):
 
     def search_for_list(self, search_term):
         app.logger.info(f'Searching for mailing list for course site {search_term}')
-        self.wait_for_element_clear_and_send_keys(self.SITE_ID_INPUT, search_term)
+        self.wait_for_element_remove_chars_send_keys(self.SITE_ID_INPUT, search_term)
         self.wait_for_element_and_click(self.GET_LIST_BUTTON)
 
     @staticmethod
@@ -98,12 +99,22 @@ class MailingListsPage(RipleyPages):
 
     def enter_custom_list_name(self, name):
         app.logger.info(f'Entering mailing list name {name}')
-        self.wait_for_element_clear_and_send_keys(self.LIST_NAME_INPUT, name)
+        self.wait_for_element_remove_chars_send_keys(self.LIST_NAME_INPUT, name)
         self.wait_for_element_and_click(self.REGISTER_LIST_BUTTON)
 
-    def click_update_memberships(self):
+    def wait_for_list_address(self):
+        self.when_present(self.LIST_ADDRESS, utils.get_short_timeout())
+        return self.el_text_if_exists(self.LIST_ADDRESS)
+
+    def update_memberships(self):
         app.logger.info('Clicking update membership button')
         self.wait_for_element_and_click(self.UPDATE_MEMBERSHIP_BUTTON)
+        self.when_present(self.UPDATE_MEMBERSHIP_AGAIN_BUTTON, utils.get_short_timeout())
+        time.sleep(1)
+
+    def wait_for_membership_count(self):
+        self.when_present(self.LIST_MEMBERSHIP_COUNT, utils.get_short_timeout())
+        return self.el_text_if_exists(self.LIST_MEMBERSHIP_COUNT)
 
     def expand_added_users(self):
         app.logger.info('Expanding list of added users')
@@ -127,7 +138,7 @@ class MailingListsPage(RipleyPages):
         return self.is_user_updated(user, 'Restored')
 
     def is_user_updated(self, user, status):
-        xpath = f'//button[contains(., "{status}")]/following-sibling::div//div[contains(., "{user.username}")]'
+        xpath = f'//button[contains(., "{status}")]/following-sibling::div//div[contains(., "{user.email}")]'
         return self.is_present((By.XPATH, xpath))
 
     def click_cancel_list(self):
