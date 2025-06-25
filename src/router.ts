@@ -1,4 +1,4 @@
-import auth from '@/auth'
+import auth from '@/lib/auth'
 const Acheron = () => import('./views/Acheron.vue')
 const BaseLTI = () => import('./layouts/lti/BaseLTI.vue')
 const BaseStandalone = () => import('./layouts/standalone/BaseStandalone.vue')

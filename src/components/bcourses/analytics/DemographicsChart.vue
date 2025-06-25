@@ -68,7 +68,7 @@
       <ChartDefinitions id="grade-distribution-demographics-definitions" :is-expanded="showChartDefinitions" :show-demographics="true" />
     </v-row>
     <hr aria-hidden="true" class="mb-3" />
-    <Chart ref="chart" :options="chartSettings" />
+    <Chart ref="chart" :options="chartOptions" />
     <v-row class="d-flex justify-center">
       <v-btn
         id="grade-distribution-demographics-show-btn"
@@ -102,14 +102,14 @@
                 <th class="grade-distribution-table-border font-weight-bold py-2" scope="col">Class Grade {{ capitalize(selectedStatistic) }}</th>
                 <th class="text-right font-weight-bold py-2" scope="col">Class Grade Count</th>
                 <th
-                  v-if="size(chartSettings.series) > 2"
+                  v-if="size(chartOptions.series) > 2"
                   class="grade-distribution-table-border font-weight-bold py-2"
                   scope="col"
                 >
                   {{ selectedDemographicLabel }} Grade {{ capitalize(selectedStatistic) }}
                 </th>
                 <th
-                  v-if="size(chartSettings.series) > 2"
+                  v-if="size(chartOptions.series) > 2"
                   class="text-right font-weight-bold py-2"
                   scope="col"
                 >
@@ -119,7 +119,7 @@
             </thead>
             <tbody>
               <tr
-                v-for="(term, index) in chartSettings.xAxis.categories"
+                v-for="(term, index) in chartOptions.xAxis.categories"
                 :id="`grade-distribution-demo-table-row-${index}`"
                 :key="index"
               >
@@ -130,30 +130,30 @@
                 >
                   {{ gradeDistribution[index].termName }}
                 </td>
-                <td :id="`grade-distro-demo-table-row-${index}-grade-0`" class="py-1">{{ chartSettings.series[0]['data'][index].y }}</td>
-                <td :id="`grade-distro-demo-table-row-${index}-count-0`" class="text-right py-1">{{ chartSettings.series[0]['data'][index].custom.count }}</td>
+                <td :id="`grade-distro-demo-table-row-${index}-grade-0`" class="py-1">{{ chartOptions.series[0]['data'][index].y }}</td>
+                <td :id="`grade-distro-demo-table-row-${index}-count-0`" class="text-right py-1">{{ chartOptions.series[0]['data'][index].custom.count }}</td>
                 <td
-                  v-if="size(chartSettings.series) > 2"
+                  v-if="size(chartOptions.series) > 2"
                   :id="`grade-distro-demo-table-row-${index}-grade-1`"
                   class="py-1"
                 >
-                  <em v-if="chartSettings.series[2]['data'][index].custom.count === 'Small sample size'">
-                    {{ chartSettings.series[2]['data'][index].y }}
+                  <em v-if="chartOptions.series[2]['data'][index].custom.count === 'Small sample size'">
+                    {{ chartOptions.series[2]['data'][index].y }}
                   </em>
-                  <span v-if="chartSettings.series[2]['data'][index].custom.count !== 'Small sample size'">
-                    {{ chartSettings.series[2]['data'][index].y || 'No data' }}
+                  <span v-if="chartOptions.series[2]['data'][index].custom.count !== 'Small sample size'">
+                    {{ chartOptions.series[2]['data'][index].y || 'No data' }}
                   </span>
                 </td>
                 <td
-                  v-if="size(chartSettings.series) > 2"
+                  v-if="size(chartOptions.series) > 2"
                   :id="`grade-distro-demo-table-row-${index}-count-1`"
                   class="text-right py-1"
                 >
-                  <em v-if="chartSettings.series[2]['data'][index].custom.count === 'Small sample size'">
+                  <em v-if="chartOptions.series[2]['data'][index].custom.count === 'Small sample size'">
                     Small sample size
                   </em>
-                  <span v-if="chartSettings.series[2]['data'][index].custom.count !== 'Small sample size'">
-                    {{ chartSettings.series[2]['data'][index].custom.count || 'No data' }}
+                  <span v-if="chartOptions.series[2]['data'][index].custom.count !== 'Small sample size'">
+                    {{ chartOptions.series[2]['data'][index].custom.count || 'No data' }}
                   </span>
                 </td>
               </tr>
@@ -173,7 +173,8 @@ import {mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
 import {Chart} from 'highcharts-vue'
 import ChartDefinitions from '@/components/bcourses/analytics/ChartDefinitions'
 import Context from '@/mixins/Context'
-import {capitalize, cloneDeep, each, get, replace, round, size} from 'lodash'
+import {capitalize, cloneDeep, each, get, merge, replace, round, size} from 'lodash'
+import {CHART_COLORS, DEFAULT_SERIES_LINE_COLOR, getDefaultChartOptions} from '@/lib/highcharts'
 
 export default {
   name: 'DemographicsChart',
@@ -183,14 +184,6 @@ export default {
   },
   mixins: [Context],
   props: {
-    chartDefaults: {
-      required: true,
-      type: Object
-    },
-    colors: {
-      required: true,
-      type: Object
-    },
     courseName: {
       required: true,
       type: String
@@ -205,7 +198,7 @@ export default {
     }
   },
   data: () => ({
-    chartSettings: {},
+    chartOptions: {},
     demographicOptions: {
       divider1: {
         label: '─────',
@@ -262,27 +255,43 @@ export default {
     }
   },
   created() {
-    this.chartSettings = cloneDeep(this.chartDefaults)
-    this.chartSettings.chart.type = 'line'
-    this.chartSettings.legend.squareSymbol = false
-    this.chartSettings.legend.symbolHeight = 3
-    this.chartSettings.plotOptions.series.lineWidth = 3
-    this.chartSettings.title.text = 'Class Grade Average by Semester'
-    this.chartSettings.tooltip.distance = 20
-    this.chartSettings.yAxis = [this.chartSettings.yAxis, cloneDeep(this.chartSettings.yAxis)]
-    this.chartSettings.yAxis[0].labels.format = '{value:.1f}'
-    this.chartSettings.yAxis[0].max = 4
-    this.chartSettings.yAxis[0].min = 0
-    this.chartSettings.yAxis[0].tickInterval = 1
-    this.chartSettings.yAxis[1].min = 0
-    this.chartSettings.yAxis[1].opposite = 'true'
+    this.chartOptions = merge(
+      getDefaultChartOptions(),
+      {
+        chart: {
+          type: 'line'
+        },
+        legend: {
+          symbolHeight: 3,
+          squareSymbol: false
+        },
+        plotOptions: {
+          series: {
+            lineWidth: 3
+          }
+        },
+        title: {
+          text: 'Class Grade Average by Semester'
+        },
+        tooltip: {
+          distance: 20
+        }
+      }
+    )
+    this.chartOptions.yAxis = [this.chartOptions.yAxis[0], cloneDeep(this.chartOptions.yAxis[0])]
+    this.chartOptions.yAxis[0].labels.format = '{value:.1f}'
+    this.chartOptions.yAxis[0].max = 4
+    this.chartOptions.yAxis[0].min = 0
+    this.chartOptions.yAxis[0].tickInterval = 1
+    this.chartOptions.yAxis[1].min = 0
+    this.chartOptions.yAxis[1].opposite = 'true'
     this.collectDemographicOptions()
     this.setTooltipFormatter()
     this.loadPrimarySeries()
   },
   mounted() {
-    if (this.$refs.chart.chart.xAxis[0].width / this.chartSettings.xAxis.categories.length < 75) {
-      this.chartSettings.xAxis.labels.rotation = -45
+    if (this.$refs.chart.chart.xAxis[0].width / this.chartOptions.xAxis.categories.length < 75) {
+      this.chartOptions.xAxis[0].labels.rotation = -45
     }
   },
   methods: {
@@ -308,26 +317,26 @@ export default {
     getSeriesMarker(series) {
       return {
         'fillColor': 'white',
-        'lineColor': series.color,
+        'lineColor': get(series, 'color', DEFAULT_SERIES_LINE_COLOR),
         'lineWidth': 3,
         'radius': 5,
         'symbol': 'circle'
       }
     },
     loadPrimarySeries() {
-      this.chartSettings.colors = [this.colors.primary, this.colors.secondary]
-      this.chartSettings.legend.enabled = size(this.gradeDistribution)
+      this.chartOptions.colors = [CHART_COLORS.primary, CHART_COLORS.secondary]
+      this.chartOptions.legend.enabled = size(this.gradeDistribution)
       const primaryGradeSeries = {
         data: [],
-        color: this.colors.primary,
+        color: CHART_COLORS.primary,
         legendSymbol: 'rectangle',
-        marker: this.getSeriesMarker(this.chartSettings.series[0]),
+        marker: this.getSeriesMarker(this.chartOptions.series[0]),
         name: `Overall Class ${capitalize(this.selectedStatistic)} Grade`,
         zIndex: 1
       }
       const primaryPopulationSeries = {
         data: [],
-        color: this.colors.tertiary,
+        color: CHART_COLORS.tertiary,
         name: 'Class Grade Count',
         type: 'area',
         yAxis: 1,
@@ -337,12 +346,12 @@ export default {
       var maxCount = 0
       each(this.gradeDistribution, item => {
         primaryGradeSeries.data.push({
-          color: this.colors.primary,
+          color: CHART_COLORS.primary,
           custom: {count: item.count},
           y: round(get(item, `${this.selectedStatistic}GradePoints`), 1)
         })
         primaryPopulationSeries.data.push({
-          color: this.colors.tertiary,
+          color: CHART_COLORS.tertiary,
           y: item.count
         })
         if (item.count > maxCount) {
@@ -350,25 +359,25 @@ export default {
         }
         xAxisCategories.push(this.shortTermName(item.termName))
       })
-      this.chartSettings.xAxis.categories = xAxisCategories
-      this.chartSettings.yAxis[1].max = maxCount * 1.25
-      this.chartSettings.series[0] = primaryGradeSeries
-      this.chartSettings.series[1] = primaryPopulationSeries
+      this.chartOptions.xAxis.categories = xAxisCategories
+      this.chartOptions.yAxis[1].max = maxCount * 1.25
+      this.chartOptions.series[0] = primaryGradeSeries
+      this.chartOptions.series[1] = primaryPopulationSeries
     },
     loadSecondarySeries() {
       if (this.selectedDemographic) {
         const group = get(this.selectedDemographic, 'group')
         const option = get(this.selectedDemographic, 'option')
         const secondaryGradeSeries = {
-          color: this.colors.secondary,
+          color: CHART_COLORS.secondary,
           data: [],
           legendSymbol: 'rectangle',
-          marker: this.getSeriesMarker(this.colors.secondary),
+          marker: this.getSeriesMarker(CHART_COLORS.secondary),
           name: `${this.selectedDemographicLabel} ${capitalize(this.selectedStatistic)} Grade`,
           zIndex: 3
         }
         const secondaryPopulationSeries = {
-          color: this.colors.quaternary,
+          color: CHART_COLORS.quaternary,
           data: [],
           name: `${this.selectedDemographicLabel} Grade Count`,
           type: 'area',
@@ -400,14 +409,14 @@ export default {
           }
           secondaryGradeSeries.data.push(point)
           secondaryPopulationSeries.data.push({
-            color: this.colors.quaternary,
+            color: CHART_COLORS.quaternary,
             y: (value && count !== 0) ? count : null
           })
         })
-        this.chartSettings.series[2] = secondaryGradeSeries
-        this.chartSettings.series[3] = secondaryPopulationSeries
-      } else if (this.chartSettings.series.length > 2) {
-        this.chartSettings.series = [this.chartSettings.series[0], this.chartSettings.series[1]]
+        this.chartOptions.series[2] = secondaryGradeSeries
+        this.chartOptions.series[3] = secondaryPopulationSeries
+      } else if (this.chartOptions.series.length > 2) {
+        this.chartOptions.series = [this.chartOptions.series[0], this.chartOptions.series[1]]
       }
     },
     onSelectDemographic() {
@@ -420,7 +429,7 @@ export default {
     setTooltipFormatter() {
       const courseName = this.courseName
       const isDemoMode = this.isDemoMode
-      this.chartSettings.tooltip.formatter = function () {
+      this.chartOptions.tooltip.formatter = function () {
         const header = `<div id="grade-dist-demo-tooltip-term" class="font-weight-bold font-size-15">${this.x}</div>
             <div id="grade-dist-demo-tooltip-course" class="font-size-13 text-grey-darken-1 ${isDemoMode ? 'demo-mode-blur' : ''}">${courseName}</div>
             <hr aria-hidden="true" class="mt-1 grade-dist-tooltip-hr" />`
