@@ -101,6 +101,20 @@ class TestGetGradeDistribution:
                 'female': {'count': 3, 'meanGradePoints': 2.233, 'medianGradePoints': 2},
             }
             assert response['enrollments']['2225'][0] == {
+                'count': 0,
+                'courseName': 'ASTRON 218',
+                'classSize': 6,
+                'grade': 'A+',
+                'percentage': 0,
+            }
+            assert response['enrollments']['2225'][1] == {
+                'count': 0,
+                'courseName': 'ASTRON 218',
+                'classSize': 6,
+                'grade': 'A',
+                'percentage': 0,
+            }
+            assert response['enrollments']['2225'][2] == {
                 'count': 1,
                 'courseName': 'ASTRON 218',
                 'classSize': 6,

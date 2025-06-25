@@ -33,7 +33,7 @@ from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.util import to_percentage
 
 
-def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  # noqa: C901, PLR0912
+def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  # noqa: C901, PLR0912, PLR0915
     demographics_distribution = {}
     grade_distribution_by_term = {}
     student_grades = get_grades_with_demographics(course_term_id, section_ids, GRADE_ORDERING, instructor_uid)
@@ -46,6 +46,7 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
             if term_id not in grade_distribution_by_term:
                 grade_distribution_by_term[term_id] = {
                     'count': 0,
+                    'courseName': row['sis_course_name'],
                 }
             if grade not in grade_distribution_by_term[term_id]:
                 grade_distribution_by_term[term_id][grade] = {
@@ -82,22 +83,44 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
 
             _count_string_value(_simplify_gender(row['gender']), 'genders')
 
+    letter_grades_included = []
+
+    # Letter grades on the A-F scale are included in the feed for all terms.
+    for grade in sorted(GRADE_POINTS.keys(), key=_grade_ordering_index):
+        if GRADE_POINTS[grade] is not None:
+            letter_grades_included.append(grade)
+
+    # Other letter grades are included in the feed for all terms if they appear in any one term.
+    for term_distribution in grade_distribution_by_term.values():
+        for grade in sorted(term_distribution.keys(), key=_grade_ordering_index):
+            if grade in GRADE_ORDERING and grade not in letter_grades_included:
+                letter_grades_included.append(grade)
+
     sorted_grade_distribution_by_term = {}
     for term_id, term_distribution in grade_distribution_by_term.items():
         if term_distribution['count'] < int(app.config['NEWT_MINIMUM_CLASS_SIZE']):
             continue
         sorted_grade_distribution = []
-        for grade in sorted(term_distribution.keys(), key=_grade_ordering_index):
-            if grade in GRADE_ORDERING:
-                term_distribution[grade].update({
-                    'classSize': term_distribution['count'],
-                    'grade': grade,
+        for grade in letter_grades_included:
+            term_distribution_entry = {
+                'classSize': term_distribution['count'],
+                'courseName': term_distribution['courseName'],
+                'grade': grade,
+            }
+            if grade in term_distribution:
+                term_distribution_entry.update({
+                    'count': term_distribution[grade]['count'],
                     'percentage': to_percentage(
                         term_distribution[grade]['count'],
                         term_distribution['count'],
                     ),
                 })
-                sorted_grade_distribution.append(term_distribution[grade])
+            else:
+                term_distribution_entry.update({
+                    'count': 0,
+                    'percentage': 0,
+                })
+            sorted_grade_distribution.append(term_distribution_entry)
         sorted_grade_distribution_by_term[term_id] = sorted_grade_distribution
 
     sorted_demographics_distribution = []
