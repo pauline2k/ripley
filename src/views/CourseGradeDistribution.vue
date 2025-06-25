@@ -73,8 +73,7 @@ export default {
   data: () => ({
     chartDefaults: {
       chart: {
-        backgroundColor: 'transparent',
-        marginTop: 145
+        backgroundColor: 'transparent'
       },
       lang: {
         noData: 'No data available until final grades are returned.'
