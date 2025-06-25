@@ -128,8 +128,8 @@ class TestProjectSiteCreation:
 
 @pytest.mark.usefixtures('page_objects')
 @pytest.mark.parametrize(argnames='tc',
-                         argvalues=[test.canvas_admin, test.ta, test.staff, test.students[0]],
-                         ids=[user.role for user in [test.canvas_admin, test.ta, test.staff, test.students[0]]],
+                         argvalues=[test.canvas_admin, test.ta, test.staff, test.student],
+                         ids=[user.role for user in [test.canvas_admin, test.ta, test.staff, test.student]],
                          scope='class')
 class TestUserRolePermissions:
 

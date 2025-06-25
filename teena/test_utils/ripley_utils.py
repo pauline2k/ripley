@@ -28,7 +28,9 @@ from random import shuffle
 import re
 
 from flask import current_app as app
+from ripley import db, std_commit
 from ripley.externals import data_loch
+from sqlalchemy import text
 from teena.models.course import Course
 from teena.models.person import Person, PersonWithRole
 from teena.models.section import Section, SectionEnrollment
@@ -607,7 +609,10 @@ def get_project_grad_student():
 
 
 def drop_existing_mailing_lists():
-    data_loch.safe_execute_rds('DELETE FROM canvas_site_mailing_lists')
+    sql = 'DELETE FROM canvas_site_mailing_lists'
+    app.logger.info(sql)
+    db.session.execute(text(sql))
+    std_commit(allow_test_environment=True)
 
 
 def set_mailing_list_member_email(member, email_address):
@@ -616,7 +621,8 @@ def set_mailing_list_member_email(member, email_address):
                WHERE CONCAT(first_name, ' ', last_name) = '{member.full_name}'
                  AND deleted_at IS NULL"""
     app.logger.info(sql)
-    data_loch.safe_execute_rds(sql)
+    db.session.execute(text(sql))
+    std_commit(allow_test_environment=True)
 
 
 def get_mailing_list_member_email(member):
@@ -625,5 +631,6 @@ def get_mailing_list_member_email(member):
                WHERE CONCAT(first_name, ' ', last_name) = '{member.full_name}'
                  AND deleted_at IS NULL"""
     app.logger.info(sql)
-    results = data_loch.safe_execute_rds(sql)
-    return results[0]['email_address']
+    result = db.session.execute(text(sql)).first()
+    std_commit(allow_test_environment=True)
+    return result[0]

@@ -256,7 +256,7 @@ class TestToolAccess:
         assert self.create_course_site_page.is_el_enabled(self.create_course_site_page.CREATE_COURSE_SITE_LINK)
 
     def test_student_has_no_access_to_tool(self):
-        self.canvas_page.masquerade_as(test.students[0])
+        self.canvas_page.masquerade_as(test.student)
         self.canvas_page.click_manage_sites_settings_link()
         self.create_course_site_page.when_present(self.create_course_site_page.CREATE_COURSE_SITE_LINK,
                                                   utils.get_short_timeout())

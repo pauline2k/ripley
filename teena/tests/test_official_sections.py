@@ -291,7 +291,7 @@ class TestDeleteSectionsSISImport:
 class TestUserToolAccess:
 
     def test_add_users(self):
-        users_to_add = [test.lead_ta, test.ta, test.designer, test.reader, test.observer, test.students[0],
+        users_to_add = [test.lead_ta, test.ta, test.designer, test.reader, test.observer, test.student,
                         test.wait_list_student]
         self.canvas_page.load_users_page(site)
         self.canvas_page.click_find_person_to_add()
@@ -344,8 +344,8 @@ class TestUserToolAccess:
         assert not self.official_sections_page.is_el_enabled(self.official_sections_page.MANAGE_SECTIONS_LINK)
 
     def test_student_has_no_access(self):
-        self.canvas_page.masquerade_as(test.students[0], site)
-        self.official_sections_page.load_embedded_tool(test.students[0])
+        self.canvas_page.masquerade_as(test.student, site)
+        self.official_sections_page.load_embedded_tool(test.student)
         self.official_sections_page.when_present(self.official_sections_page.MANAGE_SECTIONS_LINK,
                                                  utils.get_short_timeout())
         assert not self.official_sections_page.is_el_enabled(self.official_sections_page.MANAGE_SECTIONS_LINK)

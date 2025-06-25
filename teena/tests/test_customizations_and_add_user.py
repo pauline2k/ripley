@@ -170,9 +170,9 @@ class TestAddAPerson:
 
     @pytest.mark.parametrize(argnames='user',
                              argvalues=[test.lead_ta, test.ta, test.designer, test.reader, test.observer,
-                                        test.students[0], test.wait_list_student],
+                                        test.student, test.wait_list_student],
                              ids=[user.role for user in [test.lead_ta, test.ta, test.designer, test.reader,
-                                                         test.observer, test.students[0], test.wait_list_student]],
+                                                         test.observer, test.student, test.wait_list_student]],
                              scope='function')
     def test_add_users(self, user):
         self.add_user_page.search(user.uid, 'CalNet UID')
@@ -184,9 +184,9 @@ class TestAddAPerson:
 
     @pytest.mark.parametrize(argnames='user',
                              argvalues=[test.lead_ta, test.ta, test.designer, test.reader, test.observer,
-                                        test.students[0], test.wait_list_student],
+                                        test.student, test.wait_list_student],
                              ids=[user.role for user in [test.lead_ta, test.ta, test.designer, test.reader,
-                                                         test.observer, test.students[0], test.wait_list_student]],
+                                                         test.observer, test.student, test.wait_list_student]],
                              scope='function')
     def test_verify_users_added(self, user):
         section = test.course_site.sections[0]
@@ -244,8 +244,8 @@ class TestUserRolesDesignerReader:
 
 @pytest.mark.usefixtures('page_objects')
 @pytest.mark.parametrize(argnames='user',
-                         argvalues=[test.observer, test.students[0], test.wait_list_student],
-                         ids=[user.role for user in [test.observer, test.students[0], test.wait_list_student]],
+                         argvalues=[test.observer, test.student, test.wait_list_student],
+                         ids=[user.role for user in [test.observer, test.student, test.wait_list_student]],
                          scope='class')
 class TestUserRolesObserverStudents:
     POLICIES_HEADING = 'Academic Accommodations Hub | Executive Vice Chancellor and Provost'

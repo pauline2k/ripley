@@ -144,9 +144,9 @@ class CanvasPage(CanvasAssignmentsPage,
     # Course site setup
 
     ADD_NEW_COURSE_BTN = By.XPATH, '//button[@aria-label="Create new course"]'
-    COURSE_NAME_INPUT = By.XPATH, '(//form[@aria-label="Add a New Course"]//input)[1]'
+    COURSE_NAME_INPUT = By.XPATH, '//input[@data-testid="courseName"]'
     CREATE_COURSE_BTN = By.XPATH, '//button[contains(.,"Add Course")]'
-    REF_CODE_INPUT = By.XPATH, '(//form[@aria-label="Add a New Course"]//input)[2]'
+    REF_CODE_INPUT = By.XPATH, '//input[@data-testid="referenceCode"]'
     TERM_SELECT = By.ID, 'course_enrollment_term_id'
 
     COURSE_SITE_HEADING = By.XPATH, '//li[contains(@id,"crumb_course_")]//span'
@@ -181,10 +181,10 @@ class CanvasPage(CanvasAssignmentsPage,
             site.course.code = self.element(self.COURSE_CODE).text
 
         else:
-            self.load_sub_account(RipleyTools.MAILING_LIST.account)
+            self.load_sub_account(RipleyTools.MAILING_LIST.value.account)
             app.logger.info(f'Creating a site named {site.title} in term {site.term and site.term.name}')
             self.create_site(site)
-            site.site_id = self.search_for_site(site, RipleyTools.MAILING_LIST.account)
+            site.site_id = self.search_for_site(site, RipleyTools.MAILING_LIST.value.account)
             if site.sections:
                 self.add_sections(site, site.sections)
             if site.term:
@@ -210,7 +210,7 @@ class CanvasPage(CanvasAssignmentsPage,
 
     def configure_multiple_sites(self, test):
         self.add_ripley_tools([t.value for t in RipleyTools])
-        self.set_canvas_ids([test.students[0]])
+        self.set_canvas_ids([test.student])
         self.get_admin_canvas_id(test.canvas_admin, 'Support Admin')
 
     SEARCH_COURSE_INPUT = By.XPATH, '//input[@placeholder="Search courses..."]'
@@ -311,7 +311,7 @@ class CanvasPage(CanvasAssignmentsPage,
     ACCESS_BASICS_LINK = By.XPATH, '//a[contains(., "Accessibility Basics for bCourses")]'
     ACCESS_CHECKER_LINK = By.XPATH, '//a[contains(., "How do I use the Accessibility Checker")]'
     ACCESS_DSP_LINK = By.XPATH, '//a[contains(., "How to improve the accessibility of your online content")]'
-    ACCESS_SENSUS_LINK = By.XPATH, '//a[contains(., "SensusAccess Conversion")]'
+    ACCESS_SENSUS_LINK = By.XPATH, '//a[contains(., "SensusAccess File Conversion")]'
     ACCESS_TOGGLE = By.XPATH, '//button[@aria-label="Notice to Instructors for Making Course Materials Accessible"]'
     FILES_LINK = By.LINK_TEXT, 'Files'
 
