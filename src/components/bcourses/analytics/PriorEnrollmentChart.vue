@@ -119,7 +119,7 @@
     >
       <PageLoadProgress v-if="isLoadingPriorEnrollments" color="primary" />
     </v-overlay>
-    <highcharts :options="chartSettings"></highcharts>
+    <highcharts :options="chartOptions"></highcharts>
     <v-row v-if="selectedTerm" class="d-flex justify-center">
       <v-btn
         id="grade-distribution-enrollments-show-btn"
@@ -146,11 +146,11 @@
           width="700"
         >
           <table id="grade-distribution-enroll-table" class="border-0 border-t">
-            <caption class="font-weight-bold font-size-16 py-3" v-html="chartSettings.title.text"></caption>
+            <caption class="font-weight-bold font-size-16 py-3" v-html="chartOptions.title.text"></caption>
             <thead class="bg-grey-lighten-4">
               <tr>
                 <th class="font-weight-bold pl-4 py-2" scope="col" rowspan="2">Grade</th>
-                <template v-for="(series, index) in chartSettings.series" :key="index">
+                <template v-for="(series, index) in chartOptions.series" :key="index">
                   <th
                     class="grade-distribution-table-border font-weight-bold text-center pt-2 pb-0"
                     :class="{'demo-mode-blur': isDemoMode && index === 0}"
@@ -162,7 +162,7 @@
                 </template>
               </tr>
               <tr>
-                <template v-for="(series, index) in chartSettings.series" :key="index">
+                <template v-for="(series, index) in chartOptions.series" :key="index">
                   <th class="grade-distribution-table-border font-weight-bold pt-0" scope="col">Ratio</th>
                   <th class="text-right font-weight-bold pt-0" scope="col">Count</th>
                 </template>
@@ -170,7 +170,7 @@
             </thead>
             <tbody>
               <tr
-                v-for="(grade, gradeIndex) in chartSettings.xAxis.categories"
+                v-for="(grade, gradeIndex) in chartOptions.xAxis.categories"
                 :id="`grade-distribution-enroll-table-row-${gradeIndex}`"
                 :key="gradeIndex"
               >
@@ -181,7 +181,7 @@
                 >
                   {{ grade }}
                 </td>
-                <template v-for="(series, index) in chartSettings.series" :key="index">
+                <template v-for="(series, index) in chartOptions.series" :key="index">
                   <td
                     :id="`grade-distro-enroll-table-row-${gradeIndex}-ratio-${index}`"
                     class="py-1"
@@ -200,7 +200,7 @@
             <tfoot>
               <tr id="grade-distribution-enroll-table-row-totals">
                 <th class="pl-4 py-1" scope="row">Totals</th>
-                <template v-for="(series, index) in chartSettings.series" :key="index">
+                <template v-for="(series, index) in chartOptions.series" :key="index">
                   <td
                     :id="`grade-distro-enroll-table-row-totals-ratio-${index}`"
                     class="font-weight-medium py-1"
@@ -231,9 +231,10 @@ import {mdiAlert, mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
 import Context from '@/mixins/Context'
 import {Chart} from 'highcharts-vue'
 import ChartDefinitions from '@/components/bcourses/analytics/ChartDefinitions'
-import {cloneDeep, debounce, each, find, get, includes, isEmpty, round, size, sumBy, toUpper} from 'lodash'
+import {debounce, each, find, get, includes, isEmpty, merge, round, size, sumBy, toUpper} from 'lodash'
 import {getPriorEnrollmentGradeDistribution, searchCourses} from '@/api/grade-distribution'
 import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
+import {CHART_COLORS, getDefaultChartOptions} from '@/lib/highcharts'
 
 export default {
   name: 'PriorEnrollmentChart',
@@ -244,14 +245,6 @@ export default {
   },
   mixins: [Context],
   props: {
-    chartDefaults: {
-      required: true,
-      type: Object
-    },
-    colors: {
-      required: true,
-      type: Object
-    },
     courseName: {
       required: true,
       type: String
@@ -270,7 +263,7 @@ export default {
     }
   },
   data: () => ({
-    chartSettings: {},
+    chartOptions: {},
     pendingCourseSearch: undefined,
     courseSearchText: undefined,
     courseSuggestions: [],
@@ -312,30 +305,44 @@ export default {
   },
   created() {
     this.selectedTerm = get(this.terms, 0)
-    this.chartSettings = cloneDeep(this.chartDefaults)
-    this.chartSettings.chart.type = 'column'
-    this.chartSettings.legend.enabled = this.selectedTerm && !isEmpty(get(this.gradeDistribution, this.selectedTerm.id))
-    this.chartSettings.legend.useHTML = true
-    this.setLegendLabel()
-    this.chartSettings.legend.symbolHeight = 12
-    this.chartSettings.plotOptions.series.lineWidth = 0
-    this.chartSettings.plotOptions.series.states = {
-      hover: {
-        lineWidthPlus: 0
+    this.chartOptions = merge(
+      getDefaultChartOptions(),
+      {
+        chart: {
+          type: 'column'
+        },
+        legend: {
+          enabled: this.selectedTerm && !isEmpty(get(this.gradeDistribution, this.selectedTerm.id)),
+          symbolHeight: 12,
+          useHTML: true
+        },
+        series: {
+          lineWidth: 0,
+          states: {
+            hover: {
+              lineWidthPlus: 0
+            }
+          }
+        },
+        title: {
+          widthAdjust: -200
+        },
+        tooltip: {
+          distance: 12
+        }
       }
-    }
-    this.chartSettings.title.widthAdjust = -200
-    this.chartSettings.tooltip.distance = 12
-    this.chartSettings.yAxis.labels.format = '{value}%'
+    )
+    this.chartOptions.yAxis[0].labels.format = '{value}%'
+    this.setLegendLabel()
     this.debouncedSearch = debounce(this.search, 300)
     this.setTooltipFormatter()
-    this.loadPrimarySeries(this.colors.primary)
+    this.loadPrimarySeries(CHART_COLORS.primary)
     this.setChartTitle()
   },
   methods: {
     get,
     getDataLabel(yVal, color) {
-      if (this.chartSettings.series.length === 1) {
+      if (this.chartOptions.series.length === 1) {
         const displayAboveColumn = yVal < 2
         return {
           color: displayAboveColumn ? color : 'white',
@@ -354,14 +361,14 @@ export default {
     },
     isEmpty,
     loadPrimarySeries(color, showLabels=true) {
-      this.chartSettings.series[0] = {
+      this.chartOptions.series[0] = {
         color: color,
         name: `${get(this.selectedTerm, 'name')} ${this.courseName}`,
         data: []
       }
-      this.chartSettings.xAxis.categories = []
+      this.chartOptions.xAxis.categories = []
       each(this.gradeDistribution[get(this.selectedTerm, 'id')], item => {
-        this.chartSettings.series[0].data.push({
+        this.chartOptions.series[0].data.push({
           color: color,
           custom: {
             count: item.count
@@ -369,21 +376,21 @@ export default {
           dataLabels: showLabels ? this.getDataLabel(item.y, color) : {enabled: false},
           y: item.percentage
         })
-        this.chartSettings.xAxis.categories.push(item.grade)
+        this.chartOptions.xAxis.categories.push(item.grade)
       })
-      this.chartSettings.plotOptions.series.dataLabels = {
+      this.chartOptions.plotOptions.series.dataLabels = {
         enabled: showLabels
       }
     },
     loadPriorEnrollments() {
       const gradesWithPriorEnroll = {
-        color: this.colors.secondary,
+        color: CHART_COLORS.secondary,
         data: [],
         name: `Have taken ${this.selectedCourse}`,
         type: 'column'
       }
       each(this.priorEnrollmentGradeDistribution[get(this.selectedTerm, 'id')], item => {
-        if (includes(this.chartSettings.xAxis.categories, item.grade )) {
+        if (includes(this.chartOptions.xAxis.categories, item.grade )) {
           gradesWithPriorEnroll.data.push({
             custom: {
               count: get(item, 'priorEnrollCount', 0)
@@ -393,7 +400,7 @@ export default {
           })
         }
       })
-      this.chartSettings.series[1] = gradesWithPriorEnroll
+      this.chartOptions.series[1] = gradesWithPriorEnroll
     },
     onClickAddCourse() {
       if (this.selectedCourse) {
@@ -413,12 +420,12 @@ export default {
     },
     refresh() {
       if (get(this.priorEnrollmentGradeDistribution, get(this.selectedTerm, 'id'))) {
-        this.loadPrimarySeries(this.colors.primary, false)
+        this.loadPrimarySeries(CHART_COLORS.primary, false)
         this.loadPriorEnrollments()
         this.insufficientData = false
       } else {
-        this.chartSettings.series = []
-        this.loadPrimarySeries(this.colors.primary)
+        this.chartOptions.series = []
+        this.loadPrimarySeries(CHART_COLORS.primary)
         this.insufficientData = true
       }
       this.setChartTitle()
@@ -438,25 +445,25 @@ export default {
       })
     },
     setChartTitle() {
-      if (size(this.chartSettings.series) > 1) {
-        this.chartSettings.title.useHTML = true
-        this.chartSettings.title.text = `Relation of <span ${this.isDemoMode ? 'class="demo-mode-blur"' : ''}>
+      if (size(this.chartOptions.series) > 1) {
+        this.chartOptions.title.useHTML = true
+        this.chartOptions.title.text = `Relation of <span ${this.isDemoMode ? 'class="demo-mode-blur"' : ''}>
           ${this.selectedTerm.name} ${this.courseName}
           </span> Students Who Have Taken ${this.selectedCourse} to Overall Class`
       } else {
-        this.chartSettings.title.useHTML = false
-        this.chartSettings.title.text = `Overall Class Grade Distribution&mdash;${this.selectedTerm.name}`
+        this.chartOptions.title.useHTML = false
+        this.chartOptions.title.text = `Overall Class Grade Distribution&mdash;${this.selectedTerm.name}`
       }
     },
     setLegendLabel() {
-      this.chartSettings.legend.labelFormat = `{#if (eq index 0)}<span ${this.isDemoMode ? 'class="demo-mode-blur"' : ''}>{else}<span>{/if}
+      this.chartOptions.legend.labelFormat = `{#if (eq index 0)}<span ${this.isDemoMode ? 'class="demo-mode-blur"' : ''}>{else}<span>{/if}
           {name}
         </span> grades`
     },
     setTooltipFormatter() {
       const courseName = this.courseName
       const isDemoMode = this.isDemoMode
-      this.chartSettings.tooltip.formatter = function () {
+      this.chartOptions.tooltip.formatter = function () {
         const header = `<div id="grade-dist-enroll-tooltip-grade" class="font-weight-bold font-size-15">${this.x} Grade</div>
             <div id="grade-dist-enroll-tooltip-course" class="font-size-13 text-grey-darken-1">
               <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${this.color}">\u25A0</span>

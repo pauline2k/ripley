@@ -1,6 +1,6 @@
 <template>
   <div class="grade-distribution pa-5">
-    <div v-if="!isLoading">
+    <div v-if="!contextStore.isLoading">
       <div class="d-flex justify-space-between">
         <Header1 text="Grade Distribution" class="mb-0" />
         <div>
@@ -29,11 +29,9 @@
         >
           <span :class="{'demo-mode-blur': isDemoMode}">{{ gradeDistribution.courseName }}</span> &mdash; {{ gradeDistribution.canvasSite.term.name }}
         </div>
-        <div v-html="config.newtInformationBlock"></div>
+        <div v-html="contextStore.config.newtInformationBlock"></div>
         <v-card class="container mb-4" elevation="0">
           <DemographicsChart
-            :chart-defaults="chartDefaults"
-            :colors="colors"
             :course-name="gradeDistribution.courseName"
             :grade-distribution="gradeDistribution.demographics"
             :is-demo-mode="isDemoMode"
@@ -41,8 +39,6 @@
         </v-card>
         <v-card class="container mb-4" elevation="0">
           <PriorEnrollmentChart
-            :chart-defaults="chartDefaults"
-            :colors="colors"
             :course-name="gradeDistribution.courseName"
             :grade-distribution="gradeDistribution.enrollments"
             :is-demo-mode="isDemoMode"
@@ -54,149 +50,41 @@
   </div>
 </template>
 
-<script>
-import Context from '@/mixins/Context'
-import DemographicsChart from '@/components/bcourses/analytics/DemographicsChart'
-import Header1 from '@/components/utils/Header1'
-import PriorEnrollmentChart from '@/components/bcourses/analytics/PriorEnrollmentChart'
-import {get, orderBy, size} from 'lodash'
+<script lang="ts" setup>
+import DemographicsChart from '@/components/bcourses/analytics/DemographicsChart.vue'
+import Header1 from '@/components/utils/Header1.vue'
+import PriorEnrollmentChart from '@/components/bcourses/analytics/PriorEnrollmentChart.vue'
 import {getGradeDistribution} from '@/api/grade-distribution'
+import {onMounted, ref, watch} from 'vue'
+import {orderBy, toString} from 'lodash'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'CourseGradeDistribution',
-  components: {
-    DemographicsChart,
-    Header1,
-    PriorEnrollmentChart
-  },
-  mixins: [Context],
-  data: () => ({
-    chartDefaults: {
-      chart: {
-        backgroundColor: 'transparent'
-      },
-      lang: {
-        noData: 'No data available until final grades are returned.'
-      },
-      legend: {
-        align: 'right',
-        enabled: true,
-        floating: true,
-        itemStyle: {
-          fontSize: '1em'
-        },
-        labelFormat: '{name}',
-        layout: 'vertical',
-        symbolPadding: 10,
-        symbolRadius: 0,
-        verticalAlign: 'top',
-        y: 30
-      },
-      noData: {
-        style: {
-          fontSize: '18px',
-          color: '#999'
-        }
-      },
-      plotOptions: {
-        series: {
-          borderWidth: 0,
-          dataLabels: {
-            enabled: false
-          },
-          groupPadding: .1
-        }
-      },
-      series: [
-        {
-          data: []
-        }
-      ],
-      title: {
-        align: 'left',
-        margin: 45,
-        style: {
-          color: '#474747'
-        },
-        y: 23
-      },
-      tooltip: {
-        shared: true,
-        stickOnContact: true,
-        useHTML: true
-      },
-      xAxis: {
-        categories: [],
-        labels: {
-          autoRotationLimit: 0,
-          overflow: 'allow',
-          style: {
-            color: '#999',
-            fontSize: 15
-          }
-        },
-        lineColor: '#CCC',
-        lineWidth: 2,
-        tickColor: '#CCC',
-        tickmarkPlacement: 'on',
-        tickWidth: 1
-      },
-      yAxis: {
-        endOnTick: false,
-        gridLineWidth: 0,
-        labels: {
-          style: {
-            color: '#999',
-            fontSize: 16
-          }
-        },
-        lineColor: '#999',
-        lineWidth: 1,
-        tickColor: '#CCC',
-        tickWidth: 1,
-        title: {
-          enabled: false
-        }
-      }
-    },
-    colors: {
-      primary: '#8BBDDA',
-      secondary: '#DAB38B',
-      tertiary: '#C5E1F2',
-      quaternary: '#FCCE9F'
-    },
-    errorMessage: undefined,
-    gradeDistribution: undefined,
-    isDemoMode: false
-  }),
-  watch: {
-    isDemoMode(val) {
-      if (this.currentUser.isAdmin) {
-        localStorage.setItem('isDemoMode', val)
-      }
-    }
-  },
-  created() {
-    this.loadingStart()
-    this.isDemoMode = this.currentUser.isAdmin && localStorage.getItem('isDemoMode') === 'true'
-    this.chartDefaults.series[0].color = this.colors.primary
-    getGradeDistribution(this.currentUser.canvasSiteId).then(
-      data => {
-        this.gradeDistribution = data
-      },
-      error => this.showError(error)
-    ).catch(error => this.showError(error)
-    ).finally(() => this.$ready())
-  },
-  methods: {
-    get,
-    orderBy,
-    showError(errorMessage) {
-      this.errorMessage = errorMessage
-    },
-    size
+const contextStore = useContextStore()
+const currentUser = contextStore.currentUser
+const errorMessage = ref()
+const gradeDistribution = ref()
+const isDemoMode = ref<boolean>(currentUser.isAdmin && localStorage.getItem('isDemoMode') === 'true')
+
+watch(isDemoMode, (value: boolean) => {
+  if (currentUser.isAdmin) {
+    localStorage.setItem('isDemoMode', toString(value))
   }
-}
+})
+
+contextStore.loadingStart()
+
+onMounted(() => {
+  getGradeDistribution(currentUser.canvasSiteId).then(
+    data => {
+      gradeDistribution.value = data
+    },
+    error => {
+      errorMessage.value = error
+    }
+  ).catch(error => {
+    errorMessage.value = error
+  }).finally(() => contextStore.loadingComplete())
+})
 </script>
 
 <!-- eslint-disable-next-line vue-scoped-css/enforce-style-type  -->

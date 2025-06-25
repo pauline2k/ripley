@@ -5,22 +5,38 @@ import {nextTick} from 'vue'
 import {putFocusNextTick} from '@/utils'
 import router from '@/router'
 
+export type RipleyConfig = {
+  hypersleep: any,
+  newtInformationBlock: string
+}
+
+export type RipleyUser = {
+  canAccessStandaloneView: boolean,
+  canvasSiteId: number
+  inDemoMode: boolean,
+  isAdmin: boolean,
+  isAuthenticated: boolean
+}
+
 const $_getDefaultApplicationState = () => ({
   message: undefined,
   stacktrace: undefined,
   status: 200
 })
 
+const ANONYMOUS_USER: RipleyUser = {
+  canAccessStandaloneView: false,
+  canvasSiteId: NaN,
+  inDemoMode: false,
+  isAdmin: false,
+  isAuthenticated: false
+}
+
 export const useContextStore = defineStore('context', {
   state: () => ({
     applicationState: $_getDefaultApplicationState(),
-    config: undefined,
-    currentUser: {
-      canAccessStandaloneView: undefined,
-      canvasSiteId: undefined,
-      isAdmin: undefined,
-      isAuthenticated: undefined
-    },
+    config: {} as RipleyConfig,
+    currentUser: ANONYMOUS_USER as RipleyUser,
     eventHub: mitt(),
     isLoading: false,
     screenReaderAlert: {
