@@ -17,7 +17,7 @@
           v-model="selectedDemographic"
           class="grade-distribution-demographics-select justify-center w-100 mt-4"
           :disabled="!size(gradeDistribution)"
-          @change="onSelectDemographic"
+          @change="loadSecondarySeries"
         >
           <option :value="null">Select Demographic</option>
           <template v-for="(group, key) in demographicOptions" :key="key">
@@ -68,7 +68,7 @@
       <ChartDefinitions id="grade-distribution-demographics-definitions" :is-expanded="showChartDefinitions" :show-demographics="true" />
     </v-row>
     <hr aria-hidden="true" class="mb-3" />
-    <Chart ref="chart" :options="chartOptions" />
+    <Chart ref="chartComponent" :options="chartOptions" />
     <v-row class="d-flex justify-center">
       <v-btn
         id="grade-distribution-demographics-show-btn"
@@ -119,7 +119,7 @@
             </thead>
             <tbody>
               <tr
-                v-for="(term, index) in chartOptions.xAxis.categories"
+                v-for="(term, index) in chartOptions.xAxis[0].categories"
                 :id="`grade-distribution-demo-table-row-${index}`"
                 :key="index"
               >
@@ -130,18 +130,22 @@
                 >
                   {{ gradeDistribution[index].termName }}
                 </td>
-                <td :id="`grade-distro-demo-table-row-${index}-grade-0`" class="py-1">{{ chartOptions.series[0]['data'][index].y }}</td>
-                <td :id="`grade-distro-demo-table-row-${index}-count-0`" class="text-right py-1">{{ chartOptions.series[0]['data'][index].custom.count }}</td>
+                <td :id="`grade-distro-demo-table-row-${index}-grade-0`" class="py-1">
+                  {{ get(chartOptions, `series[0].data[${index}].y`) }}
+                </td>
+                <td :id="`grade-distro-demo-table-row-${index}-count-0`" class="text-right py-1">
+                  {{ get(chartOptions, `series[0].data[${index}].custom.count`) }}
+                </td>
                 <td
                   v-if="size(chartOptions.series) > 2"
                   :id="`grade-distro-demo-table-row-${index}-grade-1`"
                   class="py-1"
                 >
-                  <em v-if="chartOptions.series[2]['data'][index].custom.count === 'Small sample size'">
-                    {{ chartOptions.series[2]['data'][index].y }}
+                  <em v-if="get(chartOptions, `series[2].data[${index}].custom.count`) === 'Small sample size'">
+                    {{ get(chartOptions, `series[2].data[${index}].y`) }}
                   </em>
-                  <span v-if="chartOptions.series[2]['data'][index].custom.count !== 'Small sample size'">
-                    {{ chartOptions.series[2]['data'][index].y || 'No data' }}
+                  <span v-if="get(chartOptions, `series[2].data[${index}].custom.count`) !== 'Small sample size'">
+                    {{ get(chartOptions, `series[2].data[${index}].y`) || 'No data' }}
                   </span>
                 </td>
                 <td
@@ -149,11 +153,11 @@
                   :id="`grade-distro-demo-table-row-${index}-count-1`"
                   class="text-right py-1"
                 >
-                  <em v-if="chartOptions.series[2]['data'][index].custom.count === 'Small sample size'">
+                  <em v-if="get(chartOptions, `series[2].data[${index}].custom.count`) === 'Small sample size'">
                     Small sample size
                   </em>
-                  <span v-if="chartOptions.series[2]['data'][index].custom.count !== 'Small sample size'">
-                    {{ chartOptions.series[2]['data'][index].custom.count || 'No data' }}
+                  <span v-if="get(chartOptions, `series[2].data[${index}].custom.count`) !== 'Small sample size'">
+                    {{ get(chartOptions, `series[2].data[${index}].custom.count`) || 'No data' }}
                   </span>
                 </td>
               </tr>
@@ -165,293 +169,281 @@
   </div>
 </template>
 
-<script setup>
+<script lang="ts" setup>
+import Highcharts from 'highcharts'
 import {mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
-</script>
-
-<script>
 import {Chart} from 'highcharts-vue'
-import ChartDefinitions from '@/components/bcourses/analytics/ChartDefinitions'
-import Context from '@/mixins/Context'
-import {capitalize, cloneDeep, each, get, merge, replace, round, size} from 'lodash'
-import {CHART_COLORS, DEFAULT_SERIES_LINE_COLOR, getDefaultChartOptions} from '@/lib/highcharts'
+import ChartDefinitions from '@/components/bcourses/analytics/ChartDefinitions.vue'
+import {capitalize, cloneDeep, each, get, isNil, merge, replace, round, size} from 'lodash'
+import {
+  CHART_COLORS,
+  DEFAULT_SERIES_LINE_COLOR,
+  getDefaultChartOptions,
+  SeriesAreaOptions, SeriesLineOptions,
+  SeriesMarker
+} from '@/lib/highcharts'
+import {computed, onMounted, ref, watch} from 'vue'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'DemographicsChart',
-  components: {
-    Chart,
-    ChartDefinitions
+const props = defineProps({
+  courseName: {
+    required: true,
+    type: String
   },
-  mixins: [Context],
-  props: {
-    courseName: {
-      required: true,
-      type: String
-    },
-    gradeDistribution: {
-      required: true,
-      type: Object
-    },
-    isDemoMode: {
-      required: false,
-      type: Boolean
-    }
+  gradeDistribution: {
+    required: true,
+    type: Object
   },
-  data: () => ({
-    chartOptions: {},
-    demographicOptions: {
-      divider1: {
-        label: '─────',
-        options: []
-      },
-      'genders.female': {
-        label: 'Female Students',
-        options: []
-      },
-      'genders.male': {
-        label: 'Male Students',
-        options: []
-      },
-      'genders.other': {
-        label: 'Gender: Decline to State, Different Identity, or Genderqueer/Gender Non-Conform',
-        options: []
-      },
-      divider2: {
-        label: '─────',
-        options: []
-      },
-      underrepresentedMinorityStatus: {
-        label: 'Underrepresented Minority Students',
-        options: []
-      },
-      internationalStatus: {
-        label: 'International Students',
-        options: []
-      },
-      transferStatus: {
-        label: 'Transfer Students',
-        options: []
-      },
-      athleteStatus: {
-        label: 'Student Athletes',
-        options: []
-      },
-    },
-    selectedDemographic: null,
-    selectedStatistic: 'mean',
-    showChartDefinitions: false,
-    showTable: false
-  }),
-  computed: {
-    selectedDemographicLabel() {
-      const group = get(this.selectedDemographic, 'group')
-      const option = get(this.demographicOptions, group)
-      return get(option, 'label')
-    }
-  },
-  watch: {
-    isDemoMode() {
-      this.setTooltipFormatter()
-    }
-  },
-  created() {
-    this.chartOptions = merge(
-      getDefaultChartOptions(),
-      {
-        chart: {
-          type: 'line'
-        },
-        legend: {
-          symbolHeight: 3,
-          squareSymbol: false
-        },
-        plotOptions: {
-          series: {
-            lineWidth: 3
-          }
-        },
-        title: {
-          text: 'Class Grade Average by Semester'
-        },
-        tooltip: {
-          distance: 20
-        }
-      }
-    )
-    this.chartOptions.yAxis = [this.chartOptions.yAxis[0], cloneDeep(this.chartOptions.yAxis[0])]
-    this.chartOptions.yAxis[0].labels.format = '{value:.1f}'
-    this.chartOptions.yAxis[0].max = 4
-    this.chartOptions.yAxis[0].min = 0
-    this.chartOptions.yAxis[0].tickInterval = 1
-    this.chartOptions.yAxis[1].min = 0
-    this.chartOptions.yAxis[1].opposite = 'true'
-    this.collectDemographicOptions()
-    this.setTooltipFormatter()
-    this.loadPrimarySeries()
-  },
-  mounted() {
-    if (this.$refs.chart.chart.xAxis[0].width / this.chartOptions.xAxis.categories.length < 75) {
-      this.chartOptions.xAxis[0].labels.rotation = -45
-    }
-  },
-  methods: {
-    collectDemographicOptions() {
-      each(this.gradeDistribution, item => {
-        each(item, (values, category) => {
-          let option = get(this.demographicOptions, category)
-          if (get(values, 'true') && option && !size(option['options'])) {
-            option['options'] = ['true']
-          } else if (category === 'genders') {
-            each(values, (vals, subcategory) => {
-              if (!vals) return
-              option = get(this.demographicOptions, `${category}.${subcategory}`)
-              if (option && !size(option['options'])) {
-                option['options'] = ['true']
-              }
-            })
-          }
-        })
-      })
-    },
-    get,
-    getSeriesMarker(series) {
-      return {
-        'fillColor': 'white',
-        'lineColor': get(series, 'color', DEFAULT_SERIES_LINE_COLOR),
-        'lineWidth': 3,
-        'radius': 5,
-        'symbol': 'circle'
-      }
-    },
-    loadPrimarySeries() {
-      this.chartOptions.colors = [CHART_COLORS.primary, CHART_COLORS.secondary]
-      this.chartOptions.legend.enabled = size(this.gradeDistribution)
-      const primaryGradeSeries = {
-        data: [],
-        color: CHART_COLORS.primary,
-        legendSymbol: 'rectangle',
-        marker: this.getSeriesMarker(this.chartOptions.series[0]),
-        name: `Overall Class ${capitalize(this.selectedStatistic)} Grade`,
-        zIndex: 1
-      }
-      const primaryPopulationSeries = {
-        data: [],
-        color: CHART_COLORS.tertiary,
-        name: 'Class Grade Count',
-        type: 'area',
-        yAxis: 1,
-        zIndex: 0
-      }
-      const xAxisCategories = []
-      var maxCount = 0
-      each(this.gradeDistribution, item => {
-        primaryGradeSeries.data.push({
-          color: CHART_COLORS.primary,
-          custom: {count: item.count},
-          y: round(get(item, `${this.selectedStatistic}GradePoints`), 1)
-        })
-        primaryPopulationSeries.data.push({
-          color: CHART_COLORS.tertiary,
-          y: item.count
-        })
-        if (item.count > maxCount) {
-          maxCount = item.count
-        }
-        xAxisCategories.push(this.shortTermName(item.termName))
-      })
-      this.chartOptions.xAxis.categories = xAxisCategories
-      this.chartOptions.yAxis[1].max = maxCount * 1.25
-      this.chartOptions.series[0] = primaryGradeSeries
-      this.chartOptions.series[1] = primaryPopulationSeries
-    },
-    loadSecondarySeries() {
-      if (this.selectedDemographic) {
-        const group = get(this.selectedDemographic, 'group')
-        const option = get(this.selectedDemographic, 'option')
-        const secondaryGradeSeries = {
-          color: CHART_COLORS.secondary,
-          data: [],
-          legendSymbol: 'rectangle',
-          marker: this.getSeriesMarker(CHART_COLORS.secondary),
-          name: `${this.selectedDemographicLabel} ${capitalize(this.selectedStatistic)} Grade`,
-          zIndex: 3
-        }
-        const secondaryPopulationSeries = {
-          color: CHART_COLORS.quaternary,
-          data: [],
-          name: `${this.selectedDemographicLabel} Grade Count`,
-          type: 'area',
-          yAxis: 1,
-          zIndex: 2
-        }
-        each(this.gradeDistribution, item => {
-          const value = get(item, `${group}.${option}`) || get(item, `${group}`)
-          const count = get(value, 'count', 0)
-          const point = {
-            custom: {
-              count: count === null ? 'Small sample size' : count
-            },
-            dataLabels: {
-              enabled: false
-            },
-            y: (value && count !== 0) ? round(get(value, `${this.selectedStatistic}GradePoints`), 1) : null
-          }
-          if (count === null) {
-            point.marker = {
-              lineWidth: 1,
-              radius: 3
-            }
-          } else {
-            point.marker = {
-              lineWidth: 3,
-              radius: 5
-            }
-          }
-          secondaryGradeSeries.data.push(point)
-          secondaryPopulationSeries.data.push({
-            color: CHART_COLORS.quaternary,
-            y: (value && count !== 0) ? count : null
-          })
-        })
-        this.chartOptions.series[2] = secondaryGradeSeries
-        this.chartOptions.series[3] = secondaryPopulationSeries
-      } else if (this.chartOptions.series.length > 2) {
-        this.chartOptions.series = [this.chartOptions.series[0], this.chartOptions.series[1]]
-      }
-    },
-    onSelectDemographic() {
-      this.loadSecondarySeries()
-    },
-    onSelectStatistic() {
-      this.loadPrimarySeries()
-      this.loadSecondarySeries()
-    },
-    setTooltipFormatter() {
-      const courseName = this.courseName
-      const isDemoMode = this.isDemoMode
-      this.chartOptions.tooltip.formatter = function () {
-        const header = `<div id="grade-dist-demo-tooltip-term" class="font-weight-bold font-size-15">${this.x}</div>
-            <div id="grade-dist-demo-tooltip-course" class="font-size-13 text-grey-darken-1 ${isDemoMode ? 'demo-mode-blur' : ''}">${courseName}</div>
-            <hr aria-hidden="true" class="mt-1 grade-dist-tooltip-hr" />`
-        return (this.points || []).reduce((tooltipText, point, index) => {
-          if (point.series.name.includes('Grade Count')) {
-            return tooltipText
-          }
-          return `${tooltipText}<div id="grade-dist-demo-tooltip-series-${index}" class="font-size-13 mt-1">
-            <span aria-hidden="true" class="font-size-16" style="color:${point.color}">\u25AC</span>
-            ${point.series.name}: <span class="font-weight-bold">${point.y}</span>
-            (${point.point.custom.count === 'Small sample size' ? 'Small sample size' : point.point.custom.count + ' students' })
-          </div>`
-        }, header)
-      }
-    },
-    shortTermName(termName) {
-      return replace(termName, /[\d]{4}/g, year => {
-        return `'${year.substring(2, 4)}`
-      })
-    },
-    size
+  isDemoMode: {
+    required: false,
+    type: Boolean
   }
+})
+
+const chartComponent = ref()
+const chartOptions = ref(merge(
+  getDefaultChartOptions(),
+  {
+    chart: {
+      type: 'line'
+    },
+    legend: {
+      symbolHeight: 3,
+      squareSymbol: false
+    },
+    plotOptions: {
+      series: {
+        lineWidth: 3
+      }
+    },
+    title: {
+      text: 'Class Grade Average by Semester'
+    },
+    tooltip: {
+      distance: 20
+    }
+  }
+))
+const config = useContextStore().config
+const demographicOptions = ref({
+  divider1: {
+    label: '─────',
+    options: []
+  },
+  'genders.female': {
+    label: 'Female Students',
+    options: []
+  },
+  'genders.male': {
+    label: 'Male Students',
+    options: []
+  },
+  'genders.other': {
+    label: 'Gender: Decline to State, Different Identity, or Genderqueer/Gender Non-Conform',
+    options: []
+  },
+  divider2: {
+    label: '─────',
+    options: []
+  },
+  underrepresentedMinorityStatus: {
+    label: 'Underrepresented Minority Students',
+    options: []
+  },
+  internationalStatus: {
+    label: 'International Students',
+    options: []
+  },
+  transferStatus: {
+    label: 'Transfer Students',
+    options: []
+  },
+  athleteStatus: {
+    label: 'Student Athletes',
+    options: []
+  }
+})
+const selectedDemographic = ref(null)
+const selectedDemographicLabel = computed(() => {
+  const group = get(selectedDemographic.value, 'group')
+  const option = group && get(demographicOptions.value, group)
+  return get(option, 'label')
+})
+const selectedStatistic = ref('mean')
+const showChartDefinitions = ref(false)
+const showTable = ref(false)
+
+watch(() => props.isDemoMode, () => {
+  setTooltipFormatter()
+})
+
+onMounted(() => {
+  chartOptions.value.yAxis = [chartOptions.value.yAxis[0], cloneDeep(chartOptions.value.yAxis[0])]
+  chartOptions.value.yAxis[0].labels.format = '{value:.1f}'
+  chartOptions.value.yAxis[0].max = 4
+  chartOptions.value.yAxis[0].min = 0
+  chartOptions.value.yAxis[0].tickInterval = 1
+  chartOptions.value.yAxis[1].min = 0
+  chartOptions.value.yAxis[1].opposite = true
+  collectDemographicOptions()
+  setTooltipFormatter()
+  loadPrimarySeries()
+  if (chartComponent.value.chart.xAxis[0].width / chartOptions.value.xAxis[0].categories.length < 75) {
+    chartOptions.value.xAxis[0].labels.rotation = -45
+  }
+})
+
+const collectDemographicOptions = () => {
+  each(props.gradeDistribution, item => {
+    each(item, (values, category) => {
+      let option = get(demographicOptions.value, category)
+      if (get(values, 'true') && option && !size(option['options'])) {
+        option['options'] = ['true']
+      } else if (category === 'genders') {
+        each(values, (vals, subcategory) => {
+          if (!vals) return
+          option = get(demographicOptions.value, `${category}.${subcategory}`)
+          if (option && !size(option['options'])) {
+            option['options'] = ['true']
+          }
+        })
+      }
+    })
+  })
+}
+
+const getSeriesMarker = (lineColor: string | undefined): SeriesMarker => {
+  return {
+    fillColor: 'white',
+    lineColor: lineColor || DEFAULT_SERIES_LINE_COLOR,
+    lineWidth: 3,
+    radius: 5,
+    symbol: 'circle'
+  }
+}
+
+const loadPrimarySeries = () => {
+  chartOptions.value.colors = [CHART_COLORS.primary, CHART_COLORS.secondary]
+  chartOptions.value.legend.enabled = !!size(props.gradeDistribution)
+  const primaryGradeSeries: SeriesLineOptions = {
+    color: CHART_COLORS.primary,
+    data: [],
+    legendSymbol: 'rectangle',
+    marker: getSeriesMarker(get(chartOptions.value, 'series[0].color')),
+    name: `Overall Class ${capitalize(selectedStatistic.value)} Grade`,
+    type: 'line',
+    zIndex: 1
+  }
+  const primaryPopulationSeries: SeriesAreaOptions = {
+    data: [],
+    color: CHART_COLORS.tertiary,
+    name: 'Class Grade Count',
+    type: 'area',
+    yAxis: 1,
+    zIndex: 0
+  }
+  const xAxisCategories: string[] = []
+  let maxCount = 0
+  each(props.gradeDistribution, item => {
+    primaryGradeSeries.data.push({
+      color: CHART_COLORS.primary,
+      custom: {count: item.count},
+      y: round(get(item, `${selectedStatistic.value}GradePoints`), 1)
+    })
+    primaryPopulationSeries.data.push({
+      color: CHART_COLORS.tertiary,
+      y: item.count
+    })
+    if (item.count > maxCount) {
+      maxCount = item.count
+    }
+    xAxisCategories.push(shortTermName(item.termName))
+  })
+  chartOptions.value.xAxis[0].categories = xAxisCategories
+  chartOptions.value.yAxis[1].max = maxCount * 1.25
+  chartOptions.value.series[0] = primaryGradeSeries
+  chartOptions.value.series[1] = primaryPopulationSeries
+}
+
+const loadSecondarySeries = () => {
+  if (selectedDemographic.value) {
+    const group = get(selectedDemographic.value, 'group')
+    const option = get(selectedDemographic.value, 'option')
+    const secondaryGradeSeries: SeriesLineOptions = {
+      color: CHART_COLORS.secondary,
+      data: [],
+      legendSymbol: 'rectangle',
+      marker: getSeriesMarker(CHART_COLORS.secondary),
+      name: `${selectedDemographicLabel.value} ${capitalize(selectedStatistic.value)} Grade`,
+      type: 'line',
+      zIndex: 3
+    }
+    const secondaryPopulationSeries: SeriesAreaOptions = {
+      color: CHART_COLORS.quaternary,
+      data: [],
+      name: `${selectedDemographicLabel.value} Grade Count`,
+      type: 'area',
+      yAxis: 1,
+      zIndex: 2
+    }
+    each(props.gradeDistribution, item => {
+      const value = get(item, `${group}.${option}`) || get(item, `${group}`)
+      const count = get(value, 'count', 0)
+      const point: Highcharts.PointOptionsObject = {
+        custom: {
+          count: isNil(count) ? 'Small sample size' : count
+        },
+        dataLabels: {
+          enabled: false
+        },
+        marker: {
+          lineWidth: isNil(count) ? 1 : 3,
+          radius: isNil(count) ? 3 : 5
+        },
+        y: (value && count !== 0) ? round(get(value, `${selectedStatistic.value}GradePoints`), 1) : null
+      }
+      secondaryGradeSeries.data.push(point)
+      secondaryPopulationSeries.data.push({
+        color: CHART_COLORS.quaternary,
+        y: (value && count !== 0) ? count : null
+      })
+    })
+    chartOptions.value.series[2] = secondaryGradeSeries
+    chartOptions.value.series[3] = secondaryPopulationSeries
+  } else if (chartOptions.value.series.length > 2) {
+    chartOptions.value.series = [chartOptions.value.series[0], chartOptions.value.series[1]]
+  }
+}
+
+const onSelectStatistic = () => {
+  loadPrimarySeries()
+  loadSecondarySeries()
+}
+
+const setTooltipFormatter = () => {
+  const courseName = props.courseName
+  const isDemoMode = props.isDemoMode
+  chartOptions.value.tooltip.formatter = function () {
+    const header = `<div id="grade-dist-demo-tooltip-term" class="font-weight-bold font-size-15">${this.x}</div>
+        <div id="grade-dist-demo-tooltip-course" class="font-size-13 text-grey-darken-1 ${isDemoMode ? 'demo-mode-blur' : ''}">${courseName}</div>
+        <hr aria-hidden="true" class="mt-1 grade-dist-tooltip-hr" />`
+    return (this.points || []).reduce((tooltipText, point, index) => {
+      if (point.series.name.includes('Grade Count')) {
+        return tooltipText
+      }
+      return `${tooltipText}<div id="grade-dist-demo-tooltip-series-${index}" class="font-size-13 mt-1">
+        <span aria-hidden="true" class="font-size-16" style="color:${point.color}">\u25AC</span>
+        ${point.series.name}: <span class="font-weight-bold">${point.y}</span>
+        (${get(point, 'point.custom.count') === 'Small sample size' ? 'Small sample size' : get(point, 'point.custom.count') + ' students' })
+      </div>`
+    }, header)
+  }
+}
+
+const shortTermName = (termName: string): string => {
+  return replace(termName, /[\d]{4}/g, year => {
+    return `'${year.substring(2, 4)}`
+  })
 }
 </script>
 

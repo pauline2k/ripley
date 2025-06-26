@@ -3,21 +3,64 @@ import * as Highcharts from 'highcharts'
 
 type NonEmptyArray<T> = [T, ...T[]];
 
-type CustomSeriesOptionsType = Highcharts.SeriesOptionsType & {
-  color: string,
-  data: Array<any>,
-  name: string
+export interface PlotOptions extends Highcharts.PlotOptions {
+  // Extend PlotOptions interface to require certain properties.
+  series: CustomPlotSeriesOptions;
 }
 
-export interface CustomPlotOptions extends Highcharts.PlotOptions {
-  series: Highcharts.PlotSeriesOptions;
+export interface CustomPlotSeriesOptions extends Highcharts.PlotSeriesOptions {
+  // Extend PlotSeriesOptions interface to require certain properties.
+  data: Array<any>
+}
+
+interface XAxisOptions extends Highcharts.XAxisOptions {
+  // Extend XAxisOptions interface to require certain properties.
+  categories: Array<string>;
+  labels: Highcharts.XAxisLabelsOptions;
+}
+
+interface YAxisOptions extends Highcharts.YAxisOptions {
+  // Extend YAxisOptions interface to require certain properties.
+  labels: Highcharts.YAxisLabelsOptions;
+}
+
+export interface SeriesAreaOptions extends Highcharts.SeriesAreaOptions {
+  color: string,
+  data: Array<Highcharts.PointOptionsObject>
+}
+
+export interface SeriesColumnOptions extends Highcharts.SeriesColumnOptions {
+  color: string,
+  data: Array<Highcharts.PointOptionsObject>
+}
+
+export interface SeriesLineOptions extends Highcharts.SeriesLineOptions {
+  color: string,
+  data: Array<Highcharts.PointOptionsObject>
 }
 
 export interface HighchartsOptions extends Highcharts.Options {
-  plotOptions: CustomPlotOptions,
-  series: Array<CustomSeriesOptionsType>,
-  xAxis: NonEmptyArray<Highcharts.XAxisOptions>,
-  yAxis: NonEmptyArray<Highcharts.YAxisOptions>
+  // Extend Options interface to require certain properties.
+  legend: Highcharts.LegendOptions;
+  plotOptions: PlotOptions,
+  series: Array<
+    // If we want a new 'chart.type' then find the corresponding interface under 'Highcharts.SeriesOptionsRegistry'
+    // and add it to the list below.
+    SeriesAreaOptions |
+    SeriesColumnOptions |
+    SeriesLineOptions
+  >,
+  tooltip: Highcharts.TooltipOptions;
+  xAxis: NonEmptyArray<XAxisOptions>,
+  yAxis: NonEmptyArray<YAxisOptions>
+}
+
+export interface SeriesMarker {
+  fillColor: string,
+  lineColor: string,
+  lineWidth: number,
+  radius: number,
+  symbol: string
 }
 
 const DEFAULT_HIGHCHARTS_CHART_OPTIONS: HighchartsOptions = {
@@ -51,6 +94,7 @@ const DEFAULT_HIGHCHARTS_CHART_OPTIONS: HighchartsOptions = {
     },
     series: {
       borderWidth: 0,
+      data: [],
       dataLabels: {
         enabled: false
       }
