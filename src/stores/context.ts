@@ -6,8 +6,10 @@ import {putFocusNextTick} from '@/utils'
 import router from '@/router'
 
 export type RipleyConfig = {
+  devAuthEnabled: boolean,
   hypersleep: any,
-  newtInformationBlock: string
+  newtInformationBlock: string,
+  newtShowOtherGender: boolean
 }
 
 export type RipleyUser = {
