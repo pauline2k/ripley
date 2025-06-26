@@ -1,7 +1,27 @@
 import {cloneDeep} from 'lodash'
 import * as Highcharts from 'highcharts'
 
-const DEFAULT_HIGHCHARTS_CHART_OPTIONS: Highcharts.Options = {
+type NonEmptyArray<T> = [T, ...T[]];
+
+type CustomSeriesOptionsType = Highcharts.SeriesOptionsType & {
+  color: string,
+  data: Array<any>,
+  name: string
+}
+
+export interface CustomPlotOptions extends Highcharts.PlotOptions {
+  series: Highcharts.PlotSeriesOptions;
+}
+
+export interface HighchartsOptions extends Highcharts.Options {
+  plotOptions: CustomPlotOptions,
+  series: Array<CustomSeriesOptionsType>,
+  xAxis: NonEmptyArray<Highcharts.XAxisOptions>,
+  yAxis: NonEmptyArray<Highcharts.YAxisOptions>
+}
+
+const DEFAULT_HIGHCHARTS_CHART_OPTIONS: HighchartsOptions = {
+  // Highcharts API: https://api.highcharts.com/
   chart: {
     backgroundColor: 'transparent'
   },

@@ -25,7 +25,7 @@
               :items="courseSuggestions"
               label="Search Classes..."
               :loading="isSearching ? 'primary' : false"
-              :menu-icon="null"
+              :menu-icon="undefined"
               :search="courseSearchText"
               variant="outlined"
               @blur="selectedCourse = toUpper(courseSearchText)"
@@ -119,7 +119,7 @@
     >
       <PageLoadProgress v-if="isLoadingPriorEnrollments" color="primary" />
     </v-overlay>
-    <highcharts :options="chartOptions"></highcharts>
+    <Chart :options="chartOptions" />
     <v-row v-if="selectedTerm" class="d-flex justify-center">
       <v-btn
         id="grade-distribution-enrollments-show-btn"
@@ -146,7 +146,11 @@
           width="700"
         >
           <table id="grade-distribution-enroll-table" class="border-0 border-t">
-            <caption class="font-weight-bold font-size-16 py-3" v-html="chartOptions.title.text"></caption>
+            <caption
+              v-if="chartOptions.title"
+              class="font-weight-bold font-size-16 py-3"
+              v-html="chartOptions.title.text"
+            />
             <thead class="bg-grey-lighten-4">
               <tr>
                 <th class="font-weight-bold pl-4 py-2" scope="col" rowspan="2">Grade</th>
@@ -170,7 +174,7 @@
             </thead>
             <tbody>
               <tr
-                v-for="(grade, gradeIndex) in chartOptions.xAxis.categories"
+                v-for="(grade, gradeIndex) in chartOptions.xAxis[0].categories"
                 :id="`grade-distribution-enroll-table-row-${gradeIndex}`"
                 :key="gradeIndex"
               >
@@ -223,272 +227,272 @@
   </div>
 </template>
 
-<script setup>
-import {mdiAlert, mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
+<script lang="ts" setup>
+import type {PropType} from 'vue'
+import type {HighchartsOptions} from '@/lib/highcharts'
 import {Chart} from 'highcharts-vue'
-import ChartDefinitions from '@/components/bcourses/analytics/ChartDefinitions'
 import {debounce, each, find, get, includes, isEmpty, merge, round, size, sumBy, toUpper} from 'lodash'
-import {getPriorEnrollmentGradeDistribution, searchCourses} from '@/api/grade-distribution'
+import {mdiAlert, mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
+import {nextTick, onMounted, ref, watch} from 'vue'
+import {useContextStore} from '@/stores/context'
+import ChartDefinitions from '@/components/bcourses/analytics/ChartDefinitions.vue'
 import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
 import {CHART_COLORS, getDefaultChartOptions} from '@/lib/highcharts'
+import {getPriorEnrollmentGradeDistribution, searchCourses} from '@/api/grade-distribution'
+import {Term} from '@/lib/types'
 
-export default {
-  name: 'PriorEnrollmentChart',
-  components: {
-    ChartDefinitions,
-    highcharts: Chart,
-    PageLoadProgress
+const props = defineProps({
+  courseName: {
+    required: true,
+    type: String
   },
-  mixins: [Context],
-  props: {
-    courseName: {
-      required: true,
-      type: String
-    },
-    gradeDistribution: {
-      required: true,
-      type: Object
-    },
-    isDemoMode: {
-      required: false,
-      type: Boolean
-    },
-    terms: {
-      required: true,
-      type: Array
-    }
+  gradeDistribution: {
+    required: true,
+    type: Object
   },
-  data: () => ({
-    chartOptions: {},
-    pendingCourseSearch: undefined,
-    courseSearchText: undefined,
-    courseSuggestions: [],
-    debouncedSearch: undefined,
-    courseSearchErrors: [],
-    insufficientData: false,
-    isLoadingPriorEnrollments: false,
-    isSearching: false,
-    priorEnrollmentGradeDistribution: {},
-    selectedCourse: undefined,
-    selectedTerm: undefined,
-    showChartDefinitions: false,
-    showTable: false,
-    suppressValidation: true
-  }),
-  computed: {
-    classSize() {
-      return this.selectedTerm ? get(this.gradeDistribution, `${this.selectedTerm.id}.0.classSize`) : 0
-    }
+  isDemoMode: {
+    required: false,
+    type: Boolean
   },
-  watch: {
-    courseSearchText(newVal, oldVal) {
-      if (newVal) {
-        if (newVal !== oldVal) {
-          this.debouncedSearch()
+  terms: {
+    required: true,
+    type: Array as PropType<Term[]>
+  }
+})
+
+const chartOptions = ref<HighchartsOptions>(merge(
+  getDefaultChartOptions(),
+  {
+    chart: {
+      type: 'column'
+    },
+    legend: {
+      enabled: get(props.terms, 0) && !isEmpty(get(props.gradeDistribution, get(props.terms, 0).id)),
+      symbolHeight: 12,
+      useHTML: true
+    },
+    series: {
+      lineWidth: 0,
+      states: {
+        hover: {
+          lineWidthPlus: 0
         }
       }
     },
-    isDemoMode() {
-      this.setChartTitle()
-      this.setLegendLabel()
-      this.setTooltipFormatter()
+    title: {
+      widthAdjust: -200
     },
-    selectedCourse(newVal, oldVal) {
-      if (newVal !== oldVal) {
-        this.insufficientData = false
-      }
-    }
-  },
-  created() {
-    this.selectedTerm = get(this.terms, 0)
-    this.chartOptions = merge(
-      getDefaultChartOptions(),
+    tooltip: {
+      distance: 12
+    },
+    yAxis: [
       {
-        chart: {
-          type: 'column'
-        },
-        legend: {
-          enabled: this.selectedTerm && !isEmpty(get(this.gradeDistribution, this.selectedTerm.id)),
-          symbolHeight: 12,
-          useHTML: true
-        },
-        series: {
-          lineWidth: 0,
-          states: {
-            hover: {
-              lineWidthPlus: 0
-            }
-          }
-        },
-        title: {
-          widthAdjust: -200
-        },
-        tooltip: {
-          distance: 12
+        labels: {
+          format: '{value}%'
         }
       }
-    )
-    this.chartOptions.yAxis[0].labels.format = '{value}%'
-    this.setLegendLabel()
-    this.debouncedSearch = debounce(this.search, 300)
-    this.setTooltipFormatter()
-    this.loadPrimarySeries(CHART_COLORS.primary)
-    this.setChartTitle()
-  },
-  methods: {
-    get,
-    getDataLabel(yVal, color) {
-      if (this.chartOptions.series.length === 1) {
-        const displayAboveColumn = yVal < 2
-        return {
-          color: displayAboveColumn ? color : 'white',
-          enabled: true,
-          format: '{y}%',
-          style: {
-            textOutline: 'none'
-          },
-          y: displayAboveColumn ? 2 : 22
-        }
-      } else {
-        return {
-          enabled: false
-        }
-      }
-    },
-    isEmpty,
-    loadPrimarySeries(color, showLabels=true) {
-      this.chartOptions.series[0] = {
-        color: color,
-        name: `${get(this.selectedTerm, 'name')} ${this.courseName}`,
-        data: []
-      }
-      this.chartOptions.xAxis.categories = []
-      each(this.gradeDistribution[get(this.selectedTerm, 'id')], item => {
-        this.chartOptions.series[0].data.push({
-          color: color,
-          custom: {
-            count: item.count
-          },
-          dataLabels: showLabels ? this.getDataLabel(item.y, color) : {enabled: false},
-          y: item.percentage
-        })
-        this.chartOptions.xAxis.categories.push(item.grade)
+    ]
+  }
+))
+const currentUser = useContextStore().currentUser
+const courseSearchText = ref()
+const courseSuggestions = ref([])
+const courseSearchErrors = ref([])
+const insufficientData = ref(false)
+const isLoadingPriorEnrollments = ref(false)
+const isSearching = ref(false)
+const pendingCourseSearch = ref<AbortController>()
+const priorEnrollmentGradeDistribution = ref({})
+const selectedCourse = ref()
+const selectedTerm = ref()
+const showChartDefinitions = ref(false)
+const showTable = ref(false)
+const suppressValidation = ref(true)
+
+watch(courseSearchText, (newVal, oldVal) => {
+  if (newVal) {
+    if (newVal !== oldVal) {
+      debounce(search, 300)()
+    }
+  }
+})
+
+watch(() => props.isDemoMode, () => {
+  setChartTitle()
+  setLegendLabel()
+  setTooltipFormatter()
+})
+
+watch(selectedTerm, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    insufficientData.value = false
+  }
+})
+
+onMounted(() => {
+  selectedTerm.value = get(props.terms, 0)
+  setLegendLabel()
+  setTooltipFormatter()
+  loadPrimarySeries(CHART_COLORS.primary)
+  setChartTitle()
+})
+
+const getDataLabel = (yVal, color) => {
+  if (size(chartOptions.value.series) === 1) {
+    const displayAboveColumn = yVal < 2
+    return {
+      color: displayAboveColumn ? color : 'white',
+      enabled: true,
+      format: '{y}%',
+      style: {
+        textOutline: 'none'
+      },
+      y: displayAboveColumn ? 2 : 22
+    }
+  } else {
+    return {
+      enabled: false
+    }
+  }
+}
+
+const loadPrimarySeries = (color: string, showLabels=true) => {
+  chartOptions.value.series[0] = {
+    color,
+    data: [],
+    name: `${get(selectedTerm.value, 'name')} ${props.courseName}`,
+    type: 'column'
+  }
+  chartOptions.value.xAxis[0].categories = []
+  each(props.gradeDistribution[get(selectedTerm.value, 'id')], item => {
+    chartOptions.value.series[0].data.push({
+      color: color,
+      custom: {
+        count: item.count
+      },
+      dataLabels: showLabels ? getDataLabel(item.y, color) : {enabled: false},
+      y: item.percentage
+    })
+    chartOptions.value.xAxis[0].categories = chartOptions.value.xAxis[0].categories || []
+    chartOptions.value.xAxis[0].categories.push(item.grade)
+  })
+  chartOptions.value.plotOptions.series.dataLabels = {
+    enabled: showLabels
+  }
+}
+
+const loadPriorEnrollments = () => {
+  type summary = {custom: {count: number}, dataLabels: {enabled: boolean}, y: number}
+  const data: summary[] = []
+  each(priorEnrollmentGradeDistribution.value[get(selectedTerm.value, 'id')], item => {
+    if (chartOptions.value.xAxis && includes(chartOptions.value.xAxis[0].categories, item.grade)) {
+      data.push({
+        custom: {
+          count: get(item, 'priorEnrollCount', 0)
+        },
+        dataLabels: {enabled: false},
+        y: get(item, 'priorEnrollPercentage', 0)
       })
-      this.chartOptions.plotOptions.series.dataLabels = {
-        enabled: showLabels
-      }
-    },
-    loadPriorEnrollments() {
-      const gradesWithPriorEnroll = {
-        color: CHART_COLORS.secondary,
-        data: [],
-        name: `Have taken ${this.selectedCourse}`,
-        type: 'column'
-      }
-      each(this.priorEnrollmentGradeDistribution[get(this.selectedTerm, 'id')], item => {
-        if (includes(this.chartOptions.xAxis.categories, item.grade )) {
-          gradesWithPriorEnroll.data.push({
-            custom: {
-              count: get(item, 'priorEnrollCount', 0)
-            },
-            dataLabels: {enabled: false},
-            y: get(item, 'priorEnrollPercentage', 0)
-          })
-        }
-      })
-      this.chartOptions.series[1] = gradesWithPriorEnroll
-    },
-    onClickAddCourse() {
-      if (this.selectedCourse) {
-        this.isLoadingPriorEnrollments = true
-        getPriorEnrollmentGradeDistribution(this.currentUser.canvasSiteId, this.selectedCourse).then(response => {
-          this.courseSearchText = null
-          this.priorEnrollmentGradeDistribution = response
-          this.isLoadingPriorEnrollments = false
-          this.refresh()
-        })
-      }
-    },
-    onSelectTerm(e) {
-      const termId = e.target.value
-      this.selectedTerm = find(this.terms, {'id': termId})
-      this.refresh()
-    },
-    refresh() {
-      if (get(this.priorEnrollmentGradeDistribution, get(this.selectedTerm, 'id'))) {
-        this.loadPrimarySeries(CHART_COLORS.primary, false)
-        this.loadPriorEnrollments()
-        this.insufficientData = false
-      } else {
-        this.chartOptions.series = []
-        this.loadPrimarySeries(CHART_COLORS.primary)
-        this.insufficientData = true
-      }
-      this.setChartTitle()
-    },
-    round,
-    search() {
-      this.isSearching = true
-      if (this.pendingCourseSearch) {
-        this.pendingCourseSearch.abort()
-      }
-      this.pendingCourseSearch = new AbortController()
-      searchCourses(toUpper(this.courseSearchText), this.pendingCourseSearch).then(response => {
-        this.courseSuggestions = response.results
-        this.isSearching = false
-      }).catch(() => {
-        this.$nextTick(() => this.isSearching = false)
-      })
-    },
-    setChartTitle() {
-      if (size(this.chartOptions.series) > 1) {
-        this.chartOptions.title.useHTML = true
-        this.chartOptions.title.text = `Relation of <span ${this.isDemoMode ? 'class="demo-mode-blur"' : ''}>
-          ${this.selectedTerm.name} ${this.courseName}
-          </span> Students Who Have Taken ${this.selectedCourse} to Overall Class`
-      } else {
-        this.chartOptions.title.useHTML = false
-        this.chartOptions.title.text = `Overall Class Grade Distribution&mdash;${this.selectedTerm.name}`
-      }
-    },
-    setLegendLabel() {
-      this.chartOptions.legend.labelFormat = `{#if (eq index 0)}<span ${this.isDemoMode ? 'class="demo-mode-blur"' : ''}>{else}<span>{/if}
-          {name}
-        </span> grades`
-    },
-    setTooltipFormatter() {
-      const courseName = this.courseName
-      const isDemoMode = this.isDemoMode
-      this.chartOptions.tooltip.formatter = function () {
-        const header = `<div id="grade-dist-enroll-tooltip-grade" class="font-weight-bold font-size-15">${this.x} Grade</div>
-            <div id="grade-dist-enroll-tooltip-course" class="font-size-13 text-grey-darken-1">
-              <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${this.color}">\u25A0</span>
-              <span ${isDemoMode ? 'class="demo-mode-blur"' : ''}>${courseName}</span>
-            </div>
-            <div class="font-size-13 mb-2">
-              Ratio of class: <span id="grade-dist-enroll-tooltip-series-0-value" class="font-weight-bold">${this.point.y}%</span>
-            </div>
-            <hr aria-hidden="true" class="mb-2 ${size(this.points) <= 1 ? 'd-none' : ''}" />`
-        return (this.points.slice(1) || []).reduce((tooltipText, plot, index) => {
-          return`${tooltipText}<div id="grade-dist-enroll-tooltip-series-${index + 1}" class="font-size-13 pb-2">
-            <div class="text-grey-darken-1 text-uppercase">
-              <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${plot.color}">\u25A0</span>
-              ${plot.series.name}
-            </div
-            <div>
-              Ratio of class: <span id="grade-dist-enroll-tooltip-series-${index + 1}-value" class="font-weight-bold">${plot.y}%</span>
-            </div>
-          </div>`
-        }, header)
-      }
-    },
-    size,
-    sumBy,
-    toUpper
+    }
+  })
+  chartOptions.value.series[1] = {
+    color: CHART_COLORS.secondary,
+    data,
+    name: `Have taken ${selectedCourse.value}`,
+    type: 'column'
+  }
+}
+
+const onClickAddCourse = () => {
+  if (selectedCourse.value) {
+    isLoadingPriorEnrollments.value = true
+    getPriorEnrollmentGradeDistribution(currentUser.canvasSiteId, selectedCourse.value).then(response => {
+      courseSearchText.value = undefined
+      priorEnrollmentGradeDistribution.value = response
+      isLoadingPriorEnrollments.value = false
+      refresh()
+    })
+  }
+}
+
+const onSelectTerm = e => {
+  const termId = e.target.value
+  selectedTerm.value = find(props.terms, {'id': termId})
+  refresh()
+}
+
+const refresh = () => {
+  if (get(priorEnrollmentGradeDistribution.value, get(selectedTerm.value, 'id'))) {
+    loadPrimarySeries(CHART_COLORS.primary, false)
+    loadPriorEnrollments()
+    insufficientData.value = false
+  } else {
+    chartOptions.value.series = []
+    loadPrimarySeries(CHART_COLORS.primary)
+    insufficientData.value = true
+  }
+  setChartTitle()
+}
+
+const search = () => {
+  isSearching.value = true
+  if (pendingCourseSearch.value) {
+    pendingCourseSearch.value.abort()
+  }
+  pendingCourseSearch.value = new AbortController()
+  searchCourses(toUpper(courseSearchText.value), pendingCourseSearch.value).then(data => {
+    courseSuggestions.value = data.results
+    isSearching.value = false
+  }).catch(() => {
+    nextTick(() => isSearching.value = false)
+  })
+}
+
+const setChartTitle = () => {
+  chartOptions.value.title = chartOptions.value.title || {}
+  if (size(chartOptions.value.series) > 1) {
+    chartOptions.value.title.useHTML = true
+    chartOptions.value.title.text = `Relation of <span ${props.isDemoMode ? 'class="demo-mode-blur"' : ''}>
+      ${selectedTerm.value.name} ${props.courseName}
+      </span> Students Who Have Taken ${selectedCourse.value} to Overall Class`
+  } else {
+    chartOptions.value.title.useHTML = false
+    chartOptions.value.title.text = `Overall Class Grade Distribution&mdash;${selectedTerm.value.name}`
+  }
+}
+
+const setLegendLabel = () => {
+  chartOptions.value.legend = chartOptions.value.legend || {}
+  chartOptions.value.legend.labelFormat = `{#if (eq index 0)}<span ${props.isDemoMode ? 'class="demo-mode-blur"' : ''}>{else}<span>{/if}
+      {name}
+    </span> grades`
+}
+
+const setTooltipFormatter = () => {
+  const courseName = props.courseName
+  const isDemoMode = props.isDemoMode
+  chartOptions.value.tooltip = chartOptions.value.tooltip || {}
+  chartOptions.value.tooltip.formatter = function() {
+    const header = `<div id="grade-dist-enroll-tooltip-grade" class="font-weight-bold font-size-15">${this.x} Grade</div>
+        <div id="grade-dist-enroll-tooltip-course" class="font-size-13 text-grey-darken-1">
+          <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${this.color}">\u25A0</span>
+          <span ${isDemoMode ? 'class="demo-mode-blur"' : ''}>${courseName}</span>
+        </div>
+        <div class="font-size-13 mb-2">
+          Ratio of class: <span id="grade-dist-enroll-tooltip-series-0-value" class="font-weight-bold">${this.point.y}%</span>
+        </div>
+        <hr aria-hidden="true" class="mb-2 ${size(this.points) <= 1 ? 'd-none' : ''}" />`
+    return (this.points ? this.points.slice(1) || [] : []).reduce((tooltipText, plot, index) => {
+      return`${tooltipText}<div id="grade-dist-enroll-tooltip-series-${index + 1}" class="font-size-13 pb-2">
+        <div class="text-grey-darken-1 text-uppercase">
+          <span aria-hidden="true" class="grade-dist-enroll-tooltip-symbol" style="color:${plot.color}">\u25A0</span>
+          ${plot.series.name}
+        </div
+        <div>
+          Ratio of class: <span id="grade-dist-enroll-tooltip-series-${index + 1}-value" class="font-weight-bold">${plot.y}%</span>
+        </div>
+      </div>`
+    }, header)
   }
 }
 </script>
