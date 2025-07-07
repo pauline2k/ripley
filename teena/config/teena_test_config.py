@@ -246,7 +246,7 @@ class TeenaTestConfig(object):
         test_users = [Person(data) for data in test_users_data]
         return CourseSite({
             'abbreviation': f'Welcome Email {self.test_id}',
-            'manual_members': [u for u in test_users if u.role in ['Teacher', 'Student']],
+            'manual_members': [u for u in test_users if u.role in ['Teacher', 'Student', 'Waitlist Student']],
             'title': f'Welcome {self.test_id}',
         })
 
