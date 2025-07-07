@@ -82,11 +82,11 @@ class MailingListPage(MailingListsPage):
 
     def enter_email_subject(self, subject):
         app.logger.info(f'Entering subject {subject}')
-        self.wait_for_element_clear_and_send_keys(self.EMAIL_SUBJECT_INPUT, subject)
+        self.wait_for_element_remove_chars_send_keys(self.EMAIL_SUBJECT_INPUT, subject)
 
     def enter_email_body(self, body):
         app.logger.info(f'Entering body {body}')
-        self.wait_for_element_clear_and_send_keys(self.EMAIL_BODY_TEXT_AREA, body)
+        self.wait_for_element_remove_chars_send_keys(self.EMAIL_BODY_TEXT_AREA, body)
 
     def click_save_email_button(self):
         app.logger.info('Clicking the save email button')
