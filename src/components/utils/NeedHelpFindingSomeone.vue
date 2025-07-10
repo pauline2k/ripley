@@ -30,8 +30,8 @@
           <dt class="user-search-notice-description-term">Guests</dt>
           <dd class="user-search-notice-description">
             Peers from other institutions or guests from the community must be sponsored with a
-            <OutboundLink href="https://idc.berkeley.edu/guests/">CalNet Guest Account.</OutboundLink>
-            Do NOT request a CalNet Guest Account for concurrent enrollment students.
+            <OutboundLink href="https://https://calnet.berkeley.edu/calnet-departments/calnet-sponsored-guests">CalNet Sponsored Guest Account.</OutboundLink>
+            Do NOT request a CalNet Sponsored Guest Account for concurrent enrollment students.
           </dd>
           <dt class="user-search-notice-description-term">More Information</dt>
           <dd class="user-search-notice-description">
