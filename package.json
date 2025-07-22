@@ -15,6 +15,7 @@
     "@mdi/js": "7.4.47",
     "axios": "1.10.0",
     "core-js": "3.43.0",
+    "highcharts": "9.3.3",
     "highcharts-vue": "2.0.1",
     "js-file-download": "0.4.12",
     "lodash": "4.17.21",
