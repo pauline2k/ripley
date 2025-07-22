@@ -94,7 +94,7 @@ export default {
       if (!this.isProcessing) {
         this.isProcessing = true
         this.alertScreenReader('Searching for mailing list.')
-        let searchTimer = setInterval(() => {
+        const searchTimer = setInterval(() => {
           this.alertScreenReader('Still searching.')
         }, 7000)
         getMailingList(this.canvasSiteId).then(

@@ -203,7 +203,7 @@
               </v-container>
             </v-card-text>
             <v-card-actions>
-              <v-spacer></v-spacer>
+              <v-spacer />
               <v-btn color="blue darken-1" text @click="scheduleEditCancel">Cancel</v-btn>
               <v-btn
                 color="blue darken-1"
@@ -340,6 +340,7 @@ export default {
       })
       startJob(job.key, {isDryRun: this.isDryRun}).then(() => {})
       const jobName = find(this.jobSchedule.jobs, ['key', job.key]).name
+      // eslint-disable-next-line no-console
       console.log(`TODO: this.snackbarOpen(${jobName} job started)`)
     },
     scheduleEditCancel() {

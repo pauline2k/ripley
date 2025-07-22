@@ -23,9 +23,9 @@ const Welcome = () => import('@/views/Welcome.vue')
 const WelcomeAdmin = () => import('@/views/WelcomeAdmin.vue')
 
 import {capitalize} from 'lodash'
-import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router'
+import {RouteRecordRaw, createRouter, createWebHistory} from 'vue-router'
 import {logOut} from '@/api/auth'
-import {useContextStore} from '@/stores/context'
+import {RipleyConfig, useContextStore} from '@/stores/context'
 
 const isInIframe = window.parent.frames.length
 const BaseView = () => import(isInIframe ? '@/layouts/lti/BaseLTI.vue' : '@/layouts/standalone/BaseStandalone.vue')
@@ -34,7 +34,7 @@ const routes:RouteRecordRaw[] = [
   {
     beforeEnter: (to: any, from: any, next: any) => {
       const currentUser = useContextStore().currentUser
-      currentUser.isAuthenticated ? next({path: currentUser.isAdmin ? '/admin' : '/welcome'}) : next()
+      return currentUser.isAuthenticated ? next({path: currentUser.isAdmin ? '/admin' : '/welcome'}) : next()
     },
     children: [
       {
@@ -137,7 +137,7 @@ const routes:RouteRecordRaw[] = [
       },
       {
         beforeEnter: (to: any, from: any, next: any) => {
-          useContextStore().currentUser.isAdmin ? next({path: '/admin'}) : next()
+          return useContextStore().currentUser.isAdmin ? next({path: '/admin'}) : next()
         },
         component: Welcome,
         name: 'Welcome',
@@ -193,7 +193,7 @@ router.beforeEach((to, from, next) => {
   const currentUser = context.currentUser
   context.resetApplicationState()
   if (currentUser.isAuthenticated && !isInIframe && !currentUser.canAccessStandaloneView) {
-    return logOut().then(data => window.location.href = data.casLogoutUrl)
+    return logOut().then((data: RipleyConfig) => window.location.href = data.casLogoutUrl)
   } else {
     if (to.query.error && to.path !== '/error' && !to.meta.is404) {
       context.setApplicationState(500, to.query.error)

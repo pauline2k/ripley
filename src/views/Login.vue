@@ -17,7 +17,7 @@
           </v-btn>
         </div>
         <div>
-          <hr />
+          <hr>
         </div>
         <div v-if="config.devAuthEnabled" class="pt-3">
           <h2 class="sr-only">DevAuth</h2>

@@ -45,8 +45,7 @@
           <v-col cols="4">
             Enrollments
           </v-col>
-          <v-col cols="2">
-          </v-col>
+          <v-col cols="2" />
         </v-row>
         <v-row v-for="(user, index) in canvasSite.users" :key="user.id" :class="{'bg-blue-grey-lighten-5': !(index % 2)}">
           <v-col :class="{'font-weight-bold': user.uid === currentUser.uid}" cols="2">

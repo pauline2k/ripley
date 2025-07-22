@@ -8,7 +8,7 @@
       rounded="0"
       variant="flat"
     >
-      <hr aria-hidden="true" class="mb-3" />
+      <hr aria-hidden="true" class="mb-3">
       <v-card-title>
         <h3 class="font-weight-medium">Chart Definitions</h3>
       </v-card-title>
@@ -59,7 +59,6 @@ export default {
   components: {OutboundLink},
   props: {
     id: {
-      default: 'grade-distribution-chart-definitions',
       required: true,
       type: String
     },

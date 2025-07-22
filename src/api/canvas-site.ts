@@ -1,6 +1,6 @@
 import moment from 'moment-timezone'
-import utils from '@/api/api-utils'
 import {each} from 'lodash'
+import utils from '@/api/api-utils'
 
 export function getCanvasSite(canvasSiteId: number, includeUsers?: boolean, redirectOnError?: boolean) {
   return utils.get(`/api/canvas_site/${canvasSiteId}?includeUsers=${!!includeUsers}`, redirectOnError)

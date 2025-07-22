@@ -162,7 +162,7 @@
                     name="enablePnpCoversion"
                     value="true"
                     @change="selectedPnpCutoffGrade = null"
-                  />
+                  >
                 </div>
                 <label for="input-enable-pnp-conversion-true">
                   Automatically convert letter grades in the E-Grades export to the student-selected grading option.
@@ -199,7 +199,7 @@
                     name="enablePnpConversion"
                     value="false"
                     @change="selectedPnpCutoffGrade = ''"
-                  />
+                  >
                 </div>
                 <label for="input-enable-pnp-conversion-false">
                   Do not automatically convert any letter grades to P/NP. I have applied a P/NP grading scheme to
@@ -439,6 +439,7 @@ export default {
               this.alertScreenReader('Downloading export. Export form options presented for an additional download.')
               this.downloadGrades()
             } else if (this.config.isVueAppDebugMode) {
+              // eslint-disable-next-line no-console
               console.log(`[DEBUG] jobStatus: ${this.jobStatus}`)
             }
           },

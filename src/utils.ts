@@ -113,7 +113,7 @@ export function putFocusNextTick(id: string, cssSelector?: string) {
   const callable = () => {
     let el = document.getElementById(id)
     el = el && cssSelector ? el.querySelector(cssSelector) : el
-    el && el.focus()
+    if (el) el.focus()
     return !!el
   }
   nextTick(() => {

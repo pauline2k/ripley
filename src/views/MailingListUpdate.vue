@@ -259,7 +259,7 @@ export default {
       this.alerts = []
       this.alertScreenReader('Updating mailing list.')
       this.isUpdating = true
-      let updateTimer = setInterval(() => {
+      const updateTimer = setInterval(() => {
         this.alertScreenReader('Still processing updates.')
       }, 7000)
       populateMailingList(this.mailingList.id).then(

@@ -412,7 +412,7 @@ export default {
         this.alertScreenReader('Loading person search results.')
         this.showUsersArea = true
         this.isSearching = true
-        let searchTimer = setInterval(() => {
+        const searchTimer = setInterval(() => {
           this.alertScreenReader('Still searching.')
         }, 7000)
         searchUsers(this.searchText, this.searchType).then(data => {
@@ -443,7 +443,7 @@ export default {
       this.isAddingUser = true
       this.showAlerts = true
       this.alertScreenReader(`Adding ${this.selectedUserFullName} with role ${this.srFriendlyRole(this.selectedRole)}.`)
-      let addUserTimer = setInterval(() => {
+      const addUserTimer = setInterval(() => {
         this.alertScreenReader('Still processing.')
       }, 7000)
       const sectionId = this.sectionSelected ? this.sectionSelected.id : null

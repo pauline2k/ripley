@@ -9,6 +9,7 @@ const $_errorHandler = (error: any, redirectOnError?: boolean) => {
   } else {
     const status = get(error, 'response.status')
     const message = get(error, 'response.data.error') || get(error, 'response.data.message') || get(error, 'message') || 'Unauthorized'
+    // eslint-disable-next-line no-console
     console.log(`\n${error}\n${message}\n`)
     if (redirectOnError) {
       useContextStore().setApplicationState(status, message)
