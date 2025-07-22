@@ -12,7 +12,7 @@
             hide-details
             label="Demo mode"
             :ripple="false"
-          ></v-switch>
+          />
         </div>
       </div>
       <v-alert
@@ -29,7 +29,7 @@
         >
           <span :class="{'demo-mode-blur': isDemoMode}">{{ gradeDistribution.courseName }}</span> &mdash; {{ gradeDistribution.canvasSite.term.name }}
         </div>
-        <div v-html="contextStore.config.newtInformationBlock"></div>
+        <div v-html="contextStore.config.newtInformationBlock" />
         <v-card class="container mb-4" elevation="0">
           <DemographicsChart
             :course-name="gradeDistribution.courseName"

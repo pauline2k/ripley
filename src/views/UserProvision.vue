@@ -17,8 +17,7 @@
           :class="{'error': !isEmpty(validationErrors)}"
           rows="4"
           name="uids"
-        >
-        </textarea>
+        />
       </v-row>
       <v-row no-gutters>
         <v-col cols="8" class="pt-2">

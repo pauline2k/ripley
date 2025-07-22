@@ -59,7 +59,7 @@
             </span>
           </div>
         </template>
-        <template #bottom></template>
+        <template #bottom />
       </v-data-table>
     </v-card-text>
   </v-card>

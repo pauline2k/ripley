@@ -9,12 +9,12 @@ import {VBtn} from 'vuetify/components/VBtn'
 import {VBtnToggle} from 'vuetify/components/VBtnToggle'
 import {VCard, VCardActions, VCardSubtitle, VCardText, VCardTitle} from 'vuetify/components/VCard'
 import {VCheckbox} from 'vuetify/components/VCheckbox'
-import {VCol, VContainer, VSpacer, VRow} from 'vuetify/components/VGrid'
+import {VCol, VContainer, VRow, VSpacer} from 'vuetify/components/VGrid'
 import {VDataTable, VDataTableVirtual} from 'vuetify/components/VDataTable'
 import {VDialog} from 'vuetify/components/VDialog'
 import {VDivider} from 'vuetify/components/VDivider'
 import {VExpandTransition} from 'vuetify/components/transitions'
-import {VExpansionPanel, VExpansionPanels, VExpansionPanelText, VExpansionPanelTitle} from 'vuetify/components/VExpansionPanel'
+import {VExpansionPanel, VExpansionPanelText, VExpansionPanelTitle, VExpansionPanels} from 'vuetify/components/VExpansionPanel'
 import {VIcon} from 'vuetify/components/VIcon'
 import {VImg} from 'vuetify/components/VImg'
 import {VList, VListItem, VListItemAction, VListItemSubtitle, VListItemTitle} from 'vuetify/components/VList'
@@ -33,7 +33,6 @@ import {VTextarea} from 'vuetify/components/VTextarea'
 import {VTextField} from 'vuetify/components/VTextField'
 import {VWindow, VWindowItem} from 'vuetify/components/VWindow'
 
-// @ts-ignore
 import colors from 'vuetify/lib/util/colors'
 
 export default createVuetify({

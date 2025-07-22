@@ -41,7 +41,7 @@
                   min-height="30"
                   :title="item.raw"
                   :value="item.raw"
-                ></v-list-item>
+                />
               </template>
             </v-autocomplete>
             <v-btn
@@ -92,7 +92,7 @@
       <v-row class="d-flex justify-center" no-gutters>
         <ChartDefinitions id="grade-distribution-enrollment-definitions" :is-expanded="showChartDefinitions" />
       </v-row>
-      <hr aria-hidden="true" class="mb-3" />
+      <hr aria-hidden="true" class="mb-3">
       <div class="position-relative">
         <select
           v-if="size(terms)"

@@ -151,7 +151,7 @@
                 Message
               </div>
               <div class="pb-3 pt-1">
-                <div id="page-site-mailing-list-body" v-html="mailingList.welcomeEmailBody"></div>
+                <div id="page-site-mailing-list-body" v-html="mailingList.welcomeEmailBody" />
               </div>
             </template>
           </div>

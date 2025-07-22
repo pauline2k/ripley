@@ -9,7 +9,7 @@
         :aria-valuenow="percentCompleteRounded"
       >
         <div class="template-progress-bar-status">{{ percentCompleteRounded }}% Complete</div>
-        <div class="template-progress-bar-value" :style="{ width: percentCompleteRounded + '%' }"></div>
+        <div class="template-progress-bar-value" :style="{ width: percentCompleteRounded + '%' }" />
       </div>
     </div>
   </div>

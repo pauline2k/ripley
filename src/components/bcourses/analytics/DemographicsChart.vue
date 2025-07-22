@@ -67,7 +67,7 @@
     <v-row class="d-flex justify-center" no-gutters>
       <ChartDefinitions id="grade-distribution-demographics-definitions" :is-expanded="showChartDefinitions" :show-demographics="true" />
     </v-row>
-    <hr aria-hidden="true" class="mb-3" />
+    <hr aria-hidden="true" class="mb-3">
     <Chart ref="chartComponent" :options="chartOptions" />
     <v-row class="d-flex justify-center">
       <v-btn
@@ -172,15 +172,16 @@
 <script lang="ts" setup>
 import Highcharts from 'highcharts'
 import {mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
-import {Chart} from 'highcharts-vue'
 import ChartDefinitions from '@/components/bcourses/analytics/ChartDefinitions.vue'
+import {Chart} from 'highcharts-vue'
 import {capitalize, cloneDeep, each, get, isNil, merge, replace, round, size} from 'lodash'
 import {
   CHART_COLORS,
   DEFAULT_SERIES_LINE_COLOR,
-  getDefaultChartOptions,
-  SeriesAreaOptions, SeriesLineOptions,
-  SeriesMarker
+  SeriesAreaOptions,
+  SeriesLineOptions,
+  SeriesMarker,
+  getDefaultChartOptions
 } from '@/lib/highcharts'
 import {computed, onMounted, ref, watch} from 'vue'
 import {useContextStore} from '@/stores/context'

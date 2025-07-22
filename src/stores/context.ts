@@ -6,6 +6,7 @@ import {putFocusNextTick} from '@/utils'
 import router from '@/router'
 
 export type RipleyConfig = {
+  casLogoutUrl: string,
   devAuthEnabled: boolean,
   hypersleep: any,
   newtInformationBlock: string,

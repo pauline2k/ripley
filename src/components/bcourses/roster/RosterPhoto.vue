@@ -11,8 +11,7 @@
     :src="photoSrc"
     @error="imageError"
     @load="onLoad"
-  >
-  </v-img>
+  />
 </template>
 
 <script setup>

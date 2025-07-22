@@ -1,7 +1,7 @@
 <template>
   <div class="template-background-job-error">
     <p class="template-background-job-error-paragraph">
-      <i class="left fa fa-exclamation-circle icon-red template-background-job-error-icon"></i>
+      <i class="left fa fa-exclamation-circle icon-red template-background-job-error-icon" />
       <span class="template-background-job-error-header">{{ errorConfig.header }}</span>
     </p>
     <p class="template-background-job-error-paragraph">

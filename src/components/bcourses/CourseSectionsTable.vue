@@ -216,7 +216,7 @@
           aria-hidden="true"
           :class="sectionDisplayClass[section.id]"
         >
-          <td class="border-none"></td>
+          <td class="border-none" />
           <td :id="`${id}-${section.id}-discrepancy`" class="border-none" colspan="6">
             <div>
               <v-icon class="sited-icon mr-1" :icon="mdiInformationVariantCircle" />
@@ -230,7 +230,7 @@
           :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}-warning`"
           :class="sectionDisplayClass[section.id]"
         >
-          <td class="border-top-zero pa-0"></td>
+          <td class="border-top-zero pa-0" />
           <td
             :id="`${id}-${section.id}-warning`"
             colspan="6"

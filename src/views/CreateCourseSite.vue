@@ -372,8 +372,8 @@ export default {
         each(semester.classes, course => {
           course.allSelected = false
           course.selectToggleText = 'All'
-          let hasSites = false
-          let sectionIdToSites = {}
+          const hasSites = false
+          const sectionIdToSites = {}
           if (hasSites) {
             course.hasSites = hasSites
             each(course.sections, section => {

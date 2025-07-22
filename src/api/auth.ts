@@ -1,4 +1,5 @@
 import utils from './api-utils'
+import {RipleyConfig} from '@/stores/context'
 
 export function becomeUser(canvasSiteId: number, uid: string) {
   return utils.post('/api/auth/become_user', {canvasSiteId, uid}, true)
@@ -16,7 +17,7 @@ export function getCasLogoutUrl() {
   return utils.get('/api/auth/logout', true)
 }
 
-export function logOut() {
+export function logOut(): Promise<RipleyConfig> {
   return utils.get('/api/auth/logout', true)
 }
 
