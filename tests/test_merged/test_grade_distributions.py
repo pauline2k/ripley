@@ -68,6 +68,30 @@ class TestGradeDistributions:
                         'medianGradePoints': 0,
                     },
                 },
+                'majorStudents': {
+                    "false": {
+                        "count": 3,
+                        "meanGradePoints": 2.233,
+                        "medianGradePoints": 2,
+                    },
+                    "true": {
+                        "count": 0,
+                        "meanGradePoints": 0,
+                        "medianGradePoints": 0,
+                    },
+                },
+                "nonMajorStudents": {
+                    "false": {
+                        "count": 0,
+                        "meanGradePoints": 0,
+                        "medianGradePoints": 0,
+                    },
+                    "true": {
+                        "count": 3,
+                        "meanGradePoints": 2.233,
+                        "medianGradePoints": 2,
+                    },
+                },
                 'medianGradePoints': 2,
                 'termId': '2225',
                 'termName': 'Summer 2022',
@@ -139,6 +163,32 @@ class TestGradeDistributions:
                         'meanGradePoints': 3.644,
                         'count': 16,
                         'medianGradePoints': 4.0,
+                    },
+                },
+                'majorStudents': {
+                    'false': {
+                        'count': 77,
+                        'meanGradePoints': 3.849,
+                        'medianGradePoints': 4,
+                    },
+                    'true': {
+                        'count': 6,
+                        'meanGradePoints': 4,
+                        'medianGradePoints': 4.0,
+                    },
+                },
+                'nonMajorStudents': {
+                    'false':
+                    {
+                        'count': 6,
+                        'meanGradePoints': 4,
+                        'medianGradePoints': 4.0,
+                    },
+                    'true':
+                    {
+                        'count': 77,
+                        'meanGradePoints': 3.849,
+                        'medianGradePoints': 4,
                     },
                 },
                 'medianGradePoints': 4,
@@ -389,6 +439,14 @@ class TestGradeDistributions:
                     'true': None,
                     'false': None,
                 },
+                'majorStudents': {
+                    'false': None,
+                    'true': None,
+                },
+                'nonMajorStudents': {
+                    'false': None,
+                    'true': None,
+                },
                 'transferStatus': {
                     'true': None,
                     'false': None,
@@ -437,6 +495,30 @@ class TestGradeDistributions:
                     'true': {
                         'meanGradePoints': 3.644,
                         'count': 16,
+                        'medianGradePoints': 4,
+                    },
+                },
+                'majorStudents': {
+                    'false': {
+                        'count': 77,
+                        'meanGradePoints': 3.849,
+                        'medianGradePoints': 4,
+                    },
+                    'true': {
+                        'count': 6,
+                        'meanGradePoints': 4,
+                        'medianGradePoints': 4.0,
+                    },
+                },
+                'nonMajorStudents': {
+                    'false': {
+                        'count': 6,
+                        'meanGradePoints': 4,
+                        'medianGradePoints': 4.0,
+                    },
+                    'true': {
+                        'count': 77,
+                        'meanGradePoints': 3.849,
                         'medianGradePoints': 4,
                     },
                 },
@@ -682,6 +764,30 @@ class TestGradeDistributions:
                         'meanGradePoints': 3.85,
                         'count': 2,
                         'medianGradePoints': 3.85,
+                    },
+                },
+                'majorStudents': {
+                    'false': {
+                        'count': 77,
+                        'meanGradePoints': 3.849,
+                        'medianGradePoints': 4,
+                    },
+                    'true': {
+                        'count': 6,
+                        'meanGradePoints': 4,
+                        'medianGradePoints': 4.0,
+                    },
+                },
+                'nonMajorStudents': {
+                    'false': {
+                        'count': 6,
+                        'meanGradePoints': 4,
+                        'medianGradePoints': 4.0,
+                    },
+                    'true': {
+                        'count': 77,
+                        'meanGradePoints': 3.849,
+                        'medianGradePoints': 4,
                     },
                 },
                 'meanGradePoints': 3.86,

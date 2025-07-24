@@ -247,20 +247,28 @@ const demographicOptions = ref({
     label: '─────',
     options: []
   },
-  underrepresentedMinorityStatus: {
-    label: 'Underrepresented Minority Students',
-    options: []
-  },
   internationalStatus: {
     label: 'International Students',
+    options: []
+  },
+  majorStudents: {
+    label: 'Major Students',
+    options: []
+  },
+  nonMajorStudents: {
+    label: 'Non-Major Students',
+    options: []
+  },
+  athleteStatus: {
+    label: 'Student Athletes',
     options: []
   },
   transferStatus: {
     label: 'Transfer Students',
     options: []
   },
-  athleteStatus: {
-    label: 'Student Athletes',
+  underrepresentedMinorityStatus: {
+    label: 'Underrepresented Minority Students',
     options: []
   }
 })
