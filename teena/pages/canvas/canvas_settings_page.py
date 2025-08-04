@@ -314,4 +314,4 @@ class CanvasSettingsPage(CanvasApiPage):
 
     def is_conf_link_hidden(self):
         self.when_present(self.CONF_TOOL_LINK, utils.get_short_timeout())
-        return self.element(self.CONF_TOOL_LINK).get_dom_attribute('title') == 'Disabled. Not visible to students'
+        return self.element(self.CONF_TOOL_LINK).get_dom_attribute('data-html-tooltip-title') == 'Disabled. Not visible to students'
