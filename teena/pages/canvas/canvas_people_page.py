@@ -22,6 +22,7 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 "AS IS". REGENTS HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 """
+import itertools
 import time
 
 from flask import current_app as app
@@ -270,10 +271,14 @@ class CanvasPeoplePage(CanvasSettingsPage):
     STUDENT_ENROLLMENT_ROW = By.XPATH, '//table[contains(@class, "roster")]/tbody/tr[contains(@class, "StudentEnrollment")]'
     USER_ROW = By.XPATH, '//tr[starts-with(@id, "user_")]'
     WAITLIST_ENROLLMENT_ROW = By.XPATH, '//table[contains(@class, "roster")]/tbody/tr[contains(@class, "Waitlist")]'
+    TAG_AS_BTN = By.XPATH, '//button[@data-testid="user-diff-tag-manager-tag-as-button"]'
 
     @staticmethod
     def user_row_xpath(user):
         return f'//tr[contains(@id, "{user.canvas_id}")]'
+
+    def tag_cbx_offset(self):
+        return 1 if self.is_present(self.TAG_AS_BTN) else 0
 
     @staticmethod
     def user_row(user):
@@ -289,10 +294,10 @@ class CanvasPeoplePage(CanvasSettingsPage):
         self.when_present(self.user_row(user), utils.get_short_timeout())
 
     def roster_user_sections(self, user):
-        return self.el_text_if_exists((By.XPATH, f'{self.user_row_xpath(user)}/td[5]'))
+        return self.el_text_if_exists((By.XPATH, f'{self.user_row_xpath(user)}/td[{5 + self.tag_cbx_offset()}]'))
 
     def roster_user_roles(self, user):
-        return self.el_text_if_exists((By.XPATH, f'{self.user_row_xpath(user)}/td[6]'))
+        return self.el_text_if_exists((By.XPATH, f'{self.user_row_xpath(user)}/td[{6 + self.tag_cbx_offset()}]'))
 
     def visible_instruction_modes(self):
         self.when_present(self.SECTION_LABEL, utils.get_medium_timeout())
@@ -332,6 +337,8 @@ class CanvasPeoplePage(CanvasSettingsPage):
                     time.sleep(utils.get_short_timeout())
                     current_count = self.user_count_per_role(site)
                     assert current_count == starting_count
+                    time.sleep(utils.get_short_timeout())
+                    self.load_users_page(site)
                     return current_count
                 except AssertionError:
                     if tries == max_tries:
@@ -381,18 +388,23 @@ class CanvasPeoplePage(CanvasSettingsPage):
                     raise
 
     def load_all_students(self, site):
-        roles = ['Student', 'Waitlist Student']
-        counts = self.user_count_per_role(site, roles)
-        ttl_count = counts[0]['count'] + counts[1]['count']
-        app.logger.info(f'Trying to load {ttl_count} students and waitlisted students')
+        all_enrolls = []
+        for section in site.sections:
+            all_enrolls.extend(section.enrollments)
+        sort = sorted(all_enrolls, key=lambda e: e.student.uid)
+        grouped = [list(result) for key, result in itertools.groupby(sort, key=lambda e: e.student.uid)]
+        count = len(grouped)
+
+        app.logger.info(f'Trying to load {count} students and waitlisted students')
         self.when_present(self.USER_ROW, utils.get_short_timeout())
         self.scroll_to_bottom()
-        if len(self.elements(self.USER_ROW)) >= ttl_count:
+        if len(self.elements(self.USER_ROW)) >= count:
             app.logger.info('All users are visible')
         else:
-            self.wait_for_site_member_row_count([self.USER_ROW], ttl_count)
+            self.wait_for_site_member_row_count([self.USER_ROW], count)
 
     def visible_site_user_data(self, site, sections=None):
+        offset = self.tag_cbx_offset()
         visible_user_data = []
         sis_sec_codes = [f'{sec.course} {sec.label}' for sec in sections] if sections else []
         self.load_all_students(site)
@@ -409,22 +421,23 @@ class CanvasPeoplePage(CanvasSettingsPage):
             # User info
             visible_canvas_id = row.get_dom_attribute('id').replace('user_', '')
             row_xpath = f'//tr[contains(@id, "user_{visible_canvas_id}")]'
-            visible_uid = self.el_text_if_exists((By.XPATH, f'{row_xpath}//td[3]'), 'inactive-')
-            visible_sid = self.el_text_if_exists((By.XPATH, f'{row_xpath}//td[4]'))
-            visible_user = Person({
-                'uid': visible_uid,
-                'canvas_id': visible_canvas_id,
-                'sid': visible_sid,
-            })
+            visible_uid = self.el_text_if_exists((By.XPATH, f'{row_xpath}//td[{3 + offset}]'), 'inactive-')
+            visible_sid = self.el_text_if_exists((By.XPATH, f'{row_xpath}//td[{4 + offset}]'))
 
             # User section info
-            visible_section_codes = self.els_text_if_exist((By.XPATH, f'{row_xpath}//td[5]/div'))
+            visible_section_codes = self.els_text_if_exist((By.XPATH, f'{row_xpath}//td[{5 + offset}]/div'))
             if sections:
                 # If looking for specific sections, toss out other sections the user is in
                 for sec_code in visible_section_codes:
                     if sec_code not in sis_sec_codes:
                         visible_section_codes.remove(sec_code)
             for idx, section_code in enumerate(visible_section_codes):
+                visible_user = Person({
+                    'uid': visible_uid,
+                    'canvas_id': visible_canvas_id,
+                    'sid': visible_sid,
+                })
+
                 if site.sections:
                     sec = next(filter(lambda s: f'{s.course} {s.label}' == section_code, site.sections))
                 else:
@@ -433,7 +446,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
                 # User section role info
                 primary_roles = ['Teacher', 'TA', 'Student']
                 other_roles = list(set(CanvasSiteRoles.COURSE_ROLES) - set(primary_roles))
-                visible_roles = self.els_text_if_exist((By.XPATH, f'{row_xpath}//td[6]/div'))
+                visible_roles = self.els_text_if_exist((By.XPATH, f'{row_xpath}//td[{6 + offset}]/div'))
                 role = visible_roles[idx].strip()
                 if role in primary_roles:
                     role = role.lower()
