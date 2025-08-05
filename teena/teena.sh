@@ -8,7 +8,26 @@ echo "  Teena welcomes you  "
 echo "------------------------------------------"
 echo
 
-echo 'Firefox is the only currently supported browser.  Choose regular browser or headless.'
+echo 'What kind of browser do we want to use? Enter 1 or 2. '
+
+browser_options=("chrome" "firefox")
+
+select opt in "${browser_options[@]}"; do
+  case ${opt} in
+  "chrome")
+    browser="chrome"
+    break
+    ;;
+  "firefox")
+    browser="firefox"
+    break
+    ;;
+  *)
+    echo "What did you say?"
+    exit 1
+    ;;
+  esac
+done
 
 headless_options=("regular" "headless")
 
@@ -53,6 +72,6 @@ echo
 echo "Teena will now execute tests for ${test_suite}!"
 
 test_suite="*${test_suite}*"
-USERNAME="${username}" PASSWORD="${password}" pytest tests/test_${test_suite}.py --browser 'firefox' --headless ${headless}
+USERNAME="${username}" PASSWORD="${password}" pytest tests/test_${test_suite}.py --browser ${browser} --headless ${headless}
 
 exit 0
