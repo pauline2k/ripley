@@ -139,9 +139,9 @@ def get_course_from_catalog_id_prefix(term, catalog_id_prefix):
             else:
                 app.logger.info(f'Course code {catalog_id_prefix} in term {term.sis_id} has no teachers')
                 return None
-        else:
-            app.logger.info(f'No usable test course found matching course code {catalog_id_prefix} in term {term.sis_id}')
-            return None
+    else:
+        app.logger.info(f'No usable test course found matching course code {catalog_id_prefix} in term {term.sis_id}')
+        return None
 
 
 def _get_course_from_cs_course_id(term, cs_course_id):
