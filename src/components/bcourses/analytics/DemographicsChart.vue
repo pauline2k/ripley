@@ -337,7 +337,7 @@ const loadPrimarySeries = () => {
     type: 'line',
     zIndex: 1
   }
-  const primaryErrorSeries: SeriesLineOptions = {
+  const primaryErrorSeries = {
     color: CHART_COLORS.primary,
     data: [],
     name: 'Overall Class Error',
@@ -399,7 +399,7 @@ const loadSecondarySeries = () => {
       type: 'line',
       zIndex: 3
     }
-    const secondaryErrorSeries: SeriesLineOptions = {
+    const secondaryErrorSeries = {
       color: CHART_COLORS.secondary,
       data: [],
       name: `${selectedDemographicLabel.value} Error`,
