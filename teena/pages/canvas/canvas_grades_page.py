@@ -25,7 +25,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 import time
 
 from flask import current_app as app
-import polling2
 from selenium.common.exceptions import ElementNotInteractableException, TimeoutException
 from selenium.webdriver.common.by import By
 from teena.pages.canvas.canvas_settings_page import CanvasSettingsPage
@@ -164,13 +163,10 @@ class CanvasGradesPage(CanvasSettingsPage):
                     self.element(self.GB_REMOVE_BTN).click()
                 self.wait_for_element_remove_chars_send_keys(self.STUDENT_SEARCH_INPUT, user.full_name)
                 self.hit_enter()
-                polling2.poll(
-                    lambda: self.elements(self.GB_STUDENT_LINK)[0].get_dom_attribute('data-student_id') == user.canvas_id,
-                    step=2,
-                    timeout=3,
-                )
+                self.when_present(self.GB_STUDENT_LINK, utils.get_short_timeout())
+                assert self.elements(self.GB_STUDENT_LINK)[0].get_dom_attribute('data-student_id') == user.canvas_id
                 break
-            except (ElementNotInteractableException, TimeoutException):
+            except (AssertionError, ElementNotInteractableException, TimeoutException):
                 if tries == max_tries:
                     raise
                 else:
@@ -216,7 +212,7 @@ class CanvasGradesPage(CanvasSettingsPage):
     def open_gradebook_adv_settings(self):
         self.click_gradebook_settings()
         self.wait_for_element_and_click(self.ADV_GB_SETTINGS_TAB)
-        self.when_visible(self.ALLOW_GRADE_OVERRIDE_CBX, 1)
+        self.when_visible(self.ALLOW_GRADE_OVERRIDE_CBX, 3)
 
     def toggle_allow_grade_override(self):
         self.click_element_js(self.ALLOW_GRADE_OVERRIDE_CBX)
@@ -229,7 +225,7 @@ class CanvasGradesPage(CanvasSettingsPage):
         if self.element(self.ALLOW_GRADE_OVERRIDE_CBX).is_selected():
             app.logger.info('Final grade override is already allowed')
             self.hit_escape()
-            self.when_not_present(self.ALLOW_GRADE_OVERRIDE_CBX, 1)
+            self.when_not_present(self.ALLOW_GRADE_OVERRIDE_CBX, 3)
         else:
             app.logger.info('Allowing final grade override')
             self.toggle_allow_grade_override()
@@ -242,7 +238,7 @@ class CanvasGradesPage(CanvasSettingsPage):
         else:
             app.logger.info('Final grade override is already disallowed')
             self.hit_escape()
-            self.when_not_present(self.ALLOW_GRADE_OVERRIDE_CBX, 1)
+            self.when_not_present(self.ALLOW_GRADE_OVERRIDE_CBX, 3)
 
     def enter_override_grade(self, site, student, grade):
         app.logger.info(f'Entering override grade {grade} for UID {student.uid}')
@@ -251,7 +247,20 @@ class CanvasGradesPage(CanvasSettingsPage):
         # Navigating to the SlickGrid cell often takes a lot of work
         for i in range(30):
             self.scroll_to_element(self.elements(self.GRID_ROW_CELL)[-1])
-        self.wait_for_element_and_click(self.GRADE_OVERRIDE_CELL)
+        # Sometimes two clicks are needed to reveal the override input
+        tries = 0
+        max_tries = 2
+        while tries <= max_tries:
+            try:
+                tries += 1
+                self.wait_for_element_and_click(self.GRADE_OVERRIDE_CELL)
+                self.when_present(self.GRADE_OVERRIDE_INPUT, 3)
+                break
+            except TimeoutException:
+                if tries == max_tries:
+                    app.logger.info('Override grade input not present, retrying')
+                else:
+                    raise
         self.wait_for_element_remove_and_type_chars(self.GRADE_OVERRIDE_INPUT, grade)
         time.sleep(utils.get_click_sleep())
         self.hit_enter()
