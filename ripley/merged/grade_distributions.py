@@ -64,18 +64,13 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
             demographics_distribution[term_id]['gradePointList'].append(grade_points)
             demographics_distribution[term_id]['courseName'] = row['sis_course_name']
 
-            def _count_boolean_value(
-                    column,
-                    distribution,
-                    category_when_true='true',
-                    category_when_false='false',
-            ):
-                category = category_when_true if row[column] else category_when_false
-                demographics_distribution[term_id][distribution][category].append(grade_points)
+            def _count_boolean_value(column, distribution_key):
+                if row[column]:
+                    demographics_distribution[term_id][distribution_key]['true'].append(grade_points)
+                else:
+                    demographics_distribution[term_id][distribution_key]['false'].append(grade_points)
 
             _count_boolean_value('athlete', 'athleteStatus')
-            _count_boolean_value('major', 'majorStudents')
-            _count_boolean_value('major', 'nonMajorStudents', 'false', 'true')
             _count_boolean_value('transfer', 'transferStatus')
             _count_boolean_value('minority', 'underrepresentedMinorityStatus')
             _count_boolean_value('visa_type', 'internationalStatus')
@@ -216,14 +211,6 @@ EMPTY_DEMOGRAPHIC_DISTRIBUTION = {
         'false': [],
     },
     'internationalStatus': {
-        'true': [],
-        'false': [],
-    },
-    'majorStudents': {
-        'true': [],
-        'false': [],
-    },
-    'nonMajorStudents': {
         'true': [],
         'false': [],
     },
