@@ -58,10 +58,10 @@ class CanvasPeoplePage(CanvasSettingsPage):
 
     @staticmethod
     def user_result_link_by_uid(user):
-        return By.XPATH, f'//td[text()="{user.sis_id}" or text()="UID:{user.uid}"]/preceding-sibling::th/a'
+        return By.XPATH, f'//td[text()="{user.sid}" or text()="UID:{user.uid}"]/preceding-sibling::th/a'
 
     def search_user_by_canvas_id(self, user):
-        self.wait_for_element_clear_and_send_keys(self.COURSE_USER_SEARCH_INPUT, user.canvas_id)
+        self.wait_for_element_remove_chars_send_keys(self.COURSE_USER_SEARCH_INPUT, user.canvas_id)
         time.sleep(utils.get_click_sleep())
 
     def set_canvas_ids(self, users):
@@ -71,7 +71,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
                 app.logger.info(f'Getting Canvas ID for {user.uid}')
                 for string in [user.email, user.uid]:
                     try:
-                        self.wait_for_element_clear_and_send_keys(self.USER_SEARCH_INPUT, string)
+                        self.wait_for_element_remove_chars_send_keys(self.USER_SEARCH_INPUT, string)
                         if string == user.email:
                             loc = self.user_result_link_by_email(user)
                         else:
