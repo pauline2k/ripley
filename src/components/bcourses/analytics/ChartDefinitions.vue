@@ -36,6 +36,12 @@
                 <OutboundLink href="https://registrar.berkeley.edu/faculty-staff/grading/grading-policies-reports">grade definitions</OutboundLink> as described by the Office of the Registrar (excluding P, NP, I, S, U, IP, NR, M, and RD grades)
               </dd>
             </template>
+            <template class="d-block my-2">
+              <dt class="font-italic d-inline">Error Bars</dt>&mdash;
+              <dd class="d-inline">
+                represent the portion of the sample that is within one standard deviation of the mean.
+              </dd>
+            </template>
           </template>
           <template v-else>
             <template class="d-block my-2">

@@ -1,5 +1,6 @@
 import accessibility from 'highcharts/modules/accessibility'
 import noDataToDisplay from 'highcharts/modules/no-data-to-display'
+import more from 'highcharts/highcharts-more'
 import axios from '@/plugins/axios'
 import type {App} from 'vue'
 import Highcharts from 'highcharts'
@@ -8,6 +9,7 @@ import {createPinia} from 'pinia'
 import {loadFonts} from './webfontloader'
 
 export function registerPlugins (app: App) {
+  more(Highcharts)
   accessibility(Highcharts)
   noDataToDisplay(Highcharts)
   loadFonts().then(() => {})

@@ -39,6 +39,7 @@
           @change="onSelectStatistic"
         >
           <option id="grade-distribution-statistic-select-mean" value="mean" selected>Mean Grade Values</option>
+          <option id="grade-distribution-statistic-select-mean-error" value="mean-error" selected>Mean Grade Values With Error Bars</option>
           <option id="grade-distribution-statistic-select-median" value="median">Median Grade Values</option>
         </select>
       </v-col>
@@ -99,17 +100,17 @@
             <thead class="bg-grey-lighten-4">
               <tr>
                 <th class="font-weight-bold pl-4 py-2" scope="col">Semester</th>
-                <th class="grade-distribution-table-border font-weight-bold py-2" scope="col">Class Grade {{ capitalize(selectedStatistic) }}</th>
+                <th class="grade-distribution-table-border font-weight-bold py-2" scope="col">Class Grade {{ capitalize(selectedStatistic.split('-')[0]) }}</th>
                 <th class="text-right font-weight-bold py-2" scope="col">Class Grade Count</th>
                 <th
-                  v-if="size(chartOptions.series) > 2"
+                  v-if="size(chartOptions.series) > 3"
                   class="grade-distribution-table-border font-weight-bold py-2"
                   scope="col"
                 >
-                  {{ selectedDemographicLabel }} Grade {{ capitalize(selectedStatistic) }}
+                  {{ selectedDemographicLabel }} Grade {{ capitalize(selectedStatistic.split('-')[0]) }}
                 </th>
                 <th
-                  v-if="size(chartOptions.series) > 2"
+                  v-if="size(chartOptions.series) > 3"
                   class="text-right font-weight-bold py-2"
                   scope="col"
                 >
@@ -137,27 +138,27 @@
                   {{ get(chartOptions, `series[0].data[${index}].custom.count`) }}
                 </td>
                 <td
-                  v-if="size(chartOptions.series) > 2"
+                  v-if="size(chartOptions.series) > 3"
                   :id="`grade-distro-demo-table-row-${index}-grade-1`"
                   class="py-1"
                 >
-                  <em v-if="get(chartOptions, `series[2].data[${index}].custom.count`) === 'Small sample size'">
-                    {{ get(chartOptions, `series[2].data[${index}].y`) }}
+                  <em v-if="get(chartOptions, `series[3].data[${index}].custom.count`) === 'Small sample size'">
+                    {{ get(chartOptions, `series[3].data[${index}].y`) }}
                   </em>
-                  <span v-if="get(chartOptions, `series[2].data[${index}].custom.count`) !== 'Small sample size'">
-                    {{ get(chartOptions, `series[2].data[${index}].y`) || 'No data' }}
+                  <span v-if="get(chartOptions, `series[3].data[${index}].custom.count`) !== 'Small sample size'">
+                    {{ get(chartOptions, `series[3].data[${index}].y`) || 'No data' }}
                   </span>
                 </td>
                 <td
-                  v-if="size(chartOptions.series) > 2"
+                  v-if="size(chartOptions.series) > 3"
                   :id="`grade-distro-demo-table-row-${index}-count-1`"
                   class="text-right py-1"
                 >
-                  <em v-if="get(chartOptions, `series[2].data[${index}].custom.count`) === 'Small sample size'">
+                  <em v-if="get(chartOptions, `series[3].data[${index}].custom.count`) === 'Small sample size'">
                     Small sample size
                   </em>
-                  <span v-if="get(chartOptions, `series[2].data[${index}].custom.count`) !== 'Small sample size'">
-                    {{ get(chartOptions, `series[2].data[${index}].custom.count`) || 'No data' }}
+                  <span v-if="get(chartOptions, `series[3].data[${index}].custom.count`) !== 'Small sample size'">
+                    {{ get(chartOptions, `series[3].data[${index}].custom.count`) || 'No data' }}
                   </span>
                 </td>
               </tr>
@@ -324,6 +325,7 @@ const getSeriesMarker = (lineColor: string | undefined): SeriesMarker => {
 }
 
 const loadPrimarySeries = () => {
+  const displayStatistic = selectedStatistic.value.split('-')[0]
   chartOptions.value.colors = [CHART_COLORS.primary, CHART_COLORS.secondary]
   chartOptions.value.legend.enabled = !!size(props.gradeDistribution)
   const primaryGradeSeries: SeriesLineOptions = {
@@ -331,8 +333,17 @@ const loadPrimarySeries = () => {
     data: [],
     legendSymbol: 'rectangle',
     marker: getSeriesMarker(get(chartOptions.value, 'series[0].color')),
-    name: `Overall Class ${capitalize(selectedStatistic.value)} Grade`,
+    name: `Overall Class ${capitalize(displayStatistic)} Grade`,
     type: 'line',
+    zIndex: 1
+  }
+  const primaryErrorSeries: SeriesLineOptions = {
+    color: CHART_COLORS.primary,
+    data: [],
+    name: 'Overall Class Error',
+    type: 'errorbar',
+    visible: selectedStatistic.value === 'mean-error',
+    yAxis: 0,
     zIndex: 1
   }
   const primaryPopulationSeries: SeriesAreaOptions = {
@@ -348,9 +359,16 @@ const loadPrimarySeries = () => {
   each(props.gradeDistribution, item => {
     primaryGradeSeries.data.push({
       color: CHART_COLORS.primary,
-      custom: {count: item.count},
-      y: round(get(item, `${selectedStatistic.value}GradePoints`), 1)
+      custom: {
+        count: item.count,
+        error: get(item, 'errorGradePoints'),
+      },
+      y: round(get(item, `${displayStatistic}GradePoints`), 1)
     })
+    primaryErrorSeries.data.push([
+      round(get(item, 'meanGradePoints') - get(item, 'errorGradePoints'), 1),
+      round(get(item, 'meanGradePoints') + get(item, 'errorGradePoints'), 1)
+    ])
     primaryPopulationSeries.data.push({
       color: CHART_COLORS.tertiary,
       y: item.count
@@ -364,10 +382,12 @@ const loadPrimarySeries = () => {
   chartOptions.value.yAxis[1].max = maxCount * 1.25
   chartOptions.value.series[0] = primaryGradeSeries
   chartOptions.value.series[1] = primaryPopulationSeries
+  chartOptions.value.series[2] = primaryErrorSeries
 }
 
 const loadSecondarySeries = () => {
   if (selectedDemographic.value) {
+    const displayStatistic = selectedStatistic.value.split('-')[0]
     const group = get(selectedDemographic.value, 'group')
     const option = get(selectedDemographic.value, 'option')
     const secondaryGradeSeries: SeriesLineOptions = {
@@ -375,8 +395,18 @@ const loadSecondarySeries = () => {
       data: [],
       legendSymbol: 'rectangle',
       marker: getSeriesMarker(CHART_COLORS.secondary),
-      name: `${selectedDemographicLabel.value} ${capitalize(selectedStatistic.value)} Grade`,
+      name: `${selectedDemographicLabel.value} ${capitalize(displayStatistic)} Grade`,
       type: 'line',
+      zIndex: 3
+    }
+    const secondaryErrorSeries: SeriesLineOptions = {
+      color: CHART_COLORS.secondary,
+      data: [],
+      name: `${selectedDemographicLabel.value} Error`,
+      showInLegend: false,
+      type: selectedStatistic.value === 'mean-error' ? 'errorbar' : 'line',
+      visible: selectedStatistic.value === 'mean-error',
+      yaxis: 0,
       zIndex: 3
     }
     const secondaryPopulationSeries: SeriesAreaOptions = {
@@ -392,7 +422,8 @@ const loadSecondarySeries = () => {
       const count = get(value, 'count', 0)
       const point: Highcharts.PointOptionsObject = {
         custom: {
-          count: isNil(count) ? 'Small sample size' : count
+          count: isNil(count) ? 'Small sample size' : count,
+          error: isNil(count) ? null : get(value, 'errorGradePoints')
         },
         dataLabels: {
           enabled: false
@@ -401,18 +432,29 @@ const loadSecondarySeries = () => {
           lineWidth: isNil(count) ? 1 : 3,
           radius: isNil(count) ? 3 : 5
         },
-        y: (value && count !== 0) ? round(get(value, `${selectedStatistic.value}GradePoints`), 1) : null
+        y: (value && count !== 0) ? round(get(value, `${displayStatistic}GradePoints`), 1) : null
       }
       secondaryGradeSeries.data.push(point)
+      if (selectedStatistic.value === 'mean-error') {
+        secondaryErrorSeries.data.push([
+          round(get(value, 'meanGradePoints') - get(value, 'errorGradePoints'), 1),
+          round(get(value, 'meanGradePoints') + get(value, 'errorGradePoints'), 1)
+        ])
+      }
       secondaryPopulationSeries.data.push({
         color: CHART_COLORS.quaternary,
         y: (value && count !== 0) ? count : null
       })
     })
-    chartOptions.value.series[2] = secondaryGradeSeries
-    chartOptions.value.series[3] = secondaryPopulationSeries
-  } else if (chartOptions.value.series.length > 2) {
-    chartOptions.value.series = [chartOptions.value.series[0], chartOptions.value.series[1]]
+    chartOptions.value.series[3] = secondaryGradeSeries
+    chartOptions.value.series[4] = secondaryPopulationSeries
+    chartOptions.value.series[5] = secondaryErrorSeries
+  } else if (chartOptions.value.series.length > 3) {
+    chartOptions.value.series = [
+      chartOptions.value.series[0],
+      chartOptions.value.series[1],
+      chartOptions.value.series[2]
+    ]
   }
 }
 
@@ -429,12 +471,16 @@ const setTooltipFormatter = () => {
         <div id="grade-dist-demo-tooltip-course" class="font-size-13 text-grey-darken-1 ${isDemoMode ? 'demo-mode-blur' : ''}">${courseName}</div>
         <hr aria-hidden="true" class="mt-1 grade-dist-tooltip-hr" />`
     return (this.points || []).reduce((tooltipText, point, index) => {
-      if (point.series.name.includes('Grade Count')) {
+      if (point.series.name.includes('Grade Count') || point.series.name.includes('Error')) {
         return tooltipText
+      }
+      let errorNotation = ''
+      if (selectedStatistic.value === 'mean-error') {
+        errorNotation = `± ${get(point, 'point.custom.error')}`
       }
       return `${tooltipText}<div id="grade-dist-demo-tooltip-series-${index}" class="font-size-13 mt-1">
         <span aria-hidden="true" class="font-size-16" style="color:${point.color}">\u25AC</span>
-        ${point.series.name}: <span class="font-weight-bold">${point.y}</span>
+        ${point.series.name}: <span class="font-weight-bold">${point.y}</span> ${errorNotation}
         (${get(point, 'point.custom.count') === 'Small sample size' ? 'Small sample size' : get(point, 'point.custom.count') + ' students' })
       </div>`
     }, header)

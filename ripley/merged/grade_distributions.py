@@ -25,7 +25,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from copy import deepcopy
 from itertools import groupby
-from statistics import mean, median
+from math import sqrt
+from statistics import mean, median, stdev
 
 from flask import current_app as app
 from ripley.externals.data_loch import get_grades_with_demographics, get_grades_with_enrollments
@@ -142,12 +143,14 @@ enrollment count ({demographics_distribution[term_id]['count']}) falls short of 
                     demographics_distribution[term_id][distribution_key][distribution_value] = {
                         'meanGradePoints': round(mean(grade_points_list), 3) if student_count else 0,
                         'medianGradePoints': round(median(grade_points_list), 3) if student_count else 0,
+                        'errorGradePoints': round((stdev(grade_points_list) / sqrt(student_count)), 3) if student_count > 1 else 0,
                         'count': student_count,
                     }
         term_grade_point_list = demographics_distribution[term_id].pop('gradePointList', [])
         sorted_demographics_distribution.append({
             'meanGradePoints': round(mean(term_grade_point_list), 3) if len(term_grade_point_list) else 0,
             'medianGradePoints': round(median(term_grade_point_list), 3) if len(term_grade_point_list) else 0,
+            'errorGradePoints': round((stdev(term_grade_point_list) / sqrt(len(term_grade_point_list))), 3) if len(term_grade_point_list) > 1 else 0,
             **demographics_distribution[term_id],
             'termId': term_id,
             'termName': BerkeleyTerm.from_sis_term_id(term_id).to_english(),
