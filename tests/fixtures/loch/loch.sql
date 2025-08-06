@@ -563,27 +563,6 @@ VALUES
 ('3000000068','1000055','First','Last','40','3.637','90.08',TRUE,'2242','7','oski@berkeley.edu','2228','active'),
 ('3000000081','1000019','First','Last','40','3.795','93.16',FALSE,'2242','5','oski@berkeley.edu','2208','active');
 
-CREATE TABLE student.student_majors
-(
-    sid VARCHAR,
-    major VARCHAR
-);
-
-INSERT INTO student.student_majors
-(sid, major)
-VALUES
-('3000000007','Molecular Environ Biology BS'),
-('3000000024','Ethnic Studies BA'),
-('3000000051','Geography BA'),
-('3000000062','Social Welfare BA'),
-('3000000074','Art BA'),
-('3000000083','Forestry BS'),
-('30020000', 'Bioresource Sciences BS'),
-('30030000', 'Chemistry BA'),
-('30040000', 'English BA'),
-('30050000', 'Political Science BA'),
-('30060000', 'History BA');
-
 CREATE TABLE student.visas
 (
     sid VARCHAR,

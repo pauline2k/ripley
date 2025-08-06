@@ -25,10 +25,10 @@
               <dt class="font-italic d-inline">International Students</dt>&mdash;<dd class="d-inline">students with a valid VISA status. Includes both self-reported and verified data</dd>
             </template>
             <template class="d-block my-2">
-              <dt class="font-italic d-inline">Student Athletes</dt>&mdash;<dd class="d-inline">data is only available for active students, so these values may change over time</dd>
+              <dt class="font-italic d-inline">Transfer Students</dt>&mdash;<dd class="d-inline">students who completed coursework during a regular session at another college or university after high school</dd>
             </template>
             <template class="d-block my-2">
-              <dt class="font-italic d-inline">Transfer Students</dt>&mdash;<dd class="d-inline">students who completed coursework during a regular session at another college or university after high school</dd>
+              <dt class="font-italic d-inline">Student Athletes</dt>&mdash;<dd class="d-inline">data is only available for active students, so these values may change over time</dd>
             </template>
             <template class="d-block my-2">
               <dt class="font-italic d-inline">Grade Scales</dt>&mdash;
