@@ -175,7 +175,7 @@ import Highcharts from 'highcharts'
 import {mdiArrowDownCircle, mdiArrowUpCircle} from '@mdi/js'
 import ChartDefinitions from '@/components/bcourses/analytics/ChartDefinitions.vue'
 import {Chart} from 'highcharts-vue'
-import {capitalize, cloneDeep, each, get, isNil, merge, replace, round, size} from 'lodash'
+import {capitalize, cloneDeep, each, get, isNil, merge, round, size} from 'lodash'
 import {
   CHART_COLORS,
   DEFAULT_SERIES_LINE_COLOR,
@@ -488,9 +488,8 @@ const setTooltipFormatter = () => {
 }
 
 const shortTermName = (termName: string): string => {
-  return replace(termName, /[\d]{4}/g, year => {
-    return `'${year.substring(2, 4)}`
-  })
+  const [season, year] = termName.split(' ')
+  return `${season.substring(0,2).toUpperCase()}${year.substring(2,4)}`
 }
 </script>
 
