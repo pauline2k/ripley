@@ -349,6 +349,13 @@ onMounted(() => {
   setChartTitle()
 })
 
+const collapse = (grade) => {
+  const alphanumericMatch = grade && grade.match(/^\w+/)
+  if (alphanumericMatch && alphanumericMatch.length) {
+    return alphanumericMatch[0]
+  }
+}
+
 const getDataLabel = (yVal, color) => {
   if (size(chartOptions.value.series) === 1) {
     const displayAboveColumn = yVal < 2
@@ -378,7 +385,7 @@ const loadPrimarySeries = (color: string, showLabels=true) => {
   chartOptions.value.xAxis[0].categories = []
   const gradeDistribution = []
   each(props.gradeDistribution[get(selectedTerm.value, 'id')], item => {
-    const displayGrade = collapseLetterGrades.value ? item.grade.match(/^\w/)[0] : item.grade
+    const displayGrade = collapseLetterGrades.value ? collapse(item.grade) : item.grade
     if (gradeDistribution.length && gradeDistribution[gradeDistribution.length - 1].grade === displayGrade) {
       gradeDistribution[gradeDistribution.length - 1].count += item.count
       gradeDistribution[gradeDistribution.length - 1].percentage += item.percentage
@@ -400,7 +407,7 @@ const loadPrimarySeries = (color: string, showLabels=true) => {
       y: round(item.percentage, 1)
     })
     chartOptions.value.xAxis[0].categories = chartOptions.value.xAxis[0].categories || []
-    const displayGrade = collapseLetterGrades.value ? item.grade.match(/^\w/)[0] : item.grade
+    const displayGrade = collapseLetterGrades.value ? collapse(item.grade) : item.grade
     if (!includes(chartOptions.value.xAxis[0].categories, displayGrade)) {
       chartOptions.value.xAxis[0].categories.push(displayGrade)
     }
@@ -415,7 +422,7 @@ const loadPriorEnrollments = () => {
   const data: summary[] = []
   const gradeDistribution = []
   each(priorEnrollmentGradeDistribution.value[get(selectedTerm.value, 'id')], item => {
-    const displayGrade = collapseLetterGrades.value ? item.grade.match(/^\w/)[0] : item.grade
+    const displayGrade = collapseLetterGrades.value ? collapse(item.grade) : item.grade
     if (gradeDistribution.length && gradeDistribution[gradeDistribution.length - 1].grade === displayGrade) {
       gradeDistribution[gradeDistribution.length - 1].priorEnrollCount += item.priorEnrollCount
       gradeDistribution[gradeDistribution.length - 1].priorEnrollPercentage += item.priorEnrollPercentage
