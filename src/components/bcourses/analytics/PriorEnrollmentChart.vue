@@ -66,6 +66,17 @@
               </span>
             </div>
           </div>
+          <div>
+            <v-checkbox
+              v-model="collapseLetterGrades"
+              class="font-weight-medium text-no-wrap my-2"
+              color="primary"
+              density="compact"
+              hide-details="auto"
+              label="Collapse letter grades"
+              @change="refresh"
+            />
+          </div>
         </v-col>
         <v-col
           class="align-self-end d-flex justify-center px-2"
@@ -294,6 +305,7 @@ const chartOptions = ref<HighchartsOptions>(merge(
     ]
   }
 ))
+const collapseLetterGrades = ref(false)
 const currentUser = useContextStore().currentUser
 const courseSearchText = ref()
 const courseSuggestions = ref([])
@@ -364,17 +376,34 @@ const loadPrimarySeries = (color: string, showLabels=true) => {
     type: 'column'
   }
   chartOptions.value.xAxis[0].categories = []
+  const gradeDistribution = []
   each(props.gradeDistribution[get(selectedTerm.value, 'id')], item => {
+    const displayGrade = collapseLetterGrades.value ? item.grade.match(/^\w/)[0] : item.grade
+    if (gradeDistribution.length && gradeDistribution[gradeDistribution.length - 1].grade === displayGrade) {
+      gradeDistribution[gradeDistribution.length - 1].count += item.count
+      gradeDistribution[gradeDistribution.length - 1].percentage += item.percentage
+    } else {
+      gradeDistribution.push({
+        grade: displayGrade,
+        count: item.count,
+        percentage: item.percentage
+      })
+    }
+  })
+  each(gradeDistribution, item => {
     chartOptions.value.series[0].data.push({
       color: color,
       custom: {
         count: item.count
       },
       dataLabels: showLabels ? getDataLabel(item.y, color) : {enabled: false},
-      y: item.percentage
+      y: round(item.percentage, 1)
     })
     chartOptions.value.xAxis[0].categories = chartOptions.value.xAxis[0].categories || []
-    chartOptions.value.xAxis[0].categories.push(item.grade)
+    const displayGrade = collapseLetterGrades.value ? item.grade.match(/^\w/)[0] : item.grade
+    if (!includes(chartOptions.value.xAxis[0].categories, displayGrade)) {
+      chartOptions.value.xAxis[0].categories.push(displayGrade)
+    }
   })
   chartOptions.value.plotOptions.series.dataLabels = {
     enabled: showLabels
@@ -384,14 +413,31 @@ const loadPrimarySeries = (color: string, showLabels=true) => {
 const loadPriorEnrollments = () => {
   type summary = {custom: {count: number}, dataLabels: {enabled: boolean}, y: number}
   const data: summary[] = []
+  const gradeDistribution = []
   each(priorEnrollmentGradeDistribution.value[get(selectedTerm.value, 'id')], item => {
+    const displayGrade = collapseLetterGrades.value ? item.grade.match(/^\w/)[0] : item.grade
+    if (gradeDistribution.length && gradeDistribution[gradeDistribution.length - 1].grade === displayGrade) {
+      gradeDistribution[gradeDistribution.length - 1].priorEnrollCount += item.priorEnrollCount
+      gradeDistribution[gradeDistribution.length - 1].priorEnrollPercentage += item.priorEnrollPercentage
+    } else {
+      gradeDistribution.push({
+        grade: displayGrade,
+        priorEnrollCount: item.priorEnrollCount,
+        priorEnrollPercentage: item.priorEnrollPercentage
+      })
+    }
+  })
+  each(gradeDistribution, item => {
     if (chartOptions.value.xAxis && includes(chartOptions.value.xAxis[0].categories, item.grade)) {
+      while (chartOptions.value.xAxis[0].categories.indexOf(item.grade) > data.length) {
+        data.push(null)
+      }
       data.push({
         custom: {
           count: get(item, 'priorEnrollCount', 0)
         },
         dataLabels: {enabled: false},
-        y: get(item, 'priorEnrollPercentage', 0)
+        y: round(get(item, 'priorEnrollPercentage', 0), 1)
       })
     }
   })
@@ -479,7 +525,7 @@ const setTooltipFormatter = () => {
           <span ${isDemoMode ? 'class="demo-mode-blur"' : ''}>${courseName}</span>
         </div>
         <div class="font-size-13 mb-2">
-          Ratio of class: <span id="grade-dist-enroll-tooltip-series-0-value" class="font-weight-bold">${this.point.y}%</span>
+          Ratio of class: <span id="grade-dist-enroll-tooltip-series-0-value" class="font-weight-bold">${this.y}%</span>
         </div>
         <hr aria-hidden="true" class="mb-2 ${size(this.points) <= 1 ? 'd-none' : ''}" />`
     return (this.points ? this.points.slice(1) || [] : []).reduce((tooltipText, plot, index) => {
