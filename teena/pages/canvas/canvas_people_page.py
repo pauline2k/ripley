@@ -62,7 +62,6 @@ class CanvasPeoplePage(CanvasSettingsPage):
 
     def search_user_by_canvas_id(self, user):
         self.wait_for_element_remove_chars_send_keys(self.COURSE_USER_SEARCH_INPUT, user.canvas_id)
-        time.sleep(utils.get_click_sleep())
 
     def set_canvas_ids(self, users):
         self.navigate_to(f'{utils.canvas_base_url()}/accounts/{utils.canvas_root_acct()}/users')
