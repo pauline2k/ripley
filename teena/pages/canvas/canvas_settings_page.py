@@ -148,12 +148,7 @@ class CanvasSettingsPage(CanvasApiPage):
             self.hide_canvas_footer_and_popups()
             self.hide_sticky_footer()
             self.click_element(self.GRADING_SCHEME_SELECT)
-            for i in range(8):
-                self.arrow_down()
-                time.sleep(utils.get_click_sleep())
-                if self.el_value(self.GRADING_SCHEME_SELECT).strip() == desired_scheme:
-                    self.hit_enter()
-                    break
+            self.wait_for_element_and_click((By.XPATH, f'//span[starts-with(text(), "{desired_scheme}")]'))
         self.reveal_sticky_footer()
         self.update_course_settings()
         self.when_visible(self.GRADING_SCHEME_SELECT, utils.get_short_timeout())
