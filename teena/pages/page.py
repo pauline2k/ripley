@@ -195,7 +195,6 @@ class Page(object):
                 method=ec.element_to_be_clickable(locator),
                 message=f'Failed waiting for element to be clickable: {str(locator)}',
             )
-        time.sleep(utils.get_click_sleep())
         WebDriverManager.get_browser_logs(self.driver)
         try:
             self.hide_canvas_footer_and_popups()
@@ -225,28 +224,20 @@ class Page(object):
             self.element(locator).send_keys(string)
 
     def wait_for_element_remove_chars_send_keys(self, locator, string):
-        self.wait_for_element_and_click(locator)
         self.remove_chars(locator)
         if string:
             self.element(locator).send_keys(string)
 
     def wait_for_element_remove_and_type_chars(self, locator, string):
-        self.wait_for_element_and_click(locator)
         self.remove_chars(locator)
         self.enter_chars(locator, string)
 
     def remove_chars(self, locator):
-        self.wait_for_element(locator, utils.get_short_timeout())
-        el_tag = self.element(locator).tag_name
-        if el_tag in ['input', 'textarea'] and not self.el_value(locator):
-            app.logger.info(f'Element of type {el_tag} at {locator} has no value, no need to clear it')
-        else:
-            self.wait_for_element_and_click(locator)
-            time.sleep(utils.get_click_sleep())
-            repeat = 500
-            for x in range(repeat):
-                self.hit_delete()
-                self.hit_backspace()
+        self.wait_for_element_and_click(locator)
+        repeat = 500
+        for x in range(repeat):
+            self.hit_delete()
+            self.hit_backspace()
 
     def enter_chars(self, locator, string):
         for i in string:
