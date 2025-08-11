@@ -47,12 +47,15 @@ class AdminPage(RipleyPages):
     def job_failure(self, job):
         return By.XPATH, f'{self.job_most_recent_xpath(job)}//i[contains(@class, "error")]'
 
-    def run_job(self, job):
+    def run_job(self, job, test, cal_net_page):
         app.logger.info(f'Running {job.name}')
         time.sleep(3)
+        # When switching between Canvas masquerade and Ripley itself, re-authentication is sometimes necessary
         cas_btn = By.ID, 'cas-auth-submit-button'
         if self.is_present(cas_btn):
             self.element(cas_btn).click()
+            cal_net_page.log_in(test.admin.username, utils.get_admin_password())
+
         self.wait_for_element_and_click(self.run_job_button(job))
         self.wait_for_job_to_finish(job)
 

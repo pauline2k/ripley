@@ -106,7 +106,7 @@ class TestWelcomeEmailActivation:
     def test_refresh_mailing_list(self):
         self.canvas_page.stop_masquerading()
         self.splash_page.load_page()
-        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value)
+        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value, test, self.cal_net_page)
 
     def test_membership_updated(self):
         self.canvas_page.masquerade_as(teacher)
@@ -134,7 +134,7 @@ class TestWelcomeEmailActivation:
     def test_refresh_mailing_list_again(self):
         self.canvas_page.stop_masquerading()
         self.splash_page.load_page()
-        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value)
+        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value, test, self.cal_net_page)
 
     def test_membership_updated_again(self):
         self.canvas_page.masquerade_as(teacher)
@@ -157,7 +157,7 @@ class TestWelcomeEmailActivation:
     def test_refresh_mailing_list_yet_again(self):
         self.canvas_page.stop_masquerading()
         self.splash_page.load_page()
-        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value)
+        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value, test, self.cal_net_page)
 
     def test_new_email_sent(self):
         self.canvas_page.masquerade_as(teacher)
