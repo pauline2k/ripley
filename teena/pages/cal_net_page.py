@@ -33,7 +33,6 @@ from teena.test_utils import utils
 
 
 class CalNetPage(Page):
-
     USERNAME_INPUT = (By.ID, 'username')
     PASSWORD_INPUT = (By.ID, 'password')
     SUBMIT_BUTTON = (By.ID, 'submitBtn')
@@ -53,12 +52,14 @@ class CalNetPage(Page):
             else:
                 app.logger.info('Waiting for manual login')
                 self.wait_for_element_clear_and_send_keys(self.USERNAME_INPUT, 'PLEASE LOG IN MANUALLY')
+        ripley_home = By.XPATH, '//h2[text()="MU-TH-UR 6000"]'
         tries = 0
         max_tries = utils.get_long_timeout()
         while tries <= max_tries:
             tries += 1
             try:
-                assert self.is_present(self.TRUST_BROWSER_BUTTON) or self.is_present(self.BAD_CREDS)
+                assert self.is_present(self.TRUST_BROWSER_BUTTON) or self.is_present(self.BAD_CREDS) or self.is_present(
+                    ripley_home)
                 break
             except AssertionError:
                 if tries == max_tries:

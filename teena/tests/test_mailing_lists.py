@@ -269,7 +269,7 @@ class TestRipleyJobMembershipUpdates:
         member = course_site_1.manual_members[-1]
         self.canvas_page.remove_users_from_course(course_site_1, [member])
         self.splash_page.load_page()
-        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value)
+        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value, test, self.cal_net_page)
         self.mailing_lists_page.load_embedded_tool()
         self.mailing_lists_page.search_for_list(course_site_1.site_id)
         visible_count = self.mailing_lists_page.wait_for_membership_count()
@@ -281,7 +281,7 @@ class TestRipleyJobMembershipUpdates:
         self.canvas_page.masquerade_as(member, course_site_1)
         self.canvas_page.stop_masquerading()
         self.splash_page.load_page()
-        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value)
+        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value, test, self.cal_net_page)
         self.mailing_lists_page.load_embedded_tool()
         self.mailing_lists_page.search_for_list(course_site_1.site_id)
         visible_count = self.mailing_lists_page.wait_for_membership_count()
@@ -292,7 +292,7 @@ class TestRipleyJobMembershipUpdates:
         new_email = f'bar{test.test_id}@foo.com'
         ripley_utils.set_mailing_list_member_email(member, new_email)
         self.splash_page.load_page()
-        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value)
+        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value, test, self.cal_net_page)
         updated = ripley_utils.get_mailing_list_member_email(member)
         utils.assert_equivalence(updated, member.email)
 
@@ -307,7 +307,7 @@ class TestRipleyJobMembershipUpdates:
         self.canvas_page.masquerade_as(course_site_4.manual_members[0], course_site_4)
         self.canvas_page.stop_masquerading()
         self.splash_page.load_page()
-        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value)
+        self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value, test, self.cal_net_page)
         self.mailing_lists_page.load_embedded_tool()
         self.mailing_lists_page.search_for_list(course_site_4.site_id)
         visible_count = self.mailing_lists_page.wait_for_membership_count()
