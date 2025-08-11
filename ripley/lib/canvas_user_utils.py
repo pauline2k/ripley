@@ -119,10 +119,10 @@ def import_users(uids):
                 'sid': row['sid'],
             }
             if app.config['FLAG_CSV_SYNC_PRONOUNS']:
-                user['pronouns'] = row['pronouns']
+                user['pronouns'] = row.get('pronouns')
             if person_type != 'A' or any(item for item in ['student', 'staff', 'faculty', 'guest'] if user['roles'][item]):
                 users.append(csv_row_for_campus_user(user))
-    with SisImportCsv.create(['user_id', 'login_id', 'first_name', 'last_name', 'email', 'status']) as users_csv:
+    with SisImportCsv.create(user_import_csv_fields()) as users_csv:
         users_csv.writerows(users)
         users_csv.filehandle.close()
 
