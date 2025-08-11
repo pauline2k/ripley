@@ -68,7 +68,7 @@ class TestLoadTool:
 class TestStaticSectionsView:
 
     def test_course_code(self, tc):
-        utils.assert_equivalence(self.official_sections_page.static_sec_course(tc.section), course.code)
+        utils.assert_equivalence(self.official_sections_page.static_sec_course(tc.section), tc.section.course)
 
     def test_section_label(self, tc):
         utils.assert_equivalence(self.official_sections_page.static_sec_label(tc.section), tc.section.label)
@@ -100,7 +100,7 @@ class TestCurrentSectionsView:
     def test_course_code(self, tc):
         if not self.official_sections_page.is_present(self.official_sections_page.available_sections_heading()):
             self.official_sections_page.click_edit_sections()
-        utils.assert_equivalence(self.official_sections_page.current_sec_course(tc.section), course.code)
+        utils.assert_equivalence(self.official_sections_page.current_sec_course(tc.section), tc.section.course)
 
     def test_section_label(self, tc):
         utils.assert_equivalence(self.official_sections_page.current_sec_label(tc.section), tc.section.label)
@@ -138,7 +138,7 @@ class TestAvailableSectionsView:
             self.official_sections_page.expand_available_course_sections(tc.course, tc.section)
 
     def test_course_code(self, tc):
-        utils.assert_equivalence(self.official_sections_page.available_sec_course(tc.section), tc.course.code)
+        utils.assert_equivalence(self.official_sections_page.available_sec_course(tc.section), tc.section.course)
 
     def test_section_label(self, tc):
         utils.assert_equivalence(self.official_sections_page.available_sec_label(tc.section), tc.section.label)
