@@ -49,10 +49,6 @@ class TestSetup:
         primary_section.label = prim.label
         primary_section.section_id = prim.section_id
 
-    def test_reset_grading_scheme(self):
-        self.canvas_page.disable_grading_scheme(test.course_site)
-        self.canvas_page.enable_grading_scheme(test.course_site)
-
     def test_get_test_students(self):
         self.canvas_page.load_users_page(test.course_site)
         site_enrollments = self.canvas_page.visible_student_enrollments(test.course_site, [primary_section])
