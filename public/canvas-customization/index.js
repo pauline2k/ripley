@@ -35,18 +35,7 @@
 /**
  * Load Blue Integration
  */
-var BLUE_CANVAS_SETUP={
-    connectorUrl:"https://surveys.berkeley.edu/berkeleySurveysblueconnector/",
-    canvasAPI:window.location.origin,
-    domainName:"com.explorance",
-    consumerID:"CWN1RxHsa4vY9b2QgVC7jQ==",
-    defaultLanguage:"en-us"
-},
-    BlueCanvasJS=document.createElement("script");
-BlueCanvasJS.setAttribute("type","text/javascript");
-BlueCanvasJS.setAttribute("src","https://surveys.berkeley.edu/berkeleySurveysblueconnector//Scripts/Canvas/BlueCanvas.min.js");
-BlueCanvasJS.async=!0;
-document.getElementsByTagName("head")[0].appendChild(BlueCanvasJS);
+var BLUE_CANVAS_SETUP={connectorUrl:"https://surveys.berkeley.edu/berkeleySurveysblueconnector/",canvasAPI:window.location.origin,domainName:"com.explorance",consumerID:"CWN1RxHsa4vY9b2QgVC7jQ==",defaultLanguage:"en-us"},BlueCanvasJS=document.createElement("script");BlueCanvasJS.setAttribute("type","text/javascript");BlueCanvasJS.setAttribute("src","https://surveys.berkeley.edu/berkeleySurveysblueconnector//Scripts/Canvas/BlueCanvas.min.js");BlueCanvasJS.async=!0;document.getElementsByTagName("head")[0].appendChild(BlueCanvasJS);
 
 ////////////////////////////////////////////////////
 // DESIGNPLUS CONFIG                            //
@@ -87,7 +76,7 @@ var DT_variables = {
 // New
 DpPrimary = {
     lms: 'canvas',
-    templateCourse: '1536926',
+    templateCourse: '1536998',
     hideButton: true,
     hideLti: false,
     extendedCourse: '', // added in sub-account theme
@@ -100,7 +89,7 @@ DpPrimary = {
     excludedModules: [],
     includedModules: [],
     lang: 'en',
-    defaultToLegacy: true,
+    defaultToLegacy: false,
     enableVersionSwitching: true,
     hideSwitching: false,
 }
