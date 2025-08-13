@@ -569,11 +569,16 @@ addMentalHealthResourcesResponsiveLink();
       '    <div>Without the assistance of course instructors, the University cannot fulfill its mission and ' +
       'responsibility to make online content accessible to students with disabilities. The <a ' +
       'href="https://www.ucop.edu/electronic-accessibility/initiative/policy.html" target="blank">University of ' +
-      'California Policy IMT-1300</a> defines "accessible" as "the concept that people with disabilities can access ' +
+      'California Policy IMT-1300<span class="sr-only"> (opens in new tab)</span></a> defines "accessible" as "the concept that people with disabilities can access ' +
       'and use a product or system, including with the help of assistive technologies." The following resources can ' +
       'help you make your course content materials more accessible for all students:</div>',
       '    <h5>Digital Accessibility Resources</h5>',
       '    <ul>',
+      '      <li>The <a href="https://rtl.berkeley.edu/services-programs/ally-bcourses" target="_blank">Ally Course Accessibility Report<span class="sr-only"> (opens in new tab)</span></a> is now enabled by default in bCourses. This powerful tool helps instructors design inclusive and accessible instructional materials for every student.</li>',
+      '      <ul>',
+      '        <li>Watch: <a href="https://youtu.be/JgJYz7Hgdv0" target="_blank">Ally Course Accessibility Report for bCourses video tutorial<span class="sr-only"> (opens in new tab)</span></a></li>',
+      '      </ul>',
+      '      <li>Evaluate and update your bCourses content using the <a href="https://youtu.be/S5aY7nB4Hj0" target="_blank">WYSIWYG Instructor Feedback Tool<span class="sr-only"> (opens in new tab)</span></a></li>',
       '      <li><a href="https://bcourses.berkeley.edu/courses/1476601" target="_blank">Accessibility Basics for bCourses (Canvas)<span class="sr-only"> (opens in new tab)</span></a> - bCourses Site</li>',
       '      <li><a href="https://rtl.berkeley.edu/services-programs/ally-bcourses" target="_blank">Ally in bCourses Service Page<span class="sr-only"> (opens in new tab)</span></a> - Accessibility evaluation and remediation tool for bCourses</li>',
       '      <ul>',
