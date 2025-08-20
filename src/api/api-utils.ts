@@ -20,9 +20,9 @@ const $_errorHandler = (error: any, redirectOnError?: boolean) => {
 
 export default {
   apiBaseUrl: () => import.meta.env.VITE_APP_API_BASE_URL,
-  get: (path: string, redirectOnError?: boolean) => {
+  get: function<T>(path: string, redirectOnError?: boolean): Promise<T> {
     return axios.get(`${import.meta.env.VITE_APP_API_BASE_URL}${path}`).then(
-      data => data,
+      data => data as T,
       error => $_errorHandler(error, redirectOnError)
     )
   },

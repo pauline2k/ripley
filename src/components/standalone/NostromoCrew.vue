@@ -8,16 +8,12 @@
     <v-card-title>
       <div class="align-start d-flex py-3">
         <h2 class="ml-2 mt-3">
-          <div class="align-center d-flex">
-            <div class="pr-2">
-              <v-icon
-                :color="$vuetify.theme.dark ? 'white' : 'primary'"
-                :icon="mdiCardAccountDetails"
-                size="large"
-              />
-            </div>
-            <h2>The Nostromo Crew</h2>
-          </div>
+          <v-icon
+            :color="theme.global.current.value.dark ? 'white' : 'primary'"
+            :icon="mdiCardAccountDetails"
+            size="large"
+          />
+          The Nostromo Crew
         </h2>
       </div>
     </v-card-title>
@@ -46,12 +42,14 @@
         </template>
         <template #item.name="{item}">
           <div class="font-size-15 py-2 text-grey-darken-2">
-            <img class="profile-image" :src="item.image" :alt="item.firstName">
+            <img
+              :alt="item.firstName"
+              class="profile-image"
+              :src="item.image"
+            >
             <span v-if="item.firstName || item.lastName" class="profile-name">
               <OutboundLink :href="`https://www.berkeley.edu/directory/?search-term=${item.firstName}+${item.lastName}`">
-                <span>
-                  {{ item.firstName || '' }} {{ item.lastName || '' }}
-                </span>
+                {{ item.firstName || '' }} {{ item.lastName || '' }}
               </OutboundLink>
             </span>
             <span v-if="!item.firstName && !item.lastName">
@@ -66,67 +64,53 @@
 </template>
 
 <script setup>
+import {each, sortBy} from 'lodash'
 import {mdiCardAccountDetails} from '@mdi/js'
-</script>
-
-
-<script>
-import Context from '@/mixins/Context'
+import {onMounted, ref} from 'vue'
+import {useTheme} from 'vuetify'
 import {getNostromoCrew} from '@/api/user'
+import HarryDeanStanton from '@/assets/images/harry_dean_stanton.webp'
+import IanHolm from '@/assets/images/alien_ian_holm.webp'
+import JohnHurt from '@/assets/images/alien_john_hurt.webp'
 import OutboundLink from '@/components/utils/OutboundLink'
-import Alien_Harry_Dean_Stanton1 from '@/assets/images/Alien_Harry_Dean_Stanton1.webp'
-import Alien_Ian_Holm1 from '@/assets/images/Alien_Ian_Holm1.webp'
-import Alien_John_Hurt2 from '@/assets/images/Alien_John_Hurt2.webp'
-import Alien_Sigourney1 from '@/assets/images/Alien_Sigourney1.webp'
-import Alien_Tom_Skerritt1 from '@/assets/images/Alien_Tom_Skerritt1.webp'
-import Alien_Veronica_Cartwright1 from '@/assets/images/Alien_Veronica_Cartwright1.webp'
-import Alien_Yaphet_Kotto1 from '@/assets/images/Alien_Yaphet_Kotto1.webp'
+import Sigourney from '@/assets/images/alien_sigourney.webp'
+import TomSkerritt from '@/assets/images/alien_tom_skerritt.webp'
+import VeronicaCartwright from '@/assets/images/alien_veronica_cartwright.webp'
+import YaphetKotto from '@/assets/images/alien_yaphet_kotto.webp'
 
-import {sortBy} from 'lodash'
+const nostromoCrew = ref()
+const theme = useTheme()
 
-export default {
-  name: 'NostromoCrew',
-  mixins: [Context],
-  data: () => ({
-    nostromoCrew: undefined
-  }),
-  created() {
-    getNostromoCrew().then(data => {
-      this.nostromoCrew = sortBy(data, ['firstName', 'lastName', 'uid'])
-      const images = [
-        Alien_Harry_Dean_Stanton1,
-        Alien_Ian_Holm1,
-        Alien_John_Hurt2,
-        Alien_Sigourney1,
-        Alien_Tom_Skerritt1,
-        Alien_Veronica_Cartwright1,
-        Alien_Yaphet_Kotto1]
-      this.nostromoCrew.forEach(item => {
-        item.image = images[this.randomNumberGenerator(0, images.length - 1)]
-      })
+onMounted(() => {
+  getNostromoCrew().then(data => {
+    nostromoCrew.value = sortBy(data, ['firstName', 'lastName', 'uid'])
+    const images = [
+      HarryDeanStanton,
+      IanHolm,
+      JohnHurt,
+      Sigourney,
+      TomSkerritt,
+      VeronicaCartwright,
+      YaphetKotto
+    ]
+    each(nostromoCrew.value, (member, index) => {
+      member.image = images[index % images.length]
     })
-  },
-  methods: {
-    randomNumberGenerator(min, max) {
-      min = Math.ceil(min)
-      max = Math.floor(max)
-      return Math.floor(Math.random() * (max - min + 1)) + min
-    }
-  }
-}
+  })
+})
 </script>
 
 <style scoped lang="scss">
-  .profile-image {
-    height: 40px;
-    width: auto;
-    border-radius: 50%;
-  }
-
-  .profile-name {
-    position: relative;
-    bottom: 13px;
-    left: 16px;
-  }
-
+.profile-image {
+  background-size: cover;
+  border-radius: 5px;
+  height: 40px;
+  object-fit: cover;
+  width: 40px;
+}
+.profile-name {
+  position: relative;
+  bottom: 13px;
+  left: 16px;
+}
 </style>

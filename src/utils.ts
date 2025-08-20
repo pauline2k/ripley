@@ -71,10 +71,10 @@ export function initializeAxios(app: any, axios: any) {
     })
 }
 
-export function isValidCanvasSiteId(canvasSiteId: string) {
+export function isValidCanvasSiteId(canvasSiteId: string): boolean {
   canvasSiteId = trim(canvasSiteId)
   const maxValidCanvasSiteId = get(useContextStore(), 'config.maxValidCanvasSiteId') || 10
-  return !!canvasSiteId && canvasSiteId.match(/^\d+$/) && parseInt(canvasSiteId, 10) <= maxValidCanvasSiteId
+  return !!canvasSiteId && !!canvasSiteId.match(/^\d+$/) && parseInt(canvasSiteId, 10) <= maxValidCanvasSiteId
 }
 
 export function isValidCanvasUserId(canvasUserId: string) {

@@ -23,22 +23,21 @@
   </v-list>
 </template>
 
-<script>
-import Context from '@/mixins/Context.vue'
+<script lang="ts" setup>
+import type {PropType} from 'vue'
+import type {StandaloneToolOption} from '@/lib/types'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'StandaloneToolsList',
-  mixins: [Context],
-  props: {
-    tools: {
-      type: Array,
-      required: true
-    }
-  },
-  methods: {
-    getLinkId(tool) {
-      return `tool-${tool.title.toLowerCase().replace(/[ ]+/g, '-')}-link`
-    }
+defineProps({
+  tools: {
+    type: Array as PropType<StandaloneToolOption[]>,
+    required: true
   }
+})
+
+const config = useContextStore().config
+
+const getLinkId = (tool: StandaloneToolOption) => {
+  return `tool-${tool.title.toLowerCase().replace(/[ ]+/g, '-')}-link`
 }
 </script>

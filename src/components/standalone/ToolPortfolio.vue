@@ -49,12 +49,12 @@
               v-model="canvasSiteId"
               density="compact"
               :disabled="isUpdatingCanvasSiteId"
-              :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
+              :error="!!canvasSiteId && !isCanvasSiteIdValid"
               hide-details
               maxlength="10"
               style="width: 124px"
               variant="outlined"
-              @update:model-value="() => error = null"
+              @update:model-value="() => error = undefined"
               @keydown.enter="updateCanvasSiteId"
             />
           </div>
@@ -62,7 +62,7 @@
             <v-btn
               id="update-canvas-site-id-btn"
               color="primary"
-              :disabled="isUpdatingCanvasSiteId || !trim(canvasSiteId) || !isCanvasSiteIdValid"
+              :disabled="isUpdatingCanvasSiteId || !canvasSiteId || !isCanvasSiteIdValid"
               @click="updateCanvasSiteId"
             >
               <span v-if="isUpdatingCanvasSiteId">
@@ -87,13 +87,7 @@
   </v-card>
 </template>
 
-<script setup>
-import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
-import {mdiOpenInNew, mdiStackOverflow} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
+<script lang="ts" setup>
 import {
   mdiAccountMultiple,
   mdiAccountPlusOutline,
@@ -101,86 +95,90 @@ import {
   mdiChartBarStacked,
   mdiEmailMultipleOutline,
   mdiExport,
+  mdiOpenInNew,
+  mdiStackOverflow,
   mdiWeb
 } from '@mdi/js'
+import type {StandaloneToolOption} from '@/lib/types'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import StandaloneToolsList from '@/components/utils/StandaloneToolsList.vue'
-import {sortBy, trim} from 'lodash'
+import {computed, onMounted, ref} from 'vue'
+import {isValidCanvasSiteId} from '@/utils'
+import {sortBy, toString} from 'lodash'
 import {updateUserSession} from '@/api/auth'
 import {useContextStore} from '@/stores/context'
-import {isValidCanvasSiteId} from '@/utils'
+import {useRouter} from 'vue-router'
 
-export default {
-  name: 'ToolPortfolio',
-  components: {StandaloneToolsList},
-  mixins: [Context],
-  props: {
-    vCardClass: {
-      default: undefined,
-      required: false,
-      type: String
-    },
-    width: {
-      default: undefined,
-      required: false,
-      type: Number
-    }
+defineProps({
+  vCardClass: {
+    default: undefined,
+    required: false,
+    type: String
   },
-  data: () => ({
-    adminTools: [],
-    canvasSiteId: undefined,
-    embeddedTools: [],
-    error: undefined,
-    expansionPanel: false,
-    isUpdatingCanvasSiteId: false
-  }),
-  computed: {
-    isCanvasSiteIdValid() {
-      return isValidCanvasSiteId(this.canvasSiteId)
-    }
-  },
-  created() {
-    this.canvasSiteId = this.currentUser.canvasSiteId
-    this.loadTools()
-    this.eventHub.on('current-user-update', () => {
-      this.canvasSiteId = this.currentUser.canvasSiteId
-      this.loadTools()
-    })
-    this.$ready()
-  },
-  methods: {
-    loadTools() {
-      const canvasSiteId = this.currentUser.canvasSiteId
-      this.adminTools = sortBy([
-        {disabled: false, icon: mdiWeb, path: '/manage_sites', title: 'Manage Sites'},
-        {disabled: false, icon: mdiAccountPlusOutline, path: '/provision_user', title: 'User Provision'},
-        {disabled: false, icon: mdiEmailMultipleOutline, path: '/mailing_list/select_course', title: 'Mailing Lists Manager'},
-      ], tool => tool.title)
-      this.embeddedTools = sortBy([
-        {disabled: !canvasSiteId, icon: mdiEmailMultipleOutline, path: '/mailing_list/create', title: 'Mailing List'},
-        {disabled: !canvasSiteId, icon: mdiExport, path: '/export_grade', title: 'E-Grade Export'},
-        {disabled: !canvasSiteId, icon: mdiChartBarStacked, path: '/grade_distribution', title: 'Grade Distribution'},
-        {disabled: !canvasSiteId, icon: mdiAccountSchool, path: '/add_user', title: 'Find a Person to Add'},
-        {disabled: !canvasSiteId, icon: mdiAccountMultiple, path: '/roster', title: 'Roster Photos'}
-      ], tool => tool.title)
-    },
-    updateCanvasSiteId() {
-      const canvasSiteId = trim(this.canvasSiteId) || null
-      if (trim(canvasSiteId) && this.isCanvasSiteIdValid && this.currentUser.isAuthenticated) {
-        this.isUpdatingCanvasSiteId = true
-        updateUserSession(canvasSiteId).then(
-          data => {
-            useContextStore().setCurrentUser(data)
-            this.canvasSiteId = this.currentUser.canvasSiteId
-            this.$router.go()
-          },
-          error => {
-            this.error = error
-          }
-        ).finally(() => {
-          this.isUpdatingCanvasSiteId = false
-        })
+  width: {
+    default: undefined,
+    required: false,
+    type: Number
+  }
+})
+
+const contextStore = useContextStore()
+const adminTools = ref<StandaloneToolOption[]>([])
+const canvasSiteId = ref<number>(contextStore.currentUser.canvasSiteId)
+const config = contextStore.config
+const currentUser = contextStore.currentUser
+const embeddedTools = ref<StandaloneToolOption[]>([])
+const error = ref(undefined)
+const eventHub = contextStore.eventHub
+const isCanvasSiteIdValid = computed(() => {
+  return isValidCanvasSiteId(toString(canvasSiteId.value))
+})
+const isUpdatingCanvasSiteId = ref(false)
+const router = useRouter()
+
+onMounted(() => {
+  canvasSiteId.value = currentUser.canvasSiteId
+  loadTools()
+  eventHub.on('current-user-update', () => {
+    canvasSiteId.value = currentUser.canvasSiteId
+    loadTools()
+  })
+  contextStore.loadingComplete()
+
+})
+
+const loadTools = () => {
+  const canvasSiteId = currentUser.canvasSiteId
+  adminTools.value = sortBy([
+    {disabled: false, icon: mdiWeb, path: '/manage_sites', title: 'Manage Sites'},
+    {disabled: false, icon: mdiAccountPlusOutline, path: '/provision_user', title: 'User Provision'},
+    {disabled: false, icon: mdiEmailMultipleOutline, path: '/mailing_list/select_course', title: 'Mailing Lists Manager'},
+  ], tool => tool.title)
+  embeddedTools.value = sortBy([
+    {disabled: !canvasSiteId, icon: mdiEmailMultipleOutline, path: '/mailing_list/create', title: 'Mailing List'},
+    {disabled: !canvasSiteId, icon: mdiExport, path: '/export_grade', title: 'E-Grade Export'},
+    {disabled: !canvasSiteId, icon: mdiChartBarStacked, path: '/grade_distribution', title: 'Grade Distribution'},
+    {disabled: !canvasSiteId, icon: mdiAccountSchool, path: '/add_user', title: 'Find a Person to Add'},
+    {disabled: !canvasSiteId, icon: mdiAccountMultiple, path: '/roster', title: 'Roster Photos'}
+  ], tool => tool.title)
+}
+
+const updateCanvasSiteId = () => {
+  // const canvasSiteId = trim(canvasSiteId.value) || null
+  if (canvasSiteId.value && isCanvasSiteIdValid.value && currentUser.isAuthenticated) {
+    isUpdatingCanvasSiteId.value = true
+    updateUserSession(canvasSiteId.value).then(
+      data => {
+        contextStore.setCurrentUser(data)
+        canvasSiteId.value = currentUser.canvasSiteId
+        router.go(1)
+      },
+      error => {
+        error.value = error
       }
-    }
+    ).finally(() => {
+      isUpdatingCanvasSiteId.value = false
+    })
   }
 }
 </script>
