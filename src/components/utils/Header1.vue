@@ -5,15 +5,12 @@
   </h1>
 </template>
 
-<script>
-export default {
-  name: 'Header1',
-  props: {
-    text: {
-      default: undefined,
-      required: false,
-      type: String
-    }
+<script lang="ts" setup>
+defineProps({
+  text: {
+    default: undefined,
+    required: false,
+    type: String
   }
-}
+})
 </script>

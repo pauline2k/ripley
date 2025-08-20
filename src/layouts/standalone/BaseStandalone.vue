@@ -1,8 +1,10 @@
 <template>
-  <AppBar />
-  <router-view id="content" />
+  <div>
+    <AppBar />
+    <router-view id="content" />
+  </div>
 </template>
 
-<script setup>
-import AppBar from './AppBar.vue'
+<script lang="ts" setup>
+import AppBar from '@/layouts/standalone/AppBar.vue'
 </script>

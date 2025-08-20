@@ -1,6 +1,6 @@
 <template>
   <v-container
-    v-if="!isLoading"
+    v-if="!contextStore.isLoading"
     class="h-100 mb-2 pt-1 px-6"
     fill-height
     fluid
@@ -234,149 +234,141 @@
   </v-container>
 </template>
 
-<script setup>
+<script lang="ts" setup>
+import {cloneDeep, concat, each, filter, find, get, isNil, partition} from 'lodash'
+import {computed, onMounted, onUnmounted, ref} from 'vue'
+import {mdiDesktopClassic, mdiMessageAlert, mdiPlay, mdiPlaylistEdit, mdiStar} from '@mdi/js'
 import deepSpace from '@/assets/images/deep-space-background-tile.png'
-import DisableJobToggle from '@/components/job/DisableJobToggle'
+import DisableJobToggle from '@/components/job/DisableJobToggle.vue'
 import Header1 from '@/components/utils/Header1.vue'
-import Hypersleep from '@/components/standalone/Hypersleep'
-import JobHistory from '@/components/job/JobHistory'
-import NostromoCrew from '@/components/standalone/NostromoCrew'
+import Hypersleep from '@/components/standalone/Hypersleep.vue'
+import JobHistory from '@/components/job/JobHistory.vue'
+import moment from 'moment'
+import NostromoCrew from '@/components/standalone/NostromoCrew.vue'
 import ripleyWithCat from '@/assets/images/ripley-with-cat.png'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import ToolPortfolio from '@/components/standalone/ToolPortfolio.vue'
-import {mdiDesktopClassic, mdiPlay, mdiPlaylistEdit} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
-import {cloneDeep, concat, each, filter, find, get, isNil, partition} from 'lodash'
+import type {Job} from '@/lib/types'
 import {getJobHistory, getJobSchedule, setJobDisabled, startJob, updateJobSchedule} from '@/api/job'
-import {mdiMessageAlert, mdiStar} from '@mdi/js'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'Welcome',
-  mixins: [Context],
-  data: () => ({
-    disableScheduleSave: false,
-    editJob: undefined,
-    editJobDialog: false,
-    headers: [
-      {key: 'key', title: ''},
-      {key: 'name', title: 'Name'},
-      {key: 'description', title: 'Description'},
-      {key: 'schedule', title: 'Schedule'},
-      {key: 'enabled', title: 'Enabled'}
-    ],
-    isDryRun: false,
-    jobHistory: undefined,
-    jobSchedule: undefined,
-    refresher: undefined,
-    refreshing: false,
-    showLatestJobAlert: undefined
-  }),
-  computed: {
-    latestJob() {
-      let description
-      let icon
-      let iconColor
-      const runningJobs = filter(this.jobHistory, ['finishedAt', null]) || []
-      if (runningJobs.length) {
-        description = ''
-        each(runningJobs, job => {
-          description += `${job.jobKey} started ${this.$moment(job.startedAt).fromNow()}. `
-        })
-      } else {
-        const job = this.jobHistory[0]
-        const finishedAt = this.$moment(job.finishedAt).fromNow()
-        description = `${job.jobKey} ${job.failed ? 'failed' : 'finished'} ${finishedAt}.`
-        icon = job.failed ? mdiMessageAlert : mdiStar
-        iconColor = job.failed ? 'error' : 'green'
-      }
-      return {
-        description,
-        icon,
-        iconColor,
-        isRunning: runningJobs.length
-      }
-    }
-  },
-  created() {
-    getJobSchedule().then(data => {
-      this.jobSchedule = data
-      this.refresh(true).then(() => {
-        this.$ready()
-      })
+const contextStore = useContextStore()
+const disableScheduleSave = ref(false)
+const editJob = ref()
+const editJobDialog = ref(false)
+const isDryRun = ref(false)
+const jobHistory = ref()
+const jobSchedule = ref()
+const latestJob = computed(() => {
+  let description: string = ''
+  let icon: string | undefined = undefined
+  let iconColor: string | undefined = undefined
+  const runningJobs = filter(jobHistory.value, ['finishedAt', null]) || []
+  if (runningJobs.length) {
+    description = ''
+    each(runningJobs, job => {
+      description += `${job.jobKey} started ${moment(job.startedAt).fromNow()}. `
     })
-  },
-  unmounted() {
-    clearTimeout(this.refresher)
-  },
-  methods: {
-    get,
-    isRunning(jobKey) {
-      return !!find(this.jobHistory, h => h.jobKey === jobKey && !h.finishedAt)
-    },
-    refresh(quietly) {
-      this.refreshing = true
-      return getJobHistory().then(data => {
-        const partitions = partition(data, j => j.finishedAt)
-        this.jobHistory = concat(partitions[1], partitions[0])
-        if (isNil(this.showLatestJobAlert) && this.jobHistory.length > 1) {
-          // Set this flag only once: when jobHistory is non-empty. The flag is set to false when user closes the alert.
-          this.showLatestJobAlert = true
-        }
-        this.refreshing = false
-        if (!quietly) {
-          this.alertScreenReader('Job History refreshed')
-        }
-        this.scheduleRefresh()
-      })
-    },
-    runJob(job) {
-      this.jobHistory.unshift({
-        jobKey: job.key,
-        failed: false,
-        startedAt: this.$moment()
-      })
-      startJob(job.key, {isDryRun: this.isDryRun}).then(() => {})
-      const jobName = find(this.jobSchedule.jobs, ['key', job.key]).name
-      // eslint-disable-next-line no-console
-      console.log(`TODO: this.snackbarOpen(${jobName} job started)`)
-    },
-    scheduleEditCancel() {
-      this.editJob = undefined
-      this.editJobDialog = false
-      this.alertScreenReader('Cancelled')
-    },
-    scheduleEditOpen(job) {
-      this.editJob = cloneDeep(job)
-      this.editJobDialog = true
-      this.alertScreenReader(`Opened dialog to edit job ${job.name}`)
-    },
-    scheduleEditSave() {
-      updateJobSchedule(
-        this.editJob.id,
-        this.editJob.schedule.type,
-        this.editJob.schedule.value
-      ).then(() => {
-        const match = find(this.jobSchedule.jobs, ['id', this.editJob.id])
-        match.schedule = this.editJob.schedule
-        this.editJob = undefined
-        this.editJobDialog = false
-        this.alertScreenReader(`Job '${match.name}' was updated.`)
-      })
-    },
-    scheduleRefresh() {
-      clearTimeout(this.refresher)
-      this.refresher = setTimeout(this.refresh, 5000)
-    },
-    toggleDisabled(job, isDisabled) {
-      setJobDisabled(job.id, isDisabled).then(data => {
-        job.disabled = data.disabled
-        this.alertScreenReader(`Job '${job.name}' ${job.disabled ? 'disabled' : 'enabled'}`)
-      })
-    }
+  } else {
+    const job = jobHistory.value[0]
+    const finishedAt = moment(job.finishedAt).fromNow()
+    description = `${job.jobKey} ${job.failed ? 'failed' : 'finished'} ${finishedAt}.`
+    icon = job.failed ? mdiMessageAlert : mdiStar
+    iconColor = job.failed ? 'error' : 'green'
   }
+  return {
+    description,
+    icon,
+    iconColor,
+    isRunning: runningJobs.length
+  }
+})
+const refresher = ref()
+const refreshing = ref(false)
+const showLatestJobAlert = ref(false)
+
+onMounted(() => {
+  getJobSchedule().then(data => {
+    jobSchedule.value = data
+    refresh(true).then(() => {
+      contextStore.loadingComplete()
+    })
+  })
+})
+
+onUnmounted(() => {
+  clearTimeout(refresher.value)
+})
+
+const isRunning = jobKey => {
+  return !!find(jobHistory.value, h => h.jobKey === jobKey && !h.finishedAt)
+}
+
+const refresh = (quietly) => {
+  refreshing.value = true
+  return getJobHistory().then(data => {
+    const partitions = partition(data, j => j.finishedAt)
+    jobHistory.value = concat(partitions[1], partitions[0])
+    if (isNil(showLatestJobAlert.value) && jobHistory.value.length > 1) {
+      // Set this flag only once: when jobHistory is non-empty. The flag is set to false when user closes the alert.
+      showLatestJobAlert.value = true
+    }
+    refreshing.value = false
+    if (!quietly) {
+      contextStore.alertScreenReader('Job History refreshed')
+    }
+    scheduleRefresh()
+  })
+}
+
+const runJob = job => {
+  jobHistory.value.unshift({
+    jobKey: job.key,
+    failed: false,
+    startedAt: moment()
+  })
+  startJob(job.key, {isDryRun: isDryRun.value}).then(() => {})
+  const jobName = find(jobSchedule.value.jobs, ['key', job.key]).name
+  // eslint-disable-next-line no-console
+  console.log(`TODO: this.snackbarOpen(${jobName} job started)`)
+}
+
+const scheduleEditCancel = () => {
+  editJob.value = undefined
+  editJobDialog.value = false
+  contextStore.alertScreenReader('Cancelled')
+}
+
+const scheduleEditOpen = job => {
+  editJob.value = cloneDeep(job)
+  editJobDialog.value = true
+  contextStore.alertScreenReader(`Opened dialog to edit job ${job.name}`)
+}
+
+const scheduleEditSave = () => {
+  updateJobSchedule(
+    editJob.value.id,
+    editJob.value.schedule.type,
+    editJob.value.schedule.value
+  ).then(() => {
+    const match = find(jobSchedule.value.jobs, ['id', editJob.value.id])
+    match.schedule = editJob.value.schedule
+    editJob.value = undefined
+    editJobDialog.value = false
+    contextStore.alertScreenReader(`Job '${match.name}' was updated.`)
+  })
+}
+
+const scheduleRefresh = () => {
+  clearTimeout(refresher.value)
+  refresher.value = setTimeout(refresh, 5000)
+}
+
+const toggleDisabled = (job, isDisabled: boolean) => {
+  setJobDisabled(job.id, isDisabled).then((data: Job) => {
+    job.disabled = data.disabled
+    contextStore.alertScreenReader(`Job '${job.name}' ${job.disabled ? 'disabled' : 'enabled'}`)
+  })
 }
 </script>
 
