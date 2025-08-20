@@ -11,28 +11,27 @@
   />
 </template>
 
-<script>
-export default {
-  name: 'DisableJobToggle',
-  props: {
-    isRunning: {
-      required: true,
-      type: Boolean
-    },
-    job: {
-      required: true,
-      type: Object
-    },
-    onChange: {
-      required: true,
-      type: Function
-    }
+<script lang="ts" setup>
+import {onMounted, ref} from 'vue'
+
+const props = defineProps({
+  isRunning: {
+    required: true,
+    type: Boolean
   },
-  data: () => ({
-    enabled: undefined
-  }),
-  created() {
-    this.enabled = !this.job.disabled
+  job: {
+    required: true,
+    type: Object
+  },
+  onChange: {
+    required: true,
+    type: Function
   }
-}
+})
+
+const enabled = ref(false)
+
+onMounted(() => {
+  enabled.value = !props.job.disabled
+})
 </script>

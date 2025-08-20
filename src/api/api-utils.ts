@@ -34,9 +34,9 @@ export default {
       error => $_errorHandler(error, redirectOnError)
     )
   },
-  post: (path: string, data={}, redirectOnError?: boolean) => {
+  post: function<T>(path: string, data={}, redirectOnError?: boolean): Promise<T> {
     return axios.post(`${import.meta.env.VITE_APP_API_BASE_URL}${path}`, data).then(
-      data => data,
+      data => data as T,
       error => $_errorHandler(error, redirectOnError)
     )
   },

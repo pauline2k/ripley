@@ -10,7 +10,7 @@
           <div class="align-center d-flex">
             <div class="pr-2">
               <v-icon
-                :color="$vuetify.theme.dark ? 'white' : 'primary'"
+                :color="theme.global.current.value.dark ? 'white' : 'primary'"
                 :icon="mdiBed"
                 size="large"
               />
@@ -35,32 +35,26 @@
   </v-card>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import {mdiBed} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
+import {onMounted, ref} from 'vue'
+import {useTheme} from 'vuetify'
 import {setHypersleep} from '@/api/configuration'
 import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'Hypersleep',
-  mixins: [Context],
-  data: () => ({
-    enabled: undefined
-  }),
-  created() {
-    this.enabled = this.config.hypersleep
-  },
-  methods: {
-    toggleHypersleep(isEnabled) {
-      setHypersleep(isEnabled).then(data => {
-        this.enabled = data.hypersleep
-        useContextStore().setHypersleep(this.enabled)
-        this.alertScreenReader(`Hypersleep ${this.enabled ? 'enabled' : 'disabled'}`)
-      })
-    }
-  }
+const contextStore = useContextStore()
+const enabled = ref(false)
+const theme = useTheme()
+
+onMounted(() => {
+  enabled.value = contextStore.config.hypersleep
+})
+
+const toggleHypersleep = (isEnabled: boolean) => {
+  setHypersleep(isEnabled).then(data => {
+    enabled.value = data.hypersleep
+    contextStore.setHypersleep(enabled.value)
+    contextStore.alertScreenReader(`Hypersleep ${enabled.value ? 'enabled' : 'disabled'}`)
+  })
 }
 </script>
