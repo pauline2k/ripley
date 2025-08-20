@@ -6,6 +6,7 @@ import {putFocusNextTick} from '@/utils'
 import router from '@/router'
 
 export type RipleyConfig = {
+  canvasApiUrl: string,
   casLogoutUrl: string,
   devAuthEnabled: boolean,
   hypersleep: any,
@@ -16,6 +17,7 @@ export type RipleyConfig = {
 export type RipleyUser = {
   canAccessStandaloneView: boolean,
   canvasSiteId: number
+  canvasSiteName: string | undefined,
   inDemoMode: boolean,
   isAdmin: boolean,
   isAuthenticated: boolean
@@ -30,6 +32,7 @@ const $_getDefaultApplicationState = () => ({
 const ANONYMOUS_USER: RipleyUser = {
   canAccessStandaloneView: false,
   canvasSiteId: NaN,
+  canvasSiteName: undefined,
   inDemoMode: false,
   isAdmin: false,
   isAuthenticated: false
@@ -66,7 +69,7 @@ export const useContextStore = defineStore('context', {
       }
       putFocusNextTick(focusTarget || 'page-title')
     },
-    loadingStart(route?: Object) {
+    loadingStart(route?: object) {
       this.isLoading = true
       if (!get(route, 'meta.announcer.skip')) {
         this.screenReaderAlert.message = `${String(get(route, 'name', ''))} page is loading.`

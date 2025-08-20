@@ -3,16 +3,13 @@
     <v-card-title>
       <div class="align-start d-flex py-3">
         <h2 class="ml-2 mt-3">
-          <div class="align-center d-flex">
-            <div class="pr-2">
-              <v-icon
-                :color="$vuetify.theme.dark ? 'white' : 'primary'"
-                :icon="mdiHistory"
-                size="large"
-              />
-            </div>
-            <h2>Job History</h2>
-          </div>
+          <v-icon
+            class="mr-2"
+            :color="theme.global.current.value.dark ? 'white' : 'primary'"
+            :icon="mdiHistory"
+            size="large"
+          />
+          Job History
         </h2>
         <v-spacer />
         <v-text-field
@@ -67,12 +64,12 @@
         </template>
         <template #item.startedAt="{item}">
           <div class="py-2">
-            {{ $moment(item.startedAt).format(dateFormat) }}
+            {{ formatIsoDate(item.startedAt) }}
           </div>
         </template>
         <template #item.finishedAt="{item}">
           <div v-if="item.finishedAt" class="py-2">
-            {{ $moment(item.finishedAt).format(dateFormat) }}
+            {{ formatIsoDate(item.finishedAt) }}
           </div>
         </template>
         <template #expanded-row="{item}">
@@ -88,39 +85,34 @@
   </v-card>
 </template>
 
-<script setup>
+<script lang="ts" setup>
+import type {PropType} from 'vue'
 import {mdiAlert, mdiCheckCircle, mdiHistory, mdiMagnify} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
+import {ref} from 'vue'
 import {size} from 'lodash'
+import {useTheme} from 'vuetify'
+import moment from 'moment'
+import type {JobHistory} from '@/lib/types'
 
-export default {
-  name: 'JobHistory',
-  mixins: [Context],
-  props: {
-    jobHistory: {
-      required: true,
-      type: Array
-    },
-    refreshing: {
-      required: true,
-      type: Boolean
-    }
+defineProps({
+  jobHistory: {
+    required: true,
+    type: Array as PropType<JobHistory[]>
   },
-  data: () => ({
-    dateFormat: 'ddd, MMM Do, h:mm:ss A',
-    headers: [
-      {title: '', key: 'jobKey', sortable: false},
-      {title: 'Status', key: 'failed'},
-      {title: 'Started', key: 'startedAt'},
-      {title: 'Finished', key: 'finishedAt'}
-    ],
-    search: undefined
-  }),
-  methods: {
-    size
+  refreshing: {
+    required: true,
+    type: Boolean
   }
-}
+})
+
+const headers = [
+  {title: '', key: 'jobKey', sortable: false},
+  {title: 'Status', key: 'failed'},
+  {title: 'Started', key: 'startedAt'},
+  {title: 'Finished', key: 'finishedAt'}
+]
+const search = ref()
+const theme = useTheme()
+
+const formatIsoDate = (isoDate: string) => moment(isoDate).format('ddd, MMM Do, h:mm:ss A')
 </script>
