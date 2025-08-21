@@ -11,16 +11,25 @@ export type RipleyConfig = {
   devAuthEnabled: boolean,
   hypersleep: any,
   newtInformationBlock: string,
-  newtShowOtherGender: boolean
+  newtShowOtherGender: boolean,
+  terms: {
+    current: {
+      name: string
+    },
+    next: {
+      name: string
+    }
+  }
 }
 
 export type RipleyUser = {
   canAccessStandaloneView: boolean,
-  canvasSiteId: number
+  canvasSiteId: number,
   canvasSiteName: string | undefined,
   inDemoMode: boolean,
   isAdmin: boolean,
-  isAuthenticated: boolean
+  isAuthenticated: boolean,
+  isCanvasAdmin: boolean
 }
 
 const $_getDefaultApplicationState = () => ({
@@ -35,7 +44,8 @@ const ANONYMOUS_USER: RipleyUser = {
   canvasSiteName: undefined,
   inDemoMode: false,
   isAdmin: false,
-  isAuthenticated: false
+  isAuthenticated: false,
+  isCanvasAdmin: false
 }
 
 export const useContextStore = defineStore('context', {

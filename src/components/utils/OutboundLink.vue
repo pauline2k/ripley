@@ -16,32 +16,27 @@
   </a>
 </template>
 
-<script setup>
+<script lang="ts" setup>
 import {mdiOpenInNew} from '@mdi/js'
-</script>
 
-<script>
-export default {
-  name: 'OutboundLink',
-  props: {
-    hideIcon: {
-      type: Boolean,
-      required: false
-    },
-    href: {
-      type: String,
-      required: true
-    },
-    id: {
-      default: undefined,
-      type: String,
-      required: false
-    },
-    title: {
-      default: undefined,
-      type: String,
-      required: false
-    }
+defineProps({
+  hideIcon: {
+    type: Boolean,
+    required: false
+  },
+  href: {
+    type: String,
+    required: true
+  },
+  id: {
+    default: undefined,
+    type: String,
+    required: false
+  },
+  title: {
+    default: undefined,
+    type: String,
+    required: false
   }
-}
+})
 </script>

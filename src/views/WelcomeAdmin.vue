@@ -1,10 +1,9 @@
 <template>
   <v-container
     v-if="!contextStore.isLoading"
-    class="h-100 mb-2 pt-1 px-6"
+    class="background-deep-space h-100 mb-2 pt-1 px-6"
     fill-height
     fluid
-    :style="{backgroundImage: `url(${deepSpace})`, backgroundRepeat: 'repeat'}"
   >
     <v-row class="sr-only">
       <v-col>
@@ -239,7 +238,6 @@ import {cloneDeep, concat, each, filter, find, get, isNil, partition} from 'loda
 import {computed, onMounted, onUnmounted, ref} from 'vue'
 import {mdiDesktopClassic, mdiMessageAlert, mdiPlay, mdiPlaylistEdit, mdiStar} from '@mdi/js'
 import moment from 'moment'
-import deepSpace from '@/assets/images/deep-space-background-tile.png'
 import DisableJobToggle from '@/components/job/DisableJobToggle.vue'
 import Header1 from '@/components/utils/Header1.vue'
 import Hypersleep from '@/components/standalone/Hypersleep.vue'
@@ -248,7 +246,7 @@ import NostromoCrew from '@/components/standalone/NostromoCrew.vue'
 import ripleyWithCat from '@/assets/images/ripley-with-cat.png'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import ToolPortfolio from '@/components/standalone/ToolPortfolio.vue'
-import type {Job} from '@/lib/types'
+import type {Job, JobRunSummary} from '@/lib/types'
 import {getJobHistory, getJobSchedule, setJobDisabled, startJob, updateJobSchedule} from '@/api/job'
 import {useContextStore} from '@/stores/context'
 
@@ -307,7 +305,7 @@ const isRunning = jobKey => {
 const refresh = (quietly) => {
   refreshing.value = true
   return getJobHistory().then(data => {
-    const partitions = partition(data, j => j.finishedAt)
+    const partitions = partition(data, (j: JobRunSummary) => j.finishedAt)
     jobHistory.value = concat(partitions[1], partitions[0])
     if (isNil(showLatestJobAlert.value) && jobHistory.value.length > 1) {
       // Set this flag only once: when jobHistory is non-empty. The flag is set to false when user closes the alert.
@@ -373,6 +371,9 @@ const toggleDisabled = (job, isDisabled: boolean) => {
 </script>
 
 <style scoped>
+.background-deep-space {
+  background: url('@/assets/images/deep-space-background-tile.png') repeat;
+}
 .bg-striped-row {
   background-color: #d9edf7;
 }

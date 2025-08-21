@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="pt-3 px-6">
+  <div v-if="!contextStore.isLoading" class="pt-3 px-6">
     <Header1 v-if="canvasSite" class="mb-1 mt-0" :text="canvasSite.name" />
     <v-alert
       v-if="error"
@@ -214,298 +214,315 @@
   </div>
 </template>
 
-<script setup>
-import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
-import Header1 from '@/components/utils/Header1'
-import OutboundLink from '@/components/utils/OutboundLink'
-import {mdiMenuDown, mdiMenuRight} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
-import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
+<script lang="ts" setup>
 import {each, filter, find, flatMap, get, includes, set, size, toString, union, unset} from 'lodash'
+import {mdiMenuDown, mdiMenuRight} from '@mdi/js'
+import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable.vue'
+import Header1 from '@/components/utils/Header1.vue'
+import OutboundLink from '@/components/utils/OutboundLink.vue'
+import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
 import {pluralize, putFocusNextTick, toInt} from '@/utils'
+import {useContextStore} from '@/stores/context'
+import {computed, onMounted, ref} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
+import {Course, Section, Semester} from '@/lib/types'
 
-export default {
-  name: 'ManageOfficialSections',
-  mixins: [Context],
-  data: () => ({
-    adminActingAs: null,
-    adminTerms: null,
-    availableSectionsPanel: [],
-    canvasSite: undefined,
-    canvasSiteId: undefined,
-    courseSemesterClasses: [],
-    currentWorkflowStep: null,
-    error: null,
-    existingCourseSections: [],
-    feedFetched: false,
-    isAdmin: false,
-    isCourseCreator: false,
-    jobStatus: null,
-    jobStatusMessage: ''
-  }),
-  computed: {
-    allSections() {
-      return flatMap(this.courseSemesterClasses, c => c.sections)
-    },
-    showAlert: {
-      get() {
-        return !!size(this.jobStatusMessage)
-      },
-      set(show) {
-        if (!show) {
-          this.jobStatusMessage = ''
-        }
-      }
-    },
-    totalStagedCount() {
-      return size(filter(this.allSections, section => {
-        return (section.isCourseSection && get(section, 'stagedState')) || (!section.isCourseSection && section.stagedState === 'add')
-      }))
-    }
+const contextStore = useContextStore()
+const adminActingAs = ref()
+const adminTerms = ref()
+const availableSectionsPanel = ref<string[]>([])
+const backgroundJobId = ref()
+const canvasSite = ref()
+const canvasSiteId = ref()
+const courseSemesterClasses = ref<Course[]>([])
+const currentWorkflowStep = ref()
+const error = ref()
+const existingCourseSections = ref([])
+const exportTimer = ref()
+const feedFetched = ref<boolean>()
+const isAdmin = ref<boolean>()
+const isCourseCreator = ref<boolean>()
+const jobStatus = ref()
+const jobStatusMessage = ref('')
+const router = useRouter()
+const usersClassCount = ref<number>(NaN)
+
+const allSections = computed<Section[]>(() => {
+  return flatMap(courseSemesterClasses.value, c => c.sections)
+})
+
+const showAlert = computed({
+  get: () => {
+    return !!size(jobStatusMessage.value)
   },
-  created() {
-    this.canvasSiteId = toInt(get(this.$route, 'params.canvasSiteId'))
-    this.fetchFeed().finally(() => this.$ready())
-  },
-  methods: {
-    addAllSections(course) {
-      course.sections.forEach(section => section.stagedState = section.isCourseSection ? null : 'add')
-      this.alertScreenReader(`Linked all ${course.title} sections to the course site.`)
-      putFocusNextTick(`sections-course-${course.slug}-btn`)
-      this.eventHub.emit('sections-table-updated')
-    },
-    allSectionsAdded(course) {
-      return !find(course.sections, section => {
-        return (!section.isCourseSection && section.stagedState !== 'add') || (section.isCourseSection && section.stagedState === 'delete')
-      })
-    },
-    availableSectionsTableCaption(course) {
-      let caption = 'Official sections in this course.'
-      if (course.sections.length > 1) {
-        caption += `${this.allSectionsAdded(course) ? ' All sections linked to the course site.' : ' Use the Add All button above, or '}`
-      }
-      caption += 'Use the buttons in the Actions column to make changes.'
-      return caption
-    },
-    cancel() {
-      this.unstageAll()
-      this.changeWorkflowStep('preview')
-      this.alertScreenReader('Canceled. Nothing saved.', 'assertive')
-    },
-    changeWorkflowStep(step) {
-      if (step === 'staging') {
-        this.alertScreenReader('Edit sections form loaded')
-        this.jobStatus = null
-        this.jobStatusMessage = ''
-      } else if (step === 'preview') {
-        this.alertScreenReader('Read-only sections list loaded')
-        if (this.canvasSite.canEdit) {
-          putFocusNextTick('official-sections-edit-btn')
-        }
-      }
-      this.currentWorkflowStep = step
-    },
-    exit() {
-      this.$router.push({path: '/manage_sites'})
-    },
-    fetchFeed() {
-      return getCourseSections(this.canvasSiteId).then(data => {
-        if (data.canvasSite) {
-          this.canvasSite = data.canvasSite
-          if (data.teachingTerms) {
-            this.loadCourseLists(data.teachingTerms)
-          }
-          this.isAdmin = data.is_admin
-          this.adminActingAs = data.adminActingAs
-          this.adminTerms = data.adminTerms
-          this.isCourseCreator = this.usersClassCount > 0
-          this.feedFetched = true
-          this.changeWorkflowStep('preview')
-        } else {
-          this.error = 'Failed to retrieve section data.'
-        }
-      }, error => {
-        this.error = error
-      })
-    },
-    loadCourseLists(teachingTerms) {
-      const courseSemester = find(teachingTerms, semester => {
-        return (toString(semester.termId) === toString(this.canvasSite.term.id))
-      })
-      if (courseSemester) {
-        this.availableSectionsPanel = []
-        this.courseSemesterClasses = courseSemester.classes
-        this.usersClassCount = this.courseSemesterClasses.length
-        this.existingCourseSections = this.canvasSite.officialSections
-        this.courseSemesterClasses.forEach(classItem => {
-          classItem.sections.forEach(teachingSection => {
-            teachingSection.courseSlug = classItem.slug
-            if (teachingSection.isCourseSection) {
-              this.availableSectionsPanel = [classItem.slug]
-            }
-            this.canvasSite.officialSections.forEach(officialSection => {
-              if (officialSection.id === teachingSection.id) {
-                if (officialSection.canvasName !== `${teachingSection.courseCode} ${teachingSection.name}`) {
-                  set(teachingSection, 'nameDiscrepancy', true)
-                }
-              }
-            })
-          })
-        })
-      } else {
-        this.usersClassCount = 0
-      }
-    },
-    rowClassLogic(listMode, section) {
-      return {
-        'template-sections-table-row-added': (listMode === 'currentStaging' && section.stagedState === 'add'),
-        'template-sections-table-row-deleted': (listMode === 'availableStaging' && section.stagedState === 'delete'),
-        'template-sections-table-row-disabled': (
-          listMode === 'availableStaging' &&
-          (
-            section.stagedState === 'add' ||
-            (section.isCourseSection && section.stagedState !== 'delete')
-          )
-        )
-      }
-    },
-    rowDisplayLogic(listMode, section) {
-      return (listMode === 'preview') ||
-        (listMode === 'availableStaging') ||
-        (listMode === 'currentStaging' && section && section.isCourseSection && section.stagedState !== 'delete') ||
-        (listMode === 'currentStaging' && section && !section.isCourseSection && section.stagedState === 'add')
-    },
-    saveChanges() {
-      const sections = {
-        addSections: [],
-        deleteSections: [],
-        updateSections: []
-      }
-      let valid = false
-      this.courseSemesterClasses.forEach(classItem => {
-        classItem.sections.forEach(section => {
-          if (section.stagedState === 'add') {
-            sections.addSections.push(section.id)
-            valid = true
-          } else if (section.stagedState === 'delete') {
-            sections.deleteSections.push(section.id)
-            valid = true
-          } else if (section.stagedState === 'update') {
-            sections.updateSections.push(section.id)
-            valid = true
-          }
-        })
-      })
-      if (valid) {
-        this.changeWorkflowStep('processing')
-        this.jobStatus = 'sendingRequest'
-        this.jobStatusMessage = ''
-        updateSiteSections(
-          this.canvasSiteId,
-          sections.addSections,
-          sections.deleteSections,
-          sections.updateSections
-        ).then(
-          response => {
-            this.backgroundJobId = response.jobId
-            this.jobStatus = response.jobStatus
-            this.trackSectionUpdateJob()
-          }
-        ).catch(
-          () => {
-            this.changeWorkflowStep('preview')
-            this.jobStatus = 'error'
-            this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
-            clearInterval(this.exportTimer)
-          }
-        )
-      }
-    },
-    sectionString(section) {
-      return section.courseCode + ' ' + section.name
-    },
-    size,
-    stageAdd(section) {
-      if (!section.isCourseSection) {
-        section.stagedState = 'add'
-        this.alertScreenReader(`Linked ${this.sectionString(section)} to the course site.`)
-      } else {
-        this.error = `Cannot link ${this.sectionString(section)} because it is already linked to the course site.`
-      }
-      return this.totalStagedCount
-    },
-    stageDelete(section) {
-      if (section.isCourseSection) {
-        this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
-        section.stagedState = 'delete'
-        this.alertScreenReader(`Unlinked ${this.sectionString(section)} from the course site.`)
-      } else {
-        this.error = `Cannot unlink ${this.sectionString(section)} because it is not linked to the course site.`
-      }
-      return this.totalStagedCount
-    },
-    stageUpdate(section) {
-      if (section.isCourseSection) {
-        this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
-        section.stagedState = 'update'
-        this.alertScreenReader(`Updated ${this.sectionString(section)}.`)
-      } else {
-        this.error = `Cannot update ${this.sectionString(section)} because it is not linked to the course site.`
-      }
-    },
-    trackSectionUpdateJob() {
-      this.exportTimer = setInterval(() => {
-        courseProvisionJobStatus(this.backgroundJobId).then(
-          response => {
-            if (response.jobStatus !== this.jobStatus) {
-              this.jobStatus = response.jobStatus
-            } else {
-              this.alertScreenReader(`Still ${includes(['sendingRequest', 'queued'], this.jobStatus) ? 'waiting' : 'processing'}`)
-            }
-            if (!(includes(['started', 'queued'], this.jobStatus))) {
-              clearInterval(this.exportTimer)
-              if (this.jobStatus === 'finished') {
-                this.alertScreenReader('Success.', 'assertive')
-                this.jobStatusMessage = 'The sections in this course site have been updated successfully.'
-              } else {
-                this.alertScreenReader('Error', 'assertive')
-                this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
-              }
-              this.fetchFeed()
-            }
-          }
-        ).catch(
-          () => {
-            this.changeWorkflowStep('preview')
-            this.alertScreenReader('Error.', 'assertive')
-            this.jobStatus = 'error'
-            this.jobStatusMessage = 'An error has occurred with your request. Please try again or contact bCourses support.'
-            clearInterval(this.exportTimer)
-          }
-        )
-      }, 4000)
-    },
-    unstage(section) {
-      if (section.stagedState === 'add') {
-        this.availableSectionsPanel = union(this.availableSectionsPanel, [section.courseSlug])
-        this.alertScreenReader(`${this.sectionString(section)} will not be added to the course site.`)
-      } else if (section.stagedState === 'delete') {
-        this.alertScreenReader(`${this.sectionString(section)} will not be removed from the course site.`)
-      } else if (section.stagedState === 'update') {
-        this.alertScreenReader(`${this.sectionString(section)} will not be updated.`)
-      }
-      section.stagedState = null
-      return this.totalStagedCount
-    },
-    unstageAll() {
-      return each(this.allSections, section => {
-        unset(section, 'stagedState')
-      })
+  set: (show: boolean) => {
+    if (!show) {
+      jobStatusMessage.value = ''
     }
   }
+})
+
+const totalStagedCount = computed(() => {
+  return size(filter(allSections.value, (section: Section) => {
+    const isCourseSection = section.isCourseSection
+    return (isCourseSection && get(section, 'stagedState')) || (!isCourseSection && section.stagedState === 'add')
+  }))
+})
+
+onMounted(() => {
+  canvasSiteId.value = toInt(get(useRoute(), 'params.canvasSiteId'))
+  fetchFeed().finally(() => contextStore.loadingComplete())
+})
+
+const addAllSections = (course: Course) => {
+  each(course.sections, section => section.stagedState = section.isCourseSection ? undefined : 'add')
+  contextStore.alertScreenReader(`Linked all ${course.title} sections to the course site.`)
+  putFocusNextTick(`sections-course-${course.slug}-btn`)
+  contextStore.eventHub.emit('sections-table-updated')
+}
+
+const allSectionsAdded = (course: Course) => {
+  return !find(course.sections, section => {
+    return (!section.isCourseSection && section.stagedState !== 'add') || (section.isCourseSection && section.stagedState === 'delete')
+  })
+}
+
+const availableSectionsTableCaption = (course: Course) => {
+  let caption = 'Official sections in this course.'
+  if (course.sections.length > 1) {
+    caption += `${allSectionsAdded(course) ? ' All sections linked to the course site.' : ' Use the Add All button above, or '}`
+  }
+  caption += 'Use the buttons in the Actions column to make changes.'
+  return caption
+}
+
+const cancel = () => {
+  unstageAll()
+  changeWorkflowStep('preview')
+  contextStore.alertScreenReader('Canceled. Nothing saved.', 'assertive')
+}
+
+const changeWorkflowStep = (step: string) => {
+  if (step === 'staging') {
+    contextStore.alertScreenReader('Edit sections form loaded')
+    jobStatus.value = null
+    jobStatusMessage.value = ''
+  } else if (step === 'preview') {
+    contextStore.alertScreenReader('Read-only sections list loaded')
+    if (canvasSite.value.canEdit) {
+      putFocusNextTick('official-sections-edit-btn')
+    }
+  }
+  currentWorkflowStep.value = step
+}
+
+const exit = () => {
+  router.push({path: '/manage_sites'})
+}
+
+const fetchFeed = () => {
+  return getCourseSections(canvasSiteId.value).then(data => {
+    if (data.canvasSite) {
+      canvasSite.value = data.canvasSite
+      if (data.teachingTerms) {
+        loadCourseLists(data.teachingTerms)
+      }
+      // TODO: Where are the following values coming from? I do not see them in the /official_sections feed.
+      isAdmin.value = data.is_admin
+      adminActingAs.value = data.adminActingAs
+      adminTerms.value = data.adminTerms
+      isCourseCreator.value = usersClassCount.value > 0
+      feedFetched.value = true
+      changeWorkflowStep('preview')
+    } else {
+      error.value = 'Failed to retrieve section data.'
+    }
+  }, data => {
+    error.value = data
+  })
+}
+
+const loadCourseLists = (teachingTerms) => {
+  const courseSemester: Semester = find(teachingTerms, semester => {
+    return (toString(semester.termId) === toString(canvasSite.value.term.id))
+  })
+  if (courseSemester) {
+    availableSectionsPanel.value = []
+    courseSemesterClasses.value = courseSemester.classes
+    usersClassCount.value = courseSemesterClasses.value.length
+    existingCourseSections.value = canvasSite.value.officialSections
+    each(courseSemesterClasses.value, classItem => {
+      each(classItem.sections, teachingSection => {
+        teachingSection.courseSlug = classItem.slug
+        if (teachingSection.isCourseSection) {
+          availableSectionsPanel.value = [classItem.slug]
+        }
+        each(canvasSite.value.officialSections, officialSection => {
+          if (officialSection.id === teachingSection.id) {
+            if (officialSection.canvasName !== `${teachingSection.courseCode} ${teachingSection.name}`) {
+              set(teachingSection, 'nameDiscrepancy', true)
+            }
+          }
+        })
+      })
+    })
+  } else {
+    usersClassCount.value = 0
+  }
+}
+
+const rowClassLogic = (listMode: string, section: Section) => {
+  return {
+    'template-sections-table-row-added': (listMode === 'currentStaging' && section.stagedState === 'add'),
+    'template-sections-table-row-deleted': (listMode === 'availableStaging' && section.stagedState === 'delete'),
+    'template-sections-table-row-disabled': (
+      listMode === 'availableStaging' &&
+      (
+        section.stagedState === 'add' ||
+        (section.isCourseSection && section.stagedState !== 'delete')
+      )
+    )
+  }
+}
+
+const rowDisplayLogic = (listMode: string, section: Section) => {
+  return (listMode === 'preview') ||
+    (listMode === 'availableStaging') ||
+    (listMode === 'currentStaging' && section && section.isCourseSection && section.stagedState !== 'delete') ||
+    (listMode === 'currentStaging' && section && !section.isCourseSection && section.stagedState === 'add')
+}
+
+const saveChanges = () => {
+  type Bundle = {addSections: string[], deleteSections: string[], updateSections: string[]}
+  const sections: Bundle = {
+    addSections: [],
+    deleteSections: [],
+    updateSections: []
+  }
+  let valid = false
+  each(courseSemesterClasses.value, classItem => {
+    each(classItem.sections, section => {
+      if (section.stagedState === 'add') {
+        sections.addSections.push(toString(section.id))
+        valid = true
+      } else if (section.stagedState === 'delete') {
+        sections.deleteSections.push(toString(section.id))
+        valid = true
+      } else if (section.stagedState === 'update') {
+        sections.updateSections.push(toString(section.id))
+        valid = true
+      }
+    })
+  })
+  if (valid) {
+    changeWorkflowStep('processing')
+    jobStatus.value = 'sendingRequest'
+    jobStatusMessage.value = ''
+    updateSiteSections(
+      canvasSiteId.value,
+      sections.addSections,
+      sections.deleteSections,
+      sections.updateSections
+    ).then(
+      data => {
+        backgroundJobId.value = data.jobId
+        jobStatus.value = data.jobStatus
+        trackSectionUpdateJob()
+      }
+    ).catch(
+      () => {
+        changeWorkflowStep('preview')
+        jobStatus.value = 'error'
+        jobStatusMessage.value = 'An error has occurred with your request. Please try again or contact bCourses support.'
+        clearInterval(exportTimer.value)
+      }
+    )
+  }
+}
+
+const sectionString = (section: Section) => section.courseCode + ' ' + section.name
+
+const stageAdd = (section: Section) => {
+  if (!section.isCourseSection) {
+    section.stagedState = 'add'
+    contextStore.alertScreenReader(`Linked ${sectionString(section)} to the course site.`)
+  } else {
+    error.value = `Cannot link ${sectionString(section)} because it is already linked to the course site.`
+  }
+  return totalStagedCount.value
+}
+
+const stageDelete = (section: Section) => {
+  if (section.isCourseSection) {
+    availableSectionsPanel.value = union(availableSectionsPanel.value, [section.courseSlug])
+    section.stagedState = 'delete'
+    contextStore.alertScreenReader(`Unlinked ${sectionString(section)} from the course site.`)
+  } else {
+    error.value = `Cannot unlink ${sectionString(section)} because it is not linked to the course site.`
+  }
+  return totalStagedCount.value
+}
+
+const stageUpdate = (section: Section) => {
+  if (section.isCourseSection) {
+    availableSectionsPanel.value = union(availableSectionsPanel.value, [section.courseSlug])
+    section.stagedState = 'update'
+    contextStore.alertScreenReader(`Updated ${sectionString(section)}.`)
+  } else {
+    error.value = `Cannot update ${sectionString(section)} because it is not linked to the course site.`
+  }
+}
+
+const trackSectionUpdateJob = () => {
+  exportTimer.value = setInterval(() => {
+    courseProvisionJobStatus(backgroundJobId.value).then(
+      data => {
+        if (data.jobStatus !== jobStatus.value) {
+          jobStatus.value = data.jobStatus
+        } else {
+          contextStore.alertScreenReader(`Still ${includes(['sendingRequest', 'queued'], jobStatus.value) ? 'waiting' : 'processing'}`)
+        }
+        if (!(includes(['started', 'queued'], jobStatus.value))) {
+          clearInterval(exportTimer.value)
+          if (jobStatus.value === 'finished') {
+            contextStore.alertScreenReader('Success.', 'assertive')
+            jobStatusMessage.value = 'The sections in this course site have been updated successfully.'
+          } else {
+            contextStore.alertScreenReader('Error', 'assertive')
+            jobStatusMessage.value = 'An error has occurred with your request. Please try again or contact bCourses support.'
+          }
+          fetchFeed()
+        }
+      }
+    ).catch(
+      () => {
+        changeWorkflowStep('preview')
+        contextStore.alertScreenReader('Error.', 'assertive')
+        jobStatus.value = 'error'
+        jobStatusMessage.value = 'An error has occurred with your request. Please try again or contact bCourses support.'
+        clearInterval(exportTimer.value)
+      }
+    )
+  }, 4000)
+}
+
+const unstage = (section: Section) => {
+  if (section.stagedState === 'add') {
+    availableSectionsPanel.value = union(availableSectionsPanel.value, [section.courseSlug])
+    contextStore.alertScreenReader(`${sectionString(section)} will not be added to the course site.`)
+  } else if (section.stagedState === 'delete') {
+    contextStore.alertScreenReader(`${sectionString(section)} will not be removed from the course site.`)
+  } else if (section.stagedState === 'update') {
+    contextStore.alertScreenReader(`${sectionString(section)} will not be updated.`)
+  }
+  section.stagedState = undefined
+  return totalStagedCount.value
+}
+
+const unstageAll = () => {
+  return each(allSections.value, section => {
+    unset(section, 'stagedState')
+  })
 }
 </script>
 

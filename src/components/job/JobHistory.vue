@@ -92,12 +92,12 @@ import {ref} from 'vue'
 import {size} from 'lodash'
 import {useTheme} from 'vuetify'
 import moment from 'moment'
-import type {JobHistory} from '@/lib/types'
+import type {JobRunSummary} from '@/lib/types'
 
 defineProps({
   jobHistory: {
     required: true,
-    type: Array as PropType<JobHistory[]>
+    type: Array as PropType<JobRunSummary[]>
   },
   refreshing: {
     required: true,

@@ -1,10 +1,10 @@
-import axios from 'axios'
+import axios, {isCancel} from 'axios'
 import fileDownload from 'js-file-download'
 import {get} from 'lodash'
 import {useContextStore} from '@/stores/context'
 
 const $_errorHandler = (error: any, redirectOnError?: boolean) => {
-  if (axios.isCancel(error)) {
+  if (isCancel(error)) {
     return Promise.reject('Operation Canceled')
   } else {
     const status = get(error, 'response.status')
