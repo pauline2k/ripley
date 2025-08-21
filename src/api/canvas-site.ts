@@ -1,6 +1,7 @@
 import moment from 'moment-timezone'
 import {each} from 'lodash'
 import utils from '@/api/api-utils'
+import {CanvasSite, HasCanvasSite, HasJobStatus, Job} from '@/lib/types'
 
 export function getCanvasSite(canvasSiteId: number, includeUsers?: boolean, redirectOnError?: boolean) {
   return utils.get(`/api/canvas_site/${canvasSiteId}?includeUsers=${!!includeUsers}`, redirectOnError)
@@ -42,15 +43,15 @@ export function courseCreate(
 }
 
 export function createProjectSite(name: string) {
-  return utils.post('/api/canvas_site/project_site/create',{name})
+  return utils.post<CanvasSite>('/api/canvas_site/project_site/create',{name})
 }
 
 export function courseProvisionJobStatus(jobId: number) {
-  return utils.get(`/api/canvas_site/provision/status?jobId=${jobId}`)
+  return utils.get<Job>(`/api/canvas_site/provision/status?jobId=${jobId}`)
 }
 
 export function getCourseSections(canvasSiteId: number) {
-  return utils.get(`/api/canvas_site/${canvasSiteId}/official_sections`, false)
+  return utils.get<HasCanvasSite>(`/api/canvas_site/${canvasSiteId}/official_sections`, false)
 }
 
 export function getSections(
@@ -73,7 +74,7 @@ export function getSections(
 }
 
 export function getManageOfficialSections(redirectOnError?: boolean) {
-  return utils.get('/api/canvas_site/manage_official_sections', redirectOnError)
+  return utils.get<Record<string, CanvasSite[]>>('/api/canvas_site/manage_official_sections', redirectOnError)
 }
 
 export function updateSiteSections(
@@ -82,7 +83,7 @@ export function updateSiteSections(
   sectionIdsToRemove: string[],
   sectionIdsToUpdate: string[]
 ) {
-  return utils.post(`/api/canvas_site/${canvasSiteId}/provision/sections`, {
+  return utils.post<HasJobStatus>(`/api/canvas_site/${canvasSiteId}/provision/sections`, {
     sectionIdsToAdd,
     sectionIdsToRemove,
     sectionIdsToUpdate

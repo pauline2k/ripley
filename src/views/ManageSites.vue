@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="pt-3 px-16">
+  <div v-if="!contextStore.isLoading" class="pt-3 px-16">
     <Header1 class="mb-1" text="Create or Update bCourses Sites" />
     <v-alert
       v-if="error"
@@ -7,10 +7,9 @@
       class="mb-3"
       density="compact"
       role="alert"
+      :text="error"
       type="warning"
-    >
-      {{ error }}
-    </v-alert>
+    />
     <v-radio-group
       v-model="selection"
       class="d-flex"
@@ -144,124 +143,117 @@
   </div>
 </template>
 
-<script setup>
-import Header1 from '@/components/utils/Header1.vue'
-import OutboundLink from '@/components/utils/OutboundLink'
-import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
-import {getTermName} from '@/utils'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
+<script lang="ts" setup>
+import {computed, onMounted, ref, watch} from 'vue'
 import {each, get, map, size, trim, uniq} from 'lodash'
-import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
-import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
+import Header1 from '@/components/utils/Header1.vue'
+import OutboundLink from '@/components/utils/OutboundLink.vue'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
+import type {CanvasSite} from '@/lib/types'
 import {getCanvasSite, getManageOfficialSections} from '@/api/canvas-site'
+import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
+import {getTermName, isValidCanvasSiteId, putFocusNextTick} from '@/utils'
+import {useContextStore} from '@/stores/context'
+import {useRouter} from 'vue-router'
 
-export default {
-  name: 'ManageSites',
-  mixins: [Context],
-  data: () => ({
-    canvasSiteId: null,
-    coursesByTerm: undefined,
-    error: undefined,
-    isProcessing: false,
-    options: undefined,
-    selection: undefined
-  }),
-  computed: {
-    isAdmin() {
-      return this.currentUser.isAdmin || this.currentUser.isCanvasAdmin
-    },
-    isButtonDisabled() {
-      return !this.selection || (this.selection.id === 'manage-official-sections' && !this.isCanvasSiteIdValid)
-    },
-    isCanvasSiteIdValid() {
-      return isValidCanvasSiteId(this.canvasSiteId)
-    },
-    isManageOfficialSectionsDisabled() {
-      return !this.selection || this.selection.id !== 'manage-official-sections' || this.isProcessing
-    }
-  },
-  watch: {
-    selection() {
-      this.canvasSiteId = null
-      if (get(this.selection, 'id') === 'manage-official-sections') {
-        putFocusNextTick('canvas-site-id-input')
-      }
-    }
-  },
-  created() {
-    this.coursesByTerm = {}
-    getManageOfficialSections().then(data => {
-      each(data, (courses, term) => {
-        if (courses.length) {
-          this.coursesByTerm[term] = courses
-        }
-      })
-      getSiteCreationAuthorizations().then(data => {
-        const canCreateCourseSite = data.authorizations.canCreateCourseSite
-        const canCreateProjectSite = data.authorizations.canCreateProjectSite
-        this.options = [
-          {
-            header: 'Create a course site',
-            id: 'create-course-site',
-            isAvailable: canCreateCourseSite,
-            label: 'Create a Course Site',
-            path: '/create_course_site'
-          },
-          {
-            header: 'Create a project site',
-            id: 'create-project-site',
-            isAvailable: canCreateProjectSite,
-            label: 'Create a Project Site',
-            path: '/create_project_site'
-          },
-          {
-            header: 'Manage official sections of an existing site',
-            id: 'manage-official-sections',
-            isAvailable: this.isAdmin || size(this.coursesByTerm),
-            label: 'Manage Official Sections',
-            path: '/manage_sites'
-          }
-        ]
-        if (!canCreateCourseSite && !canCreateProjectSite) {
-          this.selection = this.options[2]
-        }
-        this.$ready()
-      })
-    }, error => {
-      this.error = error
-      this.$ready()
-    })
-  },
-  methods: {
-    each,
-    goNext() {
-      if (!this.isButtonDisabled) {
-        this.isProcessing = true
-        if (this.selection.id === 'manage-official-sections') {
-          getCanvasSite(this.canvasSiteId).then(
-            () => this.$router.push({path: `/official_sections/${this.canvasSiteId}`}),
-            error => this.error = error
-          ).finally(() => this.isProcessing = false)
-        } else {
-          this.$router.push({path: this.selection.path})
-          this.isProcessing = false
-        }
-      }
-    },
-    labelCourses(courses) {
-      const getLabel = (course, enhance) => {
-        const prefix = enhance ? `${course.canvasSiteId}: ` : ''
-        return `${prefix}${course.courseCode} &mdash; ${course.name}`
-      }
-      const enhance = uniq(map(courses, c => getLabel(c))).length !== courses.length
-      return map(courses, c => ({...c, label: getLabel(c, enhance)}))
-    },
-    size,
-    trim
+const contextStore = useContextStore()
+const canvasSiteId = ref()
+const coursesByTerm = ref<Record<string, CanvasSite[]>>({})
+const config = contextStore.config
+const currentUser = contextStore.currentUser
+const error = ref()
+const isProcessing = ref<boolean>()
+const options = ref()
+const router = useRouter()
+const selection = ref()
+
+const isAdmin = computed(() => {
+  return currentUser.isAdmin || currentUser.isCanvasAdmin
+})
+const isButtonDisabled = computed(() => {
+  return !selection.value || (selection.value.id === 'manage-official-sections' && !isCanvasSiteIdValid.value)
+})
+const isCanvasSiteIdValid = computed(() => {
+  return isValidCanvasSiteId(canvasSiteId.value)
+})
+const isManageOfficialSectionsDisabled = computed(() => {
+  return !selection.value || selection.value.id !== 'manage-official-sections' || isProcessing.value
+})
+
+watch(selection, () => {
+  canvasSiteId.value = null
+  if (get(selection.value, 'id') === 'manage-official-sections') {
+    putFocusNextTick('canvas-site-id-input')
   }
+})
+
+onMounted(() => {
+  coursesByTerm.value = {}
+  getManageOfficialSections().then((data: Record<string, CanvasSite[]>) => {
+    each(data, (courses: CanvasSite[], term) => {
+      if (courses.length) {
+        coursesByTerm.value[term] = courses
+      }
+    })
+    getSiteCreationAuthorizations().then(data => {
+      const canCreateCourseSite = data.authorizations.canCreateCourseSite
+      const canCreateProjectSite = data.authorizations.canCreateProjectSite
+      options.value = [
+        {
+          header: 'Create a course site',
+          id: 'create-course-site',
+          isAvailable: canCreateCourseSite,
+          label: 'Create a Course Site',
+          path: '/create_course_site'
+        },
+        {
+          header: 'Create a project site',
+          id: 'create-project-site',
+          isAvailable: canCreateProjectSite,
+          label: 'Create a Project Site',
+          path: '/create_project_site'
+        },
+        {
+          header: 'Manage official sections of an existing site',
+          id: 'manage-official-sections',
+          isAvailable: isAdmin.value || size(coursesByTerm.value),
+          label: 'Manage Official Sections',
+          path: '/manage_sites'
+        }
+      ]
+      if (!canCreateCourseSite && !canCreateProjectSite) {
+        selection.value = options.value[2]
+      }
+      contextStore.loadingComplete()
+    })
+  }, data => {
+    error.value = data
+    contextStore.loadingComplete()
+  })
+})
+
+const goNext = () => {
+  if (!isButtonDisabled.value) {
+    isProcessing.value = true
+    if (selection.value.id === 'manage-official-sections') {
+      getCanvasSite(canvasSiteId.value).then(
+        () => router.push({path: `/official_sections/${canvasSiteId.value}`}),
+        data => error.value = data
+      ).finally(() => isProcessing.value = false)
+    } else {
+      router.push({path: selection.value.path})
+      isProcessing.value = false
+    }
+  }
+}
+
+const labelCourses = (courses: CanvasSite[]) => {
+  const getLabel = (course: CanvasSite, enhance?: boolean) => {
+    const prefix = enhance ? `${course.canvasSiteId}: ` : ''
+    return `${prefix}${course.courseCode} &mdash; ${course.name}`
+  }
+  const enhance = uniq(map(courses, c => getLabel(c))).length !== courses.length
+  return map(courses, c => ({...c, label: getLabel(c, enhance)}))
 }
 </script>
 

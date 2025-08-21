@@ -1,8 +1,8 @@
-import type {Job} from '@/lib/types'
+import {Job, JobRunSummary} from '@/lib/types'
 import utils from '@/api/api-utils'
 
 export function getJobHistory() {
-  return utils.get('/api/job/history', true)
+  return utils.get<JobRunSummary>('/api/job/history', true)
 }
 
 export function getJobSchedule() {

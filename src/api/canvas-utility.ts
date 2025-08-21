@@ -1,7 +1,8 @@
 import utils from '@/api/api-utils'
+import type {SiteAuthorization} from '@/lib/types'
 
 export function getSiteCreationAuthorizations() {
-  return utils.get('/api/canvas/authorizations', true)
+  return utils.get<SiteAuthorization>('/api/canvas/authorizations', true)
 }
 
 export function canUserCreateSite() {

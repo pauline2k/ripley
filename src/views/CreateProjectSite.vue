@@ -1,7 +1,7 @@
 <template>
-  <div v-if="!isLoading" class="mx-10 my-5">
+  <div v-if="!contextStore.isLoading" class="mx-10 my-5">
     <Header1 text="Create a Project Site" />
-    <div v-if="!isLoading">
+    <div>
       <v-alert
         v-if="error"
         density="compact"
@@ -66,52 +66,49 @@
   </div>
 </template>
 
-<script>
-import Context from '@/mixins/Context'
+<script lang="ts" setup>
+import {onMounted, ref} from 'vue'
+import {trim} from 'lodash'
 import Header1 from '@/components/utils/Header1.vue'
 import {createProjectSite} from '@/api/canvas-site'
-import {iframeParentLocation} from '@/utils'
-import {trim} from 'lodash'
+import {iframeParentLocation, isInIframe} from '@/utils'
+import {useContextStore} from '@/stores/context'
+import {useRouter} from 'vue-router'
 
-export default {
-  name: 'CreateProjectSite',
-  components: {Header1},
-  mixins: [Context],
-  data: () => ({
-    isCreating: undefined,
-    error: undefined,
-    name: undefined
-  }),
-  created() {
-    this.$ready()
-  },
-  methods: {
-    cancel() {
-      this.$router.push({path: '/manage_sites'})
-    },
-    create() {
-      if (!this.isCreating && trim(this.name)) {
-        this.error = null
-        this.isCreating = true
-        this.alertScreenReader('Creating project site.')
-        createProjectSite(this.name).then(
-          data => {
-            this.alertScreenReader('Done. Loading new project site.')
-            if (this.$isInIframe) {
-              iframeParentLocation(data.url)
-            } else {
-              window.location.href = data.url
-            }
-          },
-          error => {
-            this.error = error
-          }
-        ).finally(() => {
-          this.isCreating = false
-        })
+const contextStore = useContextStore()
+const error = ref()
+const isCreating = ref<boolean>()
+const name = ref()
+const router = useRouter()
+
+onMounted(() => {
+  contextStore.loadingComplete()
+})
+
+const cancel = () => {
+  router.push({path: '/manage_sites'})
+}
+
+const create = () => {
+  if (!isCreating.value && trim(name.value)) {
+    error.value = null
+    isCreating.value = true
+    contextStore.alertScreenReader('Creating project site.')
+    createProjectSite(name.value).then(
+      data => {
+        contextStore.alertScreenReader('Done. Loading new project site.')
+        if (isInIframe) {
+          iframeParentLocation(data.url)
+        } else {
+          window.location.href = data.url
+        }
+      },
+      error => {
+        error.value = error
       }
-    },
-    trim
+    ).finally(() => {
+      isCreating.value = false
+    })
   }
 }
 </script>
