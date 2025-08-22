@@ -77,7 +77,7 @@
                       aria-label="All your courses"
                       :disabled="isManageOfficialSectionsDisabled"
                     >
-                      <option :value="null">Choose a course</option>
+                      <option :value="undefined">Choose a course</option>
                       <optgroup
                         v-for="(courses, termId) in coursesByTerm"
                         :key="termId"
@@ -181,7 +181,7 @@ const isManageOfficialSectionsDisabled = computed(() => {
 })
 
 watch(selection, () => {
-  canvasSiteId.value = null
+  canvasSiteId.value = undefined
   if (get(selection.value, 'id') === 'manage-official-sections') {
     putFocusNextTick('canvas-site-id-input')
   }

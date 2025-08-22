@@ -16,21 +16,13 @@ fieldset {
 html {
   overflow-y: unset !important;
 }
-
 html, body {
   font-size: 14px;
   height: 100%;
 }
-
-.height-unset {
-  height: unset !important;
-  min-height: unset !important;
-}
-
 * {
   text-transform: none !important;
 }
-
 .alert-error-icon {
   float: left;
   font-size: 38px;
@@ -54,7 +46,6 @@ html, body {
     }
   }
 }
-
 .background-splash {
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -70,14 +61,12 @@ html, body {
   border: 0;
   padding: 0;
 }
-
 .ellipsis {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .font-size-13 {
   font-size: 13px;
 }
@@ -93,7 +82,23 @@ html, body {
 .font-size-20 {
   font-size: 20px;
 }
-
+.height-unset {
+  height: unset !important;
+  min-height: unset !important;
+}
+.modal-body {
+  padding: 6px 24px 14px !important;
+}
+.modal-content {
+  background-color: rgb(var(--v-theme-surface)) !important;
+  margin: auto auto 24px auto !important;
+  min-width: 40%;
+  padding: 16px 6px 18px !important;
+}
+.modal-footer {
+  justify-content: flex-end !important;
+  padding: 0 20px !important;
+}
 .sr-only {
   position: absolute;
   left: -10000px;
@@ -101,6 +106,9 @@ html, body {
   width: 1px;
   height: 1px;
   overflow: hidden;
+}
+.vertical-middle {
+  vertical-align: middle !important;
 }
 
 @media print {

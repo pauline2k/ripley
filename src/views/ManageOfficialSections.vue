@@ -225,7 +225,7 @@ import {pluralize, putFocusNextTick, toInt} from '@/utils'
 import {useContextStore} from '@/stores/context'
 import {computed, onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {Course, Section, Semester} from '@/lib/types'
+import {Course, Section, SectionEdit, Semester} from '@/lib/types'
 
 const contextStore = useContextStore()
 const adminActingAs = ref()
@@ -234,7 +234,7 @@ const availableSectionsPanel = ref<string[]>([])
 const backgroundJobId = ref()
 const canvasSite = ref()
 const canvasSiteId = ref()
-const courseSemesterClasses = ref<Course[]>([])
+const courseSemesterClasses = ref<Course<SectionEdit>[]>([])
 const currentWorkflowStep = ref()
 const error = ref()
 const existingCourseSections = ref([])
@@ -263,7 +263,7 @@ const showAlert = computed({
 })
 
 const totalStagedCount = computed(() => {
-  return size(filter(allSections.value, (section: Section) => {
+  return size(filter(allSections.value, (section: SectionEdit) => {
     const isCourseSection = section.isCourseSection
     return (isCourseSection && get(section, 'stagedState')) || (!isCourseSection && section.stagedState === 'add')
   }))
@@ -274,20 +274,20 @@ onMounted(() => {
   fetchFeed().finally(() => contextStore.loadingComplete())
 })
 
-const addAllSections = (course: Course) => {
+const addAllSections = (course: Course<SectionEdit>) => {
   each(course.sections, section => section.stagedState = section.isCourseSection ? undefined : 'add')
   contextStore.alertScreenReader(`Linked all ${course.title} sections to the course site.`)
   putFocusNextTick(`sections-course-${course.slug}-btn`)
   contextStore.eventHub.emit('sections-table-updated')
 }
 
-const allSectionsAdded = (course: Course) => {
+const allSectionsAdded = (course: Course<SectionEdit>) => {
   return !find(course.sections, section => {
     return (!section.isCourseSection && section.stagedState !== 'add') || (section.isCourseSection && section.stagedState === 'delete')
   })
 }
 
-const availableSectionsTableCaption = (course: Course) => {
+const availableSectionsTableCaption = (course: Course<SectionEdit>) => {
   let caption = 'Official sections in this course.'
   if (course.sections.length > 1) {
     caption += `${allSectionsAdded(course) ? ' All sections linked to the course site.' : ' Use the Add All button above, or '}`
@@ -343,7 +343,7 @@ const fetchFeed = () => {
 }
 
 const loadCourseLists = (teachingTerms) => {
-  const courseSemester: Semester = find(teachingTerms, semester => {
+  const courseSemester: Semester<SectionEdit> = find(teachingTerms, semester => {
     return (toString(semester.termId) === toString(canvasSite.value.term.id))
   })
   if (courseSemester) {
@@ -371,7 +371,7 @@ const loadCourseLists = (teachingTerms) => {
   }
 }
 
-const rowClassLogic = (listMode: string, section: Section) => {
+const rowClassLogic = (listMode: string, section: SectionEdit) => {
   return {
     'template-sections-table-row-added': (listMode === 'currentStaging' && section.stagedState === 'add'),
     'template-sections-table-row-deleted': (listMode === 'availableStaging' && section.stagedState === 'delete'),
@@ -385,7 +385,7 @@ const rowClassLogic = (listMode: string, section: Section) => {
   }
 }
 
-const rowDisplayLogic = (listMode: string, section: Section) => {
+const rowDisplayLogic = (listMode: string, section: SectionEdit) => {
   return (listMode === 'preview') ||
     (listMode === 'availableStaging') ||
     (listMode === 'currentStaging' && section && section.isCourseSection && section.stagedState !== 'delete') ||
@@ -442,7 +442,7 @@ const saveChanges = () => {
 
 const sectionString = (section: Section) => section.courseCode + ' ' + section.name
 
-const stageAdd = (section: Section) => {
+const stageAdd = (section: SectionEdit) => {
   if (!section.isCourseSection) {
     section.stagedState = 'add'
     contextStore.alertScreenReader(`Linked ${sectionString(section)} to the course site.`)
@@ -452,7 +452,7 @@ const stageAdd = (section: Section) => {
   return totalStagedCount.value
 }
 
-const stageDelete = (section: Section) => {
+const stageDelete = (section: SectionEdit) => {
   if (section.isCourseSection) {
     availableSectionsPanel.value = union(availableSectionsPanel.value, [section.courseSlug])
     section.stagedState = 'delete'
@@ -463,7 +463,7 @@ const stageDelete = (section: Section) => {
   return totalStagedCount.value
 }
 
-const stageUpdate = (section: Section) => {
+const stageUpdate = (section: SectionEdit) => {
   if (section.isCourseSection) {
     availableSectionsPanel.value = union(availableSectionsPanel.value, [section.courseSlug])
     section.stagedState = 'update'
@@ -506,7 +506,7 @@ const trackSectionUpdateJob = () => {
   }, 4000)
 }
 
-const unstage = (section: Section) => {
+const unstage = (section: SectionEdit) => {
   if (section.stagedState === 'add') {
     availableSectionsPanel.value = union(availableSectionsPanel.value, [section.courseSlug])
     contextStore.alertScreenReader(`${sectionString(section)} will not be added to the course site.`)
