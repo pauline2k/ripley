@@ -1,6 +1,5 @@
 <script>
-import {mapActions} from 'pinia'
-import {mapState} from 'pinia'
+import {mapActions, mapState} from 'pinia'
 import {useContextStore} from '@/stores/context'
 
 export default {

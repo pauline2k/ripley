@@ -29,7 +29,8 @@ export type RipleyUser = {
   inDemoMode: boolean,
   isAdmin: boolean,
   isAuthenticated: boolean,
-  isCanvasAdmin: boolean
+  isCanvasAdmin: boolean,
+  uid: string | undefined
 }
 
 const $_getDefaultApplicationState = () => ({
@@ -45,7 +46,8 @@ const ANONYMOUS_USER: RipleyUser = {
   inDemoMode: false,
   isAdmin: false,
   isAuthenticated: false,
-  isCanvasAdmin: false
+  isCanvasAdmin: false,
+  uid: undefined
 }
 
 export const useContextStore = defineStore('context', {

@@ -6,22 +6,27 @@ export type CanvasSite = {
   url: string
 }
 
-export type Course = {
+export type Course<T extends Section> = {
   id: number,
   courseCode: string,
-  sections: Section[],
+  sections: T[],
   slug: string,
   title: string
 }
 
 export interface HasCanvasSite {
   canvasSite: CanvasSite,
-  teachingTerms: Semester[]
+  teachingTerms: Semester<Section>[]
 }
 
 export interface HasJobStatus {
   jobId: number,
   jobStatus: string
+}
+
+export type Instructor = {
+  name: string,
+  uid: string
 }
 
 export type Job = {
@@ -49,15 +54,31 @@ export type JobSchedule = {
 
 export type Section = {
   id: number,
+  canvasSites: CanvasSite[],
   courseCode: string,
   courseSlug: string,
+  instructors: Instructor[],
   isCourseSection: boolean,
   name: string,
-  stagedState: string | undefined
+  schedules: {
+    recurring: {
+      schedule: {
+        buildingName: string,
+        roomNumber: string,
+        schedule: string
+      }
+    }
+  }
 }
 
-export type Semester = {
-  classes: Course[]
+export type Semester<T extends Section> = {
+  classes: Course<T>[]
+}
+
+export interface SectionEdit extends Section {
+  nameDiscrepancy: boolean,
+  selected: boolean,
+  stagedState: string | undefined
 }
 
 export type SiteAuthorization = {
