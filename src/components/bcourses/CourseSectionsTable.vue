@@ -298,7 +298,7 @@
       v-model="showAreYouSureModal"
       button-label-confirm="Proceed"
       :function-cancel="stageDeleteCancel"
-      :function-confirm="stageDelete"
+      :function-confirm="stageDeleteProceed"
       modal-header="Warning"
       modal-header-class="font-size-20 text-error"
       text="You are unlinking the section(s) in which you are enrolled. Proceeding will result in loss of access to this bCourses site."
@@ -503,11 +503,16 @@ const stageUpdate = (section: SectionEdit) => {
   contextStore.eventHub.emit('sections-table-updated')
 }
 
-const stageDelete = (section: SectionEdit, index: number) => {
-  showAreYouSureModal.value = false
-  const totalStagedCount = props.stageDeleteAction(section)
-  putFocusNextTick(getNextFocusTarget(section, index, totalStagedCount, 'unlink'))
-  contextStore.eventHub.emit('sections-table-updated')
+const stageDeleteProceed = () => {
+  if (sectionToUnlink.value) {
+    const section = sectionToUnlink.value.section
+    const index = sectionToUnlink.value.index
+    showAreYouSureModal.value = false
+    const totalStagedCount = props.stageDeleteAction(section)
+    putFocusNextTick(getNextFocusTarget(section, index, totalStagedCount, 'unlink'))
+    contextStore.eventHub.emit('sections-table-updated')
+    sectionToUnlink.value = undefined
+  }
 }
 
 const stageDeleteCancel = () => {
@@ -518,14 +523,13 @@ const stageDeleteCancel = () => {
   }
 }
 
-const stageDeletePreCheck = (section, index) => {
+const stageDeletePreCheck = (section: SectionEdit, index: number) => {
+  sectionToUnlink.value = {index, section}
   const sectionsInstructedByMe = filter(displayableSections.value, s => map(s.instructors, 'uid').includes(currentUser.uid))
   if (sectionsInstructedByMe.length === 1 && sectionsInstructedByMe[0].id === section.id) {
-    sectionToUnlink.value = {index, section}
     showAreYouSureModal.value = true
   } else {
-    stageDelete(section, index)
-    sectionToUnlink.value = undefined
+    stageDeleteProceed()
   }
 }
 
