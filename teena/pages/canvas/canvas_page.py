@@ -312,6 +312,7 @@ class CanvasPage(CanvasAssignmentsPage,
     ACCESS_CHECKER_LINK = By.XPATH, '//a[contains(., "How do I use the Accessibility Checker")]'
     ACCESS_DSP_LINK = By.XPATH, '//a[contains(., "How to improve the accessibility of your online content")]'
     ACCESS_SENSUS_LINK = By.XPATH, '//a[contains(., "SensusAccess File Conversion")]'
+    ACCESS_TEACH_LEARN = By.XPATH, '//a[contains(., "Accessibility in Teaching & Learning")]'
     ACCESS_TOGGLE = By.XPATH, '//button[@aria-label="Notice to Instructors for Making Course Materials Accessible"]'
     FILES_LINK = By.LINK_TEXT, 'Files'
 

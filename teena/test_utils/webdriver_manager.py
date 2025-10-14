@@ -81,8 +81,7 @@ class WebDriverManager(object):
         time.sleep(utils.get_click_sleep())
         site_list_root = (driver.find_element(By.CSS_SELECTOR, 'settings-ui').shadow_root
                           .find_element(By.CSS_SELECTOR, 'settings-main').shadow_root
-                          .find_element(By.CSS_SELECTOR, 'settings-basic-page').shadow_root
-                          .find_element(By.CSS_SELECTOR, 'settings-privacy-page').shadow_root
+                          .find_element(By.CSS_SELECTOR, 'settings-privacy-page-index').shadow_root
                           .find_element(By.CSS_SELECTOR, 'settings-cookies-page').shadow_root
                           .find_element(By.CSS_SELECTOR, 'site-list').shadow_root)
         driver.execute_script('arguments[0].click();', site_list_root.find_element(By.CSS_SELECTOR, 'cr-button[id=addSite]'))

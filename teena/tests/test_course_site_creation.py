@@ -210,10 +210,15 @@ class TestCourseSiteCreation:
             dept = ' '.join(course_code_parts)
             utils.assert_equivalence(sub_account, dept)
 
-    def test_files_accessibility_basics_link(self, site):
+    def test_files_accessibility_teach_learn(self, site):
         if site.site_id and site.create_site_workflow in ['masq', 'uid']:
             self.canvas_page.click_files_tab()
             self.canvas_page.toggle_access_links()
+            title = 'Accessibility in Teaching & Learning'
+            assert self.canvas_page.is_external_link_valid(self.canvas_page.ACCESS_TEACH_LEARN, title)
+
+    def test_files_accessibility_basics_link(self, site):
+        if site.site_id and site.create_site_workflow in ['masq', 'uid']:
             title = 'Accessibility Basics for bCourses'
             assert self.canvas_page.is_external_link_valid(self.canvas_page.ACCESS_BASICS_LINK, title)
 
