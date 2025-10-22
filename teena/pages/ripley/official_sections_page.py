@@ -43,6 +43,9 @@ class OfficialSectionsPage(CourseSectionsTables, SiteCreationPage):
     UPDATING_SECTIONS_MSG = By.XPATH, '//*[contains(., "Updating Official Sections in Course Site")]'
     SECTIONS_UPDATED_MSG = By.XPATH, '//div[text()="The sections in this course site have been updated successfully."]'
     UPDATE_MSG_CLOSE_BUTTON = By.XPATH, '//div[contains(text(), "updated successfully")]/../following-sibling::div/button'
+    UNLINK_SECTION_PROCEED = By.ID, 'are-you-sure-confirm'
+    UNLINK_SECTION_CANCEL = By.ID, 'are-you-sure-cancel'
+
 
     def click_edit_sections(self):
         app.logger.info('Clicking edit sections button')
@@ -273,3 +276,11 @@ class OfficialSectionsPage(CourseSectionsTables, SiteCreationPage):
         app.logger.info(f'Clicking undo delete button for section {section.section_id}')
         self.wait_for_element_and_click(self.section_undo_delete_button(section))
         time.sleep(1)
+
+    def unlink_section_cancel(self):
+        app.logger.info('Clicking cancel button to remove site access')
+        self.wait_for_element_and_click(self.UNLINK_SECTION_CANCEL)
+
+    def unlink_section_proceed(self):
+        app.logger.info('Clicking proceed button to remove site access')
+        self.wait_for_element_and_click(self.UNLINK_SECTION_PROCEED)
