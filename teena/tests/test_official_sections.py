@@ -387,3 +387,26 @@ class TestSectionNameUpdates:
         self.official_sections_page.when_present(self.official_sections_page.CURRENT_SECTIONS_TABLE,
                                                  utils.get_short_timeout())
         assert not self.official_sections_page.is_present(self.official_sections_page.SECTION_NAME_MSG)
+
+
+class TestUnlinkWarning:
+
+    def test_unlink_self_cancel(self):
+        self.official_sections_page.load_embedded_tool(test.teachers[0])
+        self.official_sections_page.select_site_and_manage(site)
+        self.official_sections_page.click_edit_sections()
+        primary_sections = [s for s in site.sections if s.is_primary]
+        for section in primary_sections:
+            self.official_sections_page.click_delete_section(section)
+        self.official_sections_page.unlink_section_cancel()
+
+    def test_unlink_self_proceed(self):
+        self.official_sections_page.load_embedded_tool(test.teachers[0])
+        self.official_sections_page.select_site_and_manage(site)
+        self.official_sections_page.click_edit_sections()
+        primary_sections = [s for s in site.sections if s.is_primary]
+        for section in primary_sections:
+            self.official_sections_page.click_delete_section(section)
+        self.official_sections_page.unlink_section_proceed()
+        self.official_sections_page.click_save_changes()
+        self.official_sections_page.wait_for_unauthorized_msg()
