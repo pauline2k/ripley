@@ -86,6 +86,24 @@ def get_calnet_user_for_uid(app, uid):
         calnet_user = users[uid] if users else None
         if calnet_user:
             cache_dict_object(cache_key, calnet_user, 120)
+        else:
+            # Temporary data loch fallback (qa tier only) for NS-1799.
+            data_loch_user = next((row for row in get_users([uid]) if row['ldap_uid'] == uid), None)
+            if data_loch_user:
+                affiliations = data_loch_user['affiliations'] or ''
+                first_name = data_loch_user['first_name']
+                last_name = data_loch_user['last_name']
+                calnet_user = {
+                    'affiliations': affiliations.split(', '),
+                    'csid': data_loch_user['sid'],
+                    'email': data_loch_user['email_address'],
+                    'firstName': first_name,
+                    'isExpiredPerLdap': False,
+                    'lastName': last_name,
+                    'name': f'{first_name} {last_name}'.strip() if (first_name or last_name) else uid,
+                    'sid': data_loch_user['sid'],
+                    'uid': uid,
+                }
     return calnet_user
 
 
