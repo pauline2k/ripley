@@ -251,7 +251,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
             else:
                 app.logger.info(f'Resetting user {user.uid} email to {user.email}')
                 self.wait_for_element_and_click(self.EDIT_USER_LINK)
-                self.wait_for_element_clear_and_send_keys(self.USER_EMAIL_INPUT, user.email)
+                self.wait_for_element_remove_chars_send_keys(self.USER_EMAIL_INPUT, user.email)
                 self.wait_for_element_and_click(self.UPDATE_DETAILS_BTN)
                 self.when_present(self.DEFAULT_EMAIL, utils.get_short_timeout())
             if not self.is_present(self.USER_LOGIN):
