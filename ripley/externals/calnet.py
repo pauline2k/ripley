@@ -86,13 +86,13 @@ class Client:
             uids_batch = uids[i:i + BATCH_QUERY_MAXIMUM]
             try:
                 _filter = _ldap_search_filter({'uid': uids_batch}, search_base)
-                all_out += self._search(_filter, search_base, use_fallback_mail=use_fallback_mail)
+                all_out += self._search(_filter, use_fallback_mail=use_fallback_mail)
             except Exception as e:
                 app.logger.error('LDAP UID search query failed')
                 app.logger.exception(e)
         return all_out
 
-    def _search(self, search_filter, search_base=None, use_fallback_mail=False):
+    def _search(self, search_filter, use_fallback_mail=False):
         from flask import current_app as app
         idle_count = ldap_connection_pool.idle_connection
         # Long-running idle connections may have been closed, so we cycle through.
@@ -102,7 +102,7 @@ class Client:
                     results = conn.paged_search('dc=berkeley,dc=edu', scope=2, filter_exp=search_filter)
                     all_attributes = []
                     for entry in results:
-                        attributes = _attributes_to_dict(entry, search_base, use_fallback_mail)
+                        attributes = _attributes_to_dict(entry, use_fallback_mail)
                         if attributes:
                             all_attributes.append(attributes)
                     return all_attributes
@@ -114,16 +114,9 @@ class Client:
                         raise
 
 
-def _attributes_to_dict(entry, search_base, use_fallback_mail=False):
-    out = dict.fromkeys(SCHEMA_DICT.values(), None)
-    if search_base == 'expired':
-        out['expired'] = True
-    else:
-        if 'expired' in str(entry.get('dn', '')):
-            return None
-        else:
-            out['expired'] = False
-    keys = entry.keys()
+def _attributes_to_dict(entry, use_fallback_mail=False):
+    if 'expired' in str(entry.get('dn', '')):
+        return None
 
     def _unwrap_value(value):
         # We generally want to unwrap single-value arrays, except affiliations.
@@ -131,11 +124,16 @@ def _attributes_to_dict(entry, search_base, use_fallback_mail=False):
             value = value[0]
         return value
 
+    out = dict.fromkeys(SCHEMA_DICT.values(), None)
+
+    keys = entry.keys()
     for attr in SCHEMA_DICT:
         if attr in keys:
             out[SCHEMA_DICT[attr]] = _unwrap_value(entry[attr])
+
     if use_fallback_mail and not out['email'] and 'mail' in keys:
         out['email'] = _unwrap_value(entry['mail'])
+
     return out
 
 
@@ -144,19 +142,13 @@ def _ldap_search_filter(attributes, search_base, comparator='='):
     for attribute, values in attributes.items():
         for value in values:
             attribute_filters.append(f'({attribute}{comparator}{value})')
-    if search_base == 'expired':
-        ou_scope = '(ou=expired people)'
-    elif search_base == 'guests':
+    if search_base == 'guests':
         ou_scope = '(ou=guests)'
     elif search_base == 'active':
-        ou_scope = '(ou=people) (ou=guests)'
+        ou_scope = '(|(ou=people) (ou=guests))'
     else:
-        ou_scope = '(ou=people) (ou=advcon people)'
+        ou_scope = ''
     return f"""(&
-        (|
-            { ''.join(attribute_filters) }
-        )
-        (|
-            { ou_scope }
-        )
+        (|{ ''.join(attribute_filters) })
+        { ou_scope }
     )"""
