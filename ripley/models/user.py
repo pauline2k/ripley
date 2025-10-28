@@ -205,25 +205,24 @@ class User(UserMixin):
             if calnet_profile:
                 name = calnet_profile.get('name') or f'UID {self.uid}'
                 email_address = calnet_profile.get('email') or None
-                if not calnet_profile.get('isExpiredPerLdap', True):
-                    is_admin = AdminUser.is_admin_user(self.uid)
-                    canvas_user_data = self._load_canvas_user_data(
-                        canvas_site_id=canvas_site_id,
-                        user_profile=canvas_user_profile,
-                    ) or {}
-                    canvas_site_user_roles = canvas_user_data.get('canvasSiteUserRoles') or []
-                    is_active = bool(
-                        is_admin or (canvas_user_data.get('canvasSiteId') and canvas_site_user_roles)
-                        or canvas_user_data.get('canvasUserId'),
-                    )
-                    affiliations = calnet_profile.get('affiliations', [])
-                    affiliations = set([affiliations] if isinstance(affiliations, str) else affiliations or [])
-                    is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
-                    is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
-                    has_roles = len(canvas_site_user_roles)
-                    allow_standalone_for_non_admins = app.config['ALLOW_STANDALONE_FOR_NON_ADMINS']
-                    can_access_standalone_view = is_active and \
-                        bool(is_admin or ((has_roles or is_faculty or is_staff) and allow_standalone_for_non_admins))
+                is_admin = AdminUser.is_admin_user(self.uid)
+                canvas_user_data = self._load_canvas_user_data(
+                    canvas_site_id=canvas_site_id,
+                    user_profile=canvas_user_profile,
+                ) or {}
+                canvas_site_user_roles = canvas_user_data.get('canvasSiteUserRoles') or []
+                is_active = bool(
+                    is_admin or (canvas_user_data.get('canvasSiteId') and canvas_site_user_roles)
+                    or canvas_user_data.get('canvasUserId'),
+                )
+                affiliations = calnet_profile.get('affiliations', [])
+                affiliations = set([affiliations] if isinstance(affiliations, str) else affiliations or [])
+                is_faculty = 'EMPLOYEE-TYPE-ACADEMIC' in affiliations
+                is_staff = 'EMPLOYEE-TYPE-STAFF' in affiliations
+                has_roles = len(canvas_site_user_roles)
+                allow_standalone_for_non_admins = app.config['ALLOW_STANDALONE_FOR_NON_ADMINS']
+                can_access_standalone_view = is_active and \
+                    bool(is_admin or ((has_roles or is_faculty or is_staff) and allow_standalone_for_non_admins))
         api_json = {
             **{
                 'canAccessStandaloneView': can_access_standalone_view,

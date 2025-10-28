@@ -93,7 +93,6 @@ def roles_from_affiliations(affiliations):
     return {
         'advisor': False,
         'concurrentEnrollmentStudent': False,
-        'expiredAccount': False,
         'exStudent': any(item for item in affiliations if item in ['SIS-EXTENDED', 'FORMER-STUDENT', 'AFFILIATE-TYPE-ADVCON-ALUMNUS']),
         'faculty': 'EMPLOYEE-TYPE-ACADEMIC' in affiliations,
         'graduate': False,
@@ -150,7 +149,6 @@ def _calnet_user_api_feed(person):
         'deptCode': _get('primary_dept_code') or _get('dept_code'),
         'email': _get('email'),
         'firstName': first_name,
-        'isExpiredPerLdap': _get('expired'),
         'lastName': last_name,
         'name': f'{first_name} {last_name}'.strip() if (first_name or last_name) else uid,
         'sid': _get('sid'),
