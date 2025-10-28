@@ -258,9 +258,9 @@ class CanvasGradesPage(CanvasSettingsPage):
                 break
             except TimeoutException:
                 if tries == max_tries:
-                    app.logger.info('Override grade input not present, retrying')
-                else:
                     raise
+                else:
+                    app.logger.info('Override grade input not present, retrying')
         self.wait_for_element_remove_and_type_chars(self.GRADE_OVERRIDE_INPUT, grade)
         time.sleep(utils.get_click_sleep())
         self.hit_enter()
