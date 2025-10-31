@@ -37,7 +37,6 @@ from ripley.lib.canvas_site_utils import canvas_site_to_api_json, create_canvas_
     get_official_sections, get_teaching_terms, update_canvas_sections
 from ripley.lib.course_site_provisioner import provision_course_site
 from ripley.lib.http import tolerant_jsonify
-from ripley.lib.util import to_bool_or_none
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 from ripley.models.configuration import Configuration
 
@@ -77,24 +76,11 @@ def canvas_site_provision():
 
 
 @app.route('/api/canvas_site/<canvas_site_id>')
-@login_required
+@canvas_role_required('Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment', 'CanvasAdmin')
 def get_canvas_site(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
         api_json = canvas_site_to_api_json(course)
-        include_users = to_bool_or_none(request.args.get('includeUsers', False))
-        if include_users:
-            users = []
-            for user in course.get_users(include=('email', 'enrollments')):
-                users.append({
-                    'id': user.id,
-                    'enrollments': user.enrollments,
-                    'name': user.name,
-                    'sortableName': user.sortable_name,
-                    'uid': user.login_id if hasattr(user, 'login_id') else None,
-                    'url': f"{app.config['CANVAS_API_URL']}/courses/{canvas_site_id}/users/{user.id}",
-                })
-            api_json['users'] = sorted(users, key=lambda u: u['sortableName'])
         return tolerant_jsonify(api_json)
     else:
         raise ResourceNotFoundError(f'No Canvas course site found with ID {canvas_site_id}.')
