@@ -3,8 +3,8 @@ import {each} from 'lodash'
 import utils from '@/api/api-utils'
 import {CanvasSite, HasCanvasSite, HasJobStatus, Job} from '@/lib/types'
 
-export function getCanvasSite(canvasSiteId: number, includeUsers?: boolean, redirectOnError?: boolean) {
-  return utils.get(`/api/canvas_site/${canvasSiteId}?includeUsers=${!!includeUsers}`, redirectOnError)
+export function getCanvasSite(canvasSiteId: number, redirectOnError?: boolean) {
+  return utils.get(`/api/canvas_site/${canvasSiteId}`, redirectOnError)
 }
 
 export function getRoster(canvasSiteId: number, redirectOnError?: boolean) {

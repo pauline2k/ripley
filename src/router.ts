@@ -2,7 +2,6 @@ import auth from '@/lib/auth'
 const Acheron = () => import('./views/Acheron.vue')
 const BaseLTI = () => import('./layouts/lti/BaseLTI.vue')
 const BaseStandalone = () => import('./layouts/standalone/BaseStandalone.vue')
-const CanvasSiteSummary = () => import('./views/CanvasSiteSummary.vue')
 const CourseAddUser = () => import('./views/CourseAddUser.vue')
 const CourseGradeDistribution = () => import('./views/CourseGradeDistribution.vue')
 const CourseGradeExport = () => import('./views/CourseGradeExport.vue')
@@ -55,15 +54,6 @@ const routes:RouteRecordRaw[] = [
         component: Acheron,
         name: 'Acheron (LV-426)',
         path: '/Acheron'
-      },
-      {
-        component: CanvasSiteSummary,
-        meta: {
-          announcer: {
-            skip: true
-          }
-        },
-        path: '/canvas_site/:id'
       },
       {
         component: CourseAddUser,
