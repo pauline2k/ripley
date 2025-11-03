@@ -359,7 +359,13 @@ class CanvasPeoplePage(CanvasSettingsPage):
                     app.logger.info('All expected rows are already present')
                     break
                 else:
-                    self.scroll_to_bottom()
+                    if els:
+                        last_row = els[-1]
+
+                        self.scroll_to_element(last_row)
+                        app.logger.info(f'Scrolling to row index {len(els) - 1} to load more users.')
+                    else:
+                        app.logger.warning("No rows found to scroll to.")
                     time.sleep(3)
                     wait = 0
                     max_wait = utils.get_short_timeout()
