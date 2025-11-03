@@ -76,7 +76,7 @@ def canvas_site_provision():
 
 
 @app.route('/api/canvas_site/<canvas_site_id>')
-@canvas_role_required('DesignerEnrollment', 'Lead TA', 'Maintainer', 'Owner', 'TaEnrollment', 'TeacherEnrollment', 'CanvasAdmin')
+@canvas_role_required('DesignerEnrollment', 'Lead TA', 'Maintainer', 'Owner', 'Reader', 'TaEnrollment', 'TeacherEnrollment', 'CanvasAdmin')
 def get_canvas_site(canvas_site_id):
     course = canvas.get_course(canvas_site_id)
     if course:
