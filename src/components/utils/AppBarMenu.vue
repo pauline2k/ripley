@@ -41,10 +41,6 @@ export default {
       if (this.currentUser.isAdmin) {
         this.addOption('acheron-lv-426', 'Acheron (LV-426)', this.goAcheron)
       }
-      const canvasSiteId = this.currentUser.canvasSiteId
-      if (canvasSiteId) {
-        this.addOption('current-user-canvas-site', `Canvas Site ${canvasSiteId}`, this.goCanvasSiteSummary)
-      }
     }
     this.addOption('log-out', 'Log Out', this.logOut)
   },
@@ -54,9 +50,6 @@ export default {
     },
     goAcheron() {
       this.$router.push({path: '/acheron'})
-    },
-    goCanvasSiteSummary() {
-      this.$router.push({path: `/canvas_site/${this.currentUser.canvasSiteId}`})
     },
     goProfile() {
       this.$router.push({path: `/profile/${this.currentUser.uid}`})
