@@ -168,6 +168,11 @@ class TeenaTestConfig(object):
         self.course_site = CourseSite({'site_id': utils.e_grades_site_id()})
         self.set_real_test_course_users(self.course_site)
 
+    def grade_distribution(self):
+        site_ids = utils.grade_distribution_site_ids()
+        self.course_sites = [CourseSite({'site_id': site_id}) for site_id in site_ids]
+        self.set_real_test_course_users(self.course_sites[-1])
+
     def mailing_lists(self):
         ripley_utils.drop_existing_mailing_lists()
         test_users_data = app.config['TEST_USERS']
@@ -363,7 +368,7 @@ class TeenaTestConfig(object):
         else:
             raise
 
-    def get_existing_site_data(self, site, sis_section_ids):
+    def get_existing_site_data(self, site, sis_section_ids, newt=False):
         term_code = '-'.join(sis_section_ids[0].split('-')[:2])
         term_name = utils.term_hyphenated_code_to_name(term_code)
         term_sis_id = utils.term_name_to_sis_code(term_name)
@@ -376,7 +381,9 @@ class TeenaTestConfig(object):
         section_ids = [s_id.split('-')[2] for s_id in sis_section_ids]
         sections = ripley_utils.get_sections_from_section_ids(site.term, section_ids)
         site.course = ripley_utils.get_course_from_sections(site.term, sections)
-        if int(site.term.sis_id) < int(self.current_term.sis_id):
+        if newt:
+            ripley_utils.get_newt_enrollments(site.course)
+        elif int(site.term.sis_id) < int(self.current_term.sis_id):
             ripley_utils.get_completed_enrollments(site.course)
         else:
             ripley_utils.get_course_enrollment(site.course)

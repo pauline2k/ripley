@@ -208,10 +208,14 @@ class CanvasPage(CanvasAssignmentsPage,
         self.set_canvas_ids(test.teachers)
         self.get_admin_canvas_id(test.canvas_admin, 'Support Admin')
 
-    def configure_multiple_sites(self, test):
+    def configure_multiple_sites(self, test, newt=False):
         self.add_ripley_tools([t.value for t in RipleyTools])
         self.set_canvas_ids([test.student])
         self.get_admin_canvas_id(test.canvas_admin, 'Support Admin')
+        if newt:
+            for site in test.course_sites:
+                section_ids = self.get_course_site_sis_section_ids(site)
+                test.get_existing_site_data(site, section_ids, newt=True)
 
     SEARCH_COURSE_INPUT = By.XPATH, '//input[@placeholder="Search courses..."]'
     SEARCH_COURSE_BTN = By.XPATH, '//input[@id="course_name"]/following-sibling::button'

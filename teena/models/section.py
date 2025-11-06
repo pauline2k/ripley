@@ -28,6 +28,7 @@ class Section(object):
 
     def __init__(self, data):
         self.data = data
+        self.enrollments = []
 
     @property
     def section_id(self):
@@ -60,14 +61,6 @@ class Section(object):
     @cs_course_id.setter
     def cs_course_id(self, value):
         self.data['cs_course_id'] = value
-
-    @property
-    def enrollments(self):
-        return self.data.get('enrollments')
-
-    @enrollments.setter
-    def enrollments(self, value):
-        self.data['enrollments'] = value
 
     @property
     def include_in_site(self):

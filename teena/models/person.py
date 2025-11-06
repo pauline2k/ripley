@@ -39,7 +39,7 @@ class Person(object):
 
     @property
     def demographics(self):
-        return self.data.get('demographics') or []
+        return self.data.get('demographics')
 
     @demographics.setter
     def demographics(self, value):
