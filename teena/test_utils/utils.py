@@ -94,6 +94,10 @@ def canvas_qa_acct():
     return app.config['CANVAS_QA_ACCOUNT_ID']
 
 
+def course_template_dept():
+    return app.config['COURSE_TEMPLATE_DEPT']
+
+
 def e_grades_site_id():
     return app.config['E_GRADES_SITE_ID']
 
@@ -102,12 +106,12 @@ def e_grades_student_count():
     return app.config['E_GRADES_STUDENT_COUNT']
 
 
-def course_template_dept():
-    return app.config['COURSE_TEMPLATE_DEPT']
+def grade_distribution_site_ids():
+    return app.config['NEWT_SITE_IDS']
 
 
 def mailing_list_suffix():
-    return '-cc-ets-qa' if '-qa' in ripley_base_url() else '-cc-ets-dev'
+    return '-rip-qa' if '-qa' in ripley_base_url() else '-rip-dev'
 
 
 # Terms

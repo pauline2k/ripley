@@ -32,7 +32,7 @@ from ripley import db, std_commit
 from ripley.externals import data_loch
 from sqlalchemy import text
 from teena.models.course import Course
-from teena.models.person import Person, PersonWithRole
+from teena.models.person import Person, PersonDemographics, PersonWithRole
 from teena.models.section import Section, SectionEnrollment
 from teena.test_utils import utils
 
@@ -531,6 +531,136 @@ def results_to_enrollments(course, results):
         for enroll in enrollments:
             if enroll.section_id == str(section.section_id):
                 section.enrollments.append(enroll)
+
+
+# Course enrollment - Newt
+
+
+def newt_min_grade_count():
+    return app.config['NEWT_MINIMUM_CLASS_SIZE']
+
+
+def newt_small_cell_suppression():
+    return app.config['NEWT_SMALL_CELL_THRESHOLD']
+
+
+def get_all_instr_courses_per_cs_id(terms, user, cs_course_id):
+    sis_ids = [t.sis_id for t in terms]
+    app.logger.info(f'Checking courses in terms {sis_ids}')
+    sql = f"""SELECT sis_data.edo_sections.sis_term_id
+                FROM sis_data.edo_sections
+               WHERE sis_data.edo_sections.cs_course_id = '{cs_course_id}'
+                 AND sis_data.edo_sections.instructor_uid = '{user.uid}'
+                 AND sis_data.edo_sections.is_primary IS TRUE
+                 AND sis_data.edo_sections.sis_term_id IN ({utils.in_op(sis_ids)})"""
+    app.logger.info(sql)
+    results = data_loch.safe_execute_rds(sql)
+    term_ids = []
+    for r in results:
+        term_ids.append(str(r['sis_term_id']))
+    teaching_terms = [t for t in terms if t.sis_id in term_ids]
+    courses = []
+    for term in teaching_terms:
+        course = _get_course_from_cs_course_id(term, cs_course_id)
+        courses.append(course)
+    for course in courses:
+        get_newt_enrollments(course)
+        app.logger.info(f'Instructor UID {user.uid} taught course {cs_course_id} in {course.term.name}')
+    return courses
+
+
+def get_instructor_primaries(sections, instructor):
+    primaries = []
+    for section in sections:
+        if section.is_primary and instructor.uid in [i_r.user.uid for i_r in section.instructors_with_roles]:
+            primaries.append(section)
+    return primaries
+
+
+def get_newt_enrollments(course):
+    sql = f"""SELECT sis_data.edo_enrollments.sis_section_id,
+                     sis_data.edo_enrollments.ldap_uid AS uid,
+                     sis_data.edo_enrollments.grade,
+                     sis_data.edo_basic_attributes.sid,
+                     student.student_profile_index.transfer,
+                     student.demographics.gender,
+                     student.demographics.minority,
+                     student.visas.visa_type,
+                     boac_advising_asc.students.active AS athlete
+                FROM sis_data.edo_enrollments
+           LEFT JOIN sis_data.edo_basic_attributes
+                  ON sis_data.edo_basic_attributes.ldap_uid = sis_data.edo_enrollments.ldap_uid
+                JOIN student.student_profile_index
+                  ON sis_data.edo_enrollments.ldap_uid = student.student_profile_index.uid
+           LEFT JOIN student.demographics
+                  ON student.student_profile_index.sid = student.demographics.sid
+           LEFT JOIN student.visas
+                  ON student.student_profile_index.sid = student.visas.sid
+           LEFT JOIN boac_advising_asc.students
+                  ON student.student_profile_index.sid = boac_advising_asc.students.sid
+               WHERE sis_data.edo_enrollments.sis_term_id = '{course.term.sis_id}'
+                 AND sis_data.edo_enrollments.sis_section_id IN ({utils.in_op(s.section_id for s in course.sections)})
+                 AND sis_data.edo_enrollments.sis_enrollment_status = 'E'"""
+    app.logger.info(sql)
+    results = data_loch.safe_execute_rds(sql)
+    results_to_newt_enrollments(course, results)
+
+
+def results_to_newt_enrollments(course, results):
+    enrollments = []
+    for r in results:
+        demographics = PersonDemographics(is_athlete=(True if r['athlete'] else False),
+                                          gender=r['gender'],
+                                          is_intl=(True if r['visa_type'] else False),
+                                          is_minority=r['minority'],
+                                          is_transfer=r['transfer'])
+        student = Person({
+            'uid': r['uid'],
+            'demographics': demographics,
+            'sid': r['sid'],
+        })
+        enrollments.append(SectionEnrollment({
+            'student': student,
+            'grade': r['grade'],
+            'section_id': r['sis_section_id'],
+        }))
+    enrollments = list(set(enrollments))
+    for section in course.sections:
+        for enroll in enrollments:
+            if enroll.section_id == str(section.section_id):
+                section.enrollments.append(enroll)
+
+
+def get_newt_prior_enrollment_uids(uids, term, course_code):
+    sql = f"""SELECT DISTINCT sis_data.edo_enrollments.ldap_uid
+                FROM sis_data.edo_enrollments
+                JOIN sis_data.edo_sections
+                  ON sis_data.edo_sections.sis_section_id = sis_data.edo_enrollments.sis_section_id
+                 AND sis_data.edo_sections.sis_term_id = sis_data.edo_enrollments.sis_term_id
+               WHERE sis_data.edo_sections.sis_term_id BETWEEN '2168' AND '{utils.previous_term_sis_id(term)}'
+                 AND sis_data.edo_sections.sis_course_name = '{course_code}'
+                 AND sis_data.edo_sections.is_primary IS TRUE
+                 AND sis_data.edo_enrollments.grade NOT IN ('W', '', 'RD')
+                 AND sis_data.edo_enrollments.ldap_uid IN ({utils.in_op(uids)})"""
+    app.logger.info(sql)
+    results = data_loch.safe_execute_rds(sql)
+    return [r['ldap_uid'] for r in results]
+
+
+def newt_enrollments_per_grade(enrollments):
+    grade_enrollments = []
+    for enroll in enrollments:
+        if enroll.grade in ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'NP', 'P']:
+            grade_enrollments.append(enroll)
+    grade_enrollments.sort(key=lambda gr: gr.grade)
+    grade_groups = [list(grade_result) for key, grade_result in groupby(grade_enrollments, key=lambda e: e.grade)]
+    grade_enrolls = []
+    for grp in grade_groups:
+        grade_enrolls.append({
+            'grade': grp[0].grade,
+            'uids': [en.student.uid for en in grp],
+        })
+    return grade_enrolls
 
 
 #   Test users
