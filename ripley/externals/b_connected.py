@@ -73,7 +73,7 @@ class BConnected:
             except Exception as e:
                 app.logger.exception(e)
 
-    def ping(self):
-        with SMTP(self.bcop_smtp_server, port=self.bcop_smtp_port) as smtp:
+    def ping(self, timeout):
+        with SMTP(self.bcop_smtp_server, port=self.bcop_smtp_port, timeout=timeout) as smtp:
             smtp.noop()
             return True

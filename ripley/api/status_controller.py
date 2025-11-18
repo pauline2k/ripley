@@ -44,6 +44,7 @@ from sqlalchemy.sql import text
 
 @app.route('/api/ping')
 def ping():
+    timeout = app.config['PING_TIMEOUT_SECONDS']
     b_connected_ping = None
     calnet_ping = None
     canvas_ping = None
@@ -53,9 +54,9 @@ def ping():
     redis_queue_ping = None
     try:
         # When testing (ie, running pytest) then do NOT ping bConnected.
-        b_connected_ping = app.config['TESTING'] or BConnected().ping()
+        b_connected_ping = app.config['TESTING'] or BConnected().ping(timeout)
         calnet_ping = _ping_calnet()
-        canvas_ping = _ping_canvas()
+        canvas_ping = _ping_canvas(timeout)
         data_loch_ping = _data_loch_status()
         db_ping = _db_status()
         job_manager_ping = _job_manager_ping()
@@ -149,7 +150,11 @@ def _job_manager_ping():
 
 def _ping_calnet():
     try:
-        calnet_user = get_calnet_user_for_uid(app, app.config['CALNET_TEST_UID'])
+        calnet_user = get_calnet_user_for_uid(
+            app=app,
+            skip_cache=True,
+            uid=app.config['CALNET_TEST_UID'],
+        )
         return calnet_user and (calnet_user.get('uid', None) is not None)
     except Exception as e:
         app.logger.error('Calnet error during /api/ping')
@@ -157,9 +162,9 @@ def _ping_calnet():
         return False
 
 
-def _ping_canvas():
+def _ping_canvas(timeout):
     try:
-        return ping_canvas()
+        return ping_canvas(timeout)
     except CanvasException as e:
         app.logger.error('Canvas error during /api/ping')
         app.logger.exception(e)

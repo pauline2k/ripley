@@ -78,9 +78,9 @@ def get_calnet_attributes_for_uids(app, uids):
     return [_transform_user(u) for u in users.values()]
 
 
-def get_calnet_user_for_uid(app, uid):
+def get_calnet_user_for_uid(app, uid, skip_cache=False):
     cache_key = f'calnet_user_for_uid_{uid}'
-    calnet_user = fetch_cached_dict_object(cache_key)
+    calnet_user = None if skip_cache else fetch_cached_dict_object(cache_key)
     if not calnet_user:
         users = _get_calnet_users(app, [uid])
         calnet_user = users[uid] if users else None
