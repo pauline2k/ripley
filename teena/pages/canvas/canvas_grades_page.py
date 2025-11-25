@@ -161,7 +161,7 @@ class CanvasGradesPage(CanvasSettingsPage):
                 self.wait_for_element(self.STUDENT_SEARCH_INPUT, utils.get_medium_timeout())
                 if self.is_present(self.GB_REMOVE_BTN):
                     self.element(self.GB_REMOVE_BTN).click()
-                self.wait_for_element_remove_chars_send_keys(self.STUDENT_SEARCH_INPUT, user.full_name)
+                self.wait_for_element_remove_chars_send_keys(self.STUDENT_SEARCH_INPUT, user.full_name, chars_count=100)
                 self.hit_enter()
                 self.when_present(self.GB_STUDENT_LINK, utils.get_short_timeout())
                 assert self.elements(self.GB_STUDENT_LINK)[0].get_dom_attribute('data-student_id') == user.canvas_id

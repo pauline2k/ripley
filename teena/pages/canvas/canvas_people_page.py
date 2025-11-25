@@ -70,7 +70,7 @@ class CanvasPeoplePage(CanvasSettingsPage):
                 app.logger.info(f'Getting Canvas ID for {user.uid}')
                 for string in [user.email, user.uid]:
                     try:
-                        self.wait_for_element_remove_chars_send_keys(self.USER_SEARCH_INPUT, string)
+                        self.wait_for_element_remove_chars_send_keys(self.USER_SEARCH_INPUT, string, chars_count=100)
                         if string == user.email:
                             loc = self.user_result_link_by_email(user)
                         else:
