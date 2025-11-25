@@ -82,7 +82,7 @@ class AddUserPage(RipleyPages):
         else:
             loc = self.SEARCH_BY_UID
         self.wait_for_element_and_click(loc)
-        self.wait_for_element_remove_chars_send_keys(self.SEARCH_TERM, text)
+        self.wait_for_element_remove_chars_send_keys(self.SEARCH_TERM, text, chars_count=100)
         self.wait_for_element_and_click(self.SEARCH_BUTTON)
 
     def wait_for_no_results(self):

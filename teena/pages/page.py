@@ -223,19 +223,18 @@ class Page(object):
         if string:
             self.element(locator).send_keys(string)
 
-    def wait_for_element_remove_chars_send_keys(self, locator, string):
-        self.remove_chars(locator)
+    def wait_for_element_remove_chars_send_keys(self, locator, string, chars_count=500):
+        self.remove_chars(locator, chars_count)
         if string:
             self.element(locator).send_keys(string)
 
-    def wait_for_element_remove_and_type_chars(self, locator, string):
-        self.remove_chars(locator)
+    def wait_for_element_remove_and_type_chars(self, locator, string, chars_count=500):
+        self.remove_chars(locator, chars_count)
         self.enter_chars(locator, string)
 
-    def remove_chars(self, locator):
+    def remove_chars(self, locator, chars_count):
         self.wait_for_element_and_click(locator)
-        repeat = 500
-        for x in range(repeat):
+        for x in range(chars_count):
             self.hit_delete()
             self.hit_backspace()
 
