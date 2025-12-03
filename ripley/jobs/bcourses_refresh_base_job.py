@@ -569,5 +569,5 @@ def _csv_data_changed(row, new_row):
 
 def _delete_pronouns_if_required(row, new_row):
     if row.get('pronouns') and not new_row.get('pronouns', True):
-        new_row['pronouns'] = '<deleted>'
+        new_row['pronouns'] = '<delete>'
 
