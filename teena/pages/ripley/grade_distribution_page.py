@@ -68,6 +68,9 @@ class GradeDistributionPage(RipleyPages):
         self.wait_for_select_and_click_option(self.DEMOGRAPHICS_SELECT, demographic)
         time.sleep(utils.get_click_sleep())
 
+    def is_demographic_option_enabled(self, demographic):
+        return self.is_el_enabled((By.XPATH, f'//option[contains(text(), "{demographic}")]'))
+
     def select_statistic(self, statistic):
         app.logger.info(f'Selecting statistic {statistic}')
         self.wait_for_select_and_click_option(self.STATISTICS_SELECT, statistic)
@@ -89,13 +92,13 @@ class GradeDistributionPage(RipleyPages):
         if enrollments:
             count = len(enrollments)
             config = ripley_utils.newt_small_cell_suppression()
-            return 'Small sample size' if 1 <= count < config else str(count)
+            return 'No data' if 1 <= count < config else str(count)
         else:
             return 'No data'
 
     @staticmethod
     def grades_to_grade_points(enrollments):
-        valid_grades = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F', 'I']
+        valid_grades = ['A+', 'A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']
         grades = [e.grade for e in enrollments if e.grade in valid_grades]
         grade_points = []
         for grade in grades:
@@ -126,10 +129,13 @@ class GradeDistributionPage(RipleyPages):
         return grade_points
 
     def expected_mean_grade_points(self, enrollments):
-        grades = self.grades_to_grade_points(enrollments)
-        if grades:
-            avg = round((sum(grades) / len(grades)), 1)
-            return str(math.floor(avg) if math.floor(avg) == avg else avg)
+        if len(enrollments) >= ripley_utils.newt_small_cell_suppression():
+            grades = self.grades_to_grade_points(enrollments)
+            if grades:
+                avg = round((sum(grades) / len(grades)), 1)
+                return str(math.floor(avg) if math.floor(avg) == avg else avg)
+            else:
+                return 'No data'
         else:
             return 'No data'
 

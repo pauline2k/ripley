@@ -28,10 +28,16 @@ class TeenaTestCase(object):
 
     def __init__(self,
                  course=None,
+                 enrollments=None,
+                 instructor=None,
                  section=None,
+                 site=None,
                  term=None,
                  test_case_id=None):
         self.course = course
+        self.enrollments = enrollments
+        self.instructor = instructor
         self.section = section
+        self.site = site
         self.term = term
         self.test_case_id = test_case_id

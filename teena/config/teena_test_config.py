@@ -26,6 +26,7 @@ import calendar
 from datetime import datetime as dt
 
 from flask import current_app as app
+from ripley.externals import canvas
 from teena.models.course import Course
 from teena.models.course_site import CourseSite
 from teena.models.person import Person
@@ -172,6 +173,31 @@ class TeenaTestConfig(object):
         site_ids = utils.grade_distribution_site_ids()
         self.course_sites = [CourseSite({'site_id': site_id}) for site_id in site_ids]
         self.set_real_test_course_users(self.course_sites[-1])
+
+        # Create test cases containing data per term for each course site being tested
+        terms = utils.terms_since_code_red()
+        for site in self.course_sites:
+            canvas_sections = canvas.get_course_sections(site.site_id)
+            section_ids = []
+            for canvas_section in canvas_sections:
+                if canvas_section.sis_section_id:
+                    section_ids.append(canvas_section.sis_section_id.replace('SEC:', ''))
+            self.get_existing_site_data(site, section_ids, newt=True)
+            instructor = site.course.teachers[0]
+            instructor.canvas_id = canvas.get_canvas_user_profile_by_uid(instructor.uid)['id']
+            cs_course_id = site.sections[0].cs_course_id
+            all_term_courses = ripley_utils.get_all_instr_courses_per_cs_id(terms, instructor, cs_course_id)
+            for term_course in all_term_courses:
+                enrollments = []
+                for section in term_course.sections:
+                    if section.is_primary:
+                        enrollments.extend(section.enrollments)
+                self.test_cases.append(TeenaTestCase(course=term_course,
+                                                     enrollments=enrollments,
+                                                     instructor=instructor,
+                                                     site=site,
+                                                     term=term_course.term,
+                                                     test_case_id=f'{site.site_id} {term_course.term.sis_id}'))
 
     def mailing_lists(self):
         ripley_utils.drop_existing_mailing_lists()
