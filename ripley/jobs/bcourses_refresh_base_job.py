@@ -99,6 +99,7 @@ class BcoursesRefreshBaseJob(BaseJob):
                     for row in csv.DictReader(user_report):
                         new_row = self.process_user(row, users_by_uid)
                         if new_row and _csv_data_changed(row, new_row):
+                            _delete_pronouns_if_required(row, new_row)
                             csv_set.users.writerow(new_row)
                 else:
                     app.logger.warning(f"""
@@ -564,3 +565,9 @@ def _csv_data_changed(row, new_row):
         or (row['full_name'] != f"{new_row['first_name'] or ''} {new_row['last_name'] or ''}")
         or (row['status'] != new_row['status'])
         or ('pronouns' in row and 'pronouns' in new_row and row['pronouns'] != new_row['pronouns']))
+
+
+def _delete_pronouns_if_required(row, new_row):
+    if row.get('pronouns') and not new_row.get('pronouns', True):
+        new_row['pronouns'] = '<deleted>'
+
