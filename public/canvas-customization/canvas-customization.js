@@ -577,7 +577,7 @@ addMentalHealthResourcesResponsiveLink();
       '      <li><a href="https://rtl.berkeley.edu/resources/accessibility-teaching-learning" target="_blank">Accessibility in Teaching & Learning<span class="sr-only"> (opens in new tab)</span></a></li>',
       '      <li>The <a href="https://rtl.berkeley.edu/services-programs/ally-bcourses" target="_blank">Ally Course Accessibility Report<span class="sr-only"> (opens in new tab)</span></a> is now enabled by default in bCourses. This powerful tool helps instructors design inclusive and accessible instructional materials for every student.</li>',
       '      <ul>',
-      '        <li>Watch: <a href="https://youtu.be/JgJYz7Hgdv0" target="_blank">Ally Course Accessibility Report for bCourses video tutorial<span class="sr-only"> (opens in new tab)</span></a></li>',
+      '        <li>Watch: <a href="https://youtu.be/n-CTPSELsmQ" target="_blank">Ally Course Accessibility Report for bCourses video tutorial<span class="sr-only"> (opens in new tab)</span></a></li>',
       '      </ul>',
       '      <li>Evaluate and update your bCourses content using the <a href="https://youtu.be/S5aY7nB4Hj0" target="_blank">WYSIWYG Instructor Feedback Tool<span class="sr-only"> (opens in new tab)</span></a></li>',
       '      <li><a href="https://bcourses.berkeley.edu/courses/1476601" target="_blank">Accessibility Basics for bCourses (Canvas)<span class="sr-only"> (opens in new tab)</span></a> - bCourses Site</li>',
