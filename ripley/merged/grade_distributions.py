@@ -40,6 +40,9 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
     grade_distribution_by_term = {}
     student_grades = get_grades_with_demographics(course_term_id, section_ids, GRADE_ORDERING, instructor_uid)
 
+    graded_uids_by_term = {}
+    graded_uids_by_term_and_distribution = {}
+
     for row in student_grades:
         term_id = row['term_id']
         grade = row['grade']
@@ -55,36 +58,56 @@ def get_grade_distributions(course_term_id, section_ids, instructor_uid=None):  
                     'count': 0,
                     'courseName': row['sis_course_name'],
                 }
-            grade_distribution_by_term[term_id][grade]['count'] += 1
-            grade_distribution_by_term[term_id]['count'] += 1
+            if term_id not in graded_uids_by_term:
+                graded_uids_by_term[term_id] = set()
+            if row['ldap_uid'] not in graded_uids_by_term[term_id]:
+                grade_distribution_by_term[term_id][grade]['count'] += 1
+                grade_distribution_by_term[term_id]['count'] += 1
 
             if grade_points is None:
                 continue
             if term_id not in demographics_distribution:
                 demographics_distribution[term_id] = deepcopy(EMPTY_DEMOGRAPHIC_DISTRIBUTION)
-            demographics_distribution[term_id]['count'] += 1
-            demographics_distribution[term_id]['gradePointList'].append(grade_points)
+            if row['ldap_uid'] not in graded_uids_by_term[term_id]:
+                demographics_distribution[term_id]['count'] += 1
+                demographics_distribution[term_id]['gradePointList'].append(grade_points)
+                graded_uids_by_term[term_id].add(row['ldap_uid'])
+
             demographics_distribution[term_id]['courseName'] = row['sis_course_name']
 
-            def _count_boolean_value(column, distribution_key):
-                if row[column]:
-                    demographics_distribution[term_id][distribution_key]['true'].append(grade_points)
-                else:
-                    demographics_distribution[term_id][distribution_key]['false'].append(grade_points)
+            def _count_boolean_value(column, distribution_key, ldap_uid):
+                if term_id not in graded_uids_by_term_and_distribution:
+                    graded_uids_by_term_and_distribution[term_id] = {}
+                if distribution_key not in graded_uids_by_term_and_distribution[term_id]:
+                    graded_uids_by_term_and_distribution[term_id][distribution_key] = set()
+                if ldap_uid not in graded_uids_by_term_and_distribution[term_id][distribution_key]:
+                    if row[column]:
+                        demographics_distribution[term_id][distribution_key]['true'].append(grade_points)
+                    else:
+                        demographics_distribution[term_id][distribution_key]['false'].append(grade_points)
+                    graded_uids_by_term_and_distribution[term_id][distribution_key].add(ldap_uid)
 
-            _count_boolean_value('athlete', 'athleteStatus')
-            _count_boolean_value('transfer', 'transferStatus')
-            _count_boolean_value('minority', 'underrepresentedMinorityStatus')
-            _count_boolean_value('visa_type', 'internationalStatus')
+            _count_boolean_value('athlete', 'athleteStatus', row['ldap_uid'])
+            _count_boolean_value('transfer', 'transferStatus', row['ldap_uid'])
+            _count_boolean_value('minority', 'underrepresentedMinorityStatus', row['ldap_uid'])
+            _count_boolean_value('visa_type', 'internationalStatus', row['ldap_uid'])
 
-            def _count_string_value(value, distribution_key):
+            def _count_string_value(value, distribution_key, ldap_uid):
                 value = str(value) if value else 'none'
-                if value not in demographics_distribution[term_id][distribution_key]:
-                    demographics_distribution[term_id][distribution_key][value] = []
-                demographics_distribution[term_id][distribution_key][value].append(grade_points)
+                if term_id not in graded_uids_by_term_and_distribution:
+                    graded_uids_by_term_and_distribution[term_id] = {}
+                if distribution_key not in graded_uids_by_term_and_distribution[term_id]:
+                    graded_uids_by_term_and_distribution[term_id][distribution_key] = {}
+                if value not in graded_uids_by_term_and_distribution[term_id][distribution_key]:
+                    graded_uids_by_term_and_distribution[term_id][distribution_key][value] = set()
+                if ldap_uid not in graded_uids_by_term_and_distribution[term_id][distribution_key][value]:
+                    if value not in demographics_distribution[term_id][distribution_key]:
+                        demographics_distribution[term_id][distribution_key][value] = []
+                    demographics_distribution[term_id][distribution_key][value].append(grade_points)
+                    graded_uids_by_term_and_distribution[term_id][distribution_key][value].add(ldap_uid)
 
-            _count_string_value(_simplify_gender(row['gender']), 'genders')
-            _count_string_value(row['major'], 'majors')
+            _count_string_value(_simplify_gender(row['gender']), 'genders', row['ldap_uid'])
+            _count_string_value(row['major'], 'majors', row['ldap_uid'])
 
     letter_grades_included = []
 
