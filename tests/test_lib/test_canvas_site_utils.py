@@ -40,6 +40,8 @@ class TestCanvasUtils:
         assert parse_canvas_sis_course_id('COURSE:HISTART:R1B:2013-C')[1].to_sis_term_id() == '2135'
         assert parse_canvas_sis_course_id('PUB_POL-190-2014-B-A1C1D309')[0] == 'PUB_POL 190'
         assert parse_canvas_sis_course_id('PUB_POL-190-2014-B-A1C1D309')[1].to_sis_term_id() == '2142'
+        assert parse_canvas_sis_course_id('LAW-273.15-2024-B-A1C1D309')[0] == 'LAW 273.15'
+        assert parse_canvas_sis_course_id('LAW-273.15-2024-B-A1C1D309')[1].to_sis_term_id() == '2242'
 
     def test_parse_login_id_inactive(self):
         assert uid_from_canvas_login_id('666') == {'uid': '666', 'inactivePrefix': False}

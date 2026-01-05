@@ -250,7 +250,7 @@ def parse_canvas_sis_course_id(sis_course_id):
     course_name, berkeley_term = None, None
     if sis_course_id:
         m = re.fullmatch(
-            r'^(CRS:|COURSE:)?(?P<dept_name>\w+)[-:](?P<course_number>\w+)[-:](?P<term_year>\d{4})-(?P<term_code>[A-D]).*$',
+            r'^(CRS:|COURSE:)?(?P<dept_name>\w+)[-:](?P<course_number>[\w.]+)[-:](?P<term_year>\d{4})-(?P<term_code>[A-D]).*$',
             sis_course_id,
         )
         if not m:
