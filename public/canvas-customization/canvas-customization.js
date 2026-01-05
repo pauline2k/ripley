@@ -678,6 +678,20 @@ addMentalHealthResourcesResponsiveLink();
 
   addReligiousHolidaysInfo();
 
+  /**
+   * Modify the pronoun description text on /profile/settings
+   */
+    var addProfilePronounInfo = () => {
+      var pronounInfoText = '</br>The pronouns that you have provided will appear after your name. Follow the instructions on <a href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010898" target="_blank">How do I change my name or pronouns in bCourses?</a> to change or remove. Changes will be reflected in bCourses in 24 hours.';
+
+      waitUntilAvailable('#pronouns', false, function($header) {
+        $header.closest('td').find('.data_description').html(pronounInfoText);
+
+      });
+    };
+    
+    addProfilePronounInfo();
+
   /* 404 PAGE */
 
   /**
