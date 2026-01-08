@@ -81,6 +81,30 @@ class TestFooterCustomizations:
 
 
 @pytest.mark.usefixtures('page_objects')
+class TestProfileCustomizations:
+
+    def test_pronouns_section_and_customization(self):
+        self.canvas_page.load_user_profile()
+
+        # Verify the pronoun feature is enabled
+        assert self.canvas_page.is_pronouns_section_present(), "The 'pronouns' ID was not found on the page."
+
+        # Verify our custom text appears
+        expected_text = (
+            "The pronouns that you have provided will appear after your name. "
+            "Follow the instructions on How do I change my name or pronouns in bCourses? "
+            "to change or remove. Changes will be reflected in bCourses in 24 hours."
+        )
+        actual_text = self.canvas_page.get_description_text()
+
+        utils.assert_equivalence(actual_text, expected_text)
+
+    def test_pronouns_help_link(self):
+        partial_title = 'IT - How do I change my name in bCourses?'
+        assert self.canvas_page.is_external_link_valid(self.canvas_page.PRONOUNS_HELP_LINK, partial_title)
+
+
+@pytest.mark.usefixtures('page_objects')
 class TestAddPeopleCustomizations:
 
     def test_search_by_email_address(self):
