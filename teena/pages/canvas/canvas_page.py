@@ -31,6 +31,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.wait import WebDriverWait as Wait
 from teena.models.ripley_tool import RipleyTools
 from teena.pages.canvas.canvas_assignments_page import CanvasAssignmentsPage
+from teena.pages.canvas.canvas_profile_page import CanvasProfilePage
 from teena.pages.canvas.canvas_grades_page import CanvasGradesPage
 from teena.pages.canvas.canvas_people_page import CanvasPeoplePage
 from teena.test_utils import ripley_utils
@@ -39,7 +40,8 @@ from teena.test_utils import utils
 
 class CanvasPage(CanvasAssignmentsPage,
                  CanvasGradesPage,
-                 CanvasPeoplePage):
+                 CanvasPeoplePage,
+                 CanvasProfilePage):
 
     PROFILE_LINK = By.ID, 'global_nav_profile_link'
     LOGOUT_LINK = By.XPATH, '//button[contains(.,"Logout")]'
