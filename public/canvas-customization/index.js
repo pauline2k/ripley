@@ -90,7 +90,7 @@ DpPrimary = {
     includedModules: [],
     lang: 'en',
     defaultToLegacy: false,
-    enableVersionSwitching: true,
+    enableVersionSwitching: false,
     hideSwitching: false,
 }
 
