@@ -25,18 +25,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 from unittest import mock
 
-import bonsai
 from moto import mock_s3
 import requests_mock
 from ripley.jobs.add_guest_users_job import AddGuestUsersJob
 from tests.util import mock_s3_bucket, read_s3_csv, register_canvas_uris
 
 
-class TestAddNewUsersJob:
+class TestAddGuestUsersJob:
 
     @mock_s3
-    @mock.patch('bonsai.ldapconnection.LDAPConnection.open')
-    def test_job_run(self, mock_open, app):
+    @mock.patch('ldap3.Connection')
+    def test_job_run(self, mock_connection, app):
         with requests_mock.Mocker() as m:
             register_canvas_uris(app, {
                 'account': [
@@ -48,17 +47,18 @@ class TestAddNewUsersJob:
                 ],
             }, m)
 
-            mock_connection = mock.Mock()
-            mock_connection.paged_search.return_value = [
-                {
-                    'berkeleyEduAffiliations': bonsai.LDAPValueList(['GUEST-TYPE-SPONSORED']),
-                    'givenName': bonsai.LDAPValueList(['Jonesy']),
-                    'mail': bonsai.LDAPValueList(['jonesy@berkeley.edu']),
-                    'sn': bonsai.LDAPValueList(['🐈']),
-                    'uid': bonsai.LDAPValueList(['9999999']),
+            mock_response = [{
+                'dn': 'ou=people,dc=berkeley,dc=edu',
+                'attributes': {
+                    'berkeleyEduAffiliations': ['GUEST-TYPE-SPONSORED'],
+                    'givenName': ['Jonesy'],
+                    'mail': ['jonesy@berkeley.edu'],
+                    'sn': ['🐈'],
+                    'uid': ['9999999'],
                 },
-            ]
-            mock_open.return_value = mock_connection
+            }]
+
+            mock_connection().search.return_value = (None, None, mock_response, None)
 
             with mock_s3_bucket(app) as s3:
                 AddGuestUsersJob(app)._run()
