@@ -23,9 +23,11 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from bonsai import LDAPClient
-from bonsai.errors import ConnectionError as BonsaiConnectionError, LDAPError
-from bonsai.pool import ThreadedConnectionPool
+from contextlib import contextmanager
+import queue
+import ssl
+
+import ldap3
 
 
 ldap_connection_pool = None
@@ -53,15 +55,38 @@ def client(app):
 class Client:
 
     def __init__(self, app):
+        self.app = app
+        self.host = app.config['LDAP_HOST']
+        self.bind = app.config['LDAP_BIND']
+        self.password = app.config['LDAP_PASSWORD']
+        tls = ldap3.Tls(validate=ssl.CERT_REQUIRED)
+        server = ldap3.Server(self.host, port=636, use_ssl=True, get_info=ldap3.ALL, tls=tls)
+        self.server = server
+
         global ldap_connection_pool
         if ldap_connection_pool is None:
-            client = LDAPClient(f"ldaps://{app.config['LDAP_HOST']}:{app.config['LDAP_PORT']}")
-            client.set_credentials('SIMPLE', user=app.config['LDAP_BIND'], password=app.config['LDAP_PASSWORD'])
-            ldap_connection_pool = ThreadedConnectionPool(
-                client,
-                minconn=app.config['LDAP_POOL_SIZE_MIN'],
-                maxconn=app.config['LDAP_POOL_SIZE_MAX'],
-            )
+            ldap_connection_pool = queue.Queue()
+            for _ in range(app.config['LDAP_POOL_SIZE_MAX']):
+                ldap_connection_pool.put(self.connect())
+
+    def connect(self):
+        return ldap3.Connection(
+            self.server,
+            user=self.bind,
+            password=self.password,
+            auto_bind=ldap3.AUTO_BIND_TLS_BEFORE_BIND,
+            client_strategy=ldap3.SAFE_RESTARTABLE,
+        )
+
+    @contextmanager
+    def checkout_connection(self):
+        conn = None
+        try:
+            conn = ldap_connection_pool.get()
+            yield conn
+        finally:
+            if conn is not None:
+                ldap_connection_pool.put(conn)
 
     def guests_modified_since(self, utc_datetime):
         timestamp = utc_datetime.strftime('%Y%m%d%H%M%SZ')
@@ -73,68 +98,67 @@ class Client:
             search_base='guests',
             comparator='>=',
         )
-        return self._search(search_filter, use_fallback_mail=True)
+        results = []
+        with self.checkout_connection() as conn:
+            try:
+                results = self._search(conn, search_filter, use_fallback_mail=True)
+            except Exception as e:
+                self.app.logger.error('LDAP guest search query failed')
+                self.app.logger.exception(e)
+        return results
 
     def search_uids(self, uids, search_base=None, use_fallback_mail=False):
-        from flask import current_app as app
         all_out = []
-        for i in range(0, len(uids), BATCH_QUERY_MAXIMUM):
-            if len(uids) == 1:
-                app.logger.debug(f'Executing LDAP search (UID {uids[0]})')
-            else:
-                app.logger.debug(f'Executing LDAP UID search ({i+1} to {min(len(uids), i+BATCH_QUERY_MAXIMUM)} of {len(uids)})')
-            uids_batch = uids[i:i + BATCH_QUERY_MAXIMUM]
-            try:
-                _filter = _ldap_search_filter({'uid': uids_batch}, search_base)
-                all_out += self._search(_filter, use_fallback_mail=use_fallback_mail)
-            except Exception as e:
-                app.logger.error('LDAP UID search query failed')
-                app.logger.exception(e)
+        with self.checkout_connection() as conn:
+            for i in range(0, len(uids), BATCH_QUERY_MAXIMUM):
+                if len(uids) == 1:
+                    self.app.logger.debug(f'Executing LDAP search (UID {uids[0]})')
+                else:
+                    self.app.logger.debug(f'Executing LDAP UID search ({i+1} to {min(len(uids), i+BATCH_QUERY_MAXIMUM)} of {len(uids)})')
+                uids_batch = uids[i:i + BATCH_QUERY_MAXIMUM]
+                try:
+                    _filter = _ldap_search_filter({'uid': uids_batch}, search_base)
+                    all_out += self._search(conn, _filter, use_fallback_mail=use_fallback_mail)
+                except Exception as e:
+                    self.app.logger.error('LDAP UID search query failed')
+                    self.app.logger.exception(e)
         return all_out
 
-    def _search(self, search_filter, use_fallback_mail=False):
-        from flask import current_app as app
-        idle_count = ldap_connection_pool.idle_connection
-        # Long-running idle connections may have been closed, so we cycle through.
-        for attempt in range(idle_count + 1):
-            with ldap_connection_pool.spawn(timeout=app.config['LDAP_TIMEOUT']) as conn:
-                try:
-                    results = conn.paged_search('dc=berkeley,dc=edu', scope=2, filter_exp=search_filter)
-                    all_attributes = []
-                    for entry in results:
-                        attributes = _attributes_to_dict(entry, use_fallback_mail)
-                        if attributes:
-                            all_attributes.append(attributes)
-                    return all_attributes
-                except (BonsaiConnectionError, LDAPError) as e:
-                    conn.close()
-                    # If we've been through all idle connections in the pool and are still getting errors, something is more deeply wrong.
-                    if attempt == idle_count:
-                        app.logger.error(f'LDAP search failed: {e}')
-                        raise
+    def _search(self, conn, search_filter, use_fallback_mail=False):
+        status, result, response, _ = conn.search('dc=berkeley,dc=edu', search_filter, attributes=ldap3.ALL_ATTRIBUTES)
+        all_attributes = []
+        if response:
+            for entry in response:
+                attributes = _attributes_to_dict(entry, use_fallback_mail)
+                if attributes:
+                    all_attributes.append(attributes)
+        return all_attributes
 
 
 def _attributes_to_dict(entry, use_fallback_mail=False):
     if 'expired' in str(entry.get('dn', '')):
         return None
 
-    def _unwrap_value(value):
-        # We generally want to unwrap single-value arrays, except affiliations.
-        if type(value).__name__ == 'LDAPValueList' and len(value) == 1 and attr != 'berkeleyEduAffiliations':
-            value = value[0]
-        return value
-
     out = dict.fromkeys(SCHEMA_DICT.values(), None)
-
-    keys = entry.keys()
     for attr in SCHEMA_DICT:
-        if attr in keys:
-            out[SCHEMA_DICT[attr]] = _unwrap_value(entry[attr])
+        if attr in entry.get('attributes', {}):
+            out[SCHEMA_DICT[attr]] = _unwrap_attribute(entry, attr)
 
-    if use_fallback_mail and not out['email'] and 'mail' in keys:
-        out['email'] = _unwrap_value(entry['mail'])
+    if use_fallback_mail and not out['email'] and 'mail' in entry.get('attributes', {}):
+        out['email'] = _unwrap_attribute(entry, 'mail')
 
     return out
+
+
+def _unwrap_attribute(entry, attr):
+    attr_value = entry['attributes'][attr]
+    if type(attr_value) is list and attr != 'berkeleyEduAffiliations':
+        if len(attr_value):
+            return attr_value[0]
+        else:
+            return None
+    else:
+        return attr_value
 
 
 def _ldap_search_filter(attributes, search_base, comparator='='):
