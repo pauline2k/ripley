@@ -58,7 +58,7 @@ class TestAddGuestUsersJob:
                 },
             }]
 
-            mock_connection().search.return_value = (None, None, mock_response, None)
+            mock_connection().__enter__().search.return_value = (None, None, mock_response, None)
 
             with mock_s3_bucket(app) as s3:
                 AddGuestUsersJob(app)._run()

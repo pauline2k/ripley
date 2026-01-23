@@ -23,14 +23,9 @@ SOFTWARE AND ACCOMPANYING DOCUMENTATION, IF ANY, PROVIDED HEREUNDER IS PROVIDED
 ENHANCEMENTS, OR MODIFICATIONS.
 """
 
-from contextlib import contextmanager
-import queue
 import ssl
 
 import ldap3
-
-
-ldap_connection_pool = None
 
 
 SCHEMA_DICT = {
@@ -45,7 +40,7 @@ SCHEMA_DICT = {
     'uid': 'uid',
 }
 
-BATCH_QUERY_MAXIMUM = 20
+BATCH_QUERY_MAXIMUM = 100
 
 
 def client(app):
@@ -63,30 +58,14 @@ class Client:
         server = ldap3.Server(self.host, port=636, use_ssl=True, get_info=ldap3.ALL, tls=tls)
         self.server = server
 
-        global ldap_connection_pool
-        if ldap_connection_pool is None:
-            ldap_connection_pool = queue.Queue()
-            for _ in range(app.config['LDAP_POOL_SIZE_MAX']):
-                ldap_connection_pool.put(self.connect())
-
     def connect(self):
         return ldap3.Connection(
             self.server,
             user=self.bind,
             password=self.password,
             auto_bind=ldap3.AUTO_BIND_TLS_BEFORE_BIND,
-            client_strategy=ldap3.SAFE_RESTARTABLE,
+            client_strategy=ldap3.SAFE_SYNC,
         )
-
-    @contextmanager
-    def checkout_connection(self):
-        conn = None
-        try:
-            conn = ldap_connection_pool.get()
-            yield conn
-        finally:
-            if conn is not None:
-                ldap_connection_pool.put(conn)
 
     def guests_modified_since(self, utc_datetime):
         timestamp = utc_datetime.strftime('%Y%m%d%H%M%SZ')
@@ -99,7 +78,7 @@ class Client:
             comparator='>=',
         )
         results = []
-        with self.checkout_connection() as conn:
+        with self.connect() as conn:
             try:
                 results = self._search(conn, search_filter, use_fallback_mail=True)
             except Exception as e:
@@ -109,7 +88,7 @@ class Client:
 
     def search_uids(self, uids, search_base=None, use_fallback_mail=False):
         all_out = []
-        with self.checkout_connection() as conn:
+        with self.connect() as conn:
             for i in range(0, len(uids), BATCH_QUERY_MAXIMUM):
                 if len(uids) == 1:
                     self.app.logger.debug(f'Executing LDAP search (UID {uids[0]})')
