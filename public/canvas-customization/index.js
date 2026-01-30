@@ -115,7 +115,7 @@ $(function () {
 window.ALLY_CFG = {
  'baseUrl': 'https://prod.ally.ac',
  'clientId': 2,
- 'lti13Id': '10720000000000611'
+ 'lti13Id': '10720000000000830'
 };
 $.getScript(ALLY_CFG.baseUrl + '/integration/canvas/ally.js');
 
