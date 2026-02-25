@@ -174,17 +174,15 @@
   addCreateSiteButton();
   removeCreateSiteUserNav();
 
-  /* ACADEMIC POLICIES LINK */
-
   /**
-   * Add 'Academic Policies' above 'Help' in left-hand global navigation
+   * Add 'Student Rights and Options' above 'Help' in left-hand global navigation
    */
 
   var addAcademicPoliciesLink = function() {
     waitUntilAvailable(".ic-app-header__menu-list .ic-app-header__menu-list-item:contains('Help')", false, function($helpMenuItem) {
       var $policiesMenuItem = $helpMenuItem.clone();
       $policiesMenuItem.find('.menu-item__text')
-        .text('Academic Policies');
+        .text('Student Rights and Options');
       $policiesMenuItem.find('.menu-item__badge')
         .remove();
       $policiesMenuItem.find('a')
@@ -234,10 +232,8 @@
 
 addMentalHealthResourcesLink();
 
-  /* ACADEMIC POLICIES RESPONSIVE LINK */
-
   /**
-   * Add 'Academic Policies' above 'Help' in left-hand global navigation
+   * Add 'Student Rights and Options' above 'Help' in left-hand global navigation in the resposive view
    */
 
   var addAcademicPoliciesResponsiveLink = function() {
@@ -246,7 +242,7 @@ addMentalHealthResourcesLink();
     if (!isElementPresent) {
       var $academicPoliciesMenuItemResponsive = $helpMenuItem.clone();
       var $academicPoliciesMenuTextElement = $academicPoliciesMenuItemResponsive.find('span span span').first()
-      $academicPoliciesMenuTextElement.text('Academic Policies');
+      $academicPoliciesMenuTextElement.text('Student Rights and Options');
       $academicPoliciesMenuTextElement.next().remove();
       $academicPoliciesMenuItemResponsive.find('a')
         .attr('id', 'global_nav_academic_policies_link_responsive')
