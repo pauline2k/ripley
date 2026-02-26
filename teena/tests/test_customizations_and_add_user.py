@@ -56,7 +56,7 @@ class TestFooterCustomizations:
         assert self.canvas_page.is_external_link_valid(self.canvas_page.PRIVACY_POLICY_LINK, title)
 
     def test_link_terms_of_service(self):
-        title = 'Terms of Use | Policy'
+        title = 'Acceptable Use | Policy | Instructure'
         assert self.canvas_page.is_external_link_valid(self.canvas_page.TERMS_OF_SERVICE_LINK, title)
 
     def test_link_data_use_and_analytics(self):
@@ -100,7 +100,7 @@ class TestProfileCustomizations:
         utils.assert_equivalence(actual_text, expected_text)
 
     def test_pronouns_help_link(self):
-        partial_title = 'IT - How do I change my name in bCourses?'
+        partial_title = 'IT - How do I change my name or pronouns in bCourses?'
         assert self.canvas_page.is_external_link_valid(self.canvas_page.PRONOUNS_HELP_LINK, partial_title)
 
 
