@@ -118,6 +118,9 @@ def register_routes(app):  # noqa: C901, PLR0915
         else:
             response.headers['Access-Control-Allow-Origin'] = app.config['CANVAS_API_URL']
         if request.full_path.startswith('/api'):
+            response.headers['Cache-Control'] = 'no-store'
+            response.headers['Pragma'] = 'no-cache'
+
             forwarded_for = request.headers.get('X-Forwarded-For')
             forwarded_for = forwarded_for.split(',')[0] if forwarded_for else None
 
