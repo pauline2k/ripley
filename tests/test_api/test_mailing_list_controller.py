@@ -614,11 +614,11 @@ def _api_create_mailing_list(
         expected_status_code=200,
         name=None,
 ):
-    params = {'canvasSiteId': canvas_site_id}
+    params = {}
     if name:
         params['name'] = name
     response = client.post(
-        '/api/mailing_list/create',
+        f'/api/mailing_list/{canvas_site_id}/create',
         data=json.dumps(params),
         content_type='application/json',
     )

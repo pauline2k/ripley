@@ -64,12 +64,11 @@ def welcome_email_activate():
         raise ResourceNotFoundError(f'bCourses site {current_user.canvas_site_id} has no mailing list.')
 
 
-@app.route('/api/mailing_list/create', methods=['POST'])
+@app.route('/api/mailing_list/<canvas_site_id>/create', methods=['POST'])
 @canvas_role_required('TeacherEnrollment', 'TaEnrollment', 'Lead TA', 'Reader', 'CanvasAdmin')
-def create_mailing_lists():
+def create_mailing_list(canvas_site_id):
     try:
         params = request.get_json()
-        canvas_site_id = params.get('canvasSiteId')
         populate = params.get('populate') or False
         canvas_site = canvas.get_course(canvas_site_id) if canvas_site_id else None
         if not canvas_site:
