@@ -92,7 +92,6 @@ def search_users():
 
 def _campus_user_to_api_json(user):
     return {
-        'affiliations': user['affiliations'],
         'emailAddress': user['email_address'],
         'firstName': user['first_name'],
         'lastName': user['last_name'],
