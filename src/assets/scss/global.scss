@@ -111,6 +111,15 @@ html, body {
   vertical-align: middle !important;
 }
 
+// Higher contrast on Vuetify placeholders
+
+.v-field__field .v-label {
+  opacity: 0.8;
+}
+.v-field__input::placeholder {
+  opacity: 0.8 !important;
+}
+
 @media print {
   html,
   body {
