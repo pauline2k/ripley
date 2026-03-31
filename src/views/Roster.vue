@@ -36,11 +36,11 @@
               <v-text-field
                 id="roster-search"
                 v-model="search"
-                aria-label="Search people by name or S I D"
+                aria-label="Search students by name or S I D"
                 class="roster-search-input mr-2"
                 density="compact"
                 hide-details
-                placeholder="Search People"
+                placeholder="Search Students by Name or SID"
                 type="search"
                 variant="outlined"
               />
