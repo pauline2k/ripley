@@ -33,7 +33,10 @@
             <OutboundLink :id="`student-email-${student.studentId}`" :href="`mailto:${student.email}`" hide-icon>
               <div class="sr-only">Email </div>
               <div class="page-roster-student-name font-weight-regular">{{ student.firstName }}</div>
-              <span class="sr-only">&NonBreakingSpace;</span><div class="page-roster-student-name">{{ student.lastName }}</div>
+              <span class="sr-only">&NonBreakingSpace;</span><div class="page-roster-student-name">
+                {{ student.lastName }}
+                <v-icon class="photo-email-icon" :icon="mdiEmailOutline" size="x-small" />
+              </div>
             </OutboundLink>
           </div>
         </v-card-title>
@@ -61,6 +64,10 @@
     </li>
   </ul>
 </template>
+
+<script setup>
+import {mdiEmailOutline} from '@mdi/js'
+</script>
 
 <script>
 import Context from '@/mixins/Context'
@@ -155,6 +162,9 @@ export default {
   }
   .photo-list {
     display: table;
+  }
+  .photo-email-icon {
+    display: none;
   }
   .photo-wrapper {
     float: none;
