@@ -6,6 +6,7 @@
       :href="student.profileUrl || `${config.apiBaseUrl}/redirect/canvas/${currentUser.canvasSiteId}/user/${student.uid}`"
       target="_top"
     >
+      <div class="sr-only">Student profile page</div>
       <v-img
         :id="`student-photo-${student.id}`"
         :alt="`Photo of ${student.firstName} ${student.lastName}`"
