@@ -9,9 +9,9 @@
       :disabled="isFetching"
       hide-details
     >
-      <v-radio id="radio-btn-mode-act-as" value="actAs" aria-label="Instructor UID">
+      <v-radio id="radio-btn-mode-act-as" value="actAs" aria-label="Instructor">
         <template #label>
-          <div aria-hidden="true" class="pl-1 text-black text-body-2">Instructor UID</div>
+          <div aria-hidden="true" class="pl-1 text-black text-body-2">Instructor</div>
         </template>
       </v-radio>
       <v-radio id="radio-btn-mode-section-id" value="bySectionId" aria-label="Section I Deez">
