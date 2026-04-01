@@ -11,33 +11,28 @@
         class="avoid-break-inside-when-print mb-2 text-center v-card-roster-photo"
         elevation="0"
       >
-        <a
-          :id="`student-profile-url-${student.studentId}`"
-          class="text-decoration-none"
-          :href="student.profileUrl || `${config.apiBaseUrl}/redirect/canvas/${currentUser.canvasSiteId}/user/${student.uid}`"
-          target="_top"
-        >
-          <RosterPhoto
-            :on-load="() => student.hasRosterPhotoLoaded = true"
-            :photo-url="photoUrls[student.studentId]"
-            :show-one-photo-per-page="showOnePhotoPerPage"
-            :student="student"
-          />
-        </a>
+        <RosterPhoto
+          :on-load="() => student.hasRosterPhotoLoaded = true"
+          :photo-url="photoUrls[student.studentId]"
+          :show-one-photo-per-page="showOnePhotoPerPage"
+          :student="student"
+        />
         <v-card-title class="py-0 text-subtitle-2">
           <div v-if="!student.email" :id="`student-without-email-${student.studentId}`">
             <div class="page-roster-student-name font-weight-regular">{{ student.firstName }} </div>
             <div class="page-roster-student-name">{{ student.lastName }}</div>
           </div>
           <div v-if="student.email" class="pt-2">
-            <OutboundLink :id="`student-email-${student.studentId}`" :href="`mailto:${student.email}`" hide-icon>
-              <div class="sr-only">Email </div>
-              <div class="page-roster-student-name font-weight-regular">{{ student.firstName }}</div>
-              <span class="sr-only">&NonBreakingSpace;</span><div class="page-roster-student-name">
+            <div class="page-roster-student-name">
+              <OutboundLink :id="`student-email-${student.studentId}`" :href="`mailto:${student.email}`" hide-icon>
+                <span class="sr-only">Email </span>
+                <span class="font-weight-regular">{{ student.firstName }}</span>
+                <br>
+                <span class="sr-only">&NonBreakingSpace;</span>
                 {{ student.lastName }}
                 <v-icon class="photo-email-icon" :icon="mdiEmailOutline" size="x-small" />
-              </div>
-            </OutboundLink>
+              </OutboundLink>
+            </div>
           </div>
         </v-card-title>
         <v-card-text>

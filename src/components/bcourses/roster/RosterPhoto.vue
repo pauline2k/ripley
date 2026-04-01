@@ -1,17 +1,26 @@
 <template>
-  <v-img
-    :id="`student-photo-${student.id}`"
-    :alt="`Photo of ${student.firstName} ${student.lastName}`"
-    :aria-label="`Photo of ${student.firstName} ${student.lastName}`"
-    class="photo"
-    :class="showOnePhotoPerPage ? 'photo-one-per-page' : ''"
-    eager
-    :lazy-src="photoPlaceholder"
-    transition="none"
-    :src="photoSrc"
-    @error="imageError"
-    @load="onLoad"
-  />
+  <div class="photo-outer">
+    <a
+      :id="`student-profile-url-${student.studentId}`"
+      class="text-decoration-none"
+      :href="student.profileUrl || `${config.apiBaseUrl}/redirect/canvas/${currentUser.canvasSiteId}/user/${student.uid}`"
+      target="_top"
+    >
+      <v-img
+        :id="`student-photo-${student.id}`"
+        :alt="`Photo of ${student.firstName} ${student.lastName}`"
+        :aria-label="`Photo of ${student.firstName} ${student.lastName}`"
+        class="photo"
+        :class="showOnePhotoPerPage ? 'photo-one-per-page' : ''"
+        eager
+        :lazy-src="photoPlaceholder"
+        transition="none"
+        :src="photoSrc"
+        @error="imageError"
+        @load="onLoad"
+      />
+    </a>
+  </div>
 </template>
 
 <script setup>
@@ -69,12 +78,16 @@ export default {
 <style scoped>
 .photo {
   height: 96px;
-  margin: 0 auto;
-  width: auto;
+  width: 72px;
+}
+.photo-outer {
+  display: flex;
+  justify-content: center;
 }
 @media print {
   .photo {
     height: 130px;
+    width: auto;
   }
   .photo-one-per-page {
     height: 400px;
