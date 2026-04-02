@@ -1,12 +1,5 @@
 <template>
   <v-app>
-    <div
-      id="announcer"
-      :aria-live="context.screenReaderAlert.politeness"
-      class="sr-only"
-    >
-      {{ context.screenReaderAlert.message }}
-    </div>
     <div v-if="!$isInIframe">
       <a
         id="skip-to-content-link"
@@ -18,6 +11,15 @@
       </a>
     </div>
     <v-main class="v-main-when-print">
+      <div
+        id="announcer"
+        :role="announcerRole"
+        :aria-live="context.screenReaderAlert.politeness"
+        aria-atomic="true"
+        class="sr-only"
+      >
+        {{ context.screenReaderAlert.message }}
+      </div>
       <PageLoadProgress v-if="context.isLoading" />
       <router-view v-if="context.applicationState.status === 200" />
       <Error v-if="context.applicationState.status !== 200" />
@@ -26,11 +28,15 @@
 </template>
 
 <script setup>
+import {computed} from 'vue'
 import Error from '@/views/Error'
 import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
 import {useContextStore} from '@/stores/context'
 
 const context = useContextStore()
+const announcerRole = computed(() =>
+  context.screenReaderAlert.politeness === 'assertive' ? 'alert' : 'status'
+)
 </script>
 
 <!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
