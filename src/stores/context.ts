@@ -76,15 +76,18 @@ export const useContextStore = defineStore('context', {
       this.isLoading = false
       const route = router.currentRoute
       if (!get(route, 'value.meta.announcer.skip')) {
-        this.screenReaderAlert.message = `${String(get(route, 'value.name', ''))} page has loaded.`
-        this.screenReaderAlert.politeness = 'assertive'
+        const name = String(get(route, 'value.name', ''))
+        this.alertScreenReader(`${name} page has loaded.`, 'polite')
       }
-      putFocusNextTick(focusTarget || 'page-title')
+      nextTick(() => {
+        setTimeout(() => putFocusNextTick(focusTarget || 'page-title'), 150)
+      })
     },
     loadingStart(route?: object) {
       this.isLoading = true
       if (!get(route, 'meta.announcer.skip')) {
-        this.screenReaderAlert.message = `${String(get(route, 'name', ''))} page is loading.`
+        const name = String(get(route, 'name', ''))
+        this.alertScreenReader(`${name} page is loading.`, 'polite')
       }
     },
     resetApplicationState() {
