@@ -63,7 +63,6 @@ def send_welcome_emails(mailing_list):
     payload = {
         'from': 'bCourses Mailing Lists <no-reply@bcourses-mail.berkeley.edu>',
         'subject': mailing_list.welcome_email_subject,
-        'html': mailing_list.welcome_email_body,
         'text': TagStripper().text_format_email_body(mailing_list.welcome_email_body),
     }
     results = {'successes': [], 'total': 0}

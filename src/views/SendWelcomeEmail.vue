@@ -128,22 +128,12 @@
               <label for="input-message" class="text-subtitle-1">
                 Message
               </label>
-              <ckeditor
+              <v-textarea
                 id="input-message"
                 v-model="body"
-                :config="{
-                  codeBlock: {
-                    indentSequence: '  '
-                  },
-                  initialData: '',
-                  link: {
-                    addTargetToExternalLinks: true,
-                    defaultProtocol: 'http://'
-                  },
-                  toolbar: ['bold', 'italic', 'bulletedList', 'numberedList', 'link']
-                }"
-                :editor="editor"
-                tag-name="textarea"
+                variant="outlined"
+                bg-color="white"
+                :rules="[s => !!s || 'Required']"
               />
             </template>
             <template v-else>
@@ -201,8 +191,6 @@ import {mdiFileDownloadOutline} from '@mdi/js'
 </script>
 
 <script>
-import CKEditor from '@ckeditor/ckeditor5-vue'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1.vue'
 import MailingList from '@/mixins/MailingList'
@@ -221,7 +209,6 @@ import {trim} from 'lodash'
 export default {
   name: 'SendWelcomeEmail',
   components: {
-    ckeditor: CKEditor.component,
     Header1,
     OutboundLink,
     SpinnerWithinButton
@@ -233,7 +220,6 @@ export default {
       success: []
     },
     body: '',
-    editor: ClassicEditor,
     errorMessages: [],
     isCreating: false,
     isDownloading: false,
@@ -318,19 +304,5 @@ ol {
 }
 ul {
   margin-left: 16px;
-}
-.ck.ck-editor__editable_inline {
-  min-height: 150px;
-  padding: 0 15px;
-}
-.ck.ck-editor__editable_inline ol {
-  margin: 0 0 10px 20px;
-}
-.ck.ck-editor__editable_inline p {
-  margin: 0 0 10px 0;
-}
-.ck.ck-editor__editable_inline ul {
-  list-style-type: disc;
-  margin: 0 0 10px 20px;
 }
 </style>
