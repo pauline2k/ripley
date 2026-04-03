@@ -54,7 +54,7 @@
             </span>
             <div class="pt-1">
               For detailed instructions, see:
-              "<OutboundLink href="https://community.canvaslms.com/docs/DOC-26521-how-do-i-enable-a-grading-scheme-for-a-course">How do I enable a grading scheme for a course?</OutboundLink>"
+              "<OutboundLink href="https://community.instructure.com/en/kb/articles/661121-how-do-i-enable-a-grading-scheme-for-a-course">How do I enable a grading scheme for a course?</OutboundLink>"
             </div>
           </div>
           <h2 class="grade-export-sub-header">2. Post all assignment grades:</h2>

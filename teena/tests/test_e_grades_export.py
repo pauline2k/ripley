@@ -72,6 +72,11 @@ class TestNoGradingSchemeAndAssignmentUnPosted:
         self.e_grades_page.load_embedded_tool(test.course_site)
         self.e_grades_page.click_course_settings_button(test.course_site)
 
+    def test_how_enable_grading_scheme_link(self):
+        self.e_grades_page.load_embedded_tool(test.course_site)
+        title = 'How do I enable a grading scheme for a course'
+        assert self.e_grades_page.is_external_link_valid(self.e_grades_page.HOW_TO_ENABLE_GRADING_SCHEME_LINK, title)
+
     def test_how_post_grades_for_assignment_link(self):
         self.e_grades_page.load_embedded_tool(test.course_site)
         title = 'How do I post grades for an assignment'

@@ -37,6 +37,7 @@ from teena.test_utils import utils
 class EGradesPage(RipleyPages):
 
     BACK_TO_GRADEBOOK_LINK = By.LINK_TEXT, 'Back to Gradebook'
+    HOW_TO_ENABLE_GRADING_SCHEME_LINK = By.PARTIAL_LINK_TEXT, 'How do I enable a grading scheme for a course?'
     HOW_TO_POST_GRADES_LINK = By.PARTIAL_LINK_TEXT, 'How do I post grades for an assignment?'
     COURSE_SETTINGS_BUTTON = By.ID, 'canvas-course-settings-href'
 
