@@ -23,20 +23,18 @@
         <dl class="mb-0">
           <dt class="user-search-notice-description-term">UC Berkeley Faculty, Staff and Students</dt>
           <dd class="user-search-notice-description">
-            UC Berkeley faculty, staff and students <em>(regular and concurrent enrollment)</em> can be found in the
-            <OutboundLink href="http://directory.berkeley.edu/">CalNet Directory</OutboundLink>
-            and be added to your site using their CalNet UID or official email address.
+            <OutboundLink href="http://directory.berkeley.edu/">Find UC Berkeley faculty, staff and students <em>(regular and concurrent enrollment)</em> in the CalNet Directory</OutboundLink>
+            to be added to your site using their CalNet UID or official email address.
           </dd>
           <dt class="user-search-notice-description-term">Guests</dt>
           <dd class="user-search-notice-description">
-            Peers from other institutions or guests from the community must be sponsored with a
-            <OutboundLink href="https://https://calnet.berkeley.edu/calnet-departments/calnet-sponsored-guests">CalNet Sponsored Guest Account.</OutboundLink>
+            <OutboundLink href="https://https://calnet.berkeley.edu/calnet-departments/calnet-sponsored-guests">Sponsor peers from other institutions or guests from the community  with a CalNet Sponsored Guest Account.</OutboundLink>
             Do NOT request a CalNet Sponsored Guest Account for concurrent enrollment students.
           </dd>
           <dt class="user-search-notice-description-term">More Information</dt>
           <dd class="user-search-notice-description">
-            Go to this
-            <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010842">bCourses help page</OutboundLink>
+            See our
+            <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010842">"How do I add users to my course site?" bCourses help page</OutboundLink>
             for more information about adding people to bCourses sites.
           </dd>
         </dl>
