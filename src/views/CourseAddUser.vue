@@ -104,7 +104,7 @@
                 :disabled="isSearching || isAddingUser"
                 hide-details
               >
-                <v-radio id="radio-btn-name" aria-label="Last Name, First Name" value="name">
+                <v-radio id="radio-btn-name" aria-label="Last Name comma First Name" value="name">
                   <template #label>
                     <div aria-hidden="true" class="pl-1 text-black text-body-2">Last Name, First Name</div>
                   </template>
@@ -114,7 +114,7 @@
                     <div aria-hidden="true" class="pl-1 text-black text-body-2">Email</div>
                   </template>
                 </v-radio>
-                <v-radio id="radio-btn-uid" aria-label="UID" value="uid">
+                <v-radio id="radio-btn-uid" aria-label="CalNet U I D" value="uid">
                   <template #label>
                     <div aria-hidden="true" class="pl-1 text-black text-body-2">CalNet UID</div>
                   </template>
