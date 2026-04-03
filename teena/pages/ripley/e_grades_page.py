@@ -61,6 +61,9 @@ class EGradesPage(RipleyPages):
     def load_embedded_tool(self, course_site):
         self.load_tool_in_canvas(self.embedded_tool_path(course_site))
 
+    def is_continue_aria_disabled(self):
+        return self.element(self.CONTINUE_BUTTON).get_dom_attribute('aria-disabled') == 'true'
+
     def click_course_settings_button(self, course_site):
         self.wait_for_page_and_click(self.COURSE_SETTINGS_BUTTON)
         self.when_url_contains(f'{utils.canvas_base_url()}/courses/{course_site.site_id}/settings',
