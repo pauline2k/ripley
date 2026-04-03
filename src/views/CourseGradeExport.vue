@@ -44,12 +44,11 @@
               >Course Settings</a>
             </span>
             <span v-if="noGradingStandardEnabled">
-              Set a grading scheme in
               <a
                 id="canvas-course-settings-href"
                 :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`"
                 target="_top"
-              >Course Settings</a>
+              >Set a grading scheme in Course Settings</a>
               and return once completed.
             </span>
             <div class="pt-1">
@@ -60,13 +59,15 @@
           <h2 class="grade-export-sub-header">2. Post all assignment grades:</h2>
           <div class="pb-8 pl-5 pt-2">
             <div>
-              All assignment grades must be posted (published/unmuted) to ensure that your E-Grades export matches what you see in the gradebook. To confirm that all grades have been posted, review all columns in
-              <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">your gradebook</a>
-              for any assignments with a crossed-out eye icon
+              All assignment grades must be posted (published/unmuted) to ensure that your E-Grades export matches what you see in the gradebook. To confirm that all grades have been posted,
+              <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">
+                review all columns in your gradebook for unposted assignment grades
+              </a>
+              indicated by a crossed-out eye icon
               <span class="nowrap">
                 (<img class="grade-export-image-inline" src="@/assets/images/crossed_out_eye.png" alt="Crossed-out eye icon">)
               </span>
-              indicating that an assignment has unposted grades.
+              .
             </div>
             <div class="pt-2">
               To post unposted grades:
