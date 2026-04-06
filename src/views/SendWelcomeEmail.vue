@@ -2,6 +2,8 @@
   <div v-if="!isLoading" class="ma-5">
     <Header1 text="Mailing List" />
     <v-alert
+      id="mailing-list-created-alert"
+      tabindex="-1"
       density="compact"
       role="alert"
       type="success"
@@ -238,7 +240,7 @@ export default {
     getMyMailingList().then(
       data => {
         this.updateDisplay(data)
-        this.$ready('page-header')
+        this.$ready('mailing-list-created-alert')
       }
     )
   },
@@ -261,9 +263,10 @@ export default {
       if (this.isWelcomeEmailValid) {
         this.alertScreenReader('Saving welcome email')
         this.isSaving = true
-        updateWelcomeEmail(false, this.body, this.subject).then(
+        updateWelcomeEmail(this.isWelcomeEmailActive, this.body, this.subject).then(
           response => {
             this.updateDisplay(response)
+            this.alertScreenReader('Welcome email updated')
             putFocusNextTick('send-welcome-email-header')
           }
         ).then(() => {
