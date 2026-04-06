@@ -4,7 +4,7 @@
     :aria-label="ariaLabel"
     :color="color"
     :disabled="disabled"
-    :prepend-icon="prependIcon"
+    :prepend-icon="inProgress ? undefined : prependIcon"
     :size="size"
     :variant="variant"
     @click.prevent="action"
