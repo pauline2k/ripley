@@ -63,18 +63,13 @@
         </div>
         <div class="mt-2">
           <v-alert
+            v-if="!mailingList.welcomeEmailBody || !mailingList.welcomeEmailSubject"
             density="compact"
             role="alert"
             :type="isWelcomeEmailActive ? 'success' : 'info'"
           >
-            <span v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject">
-              <span v-if="isWelcomeEmailActive">Welcome email {{ isToggling ? 'is being' : '' }} activated.</span>
-              <span v-if="!isWelcomeEmailActive">Sending welcome emails is paused.</span>
-            </span>
-            <span v-if="!mailingList.welcomeEmailBody || !mailingList.welcomeEmailSubject">
-              You can activate the welcome email
-              <span class="font-italic">after</span> you enter email subject and message below.
-            </span>
+            You can activate the welcome email
+            <span class="font-italic">after</span> you enter email subject and message below.
           </v-alert>
           <div class="ml-5 w-25">
             <v-switch
@@ -92,8 +87,8 @@
                   size="24"
                   class="ms-2"
                 />
-                <span v-if="!isToggling" class="text-no-wrap">
-                  {{ isWelcomeEmailActive ? 'Active' : 'Inactive' }}
+                <span v-if="!isToggling" class="text-no-wrap" aria-live="assertive">
+                  {{ isWelcomeEmailActive ? 'Welcome email activated' : 'Sending welcome emails is paused' }}
                 </span>
               </template>
             </v-switch>
@@ -128,7 +123,7 @@
           <div class="mt-3">
             <template v-if="isEditing">
               <label for="input-message" class="text-subtitle-1">
-                Message
+                Message body
               </label>
               <v-textarea
                 id="input-message"
@@ -140,7 +135,7 @@
             </template>
             <template v-else>
               <div class="text-subtitle-1">
-                Message
+                Message body
               </div>
               <div class="pb-3 pt-1">
                 <div
@@ -288,7 +283,6 @@ export default {
       toggleEmailActivation().then(data => {
         this.isWelcomeEmailActive = !!data.welcomeEmailActive
         this.isToggling = false
-        this.alertScreenReader(`${this.isWelcomeEmailActive ? 'Enabled' : 'Disabled' } welcome email`)
       })
     },
     updateDisplay(data) {
