@@ -125,11 +125,13 @@
                   <v-text-field
                     id="search-text"
                     v-model="searchText"
-                    :aria-label="`enter search terms, search by ${searchType === 'uid' ? 'CalNet U I D' : searchType}`"
+                    aria-autocomplete="none"
+                    autocomplete="off"
+                    :aria-label="searchFieldAriaLabel"
                     density="comfortable"
                     :disabled="isSearching || isAddingUser"
                     hide-details
-                    :placeholder="searchType === 'name' ? 'Last name, first name' : (searchType === 'uid' ? 'UID' : 'Email')"
+                    :placeholder="searchFieldPlaceholder"
                     variant="outlined"
                     @keydown.enter="submitSearch"
                   />
@@ -336,6 +338,30 @@ export default {
   computed: {
     selectedUserFullName() {
       return `${this.selectedUser.firstName} ${this.selectedUser.lastName}`
+    },
+    searchFieldAriaLabel() {
+      switch (this.searchType) {
+      case 'name':
+        return 'Search by last name comma first name'
+      case 'email':
+        return 'Search by email address'
+      case 'uid':
+        return 'Search by CalNet U I D'
+      default:
+        return 'Person search'
+      }
+    },
+    searchFieldPlaceholder() {
+      switch (this.searchType) {
+      case 'name':
+        return 'e.g. Doe, Jane'
+      case 'email':
+        return 'name@berkeley.edu'
+      case 'uid':
+        return 'e.g. 123456789'
+      default:
+        return ''
+      }
     }
   },
   created() {
