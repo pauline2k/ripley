@@ -61,60 +61,44 @@
 </template>
 
 <script setup>
+import {each, trim, truncate} from 'lodash'
 import {mdiEmailOutline} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
+import {onMounted, ref} from 'vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import photoUnavailable from '@/assets/images/photo_unavailable.svg'
 import RosterPhoto from '@/components/bcourses/roster/RosterPhoto'
-import {each, trim, truncate} from 'lodash'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'RosterPhotos',
-  components: {OutboundLink, RosterPhoto},
-  mixins: [Context],
-  props: {
-    showOnePhotoPerPage: {
-      required: true,
-      type: Boolean
-    },
-    students: {
-      required: true,
-      type: Array
-    }
+const props = defineProps({
+  showOnePhotoPerPage: {
+    required: true,
+    type: Boolean
   },
-  data: () => ({
-    context: 'canvas',
-    photoUrls: {}
-  }),
-  watch: {
-    students() {
-      this.reloadPhotos()
-    }
-  },
-  mounted() {
-    this.reloadPhotosDelayed()
-  },
-  methods: {
-    loadPhoto(student) {
-      const photoUrl = trim(student.photoUrl || '')
-      this.photoUrls[student.studentId] = photoUrl ? photoUrl.startsWith('http') ? photoUrl : `${this.config.apiBaseUrl}${photoUrl}` : photoUnavailable
-    },
-    reloadPhotos() {
-      each(this.students, this.loadPhoto)
-    },
-    reloadPhotosDelayed() {
-      // Distribute photo loading requests with a slight delay so as not to bottleneck the browser.
-      let interval = 0
-      each(this.students, student => {
-        setTimeout(() => this.loadPhoto(student), interval)
-        interval = interval + 10
-      })
-    },
-    truncate
+  students: {
+    required: true,
+    type: Array
   }
+})
+
+const contextStore = useContextStore()
+const photoUrls = ref({})
+
+onMounted(() => {
+  reloadPhotosDelayed()
+})
+
+const loadPhoto = student => {
+  const photoUrl = trim(student.photoUrl || '')
+  photoUrls.value[student.studentId] = photoUrl ? photoUrl.startsWith('http') ? photoUrl : `${contextStore.config.apiBaseUrl}${photoUrl}` : photoUnavailable
+}
+
+const reloadPhotosDelayed = () => {
+  // Distribute photo loading requests with a slight delay so as not to bottleneck the browser.
+  let interval = 0
+  each(props.students, student => {
+    setTimeout(() => loadPhoto(student), interval)
+    interval = interval + 10
+  })
 }
 </script>
 
