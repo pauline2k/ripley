@@ -85,7 +85,8 @@ class TestNoGradingSchemeAndAssignmentUnPosted:
     def test_no_continuing(self):
         self.e_grades_page.load_embedded_tool(test.course_site)
         self.e_grades_page.when_present(self.e_grades_page.CONTINUE_BUTTON, utils.get_medium_timeout())
-        assert not self.e_grades_page.is_el_enabled(self.e_grades_page.CONTINUE_BUTTON)
+        assert self.e_grades_page.is_el_enabled(self.e_grades_page.CONTINUE_BUTTON)
+        assert self.e_grades_page.is_continue_aria_disabled()
 
     def test_cancel_e_grades(self):
         self.e_grades_page.click_cancel(test.course_site)

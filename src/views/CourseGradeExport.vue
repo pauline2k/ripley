@@ -32,69 +32,73 @@
         <v-col>
           <BackToGradebook />
           <Header1 class="grade-export-header mb-3 mt-2" text="Before exporting your E-Grades:" />
-          <h2 class="grade-export-sub-header">1. Select a grading scheme</h2>
-          <div class="pb-4 pl-5 pt-2">
-            <span v-if="!noGradingStandardEnabled">
-              You have already set a grading scheme.
-              You can view your grading scheme or select an alternate grading scheme in
-              <a
-                id="canvas-course-settings-href"
-                :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`"
-                target="_top"
-              >Course Settings</a>
-            </span>
-            <span v-if="noGradingStandardEnabled">
-              <a
-                id="canvas-course-settings-href"
-                :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`"
-                target="_top"
-              >Set a grading scheme in Course Settings</a>
-              and return once completed.
-            </span>
-            <div class="pt-1">
-              For detailed instructions, see:
-              "<OutboundLink href="https://community.instructure.com/en/kb/articles/661121-how-do-i-enable-a-grading-scheme-for-a-course">How do I enable a grading scheme for a course?</OutboundLink>"
+          <div id="egrades-export-step-grading-scheme">
+            <h2 class="grade-export-sub-header">1. Select a grading scheme</h2>
+            <div class="pb-4 pl-5 pt-2">
+              <span v-if="!noGradingStandardEnabled">
+                You have already set a grading scheme.
+                You can view your grading scheme or select an alternate grading scheme in
+                <a
+                  id="canvas-course-settings-href"
+                  :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`"
+                  target="_top"
+                >Course Settings</a>
+              </span>
+              <span v-if="noGradingStandardEnabled">
+                <a
+                  id="canvas-course-settings-href"
+                  :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`"
+                  target="_top"
+                >Set a grading scheme in Course Settings</a>
+                and return once completed.
+              </span>
+              <div class="pt-1">
+                For detailed instructions, see:
+                "<OutboundLink href="https://community.instructure.com/en/kb/articles/661121-how-do-i-enable-a-grading-scheme-for-a-course">How do I enable a grading scheme for a course?</OutboundLink>"
+              </div>
             </div>
           </div>
-          <h2 class="grade-export-sub-header">2. Post all assignment grades:</h2>
-          <div class="pb-8 pl-5 pt-2">
-            <div>
-              All assignment grades must be posted (published/unmuted) to ensure that your E-Grades export matches what you see in the gradebook. To confirm that all grades have been posted,
-              <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">
-                review all columns in your gradebook for unposted assignment grades
-              </a>
-              indicated by a crossed-out eye icon
-              <span class="nowrap">
-                (<img class="grade-export-image-inline" src="@/assets/images/crossed_out_eye.png" alt="Crossed-out eye icon">)
-              </span>
-              .
-            </div>
-            <div class="pt-2">
-              To post unposted grades:
-            </div>
-            <ol class="ml-6 mb-3 mt-1">
-              <li>
-                Mouse over the assignment name and select the three vertical dot menu
-                <span class="nowrap">(<img class="grade-export-image-inline" src="@/assets/images/three_vertical_dots.png" alt="Three vertical dots">)</span>
-              </li>
-              <li>Select "Post grades"</li>
-              <li>Select whether you wish to post grades for "Everyone," or only "Graded" students and click "Post"</li>
-            </ol>
-            <div>
-              <span>
-                For detailed instructions, see: "<OutboundLink href="https://community.instructure.com/en/kb/articles/660846-how-do-i-post-grades-for-an-assignment-in-the-gradebook">How do I post grades for an assignment?</OutboundLink>"
-              </span>
-            </div>
-            <div class="py-2">
-              <strong>
-                In order to avoid errors, we suggest cross-checking final grades in the bCourses gradebook with the
-                output CSV to confirm grades were exported as expected.
-              </strong>
-            </div>
-            <div>
-              If you have used the
-              <OutboundLink href="https://community.canvaslms.com/t5/Instructor-Guide/How-do-I-override-a-student-s-final-grade-in-the-Gradebook/ta-p/946">Final Grade Override</OutboundLink>
-              feature to set student grades, the override grades will be included in the export.
+          <div id="egrades-export-step-post-grades">
+            <h2 class="grade-export-sub-header">2. Post all assignment grades:</h2>
+            <div class="pb-8 pl-5 pt-2">
+              <div>
+                All assignment grades must be posted (published/unmuted) to ensure that your E-Grades export matches what you see in the gradebook. To confirm that all grades have been posted,
+                <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">
+                  review all columns in your gradebook for unposted assignment grades
+                </a>
+                indicated by a crossed-out eye icon
+                <span class="nowrap">
+                  (<img class="grade-export-image-inline" src="@/assets/images/crossed_out_eye.png" alt="Crossed-out eye icon">)
+                </span>
+                .
+              </div>
+              <div class="pt-2">
+                To post unposted grades:
+              </div>
+              <ol class="ml-6 mb-3 mt-1">
+                <li>
+                  Mouse over the assignment name and select the three vertical dot menu
+                  <span class="nowrap">(<img class="grade-export-image-inline" src="@/assets/images/three_vertical_dots.png" alt="Three vertical dots">)</span>
+                </li>
+                <li>Select "Post grades"</li>
+                <li>Select whether you wish to post grades for "Everyone," or only "Graded" students and click "Post"</li>
+              </ol>
+              <div>
+                <span>
+                  For detailed instructions, see: "<OutboundLink href="https://community.instructure.com/en/kb/articles/660846-how-do-i-post-grades-for-an-assignment-in-the-gradebook">How do I post grades for an assignment?</OutboundLink>"
+                </span>
+              </div>
+              <div class="py-2">
+                <strong>
+                  In order to avoid errors, we suggest cross-checking final grades in the bCourses gradebook with the
+                  output CSV to confirm grades were exported as expected.
+                </strong>
+              </div>
+              <div>
+                If you have used the
+                <OutboundLink href="https://community.canvaslms.com/t5/Instructor-Guide/How-do-I-override-a-student-s-final-grade-in-the-Gradebook/ta-p/946">Final Grade Override</OutboundLink>
+                feature to set student grades, the override grades will be included in the export.
+              </div>
             </div>
           </div>
           <div class="text-right">
@@ -109,8 +113,10 @@
             <v-btn
               id="continue-button"
               color="primary"
-              :disabled="noGradingStandardEnabled"
-              @click="switchToSelection"
+              :class="{'grade-export-continue--inactive': noGradingStandardEnabled}"
+              :aria-disabled="noGradingStandardEnabled ? 'true' : undefined"
+              :aria-describedby="noGradingStandardEnabled ? 'egrades-export-step-grading-scheme egrades-export-step-post-grades' : undefined"
+              @click="onContinueClick"
             >
               Continue
             </v-btn>
@@ -340,6 +346,12 @@ export default {
         window.location.href = gradebookUrl
       }
     },
+    onContinueClick() {
+      if (this.noGradingStandardEnabled) {
+        return
+      }
+      this.switchToSelection()
+    },
     initializePnpCutoffGrades() {
       this.enablePnpConversion = 'true'
       this.selectedPnpCutoffGrade = null
@@ -476,6 +488,9 @@ export default {
 .grade-export-select-pnp-cutoff {
   padding-right: 25px;
   width: fit-content;
+}
+.grade-export-continue--inactive {
+  opacity: 0.38;
 }
 .job-progress:after {
   animation: ellipsis steps(4,end) 1800ms infinite;
