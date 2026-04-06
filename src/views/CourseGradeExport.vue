@@ -268,7 +268,7 @@
       </v-row>
     </v-container>
 
-    <div aria-live="polite">
+    <div>
       <v-container v-if="appState === 'loading'">
         <v-row no-gutters>
           <v-col>
@@ -282,7 +282,7 @@
             indeterminate
             size="small"
           />
-          <div class="job-progress text-subtitle-1">The job {{ jobStatus === 'started' ? 'has' : 'is' }} {{ jobStatus }}</div>
+          <div aria-atomic="true" aria-live="polite" class="job-progress text-subtitle-1">The job {{ jobStatus === 'started' ? 'has' : 'is' }} {{ jobStatus }}</div>
         </div>
       </v-container>
     </div>
@@ -407,6 +407,7 @@ export default {
     preloadGrades(type) {
       this.filenameDownloaded = null
       this.selectedType = type
+      this.alertScreenReader('Preparing E-Grades for download.', 'assertive')
       this.appState = 'loading'
       this.jobStatus = 'started'
       iframeScrollToTop()
