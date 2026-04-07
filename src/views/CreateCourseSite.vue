@@ -43,11 +43,11 @@
                 :key="index"
                 aria-controls="official-sections-tabpanel"
                 :aria-selected="term.slug === selectedTerm"
+                class="tab-term-select"
                 :class="{'rounded-ts-lg': index === 0, 'rounded-te-lg': index === 1}"
                 :tabindex="term.slug === selectedTerm ? 0 : -1"
                 :value="term.slug"
                 variant="elevated"
-                width="50%"
               >
                 <span
                   class="font-size-16"
@@ -526,6 +526,9 @@ const updateSemesterData = slug => {
   font-size: 15px !important;
   font-weight: 700 !important;
   line-height: 15px;
+}
+.tab-term-select {
+  flex-grow: 1;
 }
 .tabs-border {
   -moz-border-radius: 0;

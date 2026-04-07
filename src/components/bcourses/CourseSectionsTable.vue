@@ -247,14 +247,13 @@
                 />
               </div>
               <div class="align-center d-flex">
-                bCourses site
                 <OutboundLink
                   :id="`${id}-${section.id}-warning-link`"
                   class="mx-1"
                   :hide-icon="true"
                   :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`"
                 >
-                  {{ section.canvasSites[0].name }}
+                  bCourses site {{ section.canvasSites[0].name }}
                 </OutboundLink>
                 includes this section.
               </div>
