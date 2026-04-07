@@ -1,7 +1,6 @@
 <template>
   <v-alert
     class="mt-2"
-    closable
     close-label="Hide help"
     color="grey-lighten-4"
     @click:close="onCloseHelp"
