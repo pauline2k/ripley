@@ -12,7 +12,7 @@
       :icon="mdiOpenInNew"
       size="x-small"
     />
-    <span class="sr-only print-hide"> (link opens new browser tab)</span>
+    <span class="sr-only print-hide"> (opens in new tab)</span>
   </a>
 </template>
 
