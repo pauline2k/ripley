@@ -12,140 +12,144 @@
     />
     <v-radio-group
       v-model="selection"
+      :aria-activedescendant="get(selection, 'id')"
+      aria-label="site management options"
       class="d-flex"
+      hide-details
     >
-      <ul>
-        <li
-          v-for="option in options"
-          :key="option.id"
-          class="my-2 px-3 py-1"
-          :class="{
-            'highlight-when-hover': !selection,
-            'highlight-when-selected': selection === option
-          }"
-        >
-          <div class="d-flex">
-            <div class="radio-button-container">
-              <v-radio
-                :id="option.id"
-                :aria-label="`${option.header}.`"
-                :class="{'text-grey': !option.isAvailable}"
-                :disabled="!option.isAvailable || isProcessing"
-                :value="option"
-              />
+      <div
+        v-for="option in options"
+        :key="option.id"
+        class="option d-flex my-2 px-3 py-1"
+        :class="{
+          'highlight-when-hover': selection !== option,
+          'highlight-when-selected': selection === option
+        }"
+      >
+        <div class="radio-button-container">
+          <v-radio
+            :id="option.id"
+            :aria-checked="selection === option"
+            :class="{'text-disabled': !option.isAvailable}"
+            :disabled="!option.isAvailable || isProcessing"
+            :value="option"
+          />
+        </div>
+        <div class="list-item-content">
+          <label
+            class="font-size-20 d w-100"
+            :class="{
+              'text-disabled': !option.isAvailable,
+              'text-high-emphasis': option.isAvailable
+            }"
+            :for="option.id"
+          >
+            {{ option.header }}
+          </label>
+          <div v-if="option.id === 'create-course-site'">
+            <div v-if="option.isAvailable" @click="() => selection = option">
+              Set up course sites to communicate with and manage the work of students enrolled in your classes.
             </div>
-            <div class="list-item-content">
-              <label aria-hidden="true" class="w-100" :for="option.id">
-                <h2 :class="{'text-grey': !option.isAvailable}">{{ option.header }}</h2>
-              </label>
-              <div v-if="option.id === 'create-course-site'">
-                <div v-if="option.isAvailable" @click="() => selection = option">
-                  Set up course sites to communicate with and manage the work of students enrolled in your classes.
-                </div>
-                <div v-if="!option.isAvailable" class="text-grey">
-                  To create a course site, you will need to be the official instructor of record for a course.
-                  If you have not been assigned as the official instructor of record for the course,
-                  please contact your department scheduler.
-                  You will be able to create a course site the day after you have been officially assigned to teach the course.
-                </div>
-              </div>
-              <div
-                v-if="option.id === 'create-project-site'"
-                :class="{'text-grey': !option.isAvailable}"
-                @click="() => selection = option"
-              >
-                Share files and collaborate. Project sites are best suited for instructors and <span :aria-hidden="true">GSIs</span><span class="sr-only">G S I's</span> who already use bCourses.
-                Project sites cannot access all bCourses features and are not intended for lecture, lab, or discussion sections.
-                Learn more about
-                <OutboundLink id="bcourses-project-sites-service-page" href="https://rtl.berkeley.edu/services-programs/bcourses-project-sites">Project Sites</OutboundLink>
-                and
-                <OutboundLink id="berkeley-collaboration-services-information" href="https://bconnected.berkeley.edu/collaboration-services">other collaboration tools at UC Berkeley</OutboundLink>.
-              </div>
-              <div v-if="option.id === 'manage-official-sections'" class="pt-2" @click="() => selection = option">
-                <div v-if="!size(coursesByTerm) && !isAdmin" class="font-italic text-grey">
-                  Please create a {{ config.terms.current.name }} or {{ config.terms.next.name }}
-                  course site in order to use the Manage Official Sections tool.
-                </div>
-                <div v-if="size(coursesByTerm)" :class="{'text-grey': !option.isAvailable}">
-                  <div>
-                    Add or remove official section rosters in already-created course sites.
-                  </div>
-                  <div v-if="option.isAvailable" class="pl-3 py-2">
-                    <select
-                      id="course-sections"
-                      v-model="canvasSiteId"
-                      aria-label="All your courses"
-                      :disabled="isManageOfficialSectionsDisabled"
-                    >
-                      <option :value="undefined">Choose a course</option>
-                      <optgroup
-                        v-for="(courses, termId) in coursesByTerm"
-                        :key="termId"
-                        class="text-subtitle-1"
-                        :label="getTermName(termId)"
-                      >
-                        <option
-                          v-for="course in labelCourses(courses)"
-                          :id="`canvas-site-${course.canvasSiteId}`"
-                          :key="course.canvasSiteId"
-                          :aria-label="`${getTermName(termId)} group: ${course.courseCode} ${course.name}`"
-                          :value="course.canvasSiteId"
-                          v-html="course.label"
-                        />
-                      </optgroup>
-                    </select>
-                  </div>
-                </div>
-                <div v-if="isAdmin" class="mt-2 pl-3">
-                  <v-text-field
-                    id="canvas-site-id-input"
-                    v-model="canvasSiteId"
-                    density="compact"
-                    :disabled="isManageOfficialSectionsDisabled"
-                    :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
-                    hide-details
-                    label="Canvas Site ID"
-                    maxlength="9"
-                    style="width: 148px"
-                    variant="outlined"
-                    @keydown.enter="goNext"
-                  />
-                </div>
-                <div
-                  v-if="error"
-                  aria-live="polite"
-                  class="font-italic font-weight-medium text-red"
-                  role="alert"
-                >
-                  {{ error }}
-                </div>
-              </div>
+            <div v-if="!option.isAvailable" class="text-medium-emphasis">
+              To create a course site, you will need to be the official instructor of record for a course.
+              If you have not been assigned as the official instructor of record for the course,
+              please contact your department scheduler.
+              You will be able to create a course site the day after you have been officially assigned to teach the course.
             </div>
           </div>
-        </li>
-      </ul>
+          <div
+            v-if="option.id === 'create-project-site'"
+            :class="{'text-medium-emphasis': !option.isAvailable}"
+            @click="() => selection = option"
+          >
+            Share files and collaborate. Project sites are best suited for instructors and <span :aria-hidden="true">GSIs</span><span class="sr-only">G S I's</span> who already use bCourses.
+            Project sites cannot access all bCourses features and are not intended for lecture, lab, or discussion sections.
+            <OutboundLink id="bcourses-project-sites-service-page" href="https://rtl.berkeley.edu/services-programs/bcourses-project-sites">Learn more about Project Sites</OutboundLink>
+            and
+            <OutboundLink id="berkeley-collaboration-services-information" href="https://bconnected.berkeley.edu/collaboration-services">other collaboration tools at UC Berkeley</OutboundLink>.
+          </div>
+          <div v-if="option.id === 'manage-official-sections'" class="pt-2" @click="() => selection = option">
+            <div v-if="!size(coursesByTerm) && !isAdmin" class="font-italic text-medium-emphasis">
+              Please create a {{ config.terms.current.name }} or {{ config.terms.next.name }}
+              course site in order to use the Manage Official Sections tool.
+            </div>
+            <div v-if="size(coursesByTerm)" :class="{'text-disabled': !option.isAvailable}">
+              <div>
+                Add or remove official section rosters in already-created course sites.
+              </div>
+              <div v-if="option.isAvailable" class="pl-3 py-2">
+                <select
+                  id="course-sections"
+                  v-model="canvasSiteId"
+                  aria-label="All your courses"
+                  :disabled="isManageOfficialSectionsDisabled"
+                >
+                  <option :value="undefined">Choose a course</option>
+                  <optgroup
+                    v-for="(courses, termId) in coursesByTerm"
+                    :key="termId"
+                    class="text-subtitle-1"
+                    :label="getTermName(termId)"
+                  >
+                    <option
+                      v-for="course in labelCourses(courses)"
+                      :id="`canvas-site-${course.canvasSiteId}`"
+                      :key="course.canvasSiteId"
+                      :aria-label="`${getTermName(termId)} group: ${course.courseCode} ${course.name}`"
+                      :value="course.canvasSiteId"
+                      v-html="course.label"
+                    />
+                  </optgroup>
+                </select>
+              </div>
+            </div>
+            <div v-if="isAdmin" class="mt-2 pl-3">
+              <v-text-field
+                id="canvas-site-id-input"
+                v-model="canvasSiteId"
+                autocomplete="on"
+                density="compact"
+                :disabled="isManageOfficialSectionsDisabled"
+                :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
+                hide-details
+                label="Canvas Site ID"
+                maxlength="9"
+                style="width: 148px"
+                variant="outlined"
+                @keydown.enter="goNext"
+              />
+            </div>
+            <div
+              v-if="error"
+              aria-live="polite"
+              class="font-italic font-weight-medium text-red"
+              role="alert"
+            >
+              {{ error }}
+            </div>
+          </div>
+        </div>
+      </div>
     </v-radio-group>
-    <div class="pr-8">
-      <v-btn
-        id="go-next-btn"
-        class="float-right mt-1"
-        color="primary"
-        :disabled="isButtonDisabled || isProcessing"
-        size="large"
-        @click="goNext"
-      >
-        <span v-if="isProcessing">
-          <SpinnerWithinButton /> Next
-        </span>
-        <span v-if="!isProcessing">Next</span>
-      </v-btn>
-    </div>
+    <v-btn
+      id="go-next-btn"
+      class="float-right mt-1"
+      color="primary"
+      :disabled="isButtonDisabled || isProcessing"
+      size="large"
+      @click="goNext"
+    >
+      <span v-if="isProcessing">
+        <SpinnerWithinButton /> Next
+      </span>
+      <span v-if="!isProcessing">Next</span>
+    </v-btn>
   </div>
 </template>
 
 <script lang="ts" setup>
 import {computed, onMounted, ref, watch} from 'vue'
-import {each, map, size, trim, uniq} from 'lodash'
+import {each, get, map, size, trim, uniq} from 'lodash'
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink.vue'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
@@ -255,20 +259,15 @@ const labelCourses = (courses: CanvasSite[]) => {
 </script>
 
 <style scoped lang="scss">
-li {
-  border: 1px solid #fff;
-}
-ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
 .highlight-when-hover:hover {
-  background-color: rgb(233, 239, 243);
+  background-color: rgba(var(--v-theme-surface-light));
 }
 .highlight-when-selected {
-  background-color: rgb(233, 239, 243);
-  border: 1px solid #d0d0d0 !important;
+  background-color: rgba(var(--v-theme-surface-variant));
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity)) !important;
+}
+.option {
+  border: 1px solid transparent;
 }
 .list-item-content {
   color: black;
