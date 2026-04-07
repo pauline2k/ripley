@@ -134,7 +134,7 @@
                 </div>
                 <div class="ml-12">
                   <div class="pr-2" v-html="job.description" />
-                  <div class="align-start d-flex mt-1">
+                  <div class="align-center d-flex mt-1">
                     <div class="mb-1">
                       <label v-if="job.schedule.type === 'day_at'" :for="`edit-job-schedule-${job.key}`">
                         Daily at {{ job.schedule.value.replaceAll(',', ', ') }} (UTC)
@@ -147,13 +147,12 @@
                       <v-btn
                         :id="`edit-job-schedule-${job.key}`"
                         :aria-label="`Edit job schedule ${job.key}`"
+                        density="comfortable"
                         :disabled="!job.disabled || isRunning(job.key)"
-                        icon
+                        :icon="mdiPlaylistEdit"
                         variant="text"
                         @click.stop="scheduleEditOpen(job)"
-                      >
-                        <v-icon :icon="mdiPlaylistEdit" />
-                      </v-btn>
+                      />
                     </div>
                   </div>
                 </div>
@@ -203,7 +202,13 @@
             </v-card-text>
             <v-card-actions>
               <v-spacer />
-              <v-btn color="blue darken-1" text @click="scheduleEditCancel">Cancel</v-btn>
+              <v-btn
+                color="blue darken-1"
+                text
+                @click="scheduleEditCancel"
+              >
+                Cancel
+              </v-btn>
               <v-btn
                 color="blue darken-1"
                 :disabled="disableScheduleSave"
@@ -381,6 +386,7 @@ const toggleDisabled = (job, isDisabled: boolean) => {
   margin: -10px 0 0 -10px;
 }
 .edit-job-schedule-btn {
-  margin-top: -12px;
+  margin-top: -0.5rem;
+  padding: 6px 8px;
 }
 </style>

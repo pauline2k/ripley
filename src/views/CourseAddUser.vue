@@ -8,8 +8,6 @@
       v-if="showAlerts"
       id="alerts-container"
       aria-live="polite"
-      role="alert"
-      tabindex="-1"
     >
       <div v-if="errorStatus" class="alert alert-error align-center d-flex font-weight-medium">
         <div class="pr-2">
@@ -18,42 +16,49 @@
         <div>
           {{ errorStatus }}
         </div>
-        <div class="alert-close-button-container ml-auto">
-          <button
+        <div class="alert-close-button-container d-flex pl-4 ml-auto">
+          <v-btn
             id="hide-search-error-button"
+            aria-label="hide-alert"
+            class="align-self-center bg-transparent text-error"
+            density="compact"
+            :icon="mdiCloseCircle"
+            variant="flat"
             @click="hideAlert('errorStatus')"
-          >
-            <v-icon :icon="mdiCloseCircle" />
-            <span class="sr-only">Hide Alert</span>
-          </button>
+          />
         </div>
       </div>
-      <div v-if="noUserSelectedAlert" class="alert alert-error font-weight-medium">
+      <div v-if="noUserSelectedAlert" class="alert alert-error align-center font-weight-medium d-flex">
         Please select a person from the search results.
-        <div class="alert-close-button-container d-flex ml-4">
-          <button
+        <div class="alert-close-button-container d-flex pl-4 ml-auto">
+          <v-btn
             id="hide-select-user-alert-button"
-            class="align-self-center"
+            aria-label="hide-alert"
+            class="align-self-center bg-transparent text-error"
+            density="compact"
+            :icon="mdiCloseCircle"
+            variant="flat"
             @click="hideAlert('noUserSelectedAlert')"
-          >
-            <v-icon :icon="mdiCloseCircle" />
-            <span class="sr-only">Hide Alert</span>
-          </button>
+          />
         </div>
       </div>
-      <div v-if="searchAlert" class="alert alert-error font-weight-medium">
+      <div v-if="searchAlert" class="alert alert-error align-center font-weight-medium d-flex">
         {{ searchAlert }}
         {{ searchTypeNotice }}
         Please try again.
-        <div class="alert-close-button-container d-flex ml-4">
-          <button
+        <div class="alert-close-button-container d-flex pl-4 ml-auto">
+          <v-btn
             id="hide-search-alert-button"
-            class="align-self-center"
+            aria-label="hide-alert"
+            class="align-self-center bg-transparent text-error"
+            density="compact"
+            :icon="mdiCloseCircle"
+            variant="flat"
             @click="hideAlert('searchAlert')"
           >
             <v-icon :icon="mdiCloseCircle" />
             <span class="sr-only">Hide Alert</span>
-          </button>
+          </v-btn>
         </div>
       </div>
       <div v-if="userSearchResultsCount > userSearchResults.length" class="alert alert-info font-weight-medium">
@@ -67,26 +72,29 @@
       <div
         v-if="additionSuccessMessage"
         id="success-message"
-        class="alert alert-success font-weight-medium"
+        class="alert alert-success font-weight-medium d-flex"
       >
-        <span v-if="userAdded.sectionName">
-          {{ userAdded.fullName }} was added to the &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course
-          as a <span aria-hidden="true">{{ userAdded.role }}.</span>
-          <span class="sr-only">{{ srFriendlyRole(userAdded.role) }}.</span>
-        </span>
-        <span v-if="!userAdded.sectionName">
-          {{ userAdded.fullName }} was added to the Canvas site as a <span aria-hidden="true">{{ userAdded.role }}.</span>
-          <span class="sr-only">{{ srFriendlyRole(userAdded.role) }}.</span>
-        </span>
+        <div>
+          <span v-if="userAdded.sectionName">
+            {{ userAdded.fullName }} was added to the &ldquo;{{ userAdded.sectionName }}&rdquo; section of this course
+            as a <span aria-hidden="true">{{ userAdded.role }}.</span>
+            <span class="sr-only">{{ srFriendlyRole(userAdded.role) }}.</span>
+          </span>
+          <span v-if="!userAdded.sectionName">
+            {{ userAdded.fullName }} was added to the Canvas site as a <span aria-hidden="true">{{ userAdded.role }}.</span>
+            <span class="sr-only">{{ srFriendlyRole(userAdded.role) }}.</span>
+          </span>
+        </div>
         <div class="alert-close-button-container d-flex ml-4">
-          <button
+          <v-btn
             id="hide-search-success-button"
-            class="align-self-center"
+            aria-label="hide alert"
+            class="align-self-center bg-transparent text-success"
+            density="compact"
+            :icon="mdiCloseCircle"
+            variant="flat"
             @click="hideAlert('additionSuccessMessage')"
-          >
-            <v-icon :icon="mdiCloseCircle" />
-            <span class="sr-only">Hide Alert</span>
-          </button>
+          />
         </div>
       </div>
     </div>
@@ -96,30 +104,46 @@
           <v-row justify="center" no-gutters>
             <v-col cols="12">
               <label for="search-type" class="text-subtitle-1">Search By</label>
-              <v-radio-group
-                id="search-type"
-                v-model="searchType"
-                color="primary"
-                density="compact"
-                :disabled="isSearching || isAddingUser"
-                hide-details
-              >
-                <v-radio id="radio-btn-name" aria-label="Last Name comma First Name" value="name">
-                  <template #label>
-                    <div aria-hidden="true" class="pl-1 text-black text-body-2">Last Name, First Name</div>
-                  </template>
-                </v-radio>
-                <v-radio id="radio-btn-email" aria-label="Email" value="email">
-                  <template #label>
-                    <div aria-hidden="true" class="pl-1 text-black text-body-2">Email</div>
-                  </template>
-                </v-radio>
-                <v-radio id="radio-btn-uid" aria-label="CalNet U I D" value="uid">
-                  <template #label>
-                    <div aria-hidden="true" class="pl-1 text-black text-body-2">CalNet UID</div>
-                  </template>
-                </v-radio>
-              </v-radio-group>
+              <div id="search-type" role="radiogroup">
+                <v-radio-group
+                  v-model="searchType"
+                  color="primary"
+                  density="compact"
+                  :disabled="isSearching || isAddingUser"
+                  hide-details
+                >
+                  <v-radio
+                    id="radio-btn-name"
+                    aria-label="Last Name comma First Name"
+                    name="name"
+                    value="name"
+                  >
+                    <template #label>
+                      <div aria-hidden="true" class="pl-1 text-black text-body-2">Last Name, First Name</div>
+                    </template>
+                  </v-radio>
+                  <v-radio
+                    id="radio-btn-email"
+                    aria-label="Email"
+                    name="email"
+                    value="email"
+                  >
+                    <template #label>
+                      <div aria-hidden="true" class="pl-1 text-black text-body-2">Email</div>
+                    </template>
+                  </v-radio>
+                  <v-radio
+                    id="radio-btn-uid"
+                    aria-label="CalNet U I D"
+                    name="uid"
+                    value="uid"
+                  >
+                    <template #label>
+                      <div aria-hidden="true" class="pl-1 text-black text-body-2">CalNet UID</div>
+                    </template>
+                  </v-radio>
+                </v-radio-group>
+              </div>
               <div class="align-center d-flex flex-wrap pb-3">
                 <div class="pr-3 pt-3 search-text-field">
                   <v-text-field
@@ -136,7 +160,7 @@
                     @keydown.enter="submitSearch"
                   />
                 </div>
-                <div class="pt-3">
+                <div class="pt-3 add-user-submit-search-btn-container">
                   <v-btn
                     id="add-user-submit-search-btn"
                     aria-label="Submit search"
@@ -180,7 +204,6 @@
                   <input
                     :id="`user-search-result-input-${index}`"
                     v-model="selectedUser"
-                    :aria-label="`${user.firstName} ${user.lastName}, Calnet UID ${user.uid}`"
                     class="mr-4"
                     :disabled="isAddingUser"
                     name="selectedUser"
@@ -190,7 +213,6 @@
                   <label
                     :id="`user-search-result-row-name-${index}`"
                     :for="`user-search-result-input-${index}`"
-                    aria-hidden="true"
                     class="form-input-label-no-align"
                   >
                     {{ user.firstName }} {{ user.lastName }}
@@ -519,10 +541,14 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.add-user-submit-search-btn-container {
+  width: 11rem;
+}
 .role-select-label {
   width: 64px;
 }
 .search-text-field {
-  width: 82%;
+  flex: 1 1;
+  min-width: 16rem;
 }
 </style>

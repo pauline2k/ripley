@@ -75,6 +75,7 @@ const imageError = () => {
 .photo-outer {
   display: flex;
   justify-content: center;
+  margin-top: 5px;
 }
 @media print {
   .photo {

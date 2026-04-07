@@ -22,8 +22,8 @@
             <div class="page-roster-student-name font-weight-regular">{{ student.firstName }} </div>
             <div class="page-roster-student-name">{{ student.lastName }}</div>
           </div>
-          <div v-if="student.email" class="pt-2">
-            <div class="page-roster-student-name">
+          <div v-if="student.email">
+            <div class="page-roster-student-name mt-2">
               <OutboundLink :id="`student-email-${student.studentId}`" :href="`mailto:${student.email}`" hide-icon>
                 <span class="sr-only">Email </span>
                 <span class="font-weight-regular">{{ student.firstName }}</span>
@@ -117,9 +117,8 @@ const reloadPhotosDelayed = () => {
   width: 100%;
 }
 .photo-wrapper {
-  display: inline-block;
   float: left;
-  padding: 5px;
+  padding: 0 5px 5px;
   width: 173px;
 }
 

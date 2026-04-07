@@ -9,17 +9,19 @@
         text="No Mailing List has been created for this site."
         type="info"
       />
-      <div id="mailing-lists-alert" aria-live="polite" role="alert">
+      <div id="mailing-lists-alert" aria-live="polite">
         <v-alert
           v-if="success"
           :closable="true"
           density="compact"
+          role="none"
           :text="success"
           type="success"
         />
         <v-alert
           v-if="error"
           density="compact"
+          role="none"
           :text="error"
           type="warning"
         />

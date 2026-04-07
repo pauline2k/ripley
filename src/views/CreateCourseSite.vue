@@ -1,6 +1,6 @@
 <template>
   <div class="pb-5 px-5">
-    <Header1 class="mb-2" text="Create a Course Site" />
+    <Header1 class="mb-2 ml-3" text="Create a Course Site" />
     <v-alert
       v-if="error || warning"
       id="canvas-error-container"
@@ -11,7 +11,7 @@
     >
       {{ error || warning }}
     </v-alert>
-    <div v-if="!isLoading && !error">
+    <div v-if="!contextStore.isLoading && !error">
       <div v-if="isAdmin && currentWorkflowStep !== 'processing'" class="pl-3">
         <CreateCourseSiteHeader
           :admin-mode="adminMode"
@@ -118,7 +118,7 @@
                 <v-btn
                   id="page-create-course-site-continue"
                   aria-label="Continue to next step"
-                  class="mr-1"
+                  class="mr-2"
                   color="primary"
                   :disabled="!selectedSectionsList.length"
                   @click="showConfirmation"
@@ -170,351 +170,347 @@
 </template>
 
 <script setup>
+import {computed, onMounted, ref, watch} from 'vue'
+import {each, find, findIndex, get, includes, map, size} from 'lodash'
+import {mdiMenuDown, mdiMenuRight} from '@mdi/js'
+import {useRouter} from 'vue-router'
 import ConfirmationStep from '@/components/bcourses/create/ConfirmationStep'
 import CourseCodeAndTitle from '@/components/bcourses/create/CourseCodeAndTitle'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import CreateCourseSiteHeader from '@/components/bcourses/create/CreateCourseSiteHeader'
 import Header1 from '@/components/utils/Header1'
 import SelectSectionsGuide from '@/components/bcourses/create/SelectSectionsGuide'
-import {findIndex} from 'lodash'
-import {mdiMenuDown, mdiMenuRight} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
+import {iframeParentLocation, isInIframe, putFocusNextTick} from '@/utils'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
-import {each, find, get, includes, map, size} from 'lodash'
-import {iframeParentLocation, putFocusNextTick} from '@/utils'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'CreateCourseSite',
-  mixins: [Context],
-  data: () => ({
-    actingAsInstructor: undefined,
-    adminActingAs: undefined,
-    adminBySectionIds: undefined,
-    adminMode: 'actAs',
-    adminTerms: [],
-    backgroundJobId: undefined,
-    canvasSite: undefined,
-    canvasSiteId: undefined,
-    coursesList: [],
-    currentAdminTerm: undefined,
-    currentSemester: undefined,
-    currentSemesterName: undefined,
-    currentWorkflowStep: undefined,
-    error: undefined,
-    errorConfig: {
-      header: undefined,
-      supportAction: undefined,
-      supportInfo: undefined
-    },
-    isFetching: false,
-    isTeacher: undefined,
-    isUidInputMode: true,
-    jobStatus: undefined,
-    linkToSiteOverview: undefined,
-    panels: [],
-    percentComplete: undefined,
-    selectedSectionsList: undefined,
-    selectedTerm: undefined,
-    semester: undefined,
-    teachingTerms: [],
-    timeoutPromise: undefined,
-    warning: undefined
-  }),
-  computed: {
-    isAdmin() {
-      return this.currentUser.isAdmin || this.currentUser.isCanvasAdmin
-    },
-    selectedTermName() {
-      const term = find(this.teachingTerms, t => t.slug === this.selectedTerm)
-      return get(term, 'name', '')
-    }
-  },
-  watch: {
-    selectedTerm(slug) {
-      if (slug) {
-        this.updateSemesterData(slug)
-      }
-    }
-  },
-  created() {
-    getCourseProvisioningMetadata().then(data => {
-      this.updateMetadata(data)
-      if (!this.teachingTerms.length && !this.isAdmin) {
-        this.warning = 'You are not listed as an instructor of any courses in the current or upcoming term.'
-      }
-      if (size(this.selectedSectionsList)) {
-        this.panels = Array.from({length: this.coursesList.length}, (value, index) => index)
-      } else if (this.coursesList.length === 1) {
-        this.panels = [0]
-      }
-      this.actingAsInstructor = this.getActingAsInstructor()
+const actingAsInstructor = ref(undefined)
+const adminActingAs = ref(undefined)
+const adminBySectionIds = ref(undefined)
+const adminMode = ref('actAs')
+const adminTerms = ref([])
+const backgroundJobId = ref(undefined)
+const contextStore = useContextStore()
+const coursesList = ref([])
+const currentAdminTerm = ref('')
+const currentSemester = ref(undefined)
+const currentSemesterName = ref(undefined)
+const currentWorkflowStep = ref(undefined)
+const error = ref(undefined)
+const isFetching = ref(false)
+const jobStatus = ref(undefined)
+const panels = ref([])
+const percentComplete = ref(undefined)
+const router = useRouter()
+const selectedSectionsList = ref(undefined)
+const selectedTerm = ref(undefined)
+const teachingTerms = ref([])
+const warning = ref(undefined)
 
-      this.$ready()
-    }, error => {
-      this.error = error
-      this.$ready()
+const isAdmin = computed(() => {
+  return contextStore.currentUser.isAdmin || contextStore.currentUser.isCanvasAdmin
+})
+const selectedTermName = computed(() => {
+  const term = find(teachingTerms.value, t => t.slug === selectedTerm.value)
+  return get(term, 'name', '')
+})
+
+watch(selectedTerm, slug => {
+  if (slug) {
+    updateSemesterData(slug)
+  }
+})
+
+onMounted(() => {
+  getCourseProvisioningMetadata().then(data => {
+    updateMetadata(data)
+    if (!teachingTerms.value.length && !isAdmin.value) {
+      warning.value = 'You are not listed as an instructor of any courses in the current or upcoming term.'
+    }
+    if (size(selectedSectionsList.value)) {
+      panels.value = Array.from({length: coursesList.value.length}, (value, index) => index)
+    } else if (coursesList.value.length === 1) {
+      panels.value = [0]
+    }
+    actingAsInstructor.value = getActingAsInstructor()
+
+    contextStore.loadingComplete()
+  }, error => {
+    error.value = error
+    contextStore.loadingComplete()
+  })
+})
+
+const cancel = () => {
+  router.push({path: '/manage_sites'})
+}
+
+const classCount = semesters => {
+  let count = 0
+  if (size(semesters) > 0) {
+    each(semesters, semester => {
+      count += semester.classes.length
     })
-  },
-  methods: {
-    cancel() {
-      this.$router.push({path: '/manage_sites'})
-    },
-    classCount(semesters) {
-      let count = 0
-      if (size(semesters) > 0) {
-        each(semesters, semester => {
-          count += semester.classes.length
-        })
-      }
-      return count
-    },
-    courseSectionsTableCaption(course) {
-      let caption = 'Official sections in this course. Use the checkboxes in the Action column to select sections'
-      if (size(course.sections) > 1) {
-        caption += ', or use the "Select All" button above.'
-      }
-      return caption
-    },
-    courseSiteCreationPromise(siteName, siteAbbreviation) {
-      return new Promise((resolve, reject) => {
-        const onError = message => {
-          this.percentComplete = 0
-          this.currentWorkflowStep = null
-          this.jobStatus = 'error'
-          this.warning = message
-          putFocusNextTick('page-title')
-          reject()
-        }
-        this.currentWorkflowStep = 'processing'
-        this.jobStatus = 'sendingRequest'
-        this.updateSelected()
-        const sectionIds = map(this.selectedSectionsList, 'id')
-        if (sectionIds.length > 0) {
-          const adminActingAs = this.isAdmin && this.adminMode === 'actAs' ? this.adminActingAs : null
-          const adminBySectionIds = this.isAdmin && this.adminMode === 'bySectionId' ? this.adminBySectionIds : null
-          const adminTermSlug = this.isAdmin && this.adminMode === 'bySectionId' ? this.currentAdminTerm : null
-          courseCreate(
-            adminActingAs,
-            adminBySectionIds,
-            adminTermSlug,
-            sectionIds,
-            siteAbbreviation,
-            siteName,
-            this.currentSemester
-          ).then(
-            data => {
-              this.backgroundJobId = data.jobId
-              this.jobStatus = data.jobStatus
-              this.alertScreenReader('Started course site creation.')
-              this.trackBackgroundJob()
-              resolve()
-            },
-            () => onError('Failed to start course provisioning job.')
-          )
-        } else {
-          onError('No section IDs were provided.')
-        }
-      })
-    },
-    fetchFeed() {
-      this.warning = null
-      this.isFetching = true
-      this.currentWorkflowStep = 'selecting'
-      this.backgroundJobId = undefined
-      this.jobStatus = undefined
-      this.percentComplete = undefined
-      this.selectedSectionsList = []
-      this.alertScreenReader('Loading courses and sections')
+  }
+  return count
+}
 
-      const semester = (this.adminMode === 'bySectionId' ? this.currentAdminTerm : this.currentSemester)
-      getSections(
-        this.adminActingAs,
-        this.adminBySectionIds,
-        this.adminMode,
-        semester,
-        this.isAdmin
+const courseSectionsTableCaption = course => {
+  let caption = 'Official sections in this course. Use the checkboxes in the Action column to select sections'
+  if (size(course.sections) > 1) {
+    caption += ', or use the "Select All" button above.'
+  }
+  return caption
+}
+
+const courseSiteCreationPromise = (siteName, siteAbbreviation) => {
+  return new Promise((resolve, reject) => {
+    const onError = message => {
+      percentComplete.value = 0
+      currentWorkflowStep.value = null
+      jobStatus.value = 'error'
+      warning.value = message
+      putFocusNextTick('page-title')
+      reject()
+    }
+    currentWorkflowStep.value = 'processing'
+    jobStatus.value = 'sendingRequest'
+    updateSelected()
+    const sectionIds = map(selectedSectionsList.value, 'id')
+    if (sectionIds.length > 0) {
+      const adminActingAs = isAdmin.value && adminMode.value === 'actAs' ? adminActingAs.value : null
+      const adminBySectionIds = isAdmin.value && adminMode.value === 'bySectionId' ? adminBySectionIds.value : null
+      const adminTermSlug = isAdmin.value && adminMode.value === 'bySectionId' ? currentAdminTerm.value : null
+      courseCreate(
+        adminActingAs,
+        adminBySectionIds,
+        adminTermSlug,
+        sectionIds,
+        siteAbbreviation,
+        siteName,
+        currentSemester.value
       ).then(
         data => {
-          this.updateMetadata(data)
-          this.usersClassCount = this.classCount(data.teachingTerms)
-          this.teachingTerms = data.teachingTerms
-          if (!this.teachingTerms.length && this.adminMode) {
-            this.warning = this.adminActingAs ? `UID ${this.adminActingAs} is not listed as an instructor of any courses in the current or upcoming term.` : 'No matching courses found.'
-          }
-          this.fillCourseSites(this.teachingTerms)
-          this.alertScreenReader('Course sections have loaded')
-          if (this.adminMode === 'bySectionId' && this.adminBySectionIds) {
-            each(this.coursesList, course => {
-              each(course.sections, section => {
-                section.selected = includes(this.adminBySectionIds, section.id)
-              })
-            })
-            this.updateSelected()
-          }
-          if (!this.isAdmin && !this.usersClassCount) {
-            this.warning = 'Sorry, you are not an admin user and you have no classes.'
-          }
+          backgroundJobId.value = data.jobId
+          jobStatus.value = data.jobStatus
+          contextStore.alertScreenReader('Started course site creation.')
+          trackBackgroundJob()
+          resolve()
         },
-        error => {
-          this.alertScreenReader('Course section loading failed')
-          this.warning = error || 'failure'
-        }
-      ).finally(() => {
-        this.isFetching = false
-        putFocusNextTick(this.adminMode === 'bySectionId' ? 'sections-by-ids-button' : 'sections-by-uid-button')
-      })
+        () => onError('Failed to start course provisioning job.')
+      )
+    } else {
+      onError('No section IDs were provided.')
+    }
+  })
+}
+
+const fetchFeed = () => {
+  warning.value = null
+  isFetching.value = true
+  currentWorkflowStep.value = 'selecting'
+  backgroundJobId.value = undefined
+  jobStatus.value = undefined
+  percentComplete.value = undefined
+  selectedSectionsList.value = []
+  contextStore.alertScreenReader('Loading courses and sections')
+
+  const semester = (adminMode.value === 'bySectionId' ? currentAdminTerm.value : currentSemester.value)
+  getSections(
+    adminActingAs.value,
+    adminBySectionIds.value,
+    adminMode.value,
+    semester,
+    isAdmin.value
+  ).then(
+    data => {
+      updateMetadata(data)
+      const usersClassCount = classCount(data.teachingTerms)
+      teachingTerms.value = data.teachingTerms
+      if (!teachingTerms.value.length && adminMode.value) {
+        warning.value = adminActingAs.value ? `UID ${adminActingAs.value} is not listed as an instructor of any courses in the current or upcoming term.` : 'No matching courses found.'
+      }
+      fillCourseSites(teachingTerms.value)
+      contextStore.alertScreenReader('Course sections have loaded')
+      if (adminMode.value === 'bySectionId' && adminBySectionIds.value) {
+        each(coursesList.value, course => {
+          each(course.sections, section => {
+            section.selected = includes(adminBySectionIds.value, section.id)
+          })
+        })
+        updateSelected()
+      }
+      if (!isAdmin.value && !usersClassCount) {
+        warning.value = 'Sorry, you are not an admin user and you have no classes.'
+      }
     },
-    fillCourseSites(semestersFeed) {
-      each(semestersFeed, semester => {
-        each(semester.classes, course => {
-          course.allSelected = false
-          course.selectToggleText = 'All'
-          const hasSites = false
-          const sectionIdToSites = {}
-          if (hasSites) {
-            course.hasSites = hasSites
-            each(course.sections, section => {
-              if (sectionIdToSites[section.id]) {
-                section.sites = sectionIdToSites[section.id]
-              }
-            })
+    error => {
+      contextStore.alertScreenReader('Course section loading failed')
+      warning.value = error || 'failure'
+    }
+  ).finally(() => {
+    isFetching.value = false
+    putFocusNextTick(adminMode.value === 'bySectionId' ? 'sections-by-ids-button' : 'sections-by-uid-button')
+  })
+}
+
+const fillCourseSites = semestersFeed => {
+  each(semestersFeed, semester => {
+    each(semester.classes, course => {
+      course.allSelected = false
+      course.selectToggleText = 'All'
+      const hasSites = false
+      const sectionIdToSites = {}
+      if (hasSites) {
+        course.hasSites = hasSites
+        each(course.sections, section => {
+          if (sectionIdToSites[section.id]) {
+            section.sites = sectionIdToSites[section.id]
           }
         })
-      })
-    },
-    getActingAsInstructor() {
-      let instructor
-      if (this.adminActingAs) {
-        each(this.teachingTerms, t => each(t.classes, c => each(c.sections, s => each(s.instructors, i => {
-          if (i.uid === this.adminActingAs) {
-            instructor = i
-            return false
-          }
-        }))))
       }
-      return instructor
-    },
-    onCancelConfirmationStep() {
-      this.currentWorkflowStep = 'selecting'
-    },
-    setAdminActingAs(uid) {
-      this.adminActingAs = uid
-      this.adminBySectionIds = null
-    },
-    setAdminBySectionIds(sectionIds) {
-      this.adminBySectionIds = sectionIds
-      this.adminActingAs = null
-    },
-    setAdminMode(adminMode) {
-      this.adminMode = adminMode
-      this.currentWorkflowStep = undefined
-      this.coursesList = []
-    },
-    setTermSlug(slug) {
-      if (this.selectedTerm === slug) {
-        this.updateSemesterData(this.selectedTerm)
-      } else {
-        // If the selectedTerm value is changing, updateSemesterData will be called by the 'watch' property set above
-        this.selectedTerm = slug
+    })
+  })
+}
+
+const getActingAsInstructor = () => {
+  let instructor
+  if (adminActingAs.value) {
+    each(teachingTerms.value, t => each(t.classes, c => each(c.sections, s => each(s.instructors, i => {
+      if (i.uid === adminActingAs.value) {
+        instructor = i
+        return false
       }
-    },
-    showConfirmation() {
-      this.updateSelected()
-      this.alertScreenReader('Course site details form loaded.')
-      this.currentWorkflowStep = 'confirmation'
-    },
-    size,
-    switchAdminTerm(semester) {
-      if (semester && this.currentAdminTerm !== semester.slug) {
-        this.currentWorkflowStep = null
-        this.currentAdminTerm = semester.slug
-        this.selectedSectionsList = []
-        this.updateSelected()
-      }
-    },
-    trackBackgroundJob() {
-      this.exportTimer = setInterval(() => {
-        courseProvisionJobStatus(this.backgroundJobId).then(
-          response => {
-            if (response.jobStatus !== this.jobStatus) {
-              this.jobStatus = response.jobStatus
+    }))))
+  }
+  return instructor
+}
+
+const onCancelConfirmationStep = () => {
+  currentWorkflowStep.value = 'selecting'
+}
+
+const setAdminActingAs = uid => {
+  adminActingAs.value = uid
+  adminBySectionIds.value = null
+}
+
+const setAdminBySectionIds = sectionIds => {
+  adminBySectionIds.value = sectionIds
+  adminActingAs.value = null
+}
+
+const setAdminMode = mode => {
+  adminMode.value = mode
+  currentWorkflowStep.value = undefined
+  coursesList.value = []
+}
+
+const setTermSlug = slug => {
+  if (selectedTerm.value === slug) {
+    updateSemesterData(selectedTerm.value)
+  } else {
+    // If the selectedTerm value is changing, updateSemesterData will be called by the 'watch' property set above
+    selectedTerm.value = slug
+  }
+}
+
+const showConfirmation = () => {
+  updateSelected()
+  contextStore.alertScreenReader('Course site details form loaded.')
+  currentWorkflowStep.value = 'confirmation'
+}
+
+const switchAdminTerm = semester => {
+  if (semester && currentAdminTerm.value !== semester.slug) {
+    currentWorkflowStep.value = null
+    currentAdminTerm.value = semester.slug
+    selectedSectionsList.value = []
+    updateSelected()
+  }
+}
+
+const trackBackgroundJob = () => {
+  const exportTimer = setInterval(() => {
+    courseProvisionJobStatus(backgroundJobId.value).then(
+      response => {
+        if (response.jobStatus !== jobStatus.value) {
+          jobStatus.value = response.jobStatus
+        } else {
+          contextStore.alertScreenReader(`Still ${includes(['sendingRequest', 'queued'], jobStatus.value) ? 'waiting' : 'processing'}`)
+        }
+        if (!(includes(['started', 'queued'], jobStatus.value)) || get(response, 'jobData.courseSiteUrl')) {
+          clearInterval(exportTimer)
+          if (get(response, 'jobData.courseSiteUrl')) {
+            contextStore.alertScreenReader('Done. Loading new course site.')
+            if (isInIframe) {
+              iframeParentLocation(response.jobData.courseSiteUrl)
             } else {
-              this.alertScreenReader(`Still ${includes(['sendingRequest', 'queued'], this.jobStatus) ? 'waiting' : 'processing'}`)
+              window.location.href = response.jobData.courseSiteUrl
             }
-            if (!(includes(['started', 'queued'], this.jobStatus)) || get(response, 'jobData.courseSiteUrl')) {
-              clearInterval(this.exportTimer)
-              if (get(response, 'jobData.courseSiteUrl')) {
-                this.alertScreenReader('Done. Loading new course site.')
-                if (this.$isInIframe) {
-                  iframeParentLocation(response.jobData.courseSiteUrl)
-                } else {
-                  window.location.href = response.jobData.courseSiteUrl
-                }
-              } else {
-                this.alertScreenReader('Error.', 'assertive')
-                this.currentWorkflowStep = null
-                this.jobStatus = 'error'
-                this.warning = 'An error has occurred with your request. Please try again or contact bCourses support.'
-                putFocusNextTick('page-title')
-              }
-            }
-          }
-        ).catch(
-          () => {
-            this.alertScreenReader('Error.', 'assertive')
-            this.currentWorkflowStep = null
-            this.jobStatus = 'error'
-            this.warning = 'An error has occurred with your request. Please try again or contact bCourses support.'
-            clearInterval(this.exportTimer)
+          } else {
+            contextStore.alertScreenReader('Error.', 'assertive')
+            currentWorkflowStep.value = null
+            jobStatus.value = 'error'
+            warning.value = 'An error has occurred with your request. Please try again or contact bCourses support.'
             putFocusNextTick('page-title')
           }
-        )
-      }, 4000)
-    },
-    updateMetadata(data) {
-      this.teachingTerms = data.teachingTerms
-      if (size(this.teachingTerms) > 0) {
-        this.setTermSlug(this.teachingTerms[0].slug)
-      }
-      this.fillCourseSites(this.teachingTerms)
-      if (this.isAdmin) {
-        this.adminActingAs = data.adminActingAs
-        this.adminTerms = data.adminTerms
-        if (size(this.teachingTerms) > 0 && this.adminTerms.length) {
-          this.setTermSlug(this.teachingTerms[0].slug)
         }
-        if (size(this.adminTerms) > 0 && !this.currentAdminTerm) {
-          this.switchAdminTerm(this.adminTerms[0])
-        }
-      } else {
-        this.currentWorkflowStep = 'selecting'
       }
-    },
-    updateSelected() {
-      this.selectedSectionsList = []
-      each(this.coursesList, course => {
-        each(course.sections, section => {
-          if (section.selected) {
-            section.courseTitle = course.title
-            this.selectedSectionsList.push(section)
-          }
-        })
-      })
-    },
-    updateSemesterData(slug) {
-      const teachingTerm = find(this.teachingTerms, t => t.slug === slug)
-      const term = teachingTerm || find(this.adminTerms, t => t.slug === slug)
-      this.coursesList = teachingTerm ? teachingTerm.classes : []
-      this.currentSemester = slug
-      this.currentSemesterName = term.name
-      this.selectedSectionsList = []
-      this.alertScreenReader(`Course sections for ${term.name} loaded`)
-      this.updateSelected()
-    }
+    ).catch(
+      () => {
+        contextStore.alertScreenReader('Error.', 'assertive')
+        currentWorkflowStep.value = null
+        jobStatus.value = 'error'
+        warning.value = 'An error has occurred with your request. Please try again or contact bCourses support.'
+        clearInterval(exportTimer)
+        putFocusNextTick('page-title')
+      }
+    )
+  }, 4000)
+}
+
+const updateMetadata = data => {
+  teachingTerms.value = data.teachingTerms
+  if (size(teachingTerms.value) > 0) {
+    setTermSlug(teachingTerms.value[0].slug)
   }
+  fillCourseSites(teachingTerms.value)
+  if (isAdmin.value) {
+    adminActingAs.value = data.adminActingAs
+    adminTerms.value = data.adminTerms
+    if (size(teachingTerms.value) > 0 && adminTerms.value.length) {
+      setTermSlug(teachingTerms.value[0].slug)
+    }
+    if (size(adminTerms.value) > 0 && !currentAdminTerm.value) {
+      switchAdminTerm(adminTerms.value[0])
+    }
+  } else {
+    currentWorkflowStep.value = 'selecting'
+  }
+}
+
+const updateSelected = () => {
+  selectedSectionsList.value = []
+  each(coursesList.value, course => {
+    each(course.sections, section => {
+      if (section.selected) {
+        section.courseTitle = course.title
+        selectedSectionsList.value.push(section)
+      }
+    })
+  })
+}
+
+const updateSemesterData = slug => {
+  const teachingTerm = find(teachingTerms.value, t => t.slug === slug)
+  const term = teachingTerm || find(adminTerms.value, t => t.slug === slug)
+  coursesList.value = teachingTerm ? teachingTerm.classes : []
+  currentSemester.value = slug
+  currentSemesterName.value = term.name
+  selectedSectionsList.value = []
+  contextStore.alertScreenReader(`Course sections for ${term.name} loaded`)
+  updateSelected()
 }
 </script>
 

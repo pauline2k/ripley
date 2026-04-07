@@ -2,8 +2,9 @@
   <v-menu>
     <template #activator="{ props }">
       <v-btn
-        v-bind="props"
+        class="ma-1"
         variant="outlined"
+        v-bind="props"
       >
         {{ currentUser.firstName || currentUser.uid }}
       </v-btn>

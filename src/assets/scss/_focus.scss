@@ -1,0 +1,99 @@
+@supports not selector(:focus-visible) {
+  .bg-primary:focus::after,
+  .text-primary:focus::after {
+    outline-color: rgba(var(--v-theme-primary)) !important;
+  }
+  .bg-success:focus::after,
+  .bg-success.v-expansion-panel-title:focus,
+  .text-success:focus::after{
+    outline-color: rgba(var(--v-theme-success)) !important;
+  }
+  .v-btn:focus::after,
+  .v-expansion-panel-title:focus,
+  .v-list-item:focus::after,
+  .v-list-item:focus-within::after,
+  .v-selection-control--focus-visible .v-selection-control__input::before,
+  a:not(.v-btn):focus,
+  button:not(.v-btn):focus,
+  h1[tabindex="-1"]:focus,
+  h2[tabindex="-1"]:focus,
+  select:focus,
+  textarea:focus {
+    --v-theme-overlay-multiplier: 3;
+    border-color: transparent;
+    box-shadow: 0 0 0.125rem 0.125rem white;
+    outline-color: currentColor;
+    outline-offset: 0.125rem;
+    outline-style: solid;
+    outline-width: 0.125rem;
+  }
+  .v-btn-toggle .v-btn:focus::after,
+  .v-expansion-panel-title:focus,
+  .v-tab:focus::after,
+  select:focus {
+    box-shadow: inset 0 0 0.125rem 0.25rem white !important;
+    outline-offset: -0.125rem !important;
+  }
+  .v-expansion-panel-title:focus .v-expansion-panel-title__overlay {
+    --v-theme-overlay-multiplier: 1 !important;
+  }
+  .v-selection-control input[type="checkbox"]:focus {
+    outline: none;
+  }
+}
+
+@supports selector(:focus-visible) {
+  .bg-primary:focus-visible::after,
+  .text-primary:focus-visible::after {
+    outline-color: rgba(var(--v-theme-primary)) !important;
+  }
+  .bg-success:focus-visible::after,
+  .bg-success.v-expansion-panel-title:focus-visible,
+  .text-success:focus-visible::after{
+    outline-color: rgba(var(--v-theme-success)) !important;
+  }
+  .v-btn:focus-visible::after,
+  .v-expansion-panel-title:focus-visible,
+  .v-list-item:focus-visible::after,
+  .v-list-item:focus-within::after,
+  .v-selection-control--focus-visible .v-selection-control__input::before,
+  a:not(.v-btn):focus-visible,
+  button:not(.v-btn):focus-visible,
+  h1[tabindex="-1"]:focus-visible,
+  h2[tabindex="-1"]:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    --v-theme-overlay-multiplier: 3;
+    border-color: transparent;
+    box-shadow: 0 0 0.125rem 0.125rem white;
+    outline-color: currentColor;
+    outline-offset: 0.125rem;
+    outline-style: solid;
+    outline-width: 0.125rem;
+  }
+  .v-btn-toggle .v-btn:focus-visible::after,
+  .v-expansion-panel-title:focus-visible,
+  .v-tab:focus-visible::after,
+  select:focus-visible {
+    box-shadow: inset 0 0 0.125rem 0.25rem white !important;
+    outline-offset: -0.125rem !important;
+  }
+  .v-expansion-panel-title:focus-visible .v-expansion-panel-title__overlay {
+    --v-theme-overlay-multiplier: 1 !important;
+  }
+  .v-selection-control input[type="checkbox"]:focus-visible {
+    outline: none;
+  }
+}
+.v-selection-control--focus-visible .v-selection-control__input::before {
+  background-color: transparent;
+  box-shadow: inset 0 0 0.125rem 0.25rem white;
+  opacity: calc(var(--v-high-emphasis-opacity)) !important;
+  outline-offset: -0.125rem !important;
+}
+.v-selection-control--focus-visible.v-selection-control--density-compact .v-selection-control__input::before {
+  outline-offset: -0.063rem !important;
+}
+.v-selection-control--focus-visible.v-selection-control--density-default .v-selection-control__input::before {
+  outline-offset: -0.25rem !important;
+}

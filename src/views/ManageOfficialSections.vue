@@ -65,7 +65,7 @@
           <v-btn
             id="official-sections-secondary-save-btn"
             aria-label="Apply pending modifications to this course site"
-            class="mr-1 text-no-wrap"
+            class="mr-2 text-no-wrap"
             color="primary"
             :disabled="totalStagedCount === 0"
             @click="saveChanges"
@@ -172,7 +172,7 @@
         <div v-if="currentWorkflowStep === 'preview'">
           <v-btn
             id="official-sections-edit-btn"
-            class="mr-1 text-no-wrap"
+            class="mr-2 text-no-wrap"
             color="primary"
             @click="changeWorkflowStep('staging')"
           >

@@ -181,13 +181,6 @@ export default {
         this.sectionIds = ''
         this.uid = undefined
         this.setAdminMode(mode)
-        if (mode === 'bySectionId') {
-          this.alertScreenReader('Input mode switched to section ID')
-          putFocusNextTick('load-sections-by-id')
-        } else {
-          this.alertScreenReader(`Input mode switched to ${mode === 'bySectionId' ? 'section ID' : 'UID'}`)
-          putFocusNextTick(mode === 'bySectionId' ? 'load-sections-by-id' : 'instructor-uid')
-        }
       }
     },
     isInvalidUID() {
