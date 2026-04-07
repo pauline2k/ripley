@@ -100,7 +100,7 @@ const announcerRole = computed(() =>
   margin: 0 12px 4px;
 }
 a {
-  color: $color-primary-text;
+  color: rgba(var(--v-theme-anchor));
   &:hover {
     cursor: pointer;
   }
