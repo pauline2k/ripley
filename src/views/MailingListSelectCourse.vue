@@ -11,7 +11,7 @@
         <v-alert
           class="my-2"
           density="compact"
-          role="alert"
+          role="none"
           type="warning"
         >
           {{ error }}
@@ -93,13 +93,13 @@ export default {
     proceed() {
       if (!this.isProcessing) {
         this.isProcessing = true
+        this.error = undefined
         this.alertScreenReader('Searching for mailing list.')
         const searchTimer = setInterval(() => {
           this.alertScreenReader('Still searching.')
         }, 7000)
         getMailingList(this.canvasSiteId).then(
           data => {
-            this.error = undefined
             if (data) {
               this.alertScreenReader('Mailing list found.', 'assertive')
               this.setMailingList(data)

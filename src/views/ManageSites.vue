@@ -145,14 +145,14 @@
 
 <script lang="ts" setup>
 import {computed, onMounted, ref, watch} from 'vue'
-import {each, get, map, size, trim, uniq} from 'lodash'
+import {each, map, size, trim, uniq} from 'lodash'
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink.vue'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import type {CanvasSite} from '@/lib/types'
 import {getCanvasSite, getManageOfficialSections} from '@/api/canvas-site'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
-import {getTermName, isValidCanvasSiteId, putFocusNextTick} from '@/utils'
+import {getTermName, isValidCanvasSiteId} from '@/utils'
 import {useContextStore} from '@/stores/context'
 import {useRouter} from 'vue-router'
 
@@ -182,9 +182,6 @@ const isManageOfficialSectionsDisabled = computed(() => {
 
 watch(selection, () => {
   canvasSiteId.value = undefined
-  if (get(selection.value, 'id') === 'manage-official-sections') {
-    putFocusNextTick('canvas-site-id-input')
-  }
 })
 
 onMounted(() => {

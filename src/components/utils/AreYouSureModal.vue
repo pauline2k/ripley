@@ -25,6 +25,7 @@
         <ProgressButton
           id="are-you-sure-confirm"
           :action="confirm"
+          class="mr-2"
           :disabled="isProcessing"
           :in-progress="isProcessing"
           :text="buttonLabelConfirm"

@@ -35,7 +35,7 @@
       <div class="d-flex justify-end">
         <v-btn
           id="create-project-site-button"
-          class="mr-1"
+          class="mr-2"
           color="primary"
           type="submit"
           :disabled="isCreating || !trim(name)"

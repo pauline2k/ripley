@@ -5,7 +5,7 @@
       aria-controls="page-help-notice"
       :aria-expanded="`${toggle.displayHelp}`"
       block
-      class="justify-start"
+      class="justify-start mb-1"
       :prepend-icon="mdiHelpCircle"
       variant="text"
       @click="toggle.displayHelp = !toggle.displayHelp"

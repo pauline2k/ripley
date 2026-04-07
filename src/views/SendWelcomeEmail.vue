@@ -3,7 +3,6 @@
     <Header1 text="Mailing List" />
     <v-alert
       id="mailing-list-created-alert"
-      tabindex="-1"
       density="compact"
       role="alert"
       type="success"
@@ -50,10 +49,10 @@
           </div>
         </div>
       </div>
-      <h2 id="send-welcome-email-header" class="my-2" tabindex="-1">
+      <h2 id="send-welcome-email-header" class="ml-3 my-2" tabindex="-1">
         Send Welcome Email
       </h2>
-      <div class="mb-3 ml-3">
+      <div class="pb-3 pl-3">
         <div class="mb-3">
           The Welcome Email tool automatically sends a customizable message by email to all members of your course site,
           even if the site has not yet been published. For more information, visit
@@ -239,7 +238,7 @@ export default {
     getMyMailingList().then(
       data => {
         this.updateDisplay(data)
-        this.$ready('mailing-list-created-alert')
+        this.$ready()
       }
     )
   },

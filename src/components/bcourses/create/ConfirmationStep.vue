@@ -100,7 +100,7 @@
     <v-row class="mt-2" no-gutters>
       <v-col cols="12">
         <div class="align-center d-flex float-right">
-          <div class="mr-1">
+          <div class="mr-2">
             <v-btn
               id="create-course-site-button"
               color="primary"

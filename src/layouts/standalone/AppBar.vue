@@ -5,7 +5,7 @@
         <div class="me-auto">
           <BuildSummary />
         </div>
-        <div class="float-right pr-3 text-body-2">
+        <div class="ml-auto pr-3 text-body-2">
           <AppBarMenu v-if="currentUser.isAuthenticated" />
           <span v-if="!currentUser.isAuthenticated">
             Berkeley &copy; {{ new Date().getFullYear() }} UC Regents
@@ -19,19 +19,14 @@
 <script setup>
 import AppBarMenu from '@/components/utils/AppBarMenu.vue'
 import BuildSummary from '@/components/utils/BuildSummary'
-</script>
+import {useContextStore} from '@/stores/context'
 
-<script>
-import Context from '@/mixins/Context'
-
-export default {
-  name: 'AppBar',
-  mixins: [Context],
-  props: {
-    includeBuildSummary: {
-      required: false,
-      type: Boolean
-    }
+defineProps({
+  includeBuildSummary: {
+    required: false,
+    type: Boolean
   }
-}
+})
+
+const currentUser = useContextStore().currentUser
 </script>

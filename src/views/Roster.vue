@@ -60,7 +60,7 @@
             </div>
           </v-col>
           <v-col
-            class="pt-1 pr-2"
+            class="py-1 pr-2"
             md="4"
             sm="12"
           >
@@ -238,9 +238,6 @@ const printRoster = () => {
 }
 .roster-search-input {
   min-width: 18rem;
-}
-select {
-  height: 40px;
 }
 .z-index-100 {
   z-index: 100;

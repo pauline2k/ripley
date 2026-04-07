@@ -7,7 +7,7 @@
       <router-link
         v-if="offerHomeLink"
         id="link-to-home"
-        class="text-decoration-none"
+        class="text-decoration-none v-btn ma-1"
         to="/"
       >
         <span class="sr-only">Home</span>

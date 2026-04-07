@@ -187,15 +187,6 @@ h3.sections-course-title {
   font-weight: 500 !important;
   line-height: 20px;
 }
-select {
-  appearance: auto !important;
-  background: field !important;
-  border: 1px solid $color-button-border !important;
-  border-radius: 4px;
-  color: $color-off-black;
-  line-height: 20px !important;
-  padding: 4px;
-}
 table {
   border: 1px solid $color-container-grey-border;
   border-collapse: separate;
