@@ -5,7 +5,6 @@
       <v-alert
         v-if="!error && !success"
         class="mb-3"
-        :closable="true"
         density="compact"
         text="No Mailing List has been created for this site."
         type="info"
