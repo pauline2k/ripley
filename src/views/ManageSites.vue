@@ -8,7 +8,7 @@
       density="compact"
       role="alert"
       :text="error"
-      type="warning"
+      type="error"
     />
     <v-radio-group
       v-model="selection"

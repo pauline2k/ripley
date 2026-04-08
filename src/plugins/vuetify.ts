@@ -107,7 +107,8 @@ export default createVuetify({
           red: red.darken1,
           secondary: '#eee',
           success: '#437F4B',
-          'surface-variant': '#e9eff3'
+          'surface-variant': '#e9eff3',
+          warning: '#B36200'
         }
       }
     }
