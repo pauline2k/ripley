@@ -87,7 +87,6 @@
             aria-label="Paste your list of Section IDs here, separated by commas or spaces"
             auto-grow
             class="w-50"
-            clearable
             :disabled="isFetching"
             hide-details
             placeholder="Paste your list of Section IDs here, separated by commas or spaces"
