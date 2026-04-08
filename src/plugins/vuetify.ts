@@ -33,8 +33,6 @@ import {VTextarea} from 'vuetify/components/VTextarea'
 import {VTextField} from 'vuetify/components/VTextField'
 import {VWindow, VWindowItem} from 'vuetify/components/VWindow'
 
-import {red} from 'vuetify/lib/util/colors'
-
 export default createVuetify({
   components: {
     VAlert,
@@ -104,7 +102,7 @@ export default createVuetify({
           info: '#367DA1',
           'on-surface-variant': '#324C52',
           primary: '#377695',
-          red: red.darken1,
+          red: '#8E151D',
           secondary: '#eee',
           success: '#437F4B',
           'surface-variant': '#e9eff3',

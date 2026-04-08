@@ -20,13 +20,11 @@
         />
       </v-row>
       <v-row no-gutters>
-        <v-col cols="8" class="pt-2">
+        <v-col aria-live="polite" cols="8" class="pt-2">
           <div
             v-if="!status"
             id="user-provision-validation-msg"
-            aria-live="polite"
             class="validation-messages"
-            role="alert"
           >
             <div v-if="validationErrors.required">
               You must provide at least one
@@ -44,16 +42,14 @@
           <div
             v-if="status"
             id="user-provision-status-msg"
-            aria-live="polite"
             class="mx-3"
-            role="alert"
           >
             <div v-if="status === 'error'">
-              <v-icon class="icon-red mr-2" :icon="mdiAlertCircleOutline" />
+              <v-icon class="text-red mr-2" :icon="mdiAlertCircleOutline" />
               <strong>Error: {{ error }}</strong>
             </div>
             <div v-if="status === 'success'" class="d-flex">
-              <v-icon class="icon-green mr-2" :icon="mdiCheckCircle" />
+              <v-icon class="text-success mr-2" :icon="mdiCheckCircle" />
               <div>
                 <strong>
                   Success: the following <template v-if="size(importedUids) > 1">
@@ -203,10 +199,8 @@ export default {
 
 <style scoped lang="scss">
 .page-user-provision {
-  color: $color-off-black;
   font-family: $body-font-family;
   font-size: 14px;
-  font-weight: 300;
   padding: 10px 20px;
   .page-user-provision-heading {
     font-family: $body-font-family;

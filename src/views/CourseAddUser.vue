@@ -7,6 +7,7 @@
     <div
       v-if="showAlerts"
       id="alerts-container"
+      class="px-3"
       aria-live="polite"
     >
       <div v-if="errorStatus" class="alert alert-error align-center d-flex font-weight-medium">
@@ -16,7 +17,7 @@
         <div>
           {{ errorStatus }}
         </div>
-        <div class="alert-close-button-container d-flex pl-4 ml-auto">
+        <div class="d-flex pl-4 ml-auto">
           <v-btn
             id="hide-search-error-button"
             aria-label="hide-alert"
@@ -30,7 +31,7 @@
       </div>
       <div v-if="noUserSelectedAlert" class="alert alert-error align-center font-weight-medium d-flex">
         Please select a person from the search results.
-        <div class="alert-close-button-container d-flex pl-4 ml-auto">
+        <div class="d-flex pl-4 ml-auto">
           <v-btn
             id="hide-select-user-alert-button"
             aria-label="hide-alert"
@@ -46,7 +47,7 @@
         {{ searchAlert }}
         {{ searchTypeNotice }}
         Please try again.
-        <div class="alert-close-button-container d-flex pl-4 ml-auto">
+        <div class="d-flex pl-4 ml-auto">
           <v-btn
             id="hide-search-alert-button"
             aria-label="hide-alert"
@@ -72,7 +73,7 @@
       <div
         v-if="additionSuccessMessage"
         id="success-message"
-        class="alert alert-success font-weight-medium d-flex"
+        class="alert alert-success align-center font-weight-medium d-flex"
         tabindex="-1"
       >
         <div>
@@ -86,7 +87,7 @@
             <span class="sr-only">{{ srFriendlyRole(userAdded.role) }}.</span>
           </span>
         </div>
-        <div class="alert-close-button-container d-flex ml-4">
+        <div class="d-flex pl-4 ml-auto">
           <v-btn
             id="hide-search-success-button"
             aria-label="hide alert"

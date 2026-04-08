@@ -533,7 +533,7 @@ const updateSemesterData = slug => {
 .tabs-border {
   -moz-border-radius: 0;
   -webkit-border-radius: 8px 8px 0 0;
-  border: 1px solid $color-container-grey-border;
+  border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
   border-radius: 8px 8px 0 0;
 }
 </style>
