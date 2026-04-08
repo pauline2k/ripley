@@ -102,6 +102,7 @@ export default createVuetify({
           anchor: '#1F6A98',
           error: '#b94a48',
           info: '#367DA1',
+          'on-surface-variant': '#324C52',
           primary: '#377695',
           red: red.darken1,
           secondary: '#eee',

@@ -6,7 +6,6 @@
       :href="student.profileUrl || `${contextStore.config.apiBaseUrl}/redirect/canvas/${contextStore.currentUser.canvasSiteId}/user/${student.uid}`"
       target="_top"
     >
-      <div class="sr-only">Student profile page</div>
       <v-img
         :id="`student-photo-${student.id}`"
         :alt="`${student.firstName} ${student.lastName}`"
@@ -19,6 +18,7 @@
         @error="imageError"
         @load="onLoad"
       />
+      <div class="sr-only">Student profile page</div>
     </a>
   </div>
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <ul class="pa-0 photo-list text-center">
+  <ul aria-labelledby="page-title" class="pa-0 photo-list text-center">
     <li
       v-for="student in students"
       :key="student.studentId"

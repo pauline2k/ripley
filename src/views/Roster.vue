@@ -30,7 +30,7 @@
                 class="roster-search-input mr-2"
                 density="compact"
                 hide-details
-                placeholder="Search Students by Name or SID"
+                label="Search students by name or SID"
                 type="search"
                 variant="outlined"
               />
@@ -38,7 +38,7 @@
                 v-if="size(roster.sections)"
                 id="section-select"
                 v-model="selectedSectionId"
-                aria-label="Filter by specific section. Defaults to all sections."
+                aria-label="Filter by section"
                 class="flex-fill"
                 @change="onSelectSection"
               >
@@ -92,19 +92,27 @@
                 label="Print one student per page"
               />
               <v-tooltip
+                id="print-button-tooltip"
                 v-model="showPrintButtonTooltip"
+                :activator-props="{'aria-describedby': (disablePrintButton ? 'print-button-tooltip' : undefined)}"
                 :attach="true"
-                :eager="false"
-                location="top"
+                class="print-button-tooltip"
+                content-class="on-surface-variant"
+                :eager="disablePrintButton"
+                location="left"
+                offset="4"
                 :open-on-focus="true"
-                :text="printButtonTooltip"
+                :persistent="false"
+                scroll-strategy="none"
+                text="You can print once student images have loaded."
               >
                 <template #activator="{props}">
                   <v-btn
                     id="print-roster"
+                    :aria-disabled="disablePrintButton"
                     class="roster-btn ml-3"
+                    :class="{'v-btn--disabled': disablePrintButton}"
                     color="primary"
-                    :disabled="disablePrintButton"
                     :prepend-icon="mdiPrinter"
                     variant="flat"
                     v-bind="props"
@@ -150,7 +158,6 @@ const contextStore = useContextStore()
 const error = ref(undefined)
 const isDownloading = ref(false)
 const showOnePhotoPerPage = ref(false)
-const printButtonTooltip = 'You can print once student images have loaded.'
 const roster = ref(undefined)
 const search = ref(undefined)
 const selectedSectionId = ref(null)
@@ -165,9 +172,7 @@ const showPrintButtonTooltip = defineModel({
     return !contextStore.isLoading && showTooltip.value && disablePrintButton.value
   },
   set(value) {
-    if (!value) {
-      showTooltip.value = false
-    }
+    showTooltip.value = value
   },
   type: Boolean
 })
@@ -224,17 +229,24 @@ const idx = value => {
 }
 
 const printRoster = () => {
+  if (disablePrintButton.value) {
+    return false
+  }
   printPage(`${idx(contextStore.currentUser.canvasSiteName).replace(/\s/g, '-')}_roster`)
 }
 </script>
 
 <style scoped lang="scss">
+.print-button-tooltip {
+  z-index: 0 !important;
+}
 .roster-btn {
   margin: 1px;
   width: 7rem;
 }
 .roster-heading {
   min-width: 395px;
+  z-index: 0;
 }
 .roster-search-input {
   min-width: 18rem;
