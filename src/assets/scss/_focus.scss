@@ -1,12 +1,25 @@
 @supports not selector(:focus-visible) {
+  .bg-error:focus::after,
+  .bg-error.v-expansion-panel-title:focus,
+  .text-error:focus::after {
+    outline-color: rgba(var(--v-theme-error)) !important;
+  }
   .bg-primary:focus::after,
   .text-primary:focus::after {
     outline-color: rgba(var(--v-theme-primary)) !important;
+  }
+  .bg-red:focus::after,
+  .text-red:focus::after {
+    outline-color: rgba(var(--v-theme-red)) !important;
   }
   .bg-success:focus::after,
   .bg-success.v-expansion-panel-title:focus,
   .text-success:focus::after{
     outline-color: rgba(var(--v-theme-success)) !important;
+  }
+  .bg-warning:focus::after,
+  .text-warning:focus::after {
+    outline-color: rgba(var(--v-theme-warning)) !important;
   }
   .v-btn:focus::after,
   .v-expansion-panel-title:focus,
@@ -43,14 +56,27 @@
 }
 
 @supports selector(:focus-visible) {
+  .bg-error:focus-visible::after,
+  .bg-error.v-expansion-panel-title:focus-visible,
+  .text-error:focus-visible::after {
+    outline-color: rgba(var(--v-theme-error)) !important;
+  }
   .bg-primary:focus-visible::after,
   .text-primary:focus-visible::after {
     outline-color: rgba(var(--v-theme-primary)) !important;
+  }
+  .bg-red:focus-visible::after,
+  .text-red:focus-visible::after {
+    outline-color: rgba(var(--v-theme-red)) !important;
   }
   .bg-success:focus-visible::after,
   .bg-success.v-expansion-panel-title:focus-visible,
   .text-success:focus-visible::after{
     outline-color: rgba(var(--v-theme-success)) !important;
+  }
+  .bg-warning:focus-visible::after,
+  .text-warning:focus-visible::after {
+    outline-color: rgba(var(--v-theme-warning)) !important;
   }
   .v-btn:focus-visible::after,
   .v-expansion-panel-title:focus-visible,

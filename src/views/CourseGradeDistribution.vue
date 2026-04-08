@@ -91,7 +91,7 @@ onMounted(() => {
 <style lang="scss">
 .grade-distribution {
   .course-header {
-    color: $color-nobel;
+    color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
     font-size: 17px;
     font-weight: 400;
   }
@@ -100,7 +100,7 @@ onMounted(() => {
     text-shadow: 0 0 15px rgba(0, 0, 0, 0.7) !important;
   }
   .grade-distribution-table-border {
-    border-left: solid 1px $color-container-grey-border;
+    border-left: solid 1px rgba(var(--v-border-color), var(--v-border-opacity));
   }
   .pilot-notice {
     font-size: 15px;
@@ -116,7 +116,7 @@ onMounted(() => {
   }
   table {
     caption {
-      color: $color-body-black !important;
+      color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity)) !important;
     }
     tbody tr:hover {
       background-color: $color-table-cell-bg-grey;

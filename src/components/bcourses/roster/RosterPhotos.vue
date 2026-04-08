@@ -19,11 +19,11 @@
         />
         <v-card-title class="py-0 text-subtitle-2">
           <div v-if="!student.email" :id="`student-without-email-${student.studentId}`">
-            <div class="page-roster-student-name font-weight-regular">{{ student.firstName }} </div>
-            <div class="page-roster-student-name">{{ student.lastName }}</div>
+            <div class="page-roster-student-name text-medium-emphasis font-weight-regular">{{ student.firstName }} </div>
+            <div class="page-roster-student-name text-medium-emphasis">{{ student.lastName }}</div>
           </div>
           <div v-if="student.email">
-            <div class="page-roster-student-name mt-2">
+            <div class="page-roster-student-name text-medium-emphasis mt-2">
               <OutboundLink :id="`student-email-${student.studentId}`" :href="`mailto:${student.email}`" hide-icon>
                 <span class="sr-only">Email </span>
                 <span class="font-weight-regular">{{ student.firstName }}</span>
@@ -103,7 +103,7 @@ const reloadPhotosDelayed = () => {
 </script>
 
 <style scoped lang="scss">
-.page-roster-student-name {
+.page-roster-student-name text-medium-emphasis {
   display: block;
   line-height: 24px;
   overflow: hidden;
@@ -129,8 +129,7 @@ const reloadPhotosDelayed = () => {
   a[href]::after {
     content: none;
   }
-  .page-roster-student-name {
-    color: $color-off-black;
+  .page-roster-student-name text-medium-emphasis {
     font-size: 14px;
     line-height: 20px;
     text-overflow: ellipsis;

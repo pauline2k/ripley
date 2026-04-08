@@ -156,7 +156,7 @@
                 v-if="section.stagedState === 'update'"
                 :id="`section-${section.id}-undo-update-btn`"
                 :aria-label="`Undo update '${section.courseCode} ${section.name}' section name`"
-                class="button-undo-delete ml-1"
+                color="red"
                 density="compact"
                 text="Undo Update"
                 @click="() => unstage(section, sectionIndex, 'undo-update')"
@@ -176,7 +176,7 @@
               <v-btn
                 :id="`section-${section.id}-undo-link-btn`"
                 :aria-label="`Undo link '${section.courseCode} ${section.name}' to the course site`"
-                class="button-undo-add ml-1"
+                color="warning"
                 density="compact"
                 text="Undo Link"
                 @click="() => unstage(section, sectionIndex, 'undo-link')"
@@ -187,7 +187,7 @@
               <v-btn
                 :id="`section-${section.id}-undo-unlink-btn`"
                 :aria-label="`Undo unlink '${section.courseCode} ${section.name}' from the course site`"
-                class="button-undo-delete ml-1"
+                color="red"
                 density="compact"
                 text="Undo Unlink"
                 @click="() => unstage(section, sectionIndex, 'undo-unlink')"
@@ -203,7 +203,7 @@
                 :id="`section-${section.id}-link-btn`"
                 :aria-label="`Link '${section.courseCode} ${section.name}' to the course site`"
                 class="ml-1"
-                :class="{'button-undo-add': section.stagedState === 'add'}"
+                :color="section.stagedState === 'add' ? 'warning' : 'secondary'"
                 density="compact"
                 text="Link"
                 @click="() => stageAdd(section, sectionIndex)"
@@ -618,7 +618,7 @@ const unstage = (section, index, action) => {
   }
   table tr {
     border: 0;
-    border-bottom: 1pt solid $color-container-grey-border;
+    border-bottom: 1pt solid rgba(var(--v-border-color), var(--v-border-opacity));
     display: block;
     width: 100%;
   }
@@ -658,24 +658,6 @@ th {
 .border-top-zero {
   border-top: 0;
 }
-.button-undo-add {
-  background-color: $color-orange-button-bg !important;
-  border: $color-orange-button-border solid 1px !important;
-  color: $color-white !important;
-  &:hover, &:active, &:focus, &:link {
-    background: $color-orange-button-bg-selected !important;
-    border-color: $color-orange-button-border-selected !important;
-  }
-}
-.button-undo-delete {
-  background-color: $color-red-button-bg !important;
-  border: $color-red-button-border solid 1px !important;
-  color: $color-white !important;
-  &:hover, &:active, &:focus, &:link {
-    background: $color-red-button-bg-selected !important;
-    border-color: $color-red-button-border-selected !important;
-  }
-}
 .row-added td {
   background-color: $color-yellow-row-highlighted !important;
 }
@@ -683,7 +665,7 @@ th {
   background-color: $color-red-row-highlighted !important;
 }
 .row-disabled td {
-  color: $color-grey-disabled !important;
+  color: rgba(var(--v-theme-on-surface), var(--v-disabled-opacity)) !important;
 }
 .section-in-use-icon {
   padding: 0 4px 2px 0;

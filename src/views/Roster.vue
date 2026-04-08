@@ -131,13 +131,15 @@
         :students="students"
         :show-one-photo-per-page="showOnePhotoPerPage"
       />
-      <div v-if="!roster.students.length" aria-live="polite">
-        <v-icon class="icon-gold" :icon="mdiAlertCircleOutline" />
-        Students have not yet signed up for this class.
-      </div>
-      <div v-if="roster.students.length && !students.length" aria-live="polite">
-        <v-icon class="icon-gold" :icon="mdiAlertCircleOutline" />
-        No students found matching your query.
+      <div aria-live="polite">
+        <div v-if="!roster.students.length" class="px-3">
+          <v-icon color="warning" :icon="mdiAlertCircleOutline" />
+          Students have not yet signed up for this class.
+        </div>
+        <div v-if="roster.students.length && !students.length" class="px-3">
+          <v-icon color="warning" :icon="mdiAlertCircleOutline" />
+          No students found matching your query.
+        </div>
       </div>
     </div>
   </div>

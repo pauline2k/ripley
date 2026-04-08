@@ -1,11 +1,12 @@
 <template>
-  <div class="icon-blue px-3 mt-3">
+  <div class="px-3 mt-3">
     <v-btn
       id="add-user-help-btn"
       aria-controls="page-help-notice"
       :aria-expanded="`${toggle.displayHelp}`"
       block
       class="justify-start mb-1"
+      color="info"
       :prepend-icon="mdiHelpCircle"
       variant="text"
       @click="toggle.displayHelp = !toggle.displayHelp"
