@@ -184,13 +184,17 @@
       <v-row v-if="showUsersArea" no-gutters>
         <v-col v-if="userSearchResults.length > 0" md="12">
           <table id="person-search-results" class="table table-striped">
-            <caption class="text-left font-weight-bold pl-3 py-2">
-              Search Results
-              <span class="sr-only">Sorted by last name. Select the person you wish to add to the course site using the radio button in column one.</span>
+            <caption
+              id="person-search-results-caption"
+              class="text-left font-weight-bold pl-3 py-2"
+              tabindex="-1"
+            >
+              {{ searchResultsHeadingText }}
+              <span class="sr-only">Select the person you wish to add to the course site using the radio button in column one.</span>
             </caption>
             <thead>
               <tr>
-                <th scope="col">Name</th>
+                <th aria-sort="ascending" scope="col">Name</th>
                 <th scope="col">Calnet UID</th>
                 <th scope="col">Email</th>
               </tr>
@@ -220,7 +224,8 @@
                   </label>
                 </td>
                 <td :id="`user-search-result-row-ldap-uid-${index}`" class="px-3 py-4">
-                  <span class="sr-only">Calnet U I D, </span>{{ user.uid }}
+                  <span class="sr-only">Calnet U I D, {{ uidForScreenReader(user.uid) }}</span>
+                  <span aria-hidden="true">{{ user.uid }}</span>
                 </td>
                 <td :id="`user-search-result-row-email-${index}`" class="px-3 py-4">
                   <span class="sr-only">Email, </span>{{ user.emailAddress }}
@@ -385,6 +390,12 @@ export default {
       default:
         return ''
       }
+    },
+    searchResultsCountForDisplay() {
+      return this.userSearchResultsCount || this.userSearchResults.length
+    },
+    searchResultsHeadingText() {
+      return `Search results: ${pluralize('user', this.searchResultsCountForDisplay)} found`
     }
   },
   created() {
@@ -442,6 +453,9 @@ export default {
     srFriendlyRole(role) {
       return role === 'TA' || role === 'Lead TA' ? replace(role, 'TA', 'T A') : role
     },
+    uidForScreenReader(uid) {
+      return String(uid || '').split('').join(' ')
+    },
     startOver() {
       this.showAlerts = false
       this.alertScreenReader('Starting a new search.')
@@ -484,7 +498,11 @@ export default {
         }).finally(() => {
           clearInterval(searchTimer)
           this.isSearching = false
-          this.$ready('add-user-submit-search-btn')
+          if (this.userSearchResults.length) {
+            putFocusNextTick('person-search-results-caption')
+          } else {
+            this.$ready('add-user-submit-search-btn')
+          }
         })
       }
     },
