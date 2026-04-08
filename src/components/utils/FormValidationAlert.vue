@@ -1,18 +1,11 @@
 <template>
   <v-alert
     aria-live="assertive"
-    color="red-lighten-2"
     density="compact"
-  >
-    <div class="align-center d-flex">
-      <div class="mr-1">
-        <v-icon :icon="mdiAlertCircle" />
-      </div>
-      <div class="text-white">
-        {{ text }}
-      </div>
-    </div>
-  </v-alert>
+    :icon="mdiAlertCircle"
+    :text="text"
+    type="error"
+  />
 </template>
 
 <script setup>

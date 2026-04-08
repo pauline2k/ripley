@@ -18,7 +18,7 @@
       <v-alert
         v-if="errorMessage"
         class="font-weight-medium my-3"
-        role="alert"
+        role="none"
         :text="errorMessage"
         type="warning"
       />
