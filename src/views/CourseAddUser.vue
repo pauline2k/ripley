@@ -73,6 +73,7 @@
         v-if="additionSuccessMessage"
         id="success-message"
         class="alert alert-success font-weight-medium d-flex"
+        tabindex="-1"
       >
         <div>
           <span v-if="userAdded.sectionName">
@@ -513,7 +514,7 @@ export default {
           this.resetSearchState()
           this.resetForm()
           this.additionSuccessMessage = true
-          putFocusNextTick('hide-search-success-button')
+          putFocusNextTick('success-message')
         },
         error => {
           this.alertScreenReader('Error', 'assertive')
