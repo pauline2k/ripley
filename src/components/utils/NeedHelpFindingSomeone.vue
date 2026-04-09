@@ -24,12 +24,14 @@
         <dl class="mb-0">
           <dt class="user-search-notice-description-term">UC Berkeley Faculty, Staff and Students</dt>
           <dd class="user-search-notice-description">
-            <OutboundLink href="http://directory.berkeley.edu/">Find UC Berkeley faculty, staff and students <em>(regular and concurrent enrollment)</em> in the CalNet Directory</OutboundLink>
+            Find UC Berkeley faculty, staff and students <em>(regular and concurrent enrollment)</em> in the
+            <OutboundLink href="http://directory.berkeley.edu/">CalNet Directory</OutboundLink>
             to be added to your site using their CalNet UID or official email address.
           </dd>
           <dt class="user-search-notice-description-term">Guests</dt>
           <dd class="user-search-notice-description">
-            <OutboundLink href="https://https://calnet.berkeley.edu/calnet-departments/calnet-sponsored-guests">Sponsor peers from other institutions or guests from the community  with a CalNet Sponsored Guest Account.</OutboundLink>
+            Sponsor peers from other institutions or guests from the community with a
+            <OutboundLink href="https://https://calnet.berkeley.edu/calnet-departments/calnet-sponsored-guests">CalNet Sponsored Guest Account.</OutboundLink>
             Do NOT request a CalNet Sponsored Guest Account for concurrent enrollment students.
           </dd>
           <dt class="user-search-notice-description-term">More Information</dt>
