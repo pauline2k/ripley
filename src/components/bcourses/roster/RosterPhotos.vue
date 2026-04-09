@@ -144,7 +144,6 @@ const reloadPhotosDelayed = () => {
     display: none;
   }
   .photo-wrapper {
-    float: none;
     padding: 0;
     width: 150px;
   }

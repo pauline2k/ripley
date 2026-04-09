@@ -80,10 +80,11 @@ const imageError = () => {
 @media print {
   .photo {
     height: 130px;
-    width: auto;
+    width: 98px;
   }
   .photo-one-per-page {
     height: 400px;
+    width: 300px;
   }
 }
 </style>
