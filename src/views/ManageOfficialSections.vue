@@ -1,6 +1,10 @@
 <template>
   <div v-if="!contextStore.isLoading" class="pt-3 px-6">
-    <Header1 v-if="canvasSite" class="mb-1 mt-0" :text="canvasSite.name" />
+    <Header1
+      v-if="canvasSite"
+      class="mb-1 mt-0"
+      :text="`Manage official sections for ${canvasSite.name}`"
+    />
     <v-alert
       v-if="error"
       id="error-alert"
@@ -16,6 +20,7 @@
       <div class="pl-3 pb-6 pt-1">
         <OutboundLink id="link-to-canvas-site" :href="canvasSite.url">
           <span class="text-subtitle-2">
+            Open in bCourses site:&nbsp;
             <span v-if="get(canvasSite.term, 'name')">
               {{ canvasSite.term.name }}&nbsp;
             </span>
@@ -25,7 +30,7 @@
           </span>
         </OutboundLink>
       </div>
-      <h2 class="mb-2">Official Sections</h2>
+      <h2 id="official-sections-header" class="mb-2">Official Sections</h2>
       <div v-if="currentWorkflowStep === 'preview'">
         <v-alert
           id="page-course-official-sections-job-status-notice"
@@ -303,17 +308,18 @@ const cancel = () => {
 }
 
 const changeWorkflowStep = (step: string) => {
+  currentWorkflowStep.value = step
   if (step === 'staging') {
     contextStore.alertScreenReader('Edit sections form loaded')
     jobStatus.value = null
     jobStatusMessage.value = ''
+    putFocusNextTick(getStagingEntryFocusTarget())
   } else if (step === 'preview') {
     contextStore.alertScreenReader('Read-only sections list loaded')
     if (canvasSite.value.canEdit) {
       putFocusNextTick('official-sections-edit-btn')
     }
   }
-  currentWorkflowStep.value = step
 }
 
 const exit = () => {
@@ -442,10 +448,17 @@ const saveChanges = () => {
 
 const sectionString = (section: Section) => section.courseCode + ' ' + section.name
 
+const getStagingEntryFocusTarget = () => {
+  const firstLinkedSection = find(allSections.value, section => section.isCourseSection && section.stagedState !== 'delete')
+  if (firstLinkedSection) {
+    return `section-${firstLinkedSection.id}-unlink-btn`
+  }
+  return 'official-sections-header'
+}
+
 const stageAdd = (section: SectionEdit) => {
   if (!section.isCourseSection) {
     section.stagedState = 'add'
-    contextStore.alertScreenReader(`Linked ${sectionString(section)} to the course site.`)
   } else {
     error.value = `Cannot link ${sectionString(section)} because it is already linked to the course site.`
   }
@@ -456,7 +469,6 @@ const stageDelete = (section: SectionEdit) => {
   if (section.isCourseSection) {
     availableSectionsPanel.value = union(availableSectionsPanel.value, [section.courseSlug])
     section.stagedState = 'delete'
-    contextStore.alertScreenReader(`Unlinked ${sectionString(section)} from the course site.`)
   } else {
     error.value = `Cannot unlink ${sectionString(section)} because it is not linked to the course site.`
   }
@@ -509,9 +521,6 @@ const trackSectionUpdateJob = () => {
 const unstage = (section: SectionEdit) => {
   if (section.stagedState === 'add') {
     availableSectionsPanel.value = union(availableSectionsPanel.value, [section.courseSlug])
-    contextStore.alertScreenReader(`${sectionString(section)} will not be added to the course site.`)
-  } else if (section.stagedState === 'delete') {
-    contextStore.alertScreenReader(`${sectionString(section)} will not be removed from the course site.`)
   } else if (section.stagedState === 'update') {
     contextStore.alertScreenReader(`${sectionString(section)} will not be updated.`)
   }

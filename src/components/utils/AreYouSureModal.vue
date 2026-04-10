@@ -22,20 +22,33 @@
         <slot />
       </v-card-text>
       <v-card-actions class="modal-footer">
+        <v-btn
+          v-if="functionCancel && cancelButtonFirst"
+          id="are-you-sure-cancel"
+          class="mr-2"
+          :color="cancelButtonColor"
+          :disabled="isProcessing"
+          :text="buttonLabelCancel"
+          :variant="cancelButtonVariant"
+          @click="functionCancel"
+        />
         <ProgressButton
           id="are-you-sure-confirm"
           :action="confirm"
           class="mr-2"
+          :color="confirmButtonColor"
           :disabled="isProcessing"
           :in-progress="isProcessing"
           :text="buttonLabelConfirm"
+          :variant="confirmButtonVariant"
         />
         <v-btn
-          v-if="functionCancel"
+          v-if="functionCancel && !cancelButtonFirst"
           id="are-you-sure-cancel"
+          :color="cancelButtonColor"
           :disabled="isProcessing"
           :text="buttonLabelCancel"
-          variant="text"
+          :variant="cancelButtonVariant"
           @click="functionCancel"
         />
       </v-card-actions>
@@ -58,6 +71,30 @@ const props = defineProps({
     type: String,
     required: false,
     default: 'Confirm'
+  },
+  cancelButtonColor: {
+    type: String,
+    required: false,
+    default: undefined
+  },
+  cancelButtonFirst: {
+    type: Boolean,
+    required: false
+  },
+  cancelButtonVariant: {
+    type: String,
+    required: false,
+    default: 'text'
+  },
+  confirmButtonColor: {
+    type: String,
+    required: false,
+    default: 'primary'
+  },
+  confirmButtonVariant: {
+    type: String,
+    required: false,
+    default: 'flat'
   },
   functionCancel: {
     default: undefined,
@@ -83,6 +120,11 @@ const props = defineProps({
     required: false,
     default: ''
   },
+  initialFocusTarget: {
+    type: String,
+    required: false,
+    default: 'confirm'
+  },
   width: {
     default: 600,
     required: false,
@@ -97,7 +139,7 @@ const model = defineModel({type: Boolean})
 watch(model, isOpen => {
   if (isOpen) {
     setTimeout(() => focusLocked.value = isOpen, 500)
-    putFocusNextTick('are-you-sure-confirm')
+    putFocusNextTick(props.initialFocusTarget === 'cancel' ? 'are-you-sure-cancel' : 'are-you-sure-confirm')
   } else {
     isProcessing.value = false
   }

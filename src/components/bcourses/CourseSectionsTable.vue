@@ -86,7 +86,7 @@
           </td>
           <td :id="`${id}-${section.id}-schedule`" :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
             <span class="sr-only">Schedule, </span>
-            <template v-if="filterRecurring(section, 'schedule').length">
+            <template v-if="hasRecurring(section, 'schedule')">
               <span
                 v-for="(schedule, index) in uniqBy(filterRecurring(section, 'schedule'), 'schedule')"
                 :key="index"
@@ -103,7 +103,7 @@
           </td>
           <td :id="`${id}-${section.id}-location`" :class="{'td-meeting-location': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
             <span class="sr-only">Location, </span>
-            <template v-if="filterRecurring(section, 'buildingName').length">
+            <template v-if="hasRecurring(section, 'buildingName')">
               <span
                 v-for="(schedule, index) in filterRecurring(section, 'buildingName')"
                 :key="index"
@@ -176,7 +176,7 @@
               <v-btn
                 :id="`section-${section.id}-undo-link-btn`"
                 :aria-label="`Undo link '${section.courseCode} ${section.name}' to the course site`"
-                color="warning"
+                color="secondary"
                 density="compact"
                 text="Undo Link"
                 @click="() => unstage(section, sectionIndex, 'undo-link')"
@@ -296,8 +296,14 @@
     <AreYouSureModal
       v-model="showAreYouSureModal"
       button-label-confirm="Proceed"
+      cancel-button-color="primary"
+      cancel-button-first
+      cancel-button-variant="flat"
+      confirm-button-color="error"
+      confirm-button-variant="text"
       :function-cancel="stageDeleteCancel"
       :function-confirm="stageDeleteProceed"
+      initial-focus-target="cancel"
       modal-header="Warning"
       modal-header-class="font-size-20 text-error"
       text="You are unlinking the section(s) in which you are enrolled. Proceeding will result in loss of access to this bCourses site."
@@ -383,13 +389,13 @@ const allSelected = ref(false)
 const config = contextStore.config
 const currentUser = contextStore.currentUser
 const displayableSections = computed<SectionEdit[]>((): SectionEdit[] => {
-  return filter(props.sections, s => props.rowDisplayLogic(props.mode, s))
+  return filter(props.sections as SectionEdit[], s => props.rowDisplayLogic(props.mode, s)) as SectionEdit[]
 })
 const hasSectionScheduleData = ref(false)
 const indeterminate = ref(false)
 const meetingDaysPattern = /([A-Z]{2})/g
 const sectionDisplayClass = ref({})
-const sectionToUnlink = ref<SectionAndIndex | undefined>()
+const sectionToUnlink = ref<SectionAndIndex | undefined>(undefined)
 const selected = ref<number[]>([])
 const showAreYouSureModal = ref(false)
 
@@ -413,7 +419,7 @@ watch(selected, (objects: number[]) => {
 onMounted(() => {
   selected.value = map(filter(props.sections, 'selected'), 'id')
   updateSectionDisplay()
-  hasSectionScheduleData.value = !!find(displayableSections.value, s => get(s, 'schedules.recurring', []).length)
+  hasSectionScheduleData.value = !!find(displayableSections.value, s => size(get(s, 'schedules.recurring')) > 0)
   contextStore.eventHub.on('sections-table-updated', updateSectionDisplay)
 })
 
@@ -433,6 +439,8 @@ const describeSchedule = (schedule) => {
   return `${oxfordJoin(meetingDays)}, ${startTime} to ${endTime}`
 }
 
+const sectionLabel = (section: SectionEdit) => `${section.courseCode} ${section.name}`
+
 const getNextFocusTarget = (
   section: SectionEdit,
   sectionIndex: number,
@@ -447,8 +455,10 @@ const getNextFocusTarget = (
   }
   if (size(displayableSections.value) > 0) {
     // If any section rows remain, try to move focus to the next row that has a button.
-    const nextFocusSection: SectionEdit | undefined = props.mode === 'currentStaging' ? get(displayableSections.value, sectionIndex) : find(displayableSections.value, s => s.stagedState, sectionIndex)
-    if (showUpdateButton(nextFocusSection)) {
+    const nextFocusSection: SectionEdit | undefined = props.mode === 'currentStaging'
+      ? displayableSections.value[sectionIndex]
+      : displayableSections.value.slice(sectionIndex).find(s => !!s.stagedState)
+    if (nextFocusSection && showUpdateButton(nextFocusSection)) {
       return `section-${nextFocusSection.id}-update-btn`
     }
     if (nextFocusSection) {
@@ -475,7 +485,11 @@ const getNextFocusTarget = (
   return `sections-course-${section.courseSlug}-btn`
 }
 
-const filterRecurring = (section: SectionEdit, key) => filter(section.schedules.recurring, key)
+const filterRecurring = (section: SectionEdit, key: string) => {
+  return (get(section, 'schedules.recurring', []) as any[]).filter(item => !!get(item, key))
+}
+
+const hasRecurring = (section: SectionEdit, key: string) => !!filterRecurring(section, key).length
 
 const noCurrentSections = () => {
   if (props.sections.length < 1) {
@@ -486,12 +500,13 @@ const noCurrentSections = () => {
   })
 }
 
-const showUpdateButton = (section) => {
+const showUpdateButton = (section: SectionEdit | undefined) => {
   return section && props.mode === 'currentStaging' && section.nameDiscrepancy && section.stagedState !== 'update'
 }
 
-const stageAdd = (section, index) => {
+const stageAdd = (section: SectionEdit, index: number) => {
   const totalStagedCount = props.stageAddAction(section)
+  contextStore.alertScreenReader(`Linked ${sectionLabel(section)} to the course site.`)
   putFocusNextTick(getNextFocusTarget(section, index, totalStagedCount, 'link'))
   contextStore.eventHub.emit('sections-table-updated')
 }
@@ -508,6 +523,7 @@ const stageDeleteProceed = () => {
     const index = sectionToUnlink.value.index
     showAreYouSureModal.value = false
     const totalStagedCount = props.stageDeleteAction(section)
+    contextStore.alertScreenReader(`Unlinked ${sectionLabel(section)} from the course site.`)
     putFocusNextTick(getNextFocusTarget(section, index, totalStagedCount, 'unlink'))
     contextStore.eventHub.emit('sections-table-updated')
     sectionToUnlink.value = undefined
@@ -524,7 +540,7 @@ const stageDeleteCancel = () => {
 
 const stageDeletePreCheck = (section: SectionEdit, index: number) => {
   sectionToUnlink.value = {index, section}
-  const sectionsInstructedByMe = filter(displayableSections.value, s => map(s.instructors, 'uid').includes(currentUser.uid))
+  const sectionsInstructedByMe = filter(displayableSections.value, s => map(s.instructors, 'uid').includes(currentUser.uid || ''))
   if (sectionsInstructedByMe.length === 1 && sectionsInstructedByMe[0].id === section.id) {
     showAreYouSureModal.value = true
   } else {
@@ -542,8 +558,13 @@ const updateSectionDisplay = () => {
   })
 }
 
-const unstage = (section, index, action) => {
+const unstage = (section: SectionEdit, index: number, action: string) => {
   const totalStagedCount = props.unstageAction(section)
+  if (action === 'undo-link') {
+    contextStore.alertScreenReader(`${sectionLabel(section)} will not be added to the course site.`)
+  } else if (action === 'undo-unlink') {
+    contextStore.alertScreenReader(`${sectionLabel(section)} will not be removed from the course site.`)
+  }
   putFocusNextTick(getNextFocusTarget(section, index, totalStagedCount, action))
   contextStore.eventHub.emit('sections-table-updated')
 }
