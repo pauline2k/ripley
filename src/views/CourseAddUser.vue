@@ -105,47 +105,47 @@
         <v-col>
           <v-row justify="center" no-gutters>
             <v-col cols="12">
-              <label for="search-type" class="text-subtitle-1">Search By</label>
-              <div id="search-type" role="radiogroup">
-                <v-radio-group
-                  v-model="searchType"
-                  color="primary"
-                  density="compact"
-                  :disabled="isSearching || isAddingUser"
-                  hide-details
+              <div id="search-type-label" class="text-subtitle-1">Search By</div>
+              <v-radio-group
+                id="search-type"
+                v-model="searchType"
+                aria-labelledby="search-type-label"
+                color="primary"
+                density="compact"
+                :disabled="isSearching || isAddingUser"
+                hide-details
+              >
+                <v-radio
+                  id="radio-btn-name"
+                  aria-label="Last Name comma First Name"
+                  name="name"
+                  value="name"
                 >
-                  <v-radio
-                    id="radio-btn-name"
-                    aria-label="Last Name comma First Name"
-                    name="name"
-                    value="name"
-                  >
-                    <template #label>
-                      <div aria-hidden="true" class="pl-1 text-black text-body-2">Last Name, First Name</div>
-                    </template>
-                  </v-radio>
-                  <v-radio
-                    id="radio-btn-email"
-                    aria-label="Email"
-                    name="email"
-                    value="email"
-                  >
-                    <template #label>
-                      <div aria-hidden="true" class="pl-1 text-black text-body-2">Email</div>
-                    </template>
-                  </v-radio>
-                  <v-radio
-                    id="radio-btn-uid"
-                    aria-label="CalNet U I D"
-                    name="uid"
-                    value="uid"
-                  >
-                    <template #label>
-                      <div aria-hidden="true" class="pl-1 text-black text-body-2">CalNet UID</div>
-                    </template>
-                  </v-radio>
-                </v-radio-group>
-              </div>
+                  <template #label>
+                    <div aria-hidden="true" class="pl-1 text-black text-body-2">Last Name, First Name</div>
+                  </template>
+                </v-radio>
+                <v-radio
+                  id="radio-btn-email"
+                  aria-label="Email"
+                  name="email"
+                  value="email"
+                >
+                  <template #label>
+                    <div aria-hidden="true" class="pl-1 text-black text-body-2">Email</div>
+                  </template>
+                </v-radio>
+                <v-radio
+                  id="radio-btn-uid"
+                  aria-label="CalNet U I D"
+                  name="uid"
+                  value="uid"
+                >
+                  <template #label>
+                    <div aria-hidden="true" class="pl-1 text-black text-body-2">CalNet UID</div>
+                  </template>
+                </v-radio>
+              </v-radio-group>
               <div class="align-center d-flex flex-wrap pb-3">
                 <div class="pr-3 pt-3 search-text-field">
                   <v-text-field
@@ -154,6 +154,7 @@
                     aria-autocomplete="none"
                     autocomplete="off"
                     :aria-label="searchFieldAriaLabel"
+                    :aria-labelledby="undefined"
                     density="comfortable"
                     :disabled="isSearching || isAddingUser"
                     hide-details
@@ -462,7 +463,7 @@ export default {
       this.resetForm()
       this.resetSearchState()
       this.resetImportState()
-      putFocusNextTick('search-type')
+      putFocusNextTick('radio-btn-name')
     },
     submitSearch() {
       this.resetSearchState()

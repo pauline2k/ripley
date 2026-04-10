@@ -1,9 +1,10 @@
 <template>
   <div>
     <h2 class="sr-only">Administrator Options</h2>
-    <div class="text-subtitle-1">Choose courses by:</div>
+    <div id="radio-group-modes" class="text-subtitle-1">Choose courses by:</div>
     <v-radio-group
       v-model="adminModeModel"
+      aria-labelledby="radio-group-modes"
       color="primary"
       density="compact"
       :disabled="isFetching"
@@ -26,7 +27,7 @@
           <v-text-field
             id="instructor-uid"
             v-model="uid"
-            aria-label="Instructor UID"
+            aria-label="Instructor U I D"
             class="instructor-uid-text-field"
             density="comfortable"
             :disabled="isFetching"
