@@ -68,7 +68,7 @@
             :type="isWelcomeEmailActive ? 'success' : 'info'"
           >
             You can activate the welcome email
-            <span class="font-italic">after</span> you enter email subject and message below.
+            <span class="font-italic">after</span> you save a subject and message body below.
           </v-alert>
           <div class="ml-5 w-25">
             <v-switch
@@ -86,8 +86,8 @@
                   size="24"
                   class="ms-2"
                 />
-                <span v-if="!isToggling" class="text-no-wrap" aria-live="assertive">
-                  {{ isWelcomeEmailActive ? 'Welcome email activated' : 'Sending welcome emails is paused' }}
+                <span class="text-no-wrap">
+                  Activate welcome email
                 </span>
               </template>
             </v-switch>
@@ -281,6 +281,7 @@ export default {
       const toggleEmailActivation = this.isWelcomeEmailActive ? activateWelcomeEmail : deactivateWelcomeEmail
       toggleEmailActivation().then(data => {
         this.isWelcomeEmailActive = !!data.welcomeEmailActive
+        this.alertScreenReader(`Welcome email ${this.isWelcomeEmailActive ? 'activated' : 'deactivated'}`)
         this.isToggling = false
       })
     },
@@ -310,5 +311,8 @@ ol {
 }
 ul {
   margin-left: 16px;
+}
+.v-selection-control--disabled {
+  opacity: 0.6;
 }
 </style>
