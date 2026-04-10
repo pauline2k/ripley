@@ -2,19 +2,23 @@
   <div v-if="!isLoading">
     <div v-if="appState === 'error'">
       <div class="ma-2 pl-2 pr-4">
-        <Header1 class="grade-export-header mb-3 mt-2" text="Error" />
-        <v-alert
-          v-if="error"
-          role="alert"
-          :text="error"
-          type="warning"
-        >
-          <div v-if="contactSupport" class="py-1">
-            Contact
-            <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink>
-            if you need assistance.
-          </div>
-        </v-alert>
+        <Header1 class="grade-export-header my-3" text="Error" />
+        <div aria-live="polite">
+          <v-alert
+            v-if="error"
+            class="my-2"
+            density="compact"
+            role="none"
+            :text="error"
+            type="warning"
+          >
+            <div v-if="contactSupport" class="py-1">
+              Contact
+              <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink>
+              if you need assistance.
+            </div>
+          </v-alert>
+        </div>
         <div v-if="showRetryOption" class="py-6 text-center">
           <v-btn
             id="retry-selection-btn"
@@ -31,7 +35,7 @@
       <v-row no-gutters>
         <v-col>
           <BackToGradebook />
-          <Header1 class="grade-export-header mb-3 mt-2" text="Before exporting your E-Grades:" />
+          <Header1 class="grade-export-header my-3" text="Before exporting your E-Grades:" />
           <div id="egrades-export-step-grading-scheme">
             <h2 class="grade-export-sub-header">1. Select a grading scheme</h2>
             <div class="pb-4 pl-5 pt-2">
@@ -131,7 +135,7 @@
           <BackToGradebook />
           <Header1
             id="grade-export-header"
-            class="grade-export-header mb-3 mt-2"
+            class="grade-export-header my-3"
             text="Export E-Grades"
           />
         </v-col>
@@ -476,7 +480,6 @@ export default {
 .grade-export-header {
   font-size: 23px;
   font-weight: 400;
-  padding: 12px 0 0;
 }
 .grade-export-sub-header {
   font-size: 20px;

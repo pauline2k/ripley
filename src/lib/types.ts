@@ -1,8 +1,10 @@
 export type CanvasSite = {
   canvasSiteId: string,
+  codeAndTerm: string,
   courseCode: string,
   name: string,
   officialSections: object[],
+  term: Term,
   url: string
 }
 

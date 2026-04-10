@@ -1,67 +1,74 @@
 <template>
-  <div v-if="!isLoading" class="px-3">
-    <div :class="{'pb-2': !hasUpdatedSincePageLoad}">
-      <Header1 class="mb-2" text="Update Mailing List" />
-      <v-alert
-        v-if="!hasUpdatedSincePageLoad"
-        id="mailing-list-created-alert"
-        density="compact"
-        type="info"
+  <div v-if="!contextStore.isLoading" class="px-3">
+    <Header1 class="mb-2" text="Update Mailing List" />
+    <v-alert
+      v-if="!hasUpdatedSincePageLoad && !noChangesAlert && !isUpdating"
+      id="mailing-list-created-alert"
+      class="my-2"
+      density="compact"
+      role="none"
+      type="info"
+    >
+      The list "{{ mailingList.name }}@{{ mailingList.domain }}" has been created.
+      To add members, click the "Update Memberships" button below.
+    </v-alert>
+    <v-alert
+      v-if="noChangesAlert"
+      id="mailing-list-no-changes-alert"
+      class="my-2"
+      density="compact"
+      role="none"
+      :text="noChangesAlert"
+      type="info"
+    />
+    <v-expansion-panels
+      v-if="alerts.length"
+      id="mailing-list-update-alert"
+      v-model="openPanelIndex"
+      :aria-label="alertsLabel"
+      class="mb-4"
+      color="info"
+      role="list"
+    >
+      <v-expansion-panel
+        v-for="(alert, index) in alerts"
+        :key="index"
+        :readonly="!size(alert.emailAddresses)"
+        role="listitem"
       >
-        The list "{{ mailingList.name }}@{{ mailingList.domain }}" has been created.
-        To add members, click the "Update Memberships" button below.
-      </v-alert>
-    </div>
-    <div v-if="alerts.length" aria-live="polite" class="mb-4">
-      <v-expansion-panels
-        id="mailing-list-update-alert"
-        v-model="openPanelIndex"
-        color="info"
-      >
-        <v-expansion-panel
-          v-for="(alert, index) in alerts"
-          :key="index"
-          :disabled="!size(alert.emailAddresses)"
+        <v-expansion-panel-title
+          :id="`mailing-list-alert-${index}`"
+          :aria-controls="`mailing-list-alert-panel-${index}`"
+          :color="alert.type"
         >
-          <v-expansion-panel-title
-            :id="`mailing-list-alert-${index}`"
-            :aria-controls="`mailing-list-alert-panel-${index}`"
-            :color="alert.type === 'warning' ? 'error' : 'success'"
-          >
-            <span v-if="size(alert.emailAddresses)">
-              {{ alert.message }}
-              [&ThinSpace;<span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> users</span>&ThinSpace;]
-            </span>
-            <span v-if="!size(alert.emailAddresses)" class="alert-message-without-email-addresses">
-              {{ alert.message }}
-            </span>
-            <template #actions>
+          <span>
+            {{ alert.message }}
+            <span aria-hidden="true">[&ThinSpace;</span>
+            <span class="toggle-show-hide">{{ openPanelIndex === index ? 'hide' : 'show' }}</span><span class="sr-only"> details</span>
+            <span aria-hidden="true">&ThinSpace;]</span>
+          </span>
+          <template #actions>
+            <v-icon color="white" :icon="alert.type === 'errors' ? mdiAlertCircle : mdiCheck" />
+          </template>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text :id="`mailing-list-alert-panel-${index}`">
+          <ul id="mailing-list-members" class="pt-2">
+            <li
+              v-for="emailAddress in alert.emailAddresses"
+              :key="emailAddress"
+            >
               <v-icon
-                v-if="size(alert.emailAddresses)"
-                color="white"
-                :icon="alert.type === 'errors' ? mdiAlertCircle : mdiCheck"
+                class="mr-6"
+                :color="alert.type === 'errors' ? 'red' : 'primary'"
+                :icon="mdiAccount"
               />
-            </template>
-          </v-expansion-panel-title>
-          <v-expansion-panel-text :id="`mailing-list-alert-panel-${index}`">
-            <ul id="mailing-list-members" class="pt-2">
-              <li
-                v-for="emailAddress in alert.emailAddresses"
-                :key="emailAddress"
-              >
-                <v-icon
-                  class="mr-6"
-                  :color="alert.type === 'errors' ? 'red' : 'primary'"
-                  :icon="mdiAccount"
-                />
-                {{ emailAddress }}
-              </li>
-            </ul>
-          </v-expansion-panel-text>
-        </v-expansion-panel>
-      </v-expansion-panels>
-    </div>
-    <div class="mt-2">
+              {{ emailAddress }}
+            </li>
+          </ul>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
+    <div>
       <v-card id="mailing-list-details" class="pl-3" elevation="2">
         <v-card-text>
           <h2>bCourses Site</h2>
@@ -143,7 +150,7 @@
               </v-col>
               <v-col>
                 <div id="mailing-list-membership-last-updated">
-                  <span v-if="mailingList.populatedAt">
+                  <span v-if="get(mailingList, 'populatedAt')">
                     {{ $moment(mailingList.populatedAt).format('MMM D, YYYY') }}
                   </span>
                   <span v-if="!get(mailingList, 'populatedAt')">
@@ -184,116 +191,122 @@
 
 <script setup>
 import {mdiAccount, mdiAlertCircle, mdiCheck} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
+import {nextTick, onMounted, ref} from 'vue'
+import {storeToRefs} from 'pinia'
+import {useRouter} from 'vue-router'
 import Header1 from '@/components/utils/Header1.vue'
-import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
-import {capitalize, each, get, size} from 'lodash'
-import {nextTick} from 'vue'
+import {capitalize, compact, each, get, partition, size} from 'lodash'
+import {oxfordJoin, pluralize, putFocusNextTick} from '@/utils'
 import {populateMailingList} from '@/api/mailing-list'
-import {pluralize, putFocusNextTick} from '@/utils'
+import {useContextStore} from '@/stores/context'
+import {useMailingListStore} from '@/stores/mailing-list'
 
-export default {
-  name: 'MailingListUpdate',
-  components: {Header1, OutboundLink, SpinnerWithinButton},
-  mixins: [MailingList, Context],
-  data: () => ({
-    alerts: [],
-    hasUpdatedSincePageLoad: false,
-    isUpdating: false,
-    messageType: undefined,
-    openPanelIndex: [],
-    showAlertDetails: false
-  }),
-  created() {
-    if (this.mailingList && this.canvasSite) {
-      if (this.updateSummary) {
-        this.showUpdateSummary()
-      }
-      this.$ready()
-    } else {
-      this.$router.push({path: '/mailing_list/select_course'})
+const alerts = ref([])
+const alertsLabel = ref(undefined)
+const alertTypes = {
+  errors: 'error',
+  successes: 'success'
+}
+const contextStore = useContextStore()
+const hasUpdatedSincePageLoad = ref(false)
+const isUpdating = ref(false)
+const mailingListStore = useMailingListStore()
+const {canvasSite, mailingList, updateSummary} = storeToRefs(mailingListStore)
+const noChangesAlert = ref(undefined)
+const openPanelIndex = ref([])
+const router = useRouter()
+
+contextStore.loadingStart()
+
+onMounted(() => {
+  if (mailingList.value && canvasSite) {
+    if (updateSummary.value) {
+      showUpdateSummary()
     }
-  },
-  methods: {
-    cancel() {
-      this.alertScreenReader('Canceled. Nothing saved.', 'assertive')
-      nextTick(this.$router.push({path: '/mailing_list/select_course'}))
-    },
-    get,
-    showUpdateSummary() {
-      const actions = ['add', 'remove', 'restore', 'update']
-      const count = key => {
-        let count = 0
-        each(actions, action => count += this.updateSummary[action][key].length)
-        return count
-      }
-      const errorCount = count('errors')
-      const successCount = count('successes')
-      if (errorCount || successCount) {
-        this.alerts = []
-        each(['errors', 'successes'], type => {
-          each(actions, action => {
-            const summary = this.updateSummary[action]
-            const emailAddresses = summary[type]
-            if (emailAddresses.length) {
-              const prefix = type === 'errors' ? `failed to ${action}` : (action === 'add' ? 'added ' : `${action}d `)
-              const message = capitalize(prefix + pluralize('user', emailAddresses.length) + '.')
-              this.alerts.push({action, emailAddresses, message, summary, type})
-            }
-          })
-        })
-      } else {
-        this.alerts = [{
-          message: 'Everything is up-to-date. No changes necessary.',
-          type: 'info'
-        }]
-      }
-    },
-    size,
-    update() {
-      this.alerts = []
-      this.alertScreenReader('Updating mailing list.')
-      this.isUpdating = true
-      const updateTimer = setInterval(() => {
-        this.alertScreenReader('Still processing updates.')
-      }, 7000)
-      populateMailingList(this.mailingList.id).then(
-        data => {
-          this.alertScreenReader('Success.', 'assertive')
-          this.setMailingList(data.mailingList)
-          this.setUpdateSummary(data.summary)
-          this.showUpdateSummary()
-        },
-        error => {
-          this.alertScreenReader('Error.', 'assertive')
-          this.alerts = [{
-            message: error,
-            type: 'warning'
-          }]
-        }
-      ).then(() => this.hasUpdatedSincePageLoad = true
-      ).finally(() => {
-        clearInterval(updateTimer)
-        this.isUpdating = false
-        putFocusNextTick('btn-populate-mailing-list')
-      })
-    }
+    contextStore.loadingComplete()
+  } else {
+    router.push({path: '/mailing_list/select_course'})
   }
+})
+
+const cancel = () => {
+  contextStore.alertScreenReader('Canceled. Nothing saved.', 'assertive')
+  nextTick(router.push({path: '/mailing_list/select_course'}))
+}
+
+const showUpdateSummary = () => {
+  const actions = ['add', 'remove', 'restore', 'update']
+  const count = key => {
+    let count = 0
+    each(actions, action => count += updateSummary.value[action][key].length)
+    return count
+  }
+  const errorCount = count('errors')
+  const successCount = count('successes')
+  if (errorCount || successCount) {
+    alerts.value = []
+    each(['errors', 'successes'], type => {
+      each(actions, action => {
+        const summary = updateSummary.value[action]
+        const emailAddresses = summary[type]
+        if (emailAddresses.length) {
+          const prefix = type === 'errors' ? `failed to ${action} ` : (action === 'add' ? 'added ' : `${action}d `)
+          const message = capitalize(prefix + pluralize('user', emailAddresses.length) + '.')
+          const alertType = alertTypes[type]
+          alerts.value.push({action, emailAddresses, message, summary, type: alertType})
+        }
+      })
+    })
+    const messagesByType = partition(alerts.value, {type: 'error'})
+    const errorMessageCount = size(messagesByType[0])
+    const successMessageCount = size(messagesByType[1])
+    alertsLabel.value = oxfordJoin(compact([
+      errorMessageCount ? pluralize('error', errorMessageCount) : null,
+      successMessageCount ? pluralize('success message', successMessageCount) : null,
+    ]))
+    putFocusNextTick('mailing-list-alert-0')
+  } else {
+    noChangesAlert.value = 'Everything is up-to-date. No changes necessary.'
+    contextStore.alertScreenReader(noChangesAlert.value)
+    putFocusNextTick('btn-populate-mailing-list')
+  }
+}
+
+const update = () => {
+  alerts.value = []
+  alertsLabel.value = undefined
+  noChangesAlert.value = undefined
+  contextStore.alertScreenReader('Updating mailing list.')
+  isUpdating.value = true
+  const updateTimer = setInterval(() => {
+    contextStore.alertScreenReader('Still processing updates.')
+  }, 7000)
+  populateMailingList(mailingList.value.id).then(
+    data => {
+      mailingListStore.setMailingList(data.mailingList)
+      mailingListStore.setUpdateSummary(data.summary)
+      showUpdateSummary()
+    },
+    error => {
+      alerts.value = [{
+        message: error,
+        type: 'warning'
+      }]
+    }
+  ).then(() => {
+    hasUpdatedSincePageLoad.value = true
+  }
+  ).finally(() => {
+    clearInterval(updateTimer)
+    isUpdating.value = false
+  })
 }
 </script>
 
 <style lang="scss" scoped>
-.alert-message-without-email-addresses {
-  font-size: 16px;
-  font-weight: 700;
-}
 .toggle-show-hide {
-  color: lightblue;
   text-decoration: none;
   &:hover {
     cursor: pointer;

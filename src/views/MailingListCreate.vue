@@ -1,11 +1,12 @@
 <template>
-  <div v-if="!isLoading" class="px-5 pb-5">
+  <div v-if="!contextStore.isLoading" class="px-5 pb-5">
     <div>
       <Header1 text="Create Mailing List" />
       <v-alert
         v-if="!error && !success"
         class="mb-3"
         density="compact"
+        role="none"
         text="No Mailing List has been created for this site."
         type="info"
       />
@@ -70,27 +71,22 @@
             </v-row>
             <v-row align="center" no-gutters>
               <v-col>
-                <label class="sr-only" for="mailing-list-name-input">Mailing list name</label>
                 <v-text-field
                   id="mailing-list-name-input"
                   v-model="mailingListName"
-                  :aria-invalid="hasInvalidCharacters"
+                  :aria-invalid="hasInvalidCharacters || !mailingListName"
+                  :aria-labelledby="undefined"
                   aria-required="true"
                   density="comfortable"
                   :disabled="isCreating"
-                  hide-details
+                  label="Mailing list name"
                   maxlength="50"
                   required
+                  :rules="validationRules"
+                  validate-on="lazy invalid-input"
                   variant="outlined"
-                  @focus="hasInvalidCharacters = false; debouncedValidateName()"
-                  @update:model-value="hasInvalidCharacters = false; debouncedValidateName()"
                   @keydown.enter="create"
                 />
-                <div v-if="mailingListName && hasInvalidCharacters" aria-live="assertive" class="validation-messages">
-                  <div class="pr-1 text-no-wrap">
-                    <span class="sr-only">Error: </span>Only lowercase alphanumeric, underscore and hyphen characters allowed.
-                  </div>
-                </div>
               </v-col>
               <v-col>
                 <div class="text-no-wrap text-subtitle-1">-{{ mailingListSuffix }}@{{ mailgunDomain }}</div>
@@ -132,121 +128,126 @@
   </div>
 </template>
 
-<script>
-import Context from '@/mixins/Context'
+<script setup>
+import {get, size, trim} from 'lodash'
+import {nextTick, onMounted, ref} from 'vue'
+import {storeToRefs} from 'pinia'
+import {useRoute, useRouter} from 'vue-router'
 import Header1 from '@/components/utils/Header1.vue'
-import MailingList from '@/mixins/MailingList.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {createMailingList, getMailingList, getSuggestedMailingListName} from '@/api/mailing-list'
-import {debounce, get, size, trim} from 'lodash'
 import {getCanvasSite} from '@/api/canvas-site'
-import {nextTick} from 'vue'
 import {toInt} from '@/utils'
+import {useContextStore} from '@/stores/context'
+import {useMailingListStore} from '@/stores/mailing-list'
 
-export default {
-  name: 'MailingListCreate',
-  components: {Header1, OutboundLink, SpinnerWithinButton},
-  mixins: [Context, MailingList],
-  data: () => ({
-    canvasSiteId: undefined,
-    debouncedValidateName: undefined,
-    error: undefined,
-    hasInvalidCharacters: false,
-    isAdminToolMode: undefined,
-    isCreating: false,
-    mailgunDomain: undefined,
-    mailingListName: undefined,
-    mailingListSuffix: undefined,
-    success: undefined,
-    validNameRegex: /[a-z0-9_-]/g
-  }),
-  created() {
-    this.debouncedValidateName = debounce(this.validateName, 200)
-  },
-  mounted() {
-    this.init()
-    const canvasSiteIdFromRoute = toInt(get(this.$route, 'params.canvasSiteId'))
-    this.isAdminToolMode = !!canvasSiteIdFromRoute
-    this.canvasSiteId = canvasSiteIdFromRoute || this.currentUser.canvasSiteId
-    getMailingList(this.canvasSiteId).then(
-      data => {
-        this.setMailingList(data)
-        if (data) {
-          this.goToNextPage()
-        } else {
-          this.getCanvasSite().then(data => {
-            this.setCanvasSite(data)
-            getSuggestedMailingListName(this.canvasSiteId).then(data => {
-              this.mailgunDomain = data.mailgunDomain
-              this.mailingListName = data.name
-              const suffix = data.suffix
-              this.mailingListSuffix = suffix
-              this.$ready()
-            })
+const canvasSiteId = ref(undefined)
+const contextStore = useContextStore()
+const error = ref(undefined)
+const hasInvalidCharacters = ref(false)
+const isAdminToolMode = ref(undefined)
+const isCreating = ref(false)
+const mailgunDomain = ref(undefined)
+const mailingListName = ref(undefined)
+const mailingListStore = useMailingListStore()
+const {canvasSite} = storeToRefs(mailingListStore)
+const mailingListSuffix = ref(undefined)
+const route = useRoute()
+const router = useRouter()
+const success = ref(undefined)
+const validationRules = [
+  s => !!s || 'Mailing list name is required',
+  s => validateName(s) || 'Only lowercase alphanumeric, underscore and hyphen characters allowed.'
+]
+const VALID_NAME_REGEX = /[a-z0-9_-]/g
+
+contextStore.loadingStart()
+
+onMounted(() => {
+  const canvasSiteIdFromRoute = toInt(get(route, 'params.canvasSiteId'))
+  mailingListStore.init()
+  isAdminToolMode.value = !!canvasSiteIdFromRoute
+  canvasSiteId.value = canvasSiteIdFromRoute || contextStore.currentUser.canvasSiteId
+  getMailingList(canvasSiteId.value).then(
+    mailingListResponse => {
+      mailingListStore.setMailingList(mailingListResponse)
+      if (mailingListResponse) {
+        goToNextPage()
+      } else {
+        getSite().then(canvasSiteResponse => {
+          mailingListStore.setCanvasSite(canvasSiteResponse)
+          getSuggestedMailingListName(canvasSiteId.value).then(suggestion => {
+            const suffix = suggestion.suffix
+            mailgunDomain.value = suggestion.mailgunDomain
+            mailingListName.value = suggestion.name
+            mailingListSuffix.value = suffix
+            contextStore.loadingComplete()
           })
-        }
-      },
-      error => {
-        this.error = error
-        this.$ready()
-      }
-    )
-  },
-  methods: {
-    cancel() {
-      this.alertScreenReader('Canceled. Nothing saved.', 'assertive')
-      nextTick(this.$router.push({path: '/mailing_list/select_course'}))
-    },
-    create() {
-      const name = trim(this.mailingListName)
-      if (name && !this.hasInvalidCharacters) {
-        this.isCreating = true
-        this.alertScreenReader('Creating mailing list.')
-        const createTimer = setInterval(() => {
-          this.alertScreenReader('Still creating mailing list.')
-        }, 7000)
-        createMailingList(
-          this.canvasSiteId,
-          `${name}-${this.mailingListSuffix}`,
-          !this.isAdminToolMode
-        ).then(
-          data => {
-            this.alertScreenReader('Success.', 'assertive')
-            this.error = null
-            this.setMailingList(data)
-            nextTick(this.goToNextPage())
-          },
-          error => {
-            this.alertScreenReader('Error.', 'assertive')
-            this.error = error
-          }
-        ).finally(() => {
-          clearInterval(createTimer)
-          this.isCreating = false
         })
       }
     },
-    get,
-    getCanvasSite() {
-      return new Promise(resolve => {
-        if (this.canvasSite) {
-          resolve(this.canvasSite)
-        } else {
-          getCanvasSite(this.canvasSiteId).then(resolve)
-        }
-      })
-    },
-    goToNextPage() {
-      const path = this.isAdminToolMode ? '/mailing_list/update' : '/mailing_list/send_welcome_email'
-      this.$router.push({path})
-    },
-    trim,
-    validateName() {
-      const name = trim(this.mailingListName)
-      const isValid = name.length && size(name.match(this.validNameRegex)) === name.length && name[0].match(/[a-z]/)
-      this.hasInvalidCharacters = !isValid
+    error => {
+      error.value = error
+      contextStore.loadingComplete()
     }
+  )
+})
+
+const cancel = () => {
+  contextStore.alertScreenReader('Canceled. Nothing saved.', 'assertive')
+  nextTick(router.push({path: '/mailing_list/select_course'}))
+}
+
+const create = () => {
+  const name = trim(mailingListName.value)
+  if (name && !hasInvalidCharacters.value) {
+    const createTimer = setInterval(() => {
+      contextStore.alertScreenReader('Still creating mailing list.')
+    }, 7000)
+    isCreating.value = true
+    contextStore.alertScreenReader('Creating mailing list.')
+    createMailingList(
+      canvasSiteId.value,
+      `${name}-${mailingListSuffix.value}`,
+      !isAdminToolMode.value
+    ).then(
+      data => {
+        contextStore.alertScreenReader('The mailing list has been created. To add members, click the "Update Memberships" button below.', 'assertive')
+        error.value = null
+        mailingListStore.setMailingList(data)
+        nextTick(goToNextPage())
+      },
+      error => {
+        contextStore.alertScreenReader('Error.', 'assertive')
+        error.value = error
+      }
+    ).finally(() => {
+      clearInterval(createTimer)
+      isCreating.value = false
+    })
   }
+}
+
+const getSite = () => {
+  return new Promise(resolve => {
+    if (canvasSite.value) {
+      resolve(canvasSite.value)
+    } else {
+      getCanvasSite(canvasSiteId.value).then(resolve)
+    }
+  })
+}
+
+const goToNextPage = () => {
+  const path = isAdminToolMode.value ? '/mailing_list/update' : '/mailing_list/send_welcome_email'
+  router.push({path})
+}
+
+const validateName = s => {
+  const name = trim(s)
+  const isValid = name.length && size(name.match(VALID_NAME_REGEX)) === name.length && name[0].match(/[a-z]/)
+  hasInvalidCharacters.value = !isValid
+  return isValid
 }
 </script>

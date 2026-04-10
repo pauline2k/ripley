@@ -1,43 +1,40 @@
 <template>
-  <AppBar v-if="!$isInIframe" />
-  <v-container
-    v-if="!isLoading"
-    id="content"
-    class="background-splash"
-    fill-height
-    fluid
-  >
-    <v-card
-      class="elevation-1 mt-12 mx-auto text-center"
-      :max-width="applicationState.stacktrace ? 640 : 480"
-      outlined
+  <div>
+    <AppBar v-if="!$isInIframe" />
+    <v-container
+      v-if="!isLoading"
+      id="content"
+      class="background-splash"
+      fill-height
+      fluid
     >
-      <v-img
-        v-if="!$isInIframe"
-        alt="TV screen with colored bars"
-        aria-label="TV screen with colored bars"
-        :aspect-ratio="16 / 9"
-        src="@/assets/images/color-bars.png"
-      />
-      <v-card-title>
-        <Header1 class="mt-8" :text="header" />
-      </v-card-title>
-      <v-card-text>
-        <div
-          v-if="message || stacktrace"
-          id="error-message"
-          aria-live="polite"
-          role="alert"
-        >
-          <span v-if="message">{{ message }}</span>
-          <div v-if="stacktrace" class="px-5 py-3 text-left text-sm-caption">
-            <pre>{{ stacktrace }}</pre>
+      <v-card
+        class="elevation-1 mt-12 mx-auto text-center"
+        :max-width="applicationState.stacktrace ? 640 : 480"
+        outlined
+      >
+        <v-img
+          v-if="!$isInIframe"
+          alt="TV screen with colored bars"
+          aria-label="TV screen with colored bars"
+          :aspect-ratio="16 / 9"
+          src="@/assets/images/color-bars.png"
+        />
+        <v-card-title>
+          <Header1 class="mt-8" :text="header" />
+        </v-card-title>
+        <v-card-text>
+          <div id="error-message">
+            <span aria-live="polite">{{ message }}</span>
+            <div v-if="stacktrace" class="px-5 py-3 text-left text-sm-caption">
+              <pre>{{ stacktrace }}</pre>
+            </div>
           </div>
-        </div>
-        <ContactUsPrompt class="mb-5" />
-      </v-card-text>
-    </v-card>
-  </v-container>
+          <ContactUsPrompt class="mb-5" />
+        </v-card-text>
+      </v-card>
+    </v-container>
+  </div>
 </template>
 
 <script>

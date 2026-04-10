@@ -1,8 +1,9 @@
 import {defineStore} from 'pinia'
+import type {CanvasSite} from '@/lib/types'
 
 export const useMailingListStore = defineStore('mailingList', {
   state: () => ({
-    canvasSite: undefined,
+    canvasSite: undefined as CanvasSite|undefined,
     mailingList: undefined,
     updateSummary: undefined
   }),
@@ -10,8 +11,8 @@ export const useMailingListStore = defineStore('mailingList', {
     init() {
       this.canvasSite = this.mailingList = this.updateSummary = undefined
     },
-    setCanvasSite(canvasSite: any) {
-      const a = []
+    setCanvasSite(canvasSite: CanvasSite) {
+      const a: string[] = []
       if (canvasSite.courseCode !== canvasSite.name) {
         a.push(canvasSite.courseCode)
       }

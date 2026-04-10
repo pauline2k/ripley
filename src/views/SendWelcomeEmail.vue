@@ -1,10 +1,10 @@
 <template>
-  <div v-if="!isLoading" class="ma-5">
+  <div v-if="!contextStore.isLoading" class="ma-5">
     <Header1 text="Mailing List" />
     <v-alert
       id="mailing-list-created-alert"
       density="compact"
-      role="alert"
+      role="none"
       type="success"
     >
       A Mailing List has been created at <strong>{{ mailingList.name }}@{{ mailingList.domain }}</strong>.
@@ -18,7 +18,7 @@
         of a Teacher, TA, Lead TA or Reader will be sent to the official email addresses of all site
         members. Students and people not in the site cannot send messages through Mailing Lists.
       </div>
-      <div v-if="mailingList.welcomeEmailLastSent" class="mb-3">
+      <div v-if="get(mailingList, 'welcomeEmailLastSent')" class="mb-3">
         <h2 id="download-log-file-header" class="my-2" tabindex="-1">
           Download Log of Sent Messages
         </h2>
@@ -62,9 +62,9 @@
         </div>
         <div class="mt-2">
           <v-alert
-            v-if="!mailingList.welcomeEmailBody || !mailingList.welcomeEmailSubject"
+            v-if="!get(mailingList, 'welcomeEmailBody') || !get(mailingList, 'welcomeEmailSubject')"
             density="compact"
-            role="alert"
+            role="none"
             :type="isWelcomeEmailActive ? 'success' : 'info'"
           >
             You can activate the welcome email
@@ -75,7 +75,7 @@
               id="toggle-welcome-email-active"
               v-model="isWelcomeEmailActive"
               color="success"
-              :disabled="!mailingList.welcomeEmailBody || !mailingList.welcomeEmailSubject || isSaving || isToggling"
+              :disabled="!get(mailingList, 'welcomeEmailBody') || !get(mailingList, 'welcomeEmailSubject') || isSaving || isToggling"
               hide-details
               @change="toggle"
             >
@@ -106,7 +106,7 @@
               density="compact"
               hide-details
               maxlength="255"
-              :rules="[s => !!s || 'Required']"
+              :rules="[s => !!s || 'Subject is required']"
               variant="outlined"
               @keydown.enter="saveWelcomeEmail"
             />
@@ -116,7 +116,7 @@
               Subject
             </div>
             <div id="page-site-mailing-list-subject">
-              {{ mailingList.welcomeEmailSubject }}
+              {{ get(mailingList, 'welcomeEmailSubject') }}
             </div>
           </template>
           <div class="mt-3">
@@ -129,7 +129,7 @@
                 v-model="body"
                 variant="outlined"
                 bg-color="white"
-                :rules="[s => !!s || 'Required']"
+                :rules="[s => !!s || 'Message body is required']"
               />
             </template>
             <template v-else>
@@ -140,7 +140,7 @@
                 <div
                   id="page-site-mailing-list-body"
                   class="welcome-email-message-body"
-                  v-html="mailingList.welcomeEmailBody"
+                  v-html="get(mailingList, 'welcomeEmailBody')"
                 />
               </div>
             </template>
@@ -160,7 +160,7 @@
                 </span>
               </v-btn>
               <v-btn
-                v-if="mailingList.welcomeEmailBody && mailingList.welcomeEmailSubject"
+                v-if="get(mailingList, 'welcomeEmailBody') && get(mailingList, 'welcomeEmailSubject')"
                 id="btn-cancel-welcome-email-edit"
                 :disabled="isSaving || isToggling"
                 variant="tonal"
@@ -187,13 +187,11 @@
 </template>
 
 <script setup>
+import {computed, onMounted, ref} from 'vue'
+import {get, trim} from 'lodash'
 import {mdiFileDownloadOutline} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
+import {storeToRefs} from 'pinia'
 import Header1 from '@/components/utils/Header1.vue'
-import MailingList from '@/mixins/MailingList'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {
@@ -204,97 +202,89 @@ import {
   updateWelcomeEmail
 } from '@/api/mailing-list'
 import {putFocusNextTick} from '@/utils'
-import {trim} from 'lodash'
+import {useContextStore} from '@/stores/context'
+import {useMailingListStore} from '@/stores/mailing-list'
 
-export default {
-  name: 'SendWelcomeEmail',
-  components: {
-    Header1,
-    OutboundLink,
-    SpinnerWithinButton
-  },
-  mixins: [Context, MailingList],
-  data: () => ({
-    alerts: {
-      error: [],
-      success: []
-    },
-    body: '',
-    errorMessages: [],
-    isCreating: false,
-    isDownloading: false,
-    isEditing: false,
-    isSaving: false,
-    isToggling: false,
-    isWelcomeEmailActive: false,
-    subject: ''
-  }),
-  computed: {
-    isWelcomeEmailValid() {
-      return !!trim(this.subject) && !!trim(this.body)
+const body = ref('')
+const contextStore = useContextStore()
+const errorMessages = ref([])
+const isCreating = ref(false)
+const isDownloading = ref(false)
+const isEditing = ref(false)
+const isSaving = ref(false)
+const isToggling = ref(false)
+const isWelcomeEmailActive = ref(false)
+const mailingListStore = useMailingListStore()
+const {mailingList} = storeToRefs(mailingListStore)
+const subject = ref('')
+const isWelcomeEmailValid = computed(() => {
+  return !!trim(subject.value) && !!trim(body.value)
+})
+
+contextStore.loadingStart()
+
+onMounted(() => {
+  getMyMailingList().then(
+    data => {
+      updateDisplay(data)
+      contextStore.loadingComplete()
     }
-  },
-  created() {
-    getMyMailingList().then(
-      data => {
-        this.updateDisplay(data)
-        this.$ready()
+  )
+})
+
+const cancelEditMode = () => {
+  isEditing.value = false
+  body.value = get(mailingList.value, 'welcomeEmailBody') || ''
+  subject.value = get(mailingList.value, 'welcomeEmailSubject')
+  putFocusNextTick('btn-edit-welcome-email')
+}
+
+const downloadMessageLog = () => {
+  isDownloading.value = true
+  contextStore.alertScreenReader('Downloading')
+  downloadWelcomeEmailCsv().then(() => {
+    isDownloading.value = false
+    contextStore.alertScreenReader('Downloaded.')
+  })
+}
+
+const saveWelcomeEmail = () => {
+  if (isWelcomeEmailValid.value) {
+    contextStore.alertScreenReader('Saving welcome email')
+    isSaving.value = true
+    updateWelcomeEmail(isWelcomeEmailActive.value, body.value, subject.value).then(
+      response => {
+        updateDisplay(response)
+        contextStore.alertScreenReader('Welcome email updated')
+        putFocusNextTick('btn-edit-welcome-email')
       }
-    )
-  },
-  methods: {
-    cancelEditMode() {
-      this.isEditing = false
-      this.body = this.mailingList.welcomeEmailBody || ''
-      this.subject = this.mailingList.welcomeEmailSubject
-      putFocusNextTick('send-welcome-email-header')
-    },
-    downloadMessageLog() {
-      this.isDownloading = true
-      this.alertScreenReader('Downloading')
-      downloadWelcomeEmailCsv().then(() => {
-        this.isDownloading = false
-        this.alertScreenReader('Downloaded.')
-      })
-    },
-    saveWelcomeEmail() {
-      if (this.isWelcomeEmailValid) {
-        this.alertScreenReader('Saving welcome email')
-        this.isSaving = true
-        updateWelcomeEmail(this.isWelcomeEmailActive, this.body, this.subject).then(
-          response => {
-            this.updateDisplay(response)
-            this.alertScreenReader('Welcome email updated')
-            putFocusNextTick('send-welcome-email-header')
-          }
-        ).then(() => {
-          this.isSaving = false
-        })
-      }
-    },
-    setEditMode() {
-      this.isEditing = true
-      putFocusNextTick('input-subject')
-    },
-    toggle() {
-      this.isToggling = true
-      const toggleEmailActivation = this.isWelcomeEmailActive ? activateWelcomeEmail : deactivateWelcomeEmail
-      toggleEmailActivation().then(data => {
-        this.isWelcomeEmailActive = !!data.welcomeEmailActive
-        this.alertScreenReader(`Welcome email ${this.isWelcomeEmailActive ? 'activated' : 'deactivated'}`)
-        this.isToggling = false
-      })
-    },
-    updateDisplay(data) {
-      this.setMailingList(data)
-      this.isWelcomeEmailActive = this.mailingList.welcomeEmailActive
-      this.body = this.mailingList.welcomeEmailBody || ''
-      this.subject = this.mailingList.welcomeEmailSubject
-      this.errorMessages = this.mailingList.errorMessages || []
-      this.isEditing = !this.body && !this.subject
-      this.isCreating = false
-    }
+    ).then(() => {
+      isSaving.value = false
+    })
   }
+}
+
+const setEditMode = () => {
+  isEditing.value = true
+  putFocusNextTick('input-subject')
+}
+
+const toggle = () => {
+  isToggling.value = true
+  const toggleEmailActivation = isWelcomeEmailActive.value ? activateWelcomeEmail : deactivateWelcomeEmail
+  toggleEmailActivation().then(data => {
+    isWelcomeEmailActive.value = !!data.welcomeEmailActive
+    isToggling.value = false
+  })
+}
+const updateDisplay = data => {
+  mailingListStore.setMailingList(data)
+  isWelcomeEmailActive.value = get(mailingList.value, 'welcomeEmailActive')
+  body.value = get(mailingList.value, 'welcomeEmailBody') || ''
+  subject.value = get(mailingList.value, 'welcomeEmailSubject')
+  errorMessages.value = get(mailingList.value, 'errorMessages') || []
+  isEditing.value = !body.value && !subject.value
+  isCreating.value = false
 }
 </script>
 

@@ -17,7 +17,7 @@
           closable
           color="white"
           density="compact"
-          role="alert"
+          role="none"
           rounded
           variant="outlined"
         >

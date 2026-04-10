@@ -1,14 +1,18 @@
 <template>
   <div v-if="!contextStore.isLoading" class="mx-10 my-5">
-    <Header1 text="Create a Project Site" />
+    <Header1 class="mb-2" text="Create a Project Site" />
     <div>
-      <v-alert
-        v-if="error"
-        density="compact"
-        role="alert"
-        :text="error"
-        type="warning"
-      />
+      <div aria-live="polite">
+        <v-alert
+          v-if="error"
+          id="create-site-error"
+          class="my-3"
+          density="compact"
+          role="none"
+          :text="error"
+          type="warning"
+        />
+      </div>
       <div class="align-center d-flex justify-center pb-8 pt-4">
         <div class="pr-3">
           <label
