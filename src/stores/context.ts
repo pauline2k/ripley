@@ -1,9 +1,8 @@
 import mitt from 'mitt'
 import {defineStore} from 'pinia'
-import {get} from 'lodash'
 import {nextTick} from 'vue'
-import {putFocusNextTick} from '@/utils'
-import router from '@/router'
+import type {ScreenReaderAlert} from '@/lib/types'
+import {alertScreenReader, putFocusNextTick} from '@/utils'
 
 export type RipleyConfig = {
   canvasApiUrl: string,
@@ -63,32 +62,15 @@ export const useContextStore = defineStore('context', {
     }
   }),
   actions: {
-    alertScreenReader(message: string, politeness?: string) {
-      this.screenReaderAlert.message = ''
-      nextTick(() => {
-        this.screenReaderAlert = {
-          message: message,
-          politeness: politeness || 'polite'
-        }
-      })
-    },
     loadingComplete(focusTarget?: string) {
       this.isLoading = false
-      const route = router.currentRoute
-      if (!get(route, 'value.meta.announcer.skip')) {
-        const name = String(get(route, 'value.name', ''))
-        this.alertScreenReader(`${name} page has loaded.`, 'polite')
-      }
       nextTick(() => {
         setTimeout(() => putFocusNextTick(focusTarget || 'page-title'), 150)
       })
     },
-    loadingStart(route?: object) {
+    loadingStart() {
       this.isLoading = true
-      if (!get(route, 'meta.announcer.skip')) {
-        const name = String(get(route, 'name', ''))
-        this.alertScreenReader(`${name} page is loading.`, 'polite')
-      }
+      alertScreenReader('Loading')
     },
     resetApplicationState() {
       this.applicationState = $_getDefaultApplicationState()
@@ -105,6 +87,12 @@ export const useContextStore = defineStore('context', {
     },
     setHypersleep(hypersleep: any) {
       this.config.hypersleep = hypersleep
-    }
+    },
+    setScreenReaderAlert(screenReaderAlert: ScreenReaderAlert) {
+      this.screenReaderAlert = {
+        message: screenReaderAlert.message,
+        politeness: screenReaderAlert.politeness || 'polite'
+      }
+    },
   }
 })

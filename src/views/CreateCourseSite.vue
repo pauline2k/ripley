@@ -191,7 +191,7 @@ import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable'
 import CreateCourseSiteHeader from '@/components/bcourses/create/CreateCourseSiteHeader'
 import Header1 from '@/components/utils/Header1'
 import SelectSectionsGuide from '@/components/bcourses/create/SelectSectionsGuide'
-import {iframeParentLocation, isInIframe, putFocusNextTick} from '@/utils'
+import {alertScreenReader, iframeParentLocation, isInIframe, putFocusNextTick} from '@/utils'
 import {courseCreate, courseProvisionJobStatus, getCourseProvisioningMetadata, getSections} from '@/api/canvas-site'
 import {useContextStore} from '@/stores/context'
 
@@ -304,7 +304,7 @@ const courseSiteCreationPromise = (siteName, siteAbbreviation) => {
         data => {
           backgroundJobId.value = data.jobId
           jobStatus.value = data.jobStatus
-          contextStore.alertScreenReader('Started course site creation.')
+          alertScreenReader('Started course site creation.')
           trackBackgroundJob()
           resolve()
         },
@@ -324,7 +324,7 @@ const fetchFeed = () => {
   jobStatus.value = undefined
   percentComplete.value = undefined
   selectedSectionsList.value = []
-  contextStore.alertScreenReader('Loading courses and sections')
+  alertScreenReader('Loading courses and sections')
 
   const semester = (adminMode.value === 'bySectionId' ? currentAdminTerm.value : currentSemester.value)
   getSections(
@@ -342,7 +342,7 @@ const fetchFeed = () => {
         warning.value = adminActingAs.value ? `UID ${adminActingAs.value} is not listed as an instructor of any courses in the current or upcoming term.` : 'No matching courses found.'
       }
       fillCourseSites(teachingTerms.value)
-      contextStore.alertScreenReader('Course sections have loaded')
+      alertScreenReader('Course sections have loaded')
       if (adminMode.value === 'bySectionId' && adminBySectionIds.value) {
         each(coursesList.value, course => {
           each(course.sections, section => {
@@ -356,7 +356,7 @@ const fetchFeed = () => {
       }
     },
     error => {
-      contextStore.alertScreenReader('Course section loading failed')
+      alertScreenReader('Course section loading failed')
       warning.value = error || 'failure'
     }
   ).finally(() => {
@@ -428,7 +428,7 @@ const setTermSlug = slug => {
 
 const showConfirmation = () => {
   updateSelected()
-  contextStore.alertScreenReader('Course site details form loaded.')
+  alertScreenReader('Course site details form loaded.')
   currentWorkflowStep.value = 'confirmation'
 }
 
@@ -448,19 +448,19 @@ const trackBackgroundJob = () => {
         if (response.jobStatus !== jobStatus.value) {
           jobStatus.value = response.jobStatus
         } else {
-          contextStore.alertScreenReader(`Still ${includes(['sendingRequest', 'queued'], jobStatus.value) ? 'waiting' : 'processing'}`)
+          alertScreenReader(`Still ${includes(['sendingRequest', 'queued'], jobStatus.value) ? 'waiting' : 'processing'}`)
         }
         if (!(includes(['started', 'queued'], jobStatus.value)) || get(response, 'jobData.courseSiteUrl')) {
           clearInterval(exportTimer)
           if (get(response, 'jobData.courseSiteUrl')) {
-            contextStore.alertScreenReader('Done. Loading new course site.')
+            alertScreenReader('Done. Loading new course site.')
             if (isInIframe) {
               iframeParentLocation(response.jobData.courseSiteUrl)
             } else {
               window.location.href = response.jobData.courseSiteUrl
             }
           } else {
-            contextStore.alertScreenReader('Error.', 'assertive')
+            alertScreenReader('Error.', 'assertive')
             currentWorkflowStep.value = null
             jobStatus.value = 'error'
             warning.value = 'An error has occurred with your request. Please try again or contact bCourses support.'
@@ -470,7 +470,7 @@ const trackBackgroundJob = () => {
       }
     ).catch(
       () => {
-        contextStore.alertScreenReader('Error.', 'assertive')
+        alertScreenReader('Error.', 'assertive')
         currentWorkflowStep.value = null
         jobStatus.value = 'error'
         warning.value = 'An error has occurred with your request. Please try again or contact bCourses support.'
@@ -520,7 +520,7 @@ const updateSemesterData = slug => {
   currentSemester.value = slug
   currentSemesterName.value = term.name
   selectedSectionsList.value = []
-  contextStore.alertScreenReader(`Course sections for ${term.name} loaded`)
+  alertScreenReader(`Course sections for ${term.name} loaded`)
   updateSelected()
 }
 </script>

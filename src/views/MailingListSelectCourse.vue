@@ -59,8 +59,8 @@ import {trim} from 'lodash'
 import {useRouter} from 'vue-router'
 import Header1 from '@/components/utils/Header1.vue'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
+import {alertScreenReader, isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 import {getMailingList} from '@/api/mailing-list'
-import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 import {useContextStore} from '@/stores/context'
 import {useMailingListStore} from '@/stores/mailing-list'
 
@@ -89,18 +89,18 @@ const proceed = () => {
   if (!isProcessing.value) {
     isProcessing.value = true
     error.value = undefined
-    contextStore.alertScreenReader('Searching for mailing list.')
+    alertScreenReader('Searching for mailing list.')
     const searchTimer = setInterval(() => {
-      contextStore.alertScreenReader('Still searching.')
+      alertScreenReader('Still searching.')
     }, 7000)
     getMailingList(canvasSiteId.value).then(
       data => {
         if (data) {
-          contextStore.alertScreenReader('Mailing list found.', 'assertive')
+          alertScreenReader('Mailing list found.', 'assertive')
           mailingListStore.setMailingList(data)
           router.push('/mailing_list/update')
         } else {
-          contextStore.alertScreenReader('No mailing list found.', 'assertive')
+          alertScreenReader('No mailing list found.', 'assertive')
           nextTick(() => router.push(`/mailing_list/create/${canvasSiteId.value}`))
         }
       },

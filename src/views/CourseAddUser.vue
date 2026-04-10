@@ -325,7 +325,7 @@
 
 <script setup>
 import {mdiAlert, mdiCloseCircle} from '@mdi/js'
-import {pluralize} from '@/utils'
+import {alertScreenReader, iframeScrollToTop, pluralize, putFocusNextTick} from '@/utils'
 </script>
 
 <script>
@@ -334,7 +334,6 @@ import Header1 from '@/components/utils/Header1'
 import NeedHelpFindingSomeone from '@/components/utils/NeedHelpFindingSomeone'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {addUser, getAddUserOptions} from '@/api/canvas-user'
-import {iframeScrollToTop, putFocusNextTick} from '@/utils'
 import {find, get, replace, trim} from 'lodash'
 import {searchUsers} from '@/api/user'
 
@@ -415,7 +414,7 @@ export default {
   methods: {
     hideAlert(alertName) {
       this.$data[alertName] = null
-      this.alertScreenReader('Alert hidden')
+      alertScreenReader('Alert hidden')
       putFocusNextTick('page-title')
     },
     resetForm() {
@@ -459,7 +458,7 @@ export default {
     },
     startOver() {
       this.showAlerts = false
-      this.alertScreenReader('Starting a new search.')
+      alertScreenReader('Starting a new search.')
       this.resetForm()
       this.resetSearchState()
       this.resetImportState()
@@ -473,11 +472,11 @@ export default {
       } else if (this.searchType === 'uid' && !isFinite(this.searchText)) {
         this.showSearchAlert('UID search terms must be numeric.')
       } else {
-        this.alertScreenReader('Loading person search results.')
+        alertScreenReader('Loading person search results.')
         this.showUsersArea = true
         this.isSearching = true
         const searchTimer = setInterval(() => {
-          this.alertScreenReader('Still searching.')
+          alertScreenReader('Still searching.')
         }, 7000)
         searchUsers(this.searchText, this.searchType).then(data => {
           this.userSearchResults = data.users
@@ -510,9 +509,9 @@ export default {
     submitUser() {
       this.isAddingUser = true
       this.showAlerts = true
-      this.alertScreenReader(`Adding ${this.selectedUserFullName} with role ${this.srFriendlyRole(this.selectedRole)}.`)
+      alertScreenReader(`Adding ${this.selectedUserFullName} with role ${this.srFriendlyRole(this.selectedRole)}.`)
       const addUserTimer = setInterval(() => {
-        this.alertScreenReader('Still processing.')
+        alertScreenReader('Still processing.')
       }, 7000)
       const sectionId = this.sectionSelected ? this.sectionSelected.id : null
       addUser(
@@ -529,14 +528,14 @@ export default {
             role: data.role,
             sectionName
           }
-          this.alertScreenReader('success', 'assertive')
+          alertScreenReader('success', 'assertive')
           this.resetSearchState()
           this.resetForm()
           this.additionSuccessMessage = true
           putFocusNextTick('success-message')
         },
         error => {
-          this.alertScreenReader('Error', 'assertive')
+          alertScreenReader('Error', 'assertive')
           this.errorStatus = error || 'Request to add person failed'
           this.showUsersArea = true
           putFocusNextTick('add-user-btn')

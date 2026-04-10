@@ -107,8 +107,8 @@ import nostromoCrew from '@/assets/images/nostromo-crew-eating-breakfast.png'
 <script>
 import Context from '@/mixins/Context'
 import {get, trim} from 'lodash'
+import {alertScreenReader, putFocusNextTick} from '@/utils'
 import {useContextStore} from '@/stores/context'
-import {putFocusNextTick} from '@/utils'
 import {devAuthLogIn, getCasLoginURL} from '@/api/auth'
 
 export default {
@@ -147,7 +147,6 @@ export default {
           data => {
             if (data.isAuthenticated) {
               useContextStore().setCurrentUser(data)
-              this.alertScreenReader('You are logged in.')
               this.$router.push({path: '/welcome'})
             } else {
               const message = get(data, 'error') || get(data, 'message') || 'Authentication failed'
@@ -168,7 +167,7 @@ export default {
     },
     reportError(message, putFocus='basic-auth-uid') {
       this.devAuthError = typeof message === 'string' ? message : get(message, 'message')
-      this.alertScreenReader(this.devAuthError || 'Uh oh, an error occurred.')
+      alertScreenReader(this.devAuthError || 'Uh oh, an error occurred.')
       putFocusNextTick(putFocus)
     },
     toCasLogin() {

@@ -44,14 +44,14 @@ import {mdiHelpCircleOutline} from '@mdi/js'
 <script>
 import Context from '@/mixins/Context'
 import {get, size} from 'lodash'
-import {putFocusNextTick} from '@/utils'
+import {alertScreenReader, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'SelectSectionsGuide',
   mixins: [Context],
   methods: {
     onCloseHelp() {
-      this.alertScreenReader('help hidden')
+      alertScreenReader('help hidden')
       putFocusNextTick(size(this.coursesList) ? `sections-course-${get(this.coursesList, '0.slug')}-btn` : 'page-create-course-site-cancel')
     }
   }
