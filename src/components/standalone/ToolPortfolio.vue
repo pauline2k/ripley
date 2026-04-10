@@ -26,7 +26,7 @@
           v-if="!currentUser.canvasSiteId"
           class="mt-2"
           density="compact"
-          role="alert"
+          role="none"
           type="info"
         >
           Enter a Canvas site ID (below) to enable site tools.

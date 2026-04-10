@@ -5,6 +5,9 @@
         <div class="me-auto">
           <BuildSummary />
         </div>
+        <div v-if="config.isVueAppDebugMode" class="mr-4 font-size-15 text-medium-emphasis">
+          {{ contextStore.screenReaderAlert.message }}
+        </div>
         <div class="ml-auto pr-3 text-body-2">
           <AppBarMenu v-if="currentUser.isAuthenticated" />
           <span v-if="!currentUser.isAuthenticated">
@@ -28,5 +31,7 @@ defineProps({
   }
 })
 
-const currentUser = useContextStore().currentUser
+const contextStore = useContextStore()
+const config = contextStore.config
+const currentUser = contextStore.currentUser
 </script>

@@ -150,14 +150,16 @@
     </v-container>
     <v-divider class="mb-4 mt-8" />
     <h2>Payload</h2>
-    <div
-      v-if="error"
-      id="error"
-      aria-live="polite"
-      class="font-italic font-weight-medium text-red"
-      role="alert"
-    >
-      {{ error }}
+    <div aria-live="polite">
+      <v-alert
+        v-if="error"
+        id="error"
+        class="mt-2"
+        density="compact"
+        role="none"
+        :text="error"
+        type="error"
+      />
     </div>
     <div class="payload-container">
       <pre id="payload">{{ payload }}</pre>

@@ -51,14 +51,14 @@
             <div v-if="status === 'success'" class="d-flex">
               <v-icon class="text-success mr-2" :icon="mdiCheckCircle" />
               <div>
-                <strong>
+                <div class="font-weight-bold">
                   Success: the following <template v-if="size(importedUids) > 1">
                     {{ size(importedUids) }} <span aria-hidden="true">UIDs</span><span class="sr-only">U I Deez</span> were
                   </template>
                   <template v-else>
                     UID was
                   </template> imported into bCourses.
-                </strong>
+                </div>
                 <ul id="imported-uids-list" class="ml-3">
                   <li v-for="(uid, index) in importedUids" :key="index">{{ uid }}</li>
                 </ul>
@@ -89,15 +89,17 @@
         </v-col>
       </v-row>
     </form>
-    <v-alert
-      v-if="!isAdmin"
-      class="font-weight-medium ma-2"
-      density="compact"
-      role="alert"
-      type="warning"
-    >
-      Unauthorized
-    </v-alert>
+    <div aria-live="polite">
+      <v-alert
+        v-if="!isAdmin"
+        class="font-weight-medium ma-2"
+        density="compact"
+        role="none"
+        type="warning"
+      >
+        Unauthorized
+      </v-alert>
+    </div>
   </div>
 </template>
 

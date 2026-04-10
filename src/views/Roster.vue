@@ -1,13 +1,13 @@
 <template>
   <div>
     <Header1 id="page-title" class="sr-only" text="Roster Photos" />
-    <div class="display-none-when-print">
+    <div aria-live="polite" class="display-none-when-print">
       <v-alert
         v-if="error"
-        class="ma-2"
+        class="ma-3"
         :closable="false"
         density="compact"
-        role="alert"
+        role="none"
         type="warning"
       >
         {{ error }}

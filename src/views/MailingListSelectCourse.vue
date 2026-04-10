@@ -1,15 +1,11 @@
 <template>
-  <div v-if="!isLoading" class="pb-5 px-5">
+  <div v-if="!contextStore.isLoading" class="pb-5 px-5">
     <div class="pl-3">
       <Header1 text="Manage Mailing Lists" />
-      <div
-        v-if="error"
-        id="mailing-lists-alert"
-        aria-live="polite"
-        class="pb-3"
-      >
+      <div id="mailing-lists-alert" aria-live="polite">
         <v-alert
-          class="my-2"
+          v-if="error"
+          class="my-3"
           density="compact"
           role="none"
           type="warning"
@@ -18,7 +14,7 @@
         </v-alert>
       </div>
     </div>
-    <div v-if="currentUser.isAdmin || currentUser.isCanvasAdmin" class="align-center d-flex flex-wrap px-3">
+    <div v-if="contextStore.currentUser.isAdmin || contextStore.currentUser.isCanvasAdmin" class="align-center d-flex flex-wrap px-3">
       <div class="pr-3">
         <v-text-field
           id="page-site-mailing-list-site-id"
@@ -57,67 +53,63 @@
   </div>
 </template>
 
-<script>
-import Context from '@/mixins/Context'
+<script setup>
+import {computed, nextTick, onMounted, ref} from 'vue'
+import {trim} from 'lodash'
+import {useRouter} from 'vue-router'
 import Header1 from '@/components/utils/Header1.vue'
-import MailingList from '@/mixins/MailingList'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
 import {getMailingList} from '@/api/mailing-list'
 import {isValidCanvasSiteId, putFocusNextTick} from '@/utils'
-import {nextTick} from 'vue'
-import {trim} from 'lodash'
+import {useContextStore} from '@/stores/context'
+import {useMailingListStore} from '@/stores/mailing-list'
 
-export default {
-  name: 'MailingListSelectCourse',
-  components: {Header1, SpinnerWithinButton},
-  mixins: [Context, MailingList],
-  data: () => ({
-    canvasSiteId: undefined,
-    error: undefined,
-    isProcessing: false
-  }),
-  computed: {
-    isCanvasSiteIdValid() {
-      return isValidCanvasSiteId(this.canvasSiteId)
-    }
-  },
-  mounted() {
-    if (this.currentUser.isAdmin || this.currentUser.isCanvasAdmin) {
-      this.init()
-    } else {
-      this.error = 'Unauthorized'
-    }
-    this.$ready()
-  },
-  methods: {
-    proceed() {
-      if (!this.isProcessing) {
-        this.isProcessing = true
-        this.error = undefined
-        this.alertScreenReader('Searching for mailing list.')
-        const searchTimer = setInterval(() => {
-          this.alertScreenReader('Still searching.')
-        }, 7000)
-        getMailingList(this.canvasSiteId).then(
-          data => {
-            if (data) {
-              this.alertScreenReader('Mailing list found.', 'assertive')
-              this.setMailingList(data)
-              this.$router.push('/mailing_list/update')
-            } else {
-              this.alertScreenReader('No mailing list found.', 'assertive')
-              nextTick(() => this.$router.push(`/mailing_list/create/${this.canvasSiteId}`))
-            }
-          },
-          error => {
-            this.error = error
-            this.isProcessing = false
-            putFocusNextTick('btn-get-mailing-list')
-          }
-        ).finally(() => clearInterval(searchTimer))
+const canvasSiteId = ref(undefined)
+const contextStore = useContextStore()
+const error = ref(undefined)
+const isCanvasSiteIdValid = computed(() => {
+  return isValidCanvasSiteId(canvasSiteId.value)
+})
+const isProcessing = ref(false)
+const mailingListStore = useMailingListStore()
+const router = useRouter()
+
+contextStore.loadingStart()
+
+onMounted(() => {
+  if (contextStore.currentUser.isAdmin || contextStore.currentUser.isCanvasAdmin) {
+    mailingListStore.init()
+  } else {
+    error.value = 'Unauthorized'
+  }
+  contextStore.loadingComplete()
+})
+
+const proceed = () => {
+  if (!isProcessing.value) {
+    isProcessing.value = true
+    error.value = undefined
+    contextStore.alertScreenReader('Searching for mailing list.')
+    const searchTimer = setInterval(() => {
+      contextStore.alertScreenReader('Still searching.')
+    }, 7000)
+    getMailingList(canvasSiteId.value).then(
+      data => {
+        if (data) {
+          contextStore.alertScreenReader('Mailing list found.', 'assertive')
+          mailingListStore.setMailingList(data)
+          router.push('/mailing_list/update')
+        } else {
+          contextStore.alertScreenReader('No mailing list found.', 'assertive')
+          nextTick(() => router.push(`/mailing_list/create/${canvasSiteId.value}`))
+        }
+      },
+      error => {
+        error.value = error
+        isProcessing.value = false
+        putFocusNextTick('btn-get-mailing-list')
       }
-    },
-    trim
+    ).finally(() => clearInterval(searchTimer))
   }
 }
 </script>

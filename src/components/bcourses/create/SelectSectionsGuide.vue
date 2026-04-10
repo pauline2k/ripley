@@ -3,6 +3,7 @@
     class="mt-2"
     close-label="Hide help"
     color="grey-lighten-4"
+    role="none"
     @click:close="onCloseHelp"
   >
     <div class="d-flex">

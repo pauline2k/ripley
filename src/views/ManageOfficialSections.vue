@@ -1,20 +1,17 @@
 <template>
   <div v-if="!contextStore.isLoading" class="pt-3 px-6">
-    <Header1
-      v-if="canvasSite"
-      class="mb-1 mt-0"
-      :text="`Manage official sections for ${canvasSite.name}`"
-    />
-    <v-alert
-      v-if="error"
-      id="error-alert"
-      class="mb-3"
-      density="compact"
-      role="alert"
-      type="warning"
-    >
-      {{ error }}
-    </v-alert>
+    <Header1 class="mb-2 mt-0" :text="canvasSite ? `Manage official sections for ${canvasSite.name}` : 'Manage Official Sections'" />
+    <div aria-live="polite">
+      <v-alert
+        v-if="error"
+        id="error-alert"
+        class="my-3"
+        density="compact"
+        role="none"
+        :text="error"
+        type="warning"
+      />
+    </div>
     <div v-if="feedFetched">
       <h2 class="pt-3">bCourses Site</h2>
       <div class="pl-3 pb-6 pt-1">
@@ -32,19 +29,21 @@
       </div>
       <h2 id="official-sections-header" class="mb-2">Official Sections</h2>
       <div v-if="currentWorkflowStep === 'preview'">
-        <v-alert
-          id="page-course-official-sections-job-status-notice"
-          v-model="showAlert"
-          class="my-2"
-          closable
-          close-label="Hide notice"
-          density="compact"
-          role="alert"
-          :type="jobStatus !== 'finished' ? 'error' : 'success'"
-          variant="tonal"
-        >
-          <div class="font-size-16">{{ jobStatusMessage }}</div>
-        </v-alert>
+        <div aria-live="polite">
+          <v-alert
+            id="page-course-official-sections-job-status-notice"
+            v-model="showAlert"
+            class="my-2"
+            closable
+            close-label="Hide notice"
+            density="compact"
+            role="none"
+            :type="jobStatus !== 'finished' ? 'error' : 'success'"
+            variant="tonal"
+          >
+            <div class="font-size-16">{{ jobStatusMessage }}</div>
+          </v-alert>
+        </div>
         <CourseSectionsTable
           id="template-sections-table-preview"
           mode="preview"

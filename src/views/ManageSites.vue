@@ -1,15 +1,17 @@
 <template>
   <div v-if="!contextStore.isLoading" class="pt-3 px-16">
-    <Header1 class="mb-1" text="Create or Update bCourses Sites" />
-    <v-alert
-      v-if="error"
-      id="error-alert"
-      class="mb-3"
-      density="compact"
-      role="alert"
-      :text="error"
-      type="error"
-    />
+    <Header1 class="mb-2" text="Create or Update bCourses Sites" />
+    <div aria-live="assertive" role="alert">
+      <v-alert
+        v-if="error"
+        id="error-alert"
+        class="my-2"
+        density="compact"
+        role="none"
+        :text="error"
+        type="error"
+      />
+    </div>
     <v-radio-group
       v-model="selection"
       :aria-activedescendant="get(selection, 'id')"
@@ -110,7 +112,7 @@
                 autocomplete="on"
                 density="compact"
                 :disabled="isManageOfficialSectionsDisabled"
-                :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
+                :error="error || (!!trim(canvasSiteId) && !isCanvasSiteIdValid)"
                 hide-details
                 label="Canvas Site ID"
                 maxlength="9"
@@ -121,9 +123,7 @@
             </div>
             <div
               v-if="error"
-              aria-live="polite"
               class="font-italic font-weight-medium text-red"
-              role="alert"
             >
               {{ error }}
             </div>
@@ -156,7 +156,7 @@ import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import type {CanvasSite} from '@/lib/types'
 import {getCanvasSite, getManageOfficialSections} from '@/api/canvas-site'
 import {getSiteCreationAuthorizations} from '@/api/canvas-utility'
-import {getTermName, isValidCanvasSiteId} from '@/utils'
+import {getTermName, isValidCanvasSiteId, putFocusNextTick} from '@/utils'
 import {useContextStore} from '@/stores/context'
 import {useRouter} from 'vue-router'
 
@@ -190,7 +190,7 @@ watch(selection, () => {
 
 onMounted(() => {
   coursesByTerm.value = {}
-  getManageOfficialSections().then((data: Record<string, CanvasSite[]>) => {
+  getManageOfficialSections(false).then((data: Record<string, CanvasSite[]>) => {
     each(data, (courses: CanvasSite[], term) => {
       if (courses.length) {
         coursesByTerm.value[term] = courses
@@ -239,7 +239,10 @@ const goNext = () => {
     if (selection.value.id === 'manage-official-sections') {
       getCanvasSite(canvasSiteId.value).then(
         () => router.push({path: `/official_sections/${canvasSiteId.value}`}),
-        data => error.value = data
+        data => {
+          error.value = data
+          putFocusNextTick('canvas-site-id-input')
+        }
       ).finally(() => isProcessing.value = false)
     } else {
       router.push({path: selection.value.path})

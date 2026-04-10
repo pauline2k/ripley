@@ -37,8 +37,8 @@ class MailingListPage(MailingListsPage):
     MAILING_LIST_LINK = By.LINK_TEXT, RipleyTools.MAILING_LIST.name
     NO_LIST_MSG = By.XPATH, '//div[text()="No Mailing List has been created for this site."]'
     CREATE_LIST_BUTTON = By.ID, 'btn-create-mailing-list'
-    LIST_CREATED_MSG = By.XPATH, '//div[contains(., "A Mailing List has been created")]'
-    LIST_ADDRESS = By.XPATH, '//div[@role="alert"]//strong'
+    LIST_CREATED_MSG = By.ID, 'mailing-list-created-alert'
+    LIST_ADDRESS = By.XPATH, '//div[@id="mailing-list-created-alert"]//strong'
     LIST_DUPE_EMAIL_MSG = By.XPATH, '//div[contains(., "is used by another bCourses site and is not available")]'
 
     @staticmethod

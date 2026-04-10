@@ -98,7 +98,7 @@ export default createVuetify({
         colors: {
           alert: '#fef6e6',
           anchor: '#1F6A98',
-          error: '#b94a48',
+          error: '#9B3D3B',
           info: '#367DA1',
           'on-surface-variant': '#324C52',
           primary: '#377695',

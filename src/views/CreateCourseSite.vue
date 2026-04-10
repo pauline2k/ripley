@@ -1,16 +1,28 @@
 <template>
   <div class="pb-5 px-5">
     <Header1 class="mb-2 ml-3" text="Create a Course Site" />
-    <v-alert
-      v-if="error || warning"
-      id="canvas-error-container"
-      class="mb-3"
-      density="compact"
-      role="alert"
-      type="warning"
-    >
-      {{ error || warning }}
-    </v-alert>
+    <div aria-live="assertive" role="alert">
+      <v-alert
+        v-if="error"
+        id="create-site-error"
+        class="my-3 ml-2"
+        density="compact"
+        role="none"
+        :text="error"
+        type="error"
+      />
+    </div>
+    <div aria-live="polite">
+      <v-alert
+        v-if="warning"
+        id="create-site-warning"
+        class="my-3 ml-2"
+        density="compact"
+        role="none"
+        :text="warning"
+        type="warning"
+      />
+    </div>
     <div v-if="!contextStore.isLoading && !error">
       <div v-if="isAdmin && currentWorkflowStep !== 'processing'" class="pl-3">
         <CreateCourseSiteHeader
@@ -148,7 +160,6 @@
         <div
           v-if="currentWorkflowStep === 'processing'"
           aria-live="polite"
-          role="alert"
         >
           <div class="pl-8 pr-16 py-4">
             <div class="pb-3">
@@ -235,8 +246,8 @@ onMounted(() => {
     actingAsInstructor.value = getActingAsInstructor()
 
     contextStore.loadingComplete()
-  }, error => {
-    error.value = error
+  }, errorMessage => {
+    error.value = errorMessage
     contextStore.loadingComplete()
   })
 })

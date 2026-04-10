@@ -1,7 +1,12 @@
 <template>
   <div>
     <h2 id="course-site-details-header" class="mb-2" tabindex="-1">Course Site Details</h2>
-    <v-alert color="alert" border rounded>
+    <v-alert
+      color="alert"
+      border
+      role="none"
+      rounded
+    >
       <div v-if="selectedSectionsList.length === 1">
         You are about to create a {{ currentSemesterName }} course site for
         {{ selectedSectionsList[0].courseTitle }} - {{ selectedSectionsList[0].courseCode }} ({{ selectedSectionsList[0].id }})
@@ -51,9 +56,9 @@
           <v-col cols="2" />
           <v-col cols="10">
             <FormValidationAlert
-              v-if="!trim(siteName)"
               id="validation-error-in-site-name"
               class="w-75"
+              :show="!trim(siteName)"
               text="Please provide site name."
             />
           </v-col>
@@ -92,9 +97,9 @@
           <v-col cols="2" />
           <v-col cols="10">
             <FormValidationAlert
-              v-if="!trim(siteAbbreviation)"
               id="validation-error-in-site-abbreviation"
               class="w-50"
+              :show="!trim(siteAbbreviation)"
               text="Please provide site abbreviation."
             />
           </v-col>
