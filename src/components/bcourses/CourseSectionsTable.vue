@@ -550,7 +550,7 @@ const unstage = (section, index, action) => {
 </script>
 
 <style scoped lang="scss">
-@media screen and (min-width: 600px) {
+@media screen and (min-width: 970px) {
   .sr-only-in-standard-viewport {
     display: none;
   }
@@ -602,7 +602,7 @@ const unstage = (section, index, action) => {
     justify-content: flex-end !important;
   }
 }
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 970px) {
   table {
     border-collapse: collapse;
   }
@@ -622,7 +622,7 @@ const unstage = (section, index, action) => {
     display: block;
     width: 100%;
   }
-  table td {
+  table tbody tr td {
     border: 0;
     display: block;
     padding: 3px 0;
