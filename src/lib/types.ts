@@ -83,6 +83,11 @@ export interface SectionEdit extends Section {
   stagedState: string | undefined
 }
 
+export type ScreenReaderAlert = {
+  message: string,
+  politeness: string
+}
+
 export type SiteAuthorization = {
   authorizations: {
     canCreateCourseSite: boolean,

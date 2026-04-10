@@ -224,8 +224,8 @@ import {mdiMenuDown, mdiMenuRight} from '@mdi/js'
 import CourseSectionsTable from '@/components/bcourses/CourseSectionsTable.vue'
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink.vue'
+import {alertScreenReader, pluralize, putFocusNextTick, toInt} from '@/utils'
 import {courseProvisionJobStatus, getCourseSections, updateSiteSections} from '@/api/canvas-site'
-import {pluralize, putFocusNextTick, toInt} from '@/utils'
 import {useContextStore} from '@/stores/context'
 import {computed, onMounted, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
@@ -280,7 +280,7 @@ onMounted(() => {
 
 const addAllSections = (course: Course<SectionEdit>) => {
   each(course.sections, section => section.stagedState = section.isCourseSection ? undefined : 'add')
-  contextStore.alertScreenReader(`Linked all ${course.title} sections to the course site.`)
+  alertScreenReader(`Linked all ${course.title} sections to the course site.`)
   putFocusNextTick(`sections-course-${course.slug}-btn`)
   contextStore.eventHub.emit('sections-table-updated')
 }
@@ -303,18 +303,18 @@ const availableSectionsTableCaption = (course: Course<SectionEdit>) => {
 const cancel = () => {
   unstageAll()
   changeWorkflowStep('preview')
-  contextStore.alertScreenReader('Canceled. Nothing saved.', 'assertive')
+  alertScreenReader('Canceled. Nothing saved.', 'assertive')
 }
 
 const changeWorkflowStep = (step: string) => {
   currentWorkflowStep.value = step
   if (step === 'staging') {
-    contextStore.alertScreenReader('Edit sections form loaded')
+    alertScreenReader('Edit sections form loaded')
     jobStatus.value = null
     jobStatusMessage.value = ''
     putFocusNextTick(getStagingEntryFocusTarget())
   } else if (step === 'preview') {
-    contextStore.alertScreenReader('Read-only sections list loaded')
+    alertScreenReader('Read-only sections list loaded')
     if (canvasSite.value.canEdit) {
       putFocusNextTick('official-sections-edit-btn')
     }
@@ -478,7 +478,7 @@ const stageUpdate = (section: SectionEdit) => {
   if (section.isCourseSection) {
     availableSectionsPanel.value = union(availableSectionsPanel.value, [section.courseSlug])
     section.stagedState = 'update'
-    contextStore.alertScreenReader(`Updated ${sectionString(section)}.`)
+    alertScreenReader(`Updated ${sectionString(section)}.`)
   } else {
     error.value = `Cannot update ${sectionString(section)} because it is not linked to the course site.`
   }
@@ -491,15 +491,15 @@ const trackSectionUpdateJob = () => {
         if (data.jobStatus !== jobStatus.value) {
           jobStatus.value = data.jobStatus
         } else {
-          contextStore.alertScreenReader(`Still ${includes(['sendingRequest', 'queued'], jobStatus.value) ? 'waiting' : 'processing'}`)
+          alertScreenReader(`Still ${includes(['sendingRequest', 'queued'], jobStatus.value) ? 'waiting' : 'processing'}`)
         }
         if (!(includes(['started', 'queued'], jobStatus.value))) {
           clearInterval(exportTimer.value)
           if (jobStatus.value === 'finished') {
-            contextStore.alertScreenReader('Success.', 'assertive')
+            alertScreenReader('Success.', 'assertive')
             jobStatusMessage.value = 'The sections in this course site have been updated successfully.'
           } else {
-            contextStore.alertScreenReader('Error', 'assertive')
+            alertScreenReader('Error', 'assertive')
             jobStatusMessage.value = 'An error has occurred with your request. Please try again or contact bCourses support.'
           }
           fetchFeed()
@@ -508,7 +508,7 @@ const trackSectionUpdateJob = () => {
     ).catch(
       () => {
         changeWorkflowStep('preview')
-        contextStore.alertScreenReader('Error.', 'assertive')
+        alertScreenReader('Error.', 'assertive')
         jobStatus.value = 'error'
         jobStatusMessage.value = 'An error has occurred with your request. Please try again or contact bCourses support.'
         clearInterval(exportTimer.value)
@@ -521,7 +521,7 @@ const unstage = (section: SectionEdit) => {
   if (section.stagedState === 'add') {
     availableSectionsPanel.value = union(availableSectionsPanel.value, [section.courseSlug])
   } else if (section.stagedState === 'update') {
-    contextStore.alertScreenReader(`${sectionString(section)} will not be updated.`)
+    alertScreenReader(`${sectionString(section)} will not be updated.`)
   }
   section.stagedState = undefined
   return totalStagedCount.value

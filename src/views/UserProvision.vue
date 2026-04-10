@@ -104,97 +104,87 @@
 </template>
 
 <script setup>
+import {each, isEmpty, size} from 'lodash'
 import {mdiAlertCircleOutline, mdiCheckCircle} from '@mdi/js'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
+import {computed, onMounted, ref, watch} from 'vue'
 import Header1 from '@/components/utils/Header1.vue'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
-import {each, isEmpty, size} from 'lodash'
+import {alertScreenReader} from '@/utils'
 import {importUsers} from '@/api/canvas-utility'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'UserProvision',
-  components: {Header1, SpinnerWithinButton},
-  mixins: [Context],
-  data: () => ({
-    error: undefined,
-    importedUids: undefined,
-    importProcessing: false,
-    invalidValues: [],
-    listLength: undefined,
-    rawUids: '',
-    status: undefined,
-    validationErrors: {}
-  }),
-  computed: {
-    importButtonDisabled() {
-      return this.importProcessing || isEmpty(this.rawUids)
-    },
-    isAdmin() {
-      return this.currentUser.isAdmin || this.currentUser.isCanvasAdmin
+const contextStore = useContextStore()
+const error = ref(undefined)
+const importedUids = ref(undefined)
+const importProcessing = ref(false)
+const invalidValues = ref([])
+const listLength = ref(undefined)
+const rawUids = ref('')
+const status = ref(undefined)
+const validationErrors = ref({})
+const importButtonDisabled = computed(() => {
+  return importProcessing.value || isEmpty(rawUids.value)
+})
+const isAdmin = computed(() => {
+  return contextStore.currentUser.isAdmin || contextStore.currentUser.isCanvasAdmin
+})
+
+watch(rawUids, () => {
+  validationErrors.value = {}
+})
+
+onMounted(() => {
+  contextStore.loadingComplete()
+})
+
+const handleError = errorMessage => {
+  importProcessing.value = false
+  status.value = 'error'
+  error.value = errorMessage || 'Request to import users failed.'
+}
+
+const onSubmit = () => {
+  const validatedUids = validateUids()
+  let importTimer
+  error.value = null
+  importedUids.value = null
+  status.value = null
+  if (validatedUids) {
+    importProcessing.value = true
+    importTimer = setInterval(() => {
+      alertScreenReader('Still processing user import')
+    }, 7000)
+    importUsers(validatedUids).then(response => {
+      alertScreenReader('Imported users')
+      importedUids.value = response.uids
+      importProcessing.value = false
+      rawUids.value = ''
+      status.value = response.status
+    }, handleError).catch(
+      handleError
+    ).finally(() => clearInterval(importTimer))
+  }
+}
+
+const validateUids = () => {
+  const uids = rawUids.value.match(/\w+/g)
+  validationErrors.value = {}
+  invalidValues.value = []
+  if (!uids) {
+    validationErrors.value.required = true
+  }
+  listLength.value = size(uids)
+  if (listLength.value > 200) {
+    validationErrors.value.isExceedingLimit = true
+  }
+  each(uids, uid => {
+    if (isNaN(Number(uid))) {
+      invalidValues.value.push(uid)
+      validationErrors.value.isNotNumeric = true
     }
-  },
-  watch: {
-    rawUids() {
-      this.validationErrors = {}
-    }
-  },
-  created() {
-    this.$ready()
-  },
-  methods: {
-    handleError(errorMessage) {
-      this.importProcessing = false
-      this.status = 'error'
-      this.error = errorMessage || 'Request to import users failed.'
-    },
-    isEmpty,
-    onSubmit() {
-      this.error = null
-      this.importedUids = null
-      this.status = null
-      const validatedUids = this.validateUids()
-      let importTimer
-      if (validatedUids) {
-        this.importProcessing = true
-        importTimer = setInterval(() => {
-          this.alertScreenReader('Still processing user import')
-        }, 7000)
-        importUsers(validatedUids).then(response => {
-          this.alertScreenReader('Imported users')
-          this.importedUids = response.uids
-          this.importProcessing = false
-          this.rawUids = ''
-          this.status = response.status
-        }, this.handleError).catch(
-          this.handleError
-        ).finally(() => clearInterval(importTimer))
-      }
-    },
-    size,
-    validateUids() {
-      this.validationErrors = {}
-      this.invalidValues = []
-      const uids = this.rawUids.match(/\w+/g)
-      if (!uids) {
-        this.validationErrors.required = true
-      }
-      this.listLength = size(uids)
-      if (this.listLength > 200) {
-        this.validationErrors.isExceedingLimit = true
-      }
-      each(uids, uid => {
-        if (isNaN(Number(uid))) {
-          this.invalidValues.push(uid)
-          this.validationErrors.isNotNumeric = true
-        }
-      })
-      if (isEmpty(this.validationErrors)) {
-        return uids.join()
-      }
-    }
+  })
+  if (isEmpty(validationErrors.value)) {
+    return uids.join()
   }
 }
 </script>

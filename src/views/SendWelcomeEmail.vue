@@ -201,7 +201,7 @@ import {
   getMyMailingList,
   updateWelcomeEmail
 } from '@/api/mailing-list'
-import {putFocusNextTick} from '@/utils'
+import {alertScreenReader, putFocusNextTick} from '@/utils'
 import {useContextStore} from '@/stores/context'
 import {useMailingListStore} from '@/stores/mailing-list'
 
@@ -241,21 +241,21 @@ const cancelEditMode = () => {
 
 const downloadMessageLog = () => {
   isDownloading.value = true
-  contextStore.alertScreenReader('Downloading')
+  alertScreenReader('Downloading')
   downloadWelcomeEmailCsv().then(() => {
     isDownloading.value = false
-    contextStore.alertScreenReader('Downloaded.')
+    alertScreenReader('Downloaded.')
   })
 }
 
 const saveWelcomeEmail = () => {
   if (isWelcomeEmailValid.value) {
-    contextStore.alertScreenReader('Saving welcome email')
+    alertScreenReader('Saving welcome email')
     isSaving.value = true
     updateWelcomeEmail(isWelcomeEmailActive.value, body.value, subject.value).then(
       response => {
         updateDisplay(response)
-        contextStore.alertScreenReader('Welcome email updated')
+        alertScreenReader('Welcome email updated')
         putFocusNextTick('btn-edit-welcome-email')
       }
     ).then(() => {

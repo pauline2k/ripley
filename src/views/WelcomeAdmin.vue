@@ -252,6 +252,7 @@ import ripleyWithCat from '@/assets/images/ripley-with-cat.png'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import ToolPortfolio from '@/components/standalone/ToolPortfolio.vue'
 import type {Job, JobRunSummary} from '@/lib/types'
+import {alertScreenReader} from '@/utils'
 import {getJobHistory, getJobSchedule, setJobDisabled, startJob, updateJobSchedule} from '@/api/job'
 import {useContextStore} from '@/stores/context'
 
@@ -318,7 +319,7 @@ const refresh = (quietly) => {
     }
     refreshing.value = false
     if (!quietly) {
-      contextStore.alertScreenReader('Job History refreshed')
+      alertScreenReader('Job History refreshed')
     }
     scheduleRefresh()
   })
@@ -339,13 +340,13 @@ const runJob = job => {
 const scheduleEditCancel = () => {
   editJob.value = undefined
   editJobDialog.value = false
-  contextStore.alertScreenReader('Cancelled')
+  alertScreenReader('Cancelled')
 }
 
 const scheduleEditOpen = job => {
   editJob.value = cloneDeep(job)
   editJobDialog.value = true
-  contextStore.alertScreenReader(`Opened dialog to edit job ${job.name}`)
+  alertScreenReader(`Opened dialog to edit job ${job.name}`)
 }
 
 const scheduleEditSave = () => {
@@ -358,7 +359,7 @@ const scheduleEditSave = () => {
     match.schedule = editJob.value.schedule
     editJob.value = undefined
     editJobDialog.value = false
-    contextStore.alertScreenReader(`Job '${match.name}' was updated.`)
+    alertScreenReader(`Job '${match.name}' was updated.`)
   })
 }
 
@@ -370,7 +371,7 @@ const scheduleRefresh = () => {
 const toggleDisabled = (job, isDisabled: boolean) => {
   setJobDisabled(job.id, isDisabled).then((data: Job) => {
     job.disabled = data.disabled
-    contextStore.alertScreenReader(`Job '${job.name}' ${job.disabled ? 'disabled' : 'enabled'}`)
+    alertScreenReader(`Job '${job.name}' ${job.disabled ? 'disabled' : 'enabled'}`)
   })
 }
 </script>

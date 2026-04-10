@@ -197,8 +197,8 @@ import {useRouter} from 'vue-router'
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
+import {alertScreenReader, oxfordJoin, pluralize, putFocusNextTick} from '@/utils'
 import {capitalize, compact, each, get, partition, size} from 'lodash'
-import {oxfordJoin, pluralize, putFocusNextTick} from '@/utils'
 import {populateMailingList} from '@/api/mailing-list'
 import {useContextStore} from '@/stores/context'
 import {useMailingListStore} from '@/stores/mailing-list'
@@ -232,7 +232,7 @@ onMounted(() => {
 })
 
 const cancel = () => {
-  contextStore.alertScreenReader('Canceled. Nothing saved.', 'assertive')
+  alertScreenReader('Canceled. Nothing saved.', 'assertive')
   nextTick(router.push({path: '/mailing_list/select_course'}))
 }
 
@@ -269,7 +269,7 @@ const showUpdateSummary = () => {
     putFocusNextTick('mailing-list-alert-0')
   } else {
     noChangesAlert.value = 'Everything is up-to-date. No changes necessary.'
-    contextStore.alertScreenReader(noChangesAlert.value)
+    alertScreenReader(noChangesAlert.value)
     putFocusNextTick('btn-populate-mailing-list')
   }
 }
@@ -278,10 +278,10 @@ const update = () => {
   alerts.value = []
   alertsLabel.value = undefined
   noChangesAlert.value = undefined
-  contextStore.alertScreenReader('Updating mailing list.')
+  alertScreenReader('Updating mailing list.')
   isUpdating.value = true
   const updateTimer = setInterval(() => {
-    contextStore.alertScreenReader('Still processing updates.')
+    alertScreenReader('Still processing updates.')
   }, 7000)
   populateMailingList(mailingList.value.id).then(
     data => {

@@ -1,9 +1,27 @@
 import {capitalize, concat, get, head, includes, initial, join, last, noop, startsWith, trim} from 'lodash'
 import {nextTick} from 'vue'
+import type {ScreenReaderAlert} from '@/lib/types'
 import {useContextStore} from '@/stores/context'
 
 export const isInIframe = !!window.parent.frames.length
 
+let $_screenReaderAlertExpiry: number
+
+export function alertScreenReader(message: string, persistent?: boolean, politeness?: string) {
+  clearScreenReaderAlert()
+  nextTick(() => {
+    useContextStore().setScreenReaderAlert({message, politeness} as ScreenReaderAlert)
+    window.clearInterval($_screenReaderAlertExpiry)
+    if (!persistent) {
+      $_screenReaderAlertExpiry = window.setInterval(clearScreenReaderAlert, 5000)
+    }
+  })
+}
+
+const clearScreenReaderAlert = () => {
+  window.clearInterval($_screenReaderAlertExpiry)
+  useContextStore().setScreenReaderAlert({message: ''} as ScreenReaderAlert)
+}
 export function decamelize(str: string, separator=' ') {
   const parsed = str.replace(/([a-z\d])([A-Z])/g, '$1' + separator + '$2')
   return capitalize(parsed.replace(/([A-Z]+)([A-Z][a-z\d]+)/g, '$1' + separator + '$2'))

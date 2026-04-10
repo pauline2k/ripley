@@ -75,7 +75,7 @@ import {onMounted, ref} from 'vue'
 import {trim} from 'lodash'
 import Header1 from '@/components/utils/Header1.vue'
 import {createProjectSite} from '@/api/canvas-site'
-import {iframeParentLocation, isInIframe} from '@/utils'
+import {alertScreenReader, iframeParentLocation, isInIframe} from '@/utils'
 import {useContextStore} from '@/stores/context'
 import {useRouter} from 'vue-router'
 
@@ -97,10 +97,10 @@ const create = () => {
   if (!isCreating.value && trim(name.value)) {
     error.value = null
     isCreating.value = true
-    contextStore.alertScreenReader('Creating project site.')
+    alertScreenReader('Creating project site.')
     createProjectSite(name.value).then(
       data => {
-        contextStore.alertScreenReader('Done. Loading new project site.')
+        alertScreenReader('Done. Loading new project site.')
         if (isInIframe) {
           iframeParentLocation(data.url)
         } else {

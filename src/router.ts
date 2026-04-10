@@ -22,9 +22,9 @@ const Welcome = () => import('@/views/Welcome.vue')
 const WelcomeAdmin = () => import('@/views/WelcomeAdmin.vue')
 
 import {capitalize} from 'lodash'
-import {RouteRecordRaw, createRouter, createWebHistory} from 'vue-router'
+import {type RouteRecordRaw, createRouter, createWebHistory} from 'vue-router'
 import {logOut} from '@/api/auth'
-import {RipleyConfig, useContextStore} from '@/stores/context'
+import {type RipleyConfig, useContextStore} from '@/stores/context'
 
 const isInIframe = window.parent.frames.length
 const BaseView = () => import(isInIframe ? '@/layouts/lti/BaseLTI.vue' : '@/layouts/standalone/BaseStandalone.vue')
@@ -201,7 +201,7 @@ router.afterEach((to: any, from: any) => {
   if (!samePageLink) {
     const context = useContextStore()
     context.resetApplicationState()
-    context.loadingStart(to)
+    context.loadingStart()
     const title = capitalize(to.name) || 'bCourses'
     document.title = `${title} | UC Berkeley`
   }

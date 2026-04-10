@@ -299,7 +299,7 @@ import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/egrades-export'
-import {getTermName, iframeParentLocation, iframeScrollToTop, putFocusNextTick} from '@/utils'
+import {alertScreenReader, getTermName, iframeParentLocation, iframeScrollToTop, putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CourseGradeExport',
@@ -338,7 +338,7 @@ export default {
       downloadGradeCsv(this.filenameDownloaded, this.backgroundJobId).then(() => {
         setTimeout(() => {
           this.filenameDownloaded = null
-          this.alertScreenReader('File download is complete.')
+          alertScreenReader('File download is complete.')
         }, 30000)
       })
     },
@@ -411,7 +411,7 @@ export default {
     preloadGrades(type) {
       this.filenameDownloaded = null
       this.selectedType = type
-      this.alertScreenReader('Preparing E-Grades for download.', 'assertive')
+      alertScreenReader('Preparing E-Grades for download.', 'assertive')
       this.appState = 'loading'
       this.jobStatus = 'started'
       iframeScrollToTop()
@@ -454,7 +454,7 @@ export default {
             } else if (this.jobStatus === 'finished') {
               clearInterval(this.exportTimer)
               this.switchToSelection()
-              this.alertScreenReader('Downloading export. Export form options presented for an additional download.')
+              alertScreenReader('Downloading export. Export form options presented for an additional download.')
               this.downloadGrades()
             } else if (this.config.isVueAppDebugMode) {
               // eslint-disable-next-line no-console

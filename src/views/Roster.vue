@@ -152,7 +152,7 @@ import {mdiAlertCircleOutline, mdiDownload, mdiPrinter} from '@mdi/js'
 import Header1 from '@/components/utils/Header1.vue'
 import ProgressButton from '@/components/utils/ProgressButton'
 import RosterPhotos from '@/components/bcourses/roster/RosterPhotos'
-import {pluralize, printPage} from '@/utils'
+import {alertScreenReader, pluralize, printPage} from '@/utils'
 import {useContextStore} from '@/stores/context'
 import {exportRoster, getRoster} from '@/api/canvas-site'
 
@@ -202,7 +202,7 @@ onMounted(() => {
 const downloadCsv = () => {
   isDownloading.value = true
   exportRoster(contextStore.currentUser.canvasSiteId).then(() => {
-    contextStore.alertScreenReader(`${contextStore.currentUser.canvasSiteName} CSV downloaded`)
+    alertScreenReader(`${contextStore.currentUser.canvasSiteName} CSV downloaded`)
     setTimeout(() => isDownloading.value = false, 1500)
   })
 }

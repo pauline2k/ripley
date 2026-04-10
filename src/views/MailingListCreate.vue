@@ -138,7 +138,7 @@ import OutboundLink from '@/components/utils/OutboundLink'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {createMailingList, getMailingList, getSuggestedMailingListName} from '@/api/mailing-list'
 import {getCanvasSite} from '@/api/canvas-site'
-import {toInt} from '@/utils'
+import {alertScreenReader, toInt} from '@/utils'
 import {useContextStore} from '@/stores/context'
 import {useMailingListStore} from '@/stores/mailing-list'
 
@@ -195,7 +195,7 @@ onMounted(() => {
 })
 
 const cancel = () => {
-  contextStore.alertScreenReader('Canceled. Nothing saved.', 'assertive')
+  alertScreenReader('Canceled. Nothing saved.', 'assertive')
   nextTick(router.push({path: '/mailing_list/select_course'}))
 }
 
@@ -203,23 +203,23 @@ const create = () => {
   const name = trim(mailingListName.value)
   if (name && !hasInvalidCharacters.value) {
     const createTimer = setInterval(() => {
-      contextStore.alertScreenReader('Still creating mailing list.')
+      alertScreenReader('Still creating mailing list.')
     }, 7000)
     isCreating.value = true
-    contextStore.alertScreenReader('Creating mailing list.')
+    alertScreenReader('Creating mailing list.')
     createMailingList(
       canvasSiteId.value,
       `${name}-${mailingListSuffix.value}`,
       !isAdminToolMode.value
     ).then(
       data => {
-        contextStore.alertScreenReader('The mailing list has been created. To add members, click the "Update Memberships" button below.', 'assertive')
+        alertScreenReader('The mailing list has been created. To add members, click the "Update Memberships" button below.', 'assertive')
         error.value = null
         mailingListStore.setMailingList(data)
         nextTick(goToNextPage())
       },
       error => {
-        contextStore.alertScreenReader('Error.', 'assertive')
+        alertScreenReader('Error.', 'assertive')
         error.value = error
       }
     ).finally(() => {

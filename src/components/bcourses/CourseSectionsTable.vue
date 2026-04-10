@@ -319,7 +319,7 @@ import {each, filter, find, get, includes, map, size, uniqBy} from 'lodash'
 import {mdiAlert, mdiInformationVariantCircle} from '@mdi/js'
 import AreYouSureModal from '@/components/utils/AreYouSureModal.vue'
 import OutboundLink from '@/components/utils/OutboundLink.vue'
-import {oxfordJoin, putFocusNextTick} from '@/utils'
+import {alertScreenReader, oxfordJoin, putFocusNextTick} from '@/utils'
 import {SectionEdit} from '@/lib/types'
 import {useContextStore} from '@/stores/context.js'
 
@@ -506,7 +506,7 @@ const showUpdateButton = (section: SectionEdit | undefined) => {
 
 const stageAdd = (section: SectionEdit, index: number) => {
   const totalStagedCount = props.stageAddAction(section)
-  contextStore.alertScreenReader(`Linked ${sectionLabel(section)} to the course site.`)
+  alertScreenReader(`Linked ${sectionLabel(section)} to the course site.`)
   putFocusNextTick(getNextFocusTarget(section, index, totalStagedCount, 'link'))
   contextStore.eventHub.emit('sections-table-updated')
 }
@@ -523,7 +523,7 @@ const stageDeleteProceed = () => {
     const index = sectionToUnlink.value.index
     showAreYouSureModal.value = false
     const totalStagedCount = props.stageDeleteAction(section)
-    contextStore.alertScreenReader(`Unlinked ${sectionLabel(section)} from the course site.`)
+    alertScreenReader(`Unlinked ${sectionLabel(section)} from the course site.`)
     putFocusNextTick(getNextFocusTarget(section, index, totalStagedCount, 'unlink'))
     contextStore.eventHub.emit('sections-table-updated')
     sectionToUnlink.value = undefined
@@ -561,9 +561,9 @@ const updateSectionDisplay = () => {
 const unstage = (section: SectionEdit, index: number, action: string) => {
   const totalStagedCount = props.unstageAction(section)
   if (action === 'undo-link') {
-    contextStore.alertScreenReader(`${sectionLabel(section)} will not be added to the course site.`)
+    alertScreenReader(`${sectionLabel(section)} will not be added to the course site.`)
   } else if (action === 'undo-unlink') {
-    contextStore.alertScreenReader(`${sectionLabel(section)} will not be removed from the course site.`)
+    alertScreenReader(`${sectionLabel(section)} will not be removed from the course site.`)
   }
   putFocusNextTick(getNextFocusTarget(section, index, totalStagedCount, action))
   contextStore.eventHub.emit('sections-table-updated')
