@@ -62,7 +62,8 @@
         </div>
         <div class="mt-2">
           <v-alert
-            v-if="!get(mailingList, 'welcomeEmailBody') || !get(mailingList, 'welcomeEmailSubject')"
+            v-if="!isWelcomeEmailValid"
+            id="toggle-welcome-email-desc"
             density="compact"
             role="none"
             :type="isWelcomeEmailActive ? 'success' : 'info'"
@@ -74,8 +75,9 @@
             <v-switch
               id="toggle-welcome-email-active"
               v-model="isWelcomeEmailActive"
+              :aria-describedby="isWelcomeEmailValid ? undefined : 'toggle-welcome-email-desc'"
               color="success"
-              :disabled="!get(mailingList, 'welcomeEmailBody') || !get(mailingList, 'welcomeEmailSubject') || isSaving || isToggling"
+              :disabled="!isWelcomeEmailValid || isSaving || isToggling"
               hide-details
               @change="toggle"
             >
@@ -84,7 +86,7 @@
                   v-if="isToggling"
                   indeterminate
                   size="24"
-                  class="ms-2"
+                  class="mx-2"
                 />
                 <span class="text-no-wrap">
                   Activate welcome email
@@ -151,7 +153,7 @@
                 id="btn-save-welcome-email"
                 class="mr-2"
                 color="primary"
-                :disabled="isSaving || isToggling || !isWelcomeEmailValid"
+                :disabled="isSaving || isToggling || !isInputValid"
                 @click="saveWelcomeEmail"
               >
                 <span v-if="!isSaving">Save welcome email</span>
@@ -160,7 +162,7 @@
                 </span>
               </v-btn>
               <v-btn
-                v-if="get(mailingList, 'welcomeEmailBody') && get(mailingList, 'welcomeEmailSubject')"
+                v-if="isWelcomeEmailValid"
                 id="btn-cancel-welcome-email-edit"
                 :disabled="isSaving || isToggling"
                 variant="tonal"
@@ -217,8 +219,11 @@ const isWelcomeEmailActive = ref(false)
 const mailingListStore = useMailingListStore()
 const {mailingList} = storeToRefs(mailingListStore)
 const subject = ref('')
-const isWelcomeEmailValid = computed(() => {
+const isInputValid = computed(() => {
   return !!trim(subject.value) && !!trim(body.value)
+})
+const isWelcomeEmailValid = computed(() => {
+  return !!(get(mailingList.value, 'welcomeEmailBody') && get(mailingList.value, 'welcomeEmailSubject'))
 })
 
 contextStore.loadingStart()
@@ -236,6 +241,7 @@ const cancelEditMode = () => {
   isEditing.value = false
   body.value = get(mailingList.value, 'welcomeEmailBody') || ''
   subject.value = get(mailingList.value, 'welcomeEmailSubject')
+  alertScreenReader('canceled')
   putFocusNextTick('btn-edit-welcome-email')
 }
 
@@ -249,7 +255,7 @@ const downloadMessageLog = () => {
 }
 
 const saveWelcomeEmail = () => {
-  if (isWelcomeEmailValid.value) {
+  if (isInputValid.value) {
     alertScreenReader('Saving welcome email')
     isSaving.value = true
     updateWelcomeEmail(isWelcomeEmailActive.value, body.value, subject.value).then(
@@ -275,6 +281,7 @@ const toggle = () => {
   toggleEmailActivation().then(data => {
     isWelcomeEmailActive.value = !!data.welcomeEmailActive
     isToggling.value = false
+    putFocusNextTick('toggle-welcome-email-active')
   })
 }
 const updateDisplay = data => {

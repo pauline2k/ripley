@@ -104,8 +104,8 @@ const proceed = () => {
           nextTick(() => router.push(`/mailing_list/create/${canvasSiteId.value}`))
         }
       },
-      error => {
-        error.value = error
+      errorResponse => {
+        error.value = errorResponse
         isProcessing.value = false
         putFocusNextTick('btn-get-mailing-list')
       }
