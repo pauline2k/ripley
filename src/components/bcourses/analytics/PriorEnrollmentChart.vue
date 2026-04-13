@@ -14,6 +14,7 @@
               id="grade-distribution-enrollment-course-search"
               v-model="selectedCourse"
               auto-select-first
+              autocomplete="off"
               bg-color="white"
               class="text-upper mr-2"
               density="compact"
@@ -108,6 +109,7 @@
         <select
           v-if="size(terms)"
           :value="get(selectedTerm, 'id')"
+          autocomplete="off"
           class="position-absolute grade-dist-enroll-term-select"
           :disabled="isEmpty(gradeDistribution)"
           @change="onSelectTerm"

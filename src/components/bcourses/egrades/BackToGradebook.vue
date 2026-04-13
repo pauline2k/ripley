@@ -5,11 +5,12 @@
     </div>
     <div>
       <a
+        aria-label="Back to grade book"
         class="template-back-link"
         :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`"
         target="_top"
       >
-        Back to Gradebook
+        <span aria-hidden="true">Back to Gradebook</span>
       </a>
     </div>
   </div>

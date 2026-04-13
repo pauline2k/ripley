@@ -28,6 +28,7 @@
             id="instructor-uid"
             v-model="uid"
             aria-label="Instructor U I D"
+            autocomplete="on"
             class="instructor-uid-text-field"
             density="comfortable"
             :disabled="isFetching"

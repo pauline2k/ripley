@@ -158,7 +158,7 @@
                     density="comfortable"
                     :disabled="isSearching || isAddingUser"
                     hide-details
-                    :placeholder="searchFieldPlaceholder"
+                    :label="searchFieldLabel"
                     variant="outlined"
                     @keydown.enter="submitSearch"
                   />
@@ -253,6 +253,7 @@
                       id="user-role"
                       v-model="selectedRole"
                       aria-label="Role"
+                      autocomplete="off"
                       :disabled="isAddingUser"
                     >
                       <option
@@ -281,6 +282,7 @@
                       id="course-section"
                       v-model="sectionSelected"
                       aria-label="Section"
+                      autocomplete="off"
                       :disabled="isAddingUser"
                     >
                       <option v-for="section in sections" :key="section.name" :value="section">
@@ -380,7 +382,7 @@ export default {
         return 'Person search'
       }
     },
-    searchFieldPlaceholder() {
+    searchFieldLabel() {
       switch (this.searchType) {
       case 'name':
         return 'e.g. Doe, Jane'

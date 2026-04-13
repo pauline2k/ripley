@@ -33,6 +33,7 @@
           <v-text-field
             id="course-site-name"
             v-model="siteName"
+            autocomplete="on"
             class="w-75"
             density="comfortable"
             :disabled="isCreating"
@@ -74,6 +75,7 @@
           <v-text-field
             id="course-site-abbreviation"
             v-model="siteAbbreviation"
+            autocomplete="on"
             class="w-50"
             density="comfortable"
             :error="!trim(siteAbbreviation)"

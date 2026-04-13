@@ -26,6 +26,7 @@
           <v-text-field
             id="page-create-project-site-name"
             v-model="name"
+            autocomplete="on"
             class="w-100"
             density="comfortable"
             :disabled="isCreating"
