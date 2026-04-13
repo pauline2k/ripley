@@ -22,6 +22,7 @@
           :aria-describedby="!!trim(canvasSiteId) && !isCanvasSiteIdValid ? 'mailing-list-site-id-messages' : null"
           aria-label="bCourses Course ID"
           aria-required="true"
+          autocomplete="on"
           density="comfortable"
           :error="!!trim(canvasSiteId) && !isCanvasSiteIdValid"
           hide-details

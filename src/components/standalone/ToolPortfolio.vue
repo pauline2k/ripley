@@ -47,10 +47,12 @@
             <v-text-field
               id="update-canvas-course-id"
               v-model="canvasSiteId"
+              autocomplete="on"
               density="compact"
               :disabled="isUpdatingCanvasSiteId"
               :error="!!canvasSiteId && !isCanvasSiteIdValid"
               hide-details
+              label="Canvas site ID"
               maxlength="10"
               style="width: 124px"
               variant="outlined"
