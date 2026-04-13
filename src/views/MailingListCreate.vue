@@ -77,6 +77,7 @@
                   :aria-invalid="hasInvalidCharacters || !mailingListName"
                   :aria-labelledby="undefined"
                   aria-required="true"
+                  autocomplete="on"
                   density="comfortable"
                   :disabled="isCreating"
                   label="Mailing list name"

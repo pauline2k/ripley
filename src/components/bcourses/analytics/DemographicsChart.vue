@@ -15,6 +15,7 @@
         <select
           id="grade-distribution-demographics-select"
           v-model="selectedDemographic"
+          autocomplete="off"
           class="grade-distribution-demographics-select justify-center w-100 mt-4"
           :disabled="!size(gradeDistribution)"
           @change="loadSecondarySeries"
@@ -34,6 +35,7 @@
         <select
           id="grade-distribution-statistic-select"
           v-model="selectedStatistic"
+          autocomplete="off"
           class="grade-distribution-demographics-select justify-center w-100 mt-2 mb-4"
           :disabled="!size(gradeDistribution)"
           @change="onSelectStatistic"

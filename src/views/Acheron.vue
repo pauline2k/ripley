@@ -14,6 +14,7 @@
               <v-text-field
                 id="canvas-user-profile-by-uid"
                 v-model="byUID"
+                autocomplete="on"
                 clearable
                 density="compact"
                 :disabled="disableAll"
@@ -53,6 +54,7 @@
               <v-text-field
                 id="canvas-user-profile-by-id"
                 v-model="byCanvasUserId"
+                autocomplete="on"
                 clearable
                 density="compact"
                 :disabled="disableAll"
@@ -97,6 +99,7 @@
               <v-text-field
                 id="canvas-site-id"
                 v-model="canvasSiteId"
+                autocomplete="on"
                 clearable
                 density="compact"
                 :disabled="disableAll"
@@ -116,6 +119,7 @@
               <v-text-field
                 id="canvas-site-id-btn"
                 v-model="canvasUserId"
+                autocomplete="on"
                 clearable
                 density="compact"
                 :disabled="disableAll"

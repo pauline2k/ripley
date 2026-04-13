@@ -66,9 +66,9 @@
             <h2 class="grade-export-sub-header">2. Post all assignment grades:</h2>
             <div class="pb-8 pl-5 pt-2">
               <div>
-                All assignment grades must be posted (published/unmuted) to ensure that your E-Grades export matches what you see in the gradebook. To confirm that all grades have been posted,
+                All assignment grades must be posted (published/unmuted) to ensure that your E-Grades export matches what you see in the <span aria-hidden="true">gradebook</span><span class="sr-only">grade book</span>. To confirm that all grades have been posted,
                 <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">
-                  review all columns in your gradebook for unposted assignment grades
+                  review all columns in your <span aria-hidden="true">gradebook</span><span class="sr-only">grade book</span> for unposted assignment grades
                 </a>
                 indicated by a crossed-out eye icon
                 <span class="nowrap">
@@ -94,7 +94,7 @@
               </div>
               <div class="py-2">
                 <strong>
-                  In order to avoid errors, we suggest cross-checking final grades in the bCourses gradebook with the
+                  In order to avoid errors, we suggest cross-checking final grades in the bCourses <span aria-hidden="true">gradebook</span><span class="sr-only">grade book</span> with the
                   output CSV to confirm grades were exported as expected.
                 </strong>
               </div>
@@ -112,7 +112,7 @@
               variant="tonal"
               @click="goToGradebook"
             >
-              Cancel<span class="sr-only"> and return to Gradebook</span>
+              Cancel<span class="sr-only"> and return to grade book</span>
             </v-btn>
             <v-btn
               id="continue-button"
@@ -148,6 +148,7 @@
               id="course-sections"
               v-model="selectedSection"
               aria-label="Select Section"
+              autocomplete="off"
               class="w-50"
             >
               <option :value="null">Choose...</option>
@@ -185,6 +186,7 @@
                   id="select-pnp-grade-cutoff"
                   v-model="selectedPnpCutoffGrade"
                   aria-label="Select Lowest Passing Letter Grade"
+                  autocomplete="off"
                   class="grade-export-select-pnp-cutoff"
                   :disabled="enablePnpConversion !== 'true'"
                 >

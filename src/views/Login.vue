@@ -37,6 +37,7 @@
               <v-text-field
                 id="basic-auth-uid"
                 v-model="uid"
+                autocomplete="on"
                 class="text-field"
                 :disabled="isLoggingIn"
                 hide-details
@@ -67,6 +68,7 @@
               <v-text-field
                 id="basic-auth-canvas-course-id"
                 v-model="canvasSiteId"
+                autocomplete="on"
                 class="text-field"
                 :disabled="isLoggingIn"
                 hide-details
