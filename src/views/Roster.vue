@@ -27,6 +27,7 @@
                 id="roster-search"
                 v-model="search"
                 aria-label="Search students by name or S I D"
+                autocomplete="off"
                 class="roster-search-input mr-2"
                 density="compact"
                 hide-details
@@ -39,6 +40,7 @@
                 id="section-select"
                 v-model="selectedSectionId"
                 aria-label="Filter by section"
+                autocomplete="off"
                 class="flex-fill"
                 @change="onSelectSection"
               >

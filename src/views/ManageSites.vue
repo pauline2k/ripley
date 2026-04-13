@@ -84,6 +84,7 @@
                   id="course-sections"
                   v-model="canvasSiteId"
                   aria-label="All your courses"
+                  autocomplete="off"
                   :disabled="isManageOfficialSectionsDisabled"
                 >
                   <option :value="undefined">Choose a course</option>

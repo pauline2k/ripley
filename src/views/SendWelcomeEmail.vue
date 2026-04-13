@@ -104,6 +104,7 @@
               id="input-subject"
               v-model="subject"
               aria-required="true"
+              autocomplete="on"
               class="bg-white"
               density="compact"
               hide-details

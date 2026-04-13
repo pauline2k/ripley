@@ -16,6 +16,7 @@
           v-if="size(jobHistory)"
           v-model="search"
           :append-inner-icon="mdiMagnify"
+          autocomplete="off"
           class="bg-white"
           hide-details
           label="Search History"

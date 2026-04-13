@@ -176,6 +176,7 @@
                     <select
                       id="job-schedule-select"
                       v-model="editJob.schedule.type"
+                      autocomplete="off"
                       @change="editJob.schedule.value = ''"
                     >
                       <option
@@ -190,6 +191,7 @@
                   <v-col cols="12" sm="6" class="d-flex align-center">
                     <v-text-field
                       v-model="editJob.schedule.value"
+                      :autocomplete="editJob.schedule.type === 'day_at' ? 'on' : 'off'"
                       density="compact"
                       hide-details
                       required
