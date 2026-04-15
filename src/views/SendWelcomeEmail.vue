@@ -142,7 +142,6 @@
               <div class="pb-3 pt-1">
                 <div
                   id="page-site-mailing-list-body"
-                  class="welcome-email-message-body"
                   v-html="get(mailingList, 'welcomeEmailBody')"
                 />
               </div>
@@ -295,12 +294,6 @@ const updateDisplay = data => {
   isCreating.value = false
 }
 </script>
-
-<style scoped>
-.welcome-email-message-body {
-  white-space: pre;
-}
-</style>
 
 <!-- eslint-disable-next-line vue-scoped-css/enforce-style-type -->
 <style>
