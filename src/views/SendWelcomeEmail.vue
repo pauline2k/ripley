@@ -97,7 +97,7 @@
         </div>
         <div class="container pb-5 pt-3 px-5">
           <template v-if="isEditing">
-            <label for="input-subject" class="text-subtitle-1">
+            <label id="input-subject-label" for="input-subject" class="text-subtitle-1">
               Subject
             </label>
             <v-text-field
@@ -124,7 +124,7 @@
           </template>
           <div class="mt-3">
             <template v-if="isEditing">
-              <label for="input-message" class="text-subtitle-1">
+              <label id="input-message-label" for="input-message" class="text-subtitle-1">
                 Message body
               </label>
               <v-textarea
