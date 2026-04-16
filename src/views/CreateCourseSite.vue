@@ -289,13 +289,13 @@ const courseSiteCreationPromise = (siteName, siteAbbreviation) => {
     updateSelected()
     const sectionIds = map(selectedSectionsList.value, 'id')
     if (sectionIds.length > 0) {
-      const adminActingAs = isAdmin.value && adminMode.value === 'actAs' ? adminActingAs.value : null
-      const adminBySectionIds = isAdmin.value && adminMode.value === 'bySectionId' ? adminBySectionIds.value : null
-      const adminTermSlug = isAdmin.value && adminMode.value === 'bySectionId' ? currentAdminTerm.value : null
+      const adminActingAsArg = isAdmin.value && adminMode.value === 'actAs' ? adminActingAs.value : null
+      const adminBySectionIdsArg = isAdmin.value && adminMode.value === 'bySectionId' ? adminBySectionIds.value : null
+      const adminTermSlugArg = isAdmin.value && adminMode.value === 'bySectionId' ? currentAdminTerm.value : null
       courseCreate(
-        adminActingAs,
-        adminBySectionIds,
-        adminTermSlug,
+        adminActingAsArg,
+        adminBySectionIdsArg,
+        adminTermSlugArg,
         sectionIds,
         siteAbbreviation,
         siteName,
