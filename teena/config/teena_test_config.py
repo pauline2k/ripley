@@ -323,18 +323,21 @@ class TeenaTestConfig(object):
 
     # COURSE SITES
 
-    def get_multiple_test_sites(self):
+    def get_multiple_test_sites(self, opts=None):
         courses = self.get_sis_test_courses()
         course_sites = []
         for course in courses:
             has_template = utils.course_template_dept() in course.code
-            idx = courses.index(course)
-            if idx == 0:
-                workflow = 'uid'
-            elif idx == 1:
-                workflow = 'ccn'
+            if opts and 'workflow' in opts:
+                workflow = opts['workflow']
             else:
-                workflow = 'masq'
+                idx = courses.index(course)
+                if idx == 0:
+                    workflow = 'uid'
+                elif idx == 1:
+                    workflow = 'ccn'
+                else:
+                    workflow = 'masq'
             course_sites.append(CourseSite({
                 'abbreviation': f'{self.test_id} {course.term.name} {course.code}',
                 'course': course,
@@ -368,7 +371,7 @@ class TeenaTestConfig(object):
         self.course_sites = course_sites
 
     def get_single_test_site(self, section_ids=None, opts=None):
-        self.get_multiple_test_sites()
+        self.get_multiple_test_sites(opts={'workflow': 'uid'})
         for site in self.course_sites:
             sections = site.course.sections
             primaries = [s for s in sections if s.is_primary]
