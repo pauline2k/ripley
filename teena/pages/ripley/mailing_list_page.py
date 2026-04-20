@@ -68,12 +68,11 @@ class MailingListPage(MailingListsPage):
 
     WELCOME_EMAIL_LINK = By.ID, 'link-to-httpsberkeleyservicenowcomkb_viewdosysparm_articleKB0013900'
     EMAIL_SUBJECT_INPUT = By.ID, 'input-subject'
-    EMAIL_BODY_TEXT_AREA = By.XPATH, '//div[@role="textbox"]'
+    EMAIL_BODY_TEXT_AREA = By.ID, 'input-message'
     EMAIL_SAVE_BUTTON = By.ID, 'btn-save-welcome-email'
     EMAIL_ACTIVATION_TOGGLE = By.ID, 'toggle-welcome-email-active'
     EMAIL_ACTIVATION_DISABLED_MSG = By.XPATH, '//span[contains(., "You can activate the welcome email")]'
     EMAIL_PAUSED_MSG = By.XPATH, '//span[text()="Sending welcome emails is paused."]'
-    EMAIL_ACTIVATED_MSG = By.XPATH, '//span[text()="Welcome email  activated."]'
     EMAIL_SUBJECT = By.ID, 'page-site-mailing-list-subject'
     EMAIL_BODY = By.ID, 'page-site-mailing-list-body'
     EMAIL_EDIT_BUTTON = By.ID, 'btn-edit-welcome-email'

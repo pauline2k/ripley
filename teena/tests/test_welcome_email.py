@@ -74,7 +74,8 @@ class TestWelcomeEmailCreation:
                                  email_body)
 
     def test_email_paused_by_default(self):
-        assert self.mailing_list_page.is_present(self.mailing_list_page.EMAIL_PAUSED_MSG)
+        assert self.mailing_list_page.is_el_enabled(self.mailing_list_page.EMAIL_ACTIVATION_TOGGLE)
+        assert not self.mailing_list_page.is_el_selected(self.mailing_list_page.EMAIL_ACTIVATION_TOGGLE)
 
     def test_edit_email_but_cancel(self):
         self.mailing_list_page.click_edit_email_button()
@@ -105,6 +106,8 @@ class TestWelcomeEmailActivation:
 
     def test_refresh_mailing_list(self):
         self.canvas_page.stop_masquerading()
+        # Launch admin session via LTI
+        self.mailing_list_page.load_embedded_tool(site)
         self.splash_page.load_page()
         self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value, test, self.cal_net_page)
 
@@ -133,6 +136,8 @@ class TestWelcomeEmailActivation:
 
     def test_refresh_mailing_list_again(self):
         self.canvas_page.stop_masquerading()
+        # Relaunch admin session via LTI
+        self.mailing_list_page.load_embedded_tool(site)
         self.splash_page.load_page()
         self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value, test, self.cal_net_page)
 
@@ -156,6 +161,8 @@ class TestWelcomeEmailActivation:
 
     def test_refresh_mailing_list_yet_again(self):
         self.canvas_page.stop_masquerading()
+        # Relaunch admin session via LTI
+        self.mailing_list_page.load_embedded_tool(site)
         self.splash_page.load_page()
         self.admin_page.run_job(RipleyJobs.REFRESH_MAILING_LIST.value, test, self.cal_net_page)
 
