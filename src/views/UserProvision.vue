@@ -191,11 +191,9 @@ const validateUids = () => {
 
 <style scoped lang="scss">
 .page-user-provision {
-  font-family: $body-font-family;
   font-size: 14px;
   padding: 10px 20px;
   .page-user-provision-heading {
-    font-family: $body-font-family;
     font-size: 23px;
     font-weight: normal;
     margin: 10px 0;

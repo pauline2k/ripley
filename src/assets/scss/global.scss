@@ -71,6 +71,15 @@
   height: 1px;
   overflow: hidden;
 }
+.text-body-2 {
+  letter-spacing: 0.04em !important;;
+}
+.text-subtitle-1 {
+  letter-spacing: 0.02em !important;;
+}
+.text-subtitle-2 {
+  letter-spacing: 0.05em !important;;
+}
 .vertical-middle {
   vertical-align: middle !important;
 }
@@ -156,7 +165,6 @@ html {
   overflow-y: unset !important;
 }
 html, body {
-  font-size: 14px;
   height: 100%;
 }
 select {

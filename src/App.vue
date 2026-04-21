@@ -74,7 +74,4 @@ const announcerRole = computed(() =>
   min-height: 20px;
   margin: 0 12px 4px;
 }
-body, .v-application {
-  font-family: $body-font-family !important;
-}
 </style>
