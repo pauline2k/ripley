@@ -31,7 +31,7 @@
     <v-card
       v-if="!error"
       id="mailing-list-details"
-      class="ma-0 pa-4"
+      class="ma-0 pa-md-4"
       elevation="2"
     >
       <v-card-text>
@@ -49,7 +49,7 @@
                 <h2 v-if="get(canvasSite, 'url')">
                   <OutboundLink
                     id="course-site-href"
-                    class="align-start d-flex font-size-18"
+                    class="font-size-18"
                     :href="canvasSite.url"
                     title="View course site"
                   >
@@ -69,8 +69,8 @@
                 </div>
               </v-col>
             </v-row>
-            <v-row align="center" no-gutters>
-              <v-col>
+            <v-row class="flex-md-nowrap" no-gutters>
+              <v-col cols="12" md="7">
                 <v-text-field
                   id="mailing-list-name-input"
                   v-model="mailingListName"
@@ -82,6 +82,7 @@
                   :disabled="isCreating"
                   label="Mailing list name"
                   maxlength="50"
+                  min-width="11rem"
                   required
                   :rules="validationRules"
                   validate-on="lazy invalid-input"
@@ -89,36 +90,34 @@
                   @keydown.enter="create"
                 />
               </v-col>
-              <v-col>
-                <div class="text-no-wrap text-subtitle-1">-{{ mailingListSuffix }}@{{ mailgunDomain }}</div>
+              <v-col class="overflow-x-hidden" cols="12" md="5">
+                <div class="text-no-wrap text-subtitle-1 text-truncate pt-md-2">-{{ mailingListSuffix }}@{{ mailgunDomain }}</div>
               </v-col>
             </v-row>
             <v-row no-gutters>
               <v-col>
-                <div class="d-flex float-right mt-8">
-                  <div :class="{'mr-2': isAdminToolMode}">
-                    <v-btn
-                      id="btn-create-mailing-list"
-                      color="primary"
-                      :disabled="isCreating || !trim(mailingListName) || hasInvalidCharacters"
-                      @click="create"
-                    >
-                      <span v-if="!isCreating">Create mailing list</span>
-                      <span v-if="isCreating">
-                        <SpinnerWithinButton /> Creating...
-                      </span>
-                    </v-btn>
-                  </div>
-                  <div v-if="isAdminToolMode">
-                    <v-btn
-                      id="btn-cancel"
-                      :disabled="isCreating"
-                      variant="tonal"
-                      @click="cancel"
-                    >
-                      Cancel
-                    </v-btn>
-                  </div>
+                <div class="d-flex justify-end mt-8">
+                  <v-btn
+                    id="btn-create-mailing-list"
+                    :class="{'mr-3': isAdminToolMode}"
+                    color="primary"
+                    :disabled="isCreating || !trim(mailingListName) || hasInvalidCharacters"
+                    @click="create"
+                  >
+                    <span v-if="!isCreating">Create mailing list</span>
+                    <span v-if="isCreating">
+                      <SpinnerWithinButton /> Creating...
+                    </span>
+                  </v-btn>
+                  <v-btn
+                    v-if="isAdminToolMode"
+                    id="btn-cancel"
+                    :disabled="isCreating"
+                    variant="tonal"
+                    @click="cancel"
+                  >
+                    Cancel
+                  </v-btn>
                 </div>
               </v-col>
             </v-row>

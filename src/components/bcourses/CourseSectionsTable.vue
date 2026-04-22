@@ -673,7 +673,7 @@ const unstage = (section: SectionEdit, index: number, action: string) => {
   }
 }
 th {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: bolder;
 }
 .border-top-zero {

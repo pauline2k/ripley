@@ -480,11 +480,11 @@ export default {
 
 <style scoped lang="scss">
 .grade-export-header {
-  font-size: 23px;
+  font-size: 1.438rem;
   font-weight: 400;
 }
 .grade-export-sub-header {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 400;
 }
 .grade-export-image-inline {

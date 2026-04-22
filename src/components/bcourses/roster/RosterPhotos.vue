@@ -130,7 +130,7 @@ const reloadPhotosDelayed = () => {
     content: none;
   }
   .page-roster-student-name text-medium-emphasis {
-    font-size: 14px;
+    font-size: 0.875rem;
     line-height: 20px;
     text-overflow: ellipsis;
   }

@@ -21,6 +21,7 @@
           v-model="canvasSiteId"
           :aria-describedby="!!trim(canvasSiteId) && !isCanvasSiteIdValid ? 'mailing-list-site-id-messages' : null"
           aria-label="bCourses Course ID"
+          :aria-labelledby="undefined"
           aria-required="true"
           autocomplete="on"
           density="comfortable"
@@ -28,28 +29,26 @@
           hide-details
           maxlength="10"
           label="bCourses Course ID"
-          style="width: 200px"
           variant="outlined"
+          width="15rem"
           @keydown.enter="proceed"
         />
         <span v-if="!!trim(canvasSiteId) && !isCanvasSiteIdValid" id="mailing-list-site-id-messages" class="position-absolute validation-messages">
           <span class="sr-only">Invalid entry. </span>{{ 'Only numbers allowed.' }}
         </span>
       </div>
-      <div>
-        <v-btn
-          id="btn-get-mailing-list"
-          color="primary"
-          :disabled="isProcessing || !isCanvasSiteIdValid"
-          size="large"
-          @click="proceed"
-        >
-          <span v-if="!isProcessing">Get Mailing List</span>
-          <span v-if="isProcessing">
-            <SpinnerWithinButton /> Searching...
-          </span>
-        </v-btn>
-      </div>
+      <v-btn
+        id="btn-get-mailing-list"
+        color="primary"
+        :disabled="isProcessing || !isCanvasSiteIdValid"
+        size="large"
+        @click="proceed"
+      >
+        <span v-if="!isProcessing">Get Mailing List</span>
+        <span v-if="isProcessing">
+          <SpinnerWithinButton /> Searching...
+        </span>
+      </v-btn>
     </div>
   </div>
 </template>
