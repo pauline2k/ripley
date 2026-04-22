@@ -29,26 +29,35 @@
   white-space: nowrap;
 }
 .font-size-13 {
-  font-size: 13px;
+  font-size: 0.813rem;
 }
 .font-size-14 {
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .font-size-15 {
-  font-size: 15px;
+  font-size: 0.938rem;
 }
 .font-size-16 {
-  font-size: 16px;
+  font-size: 1rem;
 }
 .font-size-18 {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 .font-size-20 {
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 .height-unset {
   height: unset !important;
   min-height: unset !important;
+}
+.ml-2r {
+  margin-left: 0.25rem;
+}
+.mr-2r {
+  margin-right: 0.25rem;
+}
+.mt-2r {
+  margin-top: 0.25rem;
 }
 .modal-body {
   padding: 6px 24px 14px !important;
@@ -74,6 +83,9 @@
 .text-body-2 {
   letter-spacing: 0.04em !important;;
 }
+.text-pretty-wrap {
+  text-wrap-style: pretty;
+}
 .text-subtitle-1 {
   letter-spacing: 0.02em !important;;
 }
@@ -83,12 +95,36 @@
 .vertical-middle {
   vertical-align: middle !important;
 }
+.v-btn.v-btn--size-default {
+  --v-btn-height: calc(var(--v-btn-size) + 22px) !important;
+}
+.v-btn.v-btn--size-large {
+  --v-btn-height: calc(var(--v-btn-size) + 28px) !important;
+}
+.v-btn.v-btn--size-small {
+  --v-btn-height: calc(var(--v-btn-size) + 16px) !important;
+}
+.v-btn.v-btn--size-x-large {
+  --v-btn-height: calc(var(--v-btn-size) + 32px) !important;
+}
+.v-btn.v-btn--size-x-small {
+  --v-btn-height: calc(var(--v-btn-size) + 10px) !important;
+}
+.v-field {
+  font-size: 1rem !important;
+}
 // Higher contrast on Vuetify placeholders
 .v-field__field .v-label {
   opacity: 0.8;
 }
 .v-field__input::placeholder {
   opacity: 0.8 !important;
+}
+.v-messages {
+  font-size: 0.75rem !important;
+  .v-messages__message {
+    line-height: 0.875rem !important;
+  }
 }
 * {
   text-transform: none !important;
@@ -119,7 +155,7 @@ form {
   textarea {
     border: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
     border-radius: 4px !important;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: normal;
     margin: 0 0 4px;
     padding: 8px 12px;
@@ -142,22 +178,22 @@ form {
   }
 }
 h1 {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 600;
-  line-height: 30px;
+  line-height: 1.875;
   margin: 15px 0 16px;
 }
 h2 {
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 500;
 }
 h3 {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: normal;
 }
 h3.sections-course-title {
   display: inline !important;
-  font-size: 15px !important;
+  font-size: 0.938rem !important;
   font-weight: 500 !important;
   line-height: 20px;
 }
@@ -200,7 +236,7 @@ table {
   width: 100%;
   tbody tr td {
     border-top: solid 1px rgba(var(--v-border-color), var(--v-border-opacity));
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 400;
     padding: 0 10px 0 14px;
     vertical-align: top;
@@ -213,7 +249,7 @@ table {
   thead tr th {
     background-color: transparent;
     color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
-    font-size: 13px;
+    font-size: 0.813rem;
     font-weight: 500;
     padding: 6px 10px 6px 14px;
     text-align: start;
@@ -228,6 +264,12 @@ table {
       }
     }
   }
+}
+
+@media (min-width: 48rem) {
+    html .pa-md-4 {
+        padding: 16px !important;
+    }
 }
 
 @media print {

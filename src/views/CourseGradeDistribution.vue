@@ -92,7 +92,7 @@ onMounted(() => {
 .grade-distribution {
   .course-header {
     color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
-    font-size: 17px;
+    font-size: 1.063rem;
     font-weight: 400;
   }
   .demo-mode-blur {
@@ -103,7 +103,7 @@ onMounted(() => {
     border-left: solid 1px rgba(var(--v-border-color), var(--v-border-opacity));
   }
   .pilot-notice {
-    font-size: 15px;
+    font-size: 0.938rem;
     font-weight: 600;
   }
   h2 {

@@ -191,10 +191,10 @@ const validateUids = () => {
 
 <style scoped lang="scss">
 .page-user-provision {
-  font-size: 14px;
+  font-size: 0.875rem;
   padding: 10px 20px;
   .page-user-provision-heading {
-    font-size: 23px;
+    font-size: 1.438rem;
     font-weight: normal;
     margin: 10px 0;
   }

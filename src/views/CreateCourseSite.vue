@@ -534,7 +534,7 @@ const updateSemesterData = slug => {
 
 <style scoped lang="scss">
 .sections-course-title {
-  font-size: 15px !important;
+  font-size: 0.938rem !important;
   font-weight: 700 !important;
   line-height: 15px;
 }

@@ -46,7 +46,7 @@ const announcerRole = computed(() =>
   border: 0;
   border-radius: 3px;
   color: $color-alert-foreground;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: normal;
   margin: 10px 0;
   padding: 8px 15px 8px 14px;
@@ -69,7 +69,7 @@ const announcerRole = computed(() =>
 }
 .validation-messages {
   color: $color-harley-davidson-orange;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   min-height: 20px;
   margin: 0 12px 4px;

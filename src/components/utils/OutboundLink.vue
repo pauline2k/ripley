@@ -1,14 +1,17 @@
 <template>
   <a
     :id="id || `link-to-${href.replace(/\W/g, '')}`"
+    class="align-end d-inline-block text-pretty-wrap"
     :href="href"
     target="_blank"
     :title="title"
   >
-    <slot />
+    <span class="text-wrap">
+      <slot />
+    </span>
     <v-icon
       v-if="!hideIcon"
-      class="ml-1"
+      class="ml-2r"
       :icon="mdiOpenInNew"
       size="x-small"
     />

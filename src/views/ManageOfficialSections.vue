@@ -536,7 +536,7 @@ const unstageAll = () => {
 
 <style scoped lang="scss">
 .sections-course-title {
-  font-size: 18px !important;
+  font-size: 1.125rem !important;
   font-weight: 400 !important;
   line-height: 18px;
 }
