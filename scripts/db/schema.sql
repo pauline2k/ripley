@@ -45,6 +45,16 @@ CREATE TYPE job_schedule_types AS ENUM (
 
 --
 
+CREATE TABLE canvas_site_archival_status (
+    canvas_site_id INTEGER PRIMARY KEY,
+    opted_out BOOLEAN DEFAULT FALSE NOT NULL,
+    archival_tier CHARACTER VARYING(4) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+--
+
 CREATE TABLE canvas_site_mailing_list_members (
     id SERIAL PRIMARY KEY,
     mailing_list_id INTEGER NOT NULL,
