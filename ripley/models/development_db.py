@@ -29,11 +29,13 @@ from flask import current_app as app
 from ripley import db, std_commit
 from ripley.factory import background_job_manager
 from ripley.models.admin_user import AdminUser
+from ripley.models.canvas_site_archival_status import CanvasSiteArchivalStatus
 from ripley.models.job import Job
 from sqlalchemy.sql import text
 
 
 ADMIN_USER_UIDS = ['10000']
+COURSE_SITES_TO_BE_ARCHIVED = ['1100000', '1200000', '8876542']
 
 
 def clear():
@@ -46,8 +48,16 @@ def load(create_test_data=True):
     _load_schemas()
     if create_test_data:
         _set_up_and_run_jobs()
+        _create_course_site_data()
         _create_users()
     return db
+
+
+def _create_course_site_data():
+    for canvas_site_id in COURSE_SITES_TO_BE_ARCHIVED:
+        archival_status = CanvasSiteArchivalStatus.create(canvas_site_id=canvas_site_id, archival_tier='2028')
+        db.session.add(archival_status)
+    std_commit(allow_test_environment=True)
 
 
 def _create_users():

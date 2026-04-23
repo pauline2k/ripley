@@ -30,7 +30,7 @@ from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, canvas_site_creation_required, csv_download_response
 from ripley.externals import canvas, data_loch
-from ripley.externals.redis import enqueue, get_job
+from ripley.externals.redis import cache_dict_object, enqueue, fetch_cached_dict_object, get_job
 from ripley.lib.berkeley_course import sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_site_utils import canvas_site_to_api_json, create_canvas_project_site, \
@@ -38,6 +38,7 @@ from ripley.lib.canvas_site_utils import canvas_site_to_api_json, create_canvas_
 from ripley.lib.course_site_provisioner import provision_course_site
 from ripley.lib.http import tolerant_jsonify
 from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
+from ripley.models.canvas_site_archival_status import CanvasSiteArchivalStatus
 from ripley.models.configuration import Configuration
 
 ROLES_CAN_EDIT_OFFICIAL_SECTIONS = ['Lead TA', 'TeacherEnrollment', 'CanvasAdmin']
@@ -229,6 +230,20 @@ def get_provision_status():
         })
     else:
         raise BadRequestError('Required parameters are missing.')
+
+
+@app.route('/api/canvas_site/<canvas_site_id>/archival_status')
+def get_archival_status(canvas_site_id):
+    cache_key = f'canvas_site_archival_status_{canvas_site_id}'
+    archival_status = fetch_cached_dict_object(cache_key)
+    if not archival_status:
+        archival_status = CanvasSiteArchivalStatus.find_by_canvas_site_id(canvas_site_id)
+        if archival_status:
+            cache_dict_object(cache_key, archival_status, 3600)
+    if archival_status:
+        return tolerant_jsonify(archival_status.to_api_json())
+    else:
+        raise ResourceNotFoundError(f'No archival status found for Canvas site ID {canvas_site_id}.')
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/roster')
