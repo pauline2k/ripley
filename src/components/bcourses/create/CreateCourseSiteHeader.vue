@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-4">
     <h2 class="sr-only">Administrator Options</h2>
     <div id="radio-group-modes" class="text-subtitle-1">Choose courses by:</div>
     <v-radio-group
@@ -10,56 +10,59 @@
       :disabled="isFetching"
       hide-details
     >
-      <v-radio id="radio-btn-mode-act-as" value="actAs" aria-label="Instructor">
+      <v-radio
+        id="radio-btn-mode-act-as"
+        aria-label="Instructor"
+        class="pt-1"
+        value="actAs"
+      >
         <template #label>
-          <div aria-hidden="true" class="pl-1 text-black text-body-2">Instructor</div>
+          <div aria-hidden="true" class="pl-1r text-black text-body-2">Instructor</div>
         </template>
       </v-radio>
-      <v-radio id="radio-btn-mode-section-id" value="bySectionId" aria-label="Section I Deez">
+      <v-radio
+        id="radio-btn-mode-section-id"
+        aria-label="Section I Deez"
+        class="pt-1"
+        value="bySectionId"
+      >
         <template #label>
-          <div aria-hidden="true" class="pl-1 text-black text-body-2">Section IDs</div>
+          <div aria-hidden="true" class="pl-1r text-black text-body-2">Section IDs</div>
         </template>
       </v-radio>
     </v-radio-group>
-    <div v-if="adminMode === 'actAs'" class="pt-5">
-      <div class="align-center d-flex pb-3">
-        <div class="pr-3">
-          <v-text-field
-            id="instructor-uid"
-            v-model="uid"
-            aria-label="Instructor U I D"
-            autocomplete="on"
-            class="instructor-uid-text-field"
-            density="comfortable"
-            :disabled="isFetching"
-            :error="isInvalidUID"
-            hide-details
-            label="Instructor UID"
-            maxlength="16"
-            variant="outlined"
-            @keydown.enter="submit"
-          />
-        </div>
-        <div>
-          <v-btn
-            id="sections-by-uid-button"
-            aria-label="Load official sections for instructor"
-            color="primary"
-            :disabled="isFetching || !trim(uid) || isInvalidUID"
-            size="large"
-            @click="submit"
-          >
-            <span v-if="isFetching">
-              <v-progress-circular
-                class="mr-1"
-                indeterminate
-                size="18"
-              />
-              Fetching...
-            </span>
-            <span v-if="!isFetching">As instructor</span>
-          </v-btn>
-        </div>
+    <div v-if="adminMode === 'actAs'" class="pt-4">
+      <div class="align-center d-flex flex-wrap pb-3">
+        <v-text-field
+          id="instructor-uid"
+          v-model="uid"
+          aria-label="Instructor U I D"
+          autocomplete="on"
+          class="instructor-uid-text-field mr-2r mt-3"
+          density="comfortable"
+          :disabled="isFetching"
+          :error="isInvalidUID"
+          hide-details
+          label="Instructor UID"
+          maxlength="16"
+          variant="outlined"
+          @keydown.enter="submit"
+        />
+        <v-btn
+          id="sections-by-uid-button"
+          aria-label="Load official sections for instructor"
+          class="mt-3"
+          color="primary"
+          :disabled="isFetching || !trim(uid) || isInvalidUID"
+          size="large"
+          @click="submit"
+        >
+          <span v-if="isFetching">
+            <SpinnerWithinButton />
+            Fetching...
+          </span>
+          <span v-if="!isFetching">As instructor</span>
+        </v-btn>
       </div>
     </div>
     <div v-if="adminMode === 'bySectionId'" class="py-5">
@@ -88,9 +91,9 @@
             v-model="sectionIds"
             aria-label="Paste your list of Section IDs here, separated by commas or spaces"
             auto-grow
-            class="w-50"
             :disabled="isFetching"
             hide-details
+            max-width="60rem"
             placeholder="Paste your list of Section IDs here, separated by commas or spaces"
             rows="2"
             variant="outlined"
@@ -103,11 +106,7 @@
           @click="submit"
         >
           <span v-if="isFetching">
-            <v-progress-circular
-              class="mr-1"
-              indeterminate
-              size="18"
-            />
+            <SpinnerWithinButton />
             Fetching...
           </span>
           <span v-if="!isFetching">Find Matching Sections</span>
@@ -119,11 +118,13 @@
 
 <script>
 import Context from '@/mixins/Context'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {find, partition, size, split, trim} from 'lodash'
 import {putFocusNextTick} from '@/utils'
 
 export default {
   name: 'CreateCourseSiteHeader',
+  components: {SpinnerWithinButton},
   mixins: [Context],
   props: {
     adminMode: {
@@ -239,7 +240,8 @@ export default {
 
 <style scoped lang="scss">
 .instructor-uid-text-field {
-  width: 208px;
+  flex-grow: 0;
+  min-width: 12rem;
 }
 .term-btn-toggle {
   border-width: 1px;

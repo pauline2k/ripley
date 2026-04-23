@@ -2,35 +2,38 @@
   <v-alert
     class="mt-2"
     close-label="Hide help"
-    color="grey-lighten-4"
     role="none"
     @click:close="onCloseHelp"
   >
     <div class="d-flex">
-      <div class="pr-2">
-        <v-icon
-          class="left page-help-notice-icon"
-          color="grey"
-          :icon="mdiHelpCircleOutline"
-        />
-      </div>
+      <v-icon
+        class="mr-2r page-help-notice-icon text-medium-emphasis"
+        :icon="mdiHelpCircleOutline"
+      />
       <div>
         <div class="font-weight-medium">
           Need help deciding which official sections to select?
         </div>
-        If you have a course with multiple sections, you will need to decide whether you want to:
-        <div class="mt-1">
-          1. Create one, single course site which includes official sections for both your primary and secondary sections, or
-        </div>
-        <div>
-          2. Create multiple course sites, perhaps with one for each section, or
-        </div>
-        <div>
-          3. Create separate course sites based on instruction mode.
-          <OutboundLink href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010732#instructionmode">
-            Learn more about instruction modes in bCourses.
-          </OutboundLink>
-        </div>
+        <p class="mt-2">
+          If you have a course with multiple sections, you will need to decide whether you want to:
+          <ol class="my-2 ml-4r mr-2">
+            <li>
+              Create one, single course site which includes official sections for both your primary and secondary sections, or
+            </li>
+            <li>
+              Create multiple course sites, perhaps with one for each section, or
+            </li>
+            <li>
+              Create separate course sites based on instruction mode.
+              <OutboundLink
+                href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0010732#instructionmode"
+                period-terminated
+              >
+                Learn more about instruction modes in bCourses
+              </OutboundLink>
+            </li>
+          </ol>
+        </p>
       </div>
     </div>
   </v-alert>
