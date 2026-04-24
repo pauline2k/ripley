@@ -37,6 +37,8 @@ CANVAS_FUTURE_ENROLLMENT_TERM = 'Fall 2023'
 DATA_LOCH_BASIC_ATTRIBUTES_TABLE = 'basic_attributes'
 DATA_LOCH_RDS_URI = 'postgresql://ripley:ripley@localhost:5432/ripley_loch_test'
 
+DISPLAY_COURSE_RETENTION_POLICY_BANNER = True
+
 EB_ENVIRONMENT = 'ripley-test'
 
 FIXTURES_PATH = f'{BASE_DIR}/tests/fixtures'

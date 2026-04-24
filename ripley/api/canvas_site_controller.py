@@ -239,9 +239,10 @@ def get_archival_status(canvas_site_id):
     if not archival_status:
         archival_status = CanvasSiteArchivalStatus.find_by_canvas_site_id(canvas_site_id)
         if archival_status:
+            archival_status = archival_status.to_api_json()
             cache_dict_object(cache_key, archival_status, 3600)
-    if archival_status:
-        return tolerant_jsonify(archival_status.to_api_json())
+    if archival_status and app.config['DISPLAY_COURSE_RETENTION_POLICY_BANNER']:
+        return tolerant_jsonify(archival_status)
     else:
         raise ResourceNotFoundError(f'No archival status found for Canvas site ID {canvas_site_id}.')
 

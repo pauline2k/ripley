@@ -294,6 +294,60 @@ addAcademicPoliciesResponsiveLink();
 
 addMentalHealthResourcesResponsiveLink();
 
+
+/* COURSE RETENTION POLICY BANNER */
+
+/**
+ * Check archival tier, if any, for current course
+ *
+ * @param  {Function}   callback                  Standard callback function
+ * @param  {Element}    callback.archivalTier     Current archival tier
+ */
+var getCourseArchivalTier = function(callback) {
+  if (window.ENV.COURSE) {
+     apiRequest('/api/canvas_site/' + window.ENV.COURSE.id + '/archival_status', function(statusResult) {
+       if (statusResult && statusResult.archivalTier && !statusResult.optedOut) {
+         return callback(statusResult.archivalTier);
+       }
+    });
+  }
+};
+
+/**
+  * Display a red banner (Course Retention Policy) for non-opted-out courses in archival tier
+  */
+var addCourseRetentionPolicyBanner = function() {
+  waitUntilAvailable('#wrapper', false, function() {
+    const isCoursePage = /^\/courses\/\d+/.test(window.location.pathname);
+    const bannerExists = $('#custom-course-banner').length > 0;
+
+    if (isCoursePage && !bannerExists) {
+      getCourseArchivalTier(function(archivalTier) {
+        if (archivalTier) {
+          const bannerHtml = `
+            <div id="custom-course-banner" style="
+              background-color: #FCC6BB;
+              color: black;
+              padding: 12px;
+              text-align: center;
+              font-weight: bold;
+              width: 100%;
+              z-index: 9999;
+              box-sizing: border-box;
+            ">
+              In accordance with the <a href="kb-article.com">bCourses Course Retention Policy</a>, this course will be archived in a read-only state in June ${archivalTier} before being removed from bCourses in June 2028. Learn about your options to <a href="kb-article.com">preserve content as an instructor</a> and <a href="kb-article.com">save coursework as a student</a>.
+            </div>
+          `;
+          $('#wrapper').prepend(bannerHtml);
+        }
+      });
+    }
+  });
+};
+
+addCourseRetentionPolicyBanner();
+
+
   /* E-GRADES EXPORT */
 
   /**
