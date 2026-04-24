@@ -17,7 +17,7 @@
           <div class="font-weight-medium">
             You are about to create a {{ currentSemesterName }} course site for:
           </div>
-          <ul id="page-create-course-site-section-list" class="page-create-course-site-section-list">
+          <ul id="page-create-course-site-section-list" class="list-bulleted page-create-course-site-section-list">
             <li v-for="section in selectedSectionsList" :key="section.id">
               {{ section.courseTitle }} - {{ section.courseCode }} ({{ section.id }})
             </li>
@@ -110,7 +110,7 @@
       </v-expand-transition>
       <v-row class="mt-2" no-gutters>
         <v-col cols="12">
-          <div class="align-center d-flex justify-end">
+          <div class="align-center d-flex flex-wrap justify-end">
             <v-btn
               id="create-course-site-button"
               class="mt-4 ml-3 w-100 w-sm-auto"

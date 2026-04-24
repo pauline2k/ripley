@@ -1,36 +1,34 @@
 <template>
-  <div v-if="!isLoading">
-    <div v-if="appState === 'error'">
-      <div class="ma-2 pl-2 pr-4">
-        <Header1 class="grade-export-header my-3" text="Error" />
-        <div aria-live="polite">
-          <v-alert
-            v-if="error"
-            class="my-2"
-            density="compact"
-            role="none"
-            :text="error"
-            type="warning"
-          >
-            <div v-if="contactSupport" class="py-1">
-              Contact
-              <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink>
-              if you need assistance.
-            </div>
-          </v-alert>
-        </div>
-        <div v-if="showRetryOption" class="py-6 text-center">
-          <v-btn
-            id="retry-selection-btn"
-            class="px-10"
-            color="primary"
-            @click="retrySelection"
-          >
-            Retry
-          </v-btn>
-        </div>
+  <div v-if="!isLoading" class="pb-4">
+    <v-container v-if="appState === 'error'">
+      <Header1 class="grade-export-header my-3" text="Error" />
+      <div aria-live="polite">
+        <v-alert
+          v-if="error"
+          class="my-2"
+          density="compact"
+          role="none"
+          :text="error"
+          type="warning"
+        >
+          <div v-if="contactSupport" class="py-1">
+            Contact
+            <OutboundLink class="text-white text-decoration-underline" href="https://rtl.berkeley.edu/services-programs/bcourses">bCourses support</OutboundLink>
+            if you need assistance.
+          </div>
+        </v-alert>
       </div>
-    </div>
+      <div v-if="showRetryOption" class="py-6 text-center">
+        <v-btn
+          id="retry-selection-btn"
+          class="px-10"
+          color="primary"
+          @click="retrySelection"
+        >
+          Retry
+        </v-btn>
+      </div>
+    </v-container>
     <v-container v-if="appState === 'preselection'">
       <v-row no-gutters>
         <v-col>
@@ -46,7 +44,7 @@
                   id="canvas-course-settings-href"
                   :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/settings#tab-details`"
                   target="_top"
-                >Course Settings</a>
+                >Course Settings</a>.
               </span>
               <span v-if="noGradingStandardEnabled">
                 <a
@@ -58,7 +56,7 @@
               </span>
               <div class="pt-1">
                 For detailed instructions, see:
-                "<OutboundLink href="https://community.instructure.com/en/kb/articles/661121-how-do-i-enable-a-grading-scheme-for-a-course">How do I enable a grading scheme for a course?</OutboundLink>"
+                <OutboundLink href="https://community.instructure.com/en/kb/articles/661121-how-do-i-enable-a-grading-scheme-for-a-course">How do I enable a grading scheme for a course?</OutboundLink>
               </div>
             </div>
           </div>
@@ -67,12 +65,14 @@
             <div class="pb-8 pl-5 pt-2">
               <div>
                 All assignment grades must be posted (published/unmuted) to ensure that your E-Grades export matches what you see in the <span aria-hidden="true">gradebook</span><span class="sr-only">grade book</span>. To confirm that all grades have been posted,
-                <a :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`" target="_top">
-                  review all columns in your <span aria-hidden="true">gradebook</span><span class="sr-only">grade book</span> for unposted assignment grades
-                </a>
+                <a
+                  :href="`${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`"
+                  target="_top"
+                >
+                  review all columns in your <span aria-hidden="true">gradebook</span><span class="sr-only">grade book</span> for unposted assignment grades</a>
                 indicated by a crossed-out eye icon
                 <span class="nowrap">
-                  (<img class="grade-export-image-inline" src="@/assets/images/crossed_out_eye.png" alt="Crossed-out eye icon">)
+                  (<img class="grade-export-image-inline" src="@/assets/images/crossed_out_eye.png" alt="Crossed-out eye">)
                 </span>
                 .
               </div>
@@ -89,7 +89,7 @@
               </ol>
               <div>
                 <span>
-                  For detailed instructions, see: "<OutboundLink href="https://community.instructure.com/en/kb/articles/660846-how-do-i-post-grades-for-an-assignment-in-the-gradebook">How do I post grades for an assignment?</OutboundLink>"
+                  For detailed instructions, see: <OutboundLink href="https://community.instructure.com/en/kb/articles/660846-how-do-i-post-grades-for-an-assignment-in-the-gradebook">How do I post grades for an assignment?</OutboundLink>
                 </span>
               </div>
               <div class="py-2">
@@ -105,10 +105,10 @@
               </div>
             </div>
           </div>
-          <div class="text-right">
+          <div class="d-flex flex-wrap justify-end">
             <v-btn
               id="cancel-button"
-              class="mr-2"
+              class="mt-4 ml-3 w-100 w-sm-auto"
               variant="tonal"
               @click="goToGradebook"
             >
@@ -116,10 +116,11 @@
             </v-btn>
             <v-btn
               id="continue-button"
-              color="primary"
-              :class="{'grade-export-continue--inactive': noGradingStandardEnabled}"
               :aria-disabled="noGradingStandardEnabled ? 'true' : undefined"
               :aria-describedby="noGradingStandardEnabled ? 'egrades-export-step-grading-scheme egrades-export-step-post-grades' : undefined"
+              color="primary"
+              class="mt-4 ml-3 w-100 w-sm-auto"
+              :class="{'v-btn--disabled': noGradingStandardEnabled}"
               @click="onContinueClick"
             >
               Continue
@@ -128,7 +129,6 @@
         </v-col>
       </v-row>
     </v-container>
-
     <v-container v-if="appState === 'selection'">
       <v-row no-gutters>
         <v-col>
@@ -141,56 +141,50 @@
         </v-col>
       </v-row>
       <v-row v-if="officialSections.length > 1" no-gutters>
-        <v-col md="5">
+        <v-col>
           <h2 class="pb-2">Select section</h2>
-          <div class="pl-3">
-            <select
-              id="course-sections"
-              v-model="selectedSection"
-              aria-label="Select Section"
-              autocomplete="off"
-              class="w-50"
-            >
-              <option :value="null">Choose...</option>
-              <option v-for="section in officialSections" :key="section.canvasName" :value="section">
-                {{ section.canvasName }}
-              </option>
-            </select>
-          </div>
+          <select
+            id="course-sections"
+            v-model="selectedSection"
+            aria-label="Select Section"
+            autocomplete="off"
+            class="mb-3 w-fit-content"
+          >
+            <option :value="null">Choose...</option>
+            <option v-for="section in officialSections" :key="section.canvasName" :value="section">
+              {{ section.canvasName }}
+            </option>
+          </select>
         </v-col>
       </v-row>
-      <v-row no-gutters>
+      <v-row class="py-4" no-gutters>
         <v-col>
-          <div class="py-4">
-            <h2>Configure P/NP grade options</h2>
-            <div class="pl-2 pt-2">
-              <div class="d-flex">
-                <div>
-                  <input
-                    id="input-enable-pnp-conversion-true"
-                    v-model="enablePnpConversion"
-                    class="mr-2"
-                    type="radio"
-                    name="enablePnpCoversion"
-                    value="true"
-                    @change="selectedPnpCutoffGrade = null"
-                  >
-                </div>
-                <label for="input-enable-pnp-conversion-true">
-                  Automatically convert letter grades in the E-Grades export to the student-selected grading option.
-                  Please select the lowest passing letter grade.
-                </label>
-              </div>
-              <div class="pb-4 pl-4 pt-1">
+          <h2>Configure P/NP grade options</h2>
+          <v-radio-group v-model="enablePnpConversion">
+            <div class="my-1" :class="{'bg-surface-light': enablePnpConversion}">
+              <v-radio
+                id="input-enable-pnp-conversion-true"
+                class="align-start pa-4"
+                density="compact"
+                :value="true"
+              >
+                <template #label>
+                  <div class="grade-export-label">
+                    Automatically convert letter grades in the E-Grades export to the student-selected grading option.
+                  </div>
+                </template>
+              </v-radio>
+              <div class="pb-4 pt-2 pl-8r">
+                <label class="d-block" for="select-pnp-grade-cutoff">Please select the lowest passing letter grade.</label>
                 <select
                   id="select-pnp-grade-cutoff"
                   v-model="selectedPnpCutoffGrade"
-                  aria-label="Select Lowest Passing Letter Grade"
+                  aria-label="Select the Lowest Passing Letter Grade"
                   autocomplete="off"
-                  class="grade-export-select-pnp-cutoff"
-                  :disabled="enablePnpConversion !== 'true'"
+                  class="bg-white pr-8 w-fit-content"
+                  :disabled="enablePnpConversion !== true"
                 >
-                  <option :value="null">Select a grade</option>
+                  <option :value="null">Choose grade...</option>
                   <option
                     v-for="grade in ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C', 'C-', 'D+', 'D', 'D-', 'F']"
                     :key="grade"
@@ -201,27 +195,23 @@
                 </select>
               </div>
             </div>
-            <div class="pl-2 pt-1">
-              <div class="d-flex">
-                <div>
-                  <input
-                    id="input-enable-pnp-conversion-false"
-                    v-model="enablePnpConversion"
-                    class="mr-2"
-                    type="radio"
-                    name="enablePnpConversion"
-                    value="false"
-                    @change="selectedPnpCutoffGrade = ''"
-                  >
-                </div>
-                <label for="input-enable-pnp-conversion-false">
-                  Do not automatically convert any letter grades to P/NP. I have applied a P/NP grading scheme to
-                  all grades in this course, or will manually adjust the grades in the E-Grades Export CSV to
-                  reflect the student-selected grading option.
-                </label>
-              </div>
+            <div class="my-1" :class="{'bg-surface-light': !enablePnpConversion}">
+              <v-radio
+                id="input-enable-pnp-conversion-false"
+                class="align-start pa-4"
+                density="compact"
+                :value="false"
+              >
+                <template #label>
+                  <div class="grade-export-label">
+                    Do not automatically convert any letter grades to P/NP. I have applied a P/NP grading scheme to
+                    all grades in this course, or will manually adjust the grades in the E-Grades Export CSV to
+                    reflect the student-selected grading option.
+                  </div>
+                </template>
+              </v-radio>
             </div>
-          </div>
+          </v-radio-group>
         </v-col>
       </v-row>
       <v-row no-gutters>
@@ -236,7 +226,7 @@
             <div class="py-2">
               <v-btn
                 id="download-current-grades-button"
-                :disabled="!selectedSection || (enablePnpConversion !== 'false' && !selectedPnpCutoffGrade)"
+                :disabled="!selectedSection || (!!enablePnpConversion && !selectedPnpCutoffGrade)"
                 color="primary"
                 @click="preloadGrades('current')"
               >
@@ -254,7 +244,7 @@
               <v-btn
                 id="download-final-grades-button"
                 color="primary"
-                :disabled="!selectedSection || (enablePnpConversion !== 'false' && !selectedPnpCutoffGrade)"
+                :disabled="!selectedSection || (!!enablePnpConversion && !selectedPnpCutoffGrade)"
                 @click="preloadGrades('final')"
               >
                 Download Final Grades
@@ -273,25 +263,22 @@
         </v-col>
       </v-row>
     </v-container>
-
-    <div>
-      <v-container v-if="appState === 'loading'">
-        <v-row no-gutters>
-          <v-col>
-            <Header1 class="grade-export-header mb-3 mt-2" text="Preparing E-Grades for Download" />
-          </v-col>
-        </v-row>
-        <div class="align-center d-flex ma-3">
-          <v-progress-circular
-            class="mr-3"
-            color="primary"
-            indeterminate
-            size="small"
-          />
-          <div aria-atomic="true" aria-live="polite" class="job-progress text-subtitle-1">The job {{ jobStatus === 'started' ? 'has' : 'is' }} {{ jobStatus }}</div>
-        </div>
-      </v-container>
-    </div>
+    <v-container v-if="appState === 'loading'">
+      <v-row no-gutters>
+        <v-col>
+          <Header1 class="grade-export-header mb-3 mt-2" text="Preparing E-Grades for Download" />
+        </v-col>
+      </v-row>
+      <div class="align-center d-flex ma-3">
+        <v-progress-circular
+          class="mr-3"
+          color="primary"
+          indeterminate
+          size="small"
+        />
+        <div aria-atomic="true" aria-live="polite" class="job-progress text-subtitle-1">The job {{ jobStatus === 'started' ? 'has' : 'is' }} {{ jobStatus }}</div>
+      </div>
+    </v-container>
   </div>
 </template>
 
@@ -313,7 +300,7 @@ export default {
     backgroundJobId: null,
     contactSupport: false,
     courseUserRoles: [],
-    enablePnpConversion: null,
+    enablePnpConversion: false,
     exportTimer: null,
     filenameDownloaded: false,
     jobStatus: null,
@@ -359,7 +346,7 @@ export default {
       this.switchToSelection()
     },
     initializePnpCutoffGrades() {
-      this.enablePnpConversion = 'true'
+      this.enablePnpConversion = true
       this.selectedPnpCutoffGrade = null
     },
     loadExportOptions() {
@@ -417,7 +404,7 @@ export default {
       this.appState = 'loading'
       this.jobStatus = 'started'
       iframeScrollToTop()
-      const pnpCutoff = this.enablePnpConversion === 'false' ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
+      const pnpCutoff = !this.enablePnpConversion ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
       prepareGradesCacheJob(
         this.selectedType,
         pnpCutoff,
@@ -483,20 +470,16 @@ export default {
   font-size: 1.438rem;
   font-weight: 400;
 }
+.grade-export-label {
+  padding: 0.1rem 0 0 0.5rem;
+}
 .grade-export-sub-header {
   font-size: 1.25rem;
   font-weight: 400;
 }
 .grade-export-image-inline {
-  height: 15px;
-  margin-bottom: -3px;
-}
-.grade-export-select-pnp-cutoff {
-  padding-right: 25px;
-  width: fit-content;
-}
-.grade-export-continue--inactive {
-  opacity: 0.38;
+  height: 1rem;
+  vertical-align: text-bottom;
 }
 .job-progress:after {
   animation: ellipsis steps(4,end) 1800ms infinite;

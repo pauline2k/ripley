@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar class="display-none-when-print pr-3" flat>
+  <v-app-bar class="d-print-none pr-3" flat>
     <v-app-bar-title>
       <div class="align-center d-flex flex-wrap justify-space-between">
         <div class="me-auto">

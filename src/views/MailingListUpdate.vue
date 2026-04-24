@@ -4,7 +4,7 @@
     <v-alert
       v-if="!hasUpdatedSincePageLoad && !noChangesAlert && !isUpdating"
       id="mailing-list-created-alert"
-      class="my-2"
+      class="my-2r"
       density="compact"
       role="none"
       type="info"
@@ -377,8 +377,5 @@ button:hover, :focus, :focus-visible {
   .toggle-show-hide {
     text-decoration: underline;
   }
-}
-ul {
-  list-style: none;
 }
 </style>

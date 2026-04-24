@@ -10,12 +10,17 @@
     @click.prevent="action"
   >
     <div class="align-center d-flex text-no-wrap">
-      <div v-if="inProgress" class="mr-2">
-        <v-progress-circular indeterminate size="18" width="2" />
-      </div>
+      <v-progress-circular
+        v-if="inProgress"
+        class="mr-2"
+        indeterminate
+        size="x-small"
+        width="3"
+      />
       <div>
-        {{ text }}
-        <slot />
+        <slot>
+          {{ text }}
+        </slot>
       </div>
     </div>
   </v-btn>

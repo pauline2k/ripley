@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="page-user-provision">
+  <div v-if="!isLoading" class="page-user-provision px-8 px-md-12 py-4">
     <Header1 id="page-title" class="page-user-provision-heading" text="Add Users to bCourses" />
     <form
       v-if="isAdmin"
@@ -8,19 +8,25 @@
       @submit.prevent="onSubmit"
     >
       <v-row no-gutters>
-        <label for="page-user-provision-uid-list" class="user-provision-uid-label mb-2 mt-3">
+        <label for="page-user-provision-uid-list" class="user-provision-uid-label mb-2r mt-3">
           Type or paste a list of <span aria-hidden="true">UIDs</span><span class="sr-only">U I Deez</span> separated by spaces, commas, or line breaks
         </label>
         <textarea
           id="page-user-provision-uid-list"
           v-model="rawUids"
           :class="{'error': !isEmpty(validationErrors)}"
+          :disabled="importProcessing"
           rows="4"
           name="uids"
         />
       </v-row>
       <v-row no-gutters>
-        <v-col aria-live="polite" cols="8" class="pt-2">
+        <v-col
+          aria-live="polite"
+          class="pt-2"
+          cols="12"
+          lg="7"
+        >
           <div
             v-if="!status"
             id="user-provision-validation-msg"
@@ -59,20 +65,20 @@
                     UID was
                   </template> imported into bCourses.
                 </div>
-                <ul id="imported-uids-list" class="ml-3">
+                <ul id="imported-uids-list" class="list-bulleted ml-3">
                   <li v-for="(uid, index) in importedUids" :key="index">{{ uid }}</li>
                 </ul>
               </div>
             </div>
           </div>
         </v-col>
-        <v-col cols="4">
+        <v-col cols="12" lg="5">
           <div class="d-flex justify-end w-100">
             <v-btn
               id="user-provision-import-btn"
               aria-describedby="user-provisioning-progress"
               :aria-disabled="importButtonDisabled"
-              class="text-no-wrap my-2"
+              class="mt-4 ml-3 w-100 w-sm-auto"
               color="primary"
               :disabled="importButtonDisabled"
               type="submit"
@@ -82,9 +88,6 @@
                 <SpinnerWithinButton /> Importing Users...
               </span>
             </v-btn>
-            <span id="user-provisioning-progress" class="sr-only" role="status">
-              <span v-if="importProcessing">Importing Users</span>
-            </span>
           </div>
         </v-col>
       </v-row>
@@ -92,7 +95,7 @@
     <div aria-live="polite">
       <v-alert
         v-if="!isAdmin"
-        class="font-weight-medium ma-2"
+        class="font-weight-medium"
         density="compact"
         role="none"
         type="warning"
@@ -192,7 +195,6 @@ const validateUids = () => {
 <style scoped lang="scss">
 .page-user-provision {
   font-size: 0.875rem;
-  padding: 10px 20px;
   .page-user-provision-heading {
     font-size: 1.438rem;
     font-weight: normal;

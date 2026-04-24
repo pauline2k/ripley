@@ -1,89 +1,95 @@
 <template>
   <div class="px-6 w-100">
     <Header1 text="Acheron (LV-426)" />
-    <v-container class="ml-2 pt-0" fluid>
+    <v-container class="pt-0" fluid>
       <v-row>
-        <v-col cols="12">
+        <v-col cols="12" md="8">
           <h2 class="mb-2">Canvas User Profile</h2>
         </v-col>
       </v-row>
       <v-row align="center" no-gutters>
-        <v-col cols="8">
-          <div class="align-center d-flex">
-            <div class="mr-2">
-              <v-text-field
-                id="canvas-user-profile-by-uid"
-                v-model="byUID"
-                autocomplete="on"
-                clearable
-                density="compact"
-                :disabled="disableAll"
-                hide-details
-                label="By UID"
-                maxlength="10"
-                style="width: 240px"
-                variant="outlined"
-                @focus="() => {
-                  byCanvasUserId = null
-                  canvasSiteId = null
-                  canvasUserId = null
-                }"
-                @keydown.enter="fetchByUID"
-              />
+        <v-col cols="12" md="8">
+          <div class="align-center d-flex flex-wrap flex-sm-nowrap">
+            <v-text-field
+              id="canvas-user-profile-by-uid"
+              v-model="byUID"
+              autocomplete="on"
+              class="mr-3 my-1r"
+              clearable
+              density="compact"
+              :disabled="disableAll"
+              hide-details
+              label="By UID"
+              maxlength="10"
+              max-width="15rem"
+              min-width="10rem"
+              variant="outlined"
+              @focus="() => {
+                byCanvasUserId = null
+                canvasSiteId = null
+                canvasUserId = null
+              }"
+              @keydown.enter="fetchByUID"
+            />
+            <div class="pr-3 w-100 w-sm-auto">
+              <v-btn
+                id="by-uid-btn"
+                class="mr-3 my-1r w-100 w-sm-auto"
+                :disabled="!trim(byUID) && !isValidUID(byUID) || disableAll"
+                variant="tonal"
+                @click="fetchByUID"
+              >
+                <span v-if="isFetchingByUID">
+                  <SpinnerWithinButton /> Fetching...
+                </span>
+                <span v-if="!isFetchingByUID">
+                  Fetch
+                </span>
+              </v-btn>
             </div>
-            <v-btn
-              id="by-uid-btn"
-              :disabled="!trim(byUID) && !isValidUID(byUID) || disableAll"
-              variant="tonal"
-              @click="fetchByUID"
-            >
-              <span v-if="isFetchingByUID">
-                <SpinnerWithinButton /> Fetching...
-              </span>
-              <span v-if="!isFetchingByUID">
-                Fetch
-              </span>
-            </v-btn>
           </div>
         </v-col>
       </v-row>
-      <v-row align="center" class="pt-3" no-gutters>
-        <v-col cols="8">
-          <div class="align-center d-flex">
-            <div class="mr-2">
-              <v-text-field
-                id="canvas-user-profile-by-id"
-                v-model="byCanvasUserId"
-                autocomplete="on"
-                clearable
-                density="compact"
-                :disabled="disableAll"
-                hide-details
-                label="By Canvas User ID"
-                maxlength="10"
-                style="width: 240px"
-                variant="outlined"
-                @focus="() => {
-                  byUID = null
-                  canvasSiteId = null
-                  canvasUserId = null
-                }"
-                @keydown.enter="fetchByCanvasUserId"
-              />
+      <v-row align="center" class="pt-4" no-gutters>
+        <v-col cols="12" md="8">
+          <div class="align-center d-flex flex-wrap flex-sm-nowrap">
+            <v-text-field
+              id="canvas-user-profile-by-id"
+              v-model="byCanvasUserId"
+              autocomplete="on"
+              class="mr-3 my-1r"
+              clearable
+              density="compact"
+              :disabled="disableAll"
+              hide-details
+              label="By Canvas User ID"
+              maxlength="10"
+              max-width="15rem"
+              min-width="10rem"
+              variant="outlined"
+              @focus="() => {
+                byUID = null
+                canvasSiteId = null
+                canvasUserId = null
+              }"
+              @keydown.enter="fetchByCanvasUserId"
+            />
+            <div class="pr-3 w-100 w-sm-auto">
+              <v-btn
+                id="by-ui-btn"
+                class="mr-3 my-1r w-100 w-sm-auto"
+                :disabled="!trim(byCanvasUserId) || !isValidCanvasUserId(byCanvasUserId) || disableAll"
+                variant="tonal"
+                @click="fetchByCanvasUserId"
+              >
+                <span v-if="isFetchingByCanvasUserId">
+                  <SpinnerWithinButton /> Fetching...
+                </span>
+                <span v-if="!isFetchingByCanvasUserId">
+                  Fetch
+                </span>
+              </v-btn>
             </div>
-            <v-btn
-              id="by-ui-btn"
-              :disabled="!trim(byCanvasUserId) || !isValidCanvasUserId(byCanvasUserId) || disableAll"
-              variant="tonal"
-              @click="fetchByCanvasUserId"
-            >
-              <span v-if="isFetchingByCanvasUserId">
-                <SpinnerWithinButton /> Fetching...
-              </span>
-              <span v-if="!isFetchingByCanvasUserId">
-                Fetch
-              </span>
-            </v-btn>
           </div>
         </v-col>
       </v-row>
@@ -93,61 +99,64 @@
         </v-col>
       </v-row>
       <v-row align="center" no-gutters>
-        <v-col cols="8">
-          <div class="align-center d-flex">
-            <div class="mr-2">
-              <v-text-field
-                id="canvas-site-id"
-                v-model="canvasSiteId"
-                autocomplete="on"
-                clearable
-                density="compact"
-                :disabled="disableAll"
-                hide-details
-                label="Canvas Site ID"
-                maxlength="10"
-                style="width: 240px"
-                variant="outlined"
-                @focus="() => {
-                  byCanvasUserId = null
-                  byUID = null
-                }"
-                @keydown.enter="fetchCanvasSiteUserProfile"
-              />
+        <v-col cols="12" lg="8">
+          <div class="align-center d-flex flex-wrap">
+            <v-text-field
+              id="canvas-site-id"
+              v-model="canvasSiteId"
+              autocomplete="on"
+              class="mr-3 mt-1r"
+              clearable
+              density="compact"
+              :disabled="disableAll"
+              hide-details
+              label="Canvas Site ID"
+              maxlength="10"
+              max-width="15rem"
+              min-width="10rem"
+              variant="outlined"
+              @focus="() => {
+                byCanvasUserId = null
+                byUID = null
+              }"
+              @keydown.enter="fetchCanvasSiteUserProfile"
+            />
+            <v-text-field
+              id="canvas-site-id-btn"
+              v-model="canvasUserId"
+              autocomplete="on"
+              class="mr-3 mt-1r"
+              clearable
+              density="compact"
+              :disabled="disableAll"
+              hide-details
+              label="Canvas User ID"
+              maxlength="10"
+              max-width="15rem"
+              min-width="10rem"
+              variant="outlined"
+              @focus="() => {
+                byCanvasUserId = null
+                byUID = null
+              }"
+              @keydown.enter="fetchCanvasSiteUserProfile"
+            />
+            <div class="pr-3 w-100 w-sm-auto">
+              <v-btn
+                id="canvas-user-profile-by-uid"
+                class="mr-3 mt-1r w-100 w-sm-auto"
+                :disabled="!trim(canvasSiteId) || !trim(canvasUserId) || !isValidCanvasSiteId(canvasSiteId) || !isValidCanvasUserId(canvasUserId) || disableAll"
+                variant="tonal"
+                @click="fetchCanvasSiteUserProfile"
+              >
+                <span v-if="isFetchingCanvasSiteUserProfile">
+                  <SpinnerWithinButton /> Fetching...
+                </span>
+                <span v-if="!isFetchingCanvasSiteUserProfile">
+                  Fetch
+                </span>
+              </v-btn>
             </div>
-            <div class="mr-2">
-              <v-text-field
-                id="canvas-site-id-btn"
-                v-model="canvasUserId"
-                autocomplete="on"
-                clearable
-                density="compact"
-                :disabled="disableAll"
-                hide-details
-                label="Canvas User ID"
-                maxlength="10"
-                style="width: 240px"
-                variant="outlined"
-                @focus="() => {
-                  byCanvasUserId = null
-                  byUID = null
-                }"
-                @keydown.enter="fetchCanvasSiteUserProfile"
-              />
-            </div>
-            <v-btn
-              id="canvas-user-profile-by-uid"
-              :disabled="!trim(canvasSiteId) || !trim(canvasUserId) || !isValidCanvasSiteId(canvasSiteId) || !isValidCanvasUserId(canvasUserId) || disableAll"
-              variant="tonal"
-              @click="fetchCanvasSiteUserProfile"
-            >
-              <span v-if="isFetchingCanvasSiteUserProfile">
-                <SpinnerWithinButton /> Fetching...
-              </span>
-              <span v-if="!isFetchingCanvasSiteUserProfile">
-                Fetch
-              </span>
-            </v-btn>
           </div>
         </v-col>
       </v-row>
@@ -239,8 +248,8 @@ export default {
 .payload-container {
   background-color: lightcyan;
   border: 1px solid #3a87ad;
-  margin-top: 10px;
-  min-height: 100px;
+  margin: 10px 0;
+  min-height: 6.25rem;
   padding: 40px;
   width: 100%;
 }

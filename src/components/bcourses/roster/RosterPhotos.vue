@@ -4,7 +4,7 @@
       v-for="student in students"
       :key="student.studentId"
       class="photo-wrapper"
-      :class="showOnePhotoPerPage ? 'photo-wrapper-one-per-page' : ''"
+      :class="{'photo-wrapper-one-per-page': showOnePhotoPerPage}"
     >
       <v-card
         :border="false"
@@ -22,21 +22,20 @@
             <div class="page-roster-student-name text-medium-emphasis font-weight-regular">{{ student.firstName }} </div>
             <div class="page-roster-student-name text-medium-emphasis">{{ student.lastName }}</div>
           </div>
-          <div v-if="student.email">
-            <div class="page-roster-student-name text-medium-emphasis mt-2">
-              <OutboundLink :id="`student-email-${student.studentId}`" :href="`mailto:${student.email}`" hide-icon>
-                <span class="sr-only">Email </span>
-                <span class="font-weight-regular">{{ student.firstName }}</span>
-                <br>
-                <span class="sr-only">&NonBreakingSpace;</span>
-                {{ student.lastName }}
-                <v-icon class="photo-email-icon" :icon="mdiEmailOutline" size="x-small" />
-              </OutboundLink>
-            </div>
+          <div v-if="student.email" class="page-roster-student-name mt-2">
+            <OutboundLink
+              :id="`student-email-${student.studentId}`"
+              :href="`mailto:${student.email}`"
+              :icon="mdiEmailOutline"
+            >
+              <span class="sr-only">Email </span>
+              <div class="font-weight-regular">{{ student.firstName }}</div>
+              {{ student.lastName }}
+            </OutboundLink>
           </div>
         </v-card-title>
         <v-card-text>
-          <div :id="`student-id-${student.studentId}`" class="display-none-when-print">
+          <div :id="`student-id-${student.studentId}`" class="d-print-none">
             <span class="sr-only">Student ID: </span>
             {{ student.studentId }}
           </div>
@@ -103,59 +102,49 @@ const reloadPhotosDelayed = () => {
 </script>
 
 <style scoped lang="scss">
-.page-roster-student-name text-medium-emphasis {
-  display: block;
-  line-height: 24px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .photo-list {
-  display: block;
-  margin-left: 1rem;
-  padding-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 1rem;
   width: 100%;
 }
 .photo-wrapper {
-  float: left;
-  padding: 0 5px 5px;
-  width: 173px;
+  padding: 5px;
+  width: 11rem;
 }
 
 @media print {
-  a {
-    text-decoration: none;
-  }
-  a[href]::after {
-    content: none;
-  }
-  .page-roster-student-name text-medium-emphasis {
-    font-size: 0.875rem;
+  .page-roster-student-name {
+    font-size: 14px;
     line-height: 20px;
-    text-overflow: ellipsis;
-  }
-  *.v-card-roster-photo {
-    margin: 0 !important;
+    :deep(a), :deep(a .text-decoration-underline) {
+      color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity)) !important;
+      text-decoration: none !important;
+    }
   }
   .photo-list {
-    display: table;
-  }
-  .photo-email-icon {
-    display: none;
+    font-size: 100% !important;
   }
   .photo-wrapper {
-    padding: 0;
     width: 150px;
   }
   .photo-wrapper-one-per-page {
-    display: block;
+    align-items: center;
+    display: flex;
     float: none;
+    height: 100vh;
+    justify-content: center;
     page-break-after: always;
-    width: 300px;
+    width: 100%;
+    .v-card-roster-photo {
+      width: 300px;
+    }
   }
   .photo-wrapper-one-per-page:last-child {
     page-break-after: avoid;
   }
+  .v-card-roster-photo {
+    margin: 0 !important;
+  }
 }
-
 </style>
