@@ -78,6 +78,8 @@ DATA_LOCH_S3_PHOTO_PATH = 'photos'
 DEV_AUTH_ENABLED = False
 DEV_AUTH_PASSWORD = 'another secret'
 
+DISPLAY_COURSE_RETENTION_POLICY_BANNER = False
+
 EXTERNAL_TOOLS_CACHE_EXPIRES_IN_SECONDS = 1800
 
 # Directory to search for mock fixtures, if running in "test" or "demo" mode.
