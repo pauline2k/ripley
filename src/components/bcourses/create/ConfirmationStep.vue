@@ -1,40 +1,41 @@
 <template>
   <div>
     <h2 id="course-site-details-header" class="mb-2" tabindex="-1">Course Site Details</h2>
-    <v-alert
-      color="alert"
-      border
-      role="none"
-      rounded
-    >
-      <div v-if="selectedSectionsList.length === 1">
-        You are about to create a {{ currentSemesterName }} course site for
-        {{ selectedSectionsList[0].courseTitle }} - {{ selectedSectionsList[0].courseCode }} ({{ selectedSectionsList[0].id }})
-      </div>
-      <div v-if="selectedSectionsList.length > 1">
-        <div class="font-weight-medium">
-          You are about to create a {{ currentSemesterName }} course site for:
+    <v-container class="ml-0 px-0" fluid max-width="100rem">
+      <v-alert
+        color="alert"
+        border
+        class="mb-4"
+        role="none"
+        rounded
+      >
+        <div v-if="selectedSectionsList.length === 1">
+          You are about to create a {{ currentSemesterName }} course site for
+          {{ selectedSectionsList[0].courseTitle }} - {{ selectedSectionsList[0].courseCode }} ({{ selectedSectionsList[0].id }})
         </div>
-        <ul id="page-create-course-site-section-list" class="page-create-course-site-section-list">
-          <li v-for="section in selectedSectionsList" :key="section.id">
-            {{ section.courseTitle }} - {{ section.courseCode }} ({{ section.id }})
-          </li>
-        </ul>
-      </div>
-    </v-alert>
-    <v-container fluid>
+        <div v-if="selectedSectionsList.length > 1">
+          <div class="font-weight-medium">
+            You are about to create a {{ currentSemesterName }} course site for:
+          </div>
+          <ul id="page-create-course-site-section-list" class="page-create-course-site-section-list">
+            <li v-for="section in selectedSectionsList" :key="section.id">
+              {{ section.courseTitle }} - {{ section.courseCode }} ({{ section.id }})
+            </li>
+          </ul>
+        </div>
+      </v-alert>
       <v-row align="center" class="mb-2" no-gutters>
-        <v-col class="pr-2" cols="2">
-          <label class="float-right font-weight-medium" for="course-site-name">
+        <v-col md="4" lg="2">
+          <label class="d-md-block text-right font-weight-medium" for="course-site-name">
             Site Name
           </label>
         </v-col>
-        <v-col cols="10">
+        <v-col md="8" lg="10">
           <v-text-field
             id="course-site-name"
             v-model="siteName"
             autocomplete="on"
-            class="w-75"
+            class="ml-2r"
             density="comfortable"
             :disabled="isCreating"
             :error="!trim(siteName)"
@@ -54,8 +55,8 @@
           class="mb-2"
           no-gutters
         >
-          <v-col cols="2" />
-          <v-col cols="10">
+          <v-col lg="2" />
+          <v-col lg="10">
             <FormValidationAlert
               id="validation-error-in-site-name"
               class="w-75"
@@ -66,17 +67,17 @@
         </v-row>
       </v-expand-transition>
       <v-row align="center" class="mt-2" no-gutters>
-        <v-col class="pr-2" cols="2">
-          <label class="float-right font-weight-medium" for="course-site-abbreviation">
+        <v-col md="4" lg="2">
+          <label class="d-md-block text-right font-weight-medium" for="course-site-abbreviation">
             Site Abbreviation
           </label>
         </v-col>
-        <v-col cols="10">
+        <v-col md="8" lg="10">
           <v-text-field
             id="course-site-abbreviation"
             v-model="siteAbbreviation"
             autocomplete="on"
-            class="w-50"
+            class="ml-2r"
             density="comfortable"
             :error="!trim(siteAbbreviation)"
             :disabled="isCreating"
@@ -96,8 +97,8 @@
           class="mt-2"
           no-gutters
         >
-          <v-col cols="2" />
-          <v-col cols="10">
+          <v-col md="4" lg="2" />
+          <v-col md="8" lg="10">
             <FormValidationAlert
               id="validation-error-in-site-abbreviation"
               class="w-50"
@@ -109,37 +110,31 @@
       </v-expand-transition>
       <v-row class="mt-2" no-gutters>
         <v-col cols="12">
-          <div class="align-center d-flex float-right">
-            <div class="mr-2">
-              <v-btn
-                id="create-course-site-button"
-                color="primary"
-                :disabled="isCreating || !trim(siteName) || !trim(siteAbbreviation)"
-                @click="create"
-              >
-                <span v-if="isCreating">
-                  <v-progress-circular
-                    class="mr-1"
-                    indeterminate
-                    size="18"
-                  />
-                  Creating...
-                </span>
-                <span v-if="!isCreating">
-                  Create Course Site
-                </span>
-              </v-btn>
-            </div>
-            <div>
-              <v-btn
-                id="go-back-button"
-                :disabled="isCreating"
-                variant="tonal"
-                @click="goBack"
-              >
-                Cancel
-              </v-btn>
-            </div>
+          <div class="align-center d-flex justify-end">
+            <v-btn
+              id="create-course-site-button"
+              class="mt-4 ml-3 w-100 w-sm-auto"
+              color="primary"
+              :disabled="isCreating || !trim(siteName) || !trim(siteAbbreviation)"
+              @click="create"
+            >
+              <span v-if="isCreating">
+                <SpinnerWithinButton />
+                Creating...
+              </span>
+              <span v-if="!isCreating">
+                Create Course Site
+              </span>
+            </v-btn>
+            <v-btn
+              id="go-back-button"
+              class="mt-4 ml-3 w-100 w-sm-auto"
+              :disabled="isCreating"
+              variant="tonal"
+              @click="goBack"
+            >
+              Cancel
+            </v-btn>
           </div>
         </v-col>
       </v-row>
@@ -150,12 +145,13 @@
 <script>
 import Context from '@/mixins/Context'
 import FormValidationAlert from '@/components/utils/FormValidationAlert.vue'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {iframeScrollToTop, putFocusNextTick} from '@/utils'
 import {trim} from 'lodash'
 
 export default {
   name: 'ConfirmationStep',
-  components: {FormValidationAlert},
+  components: {FormValidationAlert, SpinnerWithinButton},
   mixins: [Context],
   props: {
     courseSiteCreationPromise: {

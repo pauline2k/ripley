@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!contextStore.isLoading" class="pt-3 px-16">
+  <div v-if="!contextStore.isLoading" class="pt-3 px-4 px-sm-8 px-lg-16">
     <Header1 class="mb-2" text="Create or Update bCourses Sites" />
     <div aria-live="assertive" role="alert">
       <v-alert
@@ -16,13 +16,12 @@
       v-model="selection"
       :aria-activedescendant="get(selection, 'id')"
       aria-label="site management options"
-      class="d-flex"
       hide-details
     >
       <div
         v-for="option in options"
         :key="option.id"
-        class="option d-flex my-2 px-3 py-1"
+        class="option d-flex mb-1 pb-2"
         :class="{
           'highlight-when-hover': selection !== option,
           'highlight-when-selected': selection === option
@@ -37,12 +36,12 @@
             :value="option"
           />
         </div>
-        <div class="list-item-content">
+        <div class="list-item-content on-surface">
           <label
-            class="font-size-20 d w-100"
+            class="font-size-20"
             :class="{
-              'text-disabled': !option.isAvailable,
-              'text-high-emphasis': option.isAvailable
+              'text-medium-emphasis': !option.isAvailable,
+              'on-surface': option.isAvailable
             }"
             :for="option.id"
           >
@@ -61,6 +60,7 @@
           </div>
           <div
             v-if="option.id === 'create-project-site'"
+            class="on-surface"
             :class="{'text-medium-emphasis': !option.isAvailable}"
             @click="() => selection = option"
           >
@@ -68,18 +68,23 @@
             Project sites cannot access all bCourses features and are not intended for lecture, lab, or discussion sections.
             <OutboundLink id="bcourses-project-sites-service-page" href="https://rtl.berkeley.edu/services-programs/bcourses-project-sites">Learn more about Project Sites</OutboundLink>
             and
-            <OutboundLink id="berkeley-collaboration-services-information" href="https://bconnected.berkeley.edu/collaboration-services">other collaboration tools at UC Berkeley</OutboundLink>.
+            <OutboundLink
+              id="berkeley-collaboration-services-information"
+              href="https://bconnected.berkeley.edu/collaboration-services"
+              period-terminated
+              text="other collaboration tools at UC Berkeley"
+            />
           </div>
           <div v-if="option.id === 'manage-official-sections'" class="pt-2" @click="() => selection = option">
-            <div v-if="!size(coursesByTerm) && !isAdmin" class="font-italic text-medium-emphasis">
+            <div v-if="!size(coursesByTerm) && !isAdmin" class="text-medium-emphasis">
               Please create a {{ config.terms.current.name }} or {{ config.terms.next.name }}
               course site in order to use the Manage Official Sections tool.
             </div>
-            <div v-if="size(coursesByTerm)" :class="{'text-disabled': !option.isAvailable}">
+            <div v-if="size(coursesByTerm)" :class="{'text-medium-emphasis': !option.isAvailable}">
               <div>
                 Add or remove official section rosters in already-created course sites.
               </div>
-              <div v-if="option.isAvailable" class="pl-3 py-2">
+              <div v-if="option.isAvailable" class="py-2">
                 <select
                   id="course-sections"
                   v-model="canvasSiteId"
@@ -106,7 +111,7 @@
                 </select>
               </div>
             </div>
-            <div v-if="isAdmin" class="mt-2 pl-3">
+            <div v-if="isAdmin" class="mt-2">
               <v-text-field
                 id="canvas-site-id-input"
                 v-model="canvasSiteId"
@@ -117,14 +122,14 @@
                 hide-details
                 label="Canvas Site ID"
                 maxlength="9"
-                style="width: 148px"
+                max-width="10rem"
                 variant="outlined"
                 @keydown.enter="goNext"
               />
             </div>
             <div
               v-if="error"
-              class="font-italic font-weight-medium text-red"
+              class="font-weight-medium text-red"
             >
               {{ error }}
             </div>
@@ -134,7 +139,7 @@
     </v-radio-group>
     <v-btn
       id="go-next-btn"
-      class="float-right mt-1"
+      class="d-flex ml-auto mt-3"
       color="primary"
       :disabled="isButtonDisabled || isProcessing"
       size="large"
@@ -272,13 +277,12 @@ const labelCourses = (courses: CanvasSite[]) => {
 }
 .option {
   border: 1px solid transparent;
+  padding-inline: 1rem;
 }
 .list-item-content {
-  color: black;
-  min-width: 100%;
-  padding: 6px 48px 12px 0;
+  padding: 0.3rem 8px 12px 0;
 }
 .radio-button-container {
-  padding: 2px 8px 0 0;
+  padding: 0 0.75rem 0 0;
 }
 </style>

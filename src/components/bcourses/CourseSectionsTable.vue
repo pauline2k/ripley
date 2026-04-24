@@ -13,7 +13,7 @@
         @change="toggleAll"
       >
         <template #label>
-          <span class="font-weight-medium ml-1">
+          <span class="font-weight-medium ml-2r">
             Select {{ allSelected ? 'None' : 'All' }}
             <span class="sr-only">of the course sections</span>
           </span>
@@ -22,18 +22,18 @@
     </div>
     <table :id="id" class="border-0 border-b-md border-t-md">
       <caption class="sr-only">{{ tableCaption }}</caption>
-      <thead class="bg-grey-lighten-4">
+      <thead class="bg-surface-light">
         <tr>
           <th
             v-if="mode === 'createCourseForm'"
-            class="pl-4 pr-0 td-checkbox"
+            class="pl-4 pr-0 td-checkbox sr-only"
             scope="col"
           >
-            Action
+            Select
           </th>
           <th class="td-course-code" scope="col">Course</th>
           <th class="td-section-name" scope="col">Section</th>
-          <th class="td-section-id text-no-wrap" scope="col">Section ID</th>
+          <th class="td-section-id" scope="col">Section ID</th>
           <th :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}" scope="col">
             Schedule
           </th>
@@ -48,24 +48,23 @@
       </thead>
       <tbody v-for="(section, sectionIndex) in displayableSections" :key="section.id">
         <tr :id="`${id}-${section.id}`" :class="sectionDisplayClass[section.id]">
-          <td v-if="mode === 'createCourseForm'" :id="`${id}-${section.id}-action`" class="align-top td-checkbox pl-3 pr-0 py-0">
+          <td v-if="mode === 'createCourseForm'" :id="`${id}-${section.id}-action`" class="vertical-middle td-checkbox pl-3 pr-0">
             <v-checkbox
               :id="`template-canvas-manage-sections-checkbox-${section.id}`"
               v-model="selected"
               :aria-label="`${section.courseCode}, ${section.name}`"
-              class="ml-2"
               density="compact"
               hide-details
               name="section-section-id"
               :value="section.id"
             />
           </td>
-          <td :id="`${id}-${section.id}-course`" class="td-course-code text-no-wrap">
+          <td :id="`${id}-${section.id}-course`" class="td-course-code">
             <label v-if="mode === 'createCourseForm'" :for="`template-canvas-manage-sections-checkbox-${section.id}`">
-              <span class="sr-only">Course code </span>{{ section.courseCode }}
+              <span aria-hidden="true" class="hide-in-standard-viewport">Course:</span>{{ section.courseCode }}
             </label>
             <span v-if="mode !== 'createCourseForm'">
-              <span class="sr-only">Course code </span>{{ section.courseCode }}
+              <span aria-hidden="true" class="hide-in-standard-viewport">Course:</span>{{ section.courseCode }}
             </span>
           </td>
           <td :id="`${id}-${section.id}-name`" class="td-section-name">
@@ -73,54 +72,60 @@
               v-if="mode === 'createCourseForm'"
               :for="`template-canvas-manage-sections-checkbox-${section.id}`"
             >
-              <span class="sr-only">Section name </span>{{ section.name }}
+              <span aria-hidden="true" class="hide-in-standard-viewport">Section:</span>{{ section.name }}
             </label>
-            <span v-if="mode !== 'createCourseForm'">{{ section.name }}</span>
+            <span v-if="mode !== 'createCourseForm'">
+              <span aria-hidden="true" class="hide-in-standard-viewport">Section:</span>{{ section.name }}
+            </span>
             <span v-if="mode === 'currentStaging' && section.nameDiscrepancy && section.stagedState !== 'update'" class="sr-only">
               The section name in bCourses no longer matches the Student Information System.
               Use the "Update" button to rename your bCourses section name to match SIS.
             </span>
           </td>
           <td :id="`${id}-${section.id}-id`" class="td-section-id">
-            <span class="sr-only">Section ID </span>{{ section.id }}
+            <span aria-hidden="true" class="hide-in-standard-viewport">Section ID:</span>{{ section.id }}
           </td>
           <td :id="`${id}-${section.id}-schedule`" :class="{'td-schedule': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
-            <span class="sr-only">Schedule, </span>
-            <template v-if="hasRecurring(section, 'schedule')">
-              <span
-                v-for="(schedule, index) in uniqBy(filterRecurring(section, 'schedule'), 'schedule')"
-                :key="index"
-                class="d-block"
-              >
-                <span aria-hidden="true">{{ schedule.schedule }}</span>
-                <span class="sr-only">{{ describeSchedule(schedule) }}</span>
-              </span>
-            </template>
-            <template v-else>
-              <span aria-hidden="true">&mdash;</span>
-              <span class="sr-only">blank</span>
-            </template>
+            <div class="d-flex">
+              <div aria-hidden="true" class="hide-in-standard-viewport">Schedule:</div>
+              <template v-if="hasRecurring(section, 'schedule')">
+                <span
+                  v-for="(schedule, index) in uniqBy(filterRecurring(section, 'schedule'), 'schedule')"
+                  :key="index"
+                  class="d-block"
+                >
+                  <span aria-hidden="true">{{ schedule.schedule }}</span>
+                  <span class="sr-only">{{ describeSchedule(schedule) }}</span>
+                </span>
+              </template>
+              <template v-else>
+                <span aria-hidden="true">&mdash;</span>
+                <span class="sr-only">blank</span>
+              </template>
+            </div>
           </td>
           <td :id="`${id}-${section.id}-location`" :class="{'td-meeting-location': hasSectionScheduleData, 'td-shrink-to-fit': !hasSectionScheduleData}">
-            <span class="sr-only">Location, </span>
-            <template v-if="hasRecurring(section, 'buildingName')">
-              <span
-                v-for="(schedule, index) in filterRecurring(section, 'buildingName')"
-                :key="index"
-                class="d-block"
-              >
-                {{ schedule.buildingName }} {{ schedule.roomNumber }}
-              </span>
-            </template>
-            <template v-else>
-              <span aria-hidden="true">&mdash;</span>
-              <span class="sr-only">blank</span>
-            </template>
+            <div class="d-flex">
+              <div aria-hidden="true" class="hide-in-standard-viewport">Location:</div>
+              <template v-if="hasRecurring(section, 'buildingName')">
+                <span
+                  v-for="(schedule, index) in filterRecurring(section, 'buildingName')"
+                  :key="index"
+                  class="d-block"
+                >
+                  {{ schedule.buildingName }} {{ schedule.roomNumber }}
+                </span>
+              </template>
+              <template v-else>
+                <span aria-hidden="true">&mdash;</span>
+                <span class="sr-only">blank</span>
+              </template>
+            </div>
           </td>
           <td :id="`${id}-${section.id}-instructors`" class="td-instructors">
-            <div class="sr-only-in-standard-viewport">Instructors:</div>
-            <template v-if="filter(section.instructors, 'name').length">
-              <div class="instructors">
+            <div class="d-flex">
+              <div aria-hidden="true" class="hide-in-standard-viewport">Instructors:</div>
+              <template v-if="filter(section.instructors, 'name').length">
                 <span
                   v-for="instructor in section.instructors"
                   :key="instructor.uid"
@@ -128,12 +133,12 @@
                 >
                   {{ instructor.name }} <span class="sr-only">,</span>
                 </span>
-              </div>
-            </template>
-            <template v-else>
-              <span aria-hidden="true">&mdash;</span>
-              <span class="sr-only">blank</span>
-            </template>
+              </template>
+              <template v-else>
+                <span aria-hidden="true">&mdash;</span>
+                <span class="sr-only">blank</span>
+              </template>
+            </div>
           </td>
           <td
             v-if="!['createCourseForm', 'preview'].includes(mode)"
@@ -232,44 +237,37 @@
           :id="`template-sections-table-row-${mode.toLowerCase()}-${section.id}-warning`"
           :class="sectionDisplayClass[section.id]"
         >
-          <td class="border-top-zero pa-0" />
           <td
             :id="`${id}-${section.id}-warning`"
-            colspan="6"
-            class="border-top-zero pb-4 pt-0"
+            colspan="7"
+            class="td-warning border-top-zero py-3"
           >
-            <div v-if="section.canvasSites.length === 1" class="align-center d-flex">
-              <div class="section-in-use-icon">
-                <v-icon
-                  color="error"
-                  :icon="mdiAlert"
-                  size="medium"
-                />
-              </div>
-              <div class="align-center d-flex">
-                <OutboundLink
-                  :id="`${id}-${section.id}-warning-link`"
-                  class="mx-1"
-                  :hide-icon="true"
-                  :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`"
-                >
-                  bCourses site {{ section.canvasSites[0].name }}
-                </OutboundLink>
-                includes this section.
-              </div>
+            <div v-if="section.canvasSites.length === 1">
+              <v-icon
+                class="section-in-use-icon"
+                color="error"
+                :icon="mdiAlert"
+                size="1rem"
+              />
+              <OutboundLink
+                :id="`${id}-${section.id}-warning-link`"
+                class="mx-1"
+                :hide-icon="true"
+                :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`"
+              >
+                bCourses site {{ section.canvasSites[0].name }}
+              </OutboundLink>
+              includes this section.
             </div>
             <div v-if="section.canvasSites.length > 1">
-              <div class="align-center d-flex">
-                <div class="section-in-use-icon">
-                  <v-icon
-                    color="error"
-                    :icon="mdiAlert"
-                    size="medium"
-                  />
-                </div>
-                <div :id="`${id}-${section.id}-warnings-list-label`">
-                  The following bCourses sites include this section.
-                </div>
+              <v-icon
+                class="section-in-use-icon"
+                color="error"
+                :icon="mdiAlert"
+                size="1rem"
+              />
+              <div :id="`${id}-${section.id}-warnings-list-label`">
+                The following bCourses sites include this section.
               </div>
               <div class="ml-6 pt-1">
                 <ul :aria-labelledby="`${id}-${section.id}-warnings-list-label`" class="sites-container">
@@ -571,24 +569,28 @@ const unstage = (section: SectionEdit, index: number, action: string) => {
 </script>
 
 <style scoped lang="scss">
-@media screen and (min-width: 970px) {
-  .sr-only-in-standard-viewport {
+@media screen and (min-width: 992px) {
+  .hide-in-standard-viewport {
     display: none;
   }
+  .responsive-justify-end {
+    justify-content: flex-end !important;
+  }
+  .td-actions {
+    height: 45px;
+    min-width: 80px;
+    padding: 0 8px 0 0;
+    text-align: right !important;
+    width: 10%
+  }
   .td-checkbox {
-    width: 5%;
+    min-width: 2.25rem;
+    width: 1%;
   }
   .td-course-code {
     min-width: 100px;
     vertical-align: middle;
     width: 5%
-  }
-  .td-actions {
-    height: 45px;
-    min-width: 80px;
-    padding-right: 10px;
-    text-align: right !important;
-    width: 10%
   }
   .td-section-id {
     min-width: 70px;
@@ -619,56 +621,57 @@ const unstage = (section: SectionEdit, index: number, action: string) => {
     vertical-align: middle;
     width: 1%;
   }
-  .responsive-justify-end {
-    justify-content: flex-end !important;
+  .td-warning {
+    padding-left: 115px ;
   }
 }
-@media screen and (max-width: 970px) {
+@media screen and (max-width: 992px) {
   table {
     border-collapse: collapse;
+     thead {
+      border: 0;
+      clip: rect(0 0 0 0);
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      width: 1px;
+    }
+    tbody tr {
+      border: 0;
+      display: block;
+      width: 100%;
+      &:last-child {
+        border-bottom: 1pt solid rgba(var(--v-border-color), var(--v-border-opacity));
+        td:last-child {
+          padding-bottom: 12px;
+        }
+      }
+      td {
+        border: 0;
+        display: block;
+        padding: 3px 8px;
+        width: 100%;
+        &::before {
+          content: attr(data-label);
+          float: left;
+        }
+        &:first-child {
+          padding-top: 12px;
+        }
+        &.td-warning {
+          padding-left: 4px;
+        }
+      }
+    }
   }
-  table thead {
-    border: 0;
-    clip: rect(0 0 0 0);
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    width: 1px;
-  }
-  table tr {
-    border: 0;
-    border-bottom: 1pt solid rgba(var(--v-border-color), var(--v-border-opacity));
-    display: block;
-    width: 100%;
-  }
-  table tbody tr td {
-    border: 0;
-    display: block;
-    padding: 3px 0;
-    width: 100%;
-  }
-  table td::before {
-    content: attr(data-label);
-    float: left;
-  }
-  table tr:first-child {
-    padding-top: 12px;
-  }
-  tr td:last-child {
-    padding-bottom: 12px;
-    padding-top: 8px;
-  }
-  .instructors {
-    padding: 0 0 4px 8px;
-  }
-  .sr-only-in-standard-viewport {
+  .hide-in-standard-viewport {
+    display: inline-block;
     font-weight: bolder;
+    width: 33%;
   }
   .td-actions {
-    margin-left: -4px;
-    margin-bottom: 8px;
     text-align: left !important;
   }
 }
@@ -689,6 +692,6 @@ th {
   color: rgba(var(--v-theme-on-surface), var(--v-disabled-opacity)) !important;
 }
 .section-in-use-icon {
-  padding: 0 4px 2px 0;
+  margin: 0 4px 2px 0;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!contextStore.isLoading" class="pt-3 px-6">
+  <div v-if="!contextStore.isLoading" class="py-3 px-6">
     <Header1 class="mb-2 mt-0" :text="canvasSite ? `Manage official sections for ${canvasSite.name}` : 'Manage Official Sections'" />
     <div aria-live="polite">
       <v-alert
@@ -13,11 +13,14 @@
       />
     </div>
     <div v-if="feedFetched">
-      <h2 class="pt-3">bCourses Site</h2>
+      <h2 id="bcourses-site-header" class="pt-3">bCourses Site</h2>
       <div class="pl-3 pb-6 pt-1">
-        <OutboundLink id="link-to-canvas-site" :href="canvasSite.url">
+        <OutboundLink
+          id="link-to-canvas-site"
+          aria-describedby="bcourses-site-header"
+          :href="canvasSite.url"
+        >
           <span class="text-subtitle-2">
-            Open in bCourses site:&nbsp;
             <span v-if="get(canvasSite.term, 'name')">
               {{ canvasSite.term.name }}&nbsp;
             </span>
@@ -65,11 +68,11 @@
           table-caption="Official sections in this course. Use the buttons in the Actions column to make changes."
           :unstage-action="unstage"
         />
-        <div v-if="totalStagedCount > 12" class="py-2">
+        <div v-if="totalStagedCount > 12" class="pb-2">
           <v-btn
             id="official-sections-secondary-save-btn"
             aria-label="Apply pending modifications to this course site"
-            class="mr-2 text-no-wrap"
+            class="mt-4 ml-3 w-100 w-sm-auto text-no-wrap"
             color="primary"
             :disabled="totalStagedCount === 0"
             @click="saveChanges"
@@ -79,7 +82,7 @@
           <v-btn
             id="official-sections-secondary-cancel-btn"
             aria-label="Cancel section modifications for this course site"
-            class="mx-1"
+            class="mt-4 ml-3 w-100 w-sm-auto"
             variant="tonal"
             @click="cancel"
           >
@@ -116,33 +119,29 @@
                 </h3>
               </v-expansion-panel-title>
               <v-expansion-panel-text>
-                <div v-if="course.sections.length > 1">
-                  <v-btn
-                    :id="`course-${index}-add-all-sections-btn`"
-                    aria-label="Add all sections listed below to the course site"
-                    :color="allSectionsAdded(course) ? '' : 'primary'"
-                    :disabled="allSectionsAdded(course)"
-                    @click="addAllSections(course)"
-                  >
-                    <span v-if="allSectionsAdded(course)">All Added</span>
-                    <span v-else>Add All</span>
-                  </v-btn>
-                </div>
-                <v-row no-gutters>
-                  <v-col md="12">
-                    <CourseSectionsTable
-                      :id="`template-sections-table-availableStaging-${index}`"
-                      class="mb-1 mt-3"
-                      mode="availableStaging"
-                      :row-class-logic="rowClassLogic"
-                      :row-display-logic="rowDisplayLogic"
-                      :sections="course.sections"
-                      :stage-add-action="stageAdd"
-                      :table-caption="availableSectionsTableCaption(course)"
-                      :unstage-action="unstage"
-                    />
-                  </v-col>
-                </v-row>
+                <v-btn
+                  v-if="course.sections.length > 1"
+                  :id="`course-${index}-add-all-sections-btn`"
+                  aria-label="Add all sections listed below to the course site"
+                  class="mx-4"
+                  :color="allSectionsAdded(course) ? '' : 'primary'"
+                  :disabled="allSectionsAdded(course)"
+                  @click="addAllSections(course)"
+                >
+                  <span v-if="allSectionsAdded(course)">All Added</span>
+                  <span v-else>Add All</span>
+                </v-btn>
+                <CourseSectionsTable
+                  :id="`template-sections-table-availableStaging-${index}`"
+                  class="mb-1 mt-3 mx-4 mx-lg-0 mx-xl-4"
+                  mode="availableStaging"
+                  :row-class-logic="rowClassLogic"
+                  :row-display-logic="rowDisplayLogic"
+                  :sections="course.sections"
+                  :stage-add-action="stageAdd"
+                  :table-caption="availableSectionsTableCaption(course)"
+                  :unstage-action="unstage"
+                />
               </v-expansion-panel-text>
             </v-expansion-panel>
           </v-expansion-panels>
@@ -172,11 +171,11 @@
           indeterminate
         />
       </div>
-      <div v-if="canvasSite.canEdit" class="float-right my-5">
-        <div v-if="currentWorkflowStep === 'preview'">
+      <div v-if="canvasSite.canEdit" class="mb-5">
+        <div v-if="currentWorkflowStep === 'preview'" class="d-flex flex-wrap justify-end">
           <v-btn
             id="official-sections-edit-btn"
-            class="mr-2 text-no-wrap"
+            class="mt-4 ml-3 w-100 w-sm-auto text-no-wrap"
             color="primary"
             @click="changeWorkflowStep('staging')"
           >
@@ -185,33 +184,33 @@
           <v-btn
             id="official-sections-cancel"
             aria-label="Cancel and return to Manage Sites"
+            class="mt-4 ml-3 w-100 w-sm-auto"
             variant="tonal"
             @click="exit"
           >
             Cancel
           </v-btn>
         </div>
-        <div v-if="currentWorkflowStep === 'staging'">
-          <div>
-            <v-btn
-              id="official-sections-save-btn"
-              aria-label="Apply pending modifications to this course site"
-              class="mr-2 text-no-wrap"
-              color="primary"
-              :disabled="totalStagedCount === 0"
-              @click="saveChanges"
-            >
-              Save Changes
-            </v-btn>
-            <v-btn
-              id="official-sections-cancel-btn"
-              aria-label="Cancel section modifications for this course site"
-              variant="tonal"
-              @click="cancel"
-            >
-              Cancel<span class="sr-only"> edit sections</span>
-            </v-btn>
-          </div>
+        <div v-if="currentWorkflowStep === 'staging'" class="d-flex flex-wrap justify-end">
+          <v-btn
+            id="official-sections-save-btn"
+            aria-label="Apply pending modifications to this course site"
+            class="mt-4 ml-3 w-100 w-sm-auto text-no-wrap"
+            color="primary"
+            :disabled="totalStagedCount === 0"
+            @click="saveChanges"
+          >
+            Save Changes
+          </v-btn>
+          <v-btn
+            id="official-sections-cancel-btn"
+            aria-label="Cancel section modifications for this course site"
+            class="mt-4 ml-3 w-100 w-sm-auto"
+            variant="tonal"
+            @click="cancel"
+          >
+            Cancel<span class="sr-only"> edit sections</span>
+          </v-btn>
         </div>
       </div>
     </div>
@@ -538,6 +537,9 @@ const unstageAll = () => {
 .sections-course-title {
   font-size: 1.125rem !important;
   font-weight: 400 !important;
-  line-height: 18px;
+  line-height: 1.125rem !important;
+}
+:deep(.v-expansion-panel-text__wrapper) {
+  padding: 8px 0 16px;
 }
 </style>

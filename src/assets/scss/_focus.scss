@@ -101,7 +101,7 @@
   .v-expansion-panel-title:focus-visible,
   .v-tab:focus-visible::after,
   select:focus-visible {
-    box-shadow: inset 0 0 0.125rem 0.25rem white !important;
+    box-shadow: inset 0 0 0.125rem 0.125rem white !important;
     outline-offset: -0.125rem !important;
   }
   .v-expansion-panel-title:focus-visible .v-expansion-panel-title__overlay {

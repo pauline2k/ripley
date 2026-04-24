@@ -50,14 +50,20 @@
   height: unset !important;
   min-height: unset !important;
 }
-.ml-2r {
+.ml-1r {
   margin-left: 0.25rem;
 }
+.ml-2r {
+  margin-left: 0.5rem;
+}
+.ml-4r {
+  margin-left: 1rem;
+}
 .mr-2r {
-  margin-right: 0.25rem;
+  margin-right: 0.5rem;
 }
 .mt-2r {
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
 }
 .modal-body {
   padding: 6px 24px 14px !important;
@@ -72,6 +78,9 @@
   justify-content: flex-end !important;
   padding: 0 20px !important;
 }
+.pl-1r {
+  padding-left: 0.25rem;
+}
 .sr-only {
   position: absolute;
   left: -10000px;
@@ -85,6 +94,7 @@
 }
 .text-pretty-wrap {
   text-wrap-style: pretty;
+  white-space: normal;
 }
 .text-subtitle-1 {
   letter-spacing: 0.02em !important;;
@@ -125,6 +135,16 @@
   .v-messages__message {
     line-height: 0.875rem !important;
   }
+}
+.v-progress-circular--size-x-small {
+  height: 1rem;
+  width: 1rem;
+}
+.v-selection-control--density-compact {
+  --v-selection-control-size: 1.75rem !important;
+}
+.v-selection-control--density-default {
+  --v-selection-control-size: 2.5rem !important;
 }
 * {
   text-transform: none !important;
@@ -195,7 +215,7 @@ h3.sections-course-title {
   display: inline !important;
   font-size: 0.938rem !important;
   font-weight: 500 !important;
-  line-height: 20px;
+  line-height: 1rem;
 }
 html {
   overflow-y: unset !important;
@@ -220,6 +240,7 @@ select {
   line-height: 1.5;
   padding: .438rem 1.75rem .438rem .75rem;
   vertical-align: middle;
+  width: 100%;
   &:hover:not(:disabled) {
     --v-field-border-opacity: var(--v-high-emphasis-opacity);
   }
