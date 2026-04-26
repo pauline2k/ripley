@@ -252,7 +252,6 @@
               <OutboundLink
                 :id="`${id}-${section.id}-warning-link`"
                 class="mx-1"
-                :hide-icon="true"
                 :href="`${config.canvasApiUrl}/courses/${section.canvasSites[0].canvasSiteId}`"
               >
                 bCourses site {{ section.canvasSites[0].name }}
@@ -270,7 +269,7 @@
                 The following bCourses sites include this section.
               </div>
               <div class="ml-6 pt-1">
-                <ul :aria-labelledby="`${id}-${section.id}-warnings-list-label`" class="sites-container">
+                <ul :aria-labelledby="`${id}-${section.id}-warnings-list-label`" class="bulleted-list">
                   <li v-for="(canvasSite, index) in section.canvasSites" :key="index">
                     <OutboundLink :id="`${id}-${section.id}-warning-link`" :href="`${config.canvasApiUrl}/courses/${canvasSite.canvasSiteId}`">{{ canvasSite.name }}</OutboundLink>
                   </li>

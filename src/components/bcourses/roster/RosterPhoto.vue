@@ -69,8 +69,8 @@ const imageError = () => {
 
 <style scoped>
 .photo {
-  height: 96px;
-  width: 72px;
+  height: 6rem;
+  width: 4.5rem;
 }
 .photo-outer {
   display: flex;

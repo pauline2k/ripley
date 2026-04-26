@@ -10,7 +10,7 @@
     >
       <v-card
         class="elevation-1 mt-12 mx-auto text-center"
-        :max-width="applicationState.stacktrace ? 640 : 480"
+        :max-width="applicationState.stacktrace ? '40rem' : '30rem'"
         outlined
       >
         <v-img
@@ -21,7 +21,7 @@
           src="@/assets/images/color-bars.png"
         />
         <v-card-title>
-          <Header1 class="mt-8" :text="header" />
+          <Header1 class="mt-8 text-wrap" :text="header" />
         </v-card-title>
         <v-card-text>
           <div id="error-message">

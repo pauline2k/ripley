@@ -1,11 +1,11 @@
 <template>
-  <div class="px-3 mt-3">
+  <div class="px-3">
     <v-btn
       id="add-user-help-btn"
       aria-controls="page-help-notice"
       :aria-expanded="`${toggle.displayHelp}`"
       block
-      class="justify-start mb-1"
+      class="justify-start mb-1r"
       color="info"
       :prepend-icon="mdiHelpCircle"
       variant="text"
@@ -31,7 +31,9 @@
           <dt class="user-search-notice-description-term">Guests</dt>
           <dd class="user-search-notice-description">
             Sponsor peers from other institutions or guests from the community with a
-            <OutboundLink href="https://https://calnet.berkeley.edu/calnet-departments/calnet-sponsored-guests">CalNet Sponsored Guest Account.</OutboundLink>
+            <OutboundLink href="https://https://calnet.berkeley.edu/calnet-departments/calnet-sponsored-guests" period-terminated>
+              CalNet Sponsored Guest Account
+            </OutboundLink>
             Do NOT request a CalNet Sponsored Guest Account for concurrent enrollment students.
           </dd>
           <dt class="user-search-notice-description-term">More Information</dt>

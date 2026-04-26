@@ -13,12 +13,11 @@
       </slot>
     </span>
     <v-icon
-      v-if="!hideIcon"
-      class="ml-1r"
-      :icon="mdiOpenInNew"
+      class="d-print-none ml-1r"
+      :icon="icon"
       size="x-small"
     />
-    <span class="sr-only print-hide"> (opens in new tab)</span>
+    <span class="d-print-none sr-only"> (opens in new tab)</span>
   </a>
 </template>
 
@@ -26,13 +25,14 @@
 import {mdiOpenInNew} from '@mdi/js'
 
 defineProps({
-  hideIcon: {
-    type: Boolean,
-    required: false
-  },
   href: {
     type: String,
     required: true
+  },
+  icon: {
+    default: mdiOpenInNew,
+    type: String,
+    required: false
   },
   id: {
     default: undefined,
