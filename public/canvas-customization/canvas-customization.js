@@ -300,17 +300,16 @@ addMentalHealthResourcesResponsiveLink();
 /**
  * Check archival tier, if any, for current course
  *
+ * @param  {String}     courseId                  Course ID
  * @param  {Function}   callback                  Standard callback function
  * @param  {Element}    callback.archivalTier     Current archival tier
  */
-var getCourseArchivalTier = function(callback) {
-  if (window.ENV.COURSE) {
-     apiRequest('/api/canvas_site/' + window.ENV.COURSE.id + '/archival_status', function(statusResult) {
-       if (statusResult && statusResult.archivalTier && !statusResult.optedOut) {
-         return callback(statusResult.archivalTier);
-       }
-    });
-  }
+var getCourseArchivalTier = function(courseId, callback) {
+  apiRequest('/api/canvas_site/' + window.ENV.COURSE.id + '/archival_status', function(statusResult) {
+    if (statusResult && statusResult.archivalTier && !statusResult.optedOut) {
+      return callback(statusResult.archivalTier);
+    }
+  });
 };
 
 /**
@@ -318,11 +317,12 @@ var getCourseArchivalTier = function(callback) {
   */
 var addCourseRetentionPolicyBanner = function() {
   waitUntilAvailable('#wrapper', false, function() {
-    const isCoursePage = /^\/courses\/\d+/.test(window.location.pathname);
+    const courseUrlMatch = /^\/courses\/(\d+)/.exec(window.location.pathname);
+    const courseId = courseUrlMatch && courseUrlMatch.length > 1 && courseUrlMatch[1];
     const bannerExists = $('#custom-course-banner').length > 0;
 
-    if (isCoursePage && !bannerExists) {
-      getCourseArchivalTier(function(archivalTier) {
+    if (courseId && !bannerExists) {
+      getCourseArchivalTier(courseId, function(archivalTier) {
         if (archivalTier) {
           const bannerHtml = `
             <div id="custom-course-banner" style="
