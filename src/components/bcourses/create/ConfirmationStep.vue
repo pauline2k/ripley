@@ -24,7 +24,7 @@
           </ul>
         </div>
       </v-alert>
-      <v-row align="center" class="mb-2" no-gutters>
+      <v-row align="center" class="mb-1" no-gutters>
         <v-col md="4" lg="2">
           <label class="d-md-block text-right font-weight-medium" for="course-site-name">
             Site Name
@@ -34,6 +34,8 @@
           <v-text-field
             id="course-site-name"
             v-model="siteName"
+            aria-describedby="validation-error-in-site-name"
+            :aria-labelledby="undefined"
             autocomplete="on"
             class="ml-2r"
             density="comfortable"
@@ -47,26 +49,20 @@
           />
         </v-col>
       </v-row>
-      <v-expand-transition>
-        <v-row
-          v-show="!trim(siteName)"
-          align="center"
-          aria-live="polite"
-          class="mb-2"
-          no-gutters
-        >
-          <v-col lg="2" />
-          <v-col lg="10">
+      <v-row no-gutters>
+        <v-col md="4" lg="2" />
+        <v-col md="8" lg="10">
+          <v-expand-transition>
             <FormValidationAlert
               id="validation-error-in-site-name"
-              class="w-75"
+              class="ml-2r"
               :show="!trim(siteName)"
               text="Please provide site name."
             />
-          </v-col>
-        </v-row>
-      </v-expand-transition>
-      <v-row align="center" class="mt-2" no-gutters>
+          </v-expand-transition>
+        </v-col>
+      </v-row>
+      <v-row align="center" class="mb-1 mt-2" no-gutters>
         <v-col md="4" lg="2">
           <label class="d-md-block text-right font-weight-medium" for="course-site-abbreviation">
             Site Abbreviation
@@ -76,6 +72,8 @@
           <v-text-field
             id="course-site-abbreviation"
             v-model="siteAbbreviation"
+            aria-describedby="validation-error-in-site-abbreviation"
+            :aria-labelledby="undefined"
             autocomplete="on"
             class="ml-2r"
             density="comfortable"
@@ -89,25 +87,19 @@
           />
         </v-col>
       </v-row>
-      <v-expand-transition>
-        <v-row
-          v-show="!trim(siteAbbreviation)"
-          align="center"
-          aria-live="polite"
-          class="mt-2"
-          no-gutters
-        >
-          <v-col md="4" lg="2" />
-          <v-col md="8" lg="10">
+      <v-row no-gutters>
+        <v-col md="4" lg="2" />
+        <v-col md="8" lg="10">
+          <v-expand-transition>
             <FormValidationAlert
               id="validation-error-in-site-abbreviation"
-              class="w-50"
+              class="ml-2r"
               :show="!trim(siteAbbreviation)"
               text="Please provide site abbreviation."
             />
-          </v-col>
-        </v-row>
-      </v-expand-transition>
+          </v-expand-transition>
+        </v-col>
+      </v-row>
       <v-row class="mt-2" no-gutters>
         <v-col cols="12">
           <div class="align-center d-flex flex-wrap justify-end">
@@ -142,65 +134,58 @@
   </div>
 </template>
 
-<script>
-import Context from '@/mixins/Context'
+<script setup>
+import {onMounted, ref} from 'vue'
+import {trim} from 'lodash'
 import FormValidationAlert from '@/components/utils/FormValidationAlert.vue'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {iframeScrollToTop, putFocusNextTick} from '@/utils'
-import {trim} from 'lodash'
 
-export default {
-  name: 'ConfirmationStep',
-  components: {FormValidationAlert, SpinnerWithinButton},
-  mixins: [Context],
-  props: {
-    courseSiteCreationPromise: {
-      required: true,
-      type: Function
-    },
-    currentSemesterName: {
-      required: true,
-      type: String
-    },
-    goBack: {
-      required: true,
-      type: Function
-    },
-    selectedSectionsList: {
-      required: true,
-      type: Array
+const props = defineProps({
+  courseSiteCreationPromise: {
+    required: true,
+    type: Function
+  },
+  currentSemesterName: {
+    required: true,
+    type: String
+  },
+  goBack: {
+    required: true,
+    type: Function
+  },
+  selectedSectionsList: {
+    required: true,
+    type: Array
+  }
+})
+
+const isCreating = ref(false)
+const siteAbbreviation = ref()
+const siteName = ref()
+
+onMounted(() => {
+  const section = props.selectedSectionsList[0]
+  siteName.value = `${section.courseTitle} (${props.currentSemesterName})`
+  siteAbbreviation.value = `${section.courseCode}-${section.instructionFormat}-${section.sectionNumber}`
+  iframeScrollToTop()
+  putFocusNextTick('course-site-details-header')
+})
+
+const create = () => {
+  if (!isCreating.value && trim(siteAbbreviation.value) && trim(siteName.value)) {
+    isCreating.value = true
+    const done = () => {
+      isCreating.value = false
+      putFocusNextTick('page-title')
     }
-  },
-  data: () => ({
-    isCreating: false,
-    siteAbbreviation: undefined,
-    siteName: undefined
-  }),
-  created() {
-    const section = this.selectedSectionsList[0]
-    this.siteName = `${section.courseTitle} (${this.currentSemesterName})`
-    this.siteAbbreviation = `${section.courseCode}-${section.instructionFormat}-${section.sectionNumber}`
-    iframeScrollToTop()
-    putFocusNextTick('course-site-details-header')
-  },
-  methods: {
-    create() {
-      if (!this.isCreating && trim(this.siteAbbreviation) && trim(this.siteName)) {
-        this.isCreating = true
-        const done = () => {
-          this.isCreating = false
-          putFocusNextTick('page-title')
-        }
-        this.courseSiteCreationPromise(this.siteName, this.siteAbbreviation).then(
-          done,
-          error => {
-            done()
-            return error
-          }
-        )
+    props.courseSiteCreationPromise(siteName.value, siteAbbreviation.value).then(
+      done,
+      error => {
+        done()
+        return error
       }
-    },
-    trim
+    )
   }
 }
 </script>

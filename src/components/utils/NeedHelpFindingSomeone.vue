@@ -3,19 +3,19 @@
     <v-btn
       id="add-user-help-btn"
       aria-controls="page-help-notice"
-      :aria-expanded="`${toggle.displayHelp}`"
+      :aria-expanded="isExpanded"
       block
       class="justify-start mb-1r"
       color="info"
       :prepend-icon="mdiHelpCircle"
       variant="text"
-      @click="toggle.displayHelp = !toggle.displayHelp"
+      @click="isExpanded = !isExpanded"
     >
       Need help finding someone?
     </v-btn>
     <v-expand-transition>
       <v-card
-        v-show="toggle.displayHelp"
+        v-show="isExpanded"
         id="page-help-notice"
         class="user-search-notice rounded-0 mb-4"
         elevation="0"
@@ -50,20 +50,10 @@
 
 <script setup>
 import {mdiHelpCircle} from '@mdi/js'
-</script>
-
-<script>
+import {ref} from 'vue'
 import OutboundLink from '@/components/utils/OutboundLink'
 
-export default {
-  name: 'NeedHelpFindingSomeone',
-  components: {OutboundLink},
-  data: () => ({
-    toggle: {
-      displayHelp: false
-    }
-  })
-}
+const isExpanded = ref(false)
 </script>
 
 <style scoped lang="scss">

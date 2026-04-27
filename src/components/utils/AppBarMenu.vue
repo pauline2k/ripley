@@ -26,39 +26,41 @@
   </v-menu>
 </template>
 
-<script>
-import Context from '@/mixins/Context.vue'
+<script setup>
+import {onMounted, ref} from 'vue'
+import {useRouter} from 'vue-router'
 import {logOut} from '@/api/auth'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'AppBarMenu',
-  mixins: [Context],
-  data: () => ({
-    options: []
-  }),
-  created() {
-    if (this.currentUser.canAccessStandaloneView) {
-      this.addOption('my-profile', 'My Profile', this.goProfile)
-      if (this.currentUser.isAdmin) {
-        this.addOption('acheron-lv-426', 'Acheron (LV-426)', this.goAcheron)
-      }
+const contextStore = useContextStore()
+const currentUser = contextStore.currentUser
+const options = ref([])
+const router = useRouter()
+
+onMounted(() => {
+  if (currentUser.canAccessStandaloneView) {
+    addOption('my-profile', 'My Profile', goProfile)
+    if (currentUser.isAdmin) {
+      addOption('acheron-lv-426', 'Acheron (LV-426)', goAcheron)
     }
-    this.addOption('log-out', 'Log Out', this.logOut)
-  },
-  methods: {
-    addOption(id, label, onClick) {
-      this.options.push({id, label, onClick})
-    },
-    goAcheron() {
-      this.$router.push({path: '/acheron'})
-    },
-    goProfile() {
-      this.$router.push({path: `/profile/${this.currentUser.uid}`})
-    },
-    logOut() {
-      this.loadingStart()
-      logOut().then(data => window.location.href = data.casLogoutUrl)
-    },
   }
+  addOption('log-out', 'Log Out', onLogOut)
+})
+
+const addOption = (id, label, onClick) => {
+  options.value.push({id, label, onClick})
+}
+
+const goAcheron = () => {
+  router.push({path: '/acheron'})
+}
+
+const goProfile = () => {
+  router.push({path: `/profile/${currentUser.uid}`})
+}
+
+const onLogOut = () => {
+  contextStore.loadingStart()
+  logOut().then(data => window.location.href = data.casLogoutUrl)
 }
 </script>

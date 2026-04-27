@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <div v-if="!$isInIframe">
+    <div v-if="!isInIframe">
       <a
         id="skip-to-content-link"
         href="#content"
@@ -10,7 +10,7 @@
         Skip to content
       </a>
     </div>
-    <v-main class="v-main-when-print">
+    <v-main id="ripley-main" class="v-main-when-print">
       <div
         id="announcer"
         :role="announcerRole"
@@ -31,6 +31,7 @@
 import {computed} from 'vue'
 import Error from '@/views/Error'
 import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
+import {isInIframe} from '@/utils'
 import {useContextStore} from '@/stores/context'
 
 const context = useContextStore()

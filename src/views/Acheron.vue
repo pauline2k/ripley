@@ -181,66 +181,64 @@
 </template>
 
 <script setup>
+import {computed, onMounted, ref} from 'vue'
+import {trim} from 'lodash'
 import Header1 from '@/components/utils/Header1.vue'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {isValidCanvasSiteId, isValidCanvasUserId, isValidUID} from '@/utils'
-</script>
-
-<script>
-import {trim} from 'lodash'
 import {getCanvasSiteUserProfile, getCanvasUserProfileById, getCanvasUserProfileByUID} from '@/api/canvas-user'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'Acheron',
-  data: () => ({
-    byCanvasUserId: undefined,
-    canvasSiteId: undefined,
-    canvasUserId: undefined,
-    error: undefined,
-    isFetchingByCanvasUserId: false,
-    isFetchingByUID: false,
-    isFetchingCanvasSiteUserProfile: false,
-    payload: undefined,
-    byUID: undefined
-  }),
-  computed: {
-    disableAll() {
-      return this.isFetchingByCanvasUserId || this.isFetchingByUID || this.isFetchingCanvasSiteUserProfile
-    }
-  },
-  created() {
-    this.$ready()
-  },
-  methods: {
-    fetchByCanvasUserId() {
-      this.isFetchingByCanvasUserId = true
-      getCanvasUserProfileById(this.byCanvasUserId).then(this.setPayload, this.onError)
-    },
-    fetchByUID() {
-      this.isFetchingByUID = true
-      getCanvasUserProfileByUID(this.byUID).then(this.setPayload, this.onError)
-    },
-    fetchCanvasSiteUserProfile() {
-      this.isFetchingCanvasSiteUserProfile = true
-      getCanvasSiteUserProfile(this.canvasSiteId, this.canvasUserId).then(this.setPayload, this.onError)
-    },
-    onError(data) {
-      this.resetFlags()
-      this.payload = null
-      this.error = data
-    },
-    resetFlags() {
-      this.isFetchingByCanvasUserId = false
-      this.isFetchingByUID = false
-      this.isFetchingCanvasSiteUserProfile = false
-    },
-    setPayload(data) {
-      this.resetFlags()
-      this.error = null
-      this.payload = data
-    },
-    trim
-  }
+const byCanvasUserId = ref()
+const canvasSiteId = ref()
+const canvasUserId = ref()
+const contextStore = useContextStore()
+const error = ref()
+const isFetchingByCanvasUserId = ref(false)
+const isFetchingByUID = ref(false)
+const isFetchingCanvasSiteUserProfile = ref(false)
+const payload = ref()
+const byUID = ref()
+
+const disableAll = computed(() => {
+  return isFetchingByCanvasUserId.value || isFetchingByUID.value || isFetchingCanvasSiteUserProfile.value
+})
+
+onMounted(() => {
+  contextStore.loadingComplete()
+})
+
+const fetchByCanvasUserId = () => {
+  isFetchingByCanvasUserId.value = true
+  getCanvasUserProfileById(byCanvasUserId.value).then(setPayload, onError)
+}
+
+const fetchByUID = () => {
+  isFetchingByUID.value = true
+  getCanvasUserProfileByUID(byUID.value).then(setPayload, onError)
+}
+
+const fetchCanvasSiteUserProfile = () => {
+  isFetchingCanvasSiteUserProfile.value = true
+  getCanvasSiteUserProfile(canvasSiteId.value, canvasUserId.value).then(setPayload, onError)
+}
+
+const onError = data => {
+  resetFlags()
+  payload.value = null
+  error.value = data
+}
+
+const resetFlags = () => {
+  isFetchingByCanvasUserId.value = false
+  isFetchingByUID.value = false
+  isFetchingCanvasSiteUserProfile.value = false
+}
+
+const setPayload = data => {
+  resetFlags()
+  error.value = null
+  payload.value = data
 }
 </script>
 

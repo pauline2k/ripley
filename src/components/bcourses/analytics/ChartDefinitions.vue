@@ -57,25 +57,21 @@
   </v-expand-transition>
 </template>
 
-<script>
+<script setup>
 import OutboundLink from '@/components/utils/OutboundLink'
 
-export default {
-  name: 'ChartDefinitions',
-  components: {OutboundLink},
-  props: {
-    id: {
-      required: true,
-      type: String
-    },
-    isExpanded: {
-      required: false,
-      type: Boolean
-    },
-    showDemographics: {
-      required: false,
-      type: Boolean
-    }
+defineProps({
+  id: {
+    required: true,
+    type: String
+  },
+  isExpanded: {
+    required: false,
+    type: Boolean
+  },
+  showDemographics: {
+    required: false,
+    type: Boolean
   }
-}
+})
 </script>

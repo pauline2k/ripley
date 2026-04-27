@@ -116,124 +116,117 @@
   </div>
 </template>
 
-<script>
-import Context from '@/mixins/Context'
-import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
+<script setup>
+import {computed, ref, watch} from 'vue'
 import {find, partition, size, split, trim} from 'lodash'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {putFocusNextTick} from '@/utils'
 
-export default {
-  name: 'CreateCourseSiteHeader',
-  components: {SpinnerWithinButton},
-  mixins: [Context],
-  props: {
-    adminMode: {
-      required: true,
-      type: String
-    },
-    adminTerms: {
-      default: undefined,
-      required: false,
-      type: Array
-    },
-    currentAdminTerm: {
-      required: true,
-      type: String
-    },
-    fetchFeed: {
-      required: true,
-      type: Function
-    },
-    isFetching: {
-      required: true,
-      type: Boolean
-    },
-    setAdminActingAs: {
-      required: true,
-      type: Function
-    },
-    setAdminBySectionIds: {
-      required: true,
-      type: Function
-    },
-    setAdminMode: {
-      required: true,
-      type: Function
-    },
-    setWarning: {
-      required: true,
-      type: Function
-    },
-    switchAdminTerm: {
-      required: true,
-      type: Function
-    }
+const props = defineProps({
+  adminMode: {
+    required: true,
+    type: String
   },
-  data: () => ({
-    sectionIds: '',
-    uid: undefined
-  }),
-  computed: {
-    adminModeModel: {
-      get() {
-        return this.adminMode
-      },
-      set(mode) {
-        this.setWarning(null)
-        this.sectionIds = ''
-        this.uid = undefined
-        this.setAdminMode(mode)
+  adminTerms: {
+    default: undefined,
+    required: false,
+    type: Array
+  },
+  currentAdminTerm: {
+    required: true,
+    type: String
+  },
+  fetchFeed: {
+    required: true,
+    type: Function
+  },
+  isFetching: {
+    required: true,
+    type: Boolean
+  },
+  setAdminActingAs: {
+    required: true,
+    type: Function
+  },
+  setAdminBySectionIds: {
+    required: true,
+    type: Function
+  },
+  setAdminMode: {
+    required: true,
+    type: Function
+  },
+  setWarning: {
+    required: true,
+    type: Function
+  },
+  switchAdminTerm: {
+    required: true,
+    type: Function
+  }
+})
+
+const sectionIds = ref('')
+const uid = ref()
+
+const adminModeModel = defineModel('adminModeModel', {
+  get() {
+    return props.adminMode
+  },
+  set(mode) {
+    props.setWarning(null)
+    sectionIds.value = ''
+    uid.value = undefined
+    props.setAdminMode(mode)
+  },
+  type: String
+})
+
+const isInvalidUID = computed(() => {
+  return !!trim(uid.value) && !uid.value.match(/^\d+$/)
+})
+
+const slug = defineModel('slug', {
+  get() {
+    return props.currentAdminTerm
+  },
+  set(slug) {
+    const term = find(props.adminTerms, ['slug', slug])
+    props.switchAdminTerm(term)
+  },
+  type: String
+})
+
+watch(sectionIds, () => {
+  props.setWarning(null)
+})
+watch(uid, () => {
+  props.setWarning(null)
+})
+
+const submit = () => {
+  if (!props.isFetching) {
+    if (props.adminMode === 'bySectionId' && trim(sectionIds.value)) {
+      const trimmed = trim(sectionIds.value)
+      const sectionIdsList = split(trimmed, /[,\r\n\t ]+/)
+      const notNumeric = partition(sectionIdsList, sectionId => /^\d+$/.test(trim(sectionId)))[1]
+      if (notNumeric.length) {
+        props.setWarning('Section IDs must be numeric.')
+        putFocusNextTick('page-create-course-site-section-id-list')
+      } else {
+        props.setAdminBySectionIds(sectionIdsList)
+        props.fetchFeed()
       }
-    },
-    isInvalidUID() {
-      return !!this.trim(this.uid) && !this.uid.match(/^\d+$/)
-    },
-    slug: {
-      get() {
-        return this.currentAdminTerm
-      },
-      set(slug) {
-        const term = find(this.adminTerms, ['slug', slug])
-        this.switchAdminTerm(term)
+    } else if (props.adminMode === 'actAs' && trim(uid.value) && !isInvalidUID.value) {
+      const trimmed = trim(uid.value)
+      if (/^\d+$/.test(trimmed)) {
+        props.setAdminActingAs(trimmed)
+        props.fetchFeed()
+      } else {
+        props.setWarning('UID must be numeric.')
+        putFocusNextTick('instructor-uid')
       }
     }
-  },
-  watch: {
-    sectionIds() {
-      this.setWarning(null)
-    },
-    uid() {
-      this.setWarning(null)
-    }
-  },
-  methods: {
-    size,
-    submit() {
-      if (!this.isFetching) {
-        if (this.adminMode === 'bySectionId' && trim(this.sectionIds)) {
-          const trimmed = trim(this.sectionIds)
-          const sectionIds = split(trimmed, /[,\r\n\t ]+/)
-          const notNumeric = partition(sectionIds, sectionId => /^\d+$/.test(trim(sectionId)))[1]
-          if (notNumeric.length) {
-            this.setWarning('Section IDs must be numeric.')
-            putFocusNextTick('page-create-course-site-section-id-list')
-          } else {
-            this.setAdminBySectionIds(sectionIds)
-            this.fetchFeed()
-          }
-        } else if (this.adminMode === 'actAs' && trim(this.uid) && !this.isInvalidUID) {
-          const trimmed = trim(this.uid)
-          if (/^\d+$/.test(trimmed)) {
-            this.setAdminActingAs(trimmed)
-            this.fetchFeed()
-          } else {
-            this.setWarning('UID must be numeric.')
-            putFocusNextTick('instructor-uid')
-          }
-        }
-      }
-    },
-    trim
   }
 }
 </script>

@@ -147,6 +147,9 @@
 .v-btn.v-btn--size-x-small {
   --v-btn-height: calc(var(--v-btn-size) + 10px) !important;
 }
+.v-btn--icon.v-btn--size-default {
+  --v-btn-height: calc(var(--v-btn-size) + 24px) !important;
+}
 .v-field {
   font-size: 1rem !important;
 }
