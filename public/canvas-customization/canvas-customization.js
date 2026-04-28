@@ -237,7 +237,7 @@ addMentalHealthResourcesLink();
    */
 
   var addAcademicPoliciesResponsiveLink = function() {
-  waitUntilAvailable("div span ul li:contains('Inbox')", true, function($helpMenuItem) {
+  waitUntilAvailable("div > span > ul > li:contains('Inbox')", true, function($helpMenuItem) {
     const isElementPresent = !!document.getElementById('global_nav_academic_policies_link_responsive')
     if (!isElementPresent) {
       var $academicPoliciesMenuItemResponsive = $helpMenuItem.clone();
@@ -269,7 +269,7 @@ addAcademicPoliciesResponsiveLink();
    */
 
   var addMentalHealthResourcesResponsiveLink = function() {
-  waitUntilAvailable("div span ul li:contains('Inbox')", true, function($helpMenuItem) {
+  waitUntilAvailable("div > span > ul > li:contains('Inbox')", true, function($helpMenuItem) {
     const isElementPresent = !!document.getElementById('global_nav_mental_health_resources_link_responsive')
     if (!isElementPresent) {
       var $mentalHealthResourcesMenuItemResponsive = $helpMenuItem.clone();
@@ -305,7 +305,7 @@ addMentalHealthResourcesResponsiveLink();
  * @param  {Element}    callback.archivalTier     Current archival tier
  */
 var getCourseArchivalTier = function(courseId, callback) {
-  apiRequest('/api/canvas_site/' + window.ENV.COURSE.id + '/archival_status', function(statusResult) {
+  apiRequest('/api/canvas_site/' + courseId + '/archival_status', function(statusResult) {
     if (statusResult && statusResult.archivalTier && !statusResult.optedOut) {
       return callback(statusResult.archivalTier);
     }
