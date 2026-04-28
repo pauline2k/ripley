@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="pb-5 px-8">
+  <div v-if="!contextStore.isLoading" class="pb-5 px-8">
     <Header1 text="Find a Person to Add" />
     <NeedHelpFindingSomeone v-if="showSearchForm" class="py-1r" />
     <div
@@ -7,12 +7,12 @@
       class="px-3"
       aria-live="polite"
     >
-      <div v-if="errorStatus" class="alert alert-error align-center d-flex font-weight-medium">
+      <div v-if="messages.errorStatus" class="alert alert-error align-center d-flex font-weight-medium">
         <div class="pr-2">
           <v-icon class="canvas-notice-icon" :icon="mdiAlert" />
         </div>
         <div>
-          {{ errorStatus }}
+          {{ messages.errorStatus }}
         </div>
         <div class="d-flex pl-4 ml-auto">
           <v-btn
@@ -26,7 +26,7 @@
           />
         </div>
       </div>
-      <div v-if="noUserSelectedAlert" class="alert alert-error align-center font-weight-medium d-flex">
+      <div v-if="messages.noUserSelectedAlert" class="alert alert-error align-center font-weight-medium d-flex">
         Please select a person from the search results.
         <div class="d-flex pl-4 ml-auto">
           <v-btn
@@ -40,8 +40,8 @@
           />
         </div>
       </div>
-      <div v-if="searchAlert" class="alert alert-error align-center font-weight-medium d-flex">
-        {{ searchAlert }}
+      <div v-if="messages.searchAlert" class="alert alert-error align-center font-weight-medium d-flex">
+        {{ messages.searchAlert }}
         {{ searchTypeNotice }}
         Please try again.
         <div class="d-flex pl-4 ml-auto">
@@ -68,7 +68,7 @@
         {{ pluralize('search result', userSearchResultsCount) }} loaded.
       </div>
       <div
-        v-if="additionSuccessMessage"
+        v-if="messages.additionSuccessMessage"
         id="success-message"
         class="alert alert-success align-center font-weight-medium d-flex"
         tabindex="-1"
@@ -154,14 +154,14 @@
                     v-model="searchText"
                     aria-autocomplete="none"
                     aria-describedby="alerts-container"
-                    :aria-invalid="!!searchAlert"
+                    :aria-invalid="!!messages.searchAlert"
                     :aria-label="searchFieldAriaLabel"
                     :aria-labelledby="undefined"
                     autocomplete="off"
                     class="mt-4"
                     density="comfortable"
                     :disabled="isSearching || isAddingUser"
-                    :error="searchAlert"
+                    :error="!!messages.searchAlert"
                     hide-details
                     :label="searchFieldLabel"
                     variant="outlined"
@@ -337,235 +337,243 @@
 </template>
 
 <script setup>
+import {computed, onMounted, reactive, ref} from 'vue'
+import {find, get, replace, trim} from 'lodash'
 import {mdiAlert, mdiCloseCircle} from '@mdi/js'
-import {alertScreenReader, iframeScrollToTop, pluralize, putFocusNextTick} from '@/utils'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1'
 import NeedHelpFindingSomeone from '@/components/utils/NeedHelpFindingSomeone'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
+import {alertScreenReader, iframeScrollToTop, pluralize, putFocusNextTick} from '@/utils'
 import {addUser, getAddUserOptions} from '@/api/canvas-user'
-import {find, get, replace, trim} from 'lodash'
 import {searchUsers} from '@/api/user'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'CourseAddUser',
-  components: {Header1, NeedHelpFindingSomeone, SpinnerWithinButton},
-  mixins: [Context],
-  data: () => ({
-    additionSuccessMessage: false,
-    errorStatus: undefined,
-    grantingRoles: [],
-    isAddingUser: false,
-    isSearching: false,
-    noUserSelectedAlert: undefined,
-    searchAlert: undefined,
-    searchText: undefined,
-    searchType: 'name',
-    searchTypeNotice: undefined,
-    sections: [],
-    sectionSelected: undefined,
-    selectedRole: undefined,
-    selectedUser: undefined,
-    showSearchForm: undefined,
-    showUsersArea: undefined,
-    userAdded: {},
-    userSearchResultsCount: 0,
-    userSearchResults: [],
-  }),
-  computed: {
-    selectedUserFullName() {
-      return `${this.selectedUser.firstName} ${this.selectedUser.lastName}`
+const contextStore = useContextStore()
+const grantingRoles = ref([])
+const isAddingUser = ref(false)
+const isSearching = ref(false)
+const messages = reactive({
+  additionSuccessMessage: undefined,
+  errorStatus: undefined,
+  noUserSelectedAlert: false,
+  searchAlert: undefined
+})
+const searchText = ref(undefined)
+const searchType = ref('name')
+const searchTypeNotice = ref(undefined)
+const sections = ref([])
+const sectionSelected = ref(undefined)
+const selectedRole = ref(undefined)
+const selectedUser = ref(undefined)
+const showSearchForm = ref(undefined)
+const showUsersArea = ref(undefined)
+const userAdded = ref({})
+const userSearchResultsCount = ref(0)
+const userSearchResults = ref([])
+
+const searchFieldAriaLabel = computed(() => {
+  switch (searchType.value) {
+  case 'name':
+    return 'Search by last name comma first name'
+  case 'email':
+    return 'Search by email address'
+  case 'uid':
+    return 'Search by CalNet U I D'
+  default:
+    return 'Person search'
+  }
+})
+
+const searchFieldLabel = computed(() => {
+  switch (searchType.value) {
+  case 'name':
+    return 'e.g. Doe, Jane'
+  case 'email':
+    return 'name@berkeley.edu'
+  case 'uid':
+    return 'e.g. 123456789'
+  default:
+    return ''
+  }
+})
+
+const searchResultsCountForDisplay = computed(() => {
+  return userSearchResultsCount.value || userSearchResults.value.length
+})
+
+const searchResultsHeadingText = computed(() => {
+  return `Search results: ${pluralize('user', searchResultsCountForDisplay.value)} found`
+})
+
+const selectedUserFullName = computed(() => {
+  return `${selectedUser.value.firstName} ${selectedUser.value.lastName}`
+})
+
+onMounted(() => {
+  getAddUserOptions(contextStore.currentUser.canvasSiteId).then(
+    data => {
+      grantingRoles.value = data.grantingRoles
+      selectedRole.value = data.grantingRoles[0]
+      sections.value = data.courseSections || []
+      sectionSelected.value = sections.value.length ? sections.value[0] : null
+      showSearchForm.value = true
     },
-    searchFieldAriaLabel() {
-      switch (this.searchType) {
-      case 'name':
-        return 'Search by last name comma first name'
-      case 'email':
-        return 'Search by email address'
-      case 'uid':
-        return 'Search by CalNet U I D'
-      default:
-        return 'Person search'
+    showUnauthorized
+  ).catch(() => showUnauthorized()
+  ).finally(() => contextStore.loadingComplete())
+})
+
+const hideAlert = alertName => {
+  messages[alertName] = null
+  alertScreenReader('Alert hidden')
+  putFocusNextTick('page-title')
+}
+
+const resetForm = () => {
+  searchText.value = ''
+  searchType.value = 'name'
+  searchTypeNotice.value = ''
+  selectedRole.value = grantingRoles.value[0]
+  sectionSelected.value = sections.value.length ? sections.value[0] : null
+}
+
+const resetImportState = () => {
+  userAdded.value = false
+  messages.additionSuccessMessage = false
+}
+
+const resetSearchState = () => {
+  messages.errorStatus = null
+  messages.noUserSelectedAlert = false
+  messages.searchAlert = null
+  selectedUser.value = null
+  showUsersArea.value = false
+  userSearchResults.value = []
+  userSearchResultsCount.value = 0
+}
+
+const showErrorStatus = message => {
+  messages.errorStatus = message
+}
+
+const showSearchAlert = message => {
+  messages.searchAlert = message
+}
+
+const showUnauthorized = () => {
+  showErrorStatus('Authorization check failed.')
+  contextStore.loadingComplete()
+}
+
+const srFriendlyRole = role => {
+  return role === 'TA' || role === 'Lead TA' ? replace(role, 'TA', 'T A') : role
+}
+
+const uidForScreenReader = uid => {
+  return String(uid || '').split('').join(' ')
+}
+
+const startOver = () => {
+  alertScreenReader('Starting a new search.')
+  resetForm()
+  resetSearchState()
+  resetImportState()
+  putFocusNextTick('radio-btn-name')
+}
+
+const submitSearch = () => {
+  resetSearchState()
+  resetImportState()
+  if (!trim(searchText.value)) {
+    showSearchAlert('You did not enter any search terms.')
+    putFocusNextTick('search-text')
+  } else if (searchType.value === 'uid' && !isFinite(searchText.value)) {
+    showSearchAlert('UID search terms must be numeric.')
+    putFocusNextTick('search-text')
+  } else {
+    alertScreenReader('Loading person search results.')
+    showUsersArea.value = true
+    isSearching.value = true
+    const searchTimer = setInterval(() => {
+      alertScreenReader('Still searching.')
+    }, 7000)
+    searchUsers(searchText.value, searchType.value).then(data => {
+      userSearchResults.value = data.users
+      if (data.users && data.users.length) {
+        userSearchResultsCount.value = data.users[0].resultCount
+        selectedUser.value = data.users[0]
+      } else {
+        userSearchResultsCount.value = 0
+        let noResultsAlert = 'Your search did not match anyone with a CalNet ID.'
+        if (searchType.value === 'uid') {
+          noResultsAlert += ' CalNet UIDs must be an exact match.'
+        }
+        showSearchAlert(noResultsAlert)
       }
-    },
-    searchFieldLabel() {
-      switch (this.searchType) {
-      case 'name':
-        return 'e.g. Doe, Jane'
-      case 'email':
-        return 'name@berkeley.edu'
-      case 'uid':
-        return 'e.g. 123456789'
-      default:
-        return ''
-      }
-    },
-    searchResultsCountForDisplay() {
-      return this.userSearchResultsCount || this.userSearchResults.length
-    },
-    searchResultsHeadingText() {
-      return `Search results: ${pluralize('user', this.searchResultsCountForDisplay)} found`
-    }
-  },
-  created() {
-    getAddUserOptions(this.currentUser.canvasSiteId).then(
-      data => {
-        this.grantingRoles = data.grantingRoles
-        this.selectedRole = data.grantingRoles[0]
-        this.sections = data.courseSections || []
-        this.sectionSelected = this.sections.length ? this.sections[0] : null
-        this.showSearchForm = true
-      },
-      this.showUnauthorized
-    ).catch(() => this.showUnauthorized()
-    ).finally(() => this.$ready())
-  },
-  methods: {
-    hideAlert(alertName) {
-      this.$data[alertName] = null
-      alertScreenReader('Alert hidden')
-      putFocusNextTick('page-title')
-    },
-    resetForm() {
-      this.searchText = ''
-      this.searchType = 'name'
-      this.searchTypeNotice = ''
-      this.selectedRole = this.grantingRoles[0]
-      this.sectionSelected = this.sections.length ? this.sections[0] : null
-    },
-    resetImportState() {
-      this.userAdded = false
-      this.additionSuccessMessage = false
-    },
-    resetSearchState() {
-      this.errorStatus = null
-      this.noUserSelectedAlert = false
-      this.searchAlert = null
-      this.selectedUser = null
-      this.showUsersArea = false
-      this.userSearchResults = []
-      this.userSearchResultsCount = 0
-    },
-    showErrorStatus(message) {
-      this.errorStatus = message
-    },
-    showSearchAlert(message) {
-      this.searchAlert = message
-    },
-    showUnauthorized() {
-      this.showErrorStatus('Authorization check failed.')
-      this.$ready()
-    },
-    srFriendlyRole(role) {
-      return role === 'TA' || role === 'Lead TA' ? replace(role, 'TA', 'T A') : role
-    },
-    uidForScreenReader(uid) {
-      return String(uid || '').split('').join(' ')
-    },
-    startOver() {
-      alertScreenReader('Starting a new search.')
-      this.resetForm()
-      this.resetSearchState()
-      this.resetImportState()
-      putFocusNextTick('radio-btn-name')
-    },
-    submitSearch() {
-      this.resetSearchState()
-      this.resetImportState()
-      if (!trim(this.searchText)) {
-        this.showSearchAlert('You did not enter any search terms.')
-        putFocusNextTick('search-text')
-      } else if (this.searchType === 'uid' && !isFinite(this.searchText)) {
-        this.showSearchAlert('UID search terms must be numeric.')
+    }, () => {
+      showErrorStatus('Person search failed.')
+      showSearchForm.value = true
+    }).finally(() => {
+      clearInterval(searchTimer)
+      isSearching.value = false
+      if (userSearchResults.value.length) {
+        putFocusNextTick('person-search-results-caption')
+      } else if (messages.searchAlert) {
         putFocusNextTick('search-text')
       } else {
-        alertScreenReader('Loading person search results.')
-        this.showUsersArea = true
-        this.isSearching = true
-        const searchTimer = setInterval(() => {
-          alertScreenReader('Still searching.')
-        }, 7000)
-        searchUsers(this.searchText, this.searchType).then(data => {
-          this.userSearchResults = data.users
-          if (data.users && data.users.length) {
-            this.userSearchResultsCount = data.users[0].resultCount
-            this.selectedUser = data.users[0]
-          } else {
-            this.userSearchResultsCount = 0
-            let noResultsAlert = 'Your search did not match anyone with a CalNet ID.'
-            if (this.searchType === 'uid') {
-              noResultsAlert += ' CalNet UIDs must be an exact match.'
-            }
-            this.showSearchAlert(noResultsAlert)
-          }
-        }, () => {
-          this.showErrorStatus('Person search failed.')
-          this.showSearchForm = true
-        }).finally(() => {
-          clearInterval(searchTimer)
-          this.isSearching = false
-          if (this.userSearchResults.length) {
-            putFocusNextTick('person-search-results-caption')
-          } else if (this.searchAlert) {
-            putFocusNextTick('search-text')
-          } else {
-            putFocusNextTick('add-user-submit-search-btn')
-          }
-        })
+        putFocusNextTick('add-user-submit-search-btn')
       }
-    },
-    submitUser() {
-      this.isAddingUser = true
-      alertScreenReader(`Adding ${this.selectedUserFullName} with role ${this.srFriendlyRole(this.selectedRole)}.`)
-      const addUserTimer = setInterval(() => {
-        alertScreenReader('Still processing.')
-      }, 7000)
-      const sectionId = this.sectionSelected ? this.sectionSelected.id : null
-      addUser(
-        this.currentUser.canvasSiteId,
-        this.selectedUser.uid,
-        sectionId,
-        this.selectedRole
-      ).then(
-        data => {
-          const sectionName = this.sectionSelected ? get(find(this.sections, {'id': data.sectionId}), 'name', this.sectionSelected.name) : null
-          this.userAdded = {
-            ...data.userAdded,
-            fullName: this.selectedUserFullName,
-            role: data.role,
-            sectionName
-          }
-          alertScreenReader('success', 'assertive')
-          this.resetSearchState()
-          this.resetForm()
-          this.additionSuccessMessage = true
-          putFocusNextTick('success-message')
-        },
-        error => {
-          alertScreenReader('Error', 'assertive')
-          this.errorStatus = error || 'Request to add person failed'
-          this.showUsersArea = true
-          putFocusNextTick('add-user-btn')
-        }
-      ).catch(
-        error => {
-          this.errorStatus = error || 'Request to add person failed'
-          this.showUsersArea = true
-          putFocusNextTick('add-user-btn')
-        }
-      ).finally(
-        () => {
-          clearInterval(addUserTimer)
-          this.isAddingUser = false
-          this.showSearchForm = true
-          iframeScrollToTop()
-        }
-      )
-    }
+    })
   }
+}
+
+const submitUser = () => {
+  isAddingUser.value = true
+  alertScreenReader(`Adding ${selectedUserFullName.value} with role ${srFriendlyRole(selectedRole.value)}.`)
+  const addUserTimer = setInterval(() => {
+    alertScreenReader('Still processing.')
+  }, 7000)
+  const sectionId = sectionSelected.value ? sectionSelected.value.id : null
+  addUser(
+    contextStore.currentUser.canvasSiteId,
+    selectedUser.value.uid,
+    sectionId,
+    selectedRole.value
+  ).then(
+    data => {
+      const sectionName = sectionSelected.value ? get(find(sections.value, {'id': data.sectionId}), 'name', sectionSelected.value.name) : null
+      userAdded.value = {
+        ...data.userAdded,
+        fullName: selectedUserFullName.value,
+        role: data.role,
+        sectionName
+      }
+      alertScreenReader('success', 'assertive')
+      resetSearchState()
+      resetForm()
+      messages.additionSuccessMessage = true
+      putFocusNextTick('success-message')
+    },
+    error => {
+      alertScreenReader('Error', 'assertive')
+      messages.errorStatus = error || 'Request to add person failed'
+      showUsersArea.value = true
+      putFocusNextTick('add-user-btn')
+    }
+  ).catch(
+    error => {
+      messages.errorStatus = error || 'Request to add person failed'
+      showUsersArea.value = true
+      putFocusNextTick('add-user-btn')
+    }
+  ).finally(
+    () => {
+      clearInterval(addUserTimer)
+      isAddingUser.value = false
+      showSearchForm.value = true
+      iframeScrollToTop()
+    }
+  )
 }
 </script>
 

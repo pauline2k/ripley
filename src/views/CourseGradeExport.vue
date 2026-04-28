@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isLoading" class="pb-4">
+  <div v-if="!contextStore.isLoading" class="pb-4">
     <v-container v-if="appState === 'error'">
       <Header1 class="grade-export-header my-3" text="Error" />
       <div aria-live="polite">
@@ -282,186 +282,190 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import {onBeforeUnmount, onMounted, ref} from 'vue'
 import BackToGradebook from '@/components/bcourses/egrades/BackToGradebook.vue'
-import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink'
+import {alertScreenReader, getTermName, iframeParentLocation, iframeScrollToTop, isInIframe, putFocusNextTick} from '@/utils'
 import {downloadGradeCsv, getExportJobStatus, getExportOptions, prepareGradesCacheJob} from '@/api/egrades-export'
-import {alertScreenReader, getTermName, iframeParentLocation, iframeScrollToTop, putFocusNextTick} from '@/utils'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'CourseGradeExport',
-  components: {BackToGradebook, Header1, OutboundLink},
-  mixins: [Context],
-  data: () => ({
-    appState: null,
-    error: null,
-    backgroundJobId: null,
-    contactSupport: false,
-    courseUserRoles: [],
-    enablePnpConversion: false,
-    exportTimer: null,
-    filenameDownloaded: false,
-    jobStatus: null,
-    noGradingStandardEnabled: false,
-    officialSections: [],
-    selectedPnpCutoffGrade: null,
-    selectedSection: null,
-    selectedType: null,
-    showRetryOption: null
-  }),
-  beforeUnmount() {
-    clearInterval(this.exportTimer)
-  },
-  created() {
-    this.loadExportOptions().then(() => {
-      this.$ready()
-    })
-  },
-  methods: {
-    downloadGrades() {
-      const termId = this.selectedSection.termId
-      const termName = getTermName(termId).toLowerCase().replace(' ', '-')
-      this.filenameDownloaded = `egrades-${this.selectedType}-${this.selectedSection.id}-${termName}-${this.currentUser.canvasSiteId}.csv`
-      downloadGradeCsv(this.filenameDownloaded, this.backgroundJobId).then(() => {
-        setTimeout(() => {
-          this.filenameDownloaded = null
-          alertScreenReader('File download is complete.')
-        }, 30000)
-      })
-    },
-    goToGradebook() {
-      const gradebookUrl = `${this.config.canvasApiUrl}/courses/${this.currentUser.canvasSiteId}/grades`
-      if (this.$isInIframe) {
-        iframeParentLocation(gradebookUrl)
-      } else {
-        window.location.href = gradebookUrl
+const contextStore = useContextStore()
+const config = contextStore.config
+const currentUser = contextStore.currentUser
+const appState = ref(null)
+const error = ref(null)
+const backgroundJobId = ref(null)
+const contactSupport = ref(false)
+const enablePnpConversion = ref(false)
+const exportTimer = ref(null)
+const filenameDownloaded = ref(false)
+const jobStatus = ref(null)
+const noGradingStandardEnabled = ref(false)
+const officialSections = ref([])
+const selectedPnpCutoffGrade = ref(null)
+const selectedSection = ref(null)
+const selectedType = ref(null)
+const showRetryOption = ref(null)
+
+onBeforeUnmount(() => {
+  clearInterval(exportTimer.value)
+})
+onMounted(() => {
+  loadExportOptions().then(() => {
+    contextStore.loadingComplete()
+  })
+})
+
+const downloadGrades = () => {
+  const termId = selectedSection.value.termId
+  const termName = getTermName(termId).toLowerCase().replace(' ', '-')
+  filenameDownloaded.value = `egrades-${selectedType.value}-${selectedSection.value.id}-${termName}-${currentUser.canvasSiteId}.csv`
+  downloadGradeCsv(filenameDownloaded.value, backgroundJobId.value).then(() => {
+    setTimeout(() => {
+      filenameDownloaded.value = null
+      alertScreenReader('File download is complete.')
+    }, 30000)
+  })
+}
+
+const goToGradebook = () => {
+  const gradebookUrl = `${config.canvasApiUrl}/courses/${currentUser.canvasSiteId}/grades`
+  if (isInIframe) {
+    iframeParentLocation(gradebookUrl)
+  } else {
+    window.location.href = gradebookUrl
+  }
+}
+
+const onContinueClick = () => {
+  if (noGradingStandardEnabled.value) {
+    return
+  }
+  switchToSelection()
+}
+
+const initializePnpCutoffGrades = () => {
+  enablePnpConversion.value = true
+  selectedPnpCutoffGrade.value = null
+}
+
+const loadExportOptions = () => {
+  return getExportOptions(false).then(
+    data => {
+      loadSectionTerms(data.sectionTerms)
+      if (appState.value !== 'error') {
+        loadOfficialSections(data.officialSections)
       }
-    },
-    onContinueClick() {
-      if (this.noGradingStandardEnabled) {
-        return
-      }
-      this.switchToSelection()
-    },
-    initializePnpCutoffGrades() {
-      this.enablePnpConversion = true
-      this.selectedPnpCutoffGrade = null
-    },
-    loadExportOptions() {
-      return getExportOptions(false).then(
-        data => {
-          this.loadSectionTerms(data.sectionTerms)
-          if (this.appState !== 'error') {
-            this.loadOfficialSections(data.officialSections)
-          }
-          if (this.appState !== 'error') {
-            this.appState = 'preselection'
-            if (!data.gradingStandardEnabled) {
-              this.noGradingStandardEnabled = true
-            }
-            this.initializePnpCutoffGrades()
-          }
-        },
-        error => {
-          this.appState = 'error'
-          this.error = error
+      if (appState.value !== 'error') {
+        appState.value = 'preselection'
+        if (!data.gradingStandardEnabled) {
+          noGradingStandardEnabled.value = true
         }
-      )
-    },
-    loadOfficialSections(officialSections) {
-      if (!officialSections || !officialSections.length) {
-        this.appState = 'error'
-        this.error = 'None of the sections within this course site are associated with UC Berkeley course catalog sections.'
-        this.contactSupport = true
-      } else {
-        this.officialSections = officialSections
-        if (officialSections.length === 1) {
-          this.selectedSection = officialSections[0]
-        } else {
-          this.selectedSection = null
-        }
+        initializePnpCutoffGrades()
       }
     },
-    loadSectionTerms(sectionTerms) {
-      if (!sectionTerms.length) {
-        this.appState = 'error'
-        this.error = 'No sections found in this course representing a currently maintained campus term.'
-        this.contactSupport = true
-      } else if (sectionTerms.length > 1) {
-        this.appState = 'error'
-        this.error = 'This course site contains sections from multiple terms. Only sections from a single term should be present.'
-        this.contactSupport = true
-      } else {
-        this.sectionTerms = sectionTerms
-      }
-    },
-    preloadGrades(type) {
-      this.filenameDownloaded = null
-      this.selectedType = type
-      alertScreenReader('Preparing E-Grades for download.', 'assertive')
-      this.appState = 'loading'
-      this.jobStatus = 'started'
-      iframeScrollToTop()
-      const pnpCutoff = !this.enablePnpConversion ? 'ignore' : encodeURIComponent(this.selectedPnpCutoffGrade)
-      prepareGradesCacheJob(
-        this.selectedType,
-        pnpCutoff,
-        this.selectedSection.id,
-        this.selectedSection.termId
-      ).then(
-        data => {
-          this.backgroundJobId = data.jobId
-          this.startExportJob()
-        },
-        error => {
-          this.appState = 'error'
-          this.error = error || 'E-Grades job preparation failed.'
-          this.showRetryOption = true
-          this.contactSupport = true
-        }
-      )
-    },
-    retrySelection() {
-      this.appState = 'selection'
-      this.contactSupport = false
-      this.error = null
-      this.showRetryOption = false
-    },
-    startExportJob() {
-      this.exportTimer = setInterval(() => {
-        getExportJobStatus(this.backgroundJobId).then(
-          data => {
-            this.jobStatus = data.jobStatus
-            if (['canceled', 'deferred', 'failed', 'stopped'].includes(this.jobStatus)) {
-              clearInterval(this.exportTimer)
-              this.switchToSelection()
-              this.error = `Sorry, the eGrades download ${this.jobStatus === 'failed' ? 'has' : 'was'} ${this.jobStatus}.`
-              this.contactSupport = true
-              this.appState = 'error'
-            } else if (this.jobStatus === 'finished') {
-              clearInterval(this.exportTimer)
-              this.switchToSelection()
-              alertScreenReader('Downloading export. Export form options presented for an additional download.')
-              this.downloadGrades()
-            } else if (this.config.isVueAppDebugMode) {
-              // eslint-disable-next-line no-console
-              console.log(`[DEBUG] jobStatus: ${this.jobStatus}`)
-            }
-          },
-          error => {
-            this.error = error
-          }
-        )
-      }, 2000)
-    },
-    switchToSelection() {
-      iframeScrollToTop()
-      this.appState = 'selection'
-      putFocusNextTick('grade-export-header')
+    errorMessage => {
+      appState.value = 'error'
+      error.value = errorMessage
+    }
+  )
+}
+
+const loadOfficialSections = officialSections => {
+  if (!officialSections || !officialSections.length) {
+    appState.value = 'error'
+    error.value = 'None of the sections within this course site are associated with UC Berkeley course catalog sections.'
+    contactSupport.value = true
+  } else {
+    officialSections.value = officialSections
+    if (officialSections.length === 1) {
+      selectedSection.value = officialSections[0]
+    } else {
+      selectedSection.value = null
     }
   }
+}
+
+const loadSectionTerms = sectionTerms => {
+  if (!sectionTerms.length) {
+    appState.value = 'error'
+    error.value = 'No sections found in this course representing a currently maintained campus term.'
+    contactSupport.value = true
+  } else if (sectionTerms.length > 1) {
+    appState.value = 'error'
+    error.value = 'This course site contains sections from multiple terms. Only sections from a single term should be present.'
+    contactSupport.value = true
+  }
+}
+
+const preloadGrades = type => {
+  filenameDownloaded.value = null
+  selectedType.value = type
+  alertScreenReader('Preparing E-Grades for download.', 'assertive')
+  appState.value = 'loading'
+  jobStatus.value = 'started'
+  iframeScrollToTop()
+  const pnpCutoff = !enablePnpConversion.value ? 'ignore' : encodeURIComponent(selectedPnpCutoffGrade.value)
+  prepareGradesCacheJob(
+    selectedType.value,
+    pnpCutoff,
+    selectedSection.value.id,
+    selectedSection.value.termId
+  ).then(
+    data => {
+      backgroundJobId.value = data.jobId
+      startExportJob()
+    },
+    errorMessage => {
+      appState.value = 'error'
+      error.value = errorMessage || 'E-Grades job preparation failed.'
+      showRetryOption.value = true
+      contactSupport.value = true
+    }
+  )
+}
+
+const retrySelection = () => {
+  appState.value = 'selection'
+  contactSupport.value = false
+  error.value = null
+  showRetryOption.value = false
+}
+
+const startExportJob = () => {
+  exportTimer.value = setInterval(() => {
+    getExportJobStatus(backgroundJobId.value).then(
+      data => {
+        jobStatus.value = data.jobStatus
+        if (['canceled', 'deferred', 'failed', 'stopped'].includes(jobStatus.value)) {
+          clearInterval(exportTimer.value)
+          switchToSelection()
+          error.value = `Sorry, the eGrades download ${jobStatus.value === 'failed' ? 'has' : 'was'} ${jobStatus.value}.`
+          contactSupport.value = true
+          appState.value = 'error'
+        } else if (jobStatus.value === 'finished') {
+          clearInterval(exportTimer.value)
+          switchToSelection()
+          alertScreenReader('Downloading export. Export form options presented for an additional download.')
+          downloadGrades()
+        } else if (config.isVueAppDebugMode) {
+          // eslint-disable-next-line no-console
+          console.log(`[DEBUG] jobStatus: ${jobStatus.value}`)
+        }
+      },
+      errorMessage => {
+        error.value = errorMessage
+      }
+    )
+  }, 2000)
+}
+
+const switchToSelection = () => {
+  iframeScrollToTop()
+  appState.value = 'selection'
+  putFocusNextTick('grade-export-header')
 }
 </script>
 

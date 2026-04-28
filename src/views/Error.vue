@@ -1,8 +1,8 @@
 <template>
   <div>
-    <AppBar v-if="!$isInIframe" />
+    <AppBar v-if="!isInIframe" />
     <v-container
-      v-if="!isLoading"
+      v-if="!contextStore.isLoading"
       id="content"
       class="background-splash"
       fill-height
@@ -10,11 +10,11 @@
     >
       <v-card
         class="elevation-1 mt-12 mx-auto text-center"
-        :max-width="applicationState.stacktrace ? '40rem' : '30rem'"
+        :max-width="contextStore.applicationState.stacktrace ? '40rem' : '30rem'"
         outlined
       >
         <v-img
-          v-if="!$isInIframe"
+          v-if="!isInIframe"
           alt="TV screen with colored bars"
           aria-label="TV screen with colored bars"
           :aspect-ratio="16 / 9"
@@ -37,46 +37,42 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import {get} from 'lodash'
+import {onMounted, ref} from 'vue'
+import {useRoute} from 'vue-router'
 import AppBar from '@/layouts/standalone/AppBar.vue'
-import Context from '@/mixins/Context'
 import ContactUsPrompt from '@/components/utils/ContactUsPrompt'
 import Header1 from '@/components/utils/Header1.vue'
-import {get} from 'lodash'
-import {useRoute} from 'vue-router'
+import {isInIframe} from '@/utils'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'Error',
-  components: {AppBar, ContactUsPrompt, Header1},
-  mixins: [Context],
-  data: () => ({
-    header: undefined,
-    message: undefined,
-    stacktrace: undefined
-  }),
-  created() {
-    const params = new URL(window.location.href).searchParams
-    this.header = params.get('h') || this.getDefaultHeader()
-    const body = params.get('m') || this.applicationState.message
-    this.message = this.header === body ? null : body
-    this.stacktrace = this.applicationState.stacktrace
-    this.$ready()
-  },
-  methods: {
-    getDefaultHeader() {
-      const status = get(useRoute().meta, 'is404') ? 404 : this.applicationState.status
-      switch(status) {
-      case 403: {
-        return 'Unauthorized'
-      }
-      case 404: {
-        return 'Page Not Found'
-      }
-      default: {
-        return 'Uh oh, there was a problem.'
-      }
-      }
-    }
+const contextStore = useContextStore()
+const header = ref()
+const message = ref()
+const stacktrace = ref()
+
+onMounted(() => {
+  const params = new URL(window.location.href).searchParams
+  header.value = params.get('h') || getDefaultHeader()
+  const body = params.get('m') || contextStore.applicationState.message
+  message.value = header.value === body ? null : body
+  stacktrace.value = contextStore.applicationState.stacktrace
+  contextStore.loadingComplete()
+})
+
+const getDefaultHeader = () => {
+  const status = get(useRoute().meta, 'is404') ? 404 : contextStore.applicationState.status
+  switch(status) {
+  case 403: {
+    return 'Unauthorized'
+  }
+  case 404: {
+    return 'Page Not Found'
+  }
+  default: {
+    return 'Uh oh, there was a problem.'
+  }
   }
 }
 </script>

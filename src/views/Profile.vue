@@ -4,21 +4,20 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import {get} from 'lodash'
+import {onMounted, ref} from 'vue'
+import {useRoute} from 'vue-router'
 import {getUserProfile} from '@/api/user'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'Profile',
-  data: () => ({
-    profile: undefined
-  }),
-  created() {
-    const uid = get(this.$route, 'params.uid')
-    getUserProfile(uid).then(data => {
-      this.profile = data
-      this.$ready()
-    })
-  }
-}
+const profile = ref()
+
+onMounted(() => {
+  const uid = get(useRoute(), 'params.uid')
+  getUserProfile(uid).then(data => {
+    profile.value = data
+    useContextStore().loadingComplete()
+  })
+})
 </script>

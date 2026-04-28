@@ -39,11 +39,14 @@
                 v-model="uid"
                 autocomplete="on"
                 class="text-field"
+                density="comfortable"
                 :disabled="isLoggingIn"
+                :error="!trim(uid) && devAuthError"
                 hide-details
                 label="UID"
                 required
-                variant="outlined"
+                variant="solo"
+                width="18.75rem"
                 @keydown.enter="devAuth"
                 @update:model-value="clearErrors"
               />
@@ -54,12 +57,15 @@
                 v-model="password"
                 autocomplete="off"
                 class="my-2 text-field"
+                density="comfortable"
                 :disabled="isLoggingIn"
+                :error="!trim(password) && devAuthError"
                 hide-details
                 label="Password"
                 required
                 type="password"
-                variant="outlined"
+                variant="solo"
+                width="18.75rem"
                 @keydown.enter="devAuth"
                 @update:model-value="clearErrors"
               />
@@ -70,11 +76,13 @@
                 v-model="canvasSiteId"
                 autocomplete="on"
                 class="text-field"
+                density="comfortable"
                 :disabled="isLoggingIn"
                 hide-details
                 label="Canvas Course ID (optional)"
                 required
-                variant="outlined"
+                variant="solo"
+                width="18.75rem"
                 @keydown.enter="devAuth"
                 @update:model-value="clearErrors"
               />
@@ -102,92 +110,86 @@
 </template>
 
 <script setup>
+import {computed, onMounted, ref} from 'vue'
+import {get, trim} from 'lodash'
+import {useRouter} from 'vue-router'
 import Header1 from '@/components/utils/Header1.vue'
 import nostromoCrew from '@/assets/images/nostromo-crew-eating-breakfast.png'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
-import {get, trim} from 'lodash'
 import {alertScreenReader, putFocusNextTick} from '@/utils'
-import {useContextStore} from '@/stores/context'
 import {devAuthLogIn, getCasLoginURL} from '@/api/auth'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'Login',
-  mixins: [Context],
-  data: () => ({
-    canvasSiteId: undefined,
-    devAuthError: undefined,
-    isLoggingIn: false,
-    password: undefined,
-    showError: false,
-    uid: undefined
-  }),
-  computed: {
-    disableSubmit() {
-      return !trim(this.password) || !trim(this.uid)
-    }
-  },
-  created() {
-    const showDevAuth = false
-    this.$ready()
-    return {showDevAuth}
-  },
-  methods: {
-    clearErrors() {
-      this.devAuthError = null
-    },
-    devAuth() {
-      this.clearErrors()
-      const canvasSiteId = trim(this.canvasSiteId)
-      const password = trim(this.password)
-      const uid = trim(this.uid)
-      if (uid && password) {
-        this.isLoggingIn = true
-        devAuthLogIn(canvasSiteId, uid, password).then(
-          data => {
-            if (data.isAuthenticated) {
-              useContextStore().setCurrentUser(data)
-              this.$router.push({path: '/welcome'})
-            } else {
-              const message = get(data, 'error') || get(data, 'message') || 'Authentication failed'
-              this.reportError(message)
-            }
-          },
-          error => {
-            this.reportError(error)
-          }
-        ).finally(() => {
-          this.isLoggingIn = false
-        })
-      } else if (uid) {
-        this.reportError('Password required')
-      } else {
-        this.reportError('Both UID and password are required', 'basic-auth-password')
+const canvasSiteId = ref(undefined)
+const contextStore = useContextStore()
+const config = contextStore.config
+const currentUser = contextStore.currentUser
+const devAuthError = ref(undefined)
+const isLoggingIn = ref(false)
+const password = ref(undefined)
+const router = useRouter()
+const uid = ref(undefined)
+
+const disableSubmit = computed(() => {
+  return !trim(password.value) || !trim(uid.value)
+})
+
+onMounted(() => {
+  const showDevAuth = false
+  contextStore.loadingComplete()
+  return {showDevAuth}
+})
+
+const clearErrors = () => {
+  devAuthError.value = null
+}
+
+const devAuth = () => {
+  clearErrors()
+  const passwordTrimmed = trim(password.value)
+  const uidTrimmed = trim(uid.value)
+  if (uidTrimmed && passwordTrimmed) {
+    isLoggingIn.value = true
+    devAuthLogIn(trim(canvasSiteId.value), uidTrimmed, passwordTrimmed).then(
+      data => {
+        if (data.isAuthenticated) {
+          contextStore.setCurrentUser(data)
+          router.push({path: '/welcome'})
+        } else {
+          const message = get(data, 'error') || get(data, 'message') || 'Authentication failed'
+          reportError(message)
+        }
+      },
+      error => {
+        reportError(error)
       }
-    },
-    reportError(message, putFocus='basic-auth-uid') {
-      this.devAuthError = typeof message === 'string' ? message : get(message, 'message')
-      alertScreenReader(this.devAuthError || 'Uh oh, an error occurred.')
-      putFocusNextTick(putFocus)
-    },
-    toCasLogin() {
-      getCasLoginURL().then(data => {
-        window.location.href = data.casLoginUrl
-      })
-    }
+    ).finally(() => {
+      isLoggingIn.value = false
+    })
+  } else if (uidTrimmed) {
+    reportError('Password required', 'basic-auth-password')
+  } else {
+    reportError('Both UID and password are required')
   }
 }
+
+const reportError = (message, putFocus) => {
+  devAuthError.value = typeof message === 'string' ? message : get(message, 'message')
+  alertScreenReader(devAuthError.value || 'Uh oh, an error occurred.')
+  putFocusNextTick(putFocus || 'basic-auth-uid')
+}
+
+const toCasLogin = () => {
+  getCasLoginURL().then(data => {
+    window.location.href = data.casLoginUrl
+  })
+}
 </script>
 
-<style scoped>
+<style>
 .dev-auth-error {
-  width: 300px !important;
+  width: 18.75rem !important;
 }
-.text-field {
-  background-color: white;
-  opacity: 0.7;
-  width: 300px !important;
+.text-field .v-field {
+  background-color: rgba(255, 255, 255, 0.7);
 }
 </style>
