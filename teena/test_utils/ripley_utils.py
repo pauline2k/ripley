@@ -144,6 +144,19 @@ def get_course_from_catalog_id_prefix(term, catalog_id_prefix):
         return None
 
 
+def set_canvas_site_archival_status(canvas_site_id, archival_tier, opted_out):
+    if not archival_tier:
+        sql = f"""DELETE FROM canvas_site_archival_status WHERE canvas_site_id = '{canvas_site_id}'"""
+    else:
+        sql = f"""INSERT INTO canvas_site_archival_status (canvas_site_id, archival_tier, opted_out, created_at, updated_at)
+                  VALUES ('{canvas_site_id}', '{archival_tier}', {opted_out}, now(), now())
+                  ON CONFLICT (canvas_site_id)
+                  DO UPDATE SET archival_tier = EXCLUDED.archival_tier, opted_out = EXCLUDED.opted_out, updated_at = EXCLUDED.updated_at"""
+    app.logger.info(sql)
+    db.session.execute(text(sql))
+    std_commit(allow_test_environment=True)
+
+
 def _get_course_from_cs_course_id(term, cs_course_id):
     instructors = get_course_instructors(term, cs_course_id)
     results = _sections_result_from_cs_course_id(term, cs_course_id)

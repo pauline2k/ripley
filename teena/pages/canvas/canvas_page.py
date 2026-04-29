@@ -260,6 +260,8 @@ class CanvasPage(CanvasAssignmentsPage,
             time.sleep(1)
             self.when_not_present(self.FLASH_MSG, utils.get_short_timeout())
 
+    COURSE_RETENTION_POLICY_BANNER = By.ID, 'custom-course-banner'
+
     ADD_SECTION_BTN = By.XPATH, '//button[@title="Add Section"]'
     EDIT_SECTION_LINK = By.CLASS_NAME, 'edit_section_link'
     SECTION_DATA = By.XPATH, '//li[@class="section"]/span[@class="users_count"]'

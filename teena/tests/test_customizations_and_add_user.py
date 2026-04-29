@@ -26,7 +26,7 @@ import time
 
 import pytest
 from teena.config.teena_test_config import TeenaTestConfig
-from teena.test_utils import utils
+from teena.test_utils import ripley_utils, utils
 
 test = TeenaTestConfig()
 test.add_user()
@@ -78,6 +78,24 @@ class TestFooterCustomizations:
     def test_link_nondiscrimination(self):
         title = 'Nondiscrimination Policy Statement | Office for the Prevention of Harassment & Discrimination'
         assert self.canvas_page.is_external_link_valid(self.canvas_page.NONDISCRIMINATION_LINK, title)
+
+
+@pytest.mark.usefixtures('page_objects')
+class TestCourseRetentionPolicyBanner:
+
+    def test_no_archiving_status(self):
+        self.canvas_page.load_course_site(test.course_site)
+        assert not self.canvas_page.is_present(self.canvas_page.COURSE_RETENTION_POLICY_BANNER)
+        self.canvas_page.load_users_page(test.course_site)
+        assert not self.canvas_page.is_present(self.canvas_page.COURSE_RETENTION_POLICY_BANNER)
+
+    def test_set_archiving_status(self):
+        ripley_utils.set_canvas_site_archival_status(test.course_site.site_id, '2027', False)
+        self.canvas_page.load_course_site(test.course_site)
+        assert self.canvas_page.is_present(self.canvas_page.COURSE_RETENTION_POLICY_BANNER)
+        self.canvas_page.load_users_page(test.course_site)
+        assert self.canvas_page.is_present(self.canvas_page.COURSE_RETENTION_POLICY_BANNER)
+        ripley_utils.set_canvas_site_archival_status(test.course_site.site_id, None, True)
 
 
 @pytest.mark.usefixtures('page_objects')
