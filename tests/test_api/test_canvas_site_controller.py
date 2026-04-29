@@ -31,6 +31,7 @@ from tests.util import hypersleep, override_config, register_canvas_uris
 
 TERM_ID_CURRENT = '2232'
 TERM_ID_NEXT = '2235'
+TERM_ID_FUTURE = '2238'
 
 admin_uid = '10000'
 faculty_uid = '90000'
@@ -44,7 +45,7 @@ teacher_uid = '30000'
 
 class TestViewOfficialSections:
 
-    EMPTY_OFFICIAL_SECTIONS_FEED = {TERM_ID_CURRENT: [], TERM_ID_NEXT: []}
+    EMPTY_OFFICIAL_SECTIONS_FEED = {TERM_ID_CURRENT: [], TERM_ID_NEXT: [], TERM_ID_FUTURE: []}
 
     @classmethod
     def _api_canvas_site_official_sections(cls, client, expected_status_code=200):
