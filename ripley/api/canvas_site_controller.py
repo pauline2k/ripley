@@ -94,9 +94,11 @@ def manage_official_sections():
     canvas_courses = canvas.get_user_courses(current_user.uid)
     terms = BerkeleyTerm.get_current_terms()
     api_json = {}
-    for term in [terms['current'], terms['next']]:
-        term_id = term.to_sis_term_id()
-        sis_term_id = term.to_canvas_sis_term_id()
+    for term_key in ['current', 'next', 'future']:
+        if term_key not in terms:
+            continue
+        term_id = terms[term_key].to_sis_term_id()
+        sis_term_id = terms[term_key].to_canvas_sis_term_id()
         api_json[term_id] = []
         for canvas_course in canvas_courses:
             if 'sis_term_id' in canvas_course.term and canvas_course.term['sis_term_id'] == sis_term_id:
