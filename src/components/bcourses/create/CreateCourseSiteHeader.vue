@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="px-4">
     <h2 class="sr-only">Administrator Options</h2>
     <div id="radio-group-modes" class="text-subtitle-1">Choose courses by:</div>
     <v-radio-group
@@ -10,56 +10,59 @@
       :disabled="isFetching"
       hide-details
     >
-      <v-radio id="radio-btn-mode-act-as" value="actAs" aria-label="Instructor">
+      <v-radio
+        id="radio-btn-mode-act-as"
+        aria-label="Instructor"
+        class="pt-1"
+        value="actAs"
+      >
         <template #label>
-          <div aria-hidden="true" class="pl-1 text-black text-body-2">Instructor</div>
+          <div aria-hidden="true" class="pl-1r text-black text-body-2">Instructor</div>
         </template>
       </v-radio>
-      <v-radio id="radio-btn-mode-section-id" value="bySectionId" aria-label="Section I Deez">
+      <v-radio
+        id="radio-btn-mode-section-id"
+        aria-label="Section I Deez"
+        class="pt-1"
+        value="bySectionId"
+      >
         <template #label>
-          <div aria-hidden="true" class="pl-1 text-black text-body-2">Section IDs</div>
+          <div aria-hidden="true" class="pl-1r text-black text-body-2">Section IDs</div>
         </template>
       </v-radio>
     </v-radio-group>
-    <div v-if="adminMode === 'actAs'" class="pt-5">
-      <div class="align-center d-flex pb-3">
-        <div class="pr-3">
-          <v-text-field
-            id="instructor-uid"
-            v-model="uid"
-            aria-label="Instructor U I D"
-            autocomplete="on"
-            class="instructor-uid-text-field"
-            density="comfortable"
-            :disabled="isFetching"
-            :error="isInvalidUID"
-            hide-details
-            label="Instructor UID"
-            maxlength="16"
-            variant="outlined"
-            @keydown.enter="submit"
-          />
-        </div>
-        <div>
-          <v-btn
-            id="sections-by-uid-button"
-            aria-label="Load official sections for instructor"
-            color="primary"
-            :disabled="isFetching || !trim(uid) || isInvalidUID"
-            size="large"
-            @click="submit"
-          >
-            <span v-if="isFetching">
-              <v-progress-circular
-                class="mr-1"
-                indeterminate
-                size="18"
-              />
-              Fetching...
-            </span>
-            <span v-if="!isFetching">As instructor</span>
-          </v-btn>
-        </div>
+    <div v-if="adminMode === 'actAs'" class="pt-4">
+      <div class="align-center d-flex flex-wrap pb-3">
+        <v-text-field
+          id="instructor-uid"
+          v-model="uid"
+          aria-label="Instructor U I D"
+          autocomplete="on"
+          class="instructor-uid-text-field mr-2r mt-3"
+          density="comfortable"
+          :disabled="isFetching"
+          :error="isInvalidUID"
+          hide-details
+          label="Instructor UID"
+          maxlength="16"
+          variant="outlined"
+          @keydown.enter="submit"
+        />
+        <v-btn
+          id="sections-by-uid-button"
+          aria-label="Load official sections for instructor"
+          class="mt-3"
+          color="primary"
+          :disabled="isFetching || !trim(uid) || isInvalidUID"
+          size="large"
+          @click="submit"
+        >
+          <span v-if="isFetching">
+            <SpinnerWithinButton />
+            Fetching...
+          </span>
+          <span v-if="!isFetching">As instructor</span>
+        </v-btn>
       </div>
     </div>
     <div v-if="adminMode === 'bySectionId'" class="py-5">
@@ -88,9 +91,9 @@
             v-model="sectionIds"
             aria-label="Paste your list of Section IDs here, separated by commas or spaces"
             auto-grow
-            class="w-50"
             :disabled="isFetching"
             hide-details
+            max-width="60rem"
             placeholder="Paste your list of Section IDs here, separated by commas or spaces"
             rows="2"
             variant="outlined"
@@ -103,11 +106,7 @@
           @click="submit"
         >
           <span v-if="isFetching">
-            <v-progress-circular
-              class="mr-1"
-              indeterminate
-              size="18"
-            />
+            <SpinnerWithinButton />
             Fetching...
           </span>
           <span v-if="!isFetching">Find Matching Sections</span>
@@ -117,129 +116,125 @@
   </div>
 </template>
 
-<script>
-import Context from '@/mixins/Context'
+<script setup>
+import {computed, ref, watch} from 'vue'
 import {find, partition, size, split, trim} from 'lodash'
+import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton.vue'
 import {putFocusNextTick} from '@/utils'
 
-export default {
-  name: 'CreateCourseSiteHeader',
-  mixins: [Context],
-  props: {
-    adminMode: {
-      required: true,
-      type: String
-    },
-    adminTerms: {
-      default: undefined,
-      required: false,
-      type: Array
-    },
-    currentAdminTerm: {
-      required: true,
-      type: String
-    },
-    fetchFeed: {
-      required: true,
-      type: Function
-    },
-    isFetching: {
-      required: true,
-      type: Boolean
-    },
-    setAdminActingAs: {
-      required: true,
-      type: Function
-    },
-    setAdminBySectionIds: {
-      required: true,
-      type: Function
-    },
-    setAdminMode: {
-      required: true,
-      type: Function
-    },
-    setWarning: {
-      required: true,
-      type: Function
-    },
-    switchAdminTerm: {
-      required: true,
-      type: Function
-    }
+const props = defineProps({
+  adminMode: {
+    required: true,
+    type: String
   },
-  data: () => ({
-    sectionIds: '',
-    uid: undefined
-  }),
-  computed: {
-    adminModeModel: {
-      get() {
-        return this.adminMode
-      },
-      set(mode) {
-        this.setWarning(null)
-        this.sectionIds = ''
-        this.uid = undefined
-        this.setAdminMode(mode)
+  adminTerms: {
+    default: undefined,
+    required: false,
+    type: Array
+  },
+  currentAdminTerm: {
+    required: true,
+    type: String
+  },
+  fetchFeed: {
+    required: true,
+    type: Function
+  },
+  isFetching: {
+    required: true,
+    type: Boolean
+  },
+  setAdminActingAs: {
+    required: true,
+    type: Function
+  },
+  setAdminBySectionIds: {
+    required: true,
+    type: Function
+  },
+  setAdminMode: {
+    required: true,
+    type: Function
+  },
+  setWarning: {
+    required: true,
+    type: Function
+  },
+  switchAdminTerm: {
+    required: true,
+    type: Function
+  }
+})
+
+const sectionIds = ref('')
+const uid = ref()
+
+const adminModeModel = defineModel('adminModeModel', {
+  get() {
+    return props.adminMode
+  },
+  set(mode) {
+    props.setWarning(null)
+    sectionIds.value = ''
+    uid.value = undefined
+    props.setAdminMode(mode)
+  },
+  type: String
+})
+
+const isInvalidUID = computed(() => {
+  return !!trim(uid.value) && !uid.value.match(/^\d+$/)
+})
+
+const slug = defineModel('slug', {
+  get() {
+    return props.currentAdminTerm
+  },
+  set(slug) {
+    const term = find(props.adminTerms, ['slug', slug])
+    props.switchAdminTerm(term)
+  },
+  type: String
+})
+
+watch(sectionIds, () => {
+  props.setWarning(null)
+})
+watch(uid, () => {
+  props.setWarning(null)
+})
+
+const submit = () => {
+  if (!props.isFetching) {
+    if (props.adminMode === 'bySectionId' && trim(sectionIds.value)) {
+      const trimmed = trim(sectionIds.value)
+      const sectionIdsList = split(trimmed, /[,\r\n\t ]+/)
+      const notNumeric = partition(sectionIdsList, sectionId => /^\d+$/.test(trim(sectionId)))[1]
+      if (notNumeric.length) {
+        props.setWarning('Section IDs must be numeric.')
+        putFocusNextTick('page-create-course-site-section-id-list')
+      } else {
+        props.setAdminBySectionIds(sectionIdsList)
+        props.fetchFeed()
       }
-    },
-    isInvalidUID() {
-      return !!this.trim(this.uid) && !this.uid.match(/^\d+$/)
-    },
-    slug: {
-      get() {
-        return this.currentAdminTerm
-      },
-      set(slug) {
-        const term = find(this.adminTerms, ['slug', slug])
-        this.switchAdminTerm(term)
+    } else if (props.adminMode === 'actAs' && trim(uid.value) && !isInvalidUID.value) {
+      const trimmed = trim(uid.value)
+      if (/^\d+$/.test(trimmed)) {
+        props.setAdminActingAs(trimmed)
+        props.fetchFeed()
+      } else {
+        props.setWarning('UID must be numeric.')
+        putFocusNextTick('instructor-uid')
       }
     }
-  },
-  watch: {
-    sectionIds() {
-      this.setWarning(null)
-    },
-    uid() {
-      this.setWarning(null)
-    }
-  },
-  methods: {
-    size,
-    submit() {
-      if (!this.isFetching) {
-        if (this.adminMode === 'bySectionId' && trim(this.sectionIds)) {
-          const trimmed = trim(this.sectionIds)
-          const sectionIds = split(trimmed, /[,\r\n\t ]+/)
-          const notNumeric = partition(sectionIds, sectionId => /^\d+$/.test(trim(sectionId)))[1]
-          if (notNumeric.length) {
-            this.setWarning('Section IDs must be numeric.')
-            putFocusNextTick('page-create-course-site-section-id-list')
-          } else {
-            this.setAdminBySectionIds(sectionIds)
-            this.fetchFeed()
-          }
-        } else if (this.adminMode === 'actAs' && trim(this.uid) && !this.isInvalidUID) {
-          const trimmed = trim(this.uid)
-          if (/^\d+$/.test(trimmed)) {
-            this.setAdminActingAs(trimmed)
-            this.fetchFeed()
-          } else {
-            this.setWarning('UID must be numeric.')
-            putFocusNextTick('instructor-uid')
-          }
-        }
-      }
-    },
-    trim
   }
 }
 </script>
 
 <style scoped lang="scss">
 .instructor-uid-text-field {
-  width: 208px;
+  flex-grow: 0;
+  min-width: 12rem;
 }
 .term-btn-toggle {
   border-width: 1px;

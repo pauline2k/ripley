@@ -54,8 +54,8 @@
               hide-details
               label="Canvas site ID"
               maxlength="10"
-              style="width: 124px"
               variant="outlined"
+              width="9rem"
               @update:model-value="() => error = undefined"
               @keydown.enter="updateCanvasSiteId"
             />

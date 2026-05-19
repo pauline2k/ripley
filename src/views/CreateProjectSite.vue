@@ -1,7 +1,7 @@
 <template>
   <div v-if="!contextStore.isLoading" class="mx-10 my-5">
     <Header1 class="mb-2" text="Create a Project Site" />
-    <div>
+    <v-container class="ml-0 px-0" fluid max-width="100rem">
       <div aria-live="polite">
         <v-alert
           v-if="error"
@@ -13,34 +13,30 @@
           type="warning"
         />
       </div>
-      <div class="align-center d-flex justify-center pb-8 pt-4">
-        <div class="pr-3">
-          <label
-            for="page-create-project-site-name"
-            class="text-subtitle-1 font-weight-medium"
-          >
-            Project Site Name
-          </label>
-        </div>
-        <div class="mr-16 w-50">
-          <v-text-field
-            id="page-create-project-site-name"
-            v-model="name"
-            autocomplete="on"
-            class="w-100"
-            density="comfortable"
-            :disabled="isCreating"
-            hide-details
-            maxlength="255"
-            variant="outlined"
-            @keydown.enter="create"
-          />
-        </div>
+      <div class="align-center d-flex justify-center py-4">
+        <label
+          for="page-create-project-site-name"
+          class="text-subtitle-1 font-weight-medium"
+        >
+          Project Site Name
+        </label>
+        <v-text-field
+          id="page-create-project-site-name"
+          v-model="name"
+          autocomplete="on"
+          class="ml-2r"
+          density="comfortable"
+          :disabled="isCreating"
+          hide-details
+          maxlength="255"
+          variant="outlined"
+          @keydown.enter="create"
+        />
       </div>
       <div class="d-flex justify-end">
         <v-btn
           id="create-project-site-button"
-          class="mr-2"
+          class="mt-4 ml-3 w-100 w-sm-auto"
           color="primary"
           type="submit"
           :disabled="isCreating || !trim(name)"
@@ -59,6 +55,7 @@
         <v-btn
           id="cancel-and-return-to-site-creation"
           aria-label="Cancel and return to Site Creation Overview"
+          class="mt-4 ml-3 w-100 w-sm-auto"
           :disabled="isCreating"
           type="button"
           variant="tonal"
@@ -67,7 +64,7 @@
           Cancel
         </v-btn>
       </div>
-    </div>
+    </v-container>
   </div>
 </template>
 

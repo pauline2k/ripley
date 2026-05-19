@@ -1,21 +1,18 @@
 <template>
-  <div v-if="!isLoading" class="pb-5 px-5">
-    <Header1 class="mb-0" text="Find a Person to Add" />
-    <div class="my-2">
-      <NeedHelpFindingSomeone v-if="showSearchForm" />
-    </div>
+  <div v-if="!contextStore.isLoading" class="pb-5 px-8">
+    <Header1 text="Find a Person to Add" />
+    <NeedHelpFindingSomeone v-if="showSearchForm" class="py-1r" />
     <div
-      v-if="showAlerts"
       id="alerts-container"
       class="px-3"
       aria-live="polite"
     >
-      <div v-if="errorStatus" class="alert alert-error align-center d-flex font-weight-medium">
+      <div v-if="messages.errorStatus" class="alert alert-error align-center d-flex font-weight-medium">
         <div class="pr-2">
           <v-icon class="canvas-notice-icon" :icon="mdiAlert" />
         </div>
         <div>
-          {{ errorStatus }}
+          {{ messages.errorStatus }}
         </div>
         <div class="d-flex pl-4 ml-auto">
           <v-btn
@@ -29,7 +26,7 @@
           />
         </div>
       </div>
-      <div v-if="noUserSelectedAlert" class="alert alert-error align-center font-weight-medium d-flex">
+      <div v-if="messages.noUserSelectedAlert" class="alert alert-error align-center font-weight-medium d-flex">
         Please select a person from the search results.
         <div class="d-flex pl-4 ml-auto">
           <v-btn
@@ -43,8 +40,8 @@
           />
         </div>
       </div>
-      <div v-if="searchAlert" class="alert alert-error align-center font-weight-medium d-flex">
-        {{ searchAlert }}
+      <div v-if="messages.searchAlert" class="alert alert-error align-center font-weight-medium d-flex">
+        {{ messages.searchAlert }}
         {{ searchTypeNotice }}
         Please try again.
         <div class="d-flex pl-4 ml-auto">
@@ -71,7 +68,7 @@
         {{ pluralize('search result', userSearchResultsCount) }} loaded.
       </div>
       <div
-        v-if="additionSuccessMessage"
+        v-if="messages.additionSuccessMessage"
         id="success-message"
         class="alert alert-success align-center font-weight-medium d-flex"
         tabindex="-1"
@@ -109,6 +106,7 @@
               <v-radio-group
                 id="search-type"
                 v-model="searchType"
+                aria-controls="search-text"
                 aria-labelledby="search-type-label"
                 color="primary"
                 density="compact"
@@ -118,6 +116,7 @@
                 <v-radio
                   id="radio-btn-name"
                   aria-label="Last Name comma First Name"
+                  class="mb-1r"
                   name="name"
                   value="name"
                 >
@@ -128,6 +127,7 @@
                 <v-radio
                   id="radio-btn-email"
                   aria-label="Email"
+                  class="mb-1r"
                   name="email"
                   value="email"
                 >
@@ -138,6 +138,7 @@
                 <v-radio
                   id="radio-btn-uid"
                   aria-label="CalNet U I D"
+                  class="mb-1r"
                   name="uid"
                   value="uid"
                 >
@@ -146,27 +147,33 @@
                   </template>
                 </v-radio>
               </v-radio-group>
-              <div class="align-center d-flex flex-wrap pb-3">
-                <div class="pr-3 pt-3 search-text-field">
+              <div class="align-center d-flex flex-wrap justify-space-between pb-4 w-100 w-lg-75">
+                <div class="search-text-field">
                   <v-text-field
                     id="search-text"
                     v-model="searchText"
                     aria-autocomplete="none"
-                    autocomplete="off"
+                    aria-describedby="alerts-container"
+                    :aria-invalid="!!messages.searchAlert"
                     :aria-label="searchFieldAriaLabel"
                     :aria-labelledby="undefined"
+                    autocomplete="off"
+                    class="mt-4"
                     density="comfortable"
                     :disabled="isSearching || isAddingUser"
+                    :error="!!messages.searchAlert"
                     hide-details
                     :label="searchFieldLabel"
                     variant="outlined"
                     @keydown.enter="submitSearch"
                   />
                 </div>
-                <div class="pt-3 add-user-submit-search-btn-container">
+                <div class="add-user-submit-search-btn-container w-100 w-sm-auto">
                   <v-btn
                     id="add-user-submit-search-btn"
                     aria-label="Submit search"
+                    block
+                    class="vertical-middle mt-4"
                     color="primary"
                     :disabled="!searchText || isSearching || isAddingUser"
                     size="large"
@@ -197,7 +204,10 @@
             <thead>
               <tr>
                 <th aria-sort="ascending" scope="col">Name</th>
-                <th scope="col">Calnet UID</th>
+                <th scope="col">
+                  <span aria-hidden="true">Calnet UID</span>
+                  <span class="sr-only">Calnet U I D</span>
+                </th>
                 <th scope="col">Email</th>
               </tr>
             </thead>
@@ -206,100 +216,100 @@
                 v-for="(user, index) in userSearchResults"
                 :id="`user-search-result-row-${index}`"
                 :key="user.uid"
+                :class="{'bg-surface-variant border-md': selectedUser === user}"
               >
-                <td :id="`user-search-result-row-select-${index}`" class="d-flex align-center flex-nowrap px-3 py-4">
-                  <input
+                <td :id="`user-search-result-row-select-${index}`" class="px-3 py-4 vertical-middle">
+                  <v-radio
                     :id="`user-search-result-input-${index}`"
-                    v-model="selectedUser"
-                    class="mr-4"
+                    :model-value="selectedUser === user"
+                    class="select-user-radio mr-4"
+                    density="compact"
                     :disabled="isAddingUser"
-                    name="selectedUser"
-                    type="radio"
-                    :value="user"
+                    :multiple="false"
+                    @change="() => selectedUser = user"
                   >
-                  <label
-                    :id="`user-search-result-row-name-${index}`"
-                    :for="`user-search-result-input-${index}`"
-                    class="form-input-label-no-align"
-                  >
-                    {{ user.firstName }} {{ user.lastName }}
-                  </label>
+                    <template #label>
+                      {{ user.firstName }} {{ user.lastName }}
+                    </template>
+                  </v-radio>
                 </td>
-                <td :id="`user-search-result-row-ldap-uid-${index}`" class="px-3 py-4">
-                  <span class="sr-only">Calnet U I D, {{ uidForScreenReader(user.uid) }}</span>
+                <td
+                  :id="`user-search-result-row-ldap-uid-${index}`"
+                  class="px-3 py-4 vertical-middle"
+                  data-label="CalNet UID"
+                >
+                  <span class="sr-only">{{ uidForScreenReader(user.uid) }}</span>
                   <span aria-hidden="true">{{ user.uid }}</span>
                 </td>
-                <td :id="`user-search-result-row-email-${index}`" class="px-3 py-4">
-                  <span class="sr-only">Email, </span>{{ user.emailAddress }}
+                <td
+                  :id="`user-search-result-row-email-${index}`"
+                  class="px-3 py-4 vertical-middle"
+                  data-label="Email"
+                >
+                  {{ user.emailAddress }}
                 </td>
               </tr>
             </tbody>
           </table>
-          <v-row no-gutters>
-            <v-col>
-              <div class="pt-6 px-6">
-                <div class="align-center d-flex">
-                  <div :class="{'role-select-label': sections.length, 'pr-2': !sections.length}">
-                    <label
-                      aria-hidden="true"
-                      class="text-subtitle-1"
-                      for="user-role"
-                    >
-                      Role
-                    </label>
-                  </div>
-                  <div class="ml-1">
-                    <select
-                      id="user-role"
-                      v-model="selectedRole"
-                      aria-label="Role"
-                      autocomplete="off"
-                      :disabled="isAddingUser"
-                    >
-                      <option
-                        v-for="role in grantingRoles"
-                        :key="role"
-                        :aria-label="srFriendlyRole(role)"
-                        :value="role"
-                      >
-                        <span aria-hidden="true">{{ role }}</span>
-                      </option>
-                    </select>
-                  </div>
-                </div>
-                <div v-if="sections.length" class="align-center d-flex pt-3">
-                  <div class="role-select-label">
-                    <label
-                      aria-hidden="true"
-                      class="text-subtitle-1"
-                      for="course-section"
-                    >
-                      Section
-                    </label>
-                  </div>
-                  <div class="ml-1">
-                    <select
-                      id="course-section"
-                      v-model="sectionSelected"
-                      aria-label="Section"
-                      autocomplete="off"
-                      :disabled="isAddingUser"
-                    >
-                      <option v-for="section in sections" :key="section.name" :value="section">
-                        {{ section.name }}
-                      </option>
-                    </select>
-                  </div>
-                </div>
-              </div>
+          <v-row class="mt-4">
+            <v-col class="align-content-center pb-0 pb-sm-3" cols="12" sm="4">
+              <label
+                aria-hidden="true"
+                class="align-center float-sm-right text-subtitle-1"
+                for="user-role"
+              >
+                Role
+              </label>
+            </v-col>
+            <v-col class="align-content-center pt-0 pt-sm-3" cols="12" sm="8">
+              <select
+                id="user-role"
+                v-model="selectedRole"
+                aria-label="Role"
+                autocomplete="off"
+                :disabled="isAddingUser"
+              >
+                <option
+                  v-for="role in grantingRoles"
+                  :key="role"
+                  :aria-label="srFriendlyRole(role)"
+                  :value="role"
+                >
+                  {{ role }}
+                </option>
+              </select>
+            </v-col>
+          </v-row>
+          <v-row v-if="sections.length">
+            <v-col class="align-content-center pb-0 pb-sm-3" cols="12" sm="4">
+              <label
+                aria-hidden="true"
+                class="align-center float-sm-right text-subtitle-1"
+                for="course-section"
+              >
+                Section
+              </label>
+            </v-col>
+            <v-col class="align-content-center pt-0 pt-sm-3" cols="12" sm="8">
+              <select
+                id="course-section"
+                v-model="sectionSelected"
+                aria-label="Section"
+                autocomplete="off"
+                :disabled="isAddingUser"
+              >
+                <option v-for="section in sections" :key="section.name" :value="section">
+                  {{ section.name }}
+                </option>
+              </select>
             </v-col>
           </v-row>
           <v-row no-gutters>
-            <v-col md="12">
-              <div class="d-flex justify-end pt-3">
+            <v-col cols="12">
+              <div class="d-flex flex-wrap justify-end w-100">
                 <v-btn
                   id="add-user-btn"
-                  class="mx-1"
+                  class="mt-4 ml-3 w-100 w-sm-auto"
                   color="primary"
                   :disabled="!selectedUser || isAddingUser"
                   @click="submitUser"
@@ -311,7 +321,7 @@
                 </v-btn>
                 <v-btn
                   id="start-over-btn"
-                  class="mx-1"
+                  class="mt-4 ml-3 w-100 w-sm-auto"
                   :disabled="isAddingUser"
                   @click="startOver"
                 >
@@ -327,250 +337,304 @@
 </template>
 
 <script setup>
+import {computed, onMounted, reactive, ref} from 'vue'
+import {find, get, replace, trim} from 'lodash'
 import {mdiAlert, mdiCloseCircle} from '@mdi/js'
-import {alertScreenReader, iframeScrollToTop, pluralize, putFocusNextTick} from '@/utils'
-</script>
-
-<script>
-import Context from '@/mixins/Context'
 import Header1 from '@/components/utils/Header1'
 import NeedHelpFindingSomeone from '@/components/utils/NeedHelpFindingSomeone'
 import SpinnerWithinButton from '@/components/utils/SpinnerWithinButton'
+import {alertScreenReader, iframeScrollToTop, pluralize, putFocusNextTick} from '@/utils'
 import {addUser, getAddUserOptions} from '@/api/canvas-user'
-import {find, get, replace, trim} from 'lodash'
 import {searchUsers} from '@/api/user'
+import {useContextStore} from '@/stores/context'
 
-export default {
-  name: 'CourseAddUser',
-  components: {Header1, NeedHelpFindingSomeone, SpinnerWithinButton},
-  mixins: [Context],
-  data: () => ({
-    additionSuccessMessage: false,
-    errorStatus: undefined,
-    grantingRoles: [],
-    isAddingUser: false,
-    isSearching: false,
-    noUserSelectedAlert: undefined,
-    searchAlert: undefined,
-    searchText: undefined,
-    searchType: 'name',
-    searchTypeNotice: undefined,
-    sections: [],
-    sectionSelected: undefined,
-    selectedRole: undefined,
-    selectedUser: undefined,
-    showAlerts: undefined,
-    showSearchForm: undefined,
-    showUsersArea: undefined,
-    userAdded: {},
-    userSearchResultsCount: 0,
-    userSearchResults: [],
-  }),
-  computed: {
-    selectedUserFullName() {
-      return `${this.selectedUser.firstName} ${this.selectedUser.lastName}`
-    },
-    searchFieldAriaLabel() {
-      switch (this.searchType) {
-      case 'name':
-        return 'Search by last name comma first name'
-      case 'email':
-        return 'Search by email address'
-      case 'uid':
-        return 'Search by CalNet U I D'
-      default:
-        return 'Person search'
-      }
-    },
-    searchFieldLabel() {
-      switch (this.searchType) {
-      case 'name':
-        return 'e.g. Doe, Jane'
-      case 'email':
-        return 'name@berkeley.edu'
-      case 'uid':
-        return 'e.g. 123456789'
-      default:
-        return ''
-      }
-    },
-    searchResultsCountForDisplay() {
-      return this.userSearchResultsCount || this.userSearchResults.length
-    },
-    searchResultsHeadingText() {
-      return `Search results: ${pluralize('user', this.searchResultsCountForDisplay)} found`
-    }
-  },
-  created() {
-    getAddUserOptions(this.currentUser.canvasSiteId).then(
-      data => {
-        this.grantingRoles = data.grantingRoles
-        this.selectedRole = data.grantingRoles[0]
-        this.sections = data.courseSections || []
-        this.sectionSelected = this.sections.length ? this.sections[0] : null
-        this.showSearchForm = true
-      },
-      this.showUnauthorized
-    ).catch(() => this.showUnauthorized()
-    ).finally(() => this.$ready())
-  },
-  methods: {
-    hideAlert(alertName) {
-      this.$data[alertName] = null
-      alertScreenReader('Alert hidden')
-      putFocusNextTick('page-title')
-    },
-    resetForm() {
-      this.searchText = ''
-      this.searchType = 'name'
-      this.searchTypeNotice = ''
-      this.selectedRole = this.grantingRoles[0]
-      this.sectionSelected = this.sections.length ? this.sections[0] : null
-    },
-    resetImportState() {
-      this.userAdded = false
-      this.showAlerts = false
-      this.additionSuccessMessage = false
-    },
-    resetSearchState() {
-      this.errorStatus = null
-      this.noUserSelectedAlert = false
-      this.searchAlert = null
-      this.selectedUser = null
-      this.showUsersArea = false
-      this.userSearchResults = []
-      this.userSearchResultsCount = 0
-    },
-    showErrorStatus(message) {
-      this.showAlerts = true
-      this.errorStatus = message
-    },
-    showSearchAlert(message) {
-      this.showAlerts = true
-      this.searchAlert = message
-    },
-    showUnauthorized() {
-      this.showErrorStatus('Authorization check failed.')
-      this.$ready()
-    },
-    srFriendlyRole(role) {
-      return role === 'TA' || role === 'Lead TA' ? replace(role, 'TA', 'T A') : role
-    },
-    uidForScreenReader(uid) {
-      return String(uid || '').split('').join(' ')
-    },
-    startOver() {
-      this.showAlerts = false
-      alertScreenReader('Starting a new search.')
-      this.resetForm()
-      this.resetSearchState()
-      this.resetImportState()
-      putFocusNextTick('radio-btn-name')
-    },
-    submitSearch() {
-      this.resetSearchState()
-      this.resetImportState()
-      if (!trim(this.searchText)) {
-        this.showSearchAlert('You did not enter any search terms.')
-      } else if (this.searchType === 'uid' && !isFinite(this.searchText)) {
-        this.showSearchAlert('UID search terms must be numeric.')
-      } else {
-        alertScreenReader('Loading person search results.')
-        this.showUsersArea = true
-        this.isSearching = true
-        const searchTimer = setInterval(() => {
-          alertScreenReader('Still searching.')
-        }, 7000)
-        searchUsers(this.searchText, this.searchType).then(data => {
-          this.userSearchResults = data.users
-          if (data.users && data.users.length) {
-            this.userSearchResultsCount = data.users[0].resultCount
-            this.selectedUser = data.users[0]
-          } else {
-            this.userSearchResultsCount = 0
-            let noResultsAlert = 'Your search did not match anyone with a CalNet ID.'
-            if (this.searchType === 'uid') {
-              noResultsAlert += ' CalNet UIDs must be an exact match.'
-            }
-            this.showSearchAlert(noResultsAlert)
-          }
-          this.showAlerts = true
-        }, () => {
-          this.showErrorStatus('Person search failed.')
-          this.showSearchForm = true
-        }).finally(() => {
-          clearInterval(searchTimer)
-          this.isSearching = false
-          if (this.userSearchResults.length) {
-            putFocusNextTick('person-search-results-caption')
-          } else {
-            this.$ready('add-user-submit-search-btn')
-          }
-        })
-      }
-    },
-    submitUser() {
-      this.isAddingUser = true
-      this.showAlerts = true
-      alertScreenReader(`Adding ${this.selectedUserFullName} with role ${this.srFriendlyRole(this.selectedRole)}.`)
-      const addUserTimer = setInterval(() => {
-        alertScreenReader('Still processing.')
-      }, 7000)
-      const sectionId = this.sectionSelected ? this.sectionSelected.id : null
-      addUser(
-        this.currentUser.canvasSiteId,
-        this.selectedUser.uid,
-        sectionId,
-        this.selectedRole
-      ).then(
-        data => {
-          const sectionName = this.sectionSelected ? get(find(this.sections, {'id': data.sectionId}), 'name', this.sectionSelected.name) : null
-          this.userAdded = {
-            ...data.userAdded,
-            fullName: this.selectedUserFullName,
-            role: data.role,
-            sectionName
-          }
-          alertScreenReader('success', 'assertive')
-          this.resetSearchState()
-          this.resetForm()
-          this.additionSuccessMessage = true
-          putFocusNextTick('success-message')
-        },
-        error => {
-          alertScreenReader('Error', 'assertive')
-          this.errorStatus = error || 'Request to add person failed'
-          this.showUsersArea = true
-          putFocusNextTick('add-user-btn')
-        }
-      ).catch(
-        error => {
-          this.errorStatus = error || 'Request to add person failed'
-          this.showUsersArea = true
-          putFocusNextTick('add-user-btn')
-        }
-      ).finally(
-        () => {
-          clearInterval(addUserTimer)
-          this.isAddingUser = false
-          this.showSearchForm = true
-          iframeScrollToTop()
-        }
-      )
-    }
+const contextStore = useContextStore()
+const grantingRoles = ref([])
+const isAddingUser = ref(false)
+const isSearching = ref(false)
+const messages = reactive({
+  additionSuccessMessage: undefined,
+  errorStatus: undefined,
+  noUserSelectedAlert: false,
+  searchAlert: undefined
+})
+const searchText = ref(undefined)
+const searchType = ref('name')
+const searchTypeNotice = ref(undefined)
+const sections = ref([])
+const sectionSelected = ref(undefined)
+const selectedRole = ref(undefined)
+const selectedUser = ref(undefined)
+const showSearchForm = ref(undefined)
+const showUsersArea = ref(undefined)
+const userAdded = ref({})
+const userSearchResultsCount = ref(0)
+const userSearchResults = ref([])
+
+const searchFieldAriaLabel = computed(() => {
+  switch (searchType.value) {
+  case 'name':
+    return 'Search by last name comma first name'
+  case 'email':
+    return 'Search by email address'
+  case 'uid':
+    return 'Search by CalNet U I D'
+  default:
+    return 'Person search'
   }
+})
+
+const searchFieldLabel = computed(() => {
+  switch (searchType.value) {
+  case 'name':
+    return 'e.g. Doe, Jane'
+  case 'email':
+    return 'name@berkeley.edu'
+  case 'uid':
+    return 'e.g. 123456789'
+  default:
+    return ''
+  }
+})
+
+const searchResultsCountForDisplay = computed(() => {
+  return userSearchResultsCount.value || userSearchResults.value.length
+})
+
+const searchResultsHeadingText = computed(() => {
+  return `Search results: ${pluralize('user', searchResultsCountForDisplay.value)} found`
+})
+
+const selectedUserFullName = computed(() => {
+  return `${selectedUser.value.firstName} ${selectedUser.value.lastName}`
+})
+
+onMounted(() => {
+  getAddUserOptions(contextStore.currentUser.canvasSiteId).then(
+    data => {
+      grantingRoles.value = data.grantingRoles
+      selectedRole.value = data.grantingRoles[0]
+      sections.value = data.courseSections || []
+      sectionSelected.value = sections.value.length ? sections.value[0] : null
+      showSearchForm.value = true
+    },
+    showUnauthorized
+  ).catch(() => showUnauthorized()
+  ).finally(() => contextStore.loadingComplete())
+})
+
+const hideAlert = alertName => {
+  messages[alertName] = null
+  alertScreenReader('Alert hidden')
+  putFocusNextTick('page-title')
+}
+
+const resetForm = () => {
+  searchText.value = ''
+  searchType.value = 'name'
+  searchTypeNotice.value = ''
+  selectedRole.value = grantingRoles.value[0]
+  sectionSelected.value = sections.value.length ? sections.value[0] : null
+}
+
+const resetImportState = () => {
+  userAdded.value = false
+  messages.additionSuccessMessage = false
+}
+
+const resetSearchState = () => {
+  messages.errorStatus = null
+  messages.noUserSelectedAlert = false
+  messages.searchAlert = null
+  selectedUser.value = null
+  showUsersArea.value = false
+  userSearchResults.value = []
+  userSearchResultsCount.value = 0
+}
+
+const showErrorStatus = message => {
+  messages.errorStatus = message
+}
+
+const showSearchAlert = message => {
+  messages.searchAlert = message
+}
+
+const showUnauthorized = () => {
+  showErrorStatus('Authorization check failed.')
+  contextStore.loadingComplete()
+}
+
+const srFriendlyRole = role => {
+  return role === 'TA' || role === 'Lead TA' ? replace(role, 'TA', 'T A') : role
+}
+
+const uidForScreenReader = uid => {
+  return String(uid || '').split('').join(' ')
+}
+
+const startOver = () => {
+  alertScreenReader('Starting a new search.')
+  resetForm()
+  resetSearchState()
+  resetImportState()
+  putFocusNextTick('radio-btn-name')
+}
+
+const submitSearch = () => {
+  resetSearchState()
+  resetImportState()
+  if (!trim(searchText.value)) {
+    showSearchAlert('You did not enter any search terms.')
+    putFocusNextTick('search-text')
+  } else if (searchType.value === 'uid' && !isFinite(searchText.value)) {
+    showSearchAlert('UID search terms must be numeric.')
+    putFocusNextTick('search-text')
+  } else {
+    alertScreenReader('Loading person search results.')
+    showUsersArea.value = true
+    isSearching.value = true
+    const searchTimer = setInterval(() => {
+      alertScreenReader('Still searching.')
+    }, 7000)
+    searchUsers(searchText.value, searchType.value).then(data => {
+      userSearchResults.value = data.users
+      if (data.users && data.users.length) {
+        userSearchResultsCount.value = data.users[0].resultCount
+        selectedUser.value = data.users[0]
+      } else {
+        userSearchResultsCount.value = 0
+        let noResultsAlert = 'Your search did not match anyone with a CalNet ID.'
+        if (searchType.value === 'uid') {
+          noResultsAlert += ' CalNet UIDs must be an exact match.'
+        }
+        showSearchAlert(noResultsAlert)
+      }
+    }, () => {
+      showErrorStatus('Person search failed.')
+      showSearchForm.value = true
+    }).finally(() => {
+      clearInterval(searchTimer)
+      isSearching.value = false
+      if (userSearchResults.value.length) {
+        putFocusNextTick('person-search-results-caption')
+      } else if (messages.searchAlert) {
+        putFocusNextTick('search-text')
+      } else {
+        putFocusNextTick('add-user-submit-search-btn')
+      }
+    })
+  }
+}
+
+const submitUser = () => {
+  isAddingUser.value = true
+  alertScreenReader(`Adding ${selectedUserFullName.value} with role ${srFriendlyRole(selectedRole.value)}.`)
+  const addUserTimer = setInterval(() => {
+    alertScreenReader('Still processing.')
+  }, 7000)
+  const sectionId = sectionSelected.value ? sectionSelected.value.id : null
+  addUser(
+    contextStore.currentUser.canvasSiteId,
+    selectedUser.value.uid,
+    sectionId,
+    selectedRole.value
+  ).then(
+    data => {
+      const sectionName = sectionSelected.value ? get(find(sections.value, {'id': data.sectionId}), 'name', sectionSelected.value.name) : null
+      userAdded.value = {
+        ...data.userAdded,
+        fullName: selectedUserFullName.value,
+        role: data.role,
+        sectionName
+      }
+      alertScreenReader('success', 'assertive')
+      resetSearchState()
+      resetForm()
+      messages.additionSuccessMessage = true
+      putFocusNextTick('success-message')
+    },
+    error => {
+      alertScreenReader('Error', 'assertive')
+      messages.errorStatus = error || 'Request to add person failed'
+      showUsersArea.value = true
+      putFocusNextTick('add-user-btn')
+    }
+  ).catch(
+    error => {
+      messages.errorStatus = error || 'Request to add person failed'
+      showUsersArea.value = true
+      putFocusNextTick('add-user-btn')
+    }
+  ).finally(
+    () => {
+      clearInterval(addUserTimer)
+      isAddingUser.value = false
+      showSearchForm.value = true
+      iframeScrollToTop()
+    }
+  )
 }
 </script>
 
 <style scoped lang="scss">
 .add-user-submit-search-btn-container {
-  width: 11rem;
-}
-.role-select-label {
-  width: 64px;
+  margin-right: auto;
+  margin-left: 0.125rem;
+  min-width: 10rem;
+  width: 100%;
 }
 .search-text-field {
-  flex: 1 1;
-  min-width: 16rem;
+  flex: 1 1 66%;
+  margin-right: 0.25rem;
+  min-width: 12rem;
+}
+.select-user-radio :deep(.v-label) {
+  font-size: 0.875rem;
+  margin-left: 0.125rem;
+  word-break: normal;
+}
+@media screen and (max-width: 992px) {
+  table {
+    border-collapse: collapse;
+     thead {
+      border: 0;
+      clip: rect(0 0 0 0);
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      width: 1px;
+    }
+    tbody tr {
+      border: 0;
+      display: block;
+      width: 100%;
+      &:last-child {
+        border-bottom: 1pt solid rgba(var(--v-border-color), var(--v-border-opacity));
+      }
+      td {
+        border: 0;
+        display: block;
+        padding: 2px 4px !important;
+        width: 100%;
+        &::before {
+          content: attr(data-label);
+          float: left;
+          font-weight: bold;
+          margin-right: 1rem;
+          opacity: var(--v-medium-emphasis-opacity);
+          width: 6rem;
+        }
+        &:not(:first-child) {
+          padding: 4px 2rem !important;
+          &:last-child {
+            padding-bottom: 8px !important;
+          }
+        }
+      }
+    }
+  }
 }
 </style>

@@ -1,18 +1,23 @@
 <template>
   <a
     :id="id || `link-to-${href.replace(/\W/g, '')}`"
+    class="align-end d-inline-block text-pretty-wrap "
+    :class="{'with-terminating-period': periodTerminated}"
     :href="href"
     target="_blank"
     :title="title"
   >
-    <slot />
+    <span class="text-decoration-underline text-wrap">
+      <slot>
+        {{ text }}
+      </slot>
+    </span>
     <v-icon
-      v-if="!hideIcon"
-      class="ml-1"
-      :icon="mdiOpenInNew"
+      class="d-print-none ml-1r"
+      :icon="icon"
       size="x-small"
     />
-    <span class="sr-only print-hide"> (opens in new tab)</span>
+    <span class="d-print-none sr-only"> (opens in new tab)</span>
   </a>
 </template>
 
@@ -20,15 +25,25 @@
 import {mdiOpenInNew} from '@mdi/js'
 
 defineProps({
-  hideIcon: {
-    type: Boolean,
-    required: false
-  },
   href: {
     type: String,
     required: true
   },
+  icon: {
+    default: mdiOpenInNew,
+    type: String,
+    required: false
+  },
   id: {
+    default: undefined,
+    type: String,
+    required: false
+  },
+  periodTerminated: {
+    type: Boolean,
+    required: false
+  },
+  text: {
     default: undefined,
     type: String,
     required: false
@@ -40,3 +55,12 @@ defineProps({
   }
 })
 </script>
+
+<style lang="scss" scoped>
+.with-terminating-period {
+  text-decoration: none !important;
+  &::after {
+    content: ".";
+  }
+}
+</style>

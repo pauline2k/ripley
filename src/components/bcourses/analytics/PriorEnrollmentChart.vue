@@ -556,7 +556,7 @@ const setTooltipFormatter = () => {
 <style lang="scss">
 .grade-dist-enroll-tooltip-symbol {
   display: inline-block;
-  font-size: 20px !important;
+  font-size: 1.25rem !important;
   line-height: 1.1px;
   position: relative;
   top: 1px;

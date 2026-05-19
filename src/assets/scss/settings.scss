@@ -1,6 +1,5 @@
-@use 'vuetify' with (
-  $color-pack: true,
-  $utilities: true,
+@use 'vuetify/settings' with (
+  $body-font-family: ('Lato', 'Helvetica Neue', Helvetica, Arial, sans-serif),
   $grid-breakpoints: (
     'xs': 0,
     'sm': 576px,

@@ -31,6 +31,7 @@ from tests.util import hypersleep, override_config, register_canvas_uris
 
 TERM_ID_CURRENT = '2232'
 TERM_ID_NEXT = '2235'
+TERM_ID_FUTURE = '2238'
 
 admin_uid = '10000'
 faculty_uid = '90000'
@@ -44,7 +45,7 @@ teacher_uid = '30000'
 
 class TestViewOfficialSections:
 
-    EMPTY_OFFICIAL_SECTIONS_FEED = {TERM_ID_CURRENT: [], TERM_ID_NEXT: []}
+    EMPTY_OFFICIAL_SECTIONS_FEED = {TERM_ID_CURRENT: [], TERM_ID_NEXT: [], TERM_ID_FUTURE: []}
 
     @classmethod
     def _api_canvas_site_official_sections(cls, client, expected_status_code=200):
@@ -532,6 +533,27 @@ class TestCanvasSiteProvisionSections:
             fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
             with hypersleep(app):
                 self._api_canvas_course_provision_sections(client, canvas_site_id, expected_status_code=400)
+
+
+class TestCanvasSiteArchivalStatus:
+
+    @classmethod
+    def _api_get_canvas_site_archival_status(cls, client, canvas_site_id, expected_status_code=200):
+        response = client.get(f'/api/canvas_site/{canvas_site_id}/archival_status')
+        assert response.status_code == expected_status_code
+        return response.json
+
+    def test_existent_archival_status(self, client, app, fake_auth):
+        """Returns if found."""
+        canvas_site_id = 8876542
+        response = self._api_get_canvas_site_archival_status(client, canvas_site_id)
+        assert response['canvasSiteId'] == canvas_site_id
+        assert response['optedOut'] is False
+        assert response['archivalTier'] == '2028'
+
+    def test_nonexistent_archival_status(self, client, app, fake_auth):
+        """Returns not found if not found."""
+        self._api_get_canvas_site_archival_status(client, '1000000', expected_status_code=404)
 
 
 class TestCreateCourseSite:

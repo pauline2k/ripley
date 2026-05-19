@@ -1,6 +1,6 @@
 <template>
   <v-progress-circular
-    class="margin-right"
+    class="progress-btn-icon"
     :color="color"
     indeterminate
     :size="size"
@@ -24,7 +24,8 @@ defineProps({
 </script>
 
 <style scoped>
-.margin-right {
+.progress-btn-icon {
+  margin-bottom: 0.063rem;
   margin-right: 4px;
 }
 </style>

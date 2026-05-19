@@ -1,11 +1,11 @@
 <template>
-  <div class="pb-5 px-5">
-    <Header1 class="mb-2 ml-3" text="Create a Course Site" />
+  <div class="pb-5 px-4 px-lg-8 px-xl-16">
+    <Header1 class="mb-2" text="Create a Course Site" />
     <div aria-live="assertive" role="alert">
       <v-alert
         v-if="error"
         id="create-site-error"
-        class="my-3 ml-2"
+        class="my-3"
         density="compact"
         role="none"
         :text="error"
@@ -16,7 +16,7 @@
       <v-alert
         v-if="warning"
         id="create-site-warning"
-        class="my-3 ml-2"
+        class="my-3"
         density="compact"
         role="none"
         :text="warning"
@@ -24,7 +24,7 @@
       />
     </div>
     <div v-if="!contextStore.isLoading && !error">
-      <div v-if="isAdmin && currentWorkflowStep !== 'processing'" class="pl-3">
+      <div v-if="isAdmin && currentWorkflowStep !== 'processing'">
         <CreateCourseSiteHeader
           :admin-mode="adminMode"
           :admin-terms="adminTerms"
@@ -88,7 +88,7 @@
                     <SelectSectionsGuide />
                     <v-expansion-panels
                       v-model="panels"
-                      class="my-5"
+                      class="mt-5"
                       multiple
                     >
                       <v-expansion-panel
@@ -126,11 +126,11 @@
                   </div>
                 </v-window-item>
               </v-window>
-              <div class="d-flex justify-end mt-2">
+              <div class="d-flex justify-end">
                 <v-btn
                   id="page-create-course-site-continue"
                   aria-label="Continue to next step"
-                  class="mr-2"
+                  class="mt-4 ml-3 w-100 w-sm-auto"
                   color="primary"
                   :disabled="!selectedSectionsList.length"
                   @click="showConfirmation"
@@ -140,6 +140,7 @@
                 <v-btn
                   id="page-create-course-site-cancel"
                   aria-label="Cancel and return to Site Creation Overview"
+                  class="mt-4 ml-3 w-100 w-sm-auto"
                   variant="tonal"
                   @click="cancel"
                 >
@@ -399,6 +400,7 @@ const getActingAsInstructor = () => {
 
 const onCancelConfirmationStep = () => {
   currentWorkflowStep.value = 'selecting'
+  putFocusNextTick('page-create-course-site-continue')
 }
 
 const setAdminActingAs = uid => {
@@ -428,7 +430,6 @@ const setTermSlug = slug => {
 
 const showConfirmation = () => {
   updateSelected()
-  alertScreenReader('Course site details form loaded.')
   currentWorkflowStep.value = 'confirmation'
 }
 
@@ -534,9 +535,9 @@ const updateSemesterData = slug => {
 
 <style scoped lang="scss">
 .sections-course-title {
-  font-size: 15px !important;
+  font-size: 0.938rem !important;
   font-weight: 700 !important;
-  line-height: 15px;
+  line-height: 0.938rem;
 }
 .tab-term-select {
   flex-grow: 1;

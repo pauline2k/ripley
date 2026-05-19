@@ -1,7 +1,7 @@
 <template>
   <div>
     <Header1 id="page-title" class="sr-only" text="Roster Photos" />
-    <div aria-live="polite" class="display-none-when-print">
+    <div aria-live="polite" class="d-print-none">
       <v-alert
         v-if="error"
         class="ma-3"
@@ -14,21 +14,21 @@
       </v-alert>
     </div>
     <div v-if="!contextStore.isLoading && roster">
-      <v-container v-if="!error" class="roster-heading display-none-when-print pb-2" fluid>
+      <v-container v-if="!error" class="roster-heading d-print-none pb-2" fluid>
         <v-row no-gutters>
           <v-col
-            class="pr-2 py-1 roster-column-when-print"
-            md="8"
-            sm="12"
+            class="py-1"
+            cols="12"
+            lg="9"
           >
-            <div class="d-flex">
+            <div class="d-flex flex-wrap flex-md-nowrap">
               <label for="roster-search" class="sr-only">Input automatically searches upon text entry</label>
               <v-text-field
                 id="roster-search"
                 v-model="search"
                 aria-label="Search students by name or S I D"
                 autocomplete="off"
-                class="roster-search-input mr-2"
+                class="roster-search-input mx-1r my-1"
                 density="compact"
                 hide-details
                 label="Search students by name or SID"
@@ -41,7 +41,7 @@
                 v-model="selectedSectionId"
                 aria-label="Filter by section"
                 autocomplete="off"
-                class="flex-fill"
+                class="roster-search-section-select mx-1r my-1"
                 @change="onSelectSection"
               >
                 <option :value="null">All Sections</option>
@@ -56,34 +56,32 @@
             </div>
             <div
               aria-live="polite"
-              class="position-absolute pt-3 display-none-when-print text-subtitle-2"
+              class="position-absolute py-2 mx-1r d-print-none text-subtitle-2"
             >
               {{ pluralize('student', students.length, {0: 'No', 1: 'One'}) }} found
             </div>
           </v-col>
           <v-col
-            class="py-1 pr-2"
-            md="4"
-            sm="12"
+            class="d-flex align-center justify-end py-1"
+            cols="12"
+            lg="3"
           >
-            <div class="d-flex flex-column justify-center align-end">
-              <ProgressButton
-                id="download-csv"
-                :action="downloadCsv"
-                class="roster-btn"
-                :disabled="isDownloading || !students.length"
-                :in-progress="isDownloading"
-                :prepend-icon="mdiDownload"
-                variant="outlined"
-              >
-                Export<span class="sr-only"> CSV file</span>
-              </ProgressButton>
-            </div>
+            <ProgressButton
+              id="download-csv"
+              :action="downloadCsv"
+              class="mx-1r roster-btn"
+              :disabled="isDownloading || !students.length"
+              :in-progress="isDownloading"
+              :prepend-icon="mdiDownload"
+              variant="outlined"
+            >
+              Export<span class="sr-only"> CSV file</span>
+            </ProgressButton>
           </v-col>
         </v-row>
         <v-row no-gutters>
           <v-col>
-            <div class="d-flex align-center justify-end pr-2">
+            <div class="d-flex align-center justify-end flex-wrap flex-md-nowrap">
               <v-checkbox
                 v-model="showOnePhotoPerPage"
                 aria-controls="print-roster"
@@ -91,8 +89,11 @@
                 color="primary"
                 density="comfortable"
                 hide-details
-                label="Print one student per page"
-              />
+              >
+                <template #label>
+                  <span class="mx-1r">Print one student per page</span>
+                </template>
+              </v-checkbox>
               <v-tooltip
                 id="print-button-tooltip"
                 v-model="showPrintButtonTooltip"
@@ -112,7 +113,7 @@
                   <v-btn
                     id="print-roster"
                     :aria-disabled="disablePrintButton"
-                    class="roster-btn ml-3"
+                    class="roster-btn mx-1r"
                     :class="{'v-btn--disabled': disablePrintButton}"
                     color="primary"
                     :prepend-icon="mdiPrinter"
@@ -253,14 +254,12 @@ const printRoster = () => {
   z-index: 0;
 }
 .roster-search-input {
-  min-width: 18rem;
+  flex: 1 1 50%;
+}
+.roster-search-section-select {
+  flex: 1 1 50%;
 }
 .z-index-100 {
   z-index: 100;
-}
-@media print {
-  .roster-column-when-print {
-    padding: 0;
-  }
 }
 </style>

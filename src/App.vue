@@ -1,6 +1,6 @@
 <template>
   <v-app>
-    <div v-if="!$isInIframe">
+    <div v-if="!isInIframe">
       <a
         id="skip-to-content-link"
         href="#content"
@@ -10,7 +10,7 @@
         Skip to content
       </a>
     </div>
-    <v-main class="v-main-when-print">
+    <v-main id="ripley-main" class="v-main-when-print">
       <div
         id="announcer"
         :role="announcerRole"
@@ -31,6 +31,7 @@
 import {computed} from 'vue'
 import Error from '@/views/Error'
 import PageLoadProgress from '@/components/utils/PageLoadProgress.vue'
+import {isInIframe} from '@/utils'
 import {useContextStore} from '@/stores/context'
 
 const context = useContextStore()
@@ -46,7 +47,7 @@ const announcerRole = computed(() =>
   border: 0;
   border-radius: 3px;
   color: $color-alert-foreground;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: normal;
   margin: 10px 0;
   padding: 8px 15px 8px 14px;
@@ -69,12 +70,9 @@ const announcerRole = computed(() =>
 }
 .validation-messages {
   color: $color-harley-davidson-orange;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   min-height: 20px;
   margin: 0 12px 4px;
-}
-body, .v-application {
-  font-family: $body-font-family !important;
 }
 </style>

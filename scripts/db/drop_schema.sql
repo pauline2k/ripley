@@ -58,6 +58,7 @@ DROP INDEX IF EXISTS public.canvas_site_mailing_list_members_welcomed_at_idx;
 
 --
 
+DROP TABLE IF EXISTS public.canvas_site_archival_status;
 DROP TABLE IF EXISTS public.canvas_site_mailing_list_members;
 DROP TABLE IF EXISTS public.canvas_site_mailing_lists;
 DROP TABLE IF EXISTS public.canvas_synchronization;

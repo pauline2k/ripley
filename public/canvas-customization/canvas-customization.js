@@ -237,7 +237,7 @@ addMentalHealthResourcesLink();
    */
 
   var addAcademicPoliciesResponsiveLink = function() {
-  waitUntilAvailable("div span ul li:contains('Inbox')", true, function($helpMenuItem) {
+  waitUntilAvailable("div > span > ul > li:contains('Inbox')", true, function($helpMenuItem) {
     const isElementPresent = !!document.getElementById('global_nav_academic_policies_link_responsive')
     if (!isElementPresent) {
       var $academicPoliciesMenuItemResponsive = $helpMenuItem.clone();
@@ -269,7 +269,7 @@ addAcademicPoliciesResponsiveLink();
    */
 
   var addMentalHealthResourcesResponsiveLink = function() {
-  waitUntilAvailable("div span ul li:contains('Inbox')", true, function($helpMenuItem) {
+  waitUntilAvailable("div > span > ul > li:contains('Inbox')", true, function($helpMenuItem) {
     const isElementPresent = !!document.getElementById('global_nav_mental_health_resources_link_responsive')
     if (!isElementPresent) {
       var $mentalHealthResourcesMenuItemResponsive = $helpMenuItem.clone();
@@ -293,6 +293,60 @@ addAcademicPoliciesResponsiveLink();
 };
 
 addMentalHealthResourcesResponsiveLink();
+
+
+/* COURSE RETENTION POLICY BANNER */
+
+/**
+ * Check archival tier, if any, for current course
+ *
+ * @param  {String}     courseId                  Course ID
+ * @param  {Function}   callback                  Standard callback function
+ * @param  {Element}    callback.archivalTier     Current archival tier
+ */
+var getCourseArchivalTier = function(courseId, callback) {
+  apiRequest('/api/canvas_site/' + courseId + '/archival_status', function(statusResult) {
+    if (statusResult && statusResult.archivalTier && !statusResult.optedOut) {
+      return callback(statusResult.archivalTier);
+    }
+  });
+};
+
+/**
+  * Display a red banner (Course Retention Policy) for non-opted-out courses in archival tier
+  */
+var addCourseRetentionPolicyBanner = function() {
+  waitUntilAvailable('#wrapper', false, function() {
+    const courseUrlMatch = /^\/courses\/(\d+)/.exec(window.location.pathname);
+    const courseId = courseUrlMatch && courseUrlMatch.length > 1 && courseUrlMatch[1];
+    const bannerExists = $('#custom-course-banner').length > 0;
+
+    if (courseId && !bannerExists) {
+      getCourseArchivalTier(courseId, function(archivalTier) {
+        if (archivalTier) {
+          const bannerHtml = `
+            <div id="custom-course-banner" style="
+              background-color: #FCC6BB;
+              color: black;
+              padding: 12px;
+              text-align: center;
+              font-weight: bold;
+              width: 100%;
+              z-index: 9999;
+              box-sizing: border-box;
+            ">
+              In accordance with the <a href="kb-article.com">bCourses Course Retention Policy</a>, this course will be archived in a read-only state in June ${archivalTier} before being removed from bCourses in June 2028. Learn about your options to <a href="kb-article.com">preserve content as an instructor</a> and <a href="kb-article.com">save coursework as a student</a>.
+            </div>
+          `;
+          $('#wrapper').prepend(bannerHtml);
+        }
+      });
+    }
+  });
+};
+
+addCourseRetentionPolicyBanner();
+
 
   /* E-GRADES EXPORT */
 

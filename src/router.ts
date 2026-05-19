@@ -23,10 +23,10 @@ const WelcomeAdmin = () => import('@/views/WelcomeAdmin.vue')
 
 import {capitalize} from 'lodash'
 import {type RouteRecordRaw, createRouter, createWebHistory} from 'vue-router'
+import {isInIframe} from '@/utils'
 import {logOut} from '@/api/auth'
 import {type RipleyConfig, useContextStore} from '@/stores/context'
 
-const isInIframe = window.parent.frames.length
 const BaseView = () => import(isInIframe ? '@/layouts/lti/BaseLTI.vue' : '@/layouts/standalone/BaseStandalone.vue')
 
 const routes:RouteRecordRaw[] = [

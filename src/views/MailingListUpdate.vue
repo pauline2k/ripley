@@ -4,7 +4,7 @@
     <v-alert
       v-if="!hasUpdatedSincePageLoad && !noChangesAlert && !isUpdating"
       id="mailing-list-created-alert"
-      class="my-2"
+      class="my-2r"
       density="compact"
       role="none"
       type="info"
@@ -52,13 +52,14 @@
           </template>
         </v-expansion-panel-title>
         <v-expansion-panel-text :id="`mailing-list-alert-panel-${index}`">
-          <ul id="mailing-list-members" class="pt-2">
+          <ul id="mailing-list-members" class="mt-2">
             <li
               v-for="emailAddress in alert.emailAddresses"
               :key="emailAddress"
+              class="text-truncate px-md-4 py-1 mb-1"
             >
               <v-icon
-                class="mr-6"
+                class="d-none d-sm-inline-block mr-2 mr-md-6"
                 :color="alert.type === 'errors' ? 'red' : 'primary'"
                 :icon="mdiAccount"
               />
@@ -69,48 +70,75 @@
       </v-expansion-panel>
     </v-expansion-panels>
     <div>
-      <v-card id="mailing-list-details" class="pl-3" elevation="2">
-        <v-card-text>
-          <h2>bCourses Site</h2>
-          <v-container class="py-3" fluid>
+      <v-card id="mailing-list-details" class="pl-md-3" elevation="2">
+        <v-card-text class="px-4">
+          <h2 id="course-site-header">bCourses Site</h2>
+          <v-container
+            aria-labelledby="course-site-header"
+            class="py-3"
+            fluid
+            tag="dl"
+          >
             <v-row no-gutters>
-              <v-col cols="2">
-                <label for="mailing-list-course-site-name" class="float-right font-weight-medium pr-3">
-                  Name
-                </label>
+              <v-col
+                class="font-weight-medium"
+                cols="12"
+                md="3"
+                tag="dt"
+              >
+                Name
               </v-col>
-              <v-col>
-                <div>
-                  <OutboundLink
-                    id="mailing-list-course-site-name"
-                    class="d-flex align-center"
-                    :href="canvasSite.url"
-                    title="View course site"
-                  >
-                    <span class="font-size-15 font-weight-medium">{{ canvasSite.name }}</span>
-                  </OutboundLink>
-                </div>
+              <v-col
+                class="pl-4"
+                cols="12"
+                md="9"
+                tag="dd"
+              >
+                <OutboundLink
+                  id="mailing-list-course-site-name"
+                  aria-describedby="course-site-header"
+                  class="font-size-15 font-weight-medium"
+                  :href="canvasSite.url"
+                >
+                  {{ canvasSite.name }}
+                </OutboundLink>
               </v-col>
             </v-row>
-            <v-row class="pt-1" no-gutters>
-              <v-col cols="2">
-                <label for="mailing-list-course-site-id" class="float-right font-weight-medium pr-3">
-                  Canvas Site ID
-                </label>
+            <v-row class="mt-2r" no-gutters>
+              <v-col
+                class="font-weight-medium"
+                cols="12"
+                md="3"
+                tag="dt"
+              >
+                Canvas Site ID
               </v-col>
-              <v-col>
+              <v-col
+                class="align-content-end pl-4"
+                cols="12"
+                md="9"
+                tag="dd"
+              >
                 <div id="mailing-list-course-site-id">
                   {{ canvasSite.canvasSiteId }}
                 </div>
               </v-col>
             </v-row>
-            <v-row class="pt-1" no-gutters>
-              <v-col cols="2">
-                <label for="mailing-list-course-site-code" class="float-right font-weight-medium pr-3">
-                  Description
-                </label>
+            <v-row class="mt-2r" no-gutters>
+              <v-col
+                class="font-weight-medium"
+                cols="12"
+                md="3"
+                tag="dt"
+              >
+                Description
               </v-col>
-              <v-col>
+              <v-col
+                class="pl-4"
+                cols="12"
+                md="9"
+                tag="dd"
+              >
                 <div id="mailing-list-course-site-code">
                   {{ canvasSite.codeAndTerm }}
                 </div>
@@ -118,37 +146,66 @@
             </v-row>
           </v-container>
 
-          <h2 class="mt-3">Mailing List</h2>
-          <v-container class="py-3" fluid>
+          <h2 id="mailing-list-header" class="mt-3">Mailing List</h2>
+          <v-container
+            aria-labelledby="mailing-list-header"
+            class="py-3"
+            fluid
+            tag="dl"
+          >
             <v-row no-gutters>
-              <v-col cols="2">
-                <label for="mailing-list-name" class="float-right font-weight-medium pr-3">
-                  Name
-                </label>
+              <v-col
+                class="font-weight-medium"
+                cols="12"
+                md="3"
+                tag="dt"
+              >
+                Name
               </v-col>
-              <v-col>
+              <v-col
+                class="pl-4"
+                cols="12"
+                md="9"
+                tag="dd"
+              >
                 <div id="mailing-list-name">
                   {{ mailingList.name }}@{{ mailingList.domain }}
                 </div>
               </v-col>
             </v-row>
-            <v-row class="pt-1" no-gutters>
-              <v-col cols="2">
-                <label for="mailing-list-member-count" class="float-right font-weight-medium pr-3">
-                  Member count
-                </label>
+            <v-row class="mt-2r" no-gutters>
+              <v-col
+                class="font-weight-medium"
+                cols="12"
+                md="3"
+                tag="dt"
+              >
+                Member count
               </v-col>
-              <v-col>
+              <v-col
+                class="align-content-end pl-4"
+                cols="12"
+                md="9"
+                tag="dd"
+              >
                 <div id="mailing-list-member-count">{{ mailingList.membersCount }}</div>
               </v-col>
             </v-row>
-            <v-row class="pt-1" no-gutters>
-              <v-col cols="2">
-                <label for="mailing-list-membership-last-updated" class="float-right font-weight-medium pr-3">
-                  Last updated
-                </label>
+            <v-row class="mt-2r" no-gutters>
+              <v-col
+                class="font-weight-medium"
+                cols="12"
+                md="3"
+                tag="dt"
+              >
+                Last updated
               </v-col>
-              <v-col>
+              <v-col
+                class="align-content-end pl-4"
+                cols="12"
+                md="9"
+                tag="dd"
+              >
                 <div id="mailing-list-membership-last-updated">
                   <span v-if="get(mailingList, 'populatedAt')">
                     {{ $moment(mailingList.populatedAt).format('MMM D, YYYY') }}
@@ -162,10 +219,10 @@
           </v-container>
         </v-card-text>
       </v-card>
-      <div class="d-flex justify-end mt-4">
+      <div class="d-flex flex-wrap justify-end">
         <v-btn
           id="btn-populate-mailing-list"
-          class="mr-2"
+          class="mt-4 ml-3 w-100 w-sm-auto"
           color="primary"
           :disabled="isUpdating"
           @click="update"
@@ -177,7 +234,7 @@
         </v-btn>
         <v-btn
           id="btn-cancel"
-          class="mr-2"
+          class="mt-4 ml-3 w-100 w-sm-auto"
           :disabled="isUpdating"
           variant="tonal"
           @click="cancel"
@@ -320,14 +377,5 @@ button:hover, :focus, :focus-visible {
   .toggle-show-hide {
     text-decoration: underline;
   }
-}
-li {
-  height: 30px;
-  padding-inline: 16px;
-}
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
 }
 </style>
