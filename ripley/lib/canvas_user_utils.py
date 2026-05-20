@@ -69,6 +69,8 @@ def csv_row_for_campus_user(user):
     }
     if app.config['FLAG_CSV_SYNC_PRONOUNS']:
         row['pronouns'] = user.get('pronouns')
+        if row['pronouns'] == 'Decline to state':
+            row['pronouns'] = None
     return row
 
 

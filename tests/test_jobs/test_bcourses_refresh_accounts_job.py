@@ -78,6 +78,26 @@ class TestBcoursesRefreshAccountsJob:
                 assert users_imported[1] == '30020000,20000,Joan,Lambert,joan.lambert@berkeley.edu,active,she/her/hers'
 
     @mock.patch('ripley.lib.calnet_utils.get_users')
+    def test_decline_to_state_pronouns_deleted(self, mock_users, app, campus_users):
+        with override_config(app, 'FLAG_CSV_SYNC_PRONOUNS', True):
+            with setup_bcourses_refresh_job(app) as (s3, m):
+                for u in campus_users:
+                    if u['first_name'] == 'Joan':
+                        u['pronouns'] = 'Decline to state'
+                        break
+                mock_users.return_value = campus_users
+
+                result = BcoursesRefreshAccountsJob(app)._run()
+                assert 'SIS import result' in result
+
+                assert_s3_key_not_found(app, s3, 'sis-ids')
+
+                users_imported = read_s3_csv(app, s3, 'user-provision')
+                assert len(users_imported) == 2
+                assert users_imported[0] == 'user_id,login_id,first_name,last_name,email,status,pronouns'
+                assert users_imported[1] == '30020000,20000,Joan,Lambert,joan.lambert@berkeley.edu,active,<delete>'
+
+    @mock.patch('ripley.lib.calnet_utils.get_users')
     def test_email_change(self, mock_users, app, campus_users):
         with setup_bcourses_refresh_job(app) as (s3, m):
             for u in campus_users:
