@@ -50,7 +50,7 @@ class TestRefreshBcoursesIncremental:
             assert spring_2023_enrollments_imported[3] == 'CRS:ANTHRO-189-2023-B,30030000,teacher,SEC:2023-B-32936,active,'
 
     def test_incremental_job_does_not_duplicate_full_job(self, app):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             assert BcoursesRefreshFullJob(app)._run()
             assert read_s3_csv(app, s3, 'enrollments-TERM-2023-B-refresh-full')
             BcoursesRefreshIncrementalJob(app)._run()
@@ -144,7 +144,7 @@ class TestRefreshBcoursesIncremental:
 
     @contextmanager
     def setup_incremental_refresh_job(self, app):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             csv_rows = [
                 'canvas_user_id,user_id,login_id,first_name,last_name,full_name,email,status',
                 '3456789,30020000,20000,Joan,Lambert,Joan Lambert,joan.lambert@berkeley.edu,active',

@@ -90,7 +90,7 @@ def process_course_enrollments(
         primary_sections = _get_primary_sections(sis_term_id, sis_section_ids)
 
     for sis_section_id in sis_section_ids:
-        section_id, berkeley_term = parse_canvas_sis_section_id(sis_section_id)
+        section_id, _berkeley_term = parse_canvas_sis_section_id(sis_section_id)
         section_instructor_updates = instructor_updates.get(sis_term_id, {}).get(section_id, [])
         section_enrollment_updates = enrollment_updates.get(sis_term_id, {}).get(section_id, [])
         _process_section_enrollments(

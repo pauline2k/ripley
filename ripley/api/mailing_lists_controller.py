@@ -76,7 +76,7 @@ def create_mailing_list(canvas_site_id):
         list_name = (params.get('name') or '').strip()
         mailing_list = MailingList.create(canvas_site=canvas_site, list_name=list_name)
         if populate:
-            mailing_list, update_summary = MailingList.populate(mailing_list=mailing_list)
+            mailing_list, _update_summary = MailingList.populate(mailing_list=mailing_list)
         return tolerant_jsonify(mailing_list.to_api_json())
     except ValueError as e:
         raise BadRequestError(str(e))

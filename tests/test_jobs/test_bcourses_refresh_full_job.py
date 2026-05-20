@@ -37,7 +37,7 @@ from tests.util import assert_s3_key_not_found, read_s3_csv, setup_bcourses_refr
 class TestBcoursesRefreshFullJob:
 
     def test_no_previous_export(self, app):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             result = BcoursesRefreshFullJob(app)._run()
             assert 'SIS import result' in result
             assert "'Enrollment': {'created': 344, 'restored': 19, 'deleted': 4415}" in result
@@ -116,7 +116,7 @@ class TestBcoursesRefreshFullJob:
             '8876542,10000,SEC:2023-B-32936,5678901,40000,30040000,StudentEnrollment,10000000,active',
             '8876542,10000,SEC:2023-B-32936,5678901,50000,30050000,TeacherEnrollment,10000000,active',
         ]
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             export_file = tempfile.NamedTemporaryFile(suffix='.csv')
             with open(export_file.name, 'wb') as f:
                 f.write(bytes('\n'.join(csv_rows) + '\n', encoding='utf-8'))

@@ -139,7 +139,7 @@ class AddUserPage(RipleyPages):
         app.logger.info(f'Adding UID {user.uid} with role {user.role} to section {section.label if section else None}')
         self.wait_for_page_and_click(self.user_checkbox(user))
         if section:
-            opt = section.sis_id if section.sis_id else f'{section.course} {section.label}'
+            opt = section.sis_id or f'{section.course} {section.label}'
             self.wait_for_select_and_click_option(self.COURSE_SECTION, opt)
         self.wait_for_select_and_click_option(self.USER_ROLE, user.role)
         self.wait_for_element_and_click(self.ADD_USER_BUTTON)

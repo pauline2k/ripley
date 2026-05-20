@@ -36,7 +36,7 @@ from tests.util import assert_s3_key_not_found, mock_s3_bucket, read_s3_csv, reg
 class TestBcoursesProvisionSiteJob:
 
     def test_missing_params(self, app):
-        with setup_bcourses_provision_job(app) as (s3, m):
+        with setup_bcourses_provision_job(app) as (_s3, _m):
             with pytest.raises(BackgroundJobError):
                 BcoursesProvisionSiteJob(app)._run()
 
@@ -48,7 +48,7 @@ class TestBcoursesProvisionSiteJob:
             'sis_course_id': 'CRS:ANTHRO-189-2023-B',
             'sis_term_id': 'TERM:2023-B',
         }
-        with setup_bcourses_provision_job(app) as (s3, m):
+        with setup_bcourses_provision_job(app) as (s3, _m):
             assert BcoursesProvisionSiteJob(app)._run(params)
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B')
             assert len(spring_2023_enrollments_imported) == 5
@@ -62,7 +62,7 @@ class TestBcoursesProvisionSiteJob:
             'sis_term_id': 'TERM:2023-B',
             'updated_sis_section_ids': ['SEC:2023-B-98765'],
         }
-        with setup_bcourses_provision_job(app) as (s3, m):
+        with setup_bcourses_provision_job(app) as (s3, _m):
             assert BcoursesProvisionSiteJob(app)._run(params) is None
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B')
 
@@ -86,7 +86,7 @@ class TestBcoursesProvisionSiteJob:
         })
         mock_section_enrollments.return_value = section_enrollments
 
-        with setup_bcourses_provision_job(app) as (s3, m):
+        with setup_bcourses_provision_job(app) as (s3, _m):
             result = BcoursesProvisionSiteJob(app)._run(params)
             assert 'SIS import result' in result
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B')
@@ -106,7 +106,7 @@ class TestBcoursesProvisionSiteJob:
 
         mock_section_enrollments.return_value = section_enrollments
 
-        with setup_bcourses_provision_job(app) as (s3, m):
+        with setup_bcourses_provision_job(app) as (s3, _m):
             result = BcoursesProvisionSiteJob(app)._run(params)
             assert 'SIS import result' in result
             spring_2023_enrollments_imported = read_s3_csv(app, s3, 'enrollments-TERM-2023-B')

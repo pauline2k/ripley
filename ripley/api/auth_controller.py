@@ -112,7 +112,7 @@ def logout():
 def cas_login():
     ticket = request.args['ticket']
     target_url = request.args.get('url')
-    uid, attributes, proxy_granting_ticket = _cas_client(target_url).verify_ticket(ticket)
+    uid, _attributes, _proxy_granting_ticket = _cas_client(target_url).verify_ticket(ticket)
     app.logger.info(f'Logged into CAS as user {uid}')
     return _start_login_session(
         canvas_site_id=None,
