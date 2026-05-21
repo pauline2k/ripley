@@ -42,7 +42,7 @@ from rq.job import JobStatus
 @canvas_role_required('TeacherEnrollment', 'Lead TA', 'CanvasAdmin')
 def egrades_export_options():
     course_settings = canvas.get_course_settings(current_user.canvas_site_id)
-    official_sections, section_ids, sections = get_official_sections(current_user.canvas_site_id)
+    official_sections, _section_ids, sections = get_official_sections(current_user.canvas_site_id)
     return tolerant_jsonify({
         'gradingStandardEnabled': course_settings['grading_standard_enabled'],
         'officialSections': [s for s in official_sections if s['id']],
@@ -88,7 +88,7 @@ def is_official_canvas_course(canvas_site_id):
         is_official_course = False
         oldest_official_term = app.config['CANVAS_OLDEST_OFFICIAL_TERM']
         for canvas_section in get_course_sections(canvas_site_id):
-            section_id, berkeley_term = parse_canvas_sis_section_id(canvas_section.sis_section_id)
+            _section_id, berkeley_term = parse_canvas_sis_section_id(canvas_section.sis_section_id)
             if berkeley_term:
                 sis_term_id = berkeley_term.to_sis_term_id()
                 if sis_term_id >= str(oldest_official_term):

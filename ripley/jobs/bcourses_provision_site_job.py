@@ -102,7 +102,7 @@ class BcoursesProvisionSiteJob(BcoursesRefreshBaseJob):
         enrollment_csv = csv_set.enrollment_terms[sis_term_id]
         canvas_sections = canvas.get_course_sections(canvas_site_id) or []
         for section in canvas_sections:
-            section_id, berkeley_term = parse_canvas_sis_section_id(section.sis_section_id)
+            section_id, _berkeley_term = parse_canvas_sis_section_id(section.sis_section_id)
             if section_id and str(section_id) in deleted_section_ids:
                 section_enrollments = section.get_enrollments()
                 for enrollment in section_enrollments:

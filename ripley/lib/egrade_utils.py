@@ -37,7 +37,7 @@ def prepare_egrades_export(canvas_site_id, grade_type, pnp_cutoff, section_id, t
     official_grades = []
     canvas_section_id = None
     for canvas_course_section in canvas.get_course_sections(canvas_site_id):
-        berkeley_section_id, berkeley_term = parse_canvas_sis_section_id(canvas_course_section.sis_section_id)
+        berkeley_section_id, _berkeley_term = parse_canvas_sis_section_id(canvas_course_section.sis_section_id)
         if berkeley_section_id == section_id:
             canvas_section_id = canvas_course_section.id
             break
@@ -120,7 +120,7 @@ def _get_canvas_course_student_grades(canvas_site_id, section_id, term_id):
     loch_enrollments_by_uid = {e['ldap_uid']: e for e in enrollments}
     students = []
     for canvas_section in canvas.get_course_sections(canvas_site_id):
-        next_section_id, berkeley_term = parse_canvas_sis_section_id(canvas_section.sis_section_id)
+        next_section_id, _berkeley_term = parse_canvas_sis_section_id(canvas_section.sis_section_id)
         if section_id == next_section_id:
             for canvas_enrollment in canvas.get_section(canvas_section.id, api_call=False).get_enrollments():
                 required_fields = [hasattr(canvas_enrollment, key) for key in ['enrollment_state', 'grades', 'role', 'user']]

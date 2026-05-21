@@ -351,7 +351,7 @@ def update_canvas_sections(course, all_section_ids, section_ids_to_remove, secti
 
         # We need the complete list of site sections, including those we're not updating, in order to pass on a
         # complete list of primary sections in the course.
-        all_site_official_sections, all_site_section_ids, all_site_sis_sections = get_official_sections(course.id)
+        _all_site_official_sections, _all_site_section_ids, all_site_sis_sections = get_official_sections(course.id)
         primary_sections = [s for s in all_site_sis_sections if s['is_primary']]
 
         job = get_current_job()
@@ -422,7 +422,7 @@ def _inject_canvas_course_sites(courses_by_term, instructor_uid):
         term_id = extract_berkeley_term_id(canvas_course)
         if term_id in courses_by_term:
             for s in canvas_course.get_sections():
-                section_id, berkeley_term = parse_canvas_sis_section_id(s.sis_section_id)
+                section_id, _berkeley_term = parse_canvas_sis_section_id(s.sis_section_id)
                 if section_id:
                     for course in courses_by_term[term_id].values():
                         for section in course.get('sections', []):

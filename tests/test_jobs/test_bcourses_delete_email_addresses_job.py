@@ -33,14 +33,14 @@ from tests.util import assert_s3_key_not_found, setup_bcourses_refresh_job
 class TestBcoursesDeleteEmailAddressesJob:
 
     def test_no_changes(self, app):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             result = BcoursesDeleteEmailAddressesJob(app)._run()
             assert result == 'Communication channel deletion results: 0 successes, 0 errors.'
             assert_s3_key_not_found(app, s3, 'sis-ids')
             assert_s3_key_not_found(app, s3, 'user-provision')
 
     def test_no_enrollments_in_inactivate_job(self, app):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             result = BcoursesDeleteEmailAddressesJob(app)._run()
             assert result == 'Communication channel deletion results: 0 successes, 0 errors.'
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B')

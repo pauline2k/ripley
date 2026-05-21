@@ -104,7 +104,7 @@ class Client:
         return all_out
 
     def _search(self, conn, search_filter, use_fallback_mail=False):
-        status, result, response, _ = conn.search('dc=berkeley,dc=edu', search_filter, attributes=ldap3.ALL_ATTRIBUTES)
+        _status, _result, response, _ = conn.search('dc=berkeley,dc=edu', search_filter, attributes=ldap3.ALL_ATTRIBUTES)
         all_attributes = []
         if response:
             for entry in response:

@@ -87,7 +87,7 @@ def get_grade_distribution(canvas_site_id):
 @canvas_role_required('TeacherEnrollment', 'Lead TA')
 def get_prior_enrollment_grade_distribution(canvas_site_id):
     instructor_uid = None if current_user.is_admin else current_user.uid
-    course, course_name, section_ids, term = _validate(canvas_site_id, instructor_uid)
+    course, course_name, _section_ids, term = _validate(canvas_site_id, instructor_uid)
     prior_course_name = request.args.get('prior')
     cache_key = f'grade_distribution/{canvas_site_id}/{instructor_uid}/{prior_course_name}'
 

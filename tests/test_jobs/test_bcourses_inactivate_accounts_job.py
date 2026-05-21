@@ -33,20 +33,20 @@ from tests.util import assert_s3_key_not_found, read_s3_csv, setup_bcourses_refr
 class TestBcoursesInactivateAccountsJob:
 
     def test_no_changes(self, app):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             assert BcoursesInactivateAccountsJob(app)._run() is None
             assert_s3_key_not_found(app, s3, 'sis-ids')
             assert_s3_key_not_found(app, s3, 'user-provision')
 
     def test_no_enrollments_in_inactivate_job(self, app):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             assert BcoursesInactivateAccountsJob(app)._run() is None
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B')
 
     @mock.patch('ripley.lib.calnet_utils.get_calnet_attributes_for_uids')
     @mock.patch('ripley.lib.calnet_utils.get_users')
     def test_vanishing_user(self, mock_loch_users, mock_calnet_users, app, loch_campus_users):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             ash = next(u for u in loch_campus_users if u['ldap_uid'] == '30000')
             loch_campus_users.remove(ash)
             mock_loch_users.return_value = loch_campus_users

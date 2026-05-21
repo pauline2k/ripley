@@ -33,14 +33,14 @@ from tests.util import assert_s3_key_not_found, override_config, read_s3_csv, se
 class TestBcoursesRefreshAccountsJob:
 
     def test_no_changes(self, app):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             assert BcoursesRefreshAccountsJob(app)._run() is None
             assert_s3_key_not_found(app, s3, 'sis-ids')
             assert_s3_key_not_found(app, s3, 'user-provision')
 
     @mock.patch('ripley.lib.calnet_utils.get_users')
     def test_name_change(self, mock_users, app, campus_users):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             for u in campus_users:
                 if u['first_name'] == 'Ash':
                     u['first_name'] = 'Definitely-not-a-synthetic-Ash'
@@ -60,7 +60,7 @@ class TestBcoursesRefreshAccountsJob:
     @mock.patch('ripley.lib.calnet_utils.get_users')
     def test_pronoun_change(self, mock_users, app, campus_users):
         with override_config(app, 'FLAG_CSV_SYNC_PRONOUNS', True):
-            with setup_bcourses_refresh_job(app) as (s3, m):
+            with setup_bcourses_refresh_job(app) as (s3, _m):
                 for u in campus_users:
                     if u['first_name'] == 'Joan':
                         u['pronouns'] = 'she/her/hers'
@@ -80,7 +80,7 @@ class TestBcoursesRefreshAccountsJob:
     @mock.patch('ripley.lib.calnet_utils.get_users')
     def test_decline_to_state_pronouns_deleted(self, mock_users, app, campus_users):
         with override_config(app, 'FLAG_CSV_SYNC_PRONOUNS', True):
-            with setup_bcourses_refresh_job(app) as (s3, m):
+            with setup_bcourses_refresh_job(app) as (s3, _m):
                 for u in campus_users:
                     if u['first_name'] == 'Joan':
                         u['pronouns'] = 'Decline to state'
@@ -99,7 +99,7 @@ class TestBcoursesRefreshAccountsJob:
 
     @mock.patch('ripley.lib.calnet_utils.get_users')
     def test_email_change(self, mock_users, app, campus_users):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             for u in campus_users:
                 if u['email_address'] == 'synthetic.ash@berkeley.edu':
                     u['email_address'] = 'definitely.no.robots.here@berkeley.edu'
@@ -118,7 +118,7 @@ class TestBcoursesRefreshAccountsJob:
 
     @mock.patch('ripley.lib.calnet_utils.get_users')
     def test_sis_id_change(self, mock_users, app, campus_users):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             for u in campus_users:
                 if u['ldap_uid'] == '30000':
                     u['sid'] = '1337'
@@ -136,7 +136,7 @@ class TestBcoursesRefreshAccountsJob:
             assert_s3_key_not_found(app, s3, 'user-provision')
 
     def test_no_enrollments_in_accounts_job(self, app):
-        with setup_bcourses_refresh_job(app) as (s3, m):
+        with setup_bcourses_refresh_job(app) as (s3, _m):
             assert BcoursesRefreshAccountsJob(app)._run() is None
             assert_s3_key_not_found(app, s3, 'enrollments-TERM-2023-B')
 

@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@mdi/js": "7.4.47",
-    "axios": "1.15.0",
+    "axios": "1.16.1",
     "core-js": "3.43.0",
     "highcharts": "9.3.3",
     "highcharts-vue": "2.0.1",
