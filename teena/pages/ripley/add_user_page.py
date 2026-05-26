@@ -123,7 +123,7 @@ class AddUserPage(RipleyPages):
 
     @staticmethod
     def user_checkbox(user):
-        return By.XPATH, f'//td[contains(., "{user.uid}")]/ancestor::tr//input[@name="selectedUser"]'
+        return By.XPATH, f'//td[contains(., "{user.uid}")]/ancestor::tr//input[starts-with(@id, "user-search-result-input")]'
 
     def visible_user_role_options(self):
         self.when_visible(self.USER_ROLE, utils.get_short_timeout())
