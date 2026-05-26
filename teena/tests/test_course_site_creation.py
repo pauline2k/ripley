@@ -77,7 +77,7 @@ class TestCourseSiteCreation:
         if site.create_site_workflow in ['masq', 'uid']:
             assert self.create_course_site_page.is_external_link_valid(
                 locator=self.create_course_site_page.INSTR_MODE_LINK,
-                expected_page_title='IT - How do I create a Course Site?',
+                expected_page_title='IT Public KB - How do I create a Course Site?',
                 switch_to_canvas_iframe=True)
 
     def test_right_sections_are_displayed(self, site):

@@ -118,7 +118,7 @@ class TestProfileCustomizations:
         utils.assert_equivalence(actual_text, expected_text)
 
     def test_pronouns_help_link(self):
-        partial_title = 'IT - How do I change my name or pronouns in bCourses?'
+        partial_title = 'IT Public KB - How do I change my name or pronouns in bCourses?'
         assert self.canvas_page.is_external_link_valid(self.canvas_page.PRONOUNS_HELP_LINK, partial_title)
 
 
@@ -146,11 +146,11 @@ class TestAddPeopleCustomizations:
         utils.assert_equivalence(self.canvas_page.add_user_placeholder(), expected_text)
 
     def test_how_to_link(self):
-        title = 'IT - How do I add users to my course site?'
+        title = 'IT Public KB - How do I add users to my course site?'
         assert self.canvas_page.is_external_link_valid(self.canvas_page.ADD_USER_HELP_LINK, title)
 
     def test_cal_net_gues_acct_instructions(self):
-        title = 'IT - How can I access bCourses without a CalNet Account?'
+        title = 'IT Public KB - How can I access bCourses without a CalNet Account?'
         self.canvas_page.hit_escape()
         self.canvas_page.add_invalid_uid()
         assert self.canvas_page.is_external_link_valid(self.canvas_page.INVALID_USER_INFO_LINK, title)
