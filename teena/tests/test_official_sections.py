@@ -51,7 +51,7 @@ class TestLoadTool:
         self.canvas_page.masquerade_as(test.teachers[0])
         self.canvas_page.load_course_sections(site)
         self.canvas_page.expand_official_sections_notice()
-        title = 'IT - How do I add or remove a section roster from my course site?'
+        title = 'IT Public KB - How do I add or remove a section roster from my course site?'
         assert self.canvas_page.is_external_link_valid(self.canvas_page.OFFICIAL_SECTIONS_HELP_LINK, title)
 
     def test_initial_sections_count(self):

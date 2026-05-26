@@ -54,7 +54,7 @@ class TestWelcomeEmailCreation:
         self.mailing_list_page.create_list()
 
     def test_link_to_more_information(self):
-        title = 'IT - How do I send a welcome email to newly enrolled students with the bCourses Mailing List tool?'
+        title = 'IT Public KB - How do I send a welcome email to newly enrolled students with the bCourses Mailing List tool?'
         assert self.mailing_list_page.is_external_link_valid(self.mailing_list_page.WELCOME_EMAIL_LINK, title,
                                                              switch_to_canvas_iframe=True)
 
