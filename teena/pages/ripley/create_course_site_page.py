@@ -36,7 +36,7 @@ from teena.test_utils import utils
 
 class CreateCourseSitePage(CourseSectionsTables, SiteCreationPage):
 
-    NEED_HELP = By.XPATH, '//div[contains(text(), "Need help deciding which official sections to select?")]'
+    NEED_HELP = By.ID, 'toggle-help-notice-btn'
     INSTR_MODE_LINK = By.ID, 'link-to-httpsberkeleyservicenowcomkb_viewdosysparm_articleKB0010732instructionmode'
 
     SWITCH_TO_INSTRUCTOR = By.ID, 'radio-btn-mode-act-as'
