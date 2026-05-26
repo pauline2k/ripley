@@ -85,15 +85,19 @@ class TestCourseRetentionPolicyBanner:
 
     def test_no_archiving_status(self):
         self.canvas_page.load_course_site(test.course_site)
+        time.sleep(1)
         assert not self.canvas_page.is_present(self.canvas_page.COURSE_RETENTION_POLICY_BANNER)
         self.canvas_page.load_users_page(test.course_site)
+        time.sleep(1)
         assert not self.canvas_page.is_present(self.canvas_page.COURSE_RETENTION_POLICY_BANNER)
 
     def test_set_archiving_status(self):
         ripley_utils.set_canvas_site_archival_status(test.course_site.site_id, '2027', False)
         self.canvas_page.load_course_site(test.course_site)
+        time.sleep(1)
         assert self.canvas_page.is_present(self.canvas_page.COURSE_RETENTION_POLICY_BANNER)
         self.canvas_page.load_users_page(test.course_site)
+        time.sleep(1)
         assert self.canvas_page.is_present(self.canvas_page.COURSE_RETENTION_POLICY_BANNER)
         ripley_utils.set_canvas_site_archival_status(test.course_site.site_id, None, True)
 
