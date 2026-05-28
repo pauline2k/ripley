@@ -8,45 +8,48 @@ Configure the following values:
 
 | Property              | Value   |
 |-----------------------|---------|
-| Primary Color         | #003262 |
-| Primary Button        | #377695 |
-| Primary Button Text   | #ffffff |
-| Secondary Button      | #3b7ea1 |
-| Secondary Button Text | #ffffff |
-| Link                  | #367191 |
+| Primary Brand Color   | #002676 |
+| Main Text Color       | #000000 |
+| Link Color            | #004AAE |
+| Primary Button        | #004AAE |
+| Primary Button Text   | #FFFFFF |
+| Secondary Button      | #FFC31B |
+| Secondary Button Text | #002676 |
 
 ## Global Navigation
 
-| Property              | Value                          |
-|-----------------------|--------------------------------|
-| Nav Background        | #003262                        |
-| Nav Icon              | #ffffff                        |
-| Nav Icon Active       | #003262                        |
-| Nav Text              | #ffffff                        |
-| Nav Text Active       | #003262                        |
-| Nav Avatar Border     | #ffffff                        |
-| Nav Badge             | #ffffff                        |
-| Nav Badge Text        | #003262                        |
-| Nav Logo Background   | #003262                        |
+| Property              | Value                                                                             |
+|-----------------------|-----------------------------------------------------------------------------------|
+| Nav Background        | #002676                                                                           |
+| Nav Icon              | #FFFFFF                                                                           |
+| Nav Icon Active       | #002676                                                                           |
+| Nav Text              | #FFFFFF                                                                           |
+| Nav Text Active       | #002676                                                                           |
+| Nav Avatar Border     | #FFFFFF                                                                           |
+| Nav Badge             | #FFFFFF                                                                           |
+| Nav Badge Active      | #002676                                                                           |
+| Nav Badge Text        | #002676                                                                           |
+| Nav Badge Text Active | #FFFFFF                                                                           |
+| Nav Logo Background   | #002676                                                                           |
 | Nav Logo              | [bcourses_lefthand.png](public/canvas-customization/images/bcourses_lefthand.png) |
 
 ## Watermarks & Other Images
 
-| Property               | Value                                |
-|------------------------|--------------------------------------|
-| Watermark              | N/A                                  |
-| Watermark Opacity      | 100%                                 |
-| Favicon                | [favicon.ico](public/canvas-customization/images/favicon.ico) |
-| Mobile Homescreen Icon | [bcourses_ios_icon.png](public/canvas-customization/images/bcourses_ios_icon.png) |
-| Windows Tile Color     | #003262                              |
+| Property               | Value                                                                                         |
+|------------------------|-----------------------------------------------------------------------------------------------|
+| Watermark              | N/A                                                                                           |
+| Watermark Opacity      | 100%                                                                                          |
+| Favicon                | [favicon.ico](public/canvas-customization/images/favicon.ico)                                 |
+| Mobile Homescreen Icon | [bcourses_ios_icon.png](public/canvas-customization/images/bcourses_ios_icon.png)             |
+| Windows Tile Color     | #002676                                                                                       |
 | Windows Tile: Square   | [bcourses_windows_square.png](public/canvas-customization/images/bcourses_windows_square.png) |
-| Windows Tile: Wide     | [bcourses_windows_wide.png](public/canvas-customization/images/bcourses_windows_wide.png) |
-| Right Sidebar Logo     | [bcourses_righthand.png](public/canvas-customization/images/bcourses_righthand.png) |
+| Windows Tile: Wide     | [bcourses_windows_wide.png](public/canvas-customization/images/bcourses_windows_wide.png)     |
+| Right Sidebar Logo     | [bcourses_righthand.png](public/canvas-customization/images/bcourses_righthand.png)           |
 
 ## Upload
 
-| Property               | Value                     |
-|----------------------- |---------------------------|
-| JavaScript file        | [canvas-customization.js](public/canvas-customization/canvas-customization.js) |
+| Property               | Value                                                           |
+|----------------------- |-----------------------------------------------------------------|
+| JavaScript file        | [index.js](public/canvas-customization/canvas-customization.js) |
 
-**NOTE:** The `canvas-customization.js` file will by default load resources from and make API requests to CalCentral production. In order to point to a different CalCentral server, the `window.CALCENTRAL` property in the `canvas-customization.js` file should be updated to point to that server.
+**NOTE:** The `index.js` file will by default load resources from and make API requests to Ripley production. In order to point to a different Ripley server, the `window.RIPLEY` property in the `index.js` file should be updated to point to that server.
