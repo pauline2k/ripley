@@ -118,7 +118,7 @@
                 autocomplete="on"
                 density="compact"
                 :disabled="isManageOfficialSectionsDisabled"
-                :error="error || (!!trim(canvasSiteId) && !isCanvasSiteIdValid)"
+                :error="!!error || (!!trim(canvasSiteId) && !isCanvasSiteIdValid)"
                 hide-details
                 label="Canvas Site ID"
                 maxlength="9"

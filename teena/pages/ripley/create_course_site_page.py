@@ -156,11 +156,11 @@ class CreateCourseSitePage(CourseSectionsTables, SiteCreationPage):
         time.sleep(1)
         els = self.elements(self.SECTION_ID)
         app.logger.info(f'There are {len(els)} section ids')
-        return [el.text for el in els]
+        return [(el.text).replace('Section ID:', '') for el in els]
 
     def course_section_ids(self, course):
         identifier = f"{'-'.join(course.code.lower().split())}-{course.term.code}"
-        return [el.text for el in self.elements(
+        return [(el.text).replace('Section ID:', '') for el in self.elements(
             (By.XPATH, f'//div[@id="sections-course-{identifier}"]//td[@class="td-section-id"]'))]
 
     def click_next(self):
