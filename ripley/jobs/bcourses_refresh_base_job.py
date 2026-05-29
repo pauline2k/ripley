@@ -471,7 +471,20 @@ class BcoursesRefreshBaseJob(BaseJob):
             error_count = 0
 
             for canvas_user_id in self.email_deletions:
-                for channel in canvas.get_communication_channels(canvas_user_id):
+                channels = []
+                try:
+                    channels = canvas.get_communication_channels(canvas_user_id)
+                except Exception as e:
+                    app.logger.error(f'Error retrieving communication channels for user {canvas_user_id}.')
+                    app.logger.exception(e)
+                    error_count += 1
+                    email_deletions.writerow({
+                        'canvas_user_id': canvas_user_id,
+                        'email_address': None,
+                        'result': 'error',
+                    })
+
+                for channel in channels:
                     if channel.type == 'email':
                         if self.dry_run:
                             app.logger.info(f'Dry run mode, would delete communication channel {channel}.')
