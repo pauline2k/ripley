@@ -42,7 +42,7 @@ def main(csv_path, term_slug, app):
         failures = 0
 
         with open(csv_path.replace('.csv', '-out.csv'), 'w', newline='') as outfile:
-            output = csv.DictWriter(outfile, fieldnames=['grouping_id', 'ccn', 'short_name', 'long_name', 'site_url'])
+            output = csv.DictWriter(outfile, fieldnames=['grouping_id', 'ccn', 'short_name', 'long_name', 'site_url'], extrasaction='ignore')
             output.writeheader()
 
             for grouping_id, site_rows in groupby(rows, itemgetter('grouping_id')):
@@ -66,8 +66,9 @@ def main(csv_path, term_slug, app):
                     app.logger.error(f'CSV course site provision failed (grouping id {grouping_id})')
                     app.logger.exception(e)
                     failures += 1
+            outfile.flush()
 
-        app.logger.info('CSV course site provision job complete ({successes} successes, {failures} failures)')
+        app.logger.info(f'CSV course site provision job complete ({successes} successes, {failures} failures)')
 
 
 input_csv = sys.argv[1]
