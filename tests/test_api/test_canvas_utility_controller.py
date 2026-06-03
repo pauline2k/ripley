@@ -130,6 +130,32 @@ class TestImportUsers:
                 expected_status_code=400,
             )
 
+    def test_well_formed_but_nonexistent_uid(self, app, client, fake_auth):
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_by_id'],
+                'course': ['get_by_id_8876542'],
+                'user': ['profile_10000'],
+                'sis_import': ['get_by_id', 'post_csv'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            response = _api_import_users(client, uids='999999', expected_status_code=400)
+            assert response['message'] == 'Found no users matching submitted UIDs.'
+
+    def test_existent_and_nonexistent_uid(self, app, client, fake_auth):
+        with requests_mock.Mocker() as m:
+            register_canvas_uris(app, {
+                'account': ['get_admins', 'get_by_id'],
+                'course': ['get_by_id_8876542'],
+                'user': ['profile_10000'],
+                'sis_import': ['get_by_id', 'post_csv'],
+            }, m)
+            canvas_site_id = '8876542'
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=admin_uid)
+            response = _api_import_users(client, uids='50000,999999999999')
+            assert response['status'] == 'success'
+            assert response['uids'] == ['50000']
 
 def _api_authorizations(app, client, fake_auth, uid, expected_status_code=200):
     with requests_mock.Mocker() as m:

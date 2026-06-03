@@ -84,7 +84,7 @@ def provision_users():
     if not len(uids):
         raise BadRequestError('Invalid parameter: uids.')
 
-    sis_import = import_users(uids)
+    sis_import, imported_uids = import_users(uids)
     if not sis_import:
         raise InternalServerError('User provisioning SIS import failed.')
-    return tolerant_jsonify({'status': 'success', 'uids': uids})
+    return tolerant_jsonify({'status': 'success', 'uids': imported_uids})
