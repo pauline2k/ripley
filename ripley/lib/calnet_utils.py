@@ -114,8 +114,6 @@ def _get_calnet_users(app, uids, search_base=None):
             if path.isfile(fixture_path):
                 with open(fixture_path) as f:
                     users_by_uid[uid] = json.load(f)
-            else:
-                users_by_uid[uid] = {'uid': uid}
     else:
         calnet_client = calnet.client(app)
         calnet_results = calnet_client.search_uids(uids, search_base, use_fallback_mail=True)

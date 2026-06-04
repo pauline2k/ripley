@@ -71,7 +71,7 @@ class WebDriverManager(object):
             }
             options.add_experimental_option('prefs', prefs)
             driver = webdriver.Chrome(options=options)
-            WebDriverManager.allow_canvas_iframe_in_chrome(driver)
+            # WebDriverManager.allow_canvas_iframe_in_chrome(driver)
         driver.set_window_size(1600, 900) if _headless else driver.maximize_window()
         return driver
 

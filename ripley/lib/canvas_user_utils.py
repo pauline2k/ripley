@@ -24,7 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 from flask import current_app as app
-from ripley.api.errors import InternalServerError
+from ripley.api.errors import BadRequestError, InternalServerError
 from ripley.externals import canvas
 from ripley.externals.canvas import get_roles
 from ripley.externals.s3 import upload_dated_csv
@@ -104,6 +104,7 @@ def enroll_user_with_role(account_id, canvas_site, role_label, uid):
 
 def import_users(uids):
     users = []
+    submittable_uids = []
     batch_size = 1000
     for batch in [uids[i:i + batch_size] for i in range(0, len(uids), batch_size)]:
         rows = get_basic_attributes(batch)
@@ -124,6 +125,11 @@ def import_users(uids):
                 user['pronouns'] = row.get('pronouns')
             if person_type != 'A' or any(item for item in ['student', 'staff', 'faculty', 'guest'] if user['roles'][item]):
                 users.append(csv_row_for_campus_user(user))
+                submittable_uids.append(uid)
+
+    if not len(users):
+        raise BadRequestError('Found no users matching submitted UIDs.')
+
     with SisImportCsv.create(user_import_csv_fields()) as users_csv:
         users_csv.writerows(users)
         users_csv.filehandle.close()
@@ -139,7 +145,8 @@ def import_users(uids):
         sis_import = canvas.post_sis_import(attachment=users_csv.tempfile.name)
         if not sis_import:
             raise InternalServerError('User provisioning SIS import failed.')
-        return sis_import
+
+        return sis_import, submittable_uids
 
 
 def canvas_user_profile_to_api_json(canvas_user_profile, uid, canvas_site_id=None):
