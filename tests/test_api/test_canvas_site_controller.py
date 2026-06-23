@@ -556,6 +556,67 @@ class TestCanvasSiteArchivalStatus:
         self._api_get_canvas_site_archival_status(client, '1000000', expected_status_code=404)
 
 
+class TestGetAllArchivalStatuses:
+
+    @classmethod
+    def _api_get_all_archival_statuses(cls, client, expected_status_code=200):
+        response = client.get('/api/canvas_site/archival_status')
+        assert response.status_code == expected_status_code
+        return response.json
+
+    def test_anonymous(self, client):
+        """Denies anonymous user."""
+        self._api_get_all_archival_statuses(client, expected_status_code=401)
+
+    def test_teacher(self, client, app, fake_auth):
+        """Returns archival statuses for all teacher-eligible courses."""
+        with requests_mock.Mocker() as m:
+            uid = teacher_uid
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_enrollments_{canvas_site_id}_4567890'],
+                'user': [f'profile_{uid}', f'user_courses_{uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+            response = self._api_get_all_archival_statuses(client)
+            assert len(response) == 1
+            assert response[0]['canvasSiteId'] == int(canvas_site_id)
+            assert response[0]['archivalStatus']['archivalTier'] == '2028'
+            assert response[0]['archivalStatus']['optedOut'] is False
+
+    def test_ta(self, client, app, fake_auth):
+        """Returns archival statuses for all TA-eligible courses."""
+        with requests_mock.Mocker() as m:
+            uid = ta_uid
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_enrollments_{canvas_site_id}_6789012'],
+                'user': [f'profile_{uid}', f'user_courses_{uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+            response = self._api_get_all_archival_statuses(client)
+            assert len(response) == 1
+            assert response[0]['canvasSiteId'] == int(canvas_site_id)
+            assert response[0]['archivalStatus']['archivalTier'] == '2028'
+            assert response[0]['archivalStatus']['optedOut'] is False
+
+    def test_ineligible_role(self, client, app, fake_auth):
+        """Returns empty list when user's courses have no archival-viewable role."""
+        with requests_mock.Mocker() as m:
+            uid = reader_uid
+            canvas_site_id = '8876542'
+            register_canvas_uris(app, {
+                'account': ['get_admins'],
+                'course': [f'get_by_id_{canvas_site_id}', f'get_enrollments_{canvas_site_id}_7890123'],
+                'user': [f'profile_{uid}', f'user_courses_{uid}'],
+            }, m)
+            fake_auth.login(canvas_site_id=canvas_site_id, uid=uid)
+            response = self._api_get_all_archival_statuses(client)
+            assert response == []
+
+
 class TestCreateCourseSite:
 
     @classmethod

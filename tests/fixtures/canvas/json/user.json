@@ -343,6 +343,35 @@
                 }}
         ]
     },
+    "user_courses_60000": {
+        "method": "GET",
+        "endpoint": "users/sis_login_id:60000/courses",
+        "data": [
+            {
+                "course_code": "ANTHRO 189-LEC-001",
+                "id": 8876542,
+                "name": "Voix Ambiguë D'un Cœur Qui Au Zéphyr Préfère Les Jattes De Kiwis",
+                "enrollments": [
+                    {
+                        "id": 103,
+                        "course_section_id": 10000,
+                        "course_id": 8876542,
+                        "enrollment_state": "active",
+                        "html_url": "https://ucberkeley.beta.instructure.com/courses/8876542/users/7890123",
+                        "last_activity_at": "2023-03-02T06:04:43Z",
+                        "role": "Reader",
+                        "sis_user_id": "30060000",
+                        "sis_section_id": "2023-B-32936",
+                        "user_id": 7890123,
+                        "type": "TaEnrollment"
+                    }
+                ],
+                "sis_course_id": "CRS:ANTHRO-189-2023-B",
+                "term": {
+                    "sis_term_id": "TERM:2023-B"
+                }}
+        ]
+    },
     "user_courses_50000": {
         "method": "GET",
         "endpoint": "users/sis_login_id:50000/courses",

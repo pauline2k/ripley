@@ -41,9 +41,10 @@ from ripley.merged.roster import canvas_site_roster, canvas_site_roster_csv
 from ripley.models.canvas_site_archival_status import CanvasSiteArchivalStatus
 from ripley.models.configuration import Configuration
 
-ROLES_CAN_EDIT_OFFICIAL_SECTIONS = ['Lead TA', 'TeacherEnrollment', 'CanvasAdmin']
 
+ROLES_CAN_EDIT_OFFICIAL_SECTIONS = ['Lead TA', 'TeacherEnrollment', 'CanvasAdmin']
 ROLES_CAN_VIEW_OFFICIAL_SECTIONS = ['DesignerEnrollment', 'Lead TA', 'TaEnrollment', 'TeacherEnrollment', 'CanvasAdmin']
+ROLES_CAN_VIEW_ARCHIVAL_STATUS = ['Lead TA', 'TaEnrollment', 'TeacherEnrollment']
 
 
 def hypersleep_disabled(func):
@@ -232,6 +233,28 @@ def get_provision_status():
         })
     else:
         raise BadRequestError('Required parameters are missing.')
+
+
+@app.route('/api/canvas_site/archival_status')
+@login_required
+def get_all_archival_statuses():
+    canvas_courses = canvas.get_user_courses(current_user.uid)
+    candidate_sites_by_id = {}
+    for canvas_course in canvas_courses:
+        if 'sis_term_id' in canvas_course.term and canvas_course.term['sis_term_id'].startswith('TERM:'):
+            enrollments = list(filter(lambda e: e.get('user_id') == current_user.canvas_user_id, canvas_course.enrollments))
+            current_user_roles = [e['role'] for e in enrollments]
+            if next((role for role in current_user_roles if role in ROLES_CAN_VIEW_ARCHIVAL_STATUS), None):
+                candidate_sites_by_id[int(canvas_course.id)] = canvas_course
+
+    api_json = []
+    for archival_status in CanvasSiteArchivalStatus.find_by_canvas_site_ids(candidate_sites_by_id.keys()):
+        canvas_course = candidate_sites_by_id[archival_status.canvas_site_id]
+        feed_item = canvas_site_to_api_json(canvas_course)
+        feed_item['archivalStatus'] = archival_status.to_api_json()
+        api_json.append(feed_item)
+
+    return tolerant_jsonify(api_json)
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/archival_status')

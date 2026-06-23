@@ -77,6 +77,10 @@ class CanvasSiteArchivalStatus(Base):
     def find_by_canvas_site_id(cls, canvas_site_id):
         return cls.query.filter_by(canvas_site_id=canvas_site_id).first()
 
+    @classmethod
+    def find_by_canvas_site_ids(cls, canvas_site_ids):
+        return cls.query.filter(cls.canvas_site_id.in_(canvas_site_ids)).all()
+
     def to_api_json(self):
         return {
             'canvasSiteId': self.canvas_site_id,
