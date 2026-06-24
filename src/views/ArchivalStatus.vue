@@ -4,7 +4,7 @@
     <p class="my-4">
       The <OutboundLink href="https://rtl.berkeley.edu/services-programs/bcourses/bcourses-course-retention-policy">bCourses Course Retention Policy</OutboundLink> applies to all users of bCourses. bCourses sites for academic courses are retained for seven years after the end of the Academic Year in which the course was offered. Project Sites are subject to removal from the system if they do not have user activity for three years.
       <b v-if="feed.length">The chart below displays which of your courses and project sites are scheduled for removal from bCourses in June 2028.</b>
-      <b v-if="!feed.length">You have no courses or project sites currently scheduled for removal.</b>
+      <b v-if="!feed.length" id="archival-status-no-courses">You have no courses or project sites currently scheduled for removal.</b>
     </p>
     <p class="my-4">
       To learn how to preserve your work and student records or request an opt-out, review the <OutboundLink href="https://berkeley.service-now.com/kb?id=kb_article_view&sysparm_article=KB0012071">bCourses data retention policy knowledge base articles</OutboundLink>.
@@ -35,17 +35,18 @@
       <tbody>
         <tr
           v-for="item in feed"
+          :id="`archival-status-row-${item.canvasSiteId}`"
           :key="item.canvasSiteId"
           class="border-0 border-t-sm"
         >
           <td class="px-3 py-2">
-            <OutboundLink :href="item.url" no-wrap>{{ item.canvasSiteId }}</OutboundLink>
+            <OutboundLink :id="`archival-status-site-id-${item.canvasSiteId}`" :href="item.url" no-wrap>{{ item.canvasSiteId }}</OutboundLink>
           </td>
           <td class="px-3 py-2">{{ item.courseCode }}</td>
           <td class="px-3 py-2">{{ item.name }}</td>
-          <td class="px-3 py-2">{{ displayRole(item.currentUserRole) }}</td>
+          <td :id="`archival-status-role-${item.canvasSiteId}`" class="px-3 py-2">{{ displayRole(item.currentUserRole) }}</td>
           <td class="px-3 py-2">{{ get(item, 'term.name') }}</td>
-          <td class="px-3 py-2">{{ removalDate(item) }}</td>
+          <td :id="`archival-status-removal-date-${item.canvasSiteId}`" class="px-3 py-2">{{ removalDate(item) }}</td>
         </tr>
       </tbody>
     </table>
