@@ -144,6 +144,15 @@ def get_course_from_catalog_id_prefix(term, catalog_id_prefix):
         return None
 
 
+def clear_archival_statuses_for_site_ids(canvas_site_ids):
+    if canvas_site_ids:
+        ids_str = ', '.join(str(i) for i in canvas_site_ids)
+        sql = f"""DELETE FROM canvas_site_archival_status WHERE canvas_site_id IN ({ids_str})"""
+        app.logger.info(sql)
+        db.session.execute(text(sql))
+        std_commit(allow_test_environment=True)
+
+
 def set_canvas_site_archival_status(canvas_site_id, archival_tier, opted_out):
     if not archival_tier:
         sql = f"""DELETE FROM canvas_site_archival_status WHERE canvas_site_id = '{canvas_site_id}'"""
