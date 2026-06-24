@@ -1,13 +1,12 @@
 <template>
   <a
     :id="id || `link-to-${href.replace(/\W/g, '')}`"
-    class="align-end d-inline-block text-pretty-wrap "
-    :class="{'with-terminating-period': periodTerminated}"
+    :class="['align-end d-inline-block', noWrap ? 'text-no-wrap' : 'text-pretty-wrap', {'with-terminating-period': periodTerminated}]"
     :href="href"
     target="_blank"
     :title="title"
   >
-    <span class="text-decoration-underline text-wrap">
+    <span :class="['text-decoration-underline', noWrap ? 'text-no-wrap' : 'text-wrap']">
       <slot>
         {{ text }}
       </slot>
@@ -37,6 +36,10 @@ defineProps({
   id: {
     default: undefined,
     type: String,
+    required: false
+  },
+  noWrap: {
+    type: Boolean,
     required: false
   },
   periodTerminated: {

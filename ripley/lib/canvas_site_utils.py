@@ -444,4 +444,6 @@ def _canvas_site_term_json(canvas_site):
                 'term_cd': term.season,
                 'name': term.to_english(),
             }
+        elif canvas_sis_term_id and canvas_sis_term_id.startswith('TERM:'):
+            api_json = {'name': canvas_sis_term_id[len('TERM:'):]}
     return api_json

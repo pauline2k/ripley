@@ -73,6 +73,10 @@ export function getSections(
   return utils.get(feedUrl)
 }
 
+export function getArchivalStatuses() {
+  return utils.get('/api/canvas_site/archival_status')
+}
+
 export function getManageOfficialSections(redirectOnError?: boolean) {
   return utils.get<Record<string, CanvasSite[]>>('/api/canvas_site/manage_official_sections', redirectOnError)
 }

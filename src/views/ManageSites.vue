@@ -226,6 +226,13 @@ onMounted(() => {
           isAvailable: isAdmin.value || size(coursesByTerm.value),
           label: 'Manage Official Sections',
           path: '/manage_sites'
+        },
+        {
+          header: 'View course retention status and scheduled removals',
+          id: 'view-retention-status',
+          isAvailable: true,
+          label: 'View Course Retention Status',
+          path: '/archival_status'
         }
       ]
       if (!canCreateCourseSite && !canCreateProjectSite) {

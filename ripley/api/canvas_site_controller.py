@@ -241,16 +241,19 @@ def get_all_archival_statuses():
     canvas_courses = canvas.get_user_courses(current_user.uid)
     candidate_sites_by_id = {}
     for canvas_course in canvas_courses:
-        if 'sis_term_id' in canvas_course.term and canvas_course.term['sis_term_id'].startswith('TERM:'):
+        sis_term_id = canvas_course.term.get('sis_term_id')
+        if sis_term_id and sis_term_id.startswith('TERM:'):
             enrollments = list(filter(lambda e: e.get('user_id') == current_user.canvas_user_id, canvas_course.enrollments))
             current_user_roles = [e['role'] for e in enrollments]
-            if next((role for role in current_user_roles if role in ROLES_CAN_VIEW_ARCHIVAL_STATUS), None):
-                candidate_sites_by_id[int(canvas_course.id)] = canvas_course
+            matching_role = next((role for role in current_user_roles if role in ROLES_CAN_VIEW_ARCHIVAL_STATUS), None)
+            if matching_role:
+                candidate_sites_by_id[int(canvas_course.id)] = (canvas_course, matching_role)
 
     api_json = []
     for archival_status in CanvasSiteArchivalStatus.find_by_canvas_site_ids(candidate_sites_by_id.keys()):
-        canvas_course = candidate_sites_by_id[archival_status.canvas_site_id]
+        canvas_course, role = candidate_sites_by_id[archival_status.canvas_site_id]
         feed_item = canvas_site_to_api_json(canvas_course)
+        feed_item['currentUserRole'] = role
         feed_item['archivalStatus'] = archival_status.to_api_json()
         api_json.append(feed_item)
 

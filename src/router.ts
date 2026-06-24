@@ -1,5 +1,6 @@
 import auth from '@/lib/auth'
 const Acheron = () => import('./views/Acheron.vue')
+const ArchivalStatus = () => import('./views/ArchivalStatus.vue')
 const BaseLTI = () => import('./layouts/lti/BaseLTI.vue')
 const BaseStandalone = () => import('./layouts/standalone/BaseStandalone.vue')
 const CourseAddUser = () => import('./views/CourseAddUser.vue')
@@ -54,6 +55,11 @@ const routes:RouteRecordRaw[] = [
         component: Acheron,
         name: 'Acheron (LV-426)',
         path: '/Acheron'
+      },
+      {
+        component: ArchivalStatus,
+        name: 'Archival Status',
+        path: '/archival_status'
       },
       {
         component: CourseAddUser,
