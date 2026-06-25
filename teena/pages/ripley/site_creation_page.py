@@ -87,6 +87,8 @@ class SiteCreationPage(RipleyPages):
     MANAGE_SECTIONS_SITE_INPUT = By.ID, 'canvas-site-id-input'
     MANAGE_SECTIONS_SITE_SELECT = By.ID, 'course-sections'
 
+    VIEW_RETENTION_STATUS_LINK = By.ID, 'view-retention-status'
+
     def select_site_and_manage(self, course_site):
         app.logger.info(f'Selecting site {course_site.site_id} in {course_site.course.term.name} and continuing')
         self.wait_for_element_and_click(self.MANAGE_SECTIONS_LINK)
@@ -97,4 +99,9 @@ class SiteCreationPage(RipleyPages):
         app.logger.info(f'Entering site {course_site.site_id} and continuing')
         self.wait_for_element_and_click(self.MANAGE_SECTIONS_LINK)
         self.wait_for_element_clear_and_send_keys(self.MANAGE_SECTIONS_SITE_INPUT, course_site.site_id)
+        self.wait_for_element_and_click(self.GO_NEXT_BUTTON)
+
+    def click_view_retention_status(self):
+        app.logger.info('Selecting view retention status and continue')
+        self.wait_for_page_and_click(self.VIEW_RETENTION_STATUS_LINK)
         self.wait_for_element_and_click(self.GO_NEXT_BUTTON)

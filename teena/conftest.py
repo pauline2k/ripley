@@ -30,6 +30,7 @@ from ripley.factory import create_app
 from teena.pages.cal_net_page import CalNetPage
 from teena.pages.canvas.canvas_page import CanvasPage
 from teena.pages.ripley.add_user_page import AddUserPage
+from teena.pages.ripley.archival_status_page import ArchivalStatusPage
 from teena.pages.ripley.admin_page import AdminPage
 from teena.pages.ripley.create_course_site_page import CreateCourseSitePage
 from teena.pages.ripley.create_project_site_page import CreateProjectSitePage
@@ -68,6 +69,7 @@ def page_objects(request):
 
     add_user_page = AddUserPage(driver, headless)
     admin_page = AdminPage(driver, headless)
+    archival_status_page = ArchivalStatusPage(driver, headless)
     cal_net_page = CalNetPage(driver, headless)
     canvas_page = CanvasPage(driver, headless)
     create_course_site_page = CreateCourseSitePage(driver, headless)
@@ -89,6 +91,7 @@ def page_objects(request):
             setattr(cls.obj, 'driver', driver)
             setattr(cls.obj, 'add_user_page', add_user_page)
             setattr(cls.obj, 'admin_page', admin_page)
+            setattr(cls.obj, 'archival_status_page', archival_status_page)
             setattr(cls.obj, 'cal_net_page', cal_net_page)
             setattr(cls.obj, 'canvas_page', canvas_page)
             setattr(cls.obj, 'create_course_site_page', create_course_site_page)
