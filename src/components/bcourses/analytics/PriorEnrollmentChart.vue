@@ -105,12 +105,12 @@
         <ChartDefinitions id="grade-distribution-enrollment-definitions" :is-expanded="showChartDefinitions" />
       </v-row>
       <hr aria-hidden="true" class="mb-3">
-      <div class="position-relative">
+      <div>
         <select
           v-if="size(terms)"
           :value="get(selectedTerm, 'id')"
           autocomplete="off"
-          class="position-absolute grade-dist-enroll-term-select"
+          class="grade-dist-enroll-term-select"
           :disabled="isEmpty(gradeDistribution)"
           @change="onSelectTerm"
         >
