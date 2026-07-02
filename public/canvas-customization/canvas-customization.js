@@ -329,13 +329,17 @@ var addCourseRetentionPolicyBanner = function() {
               background-color: #FCC6BB;
               color: black;
               padding: 12px;
-              text-align: center;
               font-weight: bold;
               width: 100%;
               z-index: 9999;
               box-sizing: border-box;
             ">
-              In accordance with the <a target="_blank" href="https://berkeley.service-now.com/kb/en?id=kb_article_view&sysparm_article=KB0012071">bCourses Course Retention Policy</a>, this course will be archived in a read-only state in June ${archivalTier} before being removed from bCourses in June 2028. Learn about your options to <a target="_blank" href="https://berkeley.service-now.com/kb/en?id=kb_article_view&sysparm_article=KB0012388">preserve content as an instructor</a> and <a target="_blank" href="https://berkeley.service-now.com/kb/en?id=kb_article_view&sysparm_article=KB0015455">save coursework as a student</a>.
+              <p style="margin: 0 0 20px 0;">
+                In accordance with the <a target="_blank" href="https://berkeley.service-now.com/kb/en?id=kb_article_view&sysparm_article=KB0012071">bCourses Course Retention Policy</a>, this course will be archived in a read-only state in June ${archivalTier} before being removed from bCourses in June 2028.
+              </p>
+              <p style="margin: 0;">
+               You can review all sites that are currently scheduled for removal in June 2028 in your <a href="https://berkeley.service-now.com/kb_view.do?sysparm_article=KB0015538">Course Retention Status Dashboard</a>. Learn about your options to <a target="_blank" href="https://berkeley.service-now.com/kb/en?id=kb_article_view&sysparm_article=KB0012388">preserve content as an instructor</a> and <a target="_blank" href="https://berkeley.service-now.com/kb/en?id=kb_article_view&sysparm_article=KB0015455">save coursework as a student</a>.
+              </p>
             </div>
           `;
           $('#wrapper').prepend(bannerHtml);
