@@ -44,7 +44,7 @@ from ripley.models.configuration import Configuration
 
 ROLES_CAN_EDIT_OFFICIAL_SECTIONS = ['Lead TA', 'TeacherEnrollment', 'CanvasAdmin']
 ROLES_CAN_VIEW_OFFICIAL_SECTIONS = ['DesignerEnrollment', 'Lead TA', 'TaEnrollment', 'TeacherEnrollment', 'CanvasAdmin']
-ROLES_CAN_VIEW_ARCHIVAL_STATUS = ['Lead TA', 'TaEnrollment', 'TeacherEnrollment']
+ROLES_CAN_VIEW_ARCHIVAL_STATUS = ['Lead TA', 'Owner', 'TaEnrollment', 'TeacherEnrollment']
 
 
 def hypersleep_disabled(func):
