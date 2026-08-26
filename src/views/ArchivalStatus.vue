@@ -23,7 +23,7 @@
         type="warning"
       />
     </div>
-    <table v-if="feed.length" class="border-0 border-b-md border-t-md w-100">
+    <table v-if="feed.length" id="archival-status-table" class="border-0 border-b-md border-t-md w-100">
       <caption class="sr-only">Course sites and their archival removal dates</caption>
       <thead class="bg-surface-light">
         <tr>
@@ -33,6 +33,7 @@
           <th class="font-weight-bold px-3 py-2 text-left" scope="col">Role</th>
           <th class="font-weight-bold px-3 py-2 text-left" scope="col">Term</th>
           <th class="font-weight-bold px-3 py-2 text-left" scope="col">Removal Date</th>
+          <th class="font-weight-bold px-3 py-2 text-left" scope="col">Opted Out</th>
         </tr>
       </thead>
       <tbody>
@@ -42,14 +43,38 @@
           :key="item.canvasSiteId"
           class="border-0 border-t-sm"
         >
-          <td class="px-3 py-2">
+          <td class="align-middle px-3 py-2">
+            <span aria-hidden="true" class="row-label">Course ID:</span>
             <OutboundLink :id="`archival-status-site-id-${item.canvasSiteId}`" :href="item.url" no-wrap>{{ item.canvasSiteId }}</OutboundLink>
           </td>
-          <td class="px-3 py-2">{{ item.courseCode }}</td>
-          <td class="px-3 py-2">{{ item.name }}</td>
-          <td :id="`archival-status-role-${item.canvasSiteId}`" class="px-3 py-2">{{ displayRole(item.currentUserRole) }}</td>
-          <td class="px-3 py-2">{{ get(item, 'term.name') }}</td>
-          <td :id="`archival-status-removal-date-${item.canvasSiteId}`" class="px-3 py-2">{{ removalDate(item) }}</td>
+          <td class="align-middle px-3 py-2">
+            <span aria-hidden="true" class="row-label">Course Code:</span>{{ item.courseCode }}
+          </td>
+          <td class="align-middle px-3 py-2">
+            <span aria-hidden="true" class="row-label">Course Name:</span>{{ item.name }}
+          </td>
+          <td :id="`archival-status-role-${item.canvasSiteId}`" class="align-middle px-3 py-2">
+            <span aria-hidden="true" class="row-label">Role:</span>{{ displayRole(item.currentUserRole) }}
+          </td>
+          <td class="align-middle px-3 py-2">
+            <span aria-hidden="true" class="row-label">Term:</span>{{ get(item, 'term.name') }}
+          </td>
+          <td :id="`archival-status-removal-date-${item.canvasSiteId}`" class="align-middle px-3 py-2">
+            <span aria-hidden="true" class="row-label">Removal Date:</span>{{ removalDate(item) }}
+          </td>
+          <td class="align-middle px-3 py-2">
+            <span aria-hidden="true" class="row-label">Opted Out:</span>
+            <v-switch
+              :id="`archival-status-opt-out-switch-${item.canvasSiteId}`"
+              :aria-label="`${item.name}: ${get(item, 'archivalStatus.optedOut') ? 'Opted Out' : 'Not Opted Out'}`"
+              color="primary"
+              :disabled="pendingSiteIds.has(item.canvasSiteId)"
+              density="compact"
+              hide-details
+              :model-value="get(item, 'archivalStatus.optedOut')"
+              @update:model-value="value => toggleOptOut(item, !!value)"
+            />
+          </td>
         </tr>
       </tbody>
     </table>
@@ -61,12 +86,14 @@ import {onMounted, ref} from 'vue'
 import {get, sortBy} from 'lodash'
 import Header1 from '@/components/utils/Header1.vue'
 import OutboundLink from '@/components/utils/OutboundLink.vue'
-import {getArchivalStatuses} from '@/api/canvas-site'
+import {getArchivalStatuses, updateArchivalStatusOptOut} from '@/api/canvas-site'
 import {useContextStore} from '@/stores/context'
+import {alertScreenReader} from '@/utils'
 
 const contextStore = useContextStore()
 const error = ref()
 const feed = ref()
+const pendingSiteIds = ref(new Set<number>())
 
 onMounted(() => {
   getArchivalStatuses().then(
@@ -90,4 +117,60 @@ const removalDate = (item: any) => {
   // TODO: derive removal date from archivalTier once tier-to-date mapping is finalized
   return get(item, 'archivalStatus.optedOut') ? 'Exempt' : 'June 2028'
 }
+
+const toggleOptOut = (item: any, optedOut: boolean) => {
+  pendingSiteIds.value.add(item.canvasSiteId)
+  updateArchivalStatusOptOut(item.canvasSiteId, optedOut).then(
+    (data: any) => {
+      item.archivalStatus.optedOut = data.optedOut
+      alertScreenReader(`${item.name} is now ${data.optedOut ? 'opted out of' : 'opted in to'} bCourses removal.`)
+    },
+    e => {
+      error.value = e
+    }
+  ).finally(() => pendingSiteIds.value.delete(item.canvasSiteId))
+}
 </script>
+
+<style scoped lang="scss">
+.align-middle {
+  vertical-align: middle;
+}
+.row-label {
+  display: none;
+}
+@media screen and (max-width: 960px) {
+  #archival-status-table {
+    thead {
+      border: 0;
+      clip: rect(0 0 0 0);
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      padding: 0;
+      position: absolute;
+      width: 1px;
+    }
+    tbody tr {
+      border: 0;
+      border-bottom: 1pt solid rgba(var(--v-border-color), var(--v-border-opacity));
+      display: block;
+      padding-bottom: 8px;
+      width: 100%;
+    }
+    tbody td {
+      align-items: center;
+      border: 0;
+      display: flex;
+      padding: 4px 12px;
+      width: 100%;
+    }
+  }
+  .row-label {
+    display: inline-block;
+    flex-shrink: 0;
+    font-weight: bold;
+    width: 40%;
+  }
+}
+</style>

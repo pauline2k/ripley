@@ -77,6 +77,10 @@ export function getArchivalStatuses() {
   return utils.get('/api/canvas_site/archival_status')
 }
 
+export function updateArchivalStatusOptOut(canvasSiteId: number, optedOut: boolean) {
+  return utils.post(`/api/canvas_site/${canvasSiteId}/archival_status/opt_out`, {optedOut})
+}
+
 export function getManageOfficialSections(redirectOnError?: boolean) {
   return utils.get<Record<string, CanvasSite[]>>('/api/canvas_site/manage_official_sections', redirectOnError)
 }
