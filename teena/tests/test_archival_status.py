@@ -110,14 +110,26 @@ class TestUserRoles:
 @pytest.mark.usefixtures('page_objects')
 class TestOptedOut:
 
-    def test_set_opted_out(self):
-        ripley_utils.set_canvas_site_archival_status(test.course_site.site_id, '2028', True)
+    def test_opt_out_via_switch(self):
+        _load_archival_status_view(self, test.manual_teacher)
+        assert self.archival_status_page.is_opted_out(test.course_site.site_id) is False
+        self.archival_status_page.click_opt_out_switch(test.course_site.site_id)
+        assert self.archival_status_page.is_opted_out(test.course_site.site_id) is True
 
     def test_removal_date_exempt(self):
-        _load_archival_status_view(self, test.manual_teacher)
         utils.assert_equivalence(
             self.archival_status_page.removal_date_for_site(test.course_site.site_id),
             'Exempt',
+        )
+
+    def test_opt_back_in_via_switch(self):
+        self.archival_status_page.click_opt_out_switch(test.course_site.site_id)
+        assert self.archival_status_page.is_opted_out(test.course_site.site_id) is False
+
+    def test_removal_date_restored(self):
+        utils.assert_equivalence(
+            self.archival_status_page.removal_date_for_site(test.course_site.site_id),
+            'June 2028',
         )
 
 

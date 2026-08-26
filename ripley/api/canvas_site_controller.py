@@ -30,7 +30,7 @@ from flask_login import current_user, login_required
 from ripley.api.errors import BadRequestError, InternalServerError, ResourceNotFoundError
 from ripley.api.util import canvas_role_required, canvas_site_creation_required, csv_download_response
 from ripley.externals import canvas, data_loch
-from ripley.externals.redis import cache_dict_object, enqueue, fetch_cached_dict_object, get_job
+from ripley.externals.redis import cache_dict_object, delete_cache_key, enqueue, fetch_cached_dict_object, get_job
 from ripley.lib.berkeley_course import sort_course_sections
 from ripley.lib.berkeley_term import BerkeleyTerm
 from ripley.lib.canvas_site_utils import canvas_site_to_api_json, create_canvas_project_site, \
@@ -272,6 +272,28 @@ def get_archival_status(canvas_site_id):
         return tolerant_jsonify(archival_status)
     else:
         raise ResourceNotFoundError(f'No archival status found for Canvas site ID {canvas_site_id}.')
+
+
+@app.route('/api/canvas_site/<canvas_site_id>/archival_status/opt_out', methods=['POST'])
+@canvas_role_required(*ROLES_CAN_VIEW_ARCHIVAL_STATUS)
+def update_archival_status_opt_out(canvas_site_id):
+    params = request.get_json() or {}
+    opted_out = params.get('optedOut')
+    if opted_out is None:
+        raise BadRequestError('optedOut parameter is required.')
+
+    canvas_site_id = int(canvas_site_id)
+    archival_status = CanvasSiteArchivalStatus.find_by_canvas_site_id(canvas_site_id)
+    if not archival_status:
+        raise ResourceNotFoundError(f'No archival status found for Canvas site ID {canvas_site_id}.')
+
+    if opted_out:
+        archival_status = CanvasSiteArchivalStatus.add_opt_out(canvas_site_id)
+    else:
+        archival_status = CanvasSiteArchivalStatus.remove_opt_out(canvas_site_id)
+    delete_cache_key(f'canvas_site_archival_status_{canvas_site_id}')
+
+    return tolerant_jsonify(archival_status.to_api_json())
 
 
 @app.route('/api/canvas_site/<canvas_site_id>/roster')

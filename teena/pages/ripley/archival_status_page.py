@@ -24,6 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 """
 
 import json
+import time
 
 from flask import current_app as app
 from selenium.webdriver.common.by import By
@@ -58,3 +59,15 @@ class ArchivalStatusPage(RipleyPages):
 
     def removal_date_for_site(self, site_id):
         return self.element((By.ID, f'archival-status-removal-date-{site_id}')).text
+
+    @staticmethod
+    def opt_out_switch(site_id):
+        return By.ID, f'archival-status-opt-out-switch-{site_id}'
+
+    def is_opted_out(self, site_id):
+        return self.is_el_selected(self.opt_out_switch(site_id))
+
+    def click_opt_out_switch(self, site_id):
+        app.logger.info(f'Clicking archival status opt-out switch for site {site_id}')
+        self.wait_for_element_and_click(self.opt_out_switch(site_id))
+        time.sleep(2)
